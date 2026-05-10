@@ -11,6 +11,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_provider.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -227,9 +228,9 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       final isar = await ref.read(isarServiceProvider).getInstance();
 
       await isar.writeTxn(() async {
-        await isar.userProfiles.put(
-          UserProfile()..name = _nameController.text.trim(),
-        );
+        final profile = UserProfile()..name = _nameController.text.trim();
+        profile.encryptFields();
+        await isar.userProfiles.put(profile);
 
         await isar.accounts.put(
           Account()
@@ -1508,6 +1509,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
 
     await isar.writeTxn(() async {
       for (final txn in txns) {
+        txn.encryptFields();
         await isar.transactions.put(txn);
         await txn.account.save();
         await txn.category.save();

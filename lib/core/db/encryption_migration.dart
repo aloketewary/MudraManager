@@ -2,6 +2,7 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,6 +55,32 @@ class EncryptionMigration {
             t.description =
                 FieldEncryptionService.encryptNullable(t.description);
             await isar.transactions.put(t);
+            count++;
+          }
+        }
+      });
+    }
+
+    // 3. UserProfile — name, email, phone
+    final profiles = await isar.userProfiles.where().findAll();
+    if (profiles.isNotEmpty) {
+      await isar.writeTxn(() async {
+        for (final p in profiles) {
+          var changed = false;
+          if (p.name != null && !FieldEncryptionService.isEncrypted(p.name)) {
+            p.name = FieldEncryptionService.encryptNullable(p.name);
+            changed = true;
+          }
+          if (p.email != null && !FieldEncryptionService.isEncrypted(p.email)) {
+            p.email = FieldEncryptionService.encryptNullable(p.email);
+            changed = true;
+          }
+          if (p.phone != null && !FieldEncryptionService.isEncrypted(p.phone)) {
+            p.phone = FieldEncryptionService.encryptNullable(p.phone);
+            changed = true;
+          }
+          if (changed) {
+            await isar.userProfiles.put(p);
             count++;
           }
         }

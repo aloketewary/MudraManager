@@ -22,6 +22,7 @@ import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
@@ -260,7 +261,7 @@ class BackupService {
         .toList();
 
     // Backup User Profiles (assuming you have this collection)
-    final userProfiles = await isar.userProfiles.where().findAll();
+    final userProfiles = await isar.userProfiles.where().findAll().withDecryption();
     backupData['UserProfile'] = userProfiles
         .map((up) => UserProfileBackup.fromUserProfile(up).toBackupJson())
         .toList();
@@ -288,7 +289,7 @@ class BackupService {
         .toList();
 
     // Backup Transactions
-    final transactions = await isar.transactions.where().findAll();
+    final transactions = await isar.transactions.where().findAll().withDecryption();
     backupData['Transaction'] = transactions
         .map((tx) => TransactionBackup.fromTransaction(tx).toBackupJson())
         .toList();
@@ -500,6 +501,7 @@ class BackupService {
                   Map<String, dynamic>.from(itemJson),
                   restoredObjects,
                 );
+                fullyLinkedModel.encryptFields();
                 await isar.userProfiles.put(fullyLinkedModel);
                 break;
               case 'Goal':
@@ -536,6 +538,7 @@ class BackupService {
                   Map<String, dynamic>.from(itemJson),
                   restoredObjects,
                 );
+                tx.encryptFields();
                 await isar.transactions.put(tx);
                 await tx.account.save();
                 await tx.category.save();

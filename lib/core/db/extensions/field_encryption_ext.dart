@@ -3,6 +3,7 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/db/models/user_profile.dart';
 
 /// Encrypt sensitive fields before writing to Isar.
 extension SmsActivityEncryption on SmsActivity {
@@ -62,9 +63,37 @@ extension NotificationRecordEncryption on NotificationRecord {
   }
 }
 
+extension UserProfileEncryption on UserProfile {
+  /// Encrypts personal identifiable information (PII) before storage.
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.encryptNullable(name);
+    email = FieldEncryptionService.encryptNullable(email);
+    phone = FieldEncryptionService.encryptNullable(phone);
+  }
+
+  /// Decrypts user PII for UI display.
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.decryptNullable(name);
+    email = FieldEncryptionService.decryptNullable(email);
+    phone = FieldEncryptionService.decryptNullable(phone);
+  }
+}
+
 /// Decrypt a list of SmsActivity after Isar read.
 extension SmsActivityListDecryption on Future<List<SmsActivity>> {
   Future<List<SmsActivity>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
+  }
+}
+
+extension TransactionListDecryption on Future<List<Transaction>> {
+  Future<List<Transaction>> withDecryption() async {
     final list = await this;
     for (final item in list) {
       item.decryptFields();
@@ -92,5 +121,23 @@ extension NotificationRecordStreamDecryption
       }
       return list;
     });
+  }
+}
+
+extension UserProfileDecryption on Future<UserProfile?> {
+  Future<UserProfile?> withDecryption() async {
+    final profile = await this;
+    profile?.decryptFields();
+    return profile;
+  }
+}
+
+extension UserProfileListDecryption on Future<List<UserProfile>> {
+  Future<List<UserProfile>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
   }
 }
