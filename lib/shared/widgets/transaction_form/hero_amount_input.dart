@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
@@ -72,7 +73,7 @@ class HeroAmountInput extends StatelessWidget {
               focusedBorder: InputBorder.none,
               suffixIcon: onCalculatorTap != null
                   ? IconButton(
-                    tooltip: 'Calculator',
+                    tooltip: AppLocalizations.of(context)!.common_calculator,
                       onPressed: onCalculatorTap,
                       icon: Icon(
                         LucideIcons.calculator,
