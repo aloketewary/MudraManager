@@ -1,6 +1,7 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/extensions/transaction_links.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
@@ -376,7 +377,7 @@ class MonthlyRecapService {
     }
 
     // ── User ──
-    final profile = await _isar.userProfiles.where().findFirst();
+    final profile = await _isar.userProfiles.where().findFirst().withDecryption();
 
     final net = income - expense;
     final wdAvg = weekdayDaysSeen.isNotEmpty

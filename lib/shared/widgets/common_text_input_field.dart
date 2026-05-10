@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
 class CommonTextInputField extends ConsumerStatefulWidget {
@@ -92,7 +93,7 @@ class _CommonTextInputFieldState extends ConsumerState<CommonTextInputField> {
                       _effectiveController.clear();
                       widget.onChanged?.call('');
                     },
-                    tooltip: 'Clear',
+                    tooltip: AppLocalizations.of(context)!.common_clear,
                   )
                 : null,
             border: OutlineInputBorder(borderRadius: radius),
