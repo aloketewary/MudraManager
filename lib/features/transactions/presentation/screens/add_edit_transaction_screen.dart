@@ -14,6 +14,7 @@ import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -1044,6 +1045,7 @@ class _AddEditTransactionScreenState
 
           txn.smsActivityId = widget.smsActivity!.id;
           txn.isFromSms = true;
+          txn.encryptFields();
           await isar.transactions.put(txn);
         });
 
