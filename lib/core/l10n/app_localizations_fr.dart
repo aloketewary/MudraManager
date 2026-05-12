@@ -10,444 +10,459 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onboard_manageYourMoneyDescription =>
-      '100% offline. Your data never leaves your device.';
+      '100% hors ligne. Vos données ne quittent jamais votre appareil.';
 
   @override
   String onboard_welcomeToApp(Object appName) {
-    return 'Welcome to $appName';
+    return 'Bienvenue sur $appName';
   }
 
   @override
-  String get onboard_TrackYourTransactions => 'Auto-track from Bank SMS';
+  String get onboard_TrackYourTransactions =>
+      'Suivi automatique par SMS bancaire';
 
   @override
   String get onboard_SeeWhereYourMoneyGoes =>
-      'Auto-import from bank SMS & notifications. Works with 50+ banks.';
+      'Importation automatique des SMS et notifications bancaires. Fonctionne avec plus de 50 banques.';
 
   @override
-  String get onboard_SetBudgetsAndGoals => 'Budgets, Goals & Smart Alerts';
+  String get onboard_SetBudgetsAndGoals =>
+      'Budgets, objectifs et alertes intelligentes';
 
   @override
   String get onboard_stayOnTrackAndAchieveYourDream =>
-      'Get warnings before you overspend. Save for what matters.';
+      'Recevez des avertissements avant de trop dépenser. Économisez pour ce qui compte.';
 
   @override
-  String get onboard_GetStarted => 'Get Started!';
+  String get onboard_GetStarted => 'Commencer !';
 
   @override
-  String get onboard_letsSetupYourAccount => 'Let\'s set up your account.';
+  String get onboard_letsSetupYourAccount => 'Configurons votre compte.';
 
   @override
-  String get onboard_howShouldWeCallYou => 'How should we call you?';
+  String get onboard_howShouldWeCallYou =>
+      'Comment devrions-nous vous appeler ?';
 
   @override
   String get onboard_enterYourNameToPersonalizeYourExperience =>
-      'Enter your name to personalize your experience.';
+      'Entrez votre nom pour personnaliser votre expérience.';
 
   @override
-  String get onboard_enterYourName => 'Enter your name';
+  String get onboard_enterYourName => 'Entrez votre nom';
 
   @override
-  String get onboard_setupYourFirstAccount => 'Setup Your First Account';
+  String get onboard_setupYourFirstAccount => 'Configurez votre premier compte';
 
   @override
   String get onboard_letsCreateYourFirstAccount =>
-      'Let\'s create your first account (let say: Cash).';
+      'Créons votre premier compte (disons : Espèces).';
 
   @override
-  String get onboard_accountName => 'Account Name';
+  String get onboard_accountName => 'Nom du compte';
 
   @override
-  String get onboard_initialBalance => 'Initial Balance';
+  String get onboard_initialBalance => 'Solde initial';
 
   @override
   String get onboard_youCanUpdateOtherDetailsLaterAsWell =>
-      'You can update other details later as well.';
+      'Vous pourrez également mettre à jour d\'autres détails plus tard.';
 
   @override
   String onboard_pleaseFillThe(Object inputName) {
-    return 'Please fill the \"$inputName\"';
+    return 'Veuillez remplir le champ \"$inputName\"';
   }
 
   @override
   String onboard_pleaseEnterAValidNumberFor(Object hintText) {
-    return 'Please enter a valid number for \"$hintText\"';
+    return 'Veuillez entrer un nombre valide pour \"$hintText\"';
   }
 
   @override
-  String get onboard_youAreAllSet => 'You\'re all set!';
+  String get onboard_youAreAllSet => 'Tout est prêt !';
 
   @override
   String get onboard_letsStartManagingYourMoneyWisely =>
-      'Let\'s start managing your money wisely.';
+      'Commençons à gérer votre argent judicieusement.';
 
   @override
-  String get app_settings_appbar_title => 'App Settings';
+  String get app_settings_appbar_title => 'Paramètres de l\'application';
 
   @override
-  String get language_settings_appbar_title => 'Choose Language';
+  String get language_settings_appbar_title => 'Choisir la langue';
 
   @override
-  String get app_settings_language_title => 'Language';
+  String get app_settings_language_title => 'Langue';
 
   @override
-  String get app_settings_language_subtitle => 'Choose your language';
+  String get app_settings_language_subtitle => 'Choisissez votre langue';
 
   @override
-  String get app_settings_theme_mode_title => 'Theme Mode';
+  String get app_settings_theme_mode_title => 'Mode thématique';
 
   @override
-  String get app_settings_theme_mode_light => 'Light';
+  String get app_settings_theme_mode_light => 'Clair';
 
   @override
-  String get app_settings_theme_mode_dark => 'Dark';
+  String get app_settings_theme_mode_dark => 'Sombre';
 
   @override
-  String get app_settings_theme_mode_system_default => 'System Default';
+  String get app_settings_theme_mode_system_default => 'Par défaut du système';
 
   @override
   String get app_settings_theme_mode_amoled => 'AMOLED';
 
   @override
-  String get app_settings_theme_mode_subtitle => 'Choose your preferred theme';
+  String get app_settings_theme_mode_subtitle =>
+      'Choisissez votre thème préféré';
 
   @override
-  String get app_settings_daily_reminder_title => 'Daily Expense Reminder';
+  String get app_settings_daily_reminder_title =>
+      'Rappel de dépenses quotidiennes';
 
   @override
-  String get home_screen_title => 'Home';
+  String get home_screen_title => 'Accueil';
 
   @override
-  String get transaction_screen_title => 'Activity';
+  String get transaction_screen_title => 'Activité';
 
   @override
-  String get statistics_screen_title => 'Statistics';
+  String get statistics_screen_title => 'Statistiques';
 
   @override
-  String get profile_screen_title => 'Profile';
+  String get profile_screen_title => 'Profil';
 
   @override
-  String get add_edit_transaction_screen_title => 'Add Transaction';
+  String get add_edit_transaction_screen_title => 'Ajouter une transaction';
 
   @override
-  String get transaction_list_screen_title => 'Transaction List';
+  String get transaction_list_screen_title => 'Liste des transactions';
 
   @override
-  String get transaction_listViewGroupTodayLabel => 'Today';
+  String get transaction_listViewGroupTodayLabel => 'Aujourd\'hui';
 
   @override
-  String get transaction_listViewGroupYesterdayLabel => 'Yesterday';
+  String get transaction_listViewGroupYesterdayLabel => 'Hier';
 
   @override
-  String get greeting_good_morning_text => 'Good Morning';
+  String get greeting_good_morning_text => 'Bonjour';
 
   @override
-  String get greeting_good_afternoon_text => 'Good Afternoon';
+  String get greeting_good_afternoon_text => 'Bon après-midi';
 
   @override
-  String get greeting_good_evening_text => 'Good Evening';
+  String get greeting_good_evening_text => 'Bonsoir';
 
   @override
-  String get greeting_good_night_text => 'Good Night';
+  String get greeting_good_night_text => 'Bonne nuit';
 
   @override
-  String get greeting_hello_text => 'Hello';
+  String get greeting_hello_text => 'Bonjour';
 
   @override
-  String get transaction_type_income => 'Income';
+  String get transaction_type_income => 'Revenu';
 
   @override
-  String get transaction_type_expense => 'Expense';
+  String get transaction_type_expense => 'Dépense';
 
   @override
-  String get dashboard_add_transaction_text => 'Add transaction';
+  String get dashboard_add_transaction_text => 'Ajouter une transaction';
 
   @override
-  String get dashboard_add_transfer_text => 'Transfer';
+  String get dashboard_add_transfer_text => 'Transfert';
 
   @override
-  String get dashboard_cash_flow_text => 'Cash Flow';
+  String get dashboard_cash_flow_text => 'Flux de trésorerie';
 
   @override
-  String get cash_flow_filter_type_day => 'Day';
+  String get cash_flow_filter_type_day => 'Jour';
 
   @override
-  String get cash_flow_filter_type_week => 'Week';
+  String get cash_flow_filter_type_week => 'Semaine';
 
   @override
-  String get cash_flow_filter_type_month => 'Month';
+  String get cash_flow_filter_type_month => 'Mois';
 
   @override
-  String get cash_flow_filter_type_year => 'Year';
+  String get cash_flow_filter_type_year => 'Année';
 
   @override
   String get dashboard_mini_budget_text => 'Budget';
 
   @override
   String get dashboard_mini_budget_not_found_text =>
-      'No Budgets Defined, Add One!';
+      'Aucun budget défini, ajoutez-en un !';
 
   @override
-  String get dashboard_mini_budget_add_text => 'Add Budget';
+  String get dashboard_mini_budget_add_text => 'Ajouter un budget';
 
   @override
   String get transaction_list_cash_flow_screen_title => 'Transactions';
 
   @override
-  String get transaction_list_filter_all => 'All';
+  String get transaction_list_filter_all => 'Tout';
 
   @override
-  String get transaction_list_filter_income => 'Income';
+  String get transaction_list_filter_income => 'Revenu';
 
   @override
-  String get transaction_list_filter_expense => 'Expense';
+  String get transaction_list_filter_expense => 'Dépense';
 
   @override
   String get transaction_list_pending_transaction_message_text =>
-      '⚡ New transactions found! Review now';
+      '⚡ Nouvelles transactions trouvées ! Vérifiez maintenant';
 
   @override
-  String get transaction_listPendingTransactionMessageActionLabel => 'Review';
+  String get transaction_listPendingTransactionMessageActionLabel => 'Vérifier';
 
   @override
-  String get transaction_noTransactionFoundText => 'No transactions found.';
+  String get transaction_noTransactionFoundText =>
+      'Aucune transaction trouvée.';
 
   @override
-  String get transaction_deleteAlertTitleText => 'Delete Transaction?';
+  String get transaction_deleteAlertTitleText => 'Supprimer la transaction ?';
 
   @override
-  String get transaction_deleteAlertBodyText => 'This action cannot be undone.';
+  String get transaction_deleteAlertBodyText =>
+      'Cette action ne peut pas être annulée.';
 
   @override
-  String get transaction_deleteButtonActionText => 'Delete';
+  String get transaction_deleteButtonActionText => 'Supprimer';
 
   @override
-  String get transaction_cancelButtonActionText => 'Cancel';
+  String get transaction_cancelButtonActionText => 'Annuler';
 
   @override
-  String get transaction_filterCategoryText => 'Filter Transactions';
+  String get transaction_filterCategoryText => 'Filtrer les transactions';
 
   @override
   String transaction_noteDescriptionText(Object description) {
-    return 'note: $description';
+    return 'note : $description';
   }
 
   @override
-  String get calendar_week_monday_initial_text => 'M';
+  String get calendar_week_monday_initial_text => 'L';
 
   @override
-  String get calendar_week_tuesday_initial_text => 'T';
+  String get calendar_week_tuesday_initial_text => 'M';
 
   @override
-  String get calendar_week_wednesday_initial_text => 'W';
+  String get calendar_week_wednesday_initial_text => 'M';
 
   @override
-  String get calendar_week_thursday_initial_text => 'T';
+  String get calendar_week_thursday_initial_text => 'J';
 
   @override
-  String get calendar_week_friday_initial_text => 'F';
+  String get calendar_week_friday_initial_text => 'V';
 
   @override
   String get calendar_week_saturday_initial_text => 'S';
 
   @override
-  String get calendar_week_sunday_initial_text => 'S';
+  String get calendar_week_sunday_initial_text => 'D';
 
   @override
-  String get dashboard_netWorthTitle => 'Net Worth';
+  String get dashboard_netWorthTitle => 'Valeur nette';
 
   @override
   String get budget_dashboardMiniCardBudgetTitleText => 'Budget';
 
   @override
-  String get budget_dashboardMiniCardSpentTitleText => 'Spent';
+  String get budget_dashboardMiniCardSpentTitleText => 'Dépensé';
 
   @override
-  String get budget_dashboardPageTitle => 'Budgets Details';
+  String get budget_dashboardPageTitle => 'Détails des budgets';
 
   @override
-  String get budget_dashboardNotFoundText => 'No Budgets Defined, Add One!';
+  String get budget_dashboardNotFoundText =>
+      'Aucun budget défini, ajoutez-en un !';
 
   @override
-  String get budget_dashboardAddBudgetText => 'Add Budget';
+  String get budget_dashboardAddBudgetText => 'Ajouter un budget';
 
   @override
-  String get budget_categoriesTitle => 'Categories';
+  String get budget_categoriesTitle => 'Catégories';
 
   @override
   String budget_dashboardPieChartLabelText(
-      Object spentPercent, Object title, Object totalPercent) {
-    return '$title ($totalPercent of Total, ${spentPercent}of Spent)';
+    Object spentPercent,
+    Object title,
+    Object totalPercent,
+  ) {
+    return '$title ($totalPercent du total, $spentPercent des dépenses)';
   }
 
   @override
-  String get budget_buttonDeleteTitleText => 'Delete Budget?';
+  String get budget_buttonDeleteTitleText => 'Supprimer le budget ?';
 
   @override
   String get budget_buttonDeleteBodyText =>
-      'This will remove the Budget and its allocations, this action cannot be undone.';
+      'Cela supprimera le budget et ses allocations, cette action ne peut pas être annulée.';
 
   @override
-  String get budget_buttonDeleteActionText => 'Delete';
+  String get budget_buttonDeleteActionText => 'Supprimer';
 
   @override
-  String get budget_buttonCancelActionText => 'Cancel';
+  String get budget_buttonCancelActionText => 'Annuler';
 
   @override
-  String get budget_buttonAddText => 'Add Budget';
+  String get budget_buttonAddText => 'Ajouter un budget';
 
   @override
-  String get budget_buttonEditText => 'Edit Budget';
+  String get budget_buttonEditText => 'Modifier le budget';
 
   @override
-  String get budget_budgetNameControllerText => 'Budget Name';
+  String get budget_budgetNameControllerText => 'Nom du budget';
 
   @override
-  String get budget_budgetAmountControllerText => 'Total Amount';
+  String get budget_budgetAmountControllerText => 'Montant total';
 
   @override
-  String get budget_recurrenceControllerText => 'Recurrence';
+  String get budget_recurrenceControllerText => 'Récurrence';
 
   @override
-  String get budget_nameRequiredHintText => 'Budget name is required';
+  String get budget_nameRequiredHintText => 'Le nom du budget est requis';
 
   @override
-  String get budget_amountRequiredHintText => 'Valid Amount is required';
+  String get budget_amountRequiredHintText => 'Un montant valide est requis';
 
   @override
-  String get budget_selectStartDateText => 'Select Start Date';
+  String get budget_selectStartDateText => 'Sélectionner la date de début';
 
   @override
   String budget_selectedStartDateText(Object startDate) {
-    return 'Start: $startDate';
+    return 'Début : $startDate';
   }
 
   @override
-  String get budget_selectEndDateText => 'Select End Date';
+  String get budget_selectEndDateText => 'Sélectionner la date de fin';
 
   @override
   String budget_selectedEndDateText(Object endDate) {
-    return 'End: $endDate';
+    return 'Fin : $endDate';
   }
 
   @override
-  String get budget_categoryTitle => 'Select Categories & Allocations';
+  String get budget_categoryTitle =>
+      'Sélectionner les catégories et allocations';
 
   @override
-  String get budget_allocateAmountText => 'Allocate Amount';
+  String get budget_allocateAmountText => 'Allouer un montant';
 
   @override
   String get budget_categoryMessageInfoText =>
-      'You can manually enter category allocations, or leave them blank to auto-distribute the remaining amount equally.';
+      'Vous pouvez saisir manuellement les allocations par catégorie, ou les laisser vides pour répartir automatiquement le montant restant de manière égale.';
 
   @override
   String budget_totalAllocatedBudgetText(Object totalAlloc) {
-    return 'Total Allocated: $totalAlloc';
+    return 'Total alloué : $totalAlloc';
   }
 
   @override
-  String get budget_recurrenceText => 'Recurrence';
+  String get budget_recurrenceText => 'Récurrence';
 
   @override
-  String get budget_recurrenceNoneText => 'None';
+  String get budget_recurrenceNoneText => 'Aucune';
 
   @override
-  String get budget_recurrenceDailyText => 'Daily';
+  String get budget_recurrenceDailyText => 'Quotidien';
 
   @override
-  String get budget_recurrenceWeeklyText => 'Weekly';
+  String get budget_recurrenceWeeklyText => 'Hebdomadaire';
 
   @override
-  String get budget_recurrenceMonthlyText => 'Monthly';
+  String get budget_recurrenceMonthlyText => 'Mensuel';
 
   @override
-  String get budget_recurrenceYearlyText => 'Yearly';
+  String get budget_recurrenceYearlyText => 'Annuel';
 
   @override
-  String get budget_saveButtonText => 'save';
+  String get budget_saveButtonText => 'enregistrer';
 
   @override
-  String get budget_updateButtonText => 'update';
+  String get budget_updateButtonText => 'mettre à jour';
 
   @override
-  String get budget_pickBothDatesErrorText => 'Pick both dates';
+  String get budget_pickBothDatesErrorText => 'Choisissez les deux dates';
 
   @override
   String get budget_selectAtLeastOneCategoryErrorText =>
-      'Select at least one category';
+      'Sélectionnez au moins une catégorie';
 
   @override
   String get budget_allocatedAmountExceedsTotalBudgetText =>
-      'Allocated amount exceeds total budget';
+      'Le montant alloué dépasse le budget total';
 
   @override
-  String get transaction_amountControllerText => 'Amount';
+  String get transaction_amountControllerText => 'Montant';
 
   @override
-  String get transaction_descriptionControllerText => 'Description (optional)';
+  String get transaction_descriptionControllerText =>
+      'Description (facultatif)';
 
   @override
-  String get transaction_amountControllerErrorText => 'Enter amount';
+  String get transaction_amountControllerErrorText => 'Entrez le montant';
 
   @override
-  String get transaction_selectAccountLabel => 'Select Account';
+  String get transaction_selectAccountLabel => 'Sélectionner un compte';
 
   @override
-  String get transaction_selectCategoryLabel => 'Select Category';
+  String get transaction_selectCategoryLabel => 'Sélectionner une catégorie';
 
   @override
-  String get transaction_selectTagLabel => 'Select Tag';
+  String get transaction_selectTagLabel => 'Sélectionner une étiquette';
 
   @override
-  String get transaction_addNewCategoryText => 'Add New \nCategory';
+  String get transaction_addNewCategoryText =>
+      'Ajouter une \nnouvelle catégorie';
 
   @override
-  String get transaction_addNewTagText => 'Add New Tag';
+  String get transaction_addNewTagText => 'Ajouter une nouvelle étiquette';
 
   @override
-  String get transaction_tagNameControllerText => 'Tag Name';
+  String get transaction_tagNameControllerText => 'Nom de l\'étiquette';
 
   @override
-  String get transaction_saveTagButtonLabel => 'Save Tag';
+  String get transaction_saveTagButtonLabel => 'Enregistrer l\'étiquette';
 
   @override
-  String get transaction_saveTransactionButtonLabel => 'Save Transaction';
+  String get transaction_saveTransactionButtonLabel =>
+      'Enregistrer la transaction';
 
   @override
   String get transaction_selectOneAccountErrorText =>
-      'Select at least one Account';
+      'Sélectionnez au moins un compte';
 
   @override
   String get transaction_selectOneCategoryErrorText =>
-      'Select at least one Category';
+      'Sélectionnez au moins une catégorie';
 
   @override
-  String get transaction_incomeButtonLabel => 'INCOME';
+  String get transaction_incomeButtonLabel => 'REVENU';
 
   @override
-  String get transaction_expenseButtonLabel => 'EXPENSE';
+  String get transaction_expenseButtonLabel => 'DÉPENSE';
 
   @override
   String get statistics_weTrimDownDecimalInfoText =>
-      'We trim down decimal places, please round off if required.';
+      'Nous arrondissons les décimales, veuillez arrondir si nécessaire.';
 
   @override
-  String get statistics_selectPeriodTodayText => 'Today';
+  String get statistics_selectPeriodTodayText => 'Aujourd\'hui';
 
   @override
-  String get statistics_selectPeriodWeekText => 'Week';
+  String get statistics_selectPeriodWeekText => 'Semaine';
 
   @override
-  String get statistics_selectPeriodMonthText => 'Month';
+  String get statistics_selectPeriodMonthText => 'Mois';
 
   @override
-  String get statistics_selectPeriodYearText => 'Year';
+  String get statistics_selectPeriodYearText => 'Année';
 
   @override
-  String get statistics_chartLineIncomeText => 'Income';
+  String get statistics_chartLineIncomeText => 'Revenu';
 
   @override
-  String get statistics_chartLineExpenseText => 'Expense';
+  String get statistics_chartLineExpenseText => 'Dépense';
 
   @override
   String statistics_chartLineTodayHourText(Object hour) {
@@ -455,197 +470,203 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get statistics_categoryNotPresentText => 'Category not present.';
+  String get statistics_categoryNotPresentText => 'Catégorie non présente.';
 
   @override
   String get statistics_transactionNotPresentText =>
-      'Transactions not present.';
+      'Transactions non présentes.';
 
   @override
-  String get statistics_byCategoryTitleText => 'By Category';
+  String get statistics_byCategoryTitleText => 'Par catégorie';
 
   @override
-  String get statistics_recentTransactionsTitleText => 'Recent Transactions';
+  String get statistics_recentTransactionsTitleText => 'Transactions récentes';
 
   @override
-  String get statistics_metricIncomeText => 'Income';
+  String get statistics_metricIncomeText => 'Revenu';
 
   @override
-  String get statistics_metricExpenseText => 'Expense';
+  String get statistics_metricExpenseText => 'Dépense';
 
   @override
   String get statistics_metricNetText => 'Net';
 
   @override
-  String get statistics_showAllButtonText => 'Show All';
+  String get statistics_showAllButtonText => 'Tout afficher';
 
   @override
-  String get statistics_exportToPdfButtonText => 'Export to PDF';
+  String get statistics_exportToPdfButtonText => 'Exporter en PDF';
 
   @override
-  String get statistics_exportToExcelButtonText => 'Export to Excel';
+  String get statistics_exportToExcelButtonText => 'Exporter vers Excel';
 
   @override
-  String get profile_userProfileTitleText => 'User Profile';
+  String get profile_userProfileTitleText => 'Profil de l\'utilisateur';
 
   @override
   String get profile_userProfileSubtitleText =>
-      'Change profile image, name, and email';
+      'Changer l\'image de profil, le nom et l\'e-mail';
 
   @override
-  String get profile_nameControllerText => 'Name';
+  String get profile_nameControllerText => 'Nom';
 
   @override
-  String get profile_nameControllerHintText => 'Enter your name';
+  String get profile_nameControllerHintText => 'Entrez votre nom';
 
   @override
-  String get profile_nameRequiredHintText => 'Name is required';
+  String get profile_nameRequiredHintText => 'Le nom est requis';
 
   @override
-  String get profile_emailControllerText => 'Email';
+  String get profile_emailControllerText => 'E-mail';
 
   @override
-  String get profile_emailControllerHintText => 'Enter your email';
+  String get profile_emailControllerHintText => 'Entrez votre e-mail';
 
   @override
-  String get profile_phoneControllerText => 'Phone';
+  String get profile_phoneControllerText => 'Téléphone';
 
   @override
-  String get profile_phoneControllerHintText => 'Enter your phone number';
+  String get profile_phoneControllerHintText =>
+      'Entrez votre numéro de téléphone';
 
   @override
   String get profile_weAreNotStoringInfoText =>
-      'All your data lives on this device. No servers, no cloud, no tracking.';
+      'Toutes vos données restent sur cet appareil. Pas de serveurs, pas de cloud, pas de suivi.';
 
   @override
-  String get profile_saveButtonText => 'save';
+  String get profile_saveButtonText => 'enregistrer';
 
   @override
-  String get profile_editUserProfileAppTitle => 'Edit User Profile';
+  String get profile_editUserProfileAppTitle =>
+      'Modifier le profil de l\'utilisateur';
 
   @override
   String get pendingTranx_reviewPendingTransactionsScreenTitle =>
-      'Pending Transactions';
+      'Transactions en attente';
 
   @override
-  String get statistics_quickOverviewTitle => 'Quick Overview';
+  String get statistics_quickOverviewTitle => 'Aperçu rapide';
 
   @override
-  String get statistics_insightsTitle => 'Insights';
+  String get statistics_insightsTitle => 'Aperçus';
 
   @override
-  String get statistics_detailedAnalysisTitle => 'Detailed Analysis';
+  String get statistics_detailedAnalysisTitle => 'Analyse détaillée';
 
   @override
-  String get statistics_categoryBreakdownSubtitle => 'View category breakdown';
+  String get statistics_categoryBreakdownSubtitle =>
+      'Voir la répartition par catégorie';
 
   @override
-  String get statistics_expenseTrendsTitle => 'Expense Trends';
+  String get statistics_expenseTrendsTitle => 'Tendances des dépenses';
 
   @override
-  String get statistics_expenseTrendsSubtitle => 'Last 12 months trends';
+  String get statistics_expenseTrendsSubtitle =>
+      'Tendances des 12 derniers mois';
 
   @override
-  String get statistics_recentTransactionsSubtitle => 'Last 5 transactions';
+  String get statistics_recentTransactionsSubtitle =>
+      '5 dernières transactions';
 
   @override
-  String get statistics_categoryBreakdownTitle => 'Category Breakdown';
+  String get statistics_categoryBreakdownTitle => 'Répartition par catégorie';
 
   @override
-  String get statistics_recentTransactionsModalTitle => 'Recent Transactions';
+  String get statistics_recentTransactionsModalTitle => 'Transactions récentes';
 
   @override
-  String get transfer_screenTitle => 'Transfer Funds';
+  String get transfer_screenTitle => 'Transférer des fonds';
 
   @override
-  String get transfer_resetTooltip => 'Reset';
+  String get transfer_resetTooltip => 'Réinitialiser';
 
   @override
-  String get transfer_selectAccountsLabel => 'SELECT ACCOUNTS';
+  String get transfer_selectAccountsLabel => 'SÉLECTIONNER LES COMPTES';
 
   @override
-  String get transfer_fromLabel => 'FROM';
+  String get transfer_fromLabel => 'DE';
 
   @override
-  String get transfer_toLabel => 'TO';
+  String get transfer_toLabel => 'À';
 
   @override
-  String get transfer_detailsLabel => 'TRANSFER DETAILS';
+  String get transfer_detailsLabel => 'DÉTAILS DU TRANSFERT';
 
   @override
-  String get transfer_amountLabel => 'Amount';
+  String get transfer_amountLabel => 'Montant';
 
   @override
-  String get transfer_amountValidationError => 'Enter valid amount';
+  String get transfer_amountValidationError => 'Entrez un montant valide';
 
   @override
   String get transfer_dateLabel => 'Date';
 
   @override
-  String get transfer_noteLabel => 'Note (optional)';
+  String get transfer_noteLabel => 'Note (facultatif)';
 
   @override
-  String get transfer_buttonLabel => 'Transfer';
+  String get transfer_buttonLabel => 'Transférer';
 
   @override
-  String get transfer_updateButtonLabel => 'Update Transfer';
+  String get transfer_updateButtonLabel => 'Mettre à jour le transfert';
 
   @override
-  String get transfer_errorLoadingAccounts => 'Error loading accounts';
+  String get transfer_errorLoadingAccounts =>
+      'Erreur lors du chargement des comptes';
 
   @override
-  String get app_settings_themeModeModalTitle => 'Theme Mode';
+  String get app_settings_themeModeModalTitle => 'Mode thématique';
 
   @override
-  String get category_expenseLabel => 'EXPENSE';
+  String get category_expenseLabel => 'DÉPENSE';
 
   @override
-  String get category_incomeLabel => 'INCOME';
+  String get category_incomeLabel => 'REVENU';
 
   @override
-  String get category_addTitle => 'Add Category';
+  String get category_addTitle => 'Ajouter une catégorie';
 
   @override
-  String get category_editTitle => 'Edit Category';
+  String get category_editTitle => 'Modifier la catégorie';
 
   @override
-  String get category_tapToChangeIcon => 'Tap to change icon';
+  String get category_tapToChangeIcon => 'Appuyez pour changer d\'icône';
 
   @override
-  String get category_nameLabel => 'Category Name';
+  String get category_nameLabel => 'Nom de la catégorie';
 
   @override
-  String get category_nameRequired => 'Required';
+  String get category_nameRequired => 'Requis';
 
   @override
-  String get category_typeLabel => 'Category Type';
+  String get category_typeLabel => 'Type de catégorie';
 
   @override
-  String get category_colorLabel => 'Color';
+  String get category_colorLabel => 'Couleur';
 
   @override
-  String get category_tapToChangeColor => 'TAP TO CHANGE COLOR';
+  String get category_tapToChangeColor => 'APPUYEZ POUR CHANGER DE COULEUR';
 
   @override
-  String get category_saveButton => 'SAVE CATEGORY';
+  String get category_saveButton => 'ENREGISTRER LA CATÉGORIE';
 
   @override
-  String get category_updateButton => 'UPDATE CATEGORY';
+  String get category_updateButton => 'METTRE À JOUR LA CATÉGORIE';
 
   @override
-  String get dashboard_incomeLabel => 'Income';
+  String get dashboard_incomeLabel => 'Revenu';
 
   @override
-  String get dashboard_spentLabel => 'Spent';
+  String get dashboard_spentLabel => 'Dépensé';
 
   @override
-  String get dashboard_noDataLabel => 'No data';
+  String get dashboard_noDataLabel => 'Aucune donnée';
 
   @override
-  String get dashboard_editLabel => 'Edit';
+  String get dashboard_editLabel => 'Modifier';
 
   @override
-  String get dashboard_archiveLabel => 'Archive';
+  String get dashboard_archiveLabel => 'Archiver';
 
   @override
   String get currency_crore_short => 'Cr';
@@ -654,117 +675,119 @@ class AppLocalizationsFr extends AppLocalizations {
   String get currency_lakh_short => 'L';
 
   @override
-  String get currency_thousand_short => 'K';
+  String get currency_thousand_short => 'k';
 
   @override
   String common_errorText(Object error) {
-    return 'Error: $error';
+    return 'Erreur : $error';
   }
 
   @override
-  String get statistics_expenseShort => 'Exp';
+  String get statistics_expenseShort => 'Dép.';
 
   @override
-  String get statistics_incomeShort => 'Inc';
+  String get statistics_incomeShort => 'Rev.';
 
   @override
-  String get transaction_categoryFilter => 'Category Filter';
+  String get transaction_categoryFilter => 'Filtre de catégorie';
 
   @override
-  String get transaction_dateFilter => 'Date Filter';
+  String get transaction_dateFilter => 'Filtre de date';
 
   @override
-  String get transaction_allCategories => 'All Categories';
+  String get transaction_allCategories => 'Toutes les catégories';
 
   @override
-  String get transaction_applyFilters => 'APPLY FILTERS';
+  String get transaction_applyFilters => 'APPLIQUER LES FILTRES';
 
   @override
-  String get sms_selectTransactions => 'Select Transactions';
+  String get sms_selectTransactions => 'Sélectionner les transactions';
 
   @override
-  String get common_addLabel => 'Add';
+  String get common_addLabel => 'Ajouter';
 
   @override
-  String get dashboard_removeLabel => 'Remove';
+  String get dashboard_removeLabel => 'Supprimer';
 
   @override
-  String get dashboard_viewAllLabel => 'View All';
+  String get dashboard_viewAllLabel => 'Tout voir';
 
   @override
-  String get common_noAccountsYet => 'No accounts yet';
+  String get common_noAccountsYet => 'Pas encore de comptes';
 
   @override
-  String get common_loading => 'Loading...';
+  String get common_loading => 'Chargement...';
 
   @override
-  String get common_editLabel => 'Edit';
+  String get common_editLabel => 'Modifier';
 
   @override
-  String get common_deleteLabel => 'Delete';
+  String get common_deleteLabel => 'Supprimer';
 
   @override
-  String get common_fromLabel => 'From';
+  String get common_fromLabel => 'De';
 
   @override
-  String get common_toLabel => 'To';
+  String get common_toLabel => 'À';
 
   @override
-  String get theme_chooseThemeTitle => 'Choose Theme';
+  String get theme_chooseThemeTitle => 'Choisir le thème';
 
   @override
-  String get theme_applyThemeLabel => 'Apply Theme';
+  String get theme_applyThemeLabel => 'Appliquer le thème';
 
   @override
-  String get theme_themeAppliedMessage => 'Theme applied!';
+  String get theme_themeAppliedMessage => 'Thème appliqué !';
 
   @override
-  String get backup_backupRestoreTitle => 'Backup & Restore';
+  String get backup_backupRestoreTitle => 'Sauvegarde et Restauration';
 
   @override
-  String get backup_backupDataTitle => 'Backup Data';
+  String get backup_backupDataTitle => 'Sauvegarder les données';
 
   @override
-  String get backup_backupDataSubtitle => 'Export all database and settings';
+  String get backup_backupDataSubtitle =>
+      'Exporter toute la base de données et les paramètres';
 
   @override
-  String get backup_restoreBackupTitle => 'Restore Backup';
+  String get backup_restoreBackupTitle => 'Restaurer une sauvegarde';
 
   @override
-  String get backup_restoreBackupSubtitle => 'Import database and settings';
+  String get backup_restoreBackupSubtitle =>
+      'Importer la base de données et les paramètres';
 
   @override
-  String get backup_includeAttachmentsTitle => 'Include Attachments?';
+  String get backup_includeAttachmentsTitle => 'Inclure les pièces jointes ?';
 
   @override
   String get backup_includeAttachmentsMessage =>
-      'Include receipt images in backup? This will increase file size.';
+      'Inclure les images de reçus dans la sauvegarde ? Cela augmentera la taille du fichier.';
 
   @override
-  String get backup_yesLabel => 'Yes';
+  String get backup_yesLabel => 'Oui';
 
   @override
-  String get backup_noLabel => 'No';
+  String get backup_noLabel => 'Non';
 
   @override
-  String get backup_completedMessage => 'Backup completed';
+  String get backup_completedMessage => 'Sauvegarde terminée';
 
   @override
-  String get backup_restoreSuccessMessage => 'Restore successful';
+  String get backup_restoreSuccessMessage => 'Restauration réussie';
 
   @override
   String backup_lastBackupLabel(Object date) {
-    return 'Last backup: $date';
+    return 'Dernière sauvegarde : $date';
   }
 
   @override
-  String get backup_noBackupFoundLabel => 'No backup found';
+  String get backup_noBackupFoundLabel => 'Aucune sauvegarde trouvée';
 
   @override
-  String get categories_manageCategoriesTitle => 'Manage Categories';
+  String get categories_manageCategoriesTitle => 'Gérer les catégories';
 
   @override
-  String get categories_noCategoriesFound => 'No categories found.';
+  String get categories_noCategoriesFound => 'Aucune catégorie trouvée.';
 
   @override
   String categories_transactionCount(Object count, Object plural) {
@@ -772,377 +795,378 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get categories_addCategoryLabel => 'Add Category';
+  String get categories_addCategoryLabel => 'Ajouter une catégorie';
 
   @override
-  String get categories_deleteCategoryTitle => 'Delete Category';
+  String get categories_deleteCategoryTitle => 'Supprimer la catégorie';
 
   @override
   String get categories_deleteCategoryMessage =>
-      'Are you sure you want to delete this category?\nAll associated transactions will also be removed.';
+      'Êtes-vous sûr de vouloir supprimer cette catégorie ?\nToutes les transactions associées seront également supprimées.';
 
   @override
   String get categories_categoryDeletedMessage =>
-      'Category and its transactions deleted';
+      'La catégorie et ses transactions ont été supprimées';
 
   @override
-  String get accounts_manageAccountsTitle => 'Manage Accounts';
+  String get accounts_manageAccountsTitle => 'Gérer les comptes';
 
   @override
-  String get accounts_noAccountsAddedYet => 'No accounts added yet';
+  String get accounts_noAccountsAddedYet =>
+      'Aucun compte ajouté pour l\'instant';
 
   @override
-  String get accounts_addAccountLabel => 'Add Account';
+  String get accounts_addAccountLabel => 'Ajouter un compte';
 
   @override
-  String get accounts_deleteAccountTitle => 'Delete Account';
+  String get accounts_deleteAccountTitle => 'Supprimer le compte';
 
   @override
   String accounts_deleteAccountMessage(Object accountName) {
-    return 'Are you sure you want to delete \"$accountName\"?';
+    return 'Êtes-vous sûr de vouloir supprimer \"$accountName\" ?';
   }
 
   @override
-  String get accounts_archiveAccountTitle => 'Archive Account';
+  String get accounts_archiveAccountTitle => 'Archiver le compte';
 
   @override
   String accounts_archiveAccountMessage(Object accountName) {
-    return 'Are you sure you want to archive \"$accountName\"?';
+    return 'Êtes-vous sûr de vouloir archiver \"$accountName\" ?';
   }
 
   @override
-  String get accounts_cancelLabel => 'Cancel';
+  String get accounts_cancelLabel => 'Annuler';
 
   @override
-  String get accounts_archiveLabel => 'Archive';
+  String get accounts_archiveLabel => 'Archiver';
 
   @override
   String accounts_accountArchivedMessage(Object accountName) {
-    return '\"$accountName\" archived';
+    return '\"$accountName\" archivé';
   }
 
   @override
   String get accounts_atLeastOneAccountRequired =>
-      'At least 1 account required to continue';
+      'Au moins 1 compte est requis pour continuer';
 
   @override
-  String get transaction_tripLabel => 'TRIP';
+  String get transaction_tripLabel => 'VOYAGE';
 
   @override
   String get transaction_tripPartOfMessage =>
-      'This transaction is part of below trip(s)';
+      'Cette transaction fait partie du/des voyage(s) ci-dessous';
 
   @override
-  String get sms_autoAddTooltip => 'Auto Add';
+  String get sms_autoAddTooltip => 'Ajout automatique';
 
   @override
-  String get sms_clearAllTooltip => 'Clear All';
+  String get sms_clearAllTooltip => 'Tout effacer';
 
   @override
-  String get sms_importedFromSmsDescription => 'Auto-imported';
+  String get sms_importedFromSmsDescription => 'Importé automatiquement';
 
   @override
   String get sms_selectAtLeastOneMessage =>
-      'Please select at least one transaction';
+      'Veuillez sélectionner au moins une transaction';
 
   @override
-  String get dashboard_allTimeLabel => 'All Time';
+  String get dashboard_allTimeLabel => 'Depuis le début';
 
   @override
-  String get transaction_editTransactionTitle => 'Edit Transaction';
+  String get transaction_editTransactionTitle => 'Modifier la transaction';
 
   @override
-  String get transaction_addExpenseTitle => 'Add Expense';
+  String get transaction_addExpenseTitle => 'Ajouter une dépense';
 
   @override
-  String get transaction_addIncomeTitle => 'Add Income';
+  String get transaction_addIncomeTitle => 'Ajouter un revenu';
 
   @override
-  String get transaction_accountRequired => 'Account is required';
+  String get transaction_accountRequired => 'Le compte est requis';
 
   @override
-  String get transaction_categoryRequired => 'Category is required';
+  String get transaction_categoryRequired => 'La catégorie est requise';
 
   @override
   String get transaction_dateLabel => 'Date';
 
   @override
-  String get transaction_addNoteHint => 'Add a note';
+  String get transaction_addNoteHint => 'Ajouter une note';
 
   @override
   String get transaction_enterValidAmountError =>
-      'Please enter a valid amount.';
+      'Veuillez entrer un montant valide.';
 
   @override
-  String get sms_noPendingTransactions => 'No pending transactions';
+  String get sms_noPendingTransactions => 'Aucune transaction en attente';
 
   @override
-  String get sms_approveLabel => 'Approve';
+  String get sms_approveLabel => 'Approuver';
 
   @override
-  String get sms_approveTransactionTitle => 'Approve Transaction';
+  String get sms_approveTransactionTitle => 'Approuver la transaction';
 
   @override
-  String get onboard_SmartSmsTracking => 'Smart SMS Tracking';
+  String get onboard_SmartSmsTracking => 'Suivi intelligent par SMS';
 
   @override
   String get onboard_SmartSmsTrackingDesc =>
-      'Automatically detect and import transactions from your bank SMS messages.';
+      'Détectez et importez automatiquement les transactions à partir de vos messages SMS bancaires.';
 
   @override
-  String get onboard_InsightsAndAnalytics => 'Insights & Analytics';
+  String get onboard_InsightsAndAnalytics => 'Aperçus et Analyses';
 
   @override
   String get onboard_InsightsAndAnalyticsDesc =>
-      'Understand your spending habits with detailed charts, trends, and smart insights.';
+      'Comprenez vos habitudes de dépense avec des graphiques détaillés, des tendances et des aperçus intelligents.';
 
   @override
-  String get onboard_SecureAndPrivate => 'Secure & Private';
+  String get onboard_SecureAndPrivate => 'Sûr et Privé';
 
   @override
   String get onboard_SecureAndPrivateDesc =>
-      'Your data stays on your device. No cloud, no tracking — just encrypted local storage.';
+      'Vos données restent sur votre appareil. Pas de cloud, pas de suivi — juste un stockage local chiffré.';
 
   @override
-  String get onboard_SmartAutoTracking => 'Smart Auto Tracking';
+  String get onboard_SmartAutoTracking => 'Suivi automatique intelligent';
 
   @override
   String get onboard_SmartAutoTrackingDesc =>
-      'Automatically detect and import transactions from your bank notifications.';
+      'Détectez et importez automatiquement les transactions à partir de vos notifications bancaires.';
 
   @override
-  String get nav_activity => 'Activity';
+  String get nav_activity => 'Activité';
 
   @override
-  String get nav_manage => 'Manage';
+  String get nav_manage => 'Gérer';
 
   @override
-  String get nav_insights => 'Insights';
+  String get nav_insights => 'Aperçus';
 
   @override
-  String get common_save => 'Save';
+  String get common_save => 'Enregistrer';
 
   @override
-  String get common_cancel => 'Cancel';
+  String get common_cancel => 'Annuler';
 
   @override
-  String get common_next => 'Next';
+  String get common_next => 'Suivant';
 
   @override
-  String get common_back => 'Back';
+  String get common_back => 'Retour';
 
   @override
-  String get common_undo => 'Undo';
+  String get common_undo => 'Annuler';
 
   @override
-  String get common_delete => 'Delete';
+  String get common_delete => 'Supprimer';
 
   @override
-  String get common_edit => 'Edit';
+  String get common_edit => 'Modifier';
 
   @override
-  String get common_add => 'Add';
+  String get common_add => 'Ajouter';
 
   @override
-  String get common_done => 'Done';
+  String get common_done => 'Terminé';
 
   @override
-  String get common_close => 'Close';
+  String get common_close => 'Fermer';
 
   @override
-  String get common_confirm => 'Confirm';
+  String get common_confirm => 'Confirmer';
 
   @override
-  String get common_archive => 'Archive';
+  String get common_archive => 'Archiver';
 
   @override
-  String get common_create => 'Create';
+  String get common_create => 'Créer';
 
   @override
-  String get common_update => 'Update';
+  String get common_update => 'Mettre à jour';
 
   @override
-  String get common_remove => 'Remove';
+  String get common_remove => 'Supprimer';
 
   @override
-  String get common_search => 'Search';
+  String get common_search => 'Rechercher';
 
   @override
-  String get common_filter => 'Filter';
+  String get common_filter => 'Filtrer';
 
   @override
-  String get common_reset => 'Reset';
+  String get common_reset => 'Réinitialiser';
 
   @override
-  String get common_viewDetails => 'View details';
+  String get common_viewDetails => 'Voir les détails';
 
   @override
-  String get common_apply => 'Apply';
+  String get common_apply => 'Appliquer';
 
   @override
-  String get common_yes => 'Yes';
+  String get common_yes => 'Oui';
 
   @override
-  String get common_no => 'No';
+  String get common_no => 'Non';
 
   @override
   String get common_ok => 'OK';
 
   @override
-  String get common_retry => 'Retry';
+  String get common_retry => 'Réessayer';
 
   @override
-  String get common_noData => 'No data';
+  String get common_noData => 'Aucune donnée';
 
   @override
-  String get common_error => 'Something went wrong';
+  String get common_error => 'Une erreur est survenue';
 
   @override
-  String get common_required => 'Required';
+  String get common_required => 'Requis';
 
   @override
   String get title_budgets => 'Budgets';
 
   @override
-  String get title_goals => 'Goals';
+  String get title_goals => 'Objectifs';
 
   @override
-  String get title_bills => 'Bills';
+  String get title_bills => 'Factures';
 
   @override
-  String get title_groups => 'Groups';
+  String get title_groups => 'Groupes';
 
   @override
-  String get title_trips => 'Trips';
+  String get title_trips => 'Voyages';
 
   @override
-  String get title_shared => 'Shared';
+  String get title_shared => 'Partagé';
 
   @override
-  String get title_achievements => 'Achievements';
+  String get title_achievements => 'Succès';
 
   @override
   String get title_notifications => 'Notifications';
 
   @override
-  String get title_appearance => 'Appearance';
+  String get title_appearance => 'Apparence';
 
   @override
-  String get title_currency => 'Currency';
+  String get title_currency => 'Devise';
 
   @override
-  String get title_security => 'Security';
+  String get title_security => 'Sécurité';
 
   @override
-  String get title_about => 'About';
+  String get title_about => 'À propos';
 
   @override
-  String get title_analytics => 'Analytics';
+  String get title_analytics => 'Analyses';
 
   @override
-  String get title_netWorth => 'Net Worth';
+  String get title_netWorth => 'Valeur nette';
 
   @override
-  String get title_financialHealth => 'Financial Health';
+  String get title_financialHealth => 'Santé financière';
 
   @override
-  String get title_spendingPersonality => 'Spending Personality';
+  String get title_spendingPersonality => 'Personnalité dépensière';
 
   @override
-  String get title_monthlyRecap => 'Monthly Recap';
+  String get title_monthlyRecap => 'Récapitulatif mensuel';
 
   @override
-  String get title_compareMonths => 'Compare Months';
+  String get title_compareMonths => 'Comparer les mois';
 
   @override
-  String get title_smsImport => 'SMS Import';
+  String get title_smsImport => 'Importation SMS';
 
   @override
-  String get title_backupShare => 'Backup & Share';
+  String get title_backupShare => 'Sauvegarde et partage';
 
   @override
-  String get title_exchangeRates => 'Exchange Rates';
+  String get title_exchangeRates => 'Taux de change';
 
   @override
-  String get title_recurringTransactions => 'Recurring Transactions';
+  String get title_recurringTransactions => 'Transactions récurrentes';
 
   @override
-  String get title_billControlCenter => 'Bill Control Center';
+  String get title_billControlCenter => 'Centre de contrôle des factures';
 
   @override
-  String get title_plugins => 'Plugins';
+  String get title_plugins => 'Extensions';
 
   @override
-  String get title_editCategory => 'Edit Category';
+  String get title_editCategory => 'Modifier la catégorie';
 
   @override
-  String get title_allCategories => 'All Categories';
+  String get title_allCategories => 'Toutes les catégories';
 
   @override
-  String get title_exportOptions => 'Export Options';
+  String get title_exportOptions => 'Options d\'exportation';
 
   @override
-  String get title_dashboardLayout => 'Dashboard Layout';
+  String get title_dashboardLayout => 'Disposition du tableau de bord';
 
   @override
-  String get section_activeMoney => 'Active Money';
+  String get section_activeMoney => 'Argent actif';
 
   @override
-  String get section_planning => 'Planning';
+  String get section_planning => 'Planification';
 
   @override
-  String get section_insights => 'Insights';
+  String get section_insights => 'Aperçus';
 
   @override
-  String get section_coreSettings => 'Core Settings';
+  String get section_coreSettings => 'Paramètres de base';
 
   @override
-  String get section_appData => 'App & Data';
+  String get section_appData => 'Application et données';
 
   @override
-  String get section_appearance => 'Appearance';
+  String get section_appearance => 'Apparence';
 
   @override
-  String get section_advanced => 'Advanced';
+  String get section_advanced => 'Avancé';
 
   @override
-  String get section_supportLegal => 'Support & Legal';
+  String get section_supportLegal => 'Support et légal';
 
   @override
-  String get section_active => 'Active';
+  String get section_active => 'Actif';
 
   @override
-  String get section_ongoing => 'Ongoing';
+  String get section_ongoing => 'En cours';
 
   @override
   String get section_archive => 'Archive';
 
   @override
-  String get label_income => 'Income';
+  String get label_income => 'Revenu';
 
   @override
-  String get label_expense => 'Expense';
+  String get label_expense => 'Dépense';
 
   @override
-  String get label_balance => 'Balance';
+  String get label_balance => 'Solde';
 
   @override
-  String get label_savings => 'Savings';
+  String get label_savings => 'Économies';
 
   @override
   String get label_total => 'Total';
 
   @override
-  String get label_amount => 'Amount';
+  String get label_amount => 'Montant';
 
   @override
   String get label_date => 'Date';
 
   @override
-  String get label_category => 'Category';
+  String get label_category => 'Catégorie';
 
   @override
-  String get label_account => 'Account';
+  String get label_account => 'Compte';
 
   @override
   String get label_description => 'Description';
@@ -1151,159 +1175,161 @@ class AppLocalizationsFr extends AppLocalizations {
   String get label_type => 'Type';
 
   @override
-  String get label_transfer => 'Transfer';
+  String get label_transfer => 'Transfert';
 
   @override
-  String get label_from => 'From';
+  String get label_from => 'De';
 
   @override
-  String get label_to => 'To';
+  String get label_to => 'À';
 
   @override
-  String get label_all => 'All';
+  String get label_all => 'Tout';
 
   @override
-  String get label_today => 'Today';
+  String get label_today => 'Aujourd\'hui';
 
   @override
-  String get label_yesterday => 'Yesterday';
+  String get label_yesterday => 'Hier';
 
   @override
-  String get label_thisWeek => 'This Week';
+  String get label_thisWeek => 'Cette semaine';
 
   @override
-  String get label_thisMonth => 'This Month';
+  String get label_thisMonth => 'Ce mois-ci';
 
   @override
-  String get label_thisYear => 'This Year';
+  String get label_thisYear => 'Cette année';
 
   @override
-  String get label_custom => 'Custom';
+  String get label_custom => 'Personnalisé';
 
   @override
-  String get label_daily => 'Daily';
+  String get label_daily => 'Quotidien';
 
   @override
-  String get label_weekly => 'Weekly';
+  String get label_weekly => 'Hebdomadaire';
 
   @override
-  String get label_monthly => 'Monthly';
+  String get label_monthly => 'Mensuel';
 
   @override
-  String get label_yearly => 'Yearly';
+  String get label_yearly => 'Annuel';
 
   @override
-  String get label_none => 'None';
+  String get label_none => 'Aucun';
 
   @override
-  String get label_frequency => 'Frequency';
+  String get label_frequency => 'Fréquence';
 
   @override
-  String get label_repeatEvery => 'Repeat every';
+  String get label_repeatEvery => 'Répéter tous les';
 
   @override
-  String get label_days => 'days';
+  String get label_days => 'jours';
 
   @override
-  String get label_weeks => 'weeks';
+  String get label_weeks => 'semaines';
 
   @override
-  String get label_months => 'months';
+  String get label_months => 'mois';
 
   @override
-  String get label_years => 'years';
+  String get label_years => 'ans';
 
   @override
-  String get trip_expenses => 'Expenses';
+  String get trip_expenses => 'Dépenses';
 
   @override
-  String get trip_settlements => 'Settlements';
+  String get trip_settlements => 'Règlements';
 
   @override
-  String get trip_balances => 'Balances';
+  String get trip_balances => 'Soldes';
 
   @override
-  String get trip_report => 'Report';
+  String get trip_report => 'Rapport';
 
   @override
-  String get trip_createTrip => 'Create Trip';
+  String get trip_createTrip => 'Créer un voyage';
 
   @override
-  String get trip_createGroup => 'Create Shared Group';
+  String get trip_createGroup => 'Créer un groupe partagé';
 
   @override
-  String get trip_editTrip => 'Edit Trip';
+  String get trip_editTrip => 'Modifier le voyage';
 
   @override
-  String get trip_editGroup => 'Edit Group';
+  String get trip_editGroup => 'Modifier le groupe';
 
   @override
-  String get trip_archiveTrip => 'Archive Trip';
+  String get trip_archiveTrip => 'Archiver le voyage';
 
   @override
-  String get trip_archiveGroup => 'Archive Group';
+  String get trip_archiveGroup => 'Archiver le groupe';
 
   @override
-  String get trip_allSettled => 'All settled up!';
+  String get trip_allSettled => 'Tout est réglé !';
 
   @override
-  String get trip_archiveToSettle => 'Archive to settle up';
+  String get trip_archiveToSettle => 'Archiver pour régler';
 
   @override
-  String get trip_trackTravel => 'Track travel expenses with dates & budget';
+  String get trip_trackTravel =>
+      'Suivez les dépenses de voyage avec dates et budget';
 
   @override
-  String get trip_splitBills => 'Split bills with friends';
+  String get trip_splitBills => 'Partagez les factures avec des amis';
 
   @override
-  String get trip_live => 'Live';
+  String get trip_live => 'En direct';
 
   @override
-  String get budget_spendingLimits => 'Spending limits';
+  String get budget_spendingLimits => 'Limites de dépenses';
 
   @override
-  String get budget_savingsProgress => 'Savings progress';
+  String get budget_savingsProgress => 'Progression des économies';
 
   @override
-  String get budget_upcomingRecurring => 'Upcoming & recurring';
+  String get budget_upcomingRecurring => 'À venir et récurrent';
 
   @override
-  String get budget_tripsAndSplits => 'Trips & splits';
+  String get budget_tripsAndSplits => 'Voyages et partages';
 
   @override
   String import_importing(int count) {
-    return 'Importing $count transactions...';
+    return 'Importation de $count transactions...';
   }
 
   @override
-  String get import_dontClose => 'Please don\'t close the app';
+  String get import_dontClose => 'Veuillez ne pas fermer l\'application';
 
   @override
-  String get import_complete => 'Import Complete!';
+  String get import_complete => 'Importation terminée !';
 
   @override
-  String get import_failed => 'Import Failed';
+  String get import_failed => 'Échec de l\'importation';
 
   @override
-  String get import_imported => 'Imported';
+  String get import_imported => 'Importé';
 
   @override
-  String get import_duplicatesSkipped => 'Duplicates skipped';
+  String get import_duplicatesSkipped => 'Doublons ignorés';
 
   @override
-  String get import_errorsSkipped => 'Errors/skipped';
+  String get import_errorsSkipped => 'Erreurs/ignorés';
 
   @override
-  String get import_categoriesCreated => 'Categories created';
+  String get import_categoriesCreated => 'Catégories créées';
 
   @override
-  String get import_previewImport => 'Preview Import';
+  String get import_previewImport => 'Aperçu de l\'importation';
 
   @override
-  String get recap_yourMonthAtGlance => 'Your month at a glance';
+  String get recap_yourMonthAtGlance => 'Votre mois en un coup d\'œil';
 
   @override
-  String get recap_trackProgressOverTime => 'Track progress over time';
+  String get recap_trackProgressOverTime =>
+      'Suivez vos progrès au fil du temps';
 
   @override
   String recap_transactions(int count) {
@@ -1311,1944 +1337,2031 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get recap_downloadPdf => 'Download PDF';
+  String get recap_downloadPdf => 'Télécharger le PDF';
 
   @override
-  String get comparison_current => 'Current';
+  String get comparison_current => 'Actuel';
 
   @override
   String comparison_byDay(int day) {
-    return 'By day $day';
+    return 'Au jour $day';
   }
 
   @override
-  String get comparison_topCategories => 'Top Categories';
+  String get comparison_topCategories => 'Principales catégories';
 
   @override
-  String get comparison_categoryImpact => 'CATEGORY IMPACT';
+  String get comparison_categoryImpact => 'IMPACT PAR CATÉGORIE';
 
   @override
-  String get comparison_dailySpendingPace => 'Daily Spending Pace';
+  String get comparison_dailySpendingPace => 'Rythme de dépenses quotidien';
 
   @override
   String comparison_projected(String amount) {
-    return 'Projected: $amount this month';
+    return 'Prévision : $amount ce mois-ci';
   }
 
   @override
-  String get utility_customizeUtilities => 'Customize Utilities';
+  String get utility_customizeUtilities => 'Personnaliser les utilitaires';
 
   @override
-  String get utility_addUtilities => 'Add Utilities';
+  String get utility_addUtilities => 'Ajouter des utilitaires';
 
   @override
-  String get utility_analyticsSubtitle => 'Health score, trends & forecasts';
+  String get utility_analyticsSubtitle =>
+      'Score de santé, tendances et prévisions';
 
   @override
-  String get utility_cashFlowSubtitle => 'Income vs expense projections';
+  String get utility_cashFlowSubtitle => 'Projections des revenus vs dépenses';
 
   @override
-  String get utility_spendingTrendsSubtitle =>
-      'Category-wise spending patterns';
+  String get utility_spendingTrendsSubtitle => 'Modes de dépense par catégorie';
 
   @override
-  String get utility_taxSubtitle => 'Estimate your income tax';
+  String get utility_taxSubtitle => 'Estimez votre impôt sur le revenu';
 
   @override
-  String get profile_accounts => 'Accounts';
+  String get profile_accounts => 'Comptes';
 
   @override
-  String get profile_manageAccounts => 'Manage your accounts';
+  String get profile_manageAccounts => 'Gérer vos comptes';
 
   @override
-  String get profile_categories => 'Categories';
+  String get profile_categories => 'Catégories';
 
   @override
-  String get profile_manageCategories => 'Manage your categories';
+  String get profile_manageCategories => 'Gérer vos catégories';
 
   @override
-  String get profile_language => 'Language';
+  String get profile_language => 'Langue';
 
   @override
   String get profile_notifications => 'Notifications';
 
   @override
-  String get profile_dailyWeeklySummaries => 'Daily & weekly summaries';
+  String get profile_dailyWeeklySummaries =>
+      'Résumés quotidiens et hebdomadaires';
 
   @override
-  String get profile_autoImport => 'Auto Import';
+  String get profile_autoImport => 'Importation automatique';
 
   @override
-  String get profile_autoImportDesc => 'Auto-import from bank notifications';
+  String get profile_autoImportDesc =>
+      'Importation automatique des notifications bancaires';
 
   @override
   String get profile_importExport => 'Import & Export';
 
   @override
-  String get profile_importExportDesc => 'Excel import & export';
+  String get profile_importExportDesc => 'Import & export Excel';
 
   @override
-  String get profile_backupRestore => 'Backup & Restore';
+  String get profile_backupRestore => 'Sauvegarde et Restauration';
 
   @override
-  String get profile_manageData => 'Manage your data';
+  String get profile_manageData => 'Gérer vos données';
 
   @override
-  String get profile_themeDisplay => 'Theme, tone & display';
+  String get profile_themeDisplay => 'Thème, ton et affichage';
 
   @override
-  String get profile_customizeWidgets => 'Customize widgets & cards';
+  String get profile_customizeWidgets => 'Personnaliser les widgets et cartes';
 
   @override
-  String get profile_manageExtensions => 'Manage extensions';
+  String get profile_manageExtensions => 'Gérer les extensions';
 
   @override
-  String get profile_helpSupport => 'Help & Support';
+  String get profile_helpSupport => 'Aide et support';
 
   @override
-  String get profile_faqs => 'FAQs and feature guides';
+  String get profile_faqs => 'FAQ et guides des fonctionnalités';
 
   @override
-  String get profile_aboutApp => 'About App';
+  String get profile_aboutApp => 'À propos de l\'application';
 
   @override
-  String get profile_versionInfo => 'Version & Info';
+  String get profile_versionInfo => 'Version et infos';
 
   @override
-  String get profile_pinFingerprint => 'PIN or Fingerprint';
+  String get profile_pinFingerprint => 'Code PIN ou empreinte digitale';
 
   @override
-  String get profile_upgradePro => 'Upgrade to Pro';
+  String get profile_upgradePro => 'Passer à la version Pro';
 
   @override
   String get profile_unlimitedFeatures =>
-      'Unlimited accounts, analytics & more';
+      'Comptes illimités, analyses et plus encore';
 
   @override
-  String get profile_freeTier => 'Free Tier';
+  String get profile_freeTier => 'Version gratuite';
 
   @override
-  String get profile_fullAccess => 'Full Access';
+  String get profile_fullAccess => 'Accès complet';
 
   @override
-  String get profile_proActive => 'Pro Active';
+  String get profile_proActive => 'Pro actif';
 
   @override
-  String get profile_yourAchievements => 'Your Achievements';
+  String get profile_yourAchievements => 'Vos succès';
 
   @override
-  String get profile_bestStreak => 'Best Streak';
+  String get profile_bestStreak => 'Meilleure série';
 
   @override
-  String get trips_active => 'ACTIVE';
+  String get trips_active => 'ACTIF';
 
   @override
-  String get trips_live => 'Live';
+  String get trips_live => 'En direct';
 
   @override
-  String get trips_allSettled => 'All settled';
+  String get trips_allSettled => 'Tout est réglé';
 
   @override
   String get tone_friendly_txnAdded =>
-      'Done! Transaction saved ✨|Got it! All logged 👍|Saved! You\'re on top of it ✨|Noted! One more tracked 📝';
+      'C\'est fait ! Transaction enregistrée ✨|Compris ! Tout est noté 👍|Enregistré ! Vous assurez ✨|Noté ! Un de plus de suivi 📝';
 
   @override
   String get tone_friendly_txnUpdated =>
-      'Updated! Looking good 👍|Changes saved! ✓|All updated! 👌';
+      'Mis à jour ! C\'est parfait 👍|Changements enregistrés ! ✓|Tout est à jour ! 👌';
 
   @override
   String get tone_friendly_txnDeleted =>
-      'Gone! Transaction removed 🗑️|Deleted! One less to track|Removed! Clean slate 🗑️';
+      'Disparu ! Transaction supprimée 🗑️|Supprimé ! Un de moins à suivre|Enlevé ! Table rase 🗑️';
 
   @override
-  String get tone_friendly_txnFailed => 'Hmm, couldn\'t save that. Try again?';
+  String get tone_friendly_txnFailed =>
+      'Hmm, je n\'ai pas pu enregistrer ça. Réessayez ?';
 
   @override
-  String get tone_friendly_enterAmount => 'How much was it? Enter an amount';
+  String get tone_friendly_enterAmount =>
+      'C\'était combien ? Entrez un montant';
 
   @override
-  String get tone_friendly_pickAccount => 'Which account? Pick one to continue';
+  String get tone_friendly_pickAccount =>
+      'Quel compte ? Choisissez-en un pour continuer';
 
   @override
-  String get tone_friendly_pickCategory => 'What was it for? Choose a category';
+  String get tone_friendly_pickCategory =>
+      'C\'était pour quoi ? Choisissez une catégorie';
 
   @override
   String get tone_friendly_fillAllFields =>
-      'Almost there — fill in all the fields';
+      'Presque fini — remplissez tous les champs';
 
   @override
   String get tone_friendly_invalidAmount =>
-      'That doesn\'t look right — enter a valid amount';
+      'Ça n\'a pas l\'air correct — entrez un montant valide';
 
   @override
   String get tone_friendly_budgetCreated =>
-      'Budget set! Let\'s stay on track 💪|Budget locked in! You\'re planning ahead 💪|Nice! Budget is ready to roll 📊';
+      'Budget défini ! Restons sur la bonne voie 💪|Budget verrouillé ! Vous planifiez à l\'avance 💪|Super ! Le budget est prêt à rouler 📊';
 
   @override
-  String get tone_friendly_budgetUpdated => 'Budget updated!';
+  String get tone_friendly_budgetUpdated => 'Budget mis à jour !';
 
   @override
-  String get tone_friendly_budgetDeleted => 'Budget removed';
+  String get tone_friendly_budgetDeleted => 'Budget supprimé';
 
   @override
   String get tone_friendly_goalCreated =>
-      'Goal set! You got this 🎯|New goal! Let\'s make it happen 🎯|Goal locked in! Eyes on the prize 🎯';
+      'Objectif fixé ! Vous allez y arriver 🎯|Nouvel objectif ! Faisons en sorte que ça arrive 🎯|Objectif verrouillé ! Les yeux sur le prix 🎯';
 
   @override
-  String get tone_friendly_goalUpdated => 'Goal updated!';
+  String get tone_friendly_goalUpdated => 'Objectif mis à jour !';
 
   @override
-  String get tone_friendly_goalDeleted => 'Goal removed';
+  String get tone_friendly_goalDeleted => 'Objectif supprimé';
 
   @override
-  String get tone_friendly_accountCreated => 'Account added! 🏦';
+  String get tone_friendly_accountCreated => 'Compte ajouté ! 🏦';
 
   @override
-  String get tone_friendly_billAdded => 'Bill tracked! I\'ll remind you 🔔';
+  String get tone_friendly_billAdded =>
+      'Facture suivie ! Je vous le rappellerai 🔔';
 
   @override
   String get tone_friendly_billPaid =>
-      'Nice, bill marked as paid! ✅|Bill done! One less to worry about ✅|Paid! That\'s a relief ✅';
+      'Super, facture marquée comme payée ! ✅|Facture faite ! Une de moins à s\'inquiéter ✅|Payée ! Quel soulagement ✅';
 
   @override
   String get tone_friendly_backupSuccess =>
-      'Backup done! Your data is safe 🛡️';
+      'Sauvegarde effectuée ! Vos données sont en sécurité 🛡️';
 
   @override
-  String get tone_friendly_restoreSuccess => 'Restored! Welcome back 🎉';
+  String get tone_friendly_restoreSuccess =>
+      'Restauré ! Bon retour parmi nous 🎉';
 
   @override
   String get tone_friendly_noTransactions =>
-      'Nothing here yet\nAdd your first transaction to get started|Empty for now\nStart tracking — it only takes a sec|No transactions yet\nYour financial journey starts with one entry';
+      'Rien ici pour l\'instant\nAjoutez votre première transaction pour commencer|Vide pour le moment\nCommencez le suivi — ça ne prend qu\'une seconde|Pas encore de transactions\nVotre voyage financier commence par une saisie';
 
   @override
   String get tone_friendly_noBudgets =>
-      'No budgets yet\nSet one up to track your spending';
+      'Pas encore de budgets\nConfigurez-en un pour suivre vos denses';
 
   @override
   String get tone_friendly_noGoals =>
-      'No goals yet\nDream big — set your first goal!';
+      'Pas encore d\'objectifs\nVoyez grand — fixez votre premier objectif !';
 
   @override
-  String get tone_friendly_genericError => 'Something went wrong. Try again?';
+  String get tone_friendly_genericError =>
+      'Un problème est survenu. Réessayer ?';
 
   @override
   String get tone_friendly_smsImportEnabled =>
-      'Auto import is on! I\'ll track your transactions 📩';
+      'L\'importation automatique est activée ! Je suivrai vos transactions 📩';
 
   @override
   String get tone_friendly_dashboardAllCaughtUp =>
-      'You\'re all caught up! 🎉|Nothing needs your attention — nice! ✨|All good here! Enjoy your day 🎉';
+      'Vous êtes à jour ! 🎉|Rien ne nécessite votre attention — super ! ✨|Tout va bien ici ! Profitez de votre journée 🎉';
 
   @override
   String get tone_friendly_dailySummaryEmpty =>
-      'Nothing recorded yesterday — either a zero-spend win or time to catch up!|Quiet day yesterday — your wallet thanks you!|No transactions yesterday — fresh start today!';
+      'Rien d\'enregistré hier — soit une victoire sans dépense, soit il est temps de rattraper le retard !|Journée calme hier — votre portefeuille vous remercie !|Pas de transactions hier — nouveau départ aujourd\'hui !';
 
   @override
   String tone_friendly_streakMessage(int days) {
-    return '$days day streak! Keep it going! 🔥';
+    return '$days jours de suite ! Continuez comme ça ! 🔥';
   }
 
   @override
   String tone_friendly_budgetExceededBy(String amount) {
-    return 'You\'ve exceeded your budget by $amount 😬';
+    return 'Vous avez dépassé votre budget de $amount 😬';
   }
 
   @override
   String get tone_professional_txnAdded =>
-      'Transaction recorded.|Entry saved successfully.|Transaction logged.';
+      'Transaction enregistrée.|Entrée sauvegardée avec succès.|Transaction journalisée.';
 
   @override
   String get tone_professional_txnUpdated =>
-      'Transaction updated.|Changes applied.|Record updated successfully.';
+      'Transaction mise à jour.|Changements appliqués.|Enregistrement mis à jour avec succès.';
 
   @override
   String get tone_professional_txnDeleted =>
-      'Transaction deleted.|Record removed.|Entry deleted successfully.';
+      'Transaction supprimée.|Enregistrement retiré.|Entrée supprimée avec succès.';
 
   @override
   String get tone_professional_txnFailed =>
-      'Failed to save transaction. Please retry.';
+      'Échec de l\'enregistrement de la transaction. Veuillez réessayer.';
 
   @override
-  String get tone_professional_enterAmount => 'Please enter a valid amount.';
+  String get tone_professional_enterAmount =>
+      'Veuillez entrer un montant valide.';
 
   @override
-  String get tone_professional_pickAccount => 'Please select an account.';
+  String get tone_professional_pickAccount =>
+      'Veuillez sélectionner un compte.';
 
   @override
-  String get tone_professional_pickCategory => 'Please select a category.';
+  String get tone_professional_pickCategory =>
+      'Veuillez sélectionner une catégorie.';
 
   @override
   String get tone_professional_fillAllFields =>
-      'All required fields must be completed.';
+      'Tous les champs obligatoires doivent être remplis.';
 
   @override
-  String get tone_professional_invalidAmount => 'Invalid amount entered.';
+  String get tone_professional_invalidAmount => 'Montant invalide saisi.';
 
   @override
   String get tone_professional_budgetCreated =>
-      'Budget created.|Budget configured successfully.|New budget is active.';
+      'Budget créé.|Budget configuré avec succès.|Le nouveau budget est actif.';
 
   @override
-  String get tone_professional_budgetUpdated => 'Budget updated.';
+  String get tone_professional_budgetUpdated => 'Budget mis à jour.';
 
   @override
-  String get tone_professional_budgetDeleted => 'Budget deleted.';
+  String get tone_professional_budgetDeleted => 'Budget supprimé.';
 
   @override
   String get tone_professional_goalCreated =>
-      'Goal created.|Savings goal configured.|New goal is active.';
+      'Objectif créé.|Objectif d\'épargne configuré.|Le nouvel objectif est actif.';
 
   @override
-  String get tone_professional_goalUpdated => 'Goal updated.';
+  String get tone_professional_goalUpdated => 'Objectif mis à jour.';
 
   @override
-  String get tone_professional_goalDeleted => 'Goal deleted.';
+  String get tone_professional_goalDeleted => 'Objectif supprimé.';
 
   @override
-  String get tone_professional_accountCreated => 'Account added.';
+  String get tone_professional_accountCreated => 'Compte ajouté.';
 
   @override
   String get tone_professional_billAdded =>
-      'Bill added. Reminders will be sent.';
+      'Facture ajoutée. Des rappels seront envoyés.';
 
   @override
   String get tone_professional_billPaid =>
-      'Bill marked as paid.|Payment recorded.|Bill settled.';
+      'Facture marquée comme payée.|Paiement enregistré.|Facture réglée.';
 
   @override
   String get tone_professional_backupSuccess =>
-      'Backup completed successfully.';
+      'Sauvegarde terminée avec succès.';
 
   @override
-  String get tone_professional_restoreSuccess => 'Data restored successfully.';
+  String get tone_professional_restoreSuccess =>
+      'Données restaurées avec succès.';
 
   @override
   String get tone_professional_noTransactions =>
-      'No transactions recorded.\nAdd your first entry.|No records found.\nBegin by adding a transaction.|Transaction history is empty.\nStart recording.';
+      'Aucune transaction enregistrée.\nAjoutez votre première entrée.|Aucun enregistrement trouvé.\nCommencez par ajouter une transaction.|L\'historique des transactions est vide.\nCommencez l\'enregistrement.';
 
   @override
-  String get tone_professional_noBudgets => 'No budgets configured.';
+  String get tone_professional_noBudgets => 'Aucun budget configuré.';
 
   @override
-  String get tone_professional_noGoals => 'No goals set.';
+  String get tone_professional_noGoals => 'Aucun objectif fixé.';
 
   @override
-  String get tone_professional_genericError => 'An error occurred.';
+  String get tone_professional_genericError => 'Une erreur est survenue.';
 
   @override
-  String get tone_professional_smsImportEnabled => 'Auto-import enabled.';
+  String get tone_professional_smsImportEnabled =>
+      'Importation automatique activée.';
 
   @override
   String get tone_professional_dashboardAllCaughtUp =>
-      'All items are up to date.|No pending actions.|Everything is current.';
+      'Tous les éléments sont à jour.|Aucune action en attente.|Tout est à jour.';
 
   @override
   String get tone_professional_dailySummaryEmpty =>
-      'No transactions recorded yesterday.|Yesterday had no recorded activity.|No entries for the previous day.';
+      'Aucune transaction enregistrée hier.|Hier, il n\'y a eu aucune activité enregistrée.|Aucune entrée pour la journée précédente.';
 
   @override
   String tone_professional_streakMessage(int days) {
-    return '$days consecutive days of tracking.';
+    return '$days jours consécutifs de suivi.';
   }
 
   @override
   String tone_professional_budgetExceededBy(String amount) {
-    return 'Budget exceeded by $amount.';
+    return 'Budget dépassé de $amount.';
   }
 
   @override
   String get tone_motivational_txnAdded =>
-      'Great move! Transaction saved! 💪|Logged! You\'re on a roll 💪|Another one tracked! Keep the momentum! ✨|Saved! Every entry is a step forward! 🚀';
+      'Excellent travail ! Transaction enregistrée ! 💪|C\'est noté ! Vous assurez 💪|Un de plus de suivi ! Gardez le rythme ! ✨|Enregistré ! Chaque saisie est un pas en avant ! 🚀';
 
   @override
   String get tone_motivational_txnUpdated =>
-      'Nice update! Staying sharp! ✨|Updated! Precision matters! ✨|Changes saved! You\'re on it! 👍';
+      'Belle mise à jour ! On reste affûté ! ✨|Mis à jour ! La précision est la clé ! ✨|Changements enregistrés ! Vous gérez ! 👍';
 
   @override
   String get tone_motivational_txnDeleted =>
-      'Cleared out! One less to worry about|Removed! Keeping things clean! 💪|Gone! Focus on what matters';
+      'C\'est nettoyé ! Une chose de moins à gérer|Supprimé ! On garde les choses au propre ! 💪|Parti ! Concentrez-vous sur ce qui compte';
 
   @override
-  String get tone_motivational_txnFailed =>
-      'Didn\'t go through — give it another shot!';
+  String get tone_motivational_txnFailed => 'Ça n\'est pas passé — réessayez !';
 
   @override
   String get tone_motivational_enterAmount =>
-      'Every rupee counts — enter the amount!';
+      'Chaque euro compte — entrez le montant !';
 
   @override
   String get tone_motivational_pickAccount =>
-      'Pick an account to keep things organized!';
+      'Choisissez un compte pour rester organisé !';
 
   @override
   String get tone_motivational_pickCategory =>
-      'Categorize it — you\'ll thank yourself later!';
+      'Catégorisez — vous vous remercierez plus tard !';
 
   @override
   String get tone_motivational_fillAllFields =>
-      'Almost there! Fill in everything to continue';
+      'Presque là ! Remplissez tout pour continuer';
 
   @override
   String get tone_motivational_invalidAmount =>
-      'That amount doesn\'t look right — try again!';
+      'Ce montant ne semble pas correct — réessayez !';
 
   @override
   String get tone_motivational_budgetCreated =>
-      'Smart move! Budget is set! 💪|Budget locked in! You\'re taking control! 💪|That\'s discipline! Budget ready! 📊';
+      'Bien joué ! Le budget est fixé ! 💪|Budget verrouillé ! Vous prenez le contrôle ! 💪|C\'est ça la discipline ! Budget prêt ! 📊';
 
   @override
   String get tone_motivational_budgetUpdated =>
-      'Budget adjusted — staying flexible!';
+      'Budget ajusté — on reste flexible !';
 
   @override
-  String get tone_motivational_budgetDeleted => 'Budget removed';
+  String get tone_motivational_budgetDeleted => 'Budget supprimé';
 
   @override
   String get tone_motivational_goalCreated =>
-      'Love the ambition! Goal set! 🎯|Big dreams start here! Goal locked in! 🎯|That\'s the spirit! New goal ready! 🚀';
+      'J\'adore cette ambition ! Objectif fixé ! 🎯|Les grands rêves commencent ici ! Objectif verrouillé ! 🎯|C\'est l\'esprit ! Nouvel objectif prêt ! 🚀';
 
   @override
-  String get tone_motivational_goalUpdated => 'Goal refined — keep pushing!';
+  String get tone_motivational_goalUpdated =>
+      'Objectif affiné — continuez à pousser !';
 
   @override
   String get tone_motivational_goalDeleted =>
-      'Goal removed — new priorities, new plans';
+      'Objectif supprimé — nouvelles priorités, nouveaux plans';
 
   @override
   String get tone_motivational_accountCreated =>
-      'Account added! You\'re getting organized! 🏦';
+      'Compte ajouté ! Vous vous organisez ! 🏦';
 
   @override
   String get tone_motivational_billAdded =>
-      'Bill tracked! You\'re staying ahead! 🔔';
+      'Facture suivie ! Vous avez une longueur d\'avance ! 🔔';
 
   @override
   String get tone_motivational_billPaid =>
-      'Bill paid! One less thing to worry about! ✅|Crushed it! Bill is done! ✅|Paid and done! You\'re ahead of the game! 💪';
+      'Facture payée ! Une chose de moins à s\'inquiéter ! ✅|Écrasé ! La facture est payée ! ✅|Payé et terminé ! Vous avez une longueur d\'avance ! 💪';
 
   @override
   String get tone_motivational_backupSuccess =>
-      'Backed up! Your progress is safe! 🛡️';
+      'Sauvegardé ! Vos progrès sont en sécurité ! 🛡️';
 
   @override
   String get tone_motivational_restoreSuccess =>
-      'Restored! Right back on track! 🎉';
+      'Restauré ! De retour sur les rails ! 🎉';
 
   @override
   String get tone_motivational_noTransactions =>
-      'Fresh start! 🌟\nAdd your first transaction — every journey begins with one step|Empty slate! 🌟\nYour first entry is waiting — let\'s go!|Nothing yet! 💪\nOne transaction and you\'re on your way!';
+      'Nouveau départ ! 🌟\nAjoutez votre première transaction — chaque voyage commence par un pas|Table rase ! 🌟\nVotre première saisie attend — c\'est parti !|Rien pour l\'instant ! 💪\nUne transaction et vous êtes en route !';
 
   @override
   String get tone_motivational_noBudgets =>
-      'No budgets yet\nSet one up — your future self will thank you! 💪';
+      'Pas encore de budgets\nConfigurez-en un — votre futur moi vous remerciera ! 💪';
 
   @override
   String get tone_motivational_noGoals =>
-      'No goals yet\nDream big — set your first goal! 🎯';
+      'Pas encore d\'objectifs\nRêvez grand — fixez votre premier objectif ! 🎯';
 
   @override
   String get tone_motivational_genericError =>
-      'Something went wrong — try again!';
+      'Un problème est survenu — réessayez !';
 
   @override
   String get tone_motivational_smsImportEnabled =>
-      'Auto-import on! Your finances track themselves now! 📩';
+      'Importation automatique activée ! Vos finances se suivent toutes seules maintenant ! 📩';
 
   @override
   String get tone_motivational_dashboardAllCaughtUp =>
-      'All caught up — you\'re ahead of the game! 🏆|Nothing pending — you\'re on top of it 💪|All clear! Keep this energy going 🏆';
+      'Tout est à jour — vous avez une longueur d\'avance ! 🏆|Rien en attente — vous assurez 💪|Tout est clair ! Gardez cette énergie 🏆';
 
   @override
   String get tone_motivational_dailySummaryEmpty =>
-      'Zero spend yesterday — your wallet thanks you! ✨|Nothing spent yesterday — that\'s willpower! 💪|A no-spend day! That\'s a win! 🏆';
+      'Zéro dépense hier — votre portefeuille vous remercie ! ✨|Rien de dépensé hier — c\'est ça la volonté ! 💪|Une journée sans dépense ! C\'est une victoire ! 🏆';
 
   @override
   String tone_motivational_streakMessage(int days) {
-    return '$days day streak! Unstoppable! 🔥';
+    return 'Série de $days jours ! Inarrêtable ! 🔥';
   }
 
   @override
   String tone_motivational_budgetExceededBy(String amount) {
-    return 'Over by $amount — you can course-correct! 💪';
+    return 'Dépassé de $amount — vous pouvez corriger le tir ! 💪';
   }
 
   @override
-  String get tone_calm_txnAdded => 'Noted.|Recorded.|Saved quietly.';
+  String get tone_calm_txnAdded => 'Noté.|Enregistré.|Sauvegardé discrètement.';
 
   @override
-  String get tone_calm_txnUpdated => 'Updated.|Adjusted.|Changes saved.';
+  String get tone_calm_txnUpdated =>
+      'Mis à jour.|Ajusté.|Changements enregistrés.';
 
   @override
-  String get tone_calm_txnDeleted => 'Released.|Removed.|Let go.';
+  String get tone_calm_txnDeleted => 'Libéré.|Retiré.|Laissé de côté.';
 
   @override
-  String get tone_calm_txnFailed => 'That didn\'t land. Try once more.';
+  String get tone_calm_txnFailed => 'Ça n\'a pas marché. Réessayez doucement.';
 
   @override
-  String get tone_calm_enterAmount => 'An amount is needed.';
+  String get tone_calm_enterAmount => 'Un montant est nécessaire.';
 
   @override
-  String get tone_calm_pickAccount => 'Choose where this belongs.';
+  String get tone_calm_pickAccount => 'Choisissez où cela appartient.';
 
   @override
-  String get tone_calm_pickCategory => 'Give it a purpose.';
+  String get tone_calm_pickCategory => 'Donnez-lui un but.';
 
   @override
-  String get tone_calm_fillAllFields => 'A few things are still empty.';
+  String get tone_calm_fillAllFields => 'Quelques champs sont encore vides.';
 
   @override
-  String get tone_calm_invalidAmount => 'The amount needs adjusting.';
+  String get tone_calm_invalidAmount => 'Le montant doit être ajusté.';
 
   @override
   String get tone_calm_budgetCreated =>
-      'Boundary set.|Budget in place.|Limits defined.';
+      'Limite fixée.|Budget en place.|Limites définies.';
 
   @override
-  String get tone_calm_budgetUpdated => 'Adjusted.';
+  String get tone_calm_budgetUpdated => 'Ajusté.';
 
   @override
-  String get tone_calm_budgetDeleted => 'Released.';
+  String get tone_calm_budgetDeleted => 'Libéré.';
 
   @override
   String get tone_calm_goalCreated =>
-      'Intention set.|A new direction.|Goal planted.';
+      'Intention fixée.|Une nouvelle direction.|Objectif planté.';
 
   @override
-  String get tone_calm_goalUpdated => 'Refined.';
+  String get tone_calm_goalUpdated => 'Affiné.';
 
   @override
-  String get tone_calm_goalDeleted => 'Released.';
+  String get tone_calm_goalDeleted => 'Libéré.';
 
   @override
-  String get tone_calm_accountCreated => 'Account opened.';
+  String get tone_calm_accountCreated => 'Compte ouvert.';
 
   @override
-  String get tone_calm_billAdded => 'Noted. You\'ll be reminded.';
+  String get tone_calm_billAdded => 'Noté. Vous en serez rappelé.';
 
   @override
   String get tone_calm_billPaid =>
-      'Settled.|Paid. One less.|Done. Peace of mind.';
+      'Réglé.|Payé. Un de moins.|Fait. Tranquillité d\'esprit.';
 
   @override
-  String get tone_calm_backupSuccess => 'Safely stored.';
+  String get tone_calm_backupSuccess => 'En sécurité.';
 
   @override
-  String get tone_calm_restoreSuccess => 'Restored. Welcome back.';
+  String get tone_calm_restoreSuccess => 'Restauré. Bon retour.';
 
   @override
   String get tone_calm_noTransactions =>
-      'A clean slate.\nBegin when you\'re ready.|Nothing here yet.\nStart gently.|Empty.\nA fresh beginning awaits.';
+      'Une table rase.\nCommencez quand vous êtes prêt.|Rien ici pour l\'instant.\nCommencez doucement.|Vide.\nUn nouveau départ vous attend.';
 
   @override
   String get tone_calm_noBudgets =>
-      'No boundaries yet.\nSet one when it feels right.';
+      'Pas encore de limites.\nFixez-en une quand vous le sentirez bien.';
 
   @override
   String get tone_calm_noGoals =>
-      'No intentions yet.\nSet one when you\'re ready.';
+      'Pas encore d\'intentions.\nFixez-en une quand vous serez prêt.';
 
   @override
-  String get tone_calm_genericError => 'Something shifted. Try again.';
+  String get tone_calm_genericError => 'Quelque chose a bougé. Réessayez.';
 
   @override
   String get tone_calm_smsImportEnabled =>
-      'Quietly watching your transactions.';
+      'Surveille discrètement vos transactions.';
 
   @override
   String get tone_calm_dashboardAllCaughtUp =>
-      'Everything is in order.|Nothing needs attention.|All is well.';
+      'Tout est en ordre.|Rien ne nécessite votre attention.|Tout va bien.';
 
   @override
   String get tone_calm_dailySummaryEmpty =>
-      'A quiet day. Nothing recorded.|Yesterday was still. No entries.|Nothing spent. A restful day.';
+      'Une journée calme. Rien d\'enregistré.|Hier était paisible. Aucune saisie.|Rien de dépensé. Une journée de repos.';
 
   @override
   String tone_calm_streakMessage(int days) {
-    return '$days days of mindful tracking.';
+    return '$days jours de suivi attentif.';
   }
 
   @override
   String tone_calm_budgetExceededBy(String amount) {
-    return 'Over by $amount. A moment to reflect.';
+    return 'Dépassé de $amount. Un moment de réflexion.';
   }
 
   @override
-  String get tone_friendly_insightBillsDueSoon => 'Heads up — bills incoming';
+  String get tone_friendly_insightBillsDueSoon =>
+      'Attention — factures en approche';
 
   @override
-  String get tone_friendly_insightOverBudget => 'Over budget';
+  String get tone_friendly_insightOverBudget => 'Budget dépassé';
 
   @override
-  String get tone_friendly_insightNearBudget => 'Getting close...';
+  String get tone_friendly_insightNearBudget => 'On s\'en approche...';
 
   @override
-  String get tone_friendly_insightOverspending => 'Spending outpacing income';
+  String get tone_friendly_insightOverspending =>
+      'Les dépenses dépassent les revenus';
 
   @override
-  String get tone_friendly_insightSpendingSpike => 'Spending spike today';
+  String get tone_friendly_insightSpendingSpike =>
+      'Pic de dépenses aujourd\'hui';
 
   @override
-  String get tone_friendly_insightWeekendAlert => 'Weekend spending alert';
+  String get tone_friendly_insightWeekendAlert => 'Alerte dépenses du week-end';
 
   @override
-  String get tone_friendly_insightGetStarted => 'Let\'s get started! 🚀';
+  String get tone_friendly_insightGetStarted => 'C\'est parti ! 🚀';
 
   @override
   String get tone_friendly_insightGetStartedMessage =>
-      'Add your first transaction — it only takes a sec';
+      'Ajoutez votre première transaction — ça ne prend qu\'une seconde';
 
   @override
   String tone_friendly_insightBillsDueMessage(int count) {
-    return '$count bill(s) due soon, don\'t forget!';
+    return '$count facture(s) bientôt dues, n\'oubliez pas !';
   }
 
   @override
   String tone_friendly_insightOverBudgetMessage(int count) {
-    return '$count budget(s) went over this month — worth a look';
+    return '$count budget(s) ont été dépassés ce mois-ci — jetez-y un œil';
   }
 
   @override
   String tone_friendly_insightNearBudgetMessage(int count) {
-    return '$count budget(s) past 80% — still time to rein it in';
+    return '$count budget(s) à plus de 80 % — il est encore temps de ralentir';
   }
 
   @override
   String tone_friendly_insightOverspendingMessage(String amount) {
-    return 'You\'re $amount over your income this month — might want to slow down';
+    return 'Vous avez dépensé $amount de plus que vos revenus ce mois-ci — vous devriez peut-être ralentir';
   }
 
   @override
   String tone_friendly_insightSpendingSpikeMessage(String avg, String today) {
-    return 'You usually spend $avg/day. Today\'s already $today.';
+    return 'D\'habitude vous dépensez $avg/jour. Aujourd\'hui on est déjà à $today.';
   }
 
   @override
   String tone_friendly_insightWeekendAlertMessage(String avg, String current) {
-    return 'You usually spend $avg on weekends. This one\'s already $current.';
+    return 'D\'habitude vous dépensez $avg le week-end. Celui-ci est déjà à $current.';
   }
 
   @override
-  String get tone_professional_insightBillsDueSoon => 'Upcoming bills';
+  String get tone_professional_insightBillsDueSoon => 'Factures à venir';
 
   @override
-  String get tone_professional_insightOverBudget => 'Budget exceeded';
+  String get tone_professional_insightOverBudget => 'Budget dépassé';
 
   @override
-  String get tone_professional_insightNearBudget => 'Approaching budget limit';
+  String get tone_professional_insightNearBudget =>
+      'Limite du budget approchant';
 
   @override
-  String get tone_professional_insightOverspending => 'Expenses exceed income';
+  String get tone_professional_insightOverspending =>
+      'Les dépenses dépassent les revenus';
 
   @override
   String get tone_professional_insightSpendingSpike =>
-      'Elevated spending today';
+      'Dépenses élevées aujourd\'hui';
 
   @override
   String get tone_professional_insightWeekendAlert =>
-      'Weekend spending elevated';
+      'Dépenses du week-end élevées';
 
   @override
-  String get tone_professional_insightGetStarted => 'Get started';
+  String get tone_professional_insightGetStarted => 'Commencer';
 
   @override
   String get tone_professional_insightGetStartedMessage =>
-      'Record your first transaction to begin tracking.';
+      'Enregistrez votre première transaction pour commencer le suivi.';
 
   @override
   String tone_professional_insightBillsDueMessage(int count) {
-    return '$count bill(s) due within the next few days.';
+    return '$count facture(s) dues dans les prochains jours.';
   }
 
   @override
   String tone_professional_insightOverBudgetMessage(int count) {
-    return '$count budget(s) exceeded this month.';
+    return '$count budget(s) dépassés ce mois-ci.';
   }
 
   @override
   String tone_professional_insightNearBudgetMessage(int count) {
-    return '$count budget(s) above 80% utilization.';
+    return '$count budget(s) à plus de 80 % d\'utilisation.';
   }
 
   @override
   String tone_professional_insightOverspendingMessage(String amount) {
-    return 'Expenditure exceeds income by $amount this month.';
+    return 'Les dépenses dépassent les revenus de $amount ce mois-ci.';
   }
 
   @override
   String tone_professional_insightSpendingSpikeMessage(
-      String avg, String today) {
-    return 'Daily average: $avg. Today: $today.';
+    String avg,
+    String today,
+  ) {
+    return 'Moyenne quotidienne : $avg. Aujourd\'hui : $today.';
   }
 
   @override
   String tone_professional_insightWeekendAlertMessage(
-      String avg, String current) {
-    return 'Weekend average: $avg. Current: $current.';
+    String avg,
+    String current,
+  ) {
+    return 'Moyenne du week-end : $avg. Actuel : $current.';
   }
 
   @override
-  String get tone_motivational_insightBillsDueSoon => 'Bills coming up! 📋';
+  String get tone_motivational_insightBillsDueSoon => 'Factures à venir ! 📋';
 
   @override
   String get tone_motivational_insightOverBudget =>
-      'Over budget — time to regroup';
+      'Budget dépassé — temps de se ressaisir';
 
   @override
-  String get tone_motivational_insightNearBudget => 'Almost at the limit';
+  String get tone_motivational_insightNearBudget => 'Presque à la limite';
 
   @override
   String get tone_motivational_insightOverspending =>
-      'Spending exceeding income';
+      'Les dépenses dépassent les revenus';
 
   @override
-  String get tone_motivational_insightSpendingSpike => 'Spending spike today';
+  String get tone_motivational_insightSpendingSpike =>
+      'Pic de dépenses aujourd\'hui';
 
   @override
-  String get tone_motivational_insightWeekendAlert => 'Weekend spending alert';
+  String get tone_motivational_insightWeekendAlert =>
+      'Alerte dépenses du week-end';
 
   @override
   String get tone_motivational_insightGetStarted =>
-      'Let\'s build something great! 🚀';
+      'Construisons quelque chose de grand ! 🚀';
 
   @override
   String get tone_motivational_insightGetStartedMessage =>
-      'Add your first transaction — you\'re one step away!';
+      'Ajoutez votre première transaction — vous n\'êtes qu\'à un pas !';
 
   @override
   String tone_motivational_insightBillsDueMessage(int count) {
-    return '$count bill(s) due soon — stay ahead!';
+    return '$count facture(s) bientôt dues — gardez une longueur d\'avance !';
   }
 
   @override
   String tone_motivational_insightOverBudgetMessage(int count) {
-    return '$count budget(s) exceeded — you can course-correct!';
+    return '$count budget(s) dépassés — vous pouvez corriger le tir !';
   }
 
   @override
   String tone_motivational_insightNearBudgetMessage(int count) {
-    return '$count budget(s) past 80% — you\'ve got this, stay mindful!';
+    return '$count budget(s) à plus de 80 % — vous gérez, restez attentif !';
   }
 
   @override
   String tone_motivational_insightOverspendingMessage(String amount) {
-    return '$amount over income — small adjustments make a big difference!';
+    return '$amount au-dessus des revenus — les petits ajustements font une grande différence !';
   }
 
   @override
   String tone_motivational_insightSpendingSpikeMessage(
-      String avg, String today) {
-    return 'Usually $avg/day. Today\'s $today — be intentional!';
+    String avg,
+    String today,
+  ) {
+    return 'D\'habitude $avg/jour. Aujourd\'hui $today — soyez intentionnel !';
   }
 
   @override
   String tone_motivational_insightWeekendAlertMessage(
-      String avg, String current) {
-    return 'Weekend avg: $avg. This one\'s $current — stay aware!';
+    String avg,
+    String current,
+  ) {
+    return 'Moyenne week-end : $avg. Celui-ci est à $current — restez conscient !';
   }
 
   @override
-  String get tone_calm_insightBillsDueSoon => 'Bills approaching';
+  String get tone_calm_insightBillsDueSoon => 'Factures en approche';
 
   @override
-  String get tone_calm_insightOverBudget => 'Over the line';
+  String get tone_calm_insightOverBudget => 'Au-delà de la ligne';
 
   @override
-  String get tone_calm_insightNearBudget => 'Nearing the edge';
+  String get tone_calm_insightNearBudget => 'Proche de la limite';
 
   @override
-  String get tone_calm_insightOverspending => 'Outflow exceeds inflow';
+  String get tone_calm_insightOverspending =>
+      'Les sorties dépassent les entrées';
 
   @override
-  String get tone_calm_insightSpendingSpike => 'A heavier day';
+  String get tone_calm_insightSpendingSpike => 'Une journée plus lourde';
 
   @override
-  String get tone_calm_insightWeekendAlert => 'Weekend spending';
+  String get tone_calm_insightWeekendAlert => 'Dépenses du week-end';
 
   @override
-  String get tone_calm_insightGetStarted => 'A fresh start';
+  String get tone_calm_insightGetStarted => 'Un nouveau départ';
 
   @override
   String get tone_calm_insightGetStartedMessage =>
-      'Begin with your first transaction.';
+      'Commencez par votre première transaction.';
 
   @override
   String tone_calm_insightBillsDueMessage(int count) {
-    return '$count bill(s) arriving soon.';
+    return '$count facture(s) arrivant bientôt.';
   }
 
   @override
   String tone_calm_insightOverBudgetMessage(int count) {
-    return '$count budget(s) exceeded. Reflect and adjust.';
+    return '$count budget(s) dépassés. Réfléchissez et ajustez.';
   }
 
   @override
   String tone_calm_insightNearBudgetMessage(int count) {
-    return '$count budget(s) past 80%. Mindful spending helps.';
+    return '$count budget(s) à plus de 80 %. Une dépense attentive aide.';
   }
 
   @override
   String tone_calm_insightOverspendingMessage(String amount) {
-    return '$amount more spent than earned. A moment to pause.';
+    return '$amount de plus dépensé que gagné. Un moment de pause.';
   }
 
   @override
   String tone_calm_insightSpendingSpikeMessage(String avg, String today) {
-    return 'Usually $avg/day. Today, $today.';
+    return 'D\'habitude $avg/jour. Aujourd\'hui, $today.';
   }
 
   @override
   String tone_calm_insightWeekendAlertMessage(String avg, String current) {
-    return 'Usually $avg. This weekend, $current.';
+    return 'D\'habitude $avg. Ce week-end, $current.';
   }
 
   @override
   String tone_friendly_insightMoneyLeak(
-      String category, int count, String total) {
-    return '$category: $count times this month, $total total — small hits add up';
+    String category,
+    int count,
+    String total,
+  ) {
+    return '$category : $count fois ce mois-ci, $total au total — les petits coups s\'additionnent';
   }
 
   @override
   String tone_friendly_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
-    return '$wAvg avg on ${worst}s vs $bAvg on ${best}s — that\'s $saving you could keep';
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
+    return '$wAvg en moyenne les ${worst}s contre $bAvg les ${best}s — c\'est $saving que vous pourriez garder';
   }
 
   @override
   String tone_professional_insightMoneyLeak(
-      String category, int count, String total) {
-    return '$category: $count transactions, $total total this month.';
+    String category,
+    int count,
+    String total,
+  ) {
+    return '$category : $count transactions, $total au total ce mois-ci.';
   }
 
   @override
   String tone_professional_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
-    return '$wAvg avg on ${worst}s vs $bAvg on ${best}s. Potential saving: $saving.';
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
+    return '$wAvg en moyenne les ${worst}s contre $bAvg les ${best}s. Économie potentielle : $saving.';
   }
 
   @override
   String tone_motivational_insightMoneyLeak(
-      String category, int count, String total) {
-    return '$category: $count times, $total — small wins add up if you cut back!';
+    String category,
+    int count,
+    String total,
+  ) {
+    return '$category : $count fois, $total — de petites victoires s\'ajoutent si vous réduisez !';
   }
 
   @override
   String tone_motivational_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
-    return '$wAvg on ${worst}s vs $bAvg on ${best}s — $saving potential savings!';
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
+    return '$wAvg les ${worst}s contre $bAvg les ${best}s — $saving d\'économies potentielles !';
   }
 
   @override
   String tone_calm_insightMoneyLeak(String category, int count, String total) {
-    return '$category: $count times, $total. Small streams form rivers.';
+    return '$category : $count fois, $total. Les petits ruisseaux font les grandes rivières.';
   }
 
   @override
   String tone_calm_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
-    return '${worst}s: $wAvg. ${best}s: $bAvg. $saving to keep.';
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
+    return '${worst}s : $wAvg. ${best}s : $bAvg. $saving à garder.';
   }
 
   @override
-  String get tone_friendly_txnNotFound => 'Can\'t find that transaction';
+  String get tone_friendly_txnNotFound =>
+      'Impossible de trouver cette transaction';
 
   @override
-  String get tone_friendly_futureDate => 'Pick today or earlier';
+  String get tone_friendly_futureDate =>
+      'Choisissez aujourd\'hui ou une date antérieure';
 
   @override
   String get tone_friendly_selectAccountAndCategory =>
-      'Pick an account & category first';
+      'Choisissez d\'abord un compte et une catégorie';
 
   @override
   String get tone_friendly_addParticipant =>
-      'Add at least one person to split with';
+      'Ajoutez au moins une personne avec qui partager';
 
   @override
   String get tone_friendly_budgetExceededAdjust =>
-      'You\'ve exceeded this budget. Maybe ease up a bit?';
+      'Vous avez dépassé ce budget. Peut-être devriez-vous lever le pied ?';
 
   @override
   String get tone_friendly_budgetGreatDiscipline =>
-      'Great discipline! You\'re well within your budget ✨';
+      'Belle discipline ! Vous respectez bien votre budget ✨';
 
   @override
   String get tone_friendly_comparisonSpentSame =>
-      'Spending is about the same as last month — steady!';
+      'Les dépenses sont à peu près les mêmes que le mois dernier — stable !';
 
   @override
-  String get tone_friendly_accountUpdated => 'Account updated!';
+  String get tone_friendly_accountUpdated => 'Compte mis à jour !';
 
   @override
-  String get tone_friendly_accountDeleted => 'Account removed';
+  String get tone_friendly_accountDeleted => 'Compte supprimé';
 
   @override
   String get tone_friendly_accountLocked =>
-      'This account is locked — upgrade to Pro to use it 🔒';
+      'Ce compte est verrouillé — passez à la version Pro pour l\'utiliser 🔒';
 
   @override
-  String get tone_friendly_categoryCreated => 'Category added!';
+  String get tone_friendly_categoryCreated => 'Catégorie ajoutée !';
 
   @override
-  String get tone_friendly_categoryDeleted => 'Category removed';
+  String get tone_friendly_categoryDeleted => 'Catégorie supprimée';
 
   @override
-  String get tone_friendly_categoryNameRequired => 'Give it a name!';
+  String get tone_friendly_categoryNameRequired => 'Donnez-lui un nom !';
 
   @override
-  String get tone_friendly_billDeleted => 'Bill removed';
+  String get tone_friendly_billDeleted => 'Facture supprimée';
 
   @override
-  String get tone_friendly_backupFailed => 'Backup didn\'t work — try again?';
+  String get tone_friendly_backupFailed =>
+      'La sauvegarde n\'a pas fonctionné — réessayez ?';
 
   @override
   String get tone_friendly_restoreFailed =>
-      'Restore failed — is the file okay?';
+      'Échec de la restauration — le fichier est-il correct ?';
 
   @override
   String get tone_friendly_invalidBackupFile =>
-      'That doesn\'t look like a valid backup file';
+      'Cela ne semble pas être un fichier de sauvegarde valide';
 
   @override
-  String get tone_friendly_corruptBackup => 'This backup looks corrupted 😕';
+  String get tone_friendly_corruptBackup =>
+      'Cette sauvegarde semble corrompue 😕';
 
   @override
-  String get tone_friendly_settingsSaved => 'Saved! ✓';
+  String get tone_friendly_settingsSaved => 'Enregistré ! ✓';
 
   @override
-  String get tone_friendly_reminderUpdated => 'Reminder updated ⏰';
+  String get tone_friendly_reminderUpdated => 'Rappel mis à jour ⏰';
 
   @override
   String get tone_friendly_biometricFailed =>
-      'Authentication failed — try again';
+      'Échec de l\'authentification — réessayez';
 
   @override
-  String get tone_friendly_incorrectPin => 'Wrong PIN — give it another shot';
+  String get tone_friendly_incorrectPin => 'Mauvais code PIN — réessayez';
 
   @override
   String get tone_friendly_notificationAccessDenied =>
-      'Need notification access to auto-import transactions';
+      'Besoin de l\'accès aux notifications pour importer automatiquement les transactions';
 
   @override
   String get tone_friendly_noBills =>
-      'No bills tracked\\nAdd recurring bills so you never miss a payment';
+      'Aucune facture suivie\nAjoutez des factures récurrentes pour ne jamais manquer un paiement';
 
   @override
   String get tone_friendly_noAccounts =>
-      'No accounts yet\\nAdd one to start tracking';
+      'Pas encore de comptes\nAjoutez-en un pour commencer le suivi';
 
   @override
-  String get tone_friendly_noCategories => 'No categories yet';
+  String get tone_friendly_noCategories => 'Pas encore de catégories';
 
   @override
   String get tone_friendly_noNotifications =>
-      'All quiet here\\nNo notifications yet';
+      'Tout est calme ici\nPas encore de notifications';
 
   @override
   String get tone_friendly_noData =>
-      'Not enough data yet\\nKeep tracking to unlock insights';
+      'Pas encore assez de données\nContinuez le suivi pour débloquer des aperçus';
 
   @override
   String get tone_friendly_noRecurring =>
-      'No recurring transactions\\nAdd bills to auto-track them';
+      'Aucune transaction récurrente\nAjoutez des factures pour les suivre automatiquement';
 
   @override
-  String get tone_friendly_exportSuccess => 'Report exported! 📄';
+  String get tone_friendly_exportSuccess => 'Rapport exporté ! 📄';
 
   @override
   String get tone_friendly_purchaseFailed =>
-      'Purchase didn\'t go through — try again?';
+      'L\'achat n\'a pas abouti — réessayez ?';
 
   @override
   String get tone_friendly_playNotAvailable =>
-      'Google Play isn\'t available on this device';
+      'Google Play n\'est pas disponible sur cet appareil';
 
   @override
-  String get tone_friendly_deleteTitle => 'Are you sure?';
+  String get tone_friendly_deleteTitle => 'Êtes-vous sûr ?';
 
   @override
-  String get tone_friendly_deleteCancel => 'Keep it';
+  String get tone_friendly_deleteCancel => 'Le garder';
 
   @override
-  String get tone_friendly_deleteConfirm => 'Delete';
+  String get tone_friendly_deleteConfirm => 'Supprimer';
 
   @override
-  String get tone_friendly_logoutTitle => 'Leaving already?';
+  String get tone_friendly_logoutTitle => 'Déjà sur le départ ?';
 
   @override
   String get tone_friendly_logoutMessage =>
-      'All your data will be cleared from this device.';
+      'Toutes vos données seront effacées de cet appareil.';
 
   @override
-  String get tone_friendly_logoutConfirm => 'Logout';
+  String get tone_friendly_logoutConfirm => 'Se déconnecter';
 
   @override
-  String get tone_friendly_currencyChanged => 'Base currency updated! 💱';
+  String get tone_friendly_currencyChanged => 'Devise de base mise à jour ! 💱';
 
   @override
-  String get tone_friendly_currencyChangeTitle => 'Change base currency?';
+  String get tone_friendly_currencyChangeTitle => 'Changer la devise de base ?';
 
   @override
-  String get tone_friendly_currencyChangeCancel => 'Keep it';
+  String get tone_friendly_currencyChangeCancel => 'La garder';
 
   @override
-  String get tone_friendly_currencyPickerTitle => 'Choose Your Currency';
+  String get tone_friendly_currencyPickerTitle => 'Choisissez votre devise';
 
   @override
   String get tone_friendly_dashboardWelcomeBack =>
-      'Welcome back! Let\'s see where you stand';
+      'Bon retour ! Voyons où vous en êtes';
 
   @override
-  String get tone_professional_txnNotFound => 'Transaction not found.';
+  String get tone_professional_txnNotFound => 'Transaction non trouvée.';
 
   @override
-  String get tone_professional_futureDate => 'Future dates are not permitted.';
+  String get tone_professional_futureDate =>
+      'Les dates futures ne sont pas autorisées.';
 
   @override
   String get tone_professional_selectAccountAndCategory =>
-      'Account and category are required.';
+      'Le compte et la catégorie sont obligatoires.';
 
   @override
   String get tone_professional_addParticipant =>
-      'At least one participant is required.';
+      'Au moins un participant est requis.';
 
   @override
   String get tone_professional_budgetExceededAdjust =>
-      'Budget exceeded. Review spending or adjust the limit.';
+      'Budget dépassé. Examinez les dépenses ou ajustez la limite.';
 
   @override
   String get tone_professional_budgetGreatDiscipline =>
-      'Well within budget. Good financial discipline.';
+      'Bien en deçà du budget. Bonne discipline financière.';
 
   @override
   String get tone_professional_comparisonSpentSame =>
-      'Spending is consistent with last month.';
+      'Les dépenses sont cohérentes avec le mois dernier.';
 
   @override
-  String get tone_professional_accountUpdated => 'Account updated.';
+  String get tone_professional_accountUpdated => 'Compte mis à jour.';
 
   @override
-  String get tone_professional_accountDeleted => 'Account removed.';
+  String get tone_professional_accountDeleted => 'Compte supprimé.';
 
   @override
   String get tone_professional_accountLocked =>
-      'Account locked. Pro subscription required.';
+      'Compte verrouillé. Abonnement Pro requis.';
 
   @override
-  String get tone_professional_categoryCreated => 'Category added.';
+  String get tone_professional_categoryCreated => 'Catégorie ajoutée.';
 
   @override
-  String get tone_professional_categoryDeleted => 'Category removed.';
+  String get tone_professional_categoryDeleted => 'Catégorie supprimée.';
 
   @override
   String get tone_professional_categoryNameRequired =>
-      'Category name is required.';
+      'Le nom de la catégorie est requis.';
 
   @override
-  String get tone_professional_billDeleted => 'Bill removed.';
+  String get tone_professional_billDeleted => 'Facture supprimée.';
 
   @override
   String get tone_professional_backupFailed =>
-      'Backup failed. Please try again.';
+      'Échec de la sauvegarde. Veuillez réessayer.';
 
   @override
   String get tone_professional_restoreFailed =>
-      'Restore failed. Verify the backup file.';
+      'Échec de la restauration. Vérifiez le fichier de sauvegarde.';
 
   @override
   String get tone_professional_invalidBackupFile =>
-      'Invalid backup file format.';
+      'Format de fichier de sauvegarde invalide.';
 
   @override
-  String get tone_professional_corruptBackup => 'Backup file is corrupted.';
+  String get tone_professional_corruptBackup =>
+      'Le fichier de sauvegarde est corrompu.';
 
   @override
-  String get tone_professional_settingsSaved => 'Settings saved.';
+  String get tone_professional_settingsSaved => 'Paramètres enregistrés.';
 
   @override
-  String get tone_professional_reminderUpdated => 'Reminder time updated.';
+  String get tone_professional_reminderUpdated =>
+      'Heure de rappel mise à jour.';
 
   @override
-  String get tone_professional_biometricFailed => 'Authentication failed.';
+  String get tone_professional_biometricFailed =>
+      'Échec de l\'authentification.';
 
   @override
-  String get tone_professional_incorrectPin => 'Incorrect PIN.';
+  String get tone_professional_incorrectPin => 'Code PIN incorrect.';
 
   @override
   String get tone_professional_notificationAccessDenied =>
-      'Notification access is required for auto-import.';
+      'L\'accès aux notifications est requis pour l\'importation automatique.';
 
   @override
-  String get tone_professional_noBills => 'No recurring bills.';
+  String get tone_professional_noBills => 'Aucune facture récurrente.';
 
   @override
-  String get tone_professional_noAccounts => 'No accounts configured.';
+  String get tone_professional_noAccounts => 'Aucun compte configuré.';
 
   @override
-  String get tone_professional_noCategories => 'No categories defined.';
+  String get tone_professional_noCategories => 'Aucune catégorie définie.';
 
   @override
-  String get tone_professional_noNotifications => 'No notifications.';
+  String get tone_professional_noNotifications => 'Aucune notification.';
 
   @override
   String get tone_professional_noData =>
-      'Insufficient data.\\nContinue recording transactions.';
+      'Données insuffisantes.\nContinuez à enregistrer des transactions.';
 
   @override
   String get tone_professional_noRecurring =>
-      'No recurring transactions configured.';
+      'Aucune transaction récurrente configurée.';
 
   @override
-  String get tone_professional_exportSuccess => 'Report exported.';
+  String get tone_professional_exportSuccess => 'Rapport exporté.';
 
   @override
   String get tone_professional_purchaseFailed =>
-      'Purchase failed. Please retry.';
+      'Échec de l\'achat. Veuillez réessayer.';
 
   @override
   String get tone_professional_playNotAvailable =>
-      'Google Play Services unavailable.';
+      'Services Google Play indisponibles.';
 
   @override
-  String get tone_professional_deleteTitle => 'Confirm Deletion';
+  String get tone_professional_deleteTitle => 'Confirmer la suppression';
 
   @override
-  String get tone_professional_deleteCancel => 'Cancel';
+  String get tone_professional_deleteCancel => 'Annuler';
 
   @override
-  String get tone_professional_deleteConfirm => 'Delete';
+  String get tone_professional_deleteConfirm => 'Supprimer';
 
   @override
-  String get tone_professional_logoutTitle => 'Confirm Logout';
+  String get tone_professional_logoutTitle => 'Confirmer la déconnexion';
 
   @override
   String get tone_professional_logoutMessage =>
-      'All local data will be erased.';
+      'Toutes les données locales seront effacées.';
 
   @override
-  String get tone_professional_logoutConfirm => 'Logout';
+  String get tone_professional_logoutConfirm => 'Se déconnecter';
 
   @override
-  String get tone_professional_currencyChanged => 'Base currency updated.';
+  String get tone_professional_currencyChanged => 'Devise de base mise à jour.';
 
   @override
-  String get tone_professional_currencyChangeTitle => 'Change Base Currency';
+  String get tone_professional_currencyChangeTitle =>
+      'Changer la devise de base';
 
   @override
-  String get tone_professional_currencyChangeCancel => 'Cancel';
+  String get tone_professional_currencyChangeCancel => 'Annuler';
 
   @override
-  String get tone_professional_currencyPickerTitle => 'Select Currency';
+  String get tone_professional_currencyPickerTitle => 'Sélectionner la devise';
 
   @override
   String get tone_professional_dashboardWelcomeBack =>
-      'Welcome back. Here is your summary.';
+      'Bon retour. Voici votre résumé.';
 
   @override
   String get tone_motivational_txnNotFound =>
-      'Can\'t find that one — it may have been removed';
+      'Impossible de trouver celle-là — elle a peut-être été supprimée';
 
   @override
   String get tone_motivational_futureDate =>
-      'Let\'s stay in the present — pick today or earlier';
+      'Restons dans le présent — choisissez aujourd\'hui ou avant';
 
   @override
   String get tone_motivational_selectAccountAndCategory =>
-      'Account & category first — you\'re almost done!';
+      'Compte et catégorie d\'abord — vous avez presque fini !';
 
   @override
   String get tone_motivational_addParticipant =>
-      'Add at least one person to split with!';
+      'Ajoutez au moins une personne avec qui partager !';
 
   @override
   String get tone_motivational_budgetExceededAdjust =>
-      'Over budget — but every day is a chance to reset! 💪';
+      'Budget dépassé — mais chaque jour est une chance de repartir à zéro ! 💪';
 
   @override
   String get tone_motivational_budgetGreatDiscipline =>
-      'Amazing discipline! You\'re way ahead! 🏆';
+      'Discipline incroyable ! Vous avez une sacrée avance ! 🏆';
 
   @override
   String get tone_motivational_comparisonSpentSame =>
-      'Holding steady! Consistent spending shows control 💪';
+      'C\'est stable ! Des dépenses constantes montrent du contrôle 💪';
 
   @override
-  String get tone_motivational_accountUpdated => 'Account updated!';
+  String get tone_motivational_accountUpdated => 'Compte mis à jour !';
 
   @override
-  String get tone_motivational_accountDeleted => 'Account removed';
+  String get tone_motivational_accountDeleted => 'Compte supprimé';
 
   @override
   String get tone_motivational_accountLocked =>
-      'This account is locked — Go Pro to unlock! 🔒';
+      'Ce compte est verrouillé — passez en Pro pour le déverrouiller ! 🔒';
 
   @override
-  String get tone_motivational_categoryCreated => 'New category added!';
+  String get tone_motivational_categoryCreated =>
+      'Nouvelle catégorie ajoutée !';
 
   @override
-  String get tone_motivational_categoryDeleted => 'Category removed';
+  String get tone_motivational_categoryDeleted => 'Catégorie supprimée';
 
   @override
-  String get tone_motivational_categoryNameRequired => 'Give it a name!';
+  String get tone_motivational_categoryNameRequired => 'Donnez-lui un nom !';
 
   @override
-  String get tone_motivational_billDeleted => 'Bill removed';
+  String get tone_motivational_billDeleted => 'Facture supprimée';
 
   @override
   String get tone_motivational_backupFailed =>
-      'Backup didn\'t work — try again!';
+      'La sauvegarde n\'a pas fonctionné — réessayez !';
 
   @override
   String get tone_motivational_restoreFailed =>
-      'Restore failed — check the file and retry';
+      'Échec de la restauration — vérifiez le fichier et réessayez';
 
   @override
   String get tone_motivational_invalidBackupFile =>
-      'That doesn\'t look like a valid backup';
+      'Cela ne semble pas être une sauvegarde valide';
 
   @override
-  String get tone_motivational_corruptBackup => 'This backup seems damaged';
+  String get tone_motivational_corruptBackup =>
+      'Cette sauvegarde semble endommagée';
 
   @override
-  String get tone_motivational_settingsSaved => 'Saved! ✓';
+  String get tone_motivational_settingsSaved => 'Enregistré ! ✓';
 
   @override
-  String get tone_motivational_reminderUpdated => 'Reminder set! ⏰';
+  String get tone_motivational_reminderUpdated => 'Rappel fixé ! ⏰';
 
   @override
   String get tone_motivational_biometricFailed =>
-      'Authentication failed — try again!';
+      'Échec de l\'authentification — réessayez !';
 
   @override
   String get tone_motivational_incorrectPin =>
-      'Wrong PIN — you\'ve got this, try again!';
+      'Mauvais code PIN — vous allez y arriver, réessayez !';
 
   @override
   String get tone_motivational_notificationAccessDenied =>
-      'Need notification access to auto-track transactions';
+      'Besoin de l\'accès aux notifications pour suivre automatiquement les transactions';
 
   @override
   String get tone_motivational_noBills =>
-      'No bills tracked\\nStay ahead by adding your recurring bills';
+      'Aucune facture suivie\nGardez une longueur d\'avance en ajoutant vos factures récurrentes';
 
   @override
   String get tone_motivational_noAccounts =>
-      'No accounts yet\\nAdd one to start your financial journey!';
+      'Pas encore de comptes\nAjoutez-en un pour commencer votre voyage financier !';
 
   @override
-  String get tone_motivational_noCategories => 'No categories yet';
+  String get tone_motivational_noCategories => 'Pas encore de catégories';
 
   @override
   String get tone_motivational_noNotifications =>
-      'All clear!\\nNo notifications — you\'re on top of things';
+      'Tout est clair !\nAucune notification — vous gérez la situation';
 
   @override
   String get tone_motivational_noData =>
-      'Keep going! 📈\\nMore data means better insights';
+      'Continuez ! 📈\nPlus de données signifie de meilleurs aperçus';
 
   @override
   String get tone_motivational_noRecurring =>
-      'No recurring transactions\\nAutomate your bills to stay ahead!';
+      'Aucune transaction récurrente\nAutomatisez vos factures pour garder une longueur d\'avance !';
 
   @override
-  String get tone_motivational_exportSuccess => 'Report exported! 📄';
+  String get tone_motivational_exportSuccess => 'Rapport exporté ! 📄';
 
   @override
   String get tone_motivational_purchaseFailed =>
-      'Purchase didn\'t go through — try again!';
+      'L\'achat n\'a pas abouti — réessayez !';
 
   @override
   String get tone_motivational_playNotAvailable =>
-      'Google Play isn\'t available on this device';
+      'Google Play n\'est pas disponible sur cet appareil';
 
   @override
-  String get tone_motivational_deleteTitle => 'Are you sure?';
+  String get tone_motivational_deleteTitle => 'Êtes-vous sûr ?';
 
   @override
-  String get tone_motivational_deleteCancel => 'Keep it';
+  String get tone_motivational_deleteCancel => 'Le garder';
 
   @override
-  String get tone_motivational_deleteConfirm => 'Delete';
+  String get tone_motivational_deleteConfirm => 'Supprimer';
 
   @override
-  String get tone_motivational_logoutTitle => 'Heading out?';
+  String get tone_motivational_logoutTitle => 'Vous partez ?';
 
   @override
   String get tone_motivational_logoutMessage =>
-      'All data on this device will be cleared.';
+      'Toutes les données sur cet appareil seront effacées.';
 
   @override
-  String get tone_motivational_logoutConfirm => 'Logout';
+  String get tone_motivational_logoutConfirm => 'Se déconnecter';
 
   @override
   String get tone_motivational_currencyChanged =>
-      'Currency switched! New chapter! 💱';
+      'Devise changée ! Nouveau chapitre ! 💱';
 
   @override
-  String get tone_motivational_currencyChangeTitle => 'Ready to switch?';
+  String get tone_motivational_currencyChangeTitle => 'Prêt à changer ?';
 
   @override
-  String get tone_motivational_currencyChangeCancel => 'Not yet';
+  String get tone_motivational_currencyChangeCancel => 'Pas encore';
 
   @override
-  String get tone_motivational_currencyPickerTitle => 'Pick Your Currency! 🌍';
+  String get tone_motivational_currencyPickerTitle =>
+      'Choisissez votre devise ! 🌍';
 
   @override
   String get tone_motivational_dashboardWelcomeBack =>
-      'You\'re back! Let\'s keep the progress going! 🚀';
+      'Vous êtes de retour ! Continuons à progresser ! 🚀';
 
   @override
-  String get tone_calm_txnNotFound => 'Not found. It may have moved on.';
+  String get tone_calm_txnNotFound =>
+      'Non trouvé. Il se peut qu\'il soit parti.';
 
   @override
-  String get tone_calm_futureDate => 'Stay in the present.';
+  String get tone_calm_futureDate => 'Restez dans le présent.';
 
   @override
   String get tone_calm_selectAccountAndCategory =>
-      'Account and category, please.';
+      'Compte et catégorie, s\'il vous plaît.';
 
   @override
-  String get tone_calm_addParticipant => 'Add someone to share with.';
+  String get tone_calm_addParticipant =>
+      'Ajoutez quelqu\'un avec qui partager.';
 
   @override
   String get tone_calm_budgetExceededAdjust =>
-      'Past the boundary. Pause and reconsider.';
+      'Au-delà de la limite. Faites une pause et reconsidérez.';
 
   @override
-  String get tone_calm_budgetGreatDiscipline => 'Well within bounds. Peaceful.';
+  String get tone_calm_budgetGreatDiscipline =>
+      'Bien dans les limites. Paisible.';
 
   @override
   String get tone_calm_comparisonSpentSame =>
-      'Spending flows at the same pace.';
+      'Les dépenses s\'écoulent au même rythme.';
 
   @override
-  String get tone_calm_accountUpdated => 'Adjusted.';
+  String get tone_calm_accountUpdated => 'Ajusté.';
 
   @override
-  String get tone_calm_accountDeleted => 'Closed.';
+  String get tone_calm_accountDeleted => 'Fermé.';
 
   @override
-  String get tone_calm_accountLocked => 'This one is resting. Pro unlocks it.';
+  String get tone_calm_accountLocked =>
+      'Celui-ci est au repos. Le mode Pro le déverrouille.';
 
   @override
-  String get tone_calm_categoryCreated => 'Added.';
+  String get tone_calm_categoryCreated => 'Ajouté.';
 
   @override
-  String get tone_calm_categoryDeleted => 'Removed.';
+  String get tone_calm_categoryDeleted => 'Supprimé.';
 
   @override
-  String get tone_calm_categoryNameRequired => 'A name, please.';
+  String get tone_calm_categoryNameRequired => 'Un nom, s\'il vous plaît.';
 
   @override
-  String get tone_calm_billDeleted => 'Released.';
+  String get tone_calm_billDeleted => 'Libéré.';
 
   @override
-  String get tone_calm_backupFailed => 'Couldn\'t save. Try again gently.';
+  String get tone_calm_backupFailed =>
+      'Impossible d\'enregistrer. Réessayez doucement.';
 
   @override
-  String get tone_calm_restoreFailed => 'Couldn\'t restore. Check the file.';
+  String get tone_calm_restoreFailed =>
+      'Impossible de restaurer. Vérifiez le fichier.';
 
   @override
-  String get tone_calm_invalidBackupFile => 'This file doesn\'t feel right.';
+  String get tone_calm_invalidBackupFile => 'Ce fichier ne semble pas correct.';
 
   @override
-  String get tone_calm_corruptBackup => 'The file seems damaged.';
+  String get tone_calm_corruptBackup => 'Le fichier semble endommagé.';
 
   @override
-  String get tone_calm_settingsSaved => 'Saved.';
+  String get tone_calm_settingsSaved => 'Enregistré.';
 
   @override
-  String get tone_calm_reminderUpdated => 'Reminder adjusted.';
+  String get tone_calm_reminderUpdated => 'Rappel ajusté.';
 
   @override
-  String get tone_calm_biometricFailed => 'Not recognized. Try again.';
+  String get tone_calm_biometricFailed => 'Non reconnu. Réessayez.';
 
   @override
-  String get tone_calm_incorrectPin => 'Not quite. Try again.';
+  String get tone_calm_incorrectPin => 'Pas tout à fait. Réessayez.';
 
   @override
   String get tone_calm_notificationAccessDenied =>
-      'Permission needed for quiet tracking.';
+      'Permission requise pour un suivi discret.';
 
   @override
-  String get tone_calm_noBills => 'Nothing recurring.\\nPeaceful.';
+  String get tone_calm_noBills => 'Rien de récurrent.\nPaisible.';
 
   @override
-  String get tone_calm_noAccounts => 'No accounts yet.\\nStart simply.';
+  String get tone_calm_noAccounts =>
+      'Pas encore de comptes.\nCommencez simplement.';
 
   @override
-  String get tone_calm_noCategories => 'No categories yet.';
+  String get tone_calm_noCategories => 'Pas encore de catégories.';
 
   @override
-  String get tone_calm_noNotifications => 'Silence.\\nNothing needs attention.';
+  String get tone_calm_noNotifications =>
+      'Silence.\nRien ne nécessite votre attention.';
 
   @override
-  String get tone_calm_noData => 'Not enough yet.\\nIt will come with time.';
+  String get tone_calm_noData =>
+      'Pas encore assez.\nCela viendra avec le temps.';
 
   @override
-  String get tone_calm_noRecurring => 'Nothing recurring.\\nAdd when ready.';
+  String get tone_calm_noRecurring =>
+      'Rien de récurrent.\nAjoutez quand vous serez prêt.';
 
   @override
-  String get tone_calm_exportSuccess => 'Exported.';
+  String get tone_calm_exportSuccess => 'Exporté.';
 
   @override
-  String get tone_calm_purchaseFailed =>
-      'Purchase didn\'t complete. Try again.';
+  String get tone_calm_purchaseFailed => 'L\'achat n\'a pas abouti. Réessayez.';
 
   @override
-  String get tone_calm_playNotAvailable => 'Play Store not available here.';
+  String get tone_calm_playNotAvailable => 'Play Store non disponible ici.';
 
   @override
-  String get tone_calm_deleteTitle => 'Let go?';
+  String get tone_calm_deleteTitle => 'Laisser partir ?';
 
   @override
-  String get tone_calm_deleteCancel => 'Hold on';
+  String get tone_calm_deleteCancel => 'Attendez';
 
   @override
-  String get tone_calm_deleteConfirm => 'Release';
+  String get tone_calm_deleteConfirm => 'Libérer';
 
   @override
-  String get tone_calm_logoutTitle => 'Moving on?';
+  String get tone_calm_logoutTitle => 'On bouge ?';
 
   @override
-  String get tone_calm_logoutMessage => 'Your data here will be cleared.';
+  String get tone_calm_logoutMessage => 'Vos données ici seront effacées.';
 
   @override
-  String get tone_calm_logoutConfirm => 'Leave';
+  String get tone_calm_logoutConfirm => 'Partir';
 
   @override
-  String get tone_calm_currencyChanged => 'Currency shifted.';
+  String get tone_calm_currencyChanged => 'Devise modifiée.';
 
   @override
-  String get tone_calm_currencyChangeTitle => 'A new currency?';
+  String get tone_calm_currencyChangeTitle => 'Une nouvelle devise ?';
 
   @override
-  String get tone_calm_currencyChangeCancel => 'Stay';
+  String get tone_calm_currencyChangeCancel => 'Rester';
 
   @override
-  String get tone_calm_currencyPickerTitle => 'Choose your currency';
+  String get tone_calm_currencyPickerTitle => 'Choisissez votre devise';
 
   @override
-  String get tone_calm_dashboardWelcomeBack => 'Welcome back.';
+  String get tone_calm_dashboardWelcomeBack => 'Bon retour.';
 
   @override
-  String get notif_quietDayTitle => '📊 Quiet day yesterday';
+  String get notif_quietDayTitle => '📊 Journée calme hier';
 
   @override
-  String get notif_heresYesterdayTitle => '📊 Here\'s yesterday';
+  String get notif_heresYesterdayTitle => '📊 Voici hier';
 
   @override
-  String get notif_weekInReviewTitle => '📅 Week in review';
+  String get notif_weekInReviewTitle => '📅 Semaine en revue';
 
   @override
-  String get notif_yourWeekInReviewTitle => '📅 Your week in review';
+  String get notif_yourWeekInReviewTitle => '📅 Votre semaine en revue';
 
   @override
-  String get notif_niceOneTitle => '🏆 Nice one!';
+  String get notif_niceOneTitle => '🏆 Bien joué !';
 
   @override
   String notif_streakDaysTitle(int days) {
-    return '🔥 $days days straight!';
+    return '🔥 $days jours de suite !';
   }
 
   @override
   String notif_levelUpTitle(int level) {
-    return '🎉 Level $level!';
+    return '🎉 Niveau $level !';
   }
 
   @override
   String notif_budgetsOverLimitTitle(int count) {
-    return '🚨 $count budget(s) over limit';
+    return '🚨 $count budget(s) au-dessus de la limite';
   }
 
   @override
   String notif_budgetsGettingTightTitle(int count) {
-    return '⚠️ $count budget(s) getting tight';
+    return '⚠️ $count budget(s) deviennent serrés';
   }
 
   @override
   String notif_billDueTitle(String name, String label) {
-    return '📅 $name is due $label';
+    return '📅 $name est dû le $label';
   }
 
   @override
-  String get notif_fundsGettingLowTitle => '📉 Funds getting low';
+  String get notif_fundsGettingLowTitle => '📉 Les fonds baissent';
 
   @override
   String notif_categoryCreepingUpTitle(String category) {
-    return '💡 $category is creeping up';
+    return '💡 $category augmente';
   }
 
   @override
-  String get notif_bigDayTitle => '📈 Whoa, big day';
+  String get notif_bigDayTitle => '📈 Wow, grosse journée';
 
   @override
   String notif_smsFoundTitle(int count) {
-    return '📱 $count SMS transactions found';
+    return '📱 $count transactions SMS trouvées';
   }
 
   @override
-  String get notif_smallSpendsTitle => '💧 Small spends adding up';
+  String get notif_smallSpendsTitle => '💧 Les petites dépenses s\'accumulent';
 
   @override
-  String get notif_missYouTitle => '👋 We miss you';
+  String get notif_missYouTitle => '👋 Vous nous manquez';
 
   @override
   String notif_daysUntrackedTitle(int days) {
-    return '📊 $days days untracked';
+    return '📊 $days jours non suivis';
   }
 
   @override
   String notif_streakEndedTitle(int days) {
-    return '💔 $days-day streak ended';
+    return '💔 Série de $days jours terminée';
   }
 
   @override
-  String get notif_fewDaysUntrackedTitle => '📊 A few days untracked';
+  String get notif_fewDaysUntrackedTitle => '📊 Quelques jours non suivis';
 
   @override
   String notif_budgetExceededBody(String name) {
-    return '$name is over budget — time to review';
+    return '$name a dépassé le budget — temps de vérifier';
   }
 
   @override
   String notif_budgetExceededBodyMulti(String names) {
-    return '$names are over budget';
+    return '$names ont dépassé le budget';
   }
 
   @override
   String notif_budgetWarningBody(String name) {
-    return '$name is nearing the limit';
+    return '$name approche de la limite';
   }
 
   @override
   String notif_budgetWarningBodyMulti(String names) {
-    return '$names are nearing their limits';
+    return '$names approchent de leurs limites';
   }
 
   @override
   String notif_budgetWarningPctBody(String name, String pct) {
-    return '$name: $pct% used';
+    return '$name : $pct% utilisé';
   }
 
   @override
   String notif_billPaidAutoTitle(String name) {
-    return '✅ $name — auto-matched';
+    return '✅ $name — match auto';
   }
 
   @override
   String notif_billPaidRecordedTitle(String name) {
-    return '✅ $name — recorded';
+    return '✅ $name — enregistré';
   }
 
   @override
-  String get notif_smsLoggedTitle => '✅ Transaction logged';
+  String get notif_smsLoggedTitle => '✅ Transaction enregistrée';
 
   @override
-  String get notif_smsNeedsReviewTitle => '👀 Needs your review';
+  String get notif_smsNeedsReviewTitle => '👀 Nécessite votre vérification';
 
   @override
   String notif_smsLoggedBody(String amount, String sender) {
-    return '$amount from $sender — auto-saved';
+    return '$amount de $sender — enregistré auto';
   }
 
   @override
   String notif_smsLoggedBodyNoAmount(String sender) {
-    return 'From $sender — auto-saved';
+    return 'De $sender — enregistré auto';
   }
 
   @override
   String notif_smsNeedsReviewBody(String sender) {
-    return 'Transaction from $sender — tap to review';
+    return 'Transaction de $sender — appuyez pour vérifier';
   }
 
   @override
-  String get notif_smsGotItTitle => '✅ Got it!';
+  String get notif_smsGotItTitle => '✅ Compris !';
 
   @override
-  String get notif_smsAllCaughtUpTitle => '✅ All caught up!';
+  String get notif_smsAllCaughtUpTitle => '✅ Tout est à jour !';
 
   @override
-  String get notif_smsAlmostThereTitle => '📋 Almost there!';
+  String get notif_smsAlmostThereTitle => '📋 Presque fini !';
 
   @override
-  String get notif_smsNeedHelpTitle => '👋 Hey, need your help!';
+  String get notif_smsNeedHelpTitle => '👋 Hé, j\'ai besoin d\'aide !';
 
   @override
   String notif_streakOnLineTitle(int days) {
-    return '🔥 $days-day streak on the line!';
+    return '🔥 Série de $days jours en jeu !';
   }
 
   @override
-  String get notif_quickActionTitle => '⚡ 5 seconds is all it takes';
+  String get notif_quickActionTitle => '⚡ 5 secondes suffisent';
 
   @override
-  String get notif_dailyReminderTitle => '📊 Your day in numbers';
+  String get notif_dailyReminderTitle => '📊 Votre journée en chiffres';
 
   @override
   String get notif_dailyReminderBody =>
-      'Here\'s how yesterday went — take a quick look';
+      'Voici comment s\'est passé hier — jetez un coup d\'œil';
 
   @override
-  String get notif_weeklyReminderTitle => '📅 Your week wrapped up';
+  String get notif_weeklyReminderTitle => '📅 Votre semaine résumée';
 
   @override
   String get notif_weeklyReminderBody =>
-      'Let\'s see how the week went — tap to check';
+      'Voyons comment s\'est passée la semaine — appuyez pour vérifier';
 
   @override
-  String get notif_goalStatusTitle => '🎯 Monthly Goal Status';
+  String get notif_goalStatusTitle => '🎯 Statut de l\'objectif mensuel';
 
   @override
   String notif_goalStatusBody(int count, String name, String pct) {
-    return 'You have $count active goals. $name is $pct% complete!';
+    return 'Vous avez $count objectifs actifs. $name est terminé à $pct% !';
   }
 
   @override
   String notif_streakCountingTitle(int days) {
-    return '🔥 $days days and counting!';
+    return '🔥 $days jours et ça continue !';
   }
 
   @override
   String notif_achievementBody(String title, int xp) {
-    return '$title — that\'s +$xp XP for you';
+    return '$title — c\'est +$xp XP pour vous';
   }
 
   @override
-  String get notif_levelUpBody => 'You just leveled up — keep going!';
+  String get notif_levelUpBody =>
+      'Vous venez de monter de niveau — continuez !';
 
   @override
   String get notif_streakMilestoneBody =>
-      'That\'s dedication — your streak is on fire';
+      'C\'est du dévouement — votre série est en feu';
 
   @override
   String get notif_weeklyZeroBody =>
-      'Zero expenses this week — that\'s impressive 💪';
+      'Zéro dépense cette semaine — c\'est impressionnant 💪';
 
   @override
-  String get insight_moneyLeakTitle => 'Quiet money leak 💧';
+  String get insight_moneyLeakTitle => 'Petite fuite d\'argent 💧';
 
   @override
   String insight_bestDayTitle(String day) {
-    return '${day}s cost you the most';
+    return 'Les ${day}s vous coûtent le plus cher';
   }
 
   @override
-  String get bills_howBillsWorkTitle => 'How Bills Work';
+  String get bills_howBillsWorkTitle => 'Comment fonctionnent les factures';
 
   @override
   String get bills_howBillsWorkDesc =>
-      'Track recurring bills like rent, subscriptions, and utilities. Get reminders before due dates and mark bills as paid.';
+      'Suivez les factures récurrentes comme le loyer, les abonnements et les services publics. Recevez des rappels avant les dates d\'échéance et marquez les factures comme payées.';
 
   @override
-  String get bills_gotIt => 'Got it';
+  String get bills_gotIt => 'Compris';
 
   @override
-  String get bills_addBill => 'Add Bill';
+  String get bills_addBill => 'Ajouter une facture';
 
   @override
-  String get bills_markAsPaid => 'Mark as Paid';
+  String get bills_markAsPaid => 'Marquer comme payée';
 
   @override
-  String get bills_deleteBill => 'Delete Bill';
+  String get bills_deleteBill => 'Supprimer la facture';
 
   @override
-  String get bills_addNewBill => 'Add New Bill';
+  String get bills_addNewBill => 'Ajouter une nouvelle facture';
 
   @override
-  String get bills_billName => 'Bill Name';
+  String get bills_billName => 'Nom de la facture';
 
   @override
-  String get bills_amount => 'Amount';
+  String get bills_amount => 'Montant';
 
   @override
-  String get bills_frequency => 'Frequency';
+  String get bills_frequency => 'Fréquence';
 
   @override
-  String get bills_monthly => 'Monthly';
+  String get bills_monthly => 'Mensuel';
 
   @override
-  String get bills_quarterly => 'Quarterly';
+  String get bills_quarterly => 'Trimestriel';
 
   @override
-  String get bills_yearly => 'Yearly';
+  String get bills_yearly => 'Annuel';
 
   @override
-  String get bills_dueDate => 'Due Date';
+  String get bills_dueDate => 'Date d\'échéance';
 
   @override
-  String get goal_deleteGoalTitle => 'Delete Goal?';
+  String get goal_deleteGoalTitle => 'Supprimer l\'objectif ?';
 
   @override
-  String get goal_editGoal => 'Edit Goal';
+  String get goal_editGoal => 'Modifier l\'objectif';
 
   @override
-  String get goal_deleteGoal => 'Delete Goal';
+  String get goal_deleteGoal => 'Supprimer l\'objectif';
 
   @override
-  String get goal_saved => 'Saved';
+  String get goal_saved => 'Économisé';
 
   @override
-  String get goal_target => 'Target';
+  String get goal_target => 'Cible';
 
   @override
-  String get goal_quickDeposit => 'Quick Deposit';
+  String get goal_quickDeposit => 'Dépôt rapide';
 
   @override
-  String get goal_targetDate => 'Target Date';
+  String get goal_targetDate => 'Date cible';
 
   @override
-  String get goal_milestones => 'Milestones';
+  String get goal_milestones => 'Jalons';
 
   @override
-  String get goal_recentActivity => 'Recent Activity';
+  String get goal_recentActivity => 'Activité récente';
 
   @override
-  String get goal_addToGoal => 'Add to Goal';
+  String get goal_addToGoal => 'Ajouter à l\'objectif';
 
   @override
-  String get goal_goalReached => 'Goal Reached!';
+  String get goal_goalReached => 'Objectif atteint !';
 
   @override
-  String get goal_whatsThisAbout => 'What\'s this goal about?';
+  String get goal_whatsThisAbout => 'De quoi s\'agit-il pour cet objectif ?';
 
   @override
-  String get goal_icon => 'Icon';
+  String get goal_icon => 'Icône';
 
   @override
-  String get goal_color => 'Color';
+  String get goal_color => 'Couleur';
 
   @override
-  String get dashboard_enableCards => 'Enable Cards';
+  String get dashboard_enableCards => 'Activer les cartes';
 
   @override
-  String get recurring_fixedExpenses => 'Fixed Expenses';
+  String get recurring_fixedExpenses => 'Dépenses fixes';
 
   @override
   String get goal_freePlanLimit =>
-      'Free plan allows up to 2 goals. Upgrade to Pro for unlimited.';
+      'Le plan gratuit permet jusqu\'à 2 objectifs. Passez à Pro pour un nombre illimité.';
 
   @override
-  String get goal_editGoalTitle => 'Edit Goal';
+  String get goal_editGoalTitle => 'Modifier l\'objectif';
 
   @override
-  String get goal_newGoalTitle => 'New Goal';
+  String get goal_newGoalTitle => 'Nouvel objectif';
 
   @override
-  String get goal_yourGoal => 'Your Goal';
+  String get goal_yourGoal => 'Votre objectif';
 
   @override
-  String get goal_appearance => 'Appearance';
+  String get goal_appearance => 'Apparence';
 
   @override
-  String get goal_goalName => 'Goal Name';
+  String get goal_goalName => 'Nom de l\'objectif';
 
   @override
-  String get goal_giveGoalName => 'Give your goal a name';
+  String get goal_giveGoalName => 'Donnez un nom à votre objectif';
 
   @override
-  String get goal_targetAmount => 'Target Amount';
+  String get goal_targetAmount => 'Montant cible';
 
   @override
-  String get goal_enterValidTarget => 'Enter a valid target amount';
+  String get goal_enterValidTarget => 'Entrez un montant cible valide';
 
   @override
-  String get goal_alreadySaved => 'Already Saved';
+  String get goal_alreadySaved => 'Déjà économisé';
 
   @override
-  String get goal_targetDateLabel => 'Target Date';
+  String get goal_targetDateLabel => 'Date cible';
 
   @override
-  String get goal_setTargetDate => 'Set a target date (optional)';
+  String get goal_setTargetDate => 'Fixer une date cible (facultatif)';
 
   @override
-  String get goal_smartInsight => 'Smart Insight';
+  String get goal_smartInsight => 'Aperçu intelligent';
 
   @override
-  String get goal_onTrack => 'On Track';
+  String get goal_onTrack => 'Sur la bonne voie';
 
   @override
-  String get goal_onTrackDesc => 'This goal is very achievable 👍';
+  String get goal_onTrackDesc => 'Cet objectif est tout à fait réalisable 👍';
 
   @override
-  String get goal_needsEffort => 'Needs Effort';
+  String get goal_needsEffort => 'Nécessite des efforts';
 
   @override
-  String get goal_needsEffortDesc => 'Needs a bit more saving discipline';
+  String get goal_needsEffortDesc =>
+      'Nécessite un peu plus de discipline d\'épargne';
 
   @override
-  String get goal_ambitious => 'Ambitious';
+  String get goal_ambitious => 'Ambitieux';
 
   @override
-  String get goal_ambitiousDesc => 'Consider extending the deadline';
+  String get goal_ambitiousDesc => 'Envisagez de repousser la date limite';
 
   @override
-  String get goal_addNote => 'Add a note (optional)';
+  String get goal_addNote => 'Ajouter une note (facultatif)';
 
   @override
   String get goal_note => 'Note';
 
   @override
-  String get goal_updateGoal => 'Update Goal';
+  String get goal_updateGoal => 'Mettre à jour l\'objectif';
 
   @override
-  String get goal_createGoal => 'Create Goal';
+  String get goal_createGoal => 'Créer l\'objectif';
 
   @override
-  String get profile_developerMode => 'Developer Mode Activated! 🚀';
+  String get profile_developerMode => 'Mode développeur activé ! 🚀';
 
   @override
-  String get profile_couldNotOpenLink => 'Could not open link';
+  String get profile_couldNotOpenLink => 'Impossible d\'ouvrir le lien';
 
   @override
-  String get profile_about => 'About';
+  String get profile_about => 'À propos';
 
   @override
-  String get profile_unableToCheckUpdates => 'Unable to check for updates';
+  String get profile_unableToCheckUpdates =>
+      'Impossible de vérifier les mises à jour';
 
   @override
-  String get profile_openSourceLicenses => 'Open Source Licenses';
+  String get profile_openSourceLicenses => 'Licences open source';
 
   @override
-  String get account_totalValue => 'Total Value';
+  String get account_totalValue => 'Valeur totale';
 
   @override
-  String get account_gainLoss => 'Gain/Loss';
+  String get account_gainLoss => 'Gain/Perte';
 
   @override
-  String get account_holdings => 'Holdings';
+  String get account_holdings => 'Avoirs';
 
   @override
-  String get account_addHolding => 'Add Holding';
+  String get account_addHolding => 'Ajouter un avoir';
 
   @override
-  String get account_addMissingTransaction => 'Add Missing Transaction';
+  String get account_addMissingTransaction =>
+      'Ajouter une transaction manquante';
 
   @override
-  String get account_whatWasThisFor => 'What was this transaction for?';
+  String get account_whatWasThisFor => 'C\'était pour quoi cette transaction ?';
 
   @override
-  String get budget_used => 'Used';
+  String get budget_used => 'Utilisé';
 
   @override
-  String get budget_selectAtLeastOneTag => 'Please select at least one tag';
+  String get budget_selectAtLeastOneTag =>
+      'Veuillez sélectionner au moins une étiquette';
 
   @override
-  String get budget_over => 'over';
+  String get budget_over => 'au-dessus';
 
   @override
-  String get budget_left => 'left';
+  String get budget_left => 'restant';
 
   @override
-  String get budget_breakdown => 'BREAKDOWN';
+  String get budget_breakdown => 'RÉPARTITION';
 
   @override
-  String get budget_basicInfo => 'Basic Information';
+  String get budget_basicInfo => 'Informations de base';
 
   @override
-  String get budget_duration => 'Duration';
+  String get budget_duration => 'Durée';
 
   @override
-  String get budget_budgetType => 'Budget Type';
+  String get budget_budgetType => 'Type de budget';
 
   @override
-  String get budget_selectType => 'Select Type';
+  String get budget_selectType => 'Sélectionner le type';
 
   @override
-  String get budget_categoryAllocation => 'Category Allocation';
+  String get budget_categoryAllocation => 'Allocation par catégorie';
 
   @override
-  String get budget_totalBudget => 'Total Budget';
+  String get budget_totalBudget => 'Budget total';
 
   @override
-  String get budget_allocated => 'Allocated';
+  String get budget_allocated => 'Alloué';
 
   @override
-  String get budget_remaining => 'Remaining';
+  String get budget_remaining => 'Restant';
 
   @override
-  String get budget_overBudget => 'Over Budget';
+  String get budget_overBudget => 'Hors budget';
 
   @override
-  String get budget_safeToSpend => 'Safe to spend';
+  String get budget_safeToSpend => 'Sûr à dépenser';
 
   @override
-  String get budget_startDate => 'Start Date';
+  String get budget_startDate => 'Date de début';
 
   @override
-  String get budget_endDate => 'End Date';
+  String get budget_endDate => 'Date de fin';
 
   @override
-  String get budget_selectTags => 'Select Tags';
+  String get budget_selectTags => 'Sélectionner les étiquette';
 
   @override
   String get budget_tagInfo =>
-      'All expenses with selected tags will count towards this budget.';
+      'Toutes les dépenses avec les étiquettes sélectionnées seront comptabilisées dans ce budget.';
 
   @override
   String get budget_noTags =>
-      'No tags yet. Add tags to your transactions first.';
+      'Pas encore d\'étiquettes. Ajoutez d\'abord des étiquettes à vos transactions.';
 
   @override
   String get budget_freePlanLimit =>
-      'Free plan allows up to 2 budgets. Upgrade to Pro for unlimited.';
+      'Le plan gratuit permet jusqu\'à 2 budgets. Passez à Pro pour un nombre illimité.';
 
   @override
   String budget_daysRemaining(Object count) {
-    return '$count days';
+    return '$count jours';
   }
 
   @override
-  String get budget_delete => 'Delete';
+  String get budget_delete => 'Supprimer';
 
   @override
-  String get budget_emotionUnderControl => 'Spending under control 💪';
+  String get budget_emotionUnderControl => 'Dépenses sous contrôle 💪';
 
   @override
-  String get budget_emotionHalfway => 'Halfway through the month ✨';
+  String get budget_emotionHalfway => 'À la moitié du mois ✨';
 
   @override
-  String get budget_emotionAlmostThere => 'Getting tight, stay careful ⚠️';
+  String get budget_emotionAlmostThere => 'Ça devient serré, soyez prudent ⚠️';
 
   @override
-  String get budget_emotionExceeded => 'Budget exceeded, time to adjust 🔴';
+  String get budget_emotionExceeded =>
+      'Budget dépassé, il est temps d\'ajuster 🔴';
 
   @override
-  String get budget_highlightLabel => 'Needs attention';
+  String get budget_highlightLabel => 'Nécessite une attention particulière';
 
   @override
-  String get budget_overBudgetSection => 'Over budget';
+  String get budget_overBudgetSection => 'Hors budget';
 
   @override
-  String get budget_activeBudgets => 'Active budgets';
+  String get budget_activeBudgets => 'Budgets actifs';
 
   @override
-  String get budget_onTrackSection => 'On track';
+  String get budget_onTrackSection => 'Sur la bonne voie';
 
   @override
-  String get budget_spendingPace => 'Spending pace';
+  String get budget_spendingPace => 'Rythme des dépenses';
 
   @override
   String budget_dailyActual(Object amount) {
-    return '$amount/day actual';
+    return '$amount/jour réel';
   }
 
   @override
   String budget_dailyAllowed(Object amount) {
-    return '$amount/day allowed';
+    return '$amount/jour autorisé';
   }
 
   @override
   String get budget_stepNote0 =>
-      'Give your budget a name and set how much you want to spend.';
+      'Donnez un nom à votre budget et fixez le montant que vous souhaitez dépenser.';
 
   @override
   String get budget_stepNote1 =>
-      'Choose how often this budget repeats and pick the dates.';
+      'Choisissez la fréquence de répétition de ce budget et sélectionnez les dates.';
 
   @override
   String get budget_stepNote2 =>
-      'Pick which categories or tags this budget should track.';
+      'Choisissez les catégories ou les étiquettes que ce budget doit suivre.';
 
   @override
   String get budget_autoDistributed => 'auto';
@@ -3258,8 +3371,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count categories',
-      one: '1 category',
+      other: '$count catégories',
+      one: '1 catégorie',
     );
     return '$_temp0';
   }
@@ -3269,702 +3382,722 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count tags',
-      one: '1 tag',
+      other: '$count étiquettes',
+      one: '1 étiquette',
     );
     return '$_temp0';
   }
 
   @override
-  String get budget_typeCategoryWise => 'Category-wise';
+  String get budget_typeCategoryWise => 'Par catégorie';
 
   @override
-  String get budget_typeTagWise => 'Tag-wise';
+  String get budget_typeTagWise => 'Par étiquette';
 
   @override
-  String get budget_typeDayWise => 'Daily';
+  String get budget_typeDayWise => 'Quotidien';
 
   @override
   String get budget_typeFestival => 'Festival';
 
   @override
-  String get budget_typeTravel => 'Travel';
+  String get budget_typeTravel => 'Voyage';
 
   @override
   String get budget_typeDescCategoryWise =>
-      'Set budgets for specific spending categories';
+      'Définir des budgets pour des catégories de dépenses spécifiques';
 
   @override
-  String get budget_typeDescTagWise => 'Set budgets for specific tags';
+  String get budget_typeDescTagWise =>
+      'Définir des budgets pour des étiquettes spécifiques';
 
   @override
-  String get budget_typeDescDayWise => 'Set a daily spending limit';
+  String get budget_typeDescDayWise =>
+      'Définir une limite de dépense quotidienne';
 
   @override
   String get budget_typeDescFestival =>
-      'Budget for festivals and special events';
+      'Budget pour les festivals et événements spéciaux';
 
   @override
-  String get budget_typeDescTravel => 'Budget for travel expenses';
+  String get budget_typeDescTravel => 'Budget pour les frais de voyage';
 
   @override
-  String get budget_reviewTitle => 'Review & Save';
+  String get budget_reviewTitle => 'Vérifier et enregistrer';
 
   @override
-  String get budget_selectCategories => 'Select Categories';
+  String get budget_selectCategories => 'Sélectionner des catégories';
 
   @override
   String get budget_noActiveTrip =>
-      'No active trip. Start a trip first to use travel budget.';
+      'Aucun voyage actif. Commencez d\'abord un voyage pour utiliser le budget voyage.';
 
   @override
   String get budget_stepNote3 =>
-      'Review everything before saving. Tap any section to edit.';
+      'Vérifiez tout avant d\'enregistrer. Appuyez sur n\'importe quelle section pour la modifier.';
 
   @override
   String budget_categoryDeleteWarning(Object count) {
-    return 'This category is used in $count budget(s). Deleting it will affect budget tracking.';
+    return 'Cette catégorie est utilisée dans $count budget(s). Sa suppression affectera le suivi du budget.';
   }
 
   @override
   String get budget_invalidCategories =>
-      'Some categories were deleted. Edit this budget to fix.';
+      'Certaines catégories ont été supprimées. Modifiez ce budget pour corriger.';
 
   @override
   String budget_pastBudgets(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'budgets',
-      one: 'budget',
+      other: 'budgets passés',
+      one: 'budget passé',
     );
-    return '$count past $_temp0';
+    return '$count $_temp0';
   }
 
   @override
-  String get category_categoryName => 'Category Name';
+  String get category_categoryName => 'Nom de la catégorie';
 
   @override
-  String get category_keywords => 'Keywords (comma-separated)';
+  String get category_keywords => 'Mots-clés (séparés par des virgules)';
 
   @override
-  String get category_noneTopLevel => 'None (Top-level)';
+  String get category_noneTopLevel => 'Aucun (niveau supérieur)';
 
   @override
-  String get common_searchCurrency => 'Search currency...';
+  String get common_searchCurrency => 'Rechercher une devise...';
 
   @override
-  String get common_selectCategory => 'Select Category';
+  String get common_selectCategory => 'Sélectionner une catégorie';
 
   @override
-  String get common_noDescription => 'No description';
+  String get common_noDescription => 'Pas de description';
 
   @override
-  String get common_errors => 'Errors';
+  String get common_errors => 'Erreurs';
 
   @override
   String get dashboard_enableCardsDesc =>
-      'Enable dashboard cards to see your financial overview';
+      'Activez les cartes du tableau de bord pour voir votre aperçu financier';
 
   @override
-  String get dashboard_customizeDashboard => 'Customize Dashboard';
+  String get dashboard_customizeDashboard => 'Personnaliser le tableau de bord';
 
   @override
-  String get dashboard_newToApp => 'New to Mudra Manager?';
+  String get dashboard_newToApp => 'Nouveau sur Mudra Manager ?';
 
   @override
-  String get dashboard_tapToExploreHelp => 'Tap to explore the help guide';
+  String get dashboard_tapToExploreHelp =>
+      'Appuyez pour explorer le guide d\'aide';
 
   @override
-  String get dashboard_tapToReviewTxn => 'Tap to review transactions';
+  String get dashboard_tapToReviewTxn =>
+      'Appuyez pour vérifier les transactions';
 
   @override
-  String get dashboard_autoImportPaused => 'Auto Import Paused';
+  String get dashboard_autoImportPaused => 'Importation automatique en pause';
 
   @override
-  String get dashboard_enable => 'Enable';
+  String get dashboard_enable => 'Activer';
 
   @override
-  String get dashboard_enableAutoImport => 'Enable Auto Import';
+  String get dashboard_enableAutoImport => 'Activer l\'importation automatique';
 
   @override
   String get dashboard_autoTrackDesc =>
-      'Auto-track transactions from bank notifications';
+      'Suivi automatique des transactions à partir des notifications bancaires';
 
   @override
-  String get profile_awesomeUser => 'Awesome User';
+  String get profile_awesomeUser => 'Utilisateur génial';
 
   @override
-  String get profile_logout => 'Logout';
+  String get profile_logout => 'Déconnexion';
 
   @override
-  String get profile_proActiveLabel => 'Pro Active';
+  String get profile_proActiveLabel => 'Pro Actif';
 
   @override
-  String get profile_freeTierLabel => 'Free Tier';
+  String get profile_freeTierLabel => 'Version gratuite';
 
   @override
-  String get profile_fullAccessLabel => 'Full Access';
+  String get profile_fullAccessLabel => 'Accès complet';
 
   @override
-  String get profile_upgradeToProLabel => 'Upgrade to Pro';
+  String get profile_upgradeToProLabel => 'Passer à la version Pro';
 
   @override
-  String get profile_fullAccessEnjoy => 'Full access — enjoy all features!';
+  String get profile_fullAccessEnjoy =>
+      'Accès complet — profitez de toutes les fonctionnalités !';
 
   @override
   String profile_fullAccessDaysRemaining(int days) {
-    return 'Full access — $days days remaining';
+    return 'Accès complet — $days jours restants';
   }
 
   @override
   String profile_fullAccessEndsIn(int days) {
-    return 'Full access ends in $days days';
+    return 'L\'accès complet se termine dans $days jours';
   }
 
   @override
-  String get profile_trialEnded => 'Trial ended — upgrade to keep all features';
+  String get profile_trialEnded =>
+      'Période d\'essai terminée — passez à la version supérieure pour conserver toutes les fonctionnalités';
 
   @override
-  String get profile_unlimitedDesc => 'Unlimited accounts, analytics & more';
+  String get profile_unlimitedDesc =>
+      'Comptes illimités, analyses et plus encore';
 
   @override
-  String get profile_expiredRenew => 'Expired — tap to renew';
+  String get profile_expiredRenew => 'Expiré — appuyez pour renouveler';
 
   @override
-  String get profile_expiresToday => 'Expires today';
+  String get profile_expiresToday => 'Expire aujourd\'hui';
 
   @override
-  String get profile_renewsTomorrow => 'Renews tomorrow';
+  String get profile_renewsTomorrow => 'Renouvelle demain';
 
   @override
   String profile_renewsInDays(int days) {
-    return 'Renews in $days days';
+    return 'Renouvelle dans $days jours';
   }
 
   @override
-  String get profile_activeSubscription => 'Active subscription';
+  String get profile_activeSubscription => 'Abonnement actif';
 
   @override
-  String get profile_unknown => 'Unknown';
+  String get profile_unknown => 'Inconnu';
 
   @override
-  String get profile_accountsLabel => 'Accounts';
+  String get profile_accountsLabel => 'Comptes';
 
   @override
-  String get profile_categoriesLabel => 'Categories';
+  String get profile_categoriesLabel => 'Catégories';
 
   @override
   String get profile_budgetsLabel => 'Budgets';
 
   @override
-  String get profile_bestStreakLabel => 'Best Streak';
+  String get profile_bestStreakLabel => 'Meilleure série';
 
   @override
-  String get profile_yourAchievementsLabel => 'Your Achievements';
+  String get profile_yourAchievementsLabel => 'Vos succès';
 
   @override
-  String get profile_aboutMudra => 'About Mudra Manager';
+  String get profile_aboutMudra => 'À propos de Mudra Manager';
 
   @override
   String get profile_aboutMudraDesc =>
-      'Your personal finance companion. Track expenses, manage budgets, and gain insights into your spending habits.';
+      'Votre compagnon de finance personnelle. Suivez vos dépenses, gérez vos budgets et obtenez des aperçus sur vos habitudes de dépenses.';
 
   @override
-  String get txnList_searchHint => 'Search transactions...';
+  String get txnList_searchHint => 'Rechercher des transactions...';
 
   @override
-  String get txnList_category => 'Category';
+  String get txnList_category => 'Catégorie';
 
   @override
-  String get txnList_dateRange => 'Date Range';
+  String get txnList_dateRange => 'Plage de dates';
 
   @override
-  String get txnList_tag => 'Tag';
+  String get txnList_tag => 'Étiquette';
 
   @override
-  String get txnList_allTransactions => 'All Transactions';
+  String get txnList_allTransactions => 'Toutes les transactions';
 
   @override
-  String get txnList_tapStartEnd => 'Tap start and end date';
+  String get txnList_tapStartEnd => 'Appuyez sur la date de début et de fin';
 
   @override
-  String get txnList_scrollToLoad => 'Scroll to load more';
+  String get txnList_scrollToLoad => 'Faites défiler pour charger plus';
 
   @override
-  String get txnList_month => 'Month';
+  String get txnList_month => 'Mois';
 
   @override
-  String get txnList_previousMonth => 'Previous Month';
+  String get txnList_previousMonth => 'Mois précédent';
 
   @override
-  String get txnList_resetToCurrentMonth => 'Reset to Current Month';
+  String get txnList_resetToCurrentMonth => 'Réinitialiser au mois en cours';
 
   @override
-  String get txnList_selectMonth => 'Select Month';
+  String get txnList_selectMonth => 'Sélectionner le mois';
 
   @override
-  String get txnList_nextMonth => 'Next Month';
+  String get txnList_nextMonth => 'Mois suivant';
 
   @override
-  String get txnList_monthView => 'Month View';
+  String get txnList_monthView => 'Vue mensuelle';
 
   @override
-  String get txnList_subscriptionTagRemoved => 'Subscription tag removed';
+  String get txnList_subscriptionTagRemoved =>
+      'Étiquette d\'abonnement supprimée';
 
   @override
-  String get txnList_filterByTag => 'Filter by Tag';
+  String get txnList_filterByTag => 'Filtrer par étiquette';
 
   @override
   String get txnList_noTagsYet =>
-      'No tags yet. Add tags to your transactions first.';
+      'Pas encore d\'étiquettes. Ajoutez d\'abord des étiquettes à vos transactions.';
 
   @override
-  String get txnList_clear => 'Clear';
+  String get txnList_clear => 'Effacer';
 
   @override
-  String get txnList_filterOptions => 'Filter Options';
+  String get txnList_filterOptions => 'Options de filtrage';
 
   @override
-  String get txnList_transactionType => 'Transaction Type';
+  String get txnList_transactionType => 'Type de transaction';
 
   @override
-  String get txnList_allCategories => 'All Categories';
+  String get txnList_allCategories => 'Toutes les catégories';
 
   @override
-  String get txnList_selectDateRange => 'Select Date Range';
+  String get txnList_selectDateRange => 'Sélectionner la plage de dates';
 
   @override
-  String get txnList_clearDateRange => 'Clear Date Range';
+  String get txnList_clearDateRange => 'Effacer la plage de dates';
 
   @override
-  String get txnList_convertToTransfer => 'Convert to Transfer';
+  String get txnList_convertToTransfer => 'Convertir en transfert';
 
   @override
   String get txnList_convertToTransferDesc =>
-      'This was actually a transfer between your accounts';
+      'C\'était en réalité un transfert entre vos comptes';
 
   @override
-  String get txnList_convertedToTransfer => 'Converted to transfer';
+  String get txnList_convertedToTransfer => 'Converti en transfert';
 
   @override
-  String get stats_today => 'Today';
+  String get stats_today => 'Aujourd\'hui';
 
   @override
-  String get stats_week => 'Week';
+  String get stats_week => 'Semaine';
 
   @override
-  String get stats_month => 'Month';
+  String get stats_month => 'Mois';
 
   @override
-  String get stats_year => 'Year';
+  String get stats_year => 'Année';
 
   @override
-  String get stats_custom => 'Custom';
+  String get stats_custom => 'Personnalisé';
 
   @override
-  String get stats_unableToLoad => 'Unable to load statistics';
+  String get stats_unableToLoad => 'Impossible de charger les statistiques';
 
   @override
-  String get stats_overview => 'Overview';
+  String get stats_overview => 'Aperçu';
 
   @override
-  String get stats_trends => 'Trends';
+  String get stats_trends => 'Tendances';
 
   @override
-  String get stats_spendingByDay => 'Spending by Day';
+  String get stats_spendingByDay => 'Dépenses par jour';
 
   @override
-  String get stats_insights => 'Insights';
+  String get stats_insights => 'Aperçus';
 
   @override
-  String get stats_nextMonthForecast => 'Next Month Forecast';
+  String get stats_nextMonthForecast => 'Prévisions pour le mois prochain';
 
   @override
-  String get stats_topSpending => 'Top Spending';
+  String get stats_topSpending => 'Dépenses principales';
 
   @override
-  String get stats_12MonthTrend => '12-Month Trend';
+  String get stats_12MonthTrend => 'Tendance sur 12 mois';
 
   @override
   String stats_trendUp(Object category, Object percent) {
-    return '$category is trending up — $percent% of total spending';
+    return '$category est en hausse — $percent% des dépenses totales';
   }
 
   @override
   String stats_trendDown(Object category) {
-    return '$category is trending down this month 📉';
+    return '$category est en baisse ce mois-ci 📉';
   }
 
   @override
   String stats_topCategory(Object category, Object percent) {
-    return '$category is your top category — $percent% of spending';
+    return '$category est votre catégorie principale — $percent% des dépenses';
   }
 
   @override
   String stats_weekendPeak(Object day) {
-    return 'You spend more on weekends — $day is your peak day';
+    return 'Vous dépensez plus le week-end — le $day est votre jour de pic';
   }
 
   @override
   String stats_weekdayPeak(Object day) {
-    return 'Weekdays cost more — $day is your biggest day';
+    return 'Les jours de semaine coûtent plus cher — le $day est votre plus gros jour';
   }
 
   @override
   String stats_peakAndQuiet(Object peak, Object quiet) {
-    return '$peak is your peak spending day, $quiet is the quietest';
+    return '$peak est votre jour de pic de dépenses, $quiet est le plus calme';
   }
 
   @override
-  String get stats_categoryTrends => 'Category Trends';
+  String get stats_categoryTrends => 'Tendances par catégorie';
 
   @override
-  String get stats_spendingByTag => 'Spending by Tag';
+  String get stats_spendingByTag => 'Dépenses par étiquette';
 
   @override
-  String get stats_netWorth => 'Net Worth';
+  String get stats_netWorth => 'Valeur nette';
 
   @override
-  String get stats_savings => 'Savings';
+  String get stats_savings => 'Économies';
 
   @override
-  String get stats_categoryImpact => 'CATEGORY IMPACT';
+  String get stats_categoryImpact => 'IMPACT PAR CATÉGORIE';
 
   @override
-  String get stats_income => 'Income';
+  String get stats_income => 'Revenu';
 
   @override
-  String get stats_expense => 'Expense';
+  String get stats_expense => 'Dépense';
 
   @override
   String get stats_net => 'Net';
 
   @override
-  String get stats_dailySpendingPace => 'Daily Spending Pace';
+  String get stats_dailySpendingPace => 'Rythme de dépenses quotidien';
 
   @override
-  String get stats_topCategories => 'Top Categories';
+  String get stats_topCategories => 'Principales catégories';
 
   @override
   String stats_projectedThisMonth(Object amount) {
-    return 'Projected: $amount this month';
+    return 'Prévision : $amount ce mois-ci';
   }
 
   @override
   String stats_byDay(Object day, Object amount, Object month) {
-    return 'By day $day: $amount in $month';
+    return 'Au jour $day : $amount en $month';
   }
 
   @override
-  String get stats_steadyHeadline => 'Steady as she goes';
+  String get stats_steadyHeadline => 'On garde le cap';
 
   @override
   String get stats_steadyDetail =>
-      'Your spending is consistent — that\'s discipline.';
+      'Vos dépenses sont constantes — c\'est de la discipline.';
 
   @override
-  String get stats_doingGreatHeadline => 'You\'re doing great 🌟';
+  String get stats_doingGreatHeadline => 'Vous vous en sortez très bien 🌟';
 
   @override
-  String get stats_spendingUpHeadline => 'Heads up — spending is up';
+  String get stats_spendingUpHeadline =>
+      'Attention — les dépenses sont en hausse';
 
   @override
-  String get stats_downloadPdf => 'Download PDF';
+  String get stats_downloadPdf => 'Télécharger le PDF';
 
   @override
-  String get stats_generating => 'Generating...';
+  String get stats_generating => 'Génération...';
 
   @override
-  String get recap_belowAvg => 'Below avg';
+  String get recap_belowAvg => 'Sous la moyenne';
 
   @override
-  String get recap_aboveAvg => 'Above avg';
+  String get recap_aboveAvg => 'Au-dessus de la moyenne';
 
   @override
-  String get recap_recurring => 'Recurring';
+  String get recap_recurring => 'Récurrent';
 
   @override
-  String get recap_oneTime => 'One-time';
+  String get recap_oneTime => 'Ponctuel';
 
   @override
-  String get recap_recapTitle => 'Recap';
+  String get recap_recapTitle => 'Récapitulatif';
 
   @override
-  String get notifSettings_dailySummary => 'Daily Summary';
+  String get notifSettings_dailySummary => 'Résumé quotidien';
 
   @override
-  String get notifSettings_weeklySummary => 'Weekly Summary';
+  String get notifSettings_weeklySummary => 'Résumé hebdomadaire';
 
   @override
-  String get notifSettings_comeBackNudges => 'Come-back Nudges';
+  String get notifSettings_comeBackNudges => 'Rappels de retour';
 
   @override
-  String get notifSettings_streakReminder => 'Streak Reminder';
+  String get notifSettings_streakReminder => 'Rappel de série';
 
   @override
-  String get notifSettings_smartAlerts => 'Smart Alerts';
+  String get notifSettings_smartAlerts => 'Alertes intelligentes';
 
   @override
-  String get notifSettings_selectDay => 'Select Day';
+  String get notifSettings_selectDay => 'Sélectionner le jour';
 
   @override
   String get notifSettings_summariesDesc =>
-      'Summaries show spending, income, top category & balance';
+      'Les résumés affichent les dépenses, les revenus, la catégorie principale et le solde';
 
   @override
-  String get notifSettings_reminderTime => 'Reminder Time';
+  String get notifSettings_reminderTime => 'Heure du rappel';
 
   @override
-  String get notifSettings_sendTestNotif => 'Send Test Notification';
+  String get notifSettings_sendTestNotif => 'Envoyer une notification de test';
 
   @override
-  String get notifSettings_testNotifSent => 'Test notification sent';
+  String get notifSettings_testNotifSent => 'Notification de test envoyée';
 
   @override
   String get notifSettings_dailyNudgeStreak =>
-      'Daily nudge to keep your streak';
+      'Rappel quotidien pour garder votre série';
 
   @override
-  String get notifSettings_summaryDay => 'Summary Day';
+  String get notifSettings_summaryDay => 'Jour du résumé';
 
   @override
   String get notifSettings_gentleReminders =>
-      'Gentle reminders if you haven\'t opened the app';
+      'Rappels doux si vous n\'avez pas ouvert l\'application';
 
   @override
   String get notifSettings_budgetWarningsDesc =>
-      'Budget warnings, spending spikes, bill reminders';
+      'Avertissements de budget, pics de dépenses, rappels de factures';
 
   @override
   String get notifSettings_localNotifDisclaimer =>
-      'Notifications are delivered locally on your device. No data is sent to any server.';
+      'Les notifications sont délivrées localement sur votre appareil. Aucune donnée n\'est envoyée à un serveur.';
 
   @override
-  String get smsImport_autoImport => 'Auto Import';
+  String get smsImport_autoImport => 'Importation automatique';
 
   @override
-  String get smsImport_permissions => 'Permissions';
+  String get smsImport_permissions => 'Autorisations';
 
   @override
-  String get smsImport_notifAccess => 'Notification Access';
+  String get smsImport_notifAccess => 'Accès aux notifications';
 
   @override
-  String get smsImport_notifAccessEnabled => 'Notification access enabled';
+  String get smsImport_notifAccessEnabled => 'Accès aux notifications activé';
 
   @override
-  String get smsImport_allowReadingNotif => 'Allow reading bank notifications';
+  String get smsImport_allowReadingNotif =>
+      'Autoriser la lecture des notifications bancaires';
 
   @override
   String get smsImport_autoDetectTxn =>
-      'Auto-detect transactions from notifications';
+      'Détection automatique des transactions à partir des notifications';
 
   @override
   String get smsImport_privacyNote =>
-      'Notifications are read locally on your device to detect transactions. Nothing is uploaded or shared — ever.';
+      'Les notifications sont lues localement sur votre appareil pour détecter les transactions. Rien n\'est jamais téléchargé ou partagé.';
 
   @override
-  String get smsImport_tools => 'Tools';
+  String get smsImport_tools => 'Outils';
 
   @override
-  String get smsImport_txnActivity => 'Transaction Activity';
+  String get smsImport_txnActivity => 'Activité de transaction';
 
   @override
-  String get smsImport_viewDetectedTxn => 'View all detected transactions';
+  String get smsImport_viewDetectedTxn =>
+      'Voir toutes les transactions détectées';
 
   @override
-  String get smsImport_clearHistory => 'Clear Processing History';
+  String get smsImport_clearHistory => 'Effacer l\'historique de traitement';
 
   @override
-  String get smsImport_resetDetection => 'Reset detection history';
+  String get smsImport_resetDetection =>
+      'Réinitialiser l\'historique de détection';
 
   @override
-  String get smsImport_howItWorks => 'How It Works';
+  String get smsImport_howItWorks => 'Comment ça marche';
 
   @override
-  String get smsImport_readsBankNotif => 'Reads bank & wallet notifications';
+  String get smsImport_readsBankNotif =>
+      'Lit les notifications des banques et portefeuilles';
 
   @override
-  String get smsImport_dataStaysOnDevice => 'All data stays on your device';
+  String get smsImport_dataStaysOnDevice =>
+      'Toutes les données restent sur votre appareil';
 
   @override
-  String get smsImport_autoCreatesTxn => 'Automatically creates transactions';
+  String get smsImport_autoCreatesTxn =>
+      'Crée automatiquement des transactions';
 
   @override
-  String get smsImport_personalIgnored => 'Personal notifications are ignored';
+  String get smsImport_personalIgnored =>
+      'Les notifications personnelles sont ignorées';
 
   @override
-  String get smsImport_noDataSent => 'No data sent to any server';
+  String get smsImport_noDataSent => 'Aucune donnée envoyée à un serveur';
 
   @override
-  String get smsImport_active => 'Active';
+  String get smsImport_active => 'Actif';
 
   @override
-  String get smsImport_inactive => 'Inactive';
+  String get smsImport_inactive => 'Inactif';
 
   @override
   String get smsImport_grantAccess =>
-      'Grant notification access to get started';
+      'Accordez l\'accès aux notifications pour commencer';
 
   @override
-  String get smsImport_notAvailableIos => 'Not Available on iOS';
+  String get smsImport_notAvailableIos => 'Non disponible sur iOS';
 
   @override
-  String get smsImport_enableAccessFirst => 'Enable notification access first';
+  String get smsImport_enableAccessFirst =>
+      'Activez d\'abord l\'accès aux notifications';
 
   @override
-  String get smsImport_notifAccessRequired => 'Notification Access Required';
+  String get smsImport_notifAccessRequired => 'Accès aux notifications requis';
 
   @override
   String get smsImport_notifAccessDesc =>
-      'Mudra Manager needs notification access to automatically detect transactions from your bank and wallet apps.';
+      'Mudra Manager a besoin de l\'accès aux notifications pour détecter automatiquement les transactions de vos applications bancaires et de portefeuille.';
 
   @override
   String get smsImport_onlyBankRead =>
-      'Only bank/wallet notifications are read';
+      'Seules les notifications de banque/portefeuille sont lues';
 
   @override
-  String get smsImport_personalNeverRead => 'Personal messages are never read';
+  String get smsImport_personalNeverRead =>
+      'Les messages personnels ne sont jamais lus';
 
   @override
-  String get smsImport_openSettings => 'Open Settings';
+  String get smsImport_openSettings => 'Ouvrir les paramètres';
 
   @override
-  String get smsImport_clearHistoryConfirm => 'Clear Processing History?';
+  String get smsImport_clearHistoryConfirm =>
+      'Effacer l\'historique de traitement ?';
 
   @override
   String get smsImport_clearHistoryWarning =>
-      'Previously detected notifications will be processed again, which may create duplicate transactions.';
+      'Les notifications précédemment détectées seront traitées à nouveau, ce qui peut créer des transactions en double.';
 
   @override
-  String get smsImport_tapAgainSettings => 'Tap again to open system settings';
+  String get smsImport_tapAgainSettings =>
+      'Appuyez à nouveau pour ouvrir les paramètres système';
 
   @override
-  String get upgrade_purchaseFailed => 'Purchase failed. Please try again.';
+  String get upgrade_purchaseFailed => 'L\'achat a échoué. Veuillez réessayer.';
 
   @override
   String get upgrade_purchasePending =>
-      'Purchase pending. Pro will activate once payment completes.';
+      'Achat en attente. Le mode Pro s\'activera une fois le paiement terminé.';
 
   @override
-  String get upgrade_welcomePro => 'Welcome to Pro!';
+  String get upgrade_welcomePro => 'Bienvenue en mode Pro !';
 
   @override
   String get upgrade_allFeaturesUnlocked =>
-      'All features are now unlocked. Thank you for your support!';
+      'Toutes les fonctionnalités sont maintenant déverrouillées. Merci pour votre soutien !';
 
   @override
-  String get upgrade_startExploring => 'Start Exploring';
+  String get upgrade_startExploring => 'Commencer l\'exploration';
 
   @override
-  String get upgrade_yourProFeatures => 'Your Pro features';
+  String get upgrade_yourProFeatures => 'Vos fonctionnalités Pro';
 
   @override
   String get upgrade_manageSubscription =>
-      'To manage your subscription, go to Google Play Store > Subscriptions.';
+      'Pour gérer votre abonnement, allez sur Google Play Store > Abonnements.';
 
   @override
-  String get upgrade_everythingInPro => 'Everything in Pro';
+  String get upgrade_everythingInPro => 'Tout dans Pro';
 
   @override
-  String get upgrade_chooseYourPlan => 'Choose your plan';
+  String get upgrade_chooseYourPlan => 'Choisissez votre plan';
 
   @override
-  String get upgrade_yearly => 'Yearly';
+  String get upgrade_yearly => 'Annuel';
 
   @override
-  String get upgrade_save43 => 'Save 43%';
+  String get upgrade_save43 => 'Économisez 43 %';
 
   @override
-  String get upgrade_monthly => 'Monthly';
+  String get upgrade_monthly => 'Mensuel';
 
   @override
-  String get upgrade_continue => 'Continue';
+  String get upgrade_continue => 'Continuer';
 
   @override
-  String get upgrade_restorePurchases => 'Restore purchases';
+  String get upgrade_restorePurchases => 'Restaurer les achats';
 
   @override
-  String get upgrade_renewsToday => 'Renews today';
+  String get upgrade_renewsToday => 'Renouvelé aujourd\'hui';
 
   @override
   String get upgrade_mudraManagerPro => 'Mudra Manager Pro';
 
   @override
   String get upgrade_unlockFullPower =>
-      'Unlock the full power of your finances';
+      'Déverrouillez toute la puissance de vos finances';
 
   @override
-  String get day_monday => 'Monday';
+  String get day_monday => 'Lundi';
 
   @override
-  String get day_tuesday => 'Tuesday';
+  String get day_tuesday => 'Mardi';
 
   @override
-  String get day_wednesday => 'Wednesday';
+  String get day_wednesday => 'Mercredi';
 
   @override
-  String get day_thursday => 'Thursday';
+  String get day_thursday => 'Jeudi';
 
   @override
-  String get day_friday => 'Friday';
+  String get day_friday => 'Vendredi';
 
   @override
-  String get day_saturday => 'Saturday';
+  String get day_saturday => 'Samedi';
 
   @override
-  String get day_sunday => 'Sunday';
+  String get day_sunday => 'Dimanche';
 
   @override
-  String get recap_income => 'Income';
+  String get recap_income => 'Revenu';
 
   @override
-  String get recap_expense => 'Expense';
+  String get recap_expense => 'Dépense';
 
   @override
-  String get recap_saved => 'Saved';
+  String get recap_saved => 'Économisé';
 
   @override
-  String get recap_dailySpending => 'Daily Spending';
+  String get recap_dailySpending => 'Dépenses quotidiennes';
 
   @override
-  String get recap_spendingPace => 'Spending Pace';
+  String get recap_spendingPace => 'Rythme de dépenses';
 
   @override
-  String get recap_recurringVsOneTime => 'Recurring vs One-time';
+  String get recap_recurringVsOneTime => 'Récurrent vs Ponctuel';
 
   @override
-  String get recap_topCategories => 'Top Categories';
+  String get recap_topCategories => 'Principales catégories';
 
   @override
-  String get recap_mostFrequent => 'Most Frequent';
+  String get recap_mostFrequent => 'Plus fréquents';
 
   @override
-  String get recap_incomeSources => 'Income Sources';
+  String get recap_incomeSources => 'Sources de revenus';
 
   @override
-  String get recap_byAccount => 'By Account';
+  String get recap_byAccount => 'Par compte';
 
   @override
-  String get recap_budgetHealth => 'Budget Health';
+  String get recap_budgetHealth => 'Santé du budget';
 
   @override
-  String get recap_biggestExpenses => 'Biggest Expenses';
+  String get recap_biggestExpenses => 'Plus grosses dépenses';
 
   @override
-  String get recap_biggestIncome => 'Biggest Income';
+  String get recap_biggestIncome => 'Plus gros revenus';
 
   @override
-  String get recap_generating => 'Generating...';
+  String get recap_generating => 'Génération...';
 
   @override
-  String get recap_avgPerDay => 'Avg/Day';
+  String get recap_avgPerDay => 'Moy./jour';
 
   @override
-  String get recap_weekdayAvg => 'Weekday Avg';
+  String get recap_weekdayAvg => 'Moy. semaine';
 
   @override
-  String get recap_weekendAvg => 'Weekend Avg';
+  String get recap_weekendAvg => 'Moy. week-end';
 
   @override
   String get recap_budgets => 'Budgets';
@@ -3973,569 +4106,572 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recap_badges => 'Badges';
 
   @override
-  String get recap_streak => 'Streak';
+  String get recap_streak => 'Série';
 
   @override
-  String get recap_best => 'Best';
+  String get recap_best => 'Meilleur';
 
   @override
-  String get recap_savings => 'Savings';
+  String get recap_savings => 'Économies';
 
   @override
-  String get about_developerMode => 'Developer Mode Activated!';
+  String get about_developerMode => 'Mode développeur activé !';
 
   @override
-  String get about_couldNotOpenLink => 'Could not open link';
+  String get about_couldNotOpenLink => 'Impossible d\'ouvrir le lien';
 
   @override
-  String get about_title => 'About';
+  String get about_title => 'À propos';
 
   @override
   String get about_privacyDesc =>
-      'Everything stays on your device. No accounts, no cloud, no data collection. Your finances are yours alone.';
+      'Tout reste sur votre appareil. Pas de comptes, pas de cloud, pas de collecte de données. Vos finances n\'appartiennent qu\'à vous.';
 
   @override
-  String get about_legalTransparency => 'Legal & Transparency';
+  String get about_legalTransparency => 'Légal et Transparence';
 
   @override
-  String get about_privacyPolicy => 'Privacy Policy';
+  String get about_privacyPolicy => 'Politique de confidentialité';
 
   @override
-  String get about_privacyPolicyDesc => 'How we protect your data';
+  String get about_privacyPolicyDesc => 'Comment nous protégeons vos données';
 
   @override
-  String get about_termsOfService => 'Terms of Service';
+  String get about_termsOfService => 'Conditions d\'utilisation';
 
   @override
-  String get about_termsDesc => 'App usage terms and conditions';
+  String get about_termsDesc => 'Conditions d\'utilisation de l\'application';
 
   @override
-  String get about_openSourceLicenses => 'Open Source Licenses';
+  String get about_openSourceLicenses => 'Licences open source';
 
   @override
-  String get about_openSourceDesc => 'Third-party libraries we use';
+  String get about_openSourceDesc => 'Bibliothèques tierces que nous utilisons';
 
   @override
-  String get about_supportConnect => 'Support & Connect';
+  String get about_supportConnect => 'Support et Contact';
 
   @override
-  String get about_checkForUpdates => 'Check for Updates';
+  String get about_checkForUpdates => 'Vérifier les mises à jour';
 
   @override
-  String get about_checkForUpdatesDesc => 'Manually check app version';
+  String get about_checkForUpdatesDesc =>
+      'Vérifier manuellement la version de l\'application';
 
   @override
-  String get about_latestVersion => 'You are on the latest version';
+  String get about_latestVersion => 'Vous utilisez la dernière version';
 
   @override
-  String get about_unableToCheck => 'Unable to check for updates';
+  String get about_unableToCheck => 'Impossible de vérifier les mises à jour';
 
   @override
-  String get about_officialWebsite => 'Official Website';
+  String get about_officialWebsite => 'Site officiel';
 
   @override
-  String get about_visitWebsite => 'Visit mudramanager.com';
+  String get about_visitWebsite => 'Visitez mudramanager.com';
 
   @override
-  String get about_contactSupport => 'Contact Support';
+  String get about_contactSupport => 'Contacter le support';
 
   @override
-  String get about_contactSupportDesc => 'Get help or report issues';
+  String get about_contactSupportDesc =>
+      'Obtenir de l\'aide ou signaler des problèmes';
 
   @override
-  String get about_rateApp => 'Rate the App';
+  String get about_rateApp => 'Évaluer l\'application';
 
   @override
-  String get about_rateAppDesc => 'Share your experience on the store';
+  String get about_rateAppDesc =>
+      'Partagez votre expérience sur le magasin d\'applications';
 
   @override
-  String get about_developerModeSection => 'Developer Mode';
+  String get about_developerModeSection => 'Mode développeur';
 
   @override
   String get about_mudraManager => 'Mudra Manager';
 
   @override
-  String get about_secureFinancial => 'Secure Financial Command';
+  String get about_secureFinancial => 'Commande financière sécurisée';
 
   @override
-  String get about_loadingLicenses => 'Loading licenses...';
+  String get about_loadingLicenses => 'Chargement des licences...';
 
   @override
-  String get appearance_title => 'Appearance';
+  String get appearance_title => 'Apparence';
 
   @override
-  String get appearance_themeMode => 'Theme Mode';
+  String get appearance_themeMode => 'Mode thématique';
 
   @override
-  String get appearance_display => 'Display';
+  String get appearance_display => 'Affichage';
 
   @override
-  String get appearance_toneVoice => 'Tone & Voice';
+  String get appearance_toneVoice => 'Ton et voix';
 
   @override
   String get appearance_changesApplyInstantly =>
-      'Theme and display changes apply instantly.';
+      'Les changements de thème et d\'affichage s\'appliquent instantanément.';
 
   @override
-  String get appearance_darkAppearance => 'Dark appearance';
+  String get appearance_darkAppearance => 'Apparence sombre';
 
   @override
-  String get appearance_lightAppearance => 'Light appearance';
+  String get appearance_lightAppearance => 'Apparence claire';
 
   @override
-  String get appearance_accountStyle => 'Account Style';
+  String get appearance_accountStyle => 'Style de compte';
 
   @override
-  String get appearance_cards => 'Cards';
+  String get appearance_cards => 'Cartes';
 
   @override
-  String get appearance_stack => 'Stack';
+  String get appearance_stack => 'Pile';
 
   @override
   String get appearance_bento => 'Bento';
 
   @override
-  String get appearance_highContrast => 'High Contrast';
+  String get appearance_highContrast => 'Contraste élevé';
 
   @override
   String get appearance_highContrastDesc =>
-      'Improves readability for low vision';
+      'Améliore la lisibilité pour les malvoyants';
 
   @override
-  String get appearance_guestMode => 'Guest Mode';
+  String get appearance_guestMode => 'Mode invité';
 
   @override
-  String get appearance_guestModeOnDesc => 'Real amounts are hidden';
+  String get appearance_guestModeOnDesc => 'Les montants réels sont masqués';
 
   @override
-  String get appearance_guestModeOffDesc => 'Hide sensitive financial data';
+  String get appearance_guestModeOffDesc =>
+      'Masquer les données financières sensibles';
 
   @override
-  String get appearance_lightMode => 'Light Mode';
+  String get appearance_lightMode => 'Mode clair';
 
   @override
-  String get appearance_darkMode => 'Dark Mode';
+  String get appearance_darkMode => 'Mode sombre';
 
   @override
-  String get appearance_systemDefault => 'System Default';
+  String get appearance_systemDefault => 'Par défaut du système';
 
   @override
-  String get analytics_financialHealthScore => 'Financial Health Score';
+  String get analytics_financialHealthScore => 'Score de santé financière';
 
   @override
-  String get analytics_savingsRate => 'Savings Rate';
+  String get analytics_savingsRate => 'Taux d\'épargne';
 
   @override
-  String get analytics_expenseRatio => 'Expense Ratio';
+  String get analytics_expenseRatio => 'Ratio de dépenses';
 
   @override
-  String get analytics_insights => 'Insights';
+  String get analytics_insights => 'Aperçus';
 
   @override
-  String get analytics_spendingPrediction => 'Spending Prediction';
+  String get analytics_spendingPrediction => 'Prédiction de dépenses';
 
   @override
-  String get analytics_nextMonth => 'Next Month';
+  String get analytics_nextMonth => 'Mois prochain';
 
   @override
-  String get analytics_basedOnAvg => 'Based on last 3 months average';
+  String get analytics_basedOnAvg => 'Basé sur la moyenne des 3 derniers mois';
 
   @override
-  String get analytics_categoryTrends => 'Category Trends';
+  String get analytics_categoryTrends => 'Tendances par catégorie';
 
   @override
-  String get analytics_spendingByDay => 'Spending by Day';
+  String get analytics_spendingByDay => 'Dépenses par jour';
 
   @override
-  String get trip_notFound => 'Trip Not Found';
+  String get trip_notFound => 'Voyage non trouvé';
 
   @override
-  String get trip_notFoundMsg => 'Trip not found';
+  String get trip_notFoundMsg => 'Voyage non trouvé';
 
   @override
-  String get trip_tripLabel => 'Trip';
+  String get trip_tripLabel => 'Voyage';
 
   @override
-  String get trip_groupLabel => 'Group';
+  String get trip_groupLabel => 'Groupe';
 
   @override
-  String get trip_archiveTripTitle => 'Archive Trip';
+  String get trip_archiveTripTitle => 'Archiver le voyage';
 
   @override
   String get trip_archiveMsg =>
-      'This trip will be moved to archive. All data and settlements will be preserved.';
+      'Ce voyage sera déplacé vers les archives. Toutes les données et les règlements seront conservés.';
 
   @override
-  String get trip_archiveConfirm => 'Archive';
+  String get trip_archiveConfirm => 'Archiver';
 
   @override
-  String get trip_totalSpent => 'Total Spent';
+  String get trip_totalSpent => 'Total dépensé';
 
   @override
-  String get trip_splitExpense => 'Split Expense';
+  String get trip_splitExpense => 'Partager la dépense';
 
   @override
-  String get trip_allPeople => 'All People';
+  String get trip_allPeople => 'Toutes les personnes';
 
   @override
-  String get trip_allCategories => 'All Categories';
+  String get trip_allCategories => 'Toutes les catégories';
 
   @override
-  String get trip_uncategorized => 'Uncategorized';
+  String get trip_uncategorized => 'Non catégorisé';
 
   @override
-  String get trip_removeExpense => 'Remove Expense';
+  String get trip_removeExpense => 'Supprimer la dépense';
 
   @override
-  String get trip_removeFromTrip => 'Remove this expense from the trip?';
+  String get trip_removeFromTrip => 'Supprimer cette dépense du voyage ?';
 
   @override
-  String get trip_removeFromGroup => 'Remove this expense from the group?';
+  String get trip_removeFromGroup => 'Supprimer cette dépense du groupe ?';
 
   @override
-  String get trip_removeConfirm => 'Remove';
+  String get trip_removeConfirm => 'Supprimer';
 
   @override
-  String get trip_unknown => 'Unknown';
+  String get trip_unknown => 'Inconnu';
 
   @override
-  String get trip_youPaid => 'You paid';
+  String get trip_youPaid => 'Vous avez payé';
 
   @override
   String get trip_noPendingSettlements =>
-      'No pending settlements for this trip';
+      'Aucun règlement en attente pour ce voyage';
 
   @override
-  String get trip_everyoneSquare => 'Everyone is square';
+  String get trip_everyoneSquare => 'Tout le monde est quitte';
 
   @override
-  String get trip_archiveGroupTitle => 'Archive Group';
+  String get trip_archiveGroupTitle => 'Archiver le groupe';
 
   @override
   String get trip_archiveGroupMsg =>
-      'This group will be moved to archive. All data and settlements will be preserved.';
+      'Ce groupe sera déplacé vers les archives. Toutes les données et les règlements seront conservés.';
 
   @override
-  String get editTrip_addParticipant => 'Add Participant';
+  String get editTrip_addParticipant => 'Ajouter un participant';
 
   @override
-  String get editTrip_name => 'Name';
+  String get editTrip_name => 'Nom';
 
   @override
-  String get editTrip_enterName => 'Enter participant name';
+  String get editTrip_enterName => 'Entrez le nom du participant';
 
   @override
-  String get editTrip_finalizeTrip => 'Finalize Trip';
+  String get editTrip_finalizeTrip => 'Finaliser le voyage';
 
   @override
-  String get editTrip_closeGroup => 'Close Group';
+  String get editTrip_closeGroup => 'Fermer le groupe';
 
   @override
   String get editTrip_finalizeMsg =>
-      'This will mark the trip as ended. You cannot add expenses after this.';
+      'Ceci marquera le voyage comme terminé. Vous ne pourrez plus ajouter de dépenses après cela.';
 
   @override
   String get editTrip_closeGroupMsg =>
-      'This will close the group. You cannot add expenses after this.';
+      'Ceci fermera le groupe. Vous ne pourrez plus ajouter de dépenses après cela.';
 
   @override
-  String get editTrip_finalize => 'Finalize';
+  String get editTrip_finalize => 'Finaliser';
 
   @override
-  String get editTrip_close => 'Close';
+  String get editTrip_close => 'Fermer';
 
   @override
-  String get editTrip_groupNotFound => 'Group Not Found';
+  String get editTrip_groupNotFound => 'Groupe non trouvé';
 
   @override
-  String get editTrip_groupNotFoundMsg => 'Group not found';
+  String get editTrip_groupNotFoundMsg => 'Groupe non trouvé';
 
   @override
-  String get editTrip_editTrip => 'Edit Trip';
+  String get editTrip_editTrip => 'Modifier le voyage';
 
   @override
-  String get editTrip_editGroup => 'Edit Group';
+  String get editTrip_editGroup => 'Modifier le groupe';
 
   @override
-  String get editTrip_editSplitGroup => 'Edit Split Group';
+  String get editTrip_editSplitGroup => 'Modifier le groupe de partage';
 
   @override
-  String get editTrip_createTrip => 'Create Trip';
+  String get editTrip_createTrip => 'Créer un voyage';
 
   @override
-  String get editTrip_createSplitGroup => 'Create Split Group';
+  String get editTrip_createSplitGroup => 'Créer un groupe de partage';
 
   @override
-  String get editTrip_travelTrip => 'Travel Trip';
+  String get editTrip_travelTrip => 'Voyage de tourisme';
 
   @override
-  String get editTrip_splitGroup => 'Split Group';
+  String get editTrip_splitGroup => 'Groupe de partage';
 
   @override
-  String get editTrip_tripDetails => 'Trip Details';
+  String get editTrip_tripDetails => 'Détails du voyage';
 
   @override
-  String get editTrip_groupDetails => 'Group Details';
+  String get editTrip_groupDetails => 'Détails du groupe';
 
   @override
-  String get editTrip_tripName => 'Trip Name';
+  String get editTrip_tripName => 'Nom du voyage';
 
   @override
-  String get editTrip_groupName => 'Group Name';
+  String get editTrip_groupName => 'Nom du groupe';
 
   @override
-  String get editTrip_descriptionOptional => 'Description (Optional)';
+  String get editTrip_descriptionOptional => 'Description (facultatif)';
 
   @override
-  String get editTrip_tripHint => 'Beach vacation with friends';
+  String get editTrip_tripHint => 'Vacances à la plage avec des amis';
 
   @override
-  String get editTrip_groupHint => 'Split expenses with friends';
+  String get editTrip_groupHint => 'Partager les dépenses avec des amis';
 
   @override
-  String get editTrip_budgetOptional => 'Budget (Optional)';
+  String get editTrip_budgetOptional => 'Budget (facultatif)';
 
   @override
-  String get editTrip_currency => 'Currency';
+  String get editTrip_currency => 'Devise';
 
   @override
-  String get editTrip_baseCurrencyDefault => 'Base currency (default)';
+  String get editTrip_baseCurrencyDefault => 'Devise de base (par défaut)';
 
   @override
-  String get editTrip_duration => 'Duration';
+  String get editTrip_duration => 'Durée';
 
   @override
-  String get editTrip_warningDateChange => 'Warning: Date Change';
+  String get editTrip_warningDateChange => 'Avertissement : Changement de date';
 
   @override
-  String get expense_notFound => 'Not Found';
+  String get expense_notFound => 'Non trouvé';
 
   @override
-  String get expense_notFoundMsg => 'Expense not found';
+  String get expense_notFoundMsg => 'Dépense non trouvée';
 
   @override
-  String get expense_details => 'Expense Details';
+  String get expense_details => 'Détails de la dépense';
 
   @override
-  String get expense_paidBy => 'Paid by';
+  String get expense_paidBy => 'Payé par';
 
   @override
-  String get expense_you => 'You';
+  String get expense_you => 'Vous';
 
   @override
-  String get expense_yourShare => 'Your share';
+  String get expense_yourShare => 'Votre part';
 
   @override
   String get expense_noteLabel => 'Note';
 
   @override
-  String get expense_editSplit => 'Edit Split';
+  String get expense_editSplit => 'Modifier le partage';
 
   @override
-  String get expense_splitType => 'Split Type';
+  String get expense_splitType => 'Type de partage';
 
   @override
-  String get expense_equal => 'Equal';
+  String get expense_equal => 'Égal';
 
   @override
-  String get expense_custom => 'Custom';
+  String get expense_custom => 'Personnalisé';
 
   @override
   String get expense_participants => 'Participants';
 
   @override
-  String get expense_autoFillRemaining => 'Auto-fill remaining';
+  String get expense_autoFillRemaining => 'Remplissage automatique du reste';
 
   @override
-  String get expense_deleteExpense => 'Delete Expense';
+  String get expense_deleteExpense => 'Supprimer la dépense';
 
   @override
   String get expense_deleteExpenseMsg =>
-      'This will adjust everyones balance. Continue?';
+      'Ceci ajustera le solde de chacun. Continuer ?';
 
   @override
-  String get billCenter_overdue => 'Overdue';
+  String get billCenter_overdue => 'En retard';
 
   @override
-  String get billCenter_thisWeek => 'This Week';
+  String get billCenter_thisWeek => 'Cette semaine';
 
   @override
-  String get billCenter_thisMonth => 'This Month';
+  String get billCenter_thisMonth => 'Ce mois-ci';
 
   @override
-  String get billCenter_later => 'Later';
+  String get billCenter_later => 'Plus tard';
 
   @override
-  String get billCenter_totalUpcoming => 'Total upcoming';
+  String get billCenter_totalUpcoming => 'Total à venir';
 
   @override
-  String get billCenter_today => 'Today';
+  String get billCenter_today => 'Aujourd\'hui';
 
   @override
-  String get billCenter_tomorrow => 'Tomorrow';
+  String get billCenter_tomorrow => 'Demain';
 
   @override
-  String get billCenter_afterUpcoming => 'After upcoming bills';
+  String get billCenter_afterUpcoming => 'Après les factures à venir';
 
   @override
-  String get billCenter_dueToday => 'Due today';
+  String get billCenter_dueToday => 'Dû aujourd\'hui';
 
   @override
-  String get billCenter_paid => 'Paid';
+  String get billCenter_paid => 'Payé';
 
   @override
-  String get billCenter_pay => 'Pay';
+  String get billCenter_pay => 'Payer';
 
   @override
-  String get billCenter_existingTxnFound => 'Existing Transaction Found';
+  String get billCenter_existingTxnFound => 'Transaction existante trouvée';
 
   @override
-  String get billCenter_linkTransaction => 'Link This Transaction';
+  String get billCenter_linkTransaction => 'Lier cette transaction';
 
   @override
-  String get billCenter_createNewEntry => 'Create New Entry';
+  String get billCenter_createNewEntry => 'Créer une nouvelle entrée';
 
   @override
-  String get comparison_steady => 'Steady as she goes';
+  String get comparison_steady => 'On garde le cap';
 
   @override
   String get comparison_steadyDesc =>
-      'Your spending is consistent — that is discipline.';
+      'Vos dépenses sont constantes — c\'est de la discipline.';
 
   @override
-  String get comparison_doingGreat => 'You are doing great';
+  String get comparison_doingGreat => 'Vous vous en sortez très bien';
 
   @override
-  String get comparison_headsUp => 'Heads up — spending is up';
+  String get comparison_headsUp => 'Attention — les dépenses sont en hausse';
 
   @override
-  String get reconcile_title => 'Reconcile';
+  String get reconcile_title => 'Rapprocher';
 
   @override
   String get reconcile_info =>
-      'Enter the current balance shown in your bank app or passbook. We\'ll adjust the difference automatically.';
+      'Entrez le solde actuel affiché dans votre application bancaire ou votre livret. Nous ajusterons la différence automatiquement.';
 
   @override
-  String get reconcile_balanceInApp => 'Balance in App';
+  String get reconcile_balanceInApp => 'Solde dans l\'application';
 
   @override
-  String get reconcile_actualBalance => 'Actual Bank Balance';
+  String get reconcile_actualBalance => 'Solde bancaire réel';
 
   @override
-  String get reconcile_balanced => 'Balanced!';
+  String get reconcile_balanced => 'Équilibré !';
 
   @override
-  String get reconcile_difference => 'Difference';
+  String get reconcile_difference => 'Différence';
 
   @override
   String reconcile_incomeAdjustment(String amount) {
-    return 'An income adjustment of $amount will be added.';
+    return 'Un ajustement de revenu de $amount sera ajouté.';
   }
 
   @override
   String reconcile_expenseAdjustment(String amount) {
-    return 'An expense adjustment of $amount will be added.';
+    return 'Un ajustement de dépense de $amount sera ajouté.';
   }
 
   @override
-  String get balanceHistory_currentBalance => 'Current Balance';
+  String get balanceHistory_currentBalance => 'Solde actuel';
 
   @override
-  String get balanceHistory_highest => 'Highest';
+  String get balanceHistory_highest => 'Le plus haut';
 
   @override
-  String get balanceHistory_lowest => 'Lowest';
+  String get balanceHistory_lowest => 'Le plus bas';
 
   @override
-  String get balanceHistory_average => 'Average';
+  String get balanceHistory_average => 'Moyenne';
 
   @override
-  String get common_errorLoading => 'Failed to load data';
+  String get common_errorLoading => 'Échec du chargement des données';
 
   @override
-  String get balanceHistory_trend => '30-Day Trend';
+  String get balanceHistory_trend => 'Tendance sur 30 jours';
 
   @override
-  String get balanceHistory_growing => 'Your balance is growing 📈';
+  String get balanceHistory_growing => 'Votre solde augmente 📈';
 
   @override
-  String get balanceHistory_declining =>
-      'Balance has dipped — let\'s recover 💪';
+  String get balanceHistory_declining => 'Le solde a chuté — récupérons 💪';
 
   @override
-  String get balanceHistory_steady => 'Holding steady ⚖️';
+  String get balanceHistory_steady => 'Se maintient stable ⚖️';
 
   @override
-  String get account_editTitle => 'Edit Account';
+  String get account_editTitle => 'Modifier le compte';
 
   @override
-  String get account_newTitle => 'New Account';
+  String get account_newTitle => 'Nouveau compte';
 
   @override
-  String get account_name => 'Account Name';
+  String get account_name => 'Nom du compte';
 
   @override
-  String get account_typeLabel => 'Account Type';
+  String get account_typeLabel => 'Type de compte';
 
   @override
-  String get account_detailsLabel => 'Details';
+  String get account_detailsLabel => 'Détails';
 
   @override
-  String get account_colorLabel => 'Color';
+  String get account_colorLabel => 'Couleur';
 
   @override
-  String get account_currencyLabel => 'Currency';
+  String get account_currencyLabel => 'Devise';
 
   @override
-  String get account_balance => 'Balance';
+  String get account_balance => 'Solde';
 
   @override
-  String get account_outstanding => 'Outstanding';
+  String get account_outstanding => 'Encours';
 
   @override
-  String get account_last4 => 'Last 4 digits';
+  String get account_last4 => '4 derniers chiffres';
 
   @override
-  String get account_last4Helper => 'For SMS auto-matching';
+  String get account_last4Helper => 'Pour le rapprochement automatique par SMS';
 
   @override
-  String get account_initialBalance => 'Initial balance';
+  String get account_initialBalance => 'Solde initial';
 
   @override
-  String get account_cardPaidOff => 'Enter 0 if card is paid off';
+  String get account_cardPaidOff => 'Entrez 0 si la carte est remboursée';
 
   @override
-  String get account_min4 => 'At least 4 digits';
+  String get account_min4 => 'Au moins 4 chiffres';
 
   @override
-  String get account_max4 => 'Only last 4 digits';
+  String get account_max4 => 'Seulement les 4 derniers chiffres';
 
   @override
-  String get iconPicker_title => 'Pick an Icon';
+  String get iconPicker_title => 'Choisir une icône';
 
   @override
-  String get iconPicker_search => 'Search icons...';
+  String get iconPicker_search => 'Rechercher des icônes...';
 
   @override
-  String get iconPicker_noResults => 'No icons found';
+  String get iconPicker_noResults => 'Aucune icône trouvée';
 
   @override
-  String get colorPicker_title => 'Pick a Color';
+  String get colorPicker_title => 'Choisir une couleur';
 
   @override
-  String get color_red => 'Red';
+  String get color_red => 'Rouge';
 
   @override
-  String get color_pink => 'Pink';
+  String get color_pink => 'Rose';
 
   @override
-  String get color_purple => 'Purple';
+  String get color_purple => 'Violet';
 
   @override
   String get color_indigo => 'Indigo';
 
   @override
-  String get color_blue => 'Blue';
+  String get color_blue => 'Bleu';
 
   @override
   String get color_cyan => 'Cyan';
@@ -4544,324 +4680,328 @@ class AppLocalizationsFr extends AppLocalizations {
   String get color_teal => 'Teal';
 
   @override
-  String get color_green => 'Green';
+  String get color_green => 'Vert';
 
   @override
   String get color_orange => 'Orange';
 
   @override
-  String get color_brown => 'Brown';
+  String get color_brown => 'Marron';
 
   @override
-  String get color_grey => 'Grey';
+  String get color_grey => 'Gris';
 
   @override
-  String get accounts_totalBalance => 'Total Balance';
+  String get accounts_totalBalance => 'Solde total';
 
   @override
-  String get accounts_accountsCount => 'accounts';
+  String get accounts_accountsCount => 'comptes';
 
   @override
-  String get accounts_archived => 'Archived';
+  String get accounts_archived => 'Archivé';
 
   @override
-  String get accounts_howItWorks => 'How Accounts Work';
+  String get accounts_howItWorks => 'Comment fonctionnent les comptes';
 
   @override
   String get accounts_howItWorksDesc =>
-      'Manage all your bank accounts, wallets, and cash in one place. Track balances and transactions across multiple accounts.';
+      'Gérez tous vos comptes bancaires, portefeuilles et espèces en un seul endroit. Suivez les soldes et les transactions sur plusieurs comptes.';
 
   @override
-  String get accounts_primary => 'Primary';
+  String get accounts_primary => 'Principal';
 
   @override
-  String get categories_label => 'categories';
+  String get categories_label => 'catégories';
 
   @override
   String get categories_transactionsLabel => 'transactions';
 
   @override
   String categories_deleteWithTransactions(String name, int count) {
-    return 'This will permanently delete \"$name\" and $count linked transactions. This action cannot be undone.';
+    return 'Ceci supprimera définitivement \"$name\" et $count transactions liées. Cette action ne peut pas être annulée.';
   }
 
   @override
-  String get categories_deleteAll => 'Delete All';
+  String get categories_deleteAll => 'Tout supprimer';
 
   @override
-  String get categories_edit => 'Edit Category';
+  String get categories_edit => 'Modifier la catégorie';
 
   @override
-  String get categories_delete => 'Delete Category';
+  String get categories_delete => 'Supprimer la catégorie';
 
   @override
-  String get categories_deleteSubtitle => 'Removes all linked transactions';
+  String get categories_deleteSubtitle =>
+      'Supprime toutes les transactions liées';
 
   @override
-  String get category_save => 'Save';
+  String get category_save => 'Enregistrer';
 
   @override
-  String get category_detailsLabel => 'Details';
+  String get category_detailsLabel => 'Détails';
 
   @override
-  String get category_parentLabel => 'Parent Category';
+  String get category_parentLabel => 'Catégorie parente';
 
   @override
-  String get category_nameHint => 'Category Name';
+  String get category_nameHint => 'Nom de la catégorie';
 
   @override
-  String get category_keywordsHint => 'Keywords (comma-separated)';
+  String get category_keywordsHint => 'Mots-clés (séparés par des virgules)';
 
   @override
   String get category_keywordsHelper =>
-      'For SMS auto-detection (e.g. swiggy, zomato)';
+      'Pour l\'auto-détection par SMS (ex: swiggy, zomato)';
 
   @override
-  String get currency_title => 'Currency';
+  String get currency_title => 'Devise';
 
   @override
-  String get currency_baseCurrency => 'Base Currency';
+  String get currency_baseCurrency => 'Devise de base';
 
   @override
   String get currency_baseDescription =>
-      'All totals, budgets, and analytics use this currency.';
+      'Tous les totaux, budgets et analyses utilisent cette devise.';
 
   @override
-  String get currency_exchangeRates => 'Exchange Rates';
+  String get currency_exchangeRates => 'Taux de change';
 
   @override
-  String get currency_exchangeRatesDesc => 'View and edit conversion rates';
+  String get currency_exchangeRatesDesc =>
+      'Voir et modifier les taux de conversion';
 
   @override
   String get currency_archivedDesc =>
-      'View transactions from previous currencies';
+      'Voir les transactions des devises précédentes';
 
   @override
   String exchange_unitInfo(String base) {
-    return 'unit of foreign currency = X $base. Tap any rate to edit.';
+    return 'unité de devise étrangère = X $base. Appuyez sur n\'importe quel taux pour le modifier.';
   }
 
   @override
-  String get exchange_search => 'Search currency...';
+  String get exchange_search => 'Rechercher une devise...';
 
   @override
   String exchange_rateUpdated(String code) {
-    return '$code rate updated';
+    return 'Taux $code mis à jour';
   }
 
   @override
   String exchange_editRate(String code) {
-    return 'Edit $code Rate';
+    return 'Modifier le taux $code';
   }
 
   @override
-  String get exchange_rateLabel => 'Rate';
+  String get exchange_rateLabel => 'Taux';
 
   @override
-  String get exchange_invalidRate => 'Enter a valid rate';
+  String get exchange_invalidRate => 'Entrez un taux valide';
 
   @override
   String get archived_transaction => 'Transaction';
 
   @override
-  String get currency_changingCurrency => 'Changing currency...';
+  String get currency_changingCurrency => 'Changement de devise...';
 
   @override
   String get currency_pleaseWait =>
-      'Archiving transactions and updating settings';
+      'Archivage des transactions et mise à jour des paramètres';
 
   @override
-  String get security_title => 'Security';
+  String get security_title => 'Sécurité';
 
   @override
-  String get security_unprotected => 'Unprotected';
+  String get security_unprotected => 'Non protégé';
 
   @override
-  String get security_basic => 'Basic';
+  String get security_basic => 'Basique';
 
   @override
-  String get security_strong => 'Strong';
+  String get security_strong => 'Forte';
 
   @override
   String get security_unprotectedDesc =>
-      'Enable PIN or biometrics to protect your data';
+      'Activez le code PIN ou la biométrie pour protéger vos données';
 
   @override
   String security_protectionsActive(int count, int total) {
-    return '$count of $total protections active';
+    return '$count protections sur $total actives';
   }
 
   @override
-  String get security_authentication => 'Authentication';
+  String get security_authentication => 'Authentification';
 
   @override
-  String get security_pinLock => 'PIN Lock';
+  String get security_pinLock => 'Verrouillage PIN';
 
   @override
-  String get security_pinActive => '4-digit PIN active';
+  String get security_pinActive => 'Code PIN à 4 chiffres actif';
 
   @override
-  String get security_pinSet => 'Set a 4-digit PIN';
+  String get security_pinSet => 'Définir un code PIN à 4 chiffres';
 
   @override
-  String get security_biometric => 'Biometric Unlock';
+  String get security_biometric => 'Déverrouillage biométrique';
 
   @override
-  String get security_biometricDesc => 'Fingerprint or Face ID';
+  String get security_biometricDesc => 'Empreinte digitale ou Face ID';
 
   @override
-  String get security_manage => 'Manage';
+  String get security_manage => 'Gérer';
 
   @override
-  String get security_changePin => 'Change PIN';
+  String get security_changePin => 'Changer le code PIN';
 
   @override
-  String get security_changePinDesc => 'Update your 4-digit PIN';
+  String get security_changePinDesc =>
+      'Mettre à jour votre code PIN à 4 chiffres';
 
   @override
-  String get security_enablePinFirst => 'Enable PIN first';
+  String get security_enablePinFirst => 'Activez d\'abord le code PIN';
 
   @override
-  String get security_biometricEnabled => 'Biometric enabled';
+  String get security_biometricEnabled => 'Biométrie activée';
 
   @override
-  String get security_biometricDisabled => 'Biometric disabled';
+  String get security_biometricDisabled => 'Biométrie désactivée';
 
   @override
   String get security_infoText =>
-      'Your PIN is stored securely on this device — it never touches a server. Digits are randomized on entry for extra protection.';
+      'Votre code PIN est stocké en toute sécurité sur cet appareil — il ne touche jamais un serveur. Les chiffres sont randomisés lors de la saisie pour une protection supplémentaire.';
 
   @override
   String notifSettings_activeCount(int count) {
-    return '$count of 5 active';
+    return '$count sur 5 actives';
   }
 
   @override
   String get notifSettings_summaryDesc =>
-      'Summaries show spending, income, top category & balance';
+      'Les résumés affichent les dépenses, les revenus, la catégorie principale et le solde';
 
   @override
-  String get notifSettings_dailySummaryDesc => 'Yesterday\'s spending overview';
+  String get notifSettings_dailySummaryDesc => 'Aperçu des dépenses d\'hier';
 
   @override
   String notifSettings_weeklySchedule(String day) {
-    return 'Every $day at 9:00 AM';
+    return 'Chaque $day à 9h00';
   }
 
   @override
   String get smsImport_autoImporting =>
-      'Transactions are being imported automatically';
+      'Les transactions sont importées automatiquement';
 
   @override
-  String get smsImport_enableToStart => 'Enable auto import to start tracking';
+  String get smsImport_enableToStart =>
+      'Activez l\'importation automatique pour commencer le suivi';
 
   @override
   String get smsImport_iosRestriction =>
-      'Auto import is only available on Android due to iOS platform restrictions.';
+      'L\'importation automatique n\'est disponible que sur Android en raison des restrictions de la plateforme iOS.';
 
   @override
-  String get common_change => 'Change';
+  String get common_change => 'Changer';
 
   @override
-  String get goal_whatSavingFor => 'What are you saving for?';
+  String get goal_whatSavingFor => 'Pour quoi économisez-vous ?';
 
   @override
-  String get netWorth_totalLabel => 'Total Net Worth';
+  String get netWorth_totalLabel => 'Valeur nette totale';
 
   @override
-  String get netWorth_notEnoughData => 'Not enough data yet';
+  String get netWorth_notEnoughData => 'Pas encore assez de données';
 
   @override
-  String get netWorth_assets => 'Assets';
+  String get netWorth_assets => 'Actifs';
 
   @override
-  String get netWorth_liabilities => 'Liabilities';
+  String get netWorth_liabilities => 'Passifs';
 
   @override
-  String get netWorth_composition => 'Wealth Composition';
+  String get netWorth_composition => 'Composition du patrimoine';
 
   @override
-  String get goal_milestoneStarted => 'Started';
+  String get goal_milestoneStarted => 'Démarré';
 
   @override
-  String get goal_milestoneStartedDesc => 'Your journey began';
+  String get goal_milestoneStartedDesc => 'Votre voyage a commencé';
 
   @override
   String get goal_milestone25 => '25%';
 
   @override
-  String get goal_milestone25Desc => 'Quarter way there';
+  String get goal_milestone25Desc => 'Un quart du chemin fait';
 
   @override
   String get goal_milestone50 => '50%';
 
   @override
-  String get goal_milestone50Desc => 'Halfway done!';
+  String get goal_milestone50Desc => 'À mi-chemin !';
 
   @override
   String get goal_milestone75 => '75%';
 
   @override
-  String get goal_milestone75Desc => 'Almost there';
+  String get goal_milestone75Desc => 'Presque arrivé';
 
   @override
   String get goal_milestone100 => '100%';
 
   @override
-  String get goal_milestone100Desc => 'Goal reached! 🎉';
+  String get goal_milestone100Desc => 'Objectif atteint ! 🎉';
 
   @override
-  String get goal_flexibleTimeline => 'Flexible timeline';
+  String get goal_flexibleTimeline => 'Échéancier flexible';
 
   @override
-  String get goal_amount => 'Amount';
+  String get goal_amount => 'Montant';
 
   @override
-  String get goal_emotionReached => 'Goal reached! 🎉';
+  String get goal_emotionReached => 'Objectif atteint ! 🎉';
 
   @override
-  String get goal_emotionProgress => 'Great progress ✨';
+  String get goal_emotionProgress => 'Belle progression ✨';
 
   @override
   String goal_emotionMoreToGo(Object amount) {
-    return 'Just $amount more to go 💪';
+    return 'Plus que $amount à épargner 💪';
   }
 
   @override
-  String get goal_emotionSetTarget => 'Set your target 🎯';
+  String get goal_emotionSetTarget => 'Fixez votre cible 🎯';
 
   @override
-  String get goal_emotionWhatSaving => 'What are you saving for?';
+  String get goal_emotionWhatSaving => 'Pour quoi économisez-vous ?';
 
   @override
-  String get goal_exceededTarget => 'You\'ve exceeded your target! 🎉';
+  String get goal_exceededTarget => 'Vous avez dépassé votre cible ! 🎉';
 
   @override
-  String get goal_alreadyReached => 'Goal already reached! 🎉';
+  String get goal_alreadyReached => 'Objectif déjà atteint ! 🎉';
 
   @override
   String goal_progressLeft(Object percent, Object amount) {
-    return '$percent% there • $amount left';
+    return '$percent% effectué • $amount restant';
   }
 
   @override
   String goal_paceDaily(Object daily, Object monthly) {
-    return 'At this pace, you need $daily/day to reach your goal.\nThat\'s $monthly/month.';
+    return 'À ce rythme, vous avez besoin de $daily/jour pour atteindre votre objectif.\nC\'est $monthly/mois.';
   }
 
   @override
   String goal_daysRemaining(Object count) {
-    return '$count days remaining';
+    return '$count jours restants';
   }
 
   @override
   String goal_daysLeft(Object count) {
-    return '$count days left';
+    return '$count jours restants';
   }
 
   @override
   String goal_startSaving(Object amount) {
-    return 'Start saving $amount';
+    return 'Commencer à épargner $amount';
   }
 
   @override
@@ -4869,481 +5009,486 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count goals in progress',
-      one: '1 goal in progress',
+      other: '$count objectifs en cours',
+      one: '1 objectif en cours',
     );
     return '$_temp0';
   }
 
   @override
-  String get goal_completedSection => 'Completed 🎉';
+  String get goal_completedSection => 'Terminé 🎉';
 
   @override
-  String get goal_emotionAlmost => 'Almost there 🚀';
+  String get goal_emotionAlmost => 'Presque arrivé 🚀';
 
   @override
-  String get goal_emotionHalfway => 'Halfway there 💪';
+  String get goal_emotionHalfway => 'À mi-chemin 💪';
 
   @override
-  String get goal_emotionEvery => 'Every bit counts 🌱';
+  String get goal_emotionEvery => 'Chaque geste compte 🌱';
 
   @override
-  String get goal_emotionHalfwayDone => 'Halfway done ✨';
+  String get goal_emotionHalfwayDone => 'À moitié fait ✨';
 
   @override
-  String get goal_emotionKeepPushing => 'Keep pushing 🔥';
+  String get goal_emotionKeepPushing => 'Continuez comme ça 🔥';
 
   @override
-  String get goal_emotionJustStarted => 'Just getting started 🌱';
+  String get goal_emotionJustStarted => 'Vient de commencer 🌱';
 
   @override
-  String get goal_closestToCompletion => 'Closest to completion';
+  String get goal_closestToCompletion => 'Le plus proche de la fin';
 
   @override
   String goal_acrossGoals(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'across $count goals',
-      one: 'across 1 goal',
+      other: 'sur $count objectifs',
+      one: 'sur 1 objectif',
     );
     return '$_temp0';
   }
 
   @override
-  String get goal_suffixSaved => 'saved';
+  String get goal_suffixSaved => 'épargné';
 
   @override
-  String get goal_suffixLeft => 'left';
+  String get goal_suffixLeft => 'restant';
 
   @override
-  String get goal_suffixDone => 'done';
+  String get goal_suffixDone => 'fait';
 
   @override
-  String get goal_suffixAchieved => 'achieved';
+  String get goal_suffixAchieved => 'réalisé';
 
   @override
-  String get goal_suffixToGo => 'to go';
+  String get goal_suffixToGo => 'à faire';
 
   @override
-  String get goal_needsAttention => 'Needs attention ⚠️';
+  String get goal_needsAttention => 'Nécessite une attention particulière ⚠️';
 
   @override
-  String get goal_aheadOfSchedule => 'Ahead of schedule 🎯';
+  String get goal_aheadOfSchedule => 'En avance sur le planning 🎯';
 
   @override
   String goal_monthsLeft(Object count) {
-    return '$count months left';
+    return '$count mois restants';
   }
 
   @override
-  String get goal_emotionDidIt => 'You did it! 🎉';
+  String get goal_emotionDidIt => 'Vous l\'avez fait ! 🎉';
 
   @override
-  String get goal_emotionSoClose => 'So close, keep going! 💪';
+  String get goal_emotionSoClose => 'Si proche, continuez ! 💪';
 
   @override
-  String get goal_emotionMomentum => 'Building momentum 🔥';
+  String get goal_emotionMomentum => 'On prend de l\'élan 🔥';
 
   @override
-  String get goal_emotionCatchUp => 'Let\'s catch up ⚡';
+  String get goal_emotionCatchUp => 'Rattrapons le retard ⚡';
 
   @override
-  String get goal_finishGoal => 'Finish this goal! 🚀';
+  String get goal_finishGoal => 'Terminez cet objectif ! 🚀';
 
   @override
-  String get goal_onTrackStatus => 'On Track ✅';
+  String get goal_onTrackStatus => 'Sur la bonne voie ✅';
 
   @override
-  String get goal_behindPace => 'Behind pace ⚠️';
+  String get goal_behindPace => 'En retard sur le rythme ⚠️';
 
   @override
   String goal_daysAgo(Object count) {
-    return '$count days ago';
+    return 'Il y a $count jours';
   }
 
   @override
-  String get common_today => 'Today';
+  String get common_today => 'Aujourd\'hui';
 
   @override
-  String get common_yesterday => 'Yesterday';
+  String get common_yesterday => 'Hier';
 
   @override
-  String get common_amount => 'Amount';
+  String get common_amount => 'Montant';
 
   @override
-  String get accounts_edit => 'Edit Account';
+  String get accounts_edit => 'Modifier le compte';
 
   @override
-  String get accounts_balanceHistory => 'Balance History';
+  String get accounts_balanceHistory => 'Historique du solde';
 
   @override
-  String get accounts_matchBank => 'Match with bank statement';
+  String get accounts_matchBank => 'Faire correspondre avec le relevé bancaire';
 
   @override
-  String get accounts_viewPortfolio => 'View Portfolio';
+  String get accounts_viewPortfolio => 'Voir le portefeuille';
 
   @override
-  String get accounts_setAsPrimary => 'Set as Primary';
+  String get accounts_setAsPrimary => 'Définir comme principal';
 
   @override
-  String get accounts_primaryDesc => 'Default account for splits & trips';
+  String get accounts_primaryDesc =>
+      'Compte par défaut pour les partages et voyages';
 
   @override
-  String get accounts_archive => 'Archive';
+  String get accounts_archive => 'Archiver';
 
   @override
-  String get accounts_archiveDesc => 'Hide from active accounts';
+  String get accounts_archiveDesc => 'Masquer des comptes actifs';
 
   @override
-  String get accounts_unarchive => 'Unarchive';
+  String get accounts_unarchive => 'Désarchiver';
 
   @override
-  String get accounts_unarchiveDesc => 'Restore to active accounts';
+  String get accounts_unarchiveDesc => 'Restaurer dans les comptes actifs';
 
   @override
-  String get accounts_deleteDesc => 'Permanently remove account';
+  String get accounts_deleteDesc => 'Supprimer définitivement le compte';
 
   @override
-  String get smsActivity_title => 'Transaction Activity';
+  String get smsActivity_title => 'Activité des transactions';
 
   @override
-  String get smsActivity_approved => 'Approved';
+  String get smsActivity_approved => 'Approuvé';
 
   @override
-  String get smsActivity_pending => 'Pending';
+  String get smsActivity_pending => 'En attente';
 
   @override
-  String get smsActivity_rejected => 'Rejected';
+  String get smsActivity_rejected => 'Rejeté';
 
   @override
-  String get smsActivity_needsReview => 'Needs Review';
+  String get smsActivity_needsReview => 'À vérifier';
 
   @override
-  String get smsActivity_duplicates => 'Duplicates';
+  String get smsActivity_duplicates => 'Doublons';
 
   @override
-  String get smsActivity_filterByStatus => 'Filter by Status';
+  String get smsActivity_filterByStatus => 'Filtrer par statut';
 
   @override
   String smsActivity_transactionCount(Object count) {
-    return '$count Transactions';
+    return '$count transactions';
   }
 
   @override
   String smsActivity_needsAttention(Object count) {
-    return '$count needs attention';
+    return '$count nécessite votre attention';
   }
 
   @override
   String smsActivity_resultCount(Object count) {
-    return '$count results';
+    return '$count résultats';
   }
 
   @override
-  String get smsActivity_noActivities => 'No matching activities';
+  String get smsActivity_noActivities => 'Aucune activité correspondante';
 
   @override
-  String get smsActivity_status => 'Status';
+  String get smsActivity_status => 'Statut';
 
   @override
-  String get smsActivity_confidence => 'Confidence';
+  String get smsActivity_confidence => 'Confiance';
 
   @override
-  String get smsActivity_account => 'Account';
+  String get smsActivity_account => 'Compte';
 
   @override
-  String get smsActivity_bank => 'Bank';
+  String get smsActivity_bank => 'Banque';
 
   @override
   String get smsActivity_type => 'Type';
 
   @override
-  String get smsActivity_merchant => 'Merchant';
+  String get smsActivity_merchant => 'Marchand';
 
   @override
-  String get smsActivity_balance => 'Balance';
+  String get smsActivity_balance => 'Solde';
 
   @override
-  String get smsActivity_reference => 'Reference';
+  String get smsActivity_reference => 'Référence';
 
   @override
-  String get smsActivity_duplicateLabel => 'DUPLICATE';
+  String get smsActivity_duplicateLabel => 'DOUBLON';
 
   @override
-  String get smsActivity_transferLabel => 'TRANSFER';
+  String get smsActivity_transferLabel => 'TRANSFERT';
 
   @override
-  String get smsActivity_reject => 'Reject';
+  String get smsActivity_reject => 'Rejeter';
 
   @override
-  String get smsActivity_approve => 'Approve';
+  String get smsActivity_approve => 'Approuver';
 
   @override
-  String get smsActivity_transfer => 'Transfer';
+  String get smsActivity_transfer => 'Transfert';
 
   @override
-  String get smsActivity_addAccount => 'Add A/C';
+  String get smsActivity_addAccount => 'Ajouter compte';
 
   @override
   String get smsActivity_duplicateWarning =>
-      'This may be a duplicate transaction. Review carefully before approving.';
+      'Ceci peut être une transaction en doublon. Vérifiez attentivement avant d\'approuver.';
 
   @override
   String smsActivity_noAccountWarning(Object account) {
-    return 'No account found matching \"$account\". Add one to approve.';
+    return 'Aucun compte trouvé correspondant à \"$account\". Ajoutez-en un pour approuver.';
   }
 
   @override
   String get smsActivity_transferWarning =>
-      'This looks like a transfer between your accounts. Approving will open the transfer screen.';
+      'Ceci ressemble à un transfert entre vos comptes. Approuver ouvrira l\'écran de transfert.';
 
   @override
-  String get common_all => 'All';
+  String get common_all => 'Tout';
 
   @override
-  String get backup_lastBackup => 'Last backup';
+  String get backup_lastBackup => 'Dernière sauvegarde';
 
   @override
-  String get backup_noBackups => 'No backups yet';
+  String get backup_noBackups => 'Pas encore de sauvegardes';
 
   @override
   String get backup_createFirst =>
-      'Create your first backup to protect your data';
+      'Créez votre première sauvegarde pour protéger vos données';
 
   @override
   String get backup_actions => 'Actions';
 
   @override
-  String get backup_history => 'History';
+  String get backup_history => 'Historique';
 
   @override
-  String get backup_noHistory => 'No backup history';
+  String get backup_noHistory => 'Pas d\'historique de sauvegarde';
 
   @override
   String get backup_infoText =>
-      'Backups are encrypted with your password and saved as .mudra files. Keep your password safe — it cannot be recovered.';
+      'Les sauvegardes sont chiffrées avec votre mot de passe et enregistrées sous forme de fichiers .mudra. Gardez votre mot de passe en sécurité — il ne peut pas être récupéré.';
 
   @override
-  String get backup_justNow => 'Just now';
+  String get backup_justNow => 'À l\'instant';
 
   @override
   String backup_minutesAgo(int count) {
-    return '${count}m ago';
+    return 'Il y a $count min';
   }
 
   @override
   String backup_hoursAgo(int count) {
-    return '${count}h ago';
+    return 'Il y a $count h';
   }
 
   @override
   String backup_daysAgo(int count) {
-    return '${count}d ago';
+    return 'Il y a $count j';
   }
 
   @override
   String backup_recordCount(int count) {
-    return '$count records';
+    return '$count enregistrements';
   }
 
   @override
-  String get account_changeCurrency => 'Change Currency?';
+  String get account_changeCurrency => 'Changer de devise ?';
 
   @override
   String account_resetTo(String code) {
-    return 'Reset to $code';
+    return 'Réinitialiser à $code';
   }
 
   @override
   String get account_baseCurrencyInfo =>
-      'Transactions in this account use your base currency.';
+      'Les transactions de ce compte utilisent votre devise de base.';
 
   @override
   String account_foreignCurrencyInfo(String code, String base) {
-    return 'Transactions will be recorded in $code and converted to $base for totals.';
+    return 'Les transactions seront enregistrées en $code et converties en $base pour les totaux.';
   }
 
   @override
   String get account_warningNoConvert =>
-      'Existing balances will NOT be converted automatically.';
+      'Les soldes existants ne seront PAS convertis automatiquement.';
 
   @override
   String get account_warningNewCurrency =>
-      'New transactions will use the new currency.';
+      'Les nouvelles transactions utiliseront la nouvelle devise.';
 
   @override
   String get account_warningManualAdjust =>
-      'You may need to manually adjust the balance.';
+      'Vous devrez peut-être ajuster manuellement le solde.';
 
   @override
-  String get category_selectParent => 'Select Parent Category';
+  String get category_selectParent => 'Sélectionner la catégorie parente';
 
   @override
-  String get appearance_colorTheme => 'Color Theme';
+  String get appearance_colorTheme => 'Thème de couleur';
 
   @override
-  String get appearance_amoledMode => 'AMOLED Mode';
+  String get appearance_amoledMode => 'Mode AMOLED';
 
   @override
   String appearance_toneActivated(String name) {
-    return '$name tone activated';
+    return 'Ton $name activé';
   }
 
   @override
   String dashboard_cardsActive(int visible, int total) {
-    return '$visible of $total cards active';
+    return '$visible cartes sur $total actives';
   }
 
   @override
   String get dashboard_dragToReorder =>
-      'Drag to reorder, toggle to show or hide';
+      'Faites glisser pour réorganiser, basculez pour afficher ou masquer';
 
   @override
-  String get dashboard_smartOrdering => 'Smart ordering';
+  String get dashboard_smartOrdering => 'Classement intelligent';
 
   @override
-  String get dashboard_catEssential => 'Essential';
+  String get dashboard_catEssential => 'Essentiel';
 
   @override
   String get dashboard_catFinance => 'Finance';
 
   @override
-  String get dashboard_catAnalytics => 'Analytics';
+  String get dashboard_catAnalytics => 'Analyses';
 
   @override
   String get dashboard_catActions => 'Actions';
 
   @override
-  String get dashboard_catAI => 'AI Insights';
+  String get dashboard_catAI => 'Aperçus IA';
 
   @override
-  String get dashboard_catContextual => 'Contextual';
+  String get dashboard_catContextual => 'Contextuel';
 
   @override
   String get importExport_title => 'Import & Export';
 
   @override
-  String get importExport_export => 'Export';
+  String get importExport_export => 'Exportation';
 
   @override
-  String get importExport_import => 'Import';
+  String get importExport_import => 'Importation';
 
   @override
-  String get importExport_exportTitle => 'Export Transactions';
+  String get importExport_exportTitle => 'Exporter les transactions';
 
   @override
   String get importExport_exportDesc =>
-      'Download your transactions as an Excel file.';
+      'Téléchargez vos transactions sous forme de fichier Excel.';
 
   @override
-  String get importExport_exporting => 'Exporting...';
+  String get importExport_exporting => 'Exportation en cours...';
 
   @override
-  String get importExport_exportAsExcel => 'Export as Excel';
+  String get importExport_exportAsExcel => 'Exporter au format Excel';
 
   @override
-  String get importExport_importTitle => 'Import from Excel';
+  String get importExport_importTitle => 'Importer depuis Excel';
 
   @override
   String get importExport_importDesc =>
-      'Import transactions from an .xlsx file. You\'ll be able to preview and map columns before importing.';
+      'Importez des transactions à partir d\'un fichier .xlsx. Vous pourrez prévisualiser et mapper les colonnes avant l\'importation.';
 
   @override
   String get importExport_excelFormat => 'Excel (.xlsx)';
 
   @override
-  String get importExport_bankStatement => 'Bank Statement';
+  String get importExport_bankStatement => 'Relevé bancaire';
 
   @override
-  String get importExport_otherApps => 'Other Apps';
+  String get importExport_otherApps => 'Autres applications';
 
   @override
-  String get importExport_pickFile => 'Pick Excel File';
+  String get importExport_pickFile => 'Choisir un fichier Excel';
 
   @override
   String get importExport_infoText =>
-      'Export creates an Excel file with all transaction details. Import supports .xlsx files from other finance apps or manual spreadsheets.';
+      'L\'exportation crée un fichier Excel avec tous les détails des transactions. L\'importation prend en charge les fichiers .xlsx d\'autres applications de finance ou des feuilles de calcul manuelles.';
 
   @override
-  String get plugins_subtitle => 'Extend Mudra Manager with powerful plugins';
+  String get plugins_subtitle =>
+      'Étendez Mudra Manager avec des extensions puissantes';
 
   @override
-  String get plugins_official => 'Official';
+  String get plugins_official => 'Officiel';
 
   @override
   String plugins_enabled(String name) {
-    return '$name enabled';
+    return '$name activé';
   }
 
   @override
   String plugins_disabled(String name) {
-    return '$name disabled';
+    return '$name désactivé';
   }
 
   @override
-  String get plugins_configure => 'Configure Plugin';
+  String get plugins_configure => 'Configurer l\'extension';
 
   @override
   String plugins_activeCount(int active, int total) {
-    return '$active of $total active';
+    return '$active sur $total actives';
   }
 
   @override
-  String get plugins_toggleDesc => 'Toggle plugins to extend app features';
+  String get plugins_toggleDesc =>
+      'Activez les extensions pour étendre les fonctionnalités de l\'application';
 
   @override
-  String get plugins_default => 'Default';
+  String get plugins_default => 'Par défaut';
 
   @override
-  String get plugins_configureSettings => 'Configure plugin settings';
+  String get plugins_configureSettings =>
+      'Configurer les paramètres de l\'extension';
 
   @override
-  String get plugins_creditCardReminders => 'Credit Card Reminders';
+  String get plugins_creditCardReminders => 'Rappels de carte de crédit';
 
   @override
-  String get plugins_remindBefore => 'Remind me before (days)';
+  String get plugins_remindBefore => 'Me rappeler avant (jours)';
 
   @override
   String get plugins_noCreditCards =>
-      'No credit card accounts found. Add one first.';
+      'Aucun compte de carte de crédit trouvé. Ajoutez-en un d\'abord.';
 
   @override
-  String get plugins_creditCardAccounts => 'Credit Card Accounts';
+  String get plugins_creditCardAccounts => 'Comptes de carte de crédit';
 
   @override
-  String get plugins_billDay => 'Bill Day (1-31)';
+  String get plugins_billDay => 'Jour de facturation (1-31)';
 
   @override
-  String get plugins_remindersConfigured => 'Credit card reminders configured';
+  String get plugins_remindersConfigured =>
+      'Rappels de carte de crédit configurés';
 
   @override
   String get plugins_infoText =>
-      'Plugins extend app features. Some plugins require additional permissions or configuration.';
+      'Les extensions étendent les fonctionnalités de l\'application. Certaines extensions nécessitent des autorisations ou une configuration supplémentaires.';
 
   @override
-  String get help_title => 'Help & Support';
+  String get help_title => 'Aide et Support';
 
   @override
-  String get help_searchHint => 'Search help topics...';
+  String get help_searchHint => 'Rechercher des sujets d\'aide...';
 
   @override
-  String get help_heroTitle => 'How can we help?';
+  String get help_heroTitle => 'Comment pouvons-nous vous aider ?';
 
   @override
-  String get help_heroDesc => 'Browse guides or search for a topic';
+  String get help_heroDesc => 'Parcourez les guides ou recherchez un sujet';
 
   @override
-  String get help_topics => 'Topics';
+  String get help_topics => 'Sujets';
 
   @override
-  String get help_tryDifferent => 'Try a different search term';
+  String get help_tryDifferent => 'Essayez un autre terme de recherche';
 
   @override
-  String get help_howToUse => 'How to use';
+  String get help_howToUse => 'Comment utiliser';
 
   @override
-  String get help_tips => 'Tips';
+  String get help_tips => 'Conseils';
 
   @override
   String help_articleCount(int count) {
@@ -5352,816 +5497,830 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String help_resultCount(int count) {
-    return '$count results';
+    return '$count résultats';
   }
 
   @override
   String get help_infoText =>
-      'Can\'t find what you need? Visit About → Contact Support for direct help.';
+      'Vous ne trouvez pas ce dont vous avez besoin ? Visitez À propos → Contacter le support pour une aide directe.';
 
   @override
-  String get about_legalCount => '3 items';
+  String get about_legalCount => '3 éléments';
 
   @override
-  String get about_supportCount => '4 items';
+  String get about_supportCount => '4 éléments';
 
   @override
   String about_packageCount(int count) {
-    return '$count open source packages';
+    return '$count paquets open source';
   }
 
   @override
-  String get onboard_continue => 'Continue';
+  String get onboard_continue => 'Continuer';
 
   @override
-  String get onboard_restoreFromBackup => 'Restore from Backup';
+  String get onboard_restoreFromBackup => 'Restaurer depuis une sauvegarde';
 
   @override
-  String get onboard_accountNameRequired => 'Account name is required';
+  String get onboard_accountNameRequired => 'Le nom du compte est requis';
 
   @override
-  String get onboard_balanceRequired => 'Balance is required';
+  String get onboard_balanceRequired => 'Le solde est requis';
 
   @override
-  String get onboard_enterValidNumber => 'Enter valid number';
+  String get onboard_enterValidNumber => 'Entrez un nombre valide';
 
   @override
-  String get onboard_accountHint => 'e.g., Cash, Bank';
+  String get onboard_accountHint => 'ex: Espèces, Banque';
 
   @override
-  String get onboard_browseAllCurrencies => 'Browse all currencies';
+  String get onboard_browseAllCurrencies => 'Parcourir toutes les devises';
 
   @override
-  String get onboard_toneTitle => 'How should Mudra talk to you?';
+  String get onboard_toneTitle => 'Comment Mudra doit-il vous parler ?';
 
   @override
   String get onboard_toneDesc =>
-      'Pick a personality. You can change this anytime.';
+      'Choisissez une personnalité. Vous pouvez la changer à tout moment.';
 
   @override
-  String get onboard_categoriesTitle => 'Choose Your Categories';
+  String get onboard_categoriesTitle => 'Choisissez vos catégories';
 
   @override
   String get onboard_categoriesDesc =>
-      'Pick packs that match your lifestyle. You can change these later.';
+      'Choisissez les packs qui correspondent à votre style de vie. Vous pouvez les changer plus tard.';
 
   @override
-  String get onboard_startFresh => 'Start Fresh';
+  String get onboard_startFresh => 'Partir de zéro';
 
   @override
-  String get onboard_startFreshDesc => 'No categories — add your own later';
+  String get onboard_startFreshDesc =>
+      'Aucune catégorie — ajoutez les vôtres plus tard';
 
   @override
   String get onboard_currencyWarning =>
-      'Changing base currency later will archive existing transactions.';
+      'Changer la devise de base plus tard archivera les transactions existantes.';
 
   @override
-  String get statistics_topCategory => 'Top Category';
+  String get statistics_topCategory => 'Catégorie principale';
 
   @override
-  String get statistics_dailyAverage => 'Daily Average';
+  String get statistics_dailyAverage => 'Moyenne quotidienne';
 
   @override
-  String get statistics_perDay => 'per day';
+  String get statistics_perDay => 'par jour';
 
   @override
   String statistics_percentOfExpenses(String percent) {
-    return '$percent% of expenses';
+    return '$percent% des dépenses';
   }
 
   @override
-  String get sms_infoTitle => 'How SMS Import Works';
+  String get sms_infoTitle => 'Comment fonctionne l\'importation SMS';
 
   @override
-  String get sms_infoOnlyScans => 'Only scans bank and wallet SMS';
+  String get sms_infoOnlyScans =>
+      'Scanne uniquement les SMS des banques et portefeuilles';
 
   @override
-  String get sms_infoStaysOnDevice => 'All data stays on your device';
+  String get sms_infoStaysOnDevice =>
+      'Toutes les données restent sur votre appareil';
 
   @override
-  String get sms_infoAutoCreates => 'Automatically creates transactions';
+  String get sms_infoAutoCreates => 'Crée automatiquement des transactions';
 
   @override
-  String get sms_infoNoPersonal => 'No personal messages are read';
+  String get sms_infoNoPersonal => 'Aucun message personnel n\'est lu';
 
   @override
-  String get dashboard_totalBalance => 'Total Balance';
+  String get dashboard_totalBalance => 'Solde total';
 
   @override
-  String get dashboard_netWorthLink => 'Net Worth';
+  String get dashboard_netWorthLink => 'Valeur nette';
 
   @override
-  String get dashboard_showAccounts => 'Show accounts';
+  String get dashboard_showAccounts => 'Afficher les comptes';
 
   @override
-  String get dashboard_hideAccounts => 'Hide accounts';
+  String get dashboard_hideAccounts => 'Masquer les comptes';
 
   @override
   String dashboard_accountsTapExpand(int count) {
-    return '$count accounts · Tap to expand';
+    return '$count comptes · Appuyez pour agrandir';
   }
 
   @override
-  String get notif_lowBalanceTitle => '⚠️ Low Balance Alert';
+  String get notif_lowBalanceTitle => '⚠️ Alerte solde bas';
 
   @override
   String notif_lowBalanceBody(String account, String amount) {
-    return 'Your balance in $account is $amount';
+    return 'Votre solde sur $account est de $amount';
   }
 
   @override
-  String get achieve_unlocked => 'Unlocked';
+  String get achieve_unlocked => 'Déverrouillé';
 
   @override
-  String get achieve_inProgress => 'In Progress';
+  String get achieve_inProgress => 'En cours';
 
   @override
-  String get achieve_trophyShelf => 'Trophy Shelf';
+  String get achieve_trophyShelf => 'Étagère à trophées';
 
   @override
-  String get achieve_streaks => 'Streaks';
+  String get achieve_streaks => 'Séries';
 
   @override
-  String get achieve_totalXP => 'Total XP';
+  String get achieve_totalXP => 'XP total';
 
   @override
-  String get achieve_dailyCheckIn => 'Daily Check-in';
+  String get achieve_dailyCheckIn => 'Pointage quotidien';
 
   @override
-  String get achieve_budgetAdherence => 'Budget Adherence';
+  String get achieve_budgetAdherence => 'Respect du budget';
 
   @override
   String achieve_bestDays(int count) {
-    return 'Best: $count days';
+    return 'Meilleur : $count jours';
   }
 
   @override
   String achieve_noBadgesYet(String category) {
-    return 'No $category badges yet';
+    return 'Pas encore de badges $category';
   }
 
   @override
   String achieve_levelUpSnack(int level) {
-    return '🎉 Level Up! You are now Level $level!';
+    return '🎉 Niveau supérieur ! Vous êtes maintenant au niveau $level !';
   }
 
   @override
   String achieve_levelLabel(int level) {
-    return 'Level $level';
+    return 'Niveau $level';
   }
 
   @override
-  String get achieve_catBudgeting => 'Budgeting';
+  String get achieve_catBudgeting => 'Budgétisation';
 
   @override
-  String get achieve_catSavings => 'Savings';
+  String get achieve_catSavings => 'Épargne';
 
   @override
-  String get achieve_catTracking => 'Tracking';
+  String get achieve_catTracking => 'Suivi';
 
   @override
-  String get achieve_catMilestones => 'Milestones';
+  String get achieve_catMilestones => 'Jalons';
 
   @override
   String get achieve_catEngagement => 'Engagement';
 
   @override
-  String get achieve_catAll => 'All';
+  String get achieve_catAll => 'Tout';
 
   @override
-  String get alert_actionNeeded => 'Action Needed';
+  String get alert_actionNeeded => 'Action requise';
 
   @override
   String alert_billsDueTomorrow(int count) {
-    return '$count bill(s) due tomorrow';
+    return '$count facture(s) due(s) demain';
   }
 
   @override
-  String get alert_upcomingBills => 'Upcoming Bills';
+  String get alert_upcomingBills => 'Factures à venir';
 
   @override
   String alert_billsDueInDays(int count) {
-    return '$count bill(s) due in 2 days';
+    return '$count facture(s) due(s) dans 2 jours';
   }
 
   @override
-  String get alert_budgetAlert => 'Budget Alert';
+  String get alert_budgetAlert => 'Alerte budget';
 
   @override
   String alert_budgetsExceeded(int count) {
-    return '$count budget(s) exceeded';
+    return '$count budget(s) dépassé(s)';
   }
 
   @override
-  String get alert_budgetWarning => 'Budget Warning';
+  String get alert_budgetWarning => 'Avertissement budget';
 
   @override
   String alert_budgetsNearLimit(int count) {
-    return '$count budget(s) near limit';
+    return '$count budget(s) proches de la limite';
   }
 
   @override
-  String get alert_goalProgress => 'Goal Progress';
+  String get alert_goalProgress => 'Progression des objectifs';
 
   @override
   String alert_goalsAlmostComplete(int count) {
-    return '$count goal(s) almost complete!';
+    return '$count objectif(s) presque terminés !';
   }
 
   @override
-  String get analytics_cashFlowForecast => 'Cash Flow Forecast';
+  String get analytics_cashFlowForecast => 'Prévision des flux de trésorerie';
 
   @override
-  String get analytics_thisMonthProjected => 'This month (projected)';
+  String get analytics_thisMonthProjected => 'Ce mois-ci (prévision)';
 
   @override
-  String get analytics_savingOnAverage => 'You are saving on average';
+  String get analytics_savingOnAverage => 'Vous économisez en moyenne';
 
   @override
-  String get analytics_spendingExceedsIncome => 'Spending exceeds income';
+  String get analytics_spendingExceedsIncome =>
+      'Les dépenses dépassent les revenus';
 
   @override
-  String get health_scoreBreakdown => 'Score Breakdown';
+  String get health_scoreBreakdown => 'Détail du score';
 
   @override
-  String get health_savings => 'Savings';
+  String get health_savings => 'Épargne';
 
   @override
-  String get health_spending => 'Spending';
+  String get health_spending => 'Dépenses';
 
   @override
-  String get health_debt => 'Debt';
+  String get health_debt => 'Dette';
 
   @override
-  String get health_emergency => 'Emergency';
+  String get health_emergency => 'Urgence';
 
   @override
-  String get health_liquidityRunway => 'Liquidity Runway';
+  String get health_liquidityRunway => 'Marge de liquidité';
 
   @override
   String health_balanceCoversMonths(String months) {
-    return 'Your balance covers $months months of expenses';
+    return 'Votre solde couvre $months mois de dépenses';
   }
 
   @override
-  String get health_days => 'days';
+  String get health_days => 'jours';
 
   @override
   String health_nDays(String n) {
-    return '$n days';
+    return '$n jours';
   }
 
   @override
-  String get health_safe => 'Safe';
+  String get health_safe => 'Sûr';
 
   @override
-  String get health_moderate => 'Moderate';
+  String get health_moderate => 'Modéré';
 
   @override
-  String get health_risk => 'Risk';
+  String get health_risk => 'Risqué';
 
   @override
-  String get health_categoryHealth => 'Category Health';
+  String get health_categoryHealth => 'Santé par catégorie';
 
   @override
   String get health_stable => 'Stable →';
 
   @override
-  String get health_high => 'High ↑';
+  String get health_high => 'Élevé ↑';
 
   @override
-  String get health_reduced => 'Reduced ↓';
+  String get health_reduced => 'Réduit ↓';
 
   @override
-  String get health_whatYouCanDo => 'What You Can Do';
+  String get health_whatYouCanDo => 'Ce que vous pouvez faire';
 
   @override
-  String get health_verdictExcellent => 'you\'re in great shape';
+  String get health_verdictExcellent => 'vous êtes en excellente forme';
 
   @override
-  String get health_verdictGood => 'you\'re on track';
+  String get health_verdictGood => 'vous êtes sur la bonne voie';
 
   @override
-  String get health_verdictFair => 'room for improvement';
+  String get health_verdictFair => 'peut mieux faire';
 
   @override
-  String get health_verdictPoor => 'needs attention';
+  String get health_verdictPoor => 'nécessite une attention particulière';
 
   @override
-  String get health_of100 => 'of 100';
+  String get health_of100 => 'sur 100';
 
   @override
-  String get health_errorLoading => 'Unable to load health data';
+  String get health_errorLoading =>
+      'Impossible de charger les données de santé';
 
   @override
-  String get analytics_cashFlowTitle => 'Cash Flow Forecast';
+  String get analytics_cashFlowTitle => 'Prévision des flux de trésorerie';
 
   @override
-  String get analytics_currentMonth => 'Current Month';
+  String get analytics_currentMonth => 'Mois en cours';
 
   @override
-  String get analytics_projected => 'Projected';
+  String get analytics_projected => 'Prévision';
 
   @override
-  String get analytics_forecast3Month => '3-Month Forecast';
+  String get analytics_forecast3Month => 'Prévision sur 3 mois';
 
   @override
-  String get analytics_monthlyNet => 'Monthly Net';
+  String get analytics_monthlyNet => 'Net mensuel';
 
   @override
-  String get analytics_income => 'Income';
+  String get analytics_income => 'Revenu';
 
   @override
-  String get analytics_expense => 'Expense';
+  String get analytics_expense => 'Dépense';
 
   @override
   String get analytics_net => 'Net';
 
   @override
-  String get analytics_avgMonthlyNet => 'Avg Monthly Net';
+  String get analytics_avgMonthlyNet => 'Net mensuel moyen';
 
   @override
-  String get analytics_noForecastData => 'Not enough data to forecast';
+  String get analytics_noForecastData => 'Pas assez de données pour prévoir';
 
   @override
-  String get analytics_spendingTrendsTitle => 'Spending Trends';
+  String get analytics_spendingTrendsTitle => 'Tendances des dépenses';
 
   @override
-  String get analytics_predictedNextMonth => 'Predicted next month';
+  String get analytics_predictedNextMonth => 'Prévu le mois prochain';
 
   @override
-  String get analytics_anomaly => 'Anomaly';
+  String get analytics_anomaly => 'Anomalie';
 
   @override
-  String get analytics_vsLastMonth => 'vs last month';
+  String get analytics_vsLastMonth => 'vs mois dernier';
 
   @override
-  String get analytics_risingCategories => 'Rising Categories';
+  String get analytics_risingCategories => 'Catégories en hausse';
 
   @override
-  String get analytics_anomalyCategories => 'Anomaly Detected';
+  String get analytics_anomalyCategories => 'Anomalie détectée';
 
   @override
-  String get analytics_allCategories => 'All Categories';
+  String get analytics_allCategories => 'Toutes les catégories';
 
   @override
-  String get analytics_noTrendData => 'Not enough data for trends';
+  String get analytics_noTrendData => 'Pas assez de données pour les tendances';
 
   @override
-  String get recap_vsLastYear => 'vs Last Year';
+  String get recap_vsLastYear => 'vs l\'année dernière';
 
   @override
-  String get common_income => 'Income';
+  String get common_income => 'Revenu';
 
   @override
-  String get common_expense => 'Expense';
+  String get common_expense => 'Dépense';
 
   @override
   String get common_transactions => 'Transactions';
 
   @override
-  String get tax_title => 'Tax Estimation';
+  String get tax_title => 'Estimation de l\'impôt';
 
   @override
-  String get tax_projected => 'Projected (year in progress)';
+  String get tax_projected => 'Prévision (année en cours)';
 
   @override
-  String get tax_estimatedTax => 'Estimated Tax';
+  String get tax_estimatedTax => 'Impôt estimé';
 
   @override
-  String get tax_effectiveRate => 'Effective Rate';
+  String get tax_effectiveRate => 'Taux effectif';
 
   @override
-  String get tax_monthlyTax => 'Monthly';
+  String get tax_monthlyTax => 'Mensuel';
 
   @override
   String tax_fyProgress(int elapsed, int total) {
     String _temp0 = intl.Intl.pluralLogic(
       total,
       locale: localeName,
-      other: 'days',
-      one: 'day',
+      other: 'jours',
+      one: 'jour',
     );
-    return '$elapsed of $total $_temp0';
+    return '$elapsed sur $total $_temp0';
   }
 
   @override
-  String get tax_slabBreakdown => 'Slab Breakdown';
+  String get tax_slabBreakdown => 'Détail par tranche';
 
   @override
-  String get tax_totalSlabTax => 'Total Slab Tax';
+  String get tax_totalSlabTax => 'Impôt total par tranche';
 
   @override
-  String get tax_computation => 'Tax Computation';
+  String get tax_computation => 'Calcul de l\'impôt';
 
   @override
-  String get tax_grossIncome => 'Gross Income';
+  String get tax_grossIncome => 'Revenu brut';
 
   @override
-  String get tax_standardDeduction => 'Standard Deduction';
+  String get tax_standardDeduction => 'Déduction forfaitaire';
 
   @override
-  String get tax_taxableIncome => 'Taxable Income';
+  String get tax_taxableIncome => 'Revenu imposable';
 
   @override
-  String get tax_baseTax => 'Tax on Income';
+  String get tax_baseTax => 'Impôt sur le revenu';
 
   @override
-  String get tax_rebate87A => 'Rebate u/s 87A';
+  String get tax_rebate87A => 'Remise u/s 87A';
 
   @override
-  String get tax_cess => 'Health & Education Cess (4%)';
+  String get tax_cess => 'Prélèvement santé et éducation (4%)';
 
   @override
-  String get tax_totalTax => 'Total Tax Payable';
+  String get tax_totalTax => 'Impôt total à payer';
 
   @override
-  String get tax_incomeBreakdown => 'Income Sources';
+  String get tax_incomeBreakdown => 'Sources de revenus';
 
   @override
   String get tax_disclaimer =>
-      'This is an estimate based on New Tax Regime (FY 2025-26). Actual tax may vary. Consult a tax professional for accurate filing.';
+      'Il s\'agit d\'une estimation basée sur le nouveau régime fiscal (FY 2025-26). L\'impôt réel peut varier. Consultez un professionnel de la fiscalité pour une déclaration précise.';
 
   @override
-  String get tax_noData => 'Not enough data to estimate tax';
+  String get tax_noData => 'Pas assez de données pour estimer l\'impôt';
 
   @override
-  String get tax_viewDetails => 'View Tax Estimate';
+  String get tax_viewDetails => 'Voir l\'estimation de l\'impôt';
 
   @override
-  String get tax_zeroTax => 'No tax liability 🎉';
+  String get tax_zeroTax => 'Aucune dette fiscale 🎉';
 
   @override
-  String get tax_newRegime => 'New Regime';
+  String get tax_newRegime => 'Nouveau régime';
 
   @override
-  String get tax_oldRegime => 'Old Regime';
+  String get tax_oldRegime => 'Ancien régime';
 
   @override
-  String get tax_regimeComparison => 'Which Regime Saves More?';
+  String get tax_regimeComparison =>
+      'Quel régime permet d\'économiser le plus ?';
 
   @override
   String tax_regimeSavings(String regime) {
-    return '$regime saves you';
+    return '$regime vous fait économiser';
   }
 
   @override
   String get tax_oldRegimeDisclaimer =>
-      'Old Regime estimate uses standard deduction only. With HRA, 80C, 80D deductions, savings could be higher.';
+      'L\'estimation de l\'ancien régime utilise uniquement la déduction forfaitaire. Avec les déductions HRA, 80C, 80D, les économies pourraient être plus élevées.';
 
   @override
-  String get category_merge => 'Merge Category';
+  String get category_merge => 'Fusionner la catégorie';
 
   @override
-  String get category_mergeInto => 'Merge into';
+  String get category_mergeInto => 'Fusionner dans';
 
   @override
-  String get category_mergeConfirm => 'Merge';
+  String get category_mergeConfirm => 'Fusionner';
 
   @override
   String category_mergePreview(int count, String target) {
-    return '$count items will be moved to $target';
+    return '$count éléments seront déplacés vers $target';
   }
 
   @override
-  String get category_mergeSuccess => 'Categories merged successfully';
+  String get category_mergeSuccess => 'Catégories fusionnées avec succès';
 
   @override
-  String get category_mergeSameError => 'Cannot merge a category into itself';
+  String get category_mergeSameError =>
+      'Impossible de fusionner une catégorie avec elle-même';
 
   @override
-  String get category_mergeSelectTarget => 'Select target category';
+  String get category_mergeSelectTarget => 'Sélectionner la catégorie cible';
 
   @override
-  String get notif_morningInsightTitle => '☀️ Your morning money minute';
+  String get notif_morningInsightTitle => '☀️ Votre minute argent du matin';
 
   @override
-  String get notif_weeklyRecapNudgeTitle => '📊 Your weekly recap is ready';
+  String get notif_weeklyRecapNudgeTitle =>
+      '📊 Votre récapitulatif hebdomadaire est prêt';
 
   @override
-  String get notif_yesterdaySpendTitle => '💰 Yesterday\'s spending';
+  String get notif_yesterdaySpendTitle => '💰 Dépenses d\'hier';
 
   @override
-  String get notif_weeklyRecapReadyTitle => '📊 Your weekly recap is waiting';
+  String get notif_weeklyRecapReadyTitle =>
+      '📊 Votre récapitulatif hebdomadaire vous attend';
 
   @override
   String notif_underBudgetStreakTitle(int days) {
-    return '🔥 $days days under budget!';
+    return '🔥 $days jours sous le budget !';
   }
 
   @override
-  String get dashboard_bgSyncIssueTitle => 'Background sync may not be working';
+  String get dashboard_bgSyncIssueTitle =>
+      'La synchronisation en arrière-plan peut ne pas fonctionner';
 
   @override
   String get dashboard_bgSyncIssueDesc =>
-      'Bills and alerts may be delayed. Try reopening the app.';
+      'Les factures et alertes peuvent être retardées. Essayez de rouvrir l\'application.';
 
   @override
-  String get onboard_whatDidYouSpend => 'What did you spend today?';
+  String get onboard_whatDidYouSpend => 'Qu\'avez-vous dépensé aujourd\'hui ?';
 
   @override
   String get onboard_addFewToStart =>
-      'Add a few to see your dashboard come alive';
+      'Ajoutez-en quelques-unes pour voir votre tableau de bord s\'animer';
 
   @override
-  String get onboard_skipAddLater => 'Skip — I\'ll add later';
+  String get onboard_skipAddLater => 'Passer — j\'ajouterai plus tard';
 
   @override
-  String get onboard_starterCoffee => 'Coffee / Tea';
+  String get onboard_starterCoffee => 'Café / Thé';
 
   @override
   String get onboard_starterTransport => 'Transport';
 
   @override
-  String get onboard_starterLunch => 'Lunch / Dinner';
+  String get onboard_starterLunch => 'Déjeuner / Dîner';
 
   @override
-  String get onboard_starterGroceries => 'Groceries';
+  String get onboard_starterGroceries => 'Courses';
 
   @override
   String onboard_starterAdded(int count) {
-    return '$count expenses added!';
+    return '$count dépenses ajoutées !';
   }
 
   @override
-  String get dashboard_listeningTitle => 'Listening for transactions...';
+  String get dashboard_listeningTitle => 'À l\'écoute des transactions...';
 
   @override
   String get dashboard_waitingForSms =>
-      'Your next bank notification will appear here automatically';
+      'Votre prochaine notification bancaire apparaîtra ici automatiquement';
 
   @override
-  String get dashboard_meanwhile => 'Meanwhile, try:';
+  String get dashboard_meanwhile => 'En attendant, essayez :';
 
   @override
-  String get dashboard_addExpense => 'Add Expense';
+  String get dashboard_addExpense => 'Ajouter une dépense';
 
   @override
-  String get dashboard_setBudget => 'Set Budget';
+  String get dashboard_setBudget => 'Définir le budget';
 
   @override
-  String get dashboard_createGoal => 'Create Goal';
+  String get dashboard_createGoal => 'Créer un objectif';
 
   @override
-  String get dashboard_addAccount => 'Add Account';
+  String get dashboard_addAccount => 'Ajouter un compte';
 
   @override
   String get dashboard_testTip =>
-      '💡 Tip: Send a small UPI payment to see auto-import in action!';
+      '💡 Conseil : Envoyez un petit paiement UPI pour voir l\'importation automatique en action !';
 
   @override
-  String get dashboard_addFirstExpense => 'Add your first expense';
+  String get dashboard_addFirstExpense => 'Ajoutez votre première dépense';
 
   @override
   String get dashboard_addFirstExpenseDesc =>
-      'Tap to quickly log what you spent today';
+      'Appuyez pour enregistrer rapidement ce que vous avez dépensé aujourd\'hui';
 
   @override
-  String get quickAdd_title => 'Quick Add';
+  String get quickAdd_title => 'Ajout rapide';
 
   @override
-  String get quickAdd_recentCategories => 'Recent categories';
+  String get quickAdd_recentCategories => 'Catégories récentes';
 
   @override
-  String get quickAdd_moreOptions => 'More options';
+  String get quickAdd_moreOptions => 'Plus d\'options';
 
   @override
   String get mode_simple => 'Simple';
 
   @override
-  String get mode_full => 'Full';
+  String get mode_full => 'Complet';
 
   @override
-  String get mode_simpleDesc => 'Expenses, budgets & SMS tracking';
+  String get mode_simpleDesc => 'Dépenses, budgets et suivi SMS';
 
   @override
   String get mode_fullDesc =>
-      'Everything — trips, goals, analytics, gamification';
+      'Tout — voyages, objectifs, analyses, gamification';
 
   @override
-  String get mode_switchToFull => 'Switch to Full Mode';
+  String get mode_switchToFull => 'Passer en mode complet';
 
   @override
-  String get mode_switchToSimple => 'Switch to Simple Mode';
+  String get mode_switchToSimple => 'Passer en mode simple';
 
   @override
-  String get mode_pickTitle => 'How do you want to use Mudra?';
+  String get mode_pickTitle => 'Comment voulez-vous utiliser Mudra ?';
 
   @override
-  String get mode_pickDesc => 'You can change this anytime in settings';
+  String get mode_pickDesc =>
+      'Vous pouvez changer cela à tout moment dans les paramètres';
 
   @override
-  String get backup_cloudBackup => 'Cloud Backup';
+  String get backup_cloudBackup => 'Sauvegarde Cloud';
 
   @override
-  String get backup_cloudRestore => 'Restore from Cloud';
+  String get backup_cloudRestore => 'Restaurer depuis le Cloud';
 
   @override
-  String get backup_signInGoogle => 'Sign in with Google';
+  String get backup_signInGoogle => 'Se connecter avec Google';
 
   @override
   String backup_signedInAs(String email) {
-    return 'Signed in as $email';
+    return 'Connecté en tant que $email';
   }
 
   @override
-  String get backup_uploadingToDrive => 'Uploading to Google Drive...';
+  String get backup_uploadingToDrive => 'Téléchargement sur Google Drive...';
 
   @override
-  String get backup_uploadSuccess => 'Backup uploaded to Google Drive';
+  String get backup_uploadSuccess => 'Sauvegarde téléchargée sur Google Drive';
 
   @override
-  String get backup_uploadFailed => 'Failed to upload backup';
+  String get backup_uploadFailed => 'Échec du téléchargement de la sauvegarde';
 
   @override
-  String get backup_cloudBackups => 'Cloud Backups';
+  String get backup_cloudBackups => 'Sauvegardes Cloud';
 
   @override
-  String get backup_noCloudBackups => 'No cloud backups found';
+  String get backup_noCloudBackups => 'Aucune sauvegarde cloud trouvée';
 
   @override
-  String get backup_downloading => 'Downloading from Google Drive...';
+  String get backup_downloading => 'Téléchargement depuis Google Drive...';
 
   @override
-  String get backup_signInRequired => 'Sign in to Google to use cloud backup';
+  String get backup_signInRequired =>
+      'Connectez-vous à Google pour utiliser la sauvegarde cloud';
 
   @override
-  String get backup_signOut => 'Sign out';
+  String get backup_signOut => 'Se déconnecter';
 
   @override
-  String get backup_cloudSubtitle => 'Encrypted backup to Google Drive';
+  String get backup_cloudSubtitle => 'Sauvegarde chiffrée sur Google Drive';
 
   @override
-  String get backup_autoBackup => 'Auto Backup';
+  String get backup_autoBackup => 'Sauvegarde automatique';
 
   @override
   String get backup_autoBackupDesc =>
-      'Automatic local backups, keeps last 7 days';
+      'Sauvegardes locales automatiques, conserve les 7 derniers jours';
 
   @override
-  String get backup_autoFrequency => 'Backup frequency';
+  String get backup_autoFrequency => 'Fréquence de sauvegarde';
 
   @override
-  String get backup_autoNever => 'Off';
+  String get backup_autoNever => 'Désactivé';
 
   @override
-  String get backup_autoDaily => 'Daily';
+  String get backup_autoDaily => 'Quotidien';
 
   @override
-  String get backup_autoWeekly => 'Weekly';
+  String get backup_autoWeekly => 'Hebdomadaire';
 
   @override
   String get backup_autoSetPassword =>
-      'Set a backup password to enable auto backup';
+      'Définissez un mot de passe de sauvegarde pour activer la sauvegarde automatique';
 
   @override
   String backup_autoEnabled(String frequency) {
-    return 'Auto backup enabled ($frequency)';
+    return 'Sauvegarde automatique activée ($frequency)';
   }
 
   @override
   String backup_autoLastRun(String date) {
-    return 'Last auto backup: $date';
+    return 'Dernière sauvegarde automatique : $date';
   }
 
   @override
-  String get backup_passwordSet => 'Backup password set';
+  String get backup_passwordSet => 'Mot de passe de sauvegarde défini';
 
   @override
-  String get backup_proRequired => 'Pro feature';
+  String get backup_proRequired => 'Fonctionnalité Pro';
 
   @override
-  String get onboard_skip => 'Skip';
+  String get onboard_skip => 'Passer';
 
   @override
-  String get onboard_languages => 'Languages';
+  String get onboard_languages => 'Langues';
 
   @override
   String get onboard_smartTrackingMergedDesc =>
-      'Auto-import from bank SMS, set budgets, track goals — all in one place.';
+      'Importation automatique depuis les SMS bancaires, définition de budgets, suivi d\'objectifs — tout au même endroit.';
 
   @override
-  String get sms_celebrationTitle => 'Your first SMS transaction! 🎉';
+  String get sms_celebrationTitle => 'Votre première transaction par SMS ! 🎉';
 
   @override
   String get sms_celebrationBody =>
-      'Mudra just auto-imported a transaction from your bank SMS. From now on, your expenses track themselves.';
+      'Mudra vient d\'importer automatiquement une transaction à partir de votre SMS bancaire. Désormais, vos dépenses se suivent toutes seules.';
 
   @override
-  String get sms_celebrationCta => 'Awesome, let\'s go!';
+  String get sms_celebrationCta => 'Génial, c\'est parti !';
 
   @override
-  String get milestone_shareButton => 'Share to Story';
+  String get milestone_shareButton => 'Partager en Story';
 
   @override
-  String get milestone_goalReachedTitle => 'Goal Reached!';
+  String get milestone_goalReachedTitle => 'Objectif atteint !';
 
   @override
   String milestone_goalReachedDesc(String amount) {
-    return 'Saved $amount and hit the target 🌟';
+    return '$amount économisés et l\'objectif a été atteint 🌟';
   }
 
   @override
   String milestone_streakTitle(int days) {
-    return '$days-Day Streak!';
+    return 'Série de $days jours !';
   }
 
   @override
   String milestone_streakDesc(int days) {
-    return 'Tracked expenses every day for $days days straight';
+    return 'Dépenses suivies chaque jour pendant $days jours consécutifs';
   }
 
   @override
-  String get milestone_underBudgetTitle => 'Under Budget!';
+  String get milestone_underBudgetTitle => 'Sous le budget !';
 
   @override
   String get milestone_underBudgetDesc =>
-      'Stayed within budget for the entire month 💪';
+      'Resté dans le budget pendant tout le mois 💪';
 
   @override
-  String get account_creditLimit => 'Credit Limit';
+  String get account_creditLimit => 'Limite de crédit';
 
   @override
-  String get account_statementDay => 'Statement Day';
+  String get account_statementDay => 'Jour du relevé';
 
   @override
-  String get account_dueDay => 'Due Day';
+  String get account_dueDay => 'Jour d\'échéance';
 
   @override
   String account_daysUntilDue(int days) {
-    return '$days days until due';
+    return '$days jours avant l\'échéance';
   }
 
   @override
-  String get account_dueToday => 'Due today!';
+  String get account_dueToday => 'Dû aujourd\'hui !';
 
   @override
   String account_overdue(int days) {
-    return 'Overdue by $days days';
+    return 'En retard de $days jours';
   }
 
   @override
-  String get subscription_title => 'Detected Subscriptions';
+  String get subscription_title => 'Abonnements détectés';
 
   @override
   String subscription_monthlyTotal(String amount) {
-    return '$amount/month total';
+    return '$amount/mois au total';
   }
 
   @override
   String subscription_occurrences(int count) {
-    return '$count charges in 4 months';
+    return '$count prélèvements en 4 mois';
   }
 
   @override
-  String get subscription_none => 'No recurring subscriptions detected yet';
+  String get subscription_none =>
+      'Aucun abonnement récurrent détecté pour l\'instant';
 
   @override
   String subscription_dayOfMonth(int day) {
-    return 'Around the ${day}th of each month';
+    return 'Vers le $day de chaque mois';
   }
 
   @override
-  String get subscription_trackAsRecurring => 'Track as recurring bill';
+  String get subscription_trackAsRecurring => 'Suivre comme facture récurrente';
 
   @override
-  String get cc_title => 'Credit Card Bills';
+  String get cc_title => 'Factures de carte de crédit';
 
   @override
-  String get cc_totalOutstanding => 'Total Outstanding';
+  String get cc_totalOutstanding => 'Total des encours';
 
   @override
   String cc_acrossCards(int count) {
-    return 'Across $count cards';
+    return 'Sur $count cartes';
   }
 
   @override
-  String get cc_noCards => 'No credit cards added';
+  String get cc_noCards => 'Aucune carte de crédit ajoutée';
 
   @override
-  String get cc_noCardsHint => 'Add a credit card account to track bills here';
+  String get cc_noCardsHint =>
+      'Ajoutez un compte de carte de crédit pour suivre les factures ici';
 
   @override
-  String get cc_minimumDue => 'Min. Due';
+  String get cc_minimumDue => 'Min. dû';
 
   @override
-  String get cc_cycleSpend => 'Cycle Spend';
+  String get cc_cycleSpend => 'Dépenses du cycle';
 
   @override
-  String get cc_utilization => 'Credit Utilization';
+  String get cc_utilization => 'Utilisation du crédit';
 
   @override
-  String get cc_nextStatement => 'Statement';
+  String get cc_nextStatement => 'Relevé';
 
   @override
-  String get cc_nextDue => 'Due';
+  String get cc_nextDue => 'Échéance';
 
   @override
-  String get cc_payMinimum => 'Pay Minimum';
+  String get cc_payMinimum => 'Payer le minimum';
 
   @override
-  String get cc_payFull => 'Pay Full';
+  String get cc_payFull => 'Payer la totalité';
 
   @override
-  String get cc_utilitySubtitle => 'Due dates, outstanding & limits';
+  String get cc_utilitySubtitle => 'Échéances, encours et limites';
 }
