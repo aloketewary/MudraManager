@@ -2109,6 +2109,11 @@
   "notif_weeklyZeroBody": "Zero expenses this week — that's impressive 💪",
   "insight_moneyLeakTitle": "Quiet money leak 💧",
   "insight_bestDayTitle": "{day}s cost you the most",
+  "budget_alert_exceededTitle": "Budget Exceeded!",
+  "budget_alert_warningTitle": "Budget Alert: {percent}%",
+  "label_percentage_with_colon": "Percentage:",
+  "label_budget_with_colon": "Budget:",
+  "label_spent_with_colon": "Spent:",
   "@notif_streakDaysTitle": {
     "placeholders": {
       "days": {

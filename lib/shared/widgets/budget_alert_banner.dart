@@ -3,6 +3,8 @@ import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
 
 class BudgetAlertBanner extends StatelessWidget {
@@ -22,6 +24,7 @@ class BudgetAlertBanner extends StatelessWidget {
     final alert = alerts.first;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     final color = alert.threshold == 100
         ? colorScheme.error
@@ -54,7 +57,10 @@ class BudgetAlertBanner extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _showDetails(context, alert),
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            _showDetails(context, alert);
+          },
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -73,8 +79,8 @@ class BudgetAlertBanner extends StatelessWidget {
                     children: [
                       Text(
                         alert.threshold == 100
-                            ? 'Budget Exceeded!'
-                            : 'Budget Alert: ${alert.threshold}%',
+                            ? ctxt.budget_alert_exceededTitle
+                            : ctxt.budget_alert_warningTitle(alert.threshold.toString()),
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: color,
@@ -91,9 +97,12 @@ class BudgetAlertBanner extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Close',
+                  tooltip: ctxt.common_close,
                   icon: const Icon(LucideIcons.x),
-                  onPressed: onDismiss,
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    onDismiss();
+                  },
                   color: color,
                 ),
               ],
@@ -105,6 +114,7 @@ class BudgetAlertBanner extends StatelessWidget {
   }
 
   void _showDetails(BuildContext context, BudgetAlert alert) {
+    final ctxt = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -113,9 +123,9 @@ class BudgetAlertBanner extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CurrencyText(amount: alert.budget.amount, prefixText: 'Budget:', compact: false, fixedLength: 0),
-            CurrencyText(amount: alert.spent, prefixText: 'Spent:', compact: false, fixedLength: 0),
-            Text('Percentage: ${alert.percentage.toStringAsFixed(1)}%'),
+            CurrencyText(amount: alert.budget.amount, prefixText: ctxt.label_budget_with_colon, compact: false, fixedLength: 0),
+            CurrencyText(amount: alert.spent, prefixText: ctxt.label_spent_with_colon, compact: false, fixedLength: 0),
+            Text('${ctxt.label_percentage_with_colon} ${alert.percentage.toStringAsFixed(1)}%'),
             const SizedBox(height: 16),
             LinearProgressIndicator(
               semanticsLabel: 'Progress',
@@ -132,7 +142,7 @@ class BudgetAlertBanner extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(ctxt.common_ok),
           ),
         ],
       ),
