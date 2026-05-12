@@ -141,9 +141,11 @@ class TransactionService {
 
   Stream<List<Transaction>> watchAll() async* {
     final isar = await isarService.getInstance();
-    yield* isar.transactions.where().sortByDateDesc().watch(
-          fireImmediately: true,
-        );
+    yield* isar.transactions
+        .where()
+        .sortByDateDesc()
+        .watch(fireImmediately: true)
+        .withDecryption();
   }
 
   Stream<List<Transaction>> watchByType({required bool isExpense}) async* {
@@ -154,7 +156,8 @@ class TransactionService {
         .isExpenseEqualTo(isExpense)
         .isTransferEqualTo(false)
         .sortByDateDesc()
-        .watch(fireImmediately: true);
+        .watch(fireImmediately: true)
+        .withDecryption();
   }
 
   Future<int> getTransactionCountForCategory(int categoryId) async {
@@ -182,6 +185,7 @@ class TransactionService {
       await isar.writeTxn(() async {
         recurring.nextDueDate = prevDate;
         recurring.isActive = true;
+        recurring.encryptFields();
         await isar.recurringTransactions.put(recurring);
         await _cleanupTripLink(isar, transactionId);
         await isar.transactions.delete(transactionId);
@@ -335,6 +339,10 @@ class TransactionService {
       ..isTransfer = true
       ..account.value = to;
     if (toId != null) credit.id = toId;
+
+    debit.encryptFields();
+    credit.encryptFields();
+
     await isar.writeTxn(() async {
       debit.related.value = credit;
       credit.related.value = debit;
