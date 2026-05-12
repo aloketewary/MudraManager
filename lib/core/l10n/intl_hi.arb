@@ -1076,12 +1076,12 @@
   "@sms_approveTransactionTitle": {
     "description": "Title for approve transaction dialog"
   },
-  "onboard_SmartSmsTracking": "Smart SMS Tracking",
-  "onboard_SmartSmsTrackingDesc": "Bank SMS से transactions अपने आप detect और import होंगे।",
+  "onboard_SmartSmsTracking": "स्मार्ट SMS ट्रैकिंग",
+  "onboard_SmartSmsTrackingDesc": "अपने बैंक SMS संदेशों से स्वचालित रूप से लेनदेन का पता लगाएं और आयात करें।",
   "onboard_InsightsAndAnalytics": "Insights और Analytics",
-  "onboard_InsightsAndAnalyticsDesc": "Charts, trends और smart insights से अपनी spending habits समझें।",
-  "onboard_SecureAndPrivate": "Safe और Private",
-  "onboard_SecureAndPrivateDesc": "Data आपके phone में ही रहता है। कोई cloud नहीं, कोई tracking नहीं।",
+  "onboard_InsightsAndAnalyticsDesc": "अपने खर्च की आदतों को विस्तृत चार्ट, रुझान और स्मार्ट अंतर्दृष्टि के साथ समझें।",
+  "onboard_SecureAndPrivate": "सुरक्षित और निजी",
+  "onboard_SecureAndPrivateDesc": "आपका डेटा आपके डिवाइस पर रहता है। कोई क्लाउड नहीं, कोई ट्रैकिंग नहीं — बस एन्क्रिप्टेड लोकल स्टोरेज।",
   "onboard_SmartAutoTracking": "Smart Auto Tracking",
   "@onboard_SmartAutoTracking": {
     "description": "Auto-detect transactions from notifications"
@@ -2042,33 +2042,105 @@
   "notif_streakEndedTitle": "💔 {days} दिन की streak टूटी",
   "notif_fewDaysUntrackedTitle": "📊 कुछ दिन untracked",
   "notif_budgetExceededBody": "{name} budget पार हो गया — check करें",
-  "@notif_budgetExceededBody": { "placeholders": { "name": { "type": "String" } } },
+  "@notif_budgetExceededBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notif_budgetExceededBodyMulti": "{names} budget पार हो गए",
-  "@notif_budgetExceededBodyMulti": { "placeholders": { "names": { "type": "String" } } },
+  "@notif_budgetExceededBodyMulti": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
   "notif_budgetWarningBody": "{name} limit के करीब है",
-  "@notif_budgetWarningBody": { "placeholders": { "name": { "type": "String" } } },
+  "@notif_budgetWarningBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notif_budgetWarningBodyMulti": "{names} limit के करीब हैं",
-  "@notif_budgetWarningBodyMulti": { "placeholders": { "names": { "type": "String" } } },
+  "@notif_budgetWarningBodyMulti": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
   "notif_budgetWarningPctBody": "{name}: {pct}% खर्च",
-  "@notif_budgetWarningPctBody": { "placeholders": { "name": { "type": "String" }, "pct": { "type": "String" } } },
+  "@notif_budgetWarningPctBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
   "notif_billPaidAutoTitle": "✅ {name} — auto-match हो गया",
-  "@notif_billPaidAutoTitle": { "placeholders": { "name": { "type": "String" } } },
+  "@notif_billPaidAutoTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notif_billPaidRecordedTitle": "✅ {name} — record हो गया",
-  "@notif_billPaidRecordedTitle": { "placeholders": { "name": { "type": "String" } } },
+  "@notif_billPaidRecordedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notif_smsLoggedTitle": "✅ Transaction save हो गया",
   "notif_smsNeedsReviewTitle": "👀 Review करें",
   "notif_smsLoggedBody": "{sender} से {amount} — auto-save हो गया",
-  "@notif_smsLoggedBody": { "placeholders": { "amount": { "type": "String" }, "sender": { "type": "String" } } },
+  "@notif_smsLoggedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
   "notif_smsLoggedBodyNoAmount": "{sender} से — auto-save हो गया",
-  "@notif_smsLoggedBodyNoAmount": { "placeholders": { "sender": { "type": "String" } } },
+  "@notif_smsLoggedBodyNoAmount": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
   "notif_smsNeedsReviewBody": "{sender} से transaction — tap करके देखें",
-  "@notif_smsNeedsReviewBody": { "placeholders": { "sender": { "type": "String" } } },
+  "@notif_smsNeedsReviewBody": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
   "notif_smsGotItTitle": "✅ हो गया!",
   "notif_smsAllCaughtUpTitle": "✅ सब हो गया!",
   "notif_smsAlmostThereTitle": "📋 लगभग हो गया!",
   "notif_smsNeedHelpTitle": "👋 थोड़ी मदद चाहिए!",
   "notif_streakOnLineTitle": "🔥 {days} दिन की streak दांव पर!",
-  "@notif_streakOnLineTitle": { "placeholders": { "days": { "type": "int" } } },
+  "@notif_streakOnLineTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "notif_quickActionTitle": "⚡ बस 5 second का काम",
   "notif_dailyReminderTitle": "📊 आपका दिन numbers में",
   "notif_dailyReminderBody": "कल कैसा रहा — एक नज़र डालें",
@@ -2076,11 +2148,38 @@
   "notif_weeklyReminderBody": "हफ्ते का हाल देखें — tap करें",
   "notif_goalStatusTitle": "🎯 Goal Status",
   "notif_goalStatusBody": "आपके {count} goals active हैं। {name} {pct}% complete!",
-  "@notif_goalStatusBody": { "placeholders": { "count": { "type": "int" }, "name": { "type": "String" }, "pct": { "type": "String" } } },
+  "@notif_goalStatusBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
   "notif_streakCountingTitle": "🔥 {days} दिन और counting!",
-  "@notif_streakCountingTitle": { "placeholders": { "days": { "type": "int" } } },
+  "@notif_streakCountingTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "notif_achievementBody": "{title} — +{xp} XP मिला!",
-  "@notif_achievementBody": { "placeholders": { "title": { "type": "String" }, "xp": { "type": "int" } } },
+  "@notif_achievementBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
   "notif_levelUpBody": "Level up हो गया — चलते रहो!",
   "notif_streakMilestoneBody": "कमाल dedication — streak फायर पर है 🔥",
   "notif_weeklyZeroBody": "इस हफ्ते zero खर्च — impressive 💪",
@@ -2244,7 +2343,7 @@
   "budget_tagInfo": "चुने हुए tags वाले सभी खर्च इस budget में गिने जाएंगे।",
   "budget_noTags": "अभी कोई tag नहीं है। पहले transactions में tags जोड़ें।",
   "budget_freePlanLimit": "Free plan में 2 budgets बना सकते हैं। ज़्यादा के लिए Pro लें।",
-  "budget_daysRemaining": "{count} दिन",
+  "budget_daysRemaining": "{count} दिन शेष",
   "budget_delete": "हटाएं",
   "budget_emotionUnderControl": "खर्च control में है 💪",
   "budget_emotionHalfway": "महीने का आधा हिस्सा ✨",
@@ -2255,17 +2354,25 @@
   "budget_activeBudgets": "Active budgets",
   "budget_onTrackSection": "सही चल रहा है",
   "budget_spendingPace": "खर्च की रफ़्तार",
-  "budget_dailyActual": "{amount}/दिन खर्च",
-  "budget_dailyAllowed": "{amount}/दिन सीमा",
+  "budget_dailyActual": "{amount}/दिन वास्तविक",
+  "budget_dailyAllowed": "{amount}/दिन अनुमति",
   "budget_stepNote0": "Budget का नाम और कितना खर्च करना है सेट करें।",
   "budget_stepNote1": "Budget कितनी बार repeat हो और dates चुनें।",
   "budget_stepNote2": "कौन सी categories या tags track करनी हैं चुनें।",
   "budget_stepNote3": "Save करने से पहले सब चेक करें। Edit करने के लिए tap करें।",
   "budget_autoDistributed": "auto",
   "budget_categoriesCount": "{count, plural, =1{1 category} other{{count} categories}}",
-  "@budget_categoriesCount": { "placeholders": { "count": {} } },
+  "@budget_categoriesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "budget_tagsCount": "{count, plural, =1{1 tag} other{{count} tags}}",
-  "@budget_tagsCount": { "placeholders": { "count": {} } },
+  "@budget_tagsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "budget_typeCategoryWise": "Category अनुसार",
   "budget_typeTagWise": "Tag अनुसार",
   "budget_typeDayWise": "रोज़ाना",
@@ -2279,9 +2386,9 @@
   "budget_reviewTitle": "देखें और Save करें",
   "budget_selectCategories": "Categories चुनें",
   "budget_noActiveTrip": "कोई active trip नहीं है। Travel budget के लिए पहले trip शुरू करें।",
-  "budget_categoryDeleteWarning": "यह category {count} budget(s) में है। हटाने से budget tracking प्रभावित होगी।",
+  "budget_categoryDeleteWarning": "यह श्रेणी {count} बजट में उपयोग की गई है। इसे हटाने से बजट ट्रैकिंग प्रभावित होगी।",
   "budget_invalidCategories": "कुछ categories हटा दी गई हैं। ठीक करने के लिए budget edit करें।",
-  "budget_pastBudgets": "{count} पुराने budget",
+  "budget_pastBudgets": "{count} पुराने बजट",
   "category_categoryName": "श्रेणी का नाम",
   "category_keywords": "Keywords (अल्पविराम से अलग)",
   "category_noneTopLevel": "कोई नहीं (शीर्ष-स्तर)",
@@ -2360,12 +2467,12 @@
   "stats_nextMonthForecast": "अगले महीने का अनुमान",
   "stats_topSpending": "सबसे ज़्यादा खर्च",
   "stats_12MonthTrend": "12 महीने का Trend",
-  "stats_trendUp": "{category} बढ़ रहा है — कुल खर्च का {percent}%",
-  "stats_trendDown": "{category} इस महीने कम हो रहा है 📉",
-  "stats_topCategory": "{category} सबसे ज़्यादा है — {percent}% खर्च",
-  "stats_weekendPeak": "Weekend पर ज़्यादा खर्च — {day} सबसे भारी",
-  "stats_weekdayPeak": "Weekday में ज़्यादा खर्च — {day} सबसे भारी",
-  "stats_peakAndQuiet": "{peak} सबसे भारी दिन, {quiet} सबसे हल्का",
+  "stats_trendUp": "{category} ऊपर की ओर रुझान कर रहा है — कुल खर्च का {percent}%",
+  "stats_trendDown": "{category} इस महीने नीचे की ओर रुझान कर रहा है 📉",
+  "stats_topCategory": "{category} आपकी शीर्ष श्रेणी है — खर्च का {percent}%",
+  "stats_weekendPeak": "आप सप्ताहांत पर अधिक खर्च करते हैं — {day} आपका चरम दिन है",
+  "stats_weekdayPeak": "कार्यदिवसों में अधिक खर्च होता है — {day} आपका सबसे बड़ा दिन है",
+  "stats_peakAndQuiet": "{peak} आपका चरम खर्च वाला दिन है, {quiet} सबसे शांत है",
   "stats_categoryTrends": "Category Trends",
   "stats_spendingByTag": "Tag अनुसार खर्च",
   "stats_netWorth": "Net Worth",
@@ -2376,8 +2483,8 @@
   "stats_net": "नेट",
   "stats_dailySpendingPace": "रोज़ाना खर्च की रफ़्तार",
   "stats_topCategories": "शीर्ष Categories",
-  "stats_projectedThisMonth": "अनुमान: इस महीने {amount}",
-  "stats_byDay": "दिन {day} तक: {month} में {amount}",
+  "stats_projectedThisMonth": "अनुमानित: इस महीने {amount}",
+  "stats_byDay": "{month} में {day} दिन तक: {amount}",
   "stats_steadyHeadline": "स्थिर चल रहा है",
   "stats_steadyDetail": "आपका खर्च एकसमान है — यह अनुशासन है।",
   "stats_doingGreatHeadline": "बहुत अच्छा चल रहा है 🌟",
@@ -2696,7 +2803,7 @@
   "accounts_primary": "प्राथमिक",
   "categories_label": "श्रेणियाँ",
   "categories_transactionsLabel": "लेनदेन",
-  "categories_deleteWithTransactions": "यह \"{name}\" और {count} जुड़े लेनदेन स्थायी रूप से हटा देगा। यह क्रिया वापस नहीं हो सकती।",
+  "categories_deleteWithTransactions": "यह \"{name}\" और {count} जुड़े हुए लेनदेन को स्थायी रूप से हटा देगा। यह क्रिया वापस नहीं ली जा सकती।",
   "categories_deleteAll": "सब हटाएं",
   "categories_edit": "श्रेणी संपादित करें",
   "categories_delete": "श्रेणी हटाएं",
@@ -2713,9 +2820,9 @@
   "currency_exchangeRates": "विनिमय दरें",
   "currency_exchangeRatesDesc": "रूपांतरण दरें देखें और संपादित करें",
   "currency_archivedDesc": "पिछली मुद्राओं के लेनदेन देखें",
-  "exchange_unitInfo": "विदेशी मुद्रा की 1 इकाई = X {base}। संपादित करने के लिए टैप करें।",
+  "exchange_unitInfo": "विदेशी मुद्रा की 1 इकाई = X {base}। संपादित करने के लिए किसी भी दर पर टैप करें।",
   "exchange_search": "मुद्रा खोजें...",
-  "exchange_rateUpdated": "{code} दर अपडेट हो गई",
+  "exchange_rateUpdated": "{code} दर अपडेट की गई",
   "exchange_editRate": "{code} दर संपादित करें",
   "exchange_rateLabel": "दर",
   "exchange_invalidRate": "एक वैध दर दर्ज करें",
@@ -2744,7 +2851,7 @@
   "notifSettings_activeCount": "5 में से {count} सक्रिय",
   "notifSettings_summaryDesc": "सारांश में खर्च, आय, शीर्ष श्रेणी और शेष दिखाता है",
   "notifSettings_dailySummaryDesc": "कल के खर्च का सारांश",
-  "notifSettings_weeklySchedule": "हर {day} सुबह 9:00 बजे",
+  "notifSettings_weeklySchedule": "प्रत्येक {day} सुबह 9:00 बजे",
   "smsImport_autoImporting": "लेनदेन ऑटोमैटिक import हो रहे हैं",
   "smsImport_enableToStart": "Auto import सक्षम करें tracking शुरू करने के लिए",
   "smsImport_iosRestriction": "iOS प्लेटफॉर्म की सीमाओं के कारण Auto import केवल Android पर उपलब्ध है।",
@@ -2774,12 +2881,12 @@
   "goal_emotionWhatSaving": "किसके लिए बचत कर रहे हैं?",
   "goal_exceededTarget": "Target से ज़्यादा बचा लिया! 🎉",
   "goal_alreadyReached": "Goal पहले से पूरा है! 🎉",
-  "goal_progressLeft": "{percent}% हो गया • {amount} बाकी",
-  "goal_paceDaily": "इस रफ़्तार से {daily}/दिन चाहिए।\nयानी {monthly}/महीना।",
-  "goal_daysRemaining": "{count} दिन बाकी",
+  "goal_progressLeft": "{percent}% वहां • {amount} शेष",
+  "goal_paceDaily": "इस गति से, आपको अपने लक्ष्य तक पहुँचने के लिए {daily}/दिन की आवश्यकता है।\nवह {monthly}/महीना है।",
+  "goal_daysRemaining": "{count} दिन शेष",
   "goal_daysLeft": "{count} दिन बचे हैं",
   "goal_startSaving": "{amount} बचाना शुरू करें",
-  "goal_goalsInProgress": "{count, plural, =1{1 goal चल रहा है} other{{count} goals चल रहे हैं}}",
+  "goal_goalsInProgress": "{count, plural, =1{1 लक्ष्य प्रगति पर} other{{count} लक्ष्य प्रगति पर}}",
   "goal_completedSection": "पूरा हो गया 🎉",
   "goal_emotionAlmost": "बस थोड़ा और 🚀",
   "goal_emotionHalfway": "आधा रास्ता 💪",
@@ -2788,7 +2895,7 @@
   "goal_emotionKeepPushing": "जारी रखो 🔥",
   "goal_emotionJustStarted": "अभी शुरू हुआ है 🌱",
   "goal_closestToCompletion": "पूरा होने के सबसे करीब",
-  "goal_acrossGoals": "{count, plural, =1{1 goal में} other{{count} goals में}}",
+  "goal_acrossGoals": "{count, plural, =1{1 लक्ष्य में} other{{count} लक्ष्यों में}}",
   "goal_suffixSaved": "बचाया",
   "goal_suffixLeft": "बाकी",
   "goal_suffixDone": "हो गया",
@@ -2796,7 +2903,7 @@
   "goal_suffixToGo": "और चाहिए",
   "goal_needsAttention": "ध्यान दें ⚠️",
   "goal_aheadOfSchedule": "समय से आगे 🎯",
-  "goal_monthsLeft": "{count} महीने बाकी",
+  "goal_monthsLeft": "{count} महीने शेष",
   "goal_emotionDidIt": "आपने कर दिखाया! 🎉",
   "goal_emotionSoClose": "बहुत करीब, जारी रखो! 💪",
   "goal_emotionMomentum": "रफ़्तार बन रही है 🔥",
@@ -2859,19 +2966,19 @@
   "backup_minutesAgo": "{count} मिनट पहले",
   "backup_hoursAgo": "{count} घंटे पहले",
   "backup_daysAgo": "{count} दिन पहले",
-  "backup_recordCount": "{count} records",
+  "backup_recordCount": "{count} रिकॉर्ड",
   "account_changeCurrency": "मुद्रा बदलें?",
-  "account_resetTo": "{code} पर reset करें",
+  "account_resetTo": "{code} पर रीसेट करें",
   "account_baseCurrencyInfo": "इस खाते के transactions आपकी base currency में हैं।",
-  "account_foreignCurrencyInfo": "Transactions {code} में record होंगे और {base} में convert होंगे।",
+  "account_foreignCurrencyInfo": "लेनदेन {code} में रिकॉर्ड किए जाएंगे और कुल योग के लिए {base} में बदले जाएंगे।",
   "account_warningNoConvert": "मौजूदा balance अपने आप convert नहीं होगा।",
   "account_warningNewCurrency": "नए transactions नई मुद्रा में होंगे।",
   "account_warningManualAdjust": "आपको balance मैन्युअली adjust करना पड़ सकता है।",
   "category_selectParent": "मूल श्रेणी चुनें",
   "appearance_colorTheme": "Color Theme",
   "appearance_amoledMode": "AMOLED Mode",
-  "appearance_toneActivated": "{name} tone सक्रिय",
-  "dashboard_cardsActive": "{total} में से {visible} cards सक्रिय",
+  "appearance_toneActivated": "{name} टोन सक्रिय",
+  "dashboard_cardsActive": "{total} में से {visible} कार्ड सक्रिय",
   "dashboard_dragToReorder": "क्रम बदलने के लिए drag करें, दिखाने/छुपाने के लिए toggle करें",
   "dashboard_smartOrdering": "Smart क्रम",
   "dashboard_catEssential": "ज़रूरी",
@@ -2923,7 +3030,7 @@
   "help_infoText": "जो चाहिए वो नहीं मिला? About → Contact Support पर जाएं।",
   "about_legalCount": "3 आइटम",
   "about_supportCount": "4 आइटम",
-  "about_packageCount": "{count} open source packages",
+  "about_packageCount": "{count} ओपन सोर्स पैकेज",
   "onboard_continue": "आगे बढ़ें",
   "onboard_restoreFromBackup": "Backup से restore करें",
   "onboard_accountNameRequired": "खाते का नाम ज़रूरी है",
@@ -2938,18 +3045,15 @@
   "onboard_startFresh": "नए सिरे से शुरू",
   "onboard_startFreshDesc": "कोई श्रेणी नहीं — बाद में खुद जोड़ें",
   "onboard_currencyWarning": "बाद में base currency बदलने पर मौजूदा transactions archive हो जाएंगे।",
-
   "statistics_topCategory": "टॉप Category",
   "statistics_dailyAverage": "रोज़ का औसत",
   "statistics_perDay": "प्रति दिन",
-  "statistics_percentOfExpenses": "{percent}% खर्चों का",
-
+  "statistics_percentOfExpenses": "खर्चों का {percent}%",
   "sms_infoTitle": "SMS Import कैसे काम करता है",
   "sms_infoOnlyScans": "सिर्फ bank और wallet SMS scan करता है",
   "sms_infoStaysOnDevice": "सारा data आपके device पर ही रहता है",
   "sms_infoAutoCreates": "Transactions अपने-आप बन जाते हैं",
   "sms_infoNoPersonal": "कोई personal message नहीं पढ़ा जाता",
-
   "dashboard_totalBalance": "कुल बैलेंस",
   "dashboard_netWorthLink": "Net Worth",
   "dashboard_showAccounts": "Accounts दिखाएं",
@@ -2982,13 +3086,37 @@
   "achieve_dailyCheckIn": "Daily Check-in",
   "achieve_budgetAdherence": "Budget पालन",
   "achieve_bestDays": "Best: {count} दिन",
-  "@achieve_bestDays": { "placeholders": { "count": { "type": "int" } } },
+  "@achieve_bestDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "achieve_noBadgesYet": "अभी कोई {category} badge नहीं",
-  "@achieve_noBadgesYet": { "placeholders": { "category": { "type": "String" } } },
+  "@achieve_noBadgesYet": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
   "achieve_levelUpSnack": "🎉 Level Up! आप Level {level} पर हैं!",
-  "@achieve_levelUpSnack": { "placeholders": { "level": { "type": "int" } } },
+  "@achieve_levelUpSnack": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
   "achieve_levelLabel": "Level {level}",
-  "@achieve_levelLabel": { "placeholders": { "level": { "type": "int" } } },
+  "@achieve_levelLabel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
   "achieve_catBudgeting": "Budgeting",
   "achieve_catSavings": "बचत",
   "achieve_catTracking": "Tracking",
@@ -2997,19 +3125,49 @@
   "achieve_catAll": "सब",
   "alert_actionNeeded": "Action ज़रूरी",
   "alert_billsDueTomorrow": "कल {count} bill(s) due हैं",
-  "@alert_billsDueTomorrow": { "placeholders": { "count": { "type": "int" } } },
+  "@alert_billsDueTomorrow": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "alert_upcomingBills": "आने वाले Bills",
   "alert_billsDueInDays": "2 दिन में {count} bill(s) due",
-  "@alert_billsDueInDays": { "placeholders": { "count": { "type": "int" } } },
+  "@alert_billsDueInDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "alert_budgetAlert": "Budget Alert",
   "alert_budgetsExceeded": "{count} budget(s) पार हो गए",
-  "@alert_budgetsExceeded": { "placeholders": { "count": { "type": "int" } } },
+  "@alert_budgetsExceeded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "alert_budgetWarning": "Budget Warning",
   "alert_budgetsNearLimit": "{count} budget(s) limit के करीब",
-  "@alert_budgetsNearLimit": { "placeholders": { "count": { "type": "int" } } },
+  "@alert_budgetsNearLimit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "alert_goalProgress": "Goal Progress",
   "alert_goalsAlmostComplete": "{count} goal(s) लगभग पूरे!",
-  "@alert_goalsAlmostComplete": { "placeholders": { "count": { "type": "int" } } },
+  "@alert_goalsAlmostComplete": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "analytics_cashFlowForecast": "Cash Flow पूर्वानुमान",
   "analytics_thisMonthProjected": "इस महीने (अनुमानित)",
   "analytics_savingOnAverage": "औसतन बचत हो रही है",
@@ -3021,10 +3179,22 @@
   "health_emergency": "Emergency Fund",
   "health_liquidityRunway": "Liquidity Runway",
   "health_balanceCoversMonths": "आपका balance {months} महीने का खर्च cover करता है",
-  "@health_balanceCoversMonths": {"placeholders": {"months": {"type": "String"}}},
+  "@health_balanceCoversMonths": {
+    "placeholders": {
+      "months": {
+        "type": "String"
+      }
+    }
+  },
   "health_days": "दिन",
   "health_nDays": "{n} दिन",
-  "@health_nDays": {"placeholders": {"n": {"type": "String"}}},
+  "@health_nDays": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
   "health_safe": "Safe",
   "health_moderate": "ठीक-ठाक",
   "health_risk": "Risk",
@@ -3061,14 +3231,22 @@
   "common_income": "आय",
   "common_expense": "खर्च",
   "common_transactions": "Transactions",
-
   "tax_title": "Tax Estimation",
   "tax_projected": "Projected (साल अभी चल रहा है)",
   "tax_estimatedTax": "अनुमानित Tax",
   "tax_effectiveRate": "Effective Rate",
   "tax_monthlyTax": "Monthly",
   "tax_fyProgress": "{total} में से {elapsed} {elapsed, plural, =1{दिन} other{दिन}}",
-  "@tax_fyProgress": { "placeholders": { "elapsed": { "type": "int" }, "total": { "type": "int" } } },
+  "@tax_fyProgress": {
+    "placeholders": {
+      "elapsed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "tax_slabBreakdown": "Slab Breakdown",
   "tax_totalSlabTax": "कुल Slab Tax",
   "tax_computation": "Tax Computation",
@@ -3088,27 +3266,45 @@
   "tax_oldRegime": "Old Regime",
   "tax_regimeComparison": "कौन सा Regime बेहतर है?",
   "tax_regimeSavings": "{regime} से बचत",
-  "@tax_regimeSavings": { "placeholders": { "regime": { "type": "String" } } },
+  "@tax_regimeSavings": {
+    "placeholders": {
+      "regime": {
+        "type": "String"
+      }
+    }
+  },
   "tax_oldRegimeDisclaimer": "Old Regime estimate सिर्फ standard deduction पर है। HRA, 80C, 80D deductions से बचत और ज़्यादा हो सकती है।",
-
   "category_merge": "Category मर्ज करें",
   "category_mergeInto": "इसमें merge करें",
   "category_mergeConfirm": "Merge",
   "category_mergePreview": "{count} items {target} में move होंगे",
-  "@category_mergePreview": { "placeholders": { "count": { "type": "int" }, "target": { "type": "String" } } },
+  "@category_mergePreview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
   "category_mergeSuccess": "Categories merge हो गईं ✅",
   "category_mergeSameError": "एक ही category में merge नहीं कर सकते",
   "category_mergeSelectTarget": "Target category चुनें",
-
   "notif_morningInsightTitle": "☀️ सुबह का पैसा update",
   "notif_weeklyRecapNudgeTitle": "📊 हफ़्ते का recap तैयार है",
   "notif_yesterdaySpendTitle": "💰 कल का खर्च",
   "notif_weeklyRecapReadyTitle": "📊 Weekly recap आपका इंतज़ार कर रहा है",
   "notif_underBudgetStreakTitle": "🔥 {days} दिन budget में!",
-  "@notif_underBudgetStreakTitle": { "placeholders": { "days": { "type": "int" } } },
+  "@notif_underBudgetStreakTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "dashboard_bgSyncIssueTitle": "Background sync में दिक्कत हो सकती है",
   "dashboard_bgSyncIssueDesc": "Bills और alerts में देरी हो सकती है। App दोबारा खोलें।",
-
   "onboard_whatDidYouSpend": "आज क्या खर्च किया?",
   "onboard_addFewToStart": "कुछ add करें — dashboard तुरंत live हो जाएगा",
   "onboard_skipAddLater": "Skip — बाद में करूँगा",
@@ -3117,8 +3313,13 @@
   "onboard_starterLunch": "खाना",
   "onboard_starterGroceries": "Groceries",
   "onboard_starterAdded": "{count} expenses add हो गए!",
-  "@onboard_starterAdded": { "placeholders": { "count": { "type": "int" } } },
-
+  "@onboard_starterAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "dashboard_listeningTitle": "Transactions सुन रहे हैं...",
   "dashboard_waitingForSms": "अगला bank notification यहाँ अपने आप आ जाएगा",
   "dashboard_meanwhile": "तब तक, try करें:",
@@ -3129,11 +3330,9 @@
   "dashboard_testTip": "💡 Tip: एक छोटा UPI payment भेजें — auto-import देखें!",
   "dashboard_addFirstExpense": "पहला खर्च add करें",
   "dashboard_addFirstExpenseDesc": "आज क्या खर्च किया? Tap करके बताएं",
-
   "quickAdd_title": "Quick Add",
   "quickAdd_recentCategories": "Recent categories",
   "quickAdd_moreOptions": "और options",
-
   "mode_simple": "Simple",
   "mode_full": "Full",
   "mode_simpleDesc": "Expenses, budgets और SMS tracking",
@@ -3142,12 +3341,17 @@
   "mode_switchToSimple": "Simple Mode में जाएं",
   "mode_pickTitle": "Mudra कैसे use करना चाहेंगे?",
   "mode_pickDesc": "बाद में settings से बदल सकते हैं",
-
   "backup_cloudBackup": "Cloud Backup",
   "backup_cloudRestore": "Cloud से Restore करें",
   "backup_signInGoogle": "Google से Sign in करें",
   "backup_signedInAs": "{email} से signed in",
-  "@backup_signedInAs": { "placeholders": { "email": { "type": "String" } } },
+  "@backup_signedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "backup_uploadingToDrive": "Google Drive पर upload हो रहा है...",
   "backup_uploadSuccess": "Backup Google Drive पर upload हो गया",
   "backup_uploadFailed": "Backup upload नहीं हो पाया",
@@ -3157,7 +3361,6 @@
   "backup_signInRequired": "Cloud backup के लिए Google से sign in करें",
   "backup_signOut": "Sign out",
   "backup_cloudSubtitle": "Google Drive पर encrypted backup",
-
   "backup_autoBackup": "Auto Backup",
   "backup_autoBackupDesc": "Automatic local backup, पिछले 7 दिन रखता है",
   "backup_autoFrequency": "Backup frequency",
@@ -3166,53 +3369,114 @@
   "backup_autoWeekly": "Weekly",
   "backup_autoSetPassword": "Auto backup के लिए password set करें",
   "backup_autoEnabled": "Auto backup on ({frequency})",
-  "@backup_autoEnabled": { "placeholders": { "frequency": { "type": "String" } } },
+  "@backup_autoEnabled": {
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      }
+    }
+  },
   "backup_autoLastRun": "पिछला auto backup: {date}",
-  "@backup_autoLastRun": { "placeholders": { "date": { "type": "String" } } },
+  "@backup_autoLastRun": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "backup_passwordSet": "Backup password set हो गया",
   "backup_proRequired": "Pro feature",
-
   "onboard_skip": "Skip करें",
   "onboard_languages": "भाषा",
   "onboard_smartTrackingMergedDesc": "Bank SMS से auto-import, budget बनाएं, goals track करें — सब एक जगह।",
-
   "sms_celebrationTitle": "पहला SMS transaction! 🎉",
   "sms_celebrationBody": "Mudra ने आपके bank SMS से खुद transaction save कर लिया। अब से खर्च अपने आप track होंगे।",
   "sms_celebrationCta": "चलो, शुरू करते हैं!",
-
   "milestone_shareButton": "Story में Share करें",
   "milestone_goalReachedTitle": "Goal पूरा हो गया!",
   "milestone_goalReachedDesc": "{amount} बचाकर target पूरा किया 🌟",
-  "@milestone_goalReachedDesc": { "placeholders": { "amount": { "type": "String" } } },
+  "@milestone_goalReachedDesc": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "milestone_streakTitle": "{days} दिन की Streak!",
-  "@milestone_streakTitle": { "placeholders": { "days": { "type": "int" } } },
+  "@milestone_streakTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "milestone_streakDesc": "लगातार {days} दिन खर्च track किया",
-  "@milestone_streakDesc": { "placeholders": { "days": { "type": "int" } } },
+  "@milestone_streakDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "milestone_underBudgetTitle": "Budget के अंदर!",
   "milestone_underBudgetDesc": "पूरे महीने budget में रहे 💪",
-
   "account_creditLimit": "Credit Limit",
   "account_statementDay": "Statement Day",
   "account_dueDay": "Due Day",
   "account_daysUntilDue": "{days} दिन बाकी",
-  "@account_daysUntilDue": { "placeholders": { "days": { "type": "int" } } },
+  "@account_daysUntilDue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "account_dueToday": "आज due है!",
   "account_overdue": "{days} दिन से overdue",
-  "@account_overdue": { "placeholders": { "days": { "type": "int" } } },
-
+  "@account_overdue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "subscription_title": "Subscriptions पता चले",
   "subscription_monthlyTotal": "हर महीने {amount}",
-  "@subscription_monthlyTotal": { "placeholders": { "amount": { "type": "String" } } },
+  "@subscription_monthlyTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "subscription_occurrences": "4 महीने में {count} बार",
-  "@subscription_occurrences": { "placeholders": { "count": { "type": "int" } } },
+  "@subscription_occurrences": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "subscription_none": "अभी कोई subscription detect नहीं हुआ",
   "subscription_dayOfMonth": "हर महीने {day} तारीख के आसपास",
-  "@subscription_dayOfMonth": { "placeholders": { "day": { "type": "int" } } },
+  "@subscription_dayOfMonth": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
   "subscription_trackAsRecurring": "Recurring bill में track करें",
   "cc_title": "Credit Card Bills",
   "cc_totalOutstanding": "कुल बकाया",
   "cc_acrossCards": "{count} cards पर",
-  "@cc_acrossCards": { "placeholders": { "count": { "type": "int" } } },
+  "@cc_acrossCards": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "cc_noCards": "कोई credit card नहीं है",
   "cc_noCardsHint": "Bills track करने के लिए credit card account जोड़ें",
   "cc_minimumDue": "Min. Due",
@@ -3222,5 +3486,330 @@
   "cc_nextDue": "Due",
   "cc_payMinimum": "Minimum भरें",
   "cc_payFull": "पूरा भरें",
-  "cc_utilitySubtitle": "Due dates, बकाया और limits"
+  "cc_utilitySubtitle": "Due dates, बकाया और limits",
+  "@onboard_InsightsAndAnalytics": {
+    "description": "Financial insights and analytics"
+  },
+  "@onboard_InsightsAndAnalyticsDesc": {
+    "description": "Description for insights onboarding page"
+  },
+  "@onboard_SecureAndPrivate": {
+    "description": "Data security and privacy"
+  },
+  "@onboard_SecureAndPrivateDesc": {
+    "description": "Description for security onboarding page"
+  },
+  "@onboard_SmartSmsTracking": {
+    "description": "Auto-detect bank SMS transactions"
+  },
+  "@onboard_SmartSmsTrackingDesc": {
+    "description": "Description for SMS tracking onboarding page"
+  },
+  "@about_packageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@account_foreignCurrencyInfo": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "@account_resetTo": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@appearance_toneActivated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@backup_daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@backup_hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@backup_minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@backup_recordCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@budget_categoryDeleteWarning": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@budget_dailyActual": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "@budget_dailyAllowed": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "@budget_daysRemaining": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@budget_pastBudgets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@categories_deleteWithTransactions": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@dashboard_cardsActive": {
+    "placeholders": {
+      "visible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@exchange_editRate": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@exchange_rateUpdated": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@exchange_unitInfo": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "@goal_acrossGoals": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_daysAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_daysLeft": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_daysRemaining": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_emotionMoreToGo": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "@goal_goalsInProgress": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_monthsLeft": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_paceDaily": {
+    "placeholders": {
+      "daily": {},
+      "monthly": {}
+    }
+  },
+  "@goal_progressLeft": {
+    "placeholders": {
+      "percent": {},
+      "amount": {}
+    }
+  },
+  "@goal_startSaving": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "@help_articleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@help_resultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@notifSettings_activeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@notifSettings_weeklySchedule": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "@plugins_activeCount": {
+    "placeholders": {
+      "active": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@plugins_disabled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@plugins_enabled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@reconcile_expenseAdjustment": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@reconcile_incomeAdjustment": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@security_protectionsActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@statistics_percentOfExpenses": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "@stats_byDay": {
+    "placeholders": {
+      "day": {},
+      "amount": {},
+      "month": {}
+    }
+  },
+  "@stats_peakAndQuiet": {
+    "placeholders": {
+      "peak": {},
+      "quiet": {}
+    }
+  },
+  "@stats_projectedThisMonth": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "@stats_topCategory": {
+    "placeholders": {
+      "category": {},
+      "percent": {}
+    }
+  },
+  "@stats_trendDown": {
+    "placeholders": {
+      "category": {}
+    }
+  },
+  "@stats_trendUp": {
+    "placeholders": {
+      "category": {},
+      "percent": {}
+    }
+  },
+  "@stats_weekdayPeak": {
+    "placeholders": {
+      "day": {}
+    }
+  },
+  "@stats_weekendPeak": {
+    "placeholders": {
+      "day": {}
+    }
+  }
 }

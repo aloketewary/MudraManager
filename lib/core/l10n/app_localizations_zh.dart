@@ -276,7 +276,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String budget_dashboardPieChartLabelText(
-      Object spentPercent, Object title, Object totalPercent) {
+    Object spentPercent,
+    Object title,
+    Object totalPercent,
+  ) {
     return '$title ($totalPercent of Total, ${spentPercent}of Spent)';
   }
 
@@ -1993,13 +1996,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String tone_professional_insightSpendingSpikeMessage(
-      String avg, String today) {
+    String avg,
+    String today,
+  ) {
     return 'Daily average: $avg. Today: $today.';
   }
 
   @override
   String tone_professional_insightWeekendAlertMessage(
-      String avg, String current) {
+    String avg,
+    String current,
+  ) {
     return 'Weekend average: $avg. Current: $current.';
   }
 
@@ -2053,13 +2060,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String tone_motivational_insightSpendingSpikeMessage(
-      String avg, String today) {
+    String avg,
+    String today,
+  ) {
     return 'Usually $avg/day. Today\'s $today — be intentional!';
   }
 
   @override
   String tone_motivational_insightWeekendAlertMessage(
-      String avg, String current) {
+    String avg,
+    String current,
+  ) {
     return 'Weekend avg: $avg. This one\'s $current — stay aware!';
   }
 
@@ -2120,37 +2131,61 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String tone_friendly_insightMoneyLeak(
-      String category, int count, String total) {
+    String category,
+    int count,
+    String total,
+  ) {
     return '$category: $count times this month, $total total — small hits add up';
   }
 
   @override
   String tone_friendly_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
     return '$wAvg avg on ${worst}s vs $bAvg on ${best}s — that\'s $saving you could keep';
   }
 
   @override
   String tone_professional_insightMoneyLeak(
-      String category, int count, String total) {
+    String category,
+    int count,
+    String total,
+  ) {
     return '$category: $count transactions, $total total this month.';
   }
 
   @override
   String tone_professional_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
     return '$wAvg avg on ${worst}s vs $bAvg on ${best}s. Potential saving: $saving.';
   }
 
   @override
   String tone_motivational_insightMoneyLeak(
-      String category, int count, String total) {
+    String category,
+    int count,
+    String total,
+  ) {
     return '$category: $count times, $total — small wins add up if you cut back!';
   }
 
   @override
   String tone_motivational_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
     return '$wAvg on ${worst}s vs $bAvg on ${best}s — $saving potential savings!';
   }
 
@@ -2161,7 +2196,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String tone_calm_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
     return '${worst}s: $wAvg. ${best}s: $bAvg. $saving to keep.';
   }
 

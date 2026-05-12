@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 
 /// Extension to auto-load Isar links on transaction queries.
@@ -16,6 +17,7 @@ extension TransactionListLinks on Future<List<Transaction>> {
     for (final t in txns) {
       t.category.loadSync();
       t.account.loadSync();
+      t.decryptFields();
     }
     return txns;
   }

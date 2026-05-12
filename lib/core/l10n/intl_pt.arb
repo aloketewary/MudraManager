@@ -115,8 +115,284 @@
   "achieve_catAll": "Tudo",
   "achieve_catSavings": "Economia",
   "achieve_bestDays": "Melhor: {count} dias",
-  "@achieve_bestDays": { "placeholders": { "count": { "type": "int" } } },
+  "@achieve_bestDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "achieve_levelLabel": "Nível {level}",
-  "@achieve_levelLabel": { "placeholders": { "level": { "type": "int" } } },
-  "dashboard_totalBalance": "Saldo total"
+  "@achieve_levelLabel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboard_totalBalance": "Saldo total",
+  "calendar_week_monday_initial_text": "S",
+  "@calendar_week_monday_initial_text": {
+    "description": "This is text of Monday initial"
+  },
+  "calendar_week_tuesday_initial_text": "T",
+  "@calendar_week_tuesday_initial_text": {
+    "description": "This is text of Tuesday initial"
+  },
+  "calendar_week_wednesday_initial_text": "Q",
+  "@calendar_week_wednesday_initial_text": {
+    "description": "This is text of Wednesday initial"
+  },
+  "calendar_week_thursday_initial_text": "Q",
+  "@calendar_week_thursday_initial_text": {
+    "description": "This is text of Thursday initial"
+  },
+  "calendar_week_friday_initial_text": "S",
+  "@calendar_week_friday_initial_text": {
+    "description": "This is text of Friday initial"
+  },
+  "calendar_week_saturday_initial_text": "S",
+  "@calendar_week_saturday_initial_text": {
+    "description": "This is text of Saturday initial"
+  },
+  "calendar_week_sunday_initial_text": "D",
+  "@calendar_week_sunday_initial_text": {
+    "description": "This is text of Sunday initial"
+  },
+  "dashboard_netWorthTitle": "Patrimônio Líquido",
+  "@dashboard_netWorthTitle": {
+    "description": "This is title of Net Worth"
+  },
+  "budget_dashboardMiniCardBudgetTitleText": "Orçamento",
+  "@budget_dashboardMiniCardBudgetTitleText": {
+    "description": "This is title of Budget"
+  },
+  "budget_dashboardMiniCardSpentTitleText": "Gasto",
+  "@budget_dashboardMiniCardSpentTitleText": {
+    "description": "This is title of Spent"
+  },
+  "budget_dashboardPageTitle": "Detalhes do Orçamento",
+  "@budget_dashboardPageTitle": {
+    "description": "This is title of Budgets Details"
+  },
+  "budget_dashboardNotFoundText": "Nenhum orçamento definido, adicione um!",
+  "@budget_dashboardNotFoundText": {
+    "description": "This is text of budget not found"
+  },
+  "budget_dashboardAddBudgetText": "Adicionar Orçamento",
+  "@budget_dashboardAddBudgetText": {
+    "description": "This is text of add budget"
+  },
+  "budget_categoriesTitle": "Categorias",
+  "@budget_categoriesTitle": {
+    "description": "This is text of categories title"
+  },
+  "budget_dashboardPieChartLabelText": "{title} ({totalPercent} do Total, {spentPercent} do Gasto)",
+  "@budget_dashboardPieChartLabelText": {
+    "description": "This is text of pie chart label"
+  },
+  "budget_buttonDeleteTitleText": "Excluir Orçamento?",
+  "@budget_buttonDeleteTitleText": {
+    "description": "This is text of delete title"
+  },
+  "budget_buttonDeleteBodyText": "Isso removerá o orçamento e suas alocações. Esta ação não pode ser desfeita.",
+  "@budget_buttonDeleteBodyText": {
+    "description": "This is text of delete body"
+  },
+  "budget_buttonDeleteActionText": "Excluir",
+  "@budget_buttonDeleteActionText": {
+    "description": "This is text of delete action"
+  },
+  "budget_buttonCancelActionText": "Cancelar",
+  "@budget_buttonCancelActionText": {
+    "description": "This is text of cancel action"
+  },
+  "budget_buttonAddText": "Adicionar Orçamento",
+  "@budget_buttonAddText": {
+    "description": "This is text of add budget"
+  },
+  "budget_buttonEditText": "Editar Orçamento",
+  "@budget_buttonEditText": {
+    "description": "This is text of edit budget"
+  },
+  "budget_budgetNameControllerText": "Nome do Orçamento",
+  "@budget_budgetNameControllerText": {
+    "description": "This is text of Budget Name title"
+  },
+  "budget_budgetAmountControllerText": "Valor Total",
+  "@budget_budgetAmountControllerText": {
+    "description": "This is text of Total Amount title"
+  },
+  "budget_recurrenceControllerText": "Recorrência",
+  "@budget_recurrenceControllerText": {
+    "description": "This is text of Recurrence title"
+  },
+  "budget_nameRequiredHintText": "Nome do orçamento é obrigatório",
+  "@budget_nameRequiredHintText": {
+    "description": "This is text of Budget name is required text"
+  },
+  "budget_amountRequiredHintText": "Valor válido é obrigatório",
+  "@budget_amountRequiredHintText": {
+    "description": "This is text of Amount is required text"
+  },
+  "budget_selectStartDateText": "Selecionar Data de Início",
+  "@budget_selectStartDateText": {
+    "description": "This is text of Select Start Date"
+  },
+  "budget_selectedStartDateText": "Início: {startDate}",
+  "@budget_selectedStartDateText": {
+    "description": "This is text of Select End Date"
+  },
+  "budget_selectEndDateText": "Selecionar Data de Término",
+  "@budget_selectEndDateText": {
+    "description": "This is text of Select End Date"
+  },
+  "budget_selectedEndDateText": "Fim: {endDate}",
+  "@budget_selectedEndDateText": {
+    "description": "This is text of Select End Date"
+  },
+  "budget_categoryTitle": "Selecionar Categorias e Alocações",
+  "@budget_categoryTitle": {
+    "description": "This is text of Select Categories & Allocations title"
+  },
+  "budget_allocateAmountText": "Alocar Valor",
+  "@budget_allocateAmountText": {
+    "description": "This is text of Allocate Amount"
+  },
+  "budget_categoryMessageInfoText": "Você pode inserir manualmente as alocações das categorias ou deixá-las em branco para distribuir automaticamente o valor restante igualmente.",
+  "@budget_categoryMessageInfoText": {
+    "description": "This is text of category message info"
+  },
+  "budget_totalAllocatedBudgetText": "Total Alocado: {totalAlloc}",
+  "@budget_totalAllocatedBudgetText": {
+    "description": "This is text of Total Allocated"
+  },
+  "budget_recurrenceText": "Recorrência",
+  "@budget_recurrenceText": {
+    "description": "This is text of Recurrence text"
+  },
+  "budget_recurrenceNoneText": "Nenhuma",
+  "@budget_recurrenceNoneText": {
+    "description": "This is text of None text"
+  },
+  "budget_recurrenceDailyText": "Diário",
+  "@budget_recurrenceDailyText": {
+    "description": "This is text of Daily text"
+  },
+  "budget_recurrenceWeeklyText": "Semanal",
+  "@budget_recurrenceWeeklyText": {
+    "description": "This is text of Weekly text"
+  },
+  "budget_recurrenceMonthlyText": "Mensal",
+  "@budget_recurrenceMonthlyText": {
+    "description": "This is text of Monthly text"
+  },
+  "budget_recurrenceYearlyText": "Anual",
+  "@budget_recurrenceYearlyText": {
+    "description": "This is text of Yearly text"
+  },
+  "budget_saveButtonText": "salvar",
+  "@budget_saveButtonText": {
+    "description": "This is text of save button"
+  },
+  "budget_updateButtonText": "atualizar",
+  "@budget_updateButtonText": {
+    "description": "This is text of update button"
+  },
+  "budget_pickBothDatesErrorText": "Escolha ambas as datas",
+  "@budget_pickBothDatesErrorText": {
+    "description": "This is text of Pick both dates"
+  },
+  "budget_selectAtLeastOneCategoryErrorText": "Selecione pelo menos uma categoria",
+  "@budget_selectAtLeastOneCategoryErrorText": {
+    "description": "This is text of Select at least one category"
+  },
+  "budget_allocatedAmountExceedsTotalBudgetText": "O valor alocado excede o orçamento total",
+  "@budget_allocatedAmountExceedsTotalBudgetText": {
+    "description": "This is text of Allocated amount exceeds total budget"
+  },
+  "transaction_amountControllerErrorText": "Insira o valor",
+  "@transaction_amountControllerErrorText": {
+    "description": "This is text of Enter amount title"
+  },
+  "transaction_selectTagLabel": "Selecionar Tag",
+  "@transaction_selectTagLabel": {
+    "description": "This is text of Select Tag"
+  },
+  "transaction_addNewCategoryText": "Adicionar Nova \nCategoria",
+  "@transaction_addNewCategoryText": {
+    "description": "This is text of Add New Category"
+  },
+  "transaction_addNewTagText": "Adicionar Nova Tag",
+  "@transaction_addNewTagText": {
+    "description": "This is text of Add New Tag"
+  },
+  "transaction_tagNameControllerText": "Nome da Tag",
+  "@transaction_tagNameControllerText": {
+    "description": "This is text of Tag Name"
+  },
+  "transaction_saveTagButtonLabel": "Salvar Tag",
+  "@transaction_saveTagButtonLabel": {
+    "description": "This is text of Save Tag"
+  },
+  "transaction_saveTransactionButtonLabel": "Salvar Transação",
+  "@transaction_saveTransactionButtonLabel": {
+    "description": "This is text of Save Transaction"
+  },
+  "transaction_selectOneAccountErrorText": "Selecione pelo menos uma conta",
+  "@transaction_selectOneAccountErrorText": {
+    "description": "This is text of Select one Account"
+  },
+  "transaction_selectOneCategoryErrorText": "Selecione pelo menos uma categoria",
+  "@transaction_selectOneCategoryErrorText": {
+    "description": "This is text of Select one Category"
+  },
+  "statistics_weTrimDownDecimalInfoText": "Nós reduzimos as casas decimais, por favor arredonde se necessário.",
+  "@statistics_weTrimDownDecimalInfoText": {
+    "description": "This is text of We trim down decimal places, please round off if required."
+  },
+  "statistics_selectPeriodTodayText": "Hoje",
+  "@statistics_selectPeriodTodayText": {
+    "description": "This is text of Today"
+  },
+  "statistics_selectPeriodWeekText": "Semana",
+  "@statistics_selectPeriodWeekText": {
+    "description": "This is text of Week"
+  },
+  "statistics_selectPeriodMonthText": "Mês",
+  "@statistics_selectPeriodMonthText": {
+    "description": "This is text of Month"
+  },
+  "statistics_selectPeriodYearText": "Ano",
+  "@statistics_selectPeriodYearText": {
+    "description": "This is text of Year"
+  },
+  "statistics_chartLineIncomeText": "Renda",
+  "@statistics_chartLineIncomeText": {
+    "description": "This is text of Income"
+  },
+  "statistics_chartLineExpenseText": "Despesa",
+  "@statistics_chartLineExpenseText": {
+    "description": "This is text of Expense"
+  },
+  "statistics_chartLineTodayHourText": "{hour}h",
+  "@statistics_chartLineTodayHourText": {
+    "description": "This is text of h"
+  },
+  "statistics_categoryNotPresentText": "Categoria não presente.",
+  "@statistics_categoryNotPresentText": {
+    "description": "This is text of Category not present"
+  },
+  "statistics_transactionNotPresentText": "Transações não presentes.",
+  "@statistics_transactionNotPresentText": {
+    "description": "This is text of Transactions not present."
+  },
+  "statistics_byCategoryTitleText": "Por Categoria",
+  "@statistics_byCategoryTitleText": {
+    "description": "This is text of By Category"
+  },
+  "statistics_recentTransactionsTitleText": "Transações Recentes",
+  "@statistics_recentTransactionsTitleText": {
+    "description": "This is text of Recent Transactions"
+  }
 }

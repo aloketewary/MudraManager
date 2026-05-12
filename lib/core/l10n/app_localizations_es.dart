@@ -234,152 +234,157 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get calendar_week_monday_initial_text => 'M';
+  String get calendar_week_monday_initial_text => 'L';
 
   @override
-  String get calendar_week_tuesday_initial_text => 'T';
+  String get calendar_week_tuesday_initial_text => 'M';
 
   @override
-  String get calendar_week_wednesday_initial_text => 'W';
+  String get calendar_week_wednesday_initial_text => 'X';
 
   @override
-  String get calendar_week_thursday_initial_text => 'T';
+  String get calendar_week_thursday_initial_text => 'J';
 
   @override
-  String get calendar_week_friday_initial_text => 'F';
+  String get calendar_week_friday_initial_text => 'V';
 
   @override
   String get calendar_week_saturday_initial_text => 'S';
 
   @override
-  String get calendar_week_sunday_initial_text => 'S';
+  String get calendar_week_sunday_initial_text => 'D';
 
   @override
-  String get dashboard_netWorthTitle => 'Net Worth';
+  String get dashboard_netWorthTitle => 'Patrimonio neto';
 
   @override
-  String get budget_dashboardMiniCardBudgetTitleText => 'Budget';
+  String get budget_dashboardMiniCardBudgetTitleText => 'Presupuesto';
 
   @override
-  String get budget_dashboardMiniCardSpentTitleText => 'Spent';
+  String get budget_dashboardMiniCardSpentTitleText => 'Gastado';
 
   @override
-  String get budget_dashboardPageTitle => 'Budgets Details';
+  String get budget_dashboardPageTitle => 'Detalles del presupuesto';
 
   @override
-  String get budget_dashboardNotFoundText => 'No Budgets Defined, Add One!';
+  String get budget_dashboardNotFoundText =>
+      '¡No hay presupuestos definidos, añade uno!';
 
   @override
-  String get budget_dashboardAddBudgetText => 'Add Budget';
+  String get budget_dashboardAddBudgetText => 'Añadir presupuesto';
 
   @override
-  String get budget_categoriesTitle => 'Categories';
+  String get budget_categoriesTitle => 'Categorías';
 
   @override
   String budget_dashboardPieChartLabelText(
-      Object spentPercent, Object title, Object totalPercent) {
-    return '$title ($totalPercent of Total, ${spentPercent}of Spent)';
+    Object spentPercent,
+    Object title,
+    Object totalPercent,
+  ) {
+    return '$title ($totalPercent del total, $spentPercent del gastado)';
   }
 
   @override
-  String get budget_buttonDeleteTitleText => 'Delete Budget?';
+  String get budget_buttonDeleteTitleText => '¿Eliminar presupuesto?';
 
   @override
   String get budget_buttonDeleteBodyText =>
-      'This will remove the Budget and its allocations, this action cannot be undone.';
+      'Esto eliminará el presupuesto y sus asignaciones, esta acción no se puede deshacer.';
 
   @override
-  String get budget_buttonDeleteActionText => 'Delete';
+  String get budget_buttonDeleteActionText => 'Eliminar';
 
   @override
-  String get budget_buttonCancelActionText => 'Cancel';
+  String get budget_buttonCancelActionText => 'Cancelar';
 
   @override
-  String get budget_buttonAddText => 'Add Budget';
+  String get budget_buttonAddText => 'Añadir presupuesto';
 
   @override
-  String get budget_buttonEditText => 'Edit Budget';
+  String get budget_buttonEditText => 'Editar presupuesto';
 
   @override
-  String get budget_budgetNameControllerText => 'Budget Name';
+  String get budget_budgetNameControllerText => 'Nombre del presupuesto';
 
   @override
-  String get budget_budgetAmountControllerText => 'Total Amount';
+  String get budget_budgetAmountControllerText => 'Monto total';
 
   @override
-  String get budget_recurrenceControllerText => 'Recurrence';
+  String get budget_recurrenceControllerText => 'Recurrencia';
 
   @override
-  String get budget_nameRequiredHintText => 'Budget name is required';
+  String get budget_nameRequiredHintText =>
+      'El nombre del presupuesto es obligatorio';
 
   @override
-  String get budget_amountRequiredHintText => 'Valid Amount is required';
+  String get budget_amountRequiredHintText => 'Se requiere un monto válido';
 
   @override
-  String get budget_selectStartDateText => 'Select Start Date';
+  String get budget_selectStartDateText => 'Seleccionar fecha de inicio';
 
   @override
   String budget_selectedStartDateText(Object startDate) {
-    return 'Start: $startDate';
+    return 'Inicio: $startDate';
   }
 
   @override
-  String get budget_selectEndDateText => 'Select End Date';
+  String get budget_selectEndDateText => 'Seleccionar fecha de fin';
 
   @override
   String budget_selectedEndDateText(Object endDate) {
-    return 'End: $endDate';
+    return 'Fin: $endDate';
   }
 
   @override
-  String get budget_categoryTitle => 'Select Categories & Allocations';
+  String get budget_categoryTitle => 'Seleccionar categorías y asignaciones';
 
   @override
-  String get budget_allocateAmountText => 'Allocate Amount';
+  String get budget_allocateAmountText => 'Asignar monto';
 
   @override
   String get budget_categoryMessageInfoText =>
-      'You can manually enter category allocations, or leave them blank to auto-distribute the remaining amount equally.';
+      'Puede ingresar manualmente las asignaciones por categoría, o dejarlas en blanco para distribuir automáticamente el monto restante de manera equitativa.';
 
   @override
   String budget_totalAllocatedBudgetText(Object totalAlloc) {
-    return 'Total Allocated: $totalAlloc';
+    return 'Total asignado: $totalAlloc';
   }
 
   @override
-  String get budget_recurrenceText => 'Recurrence';
+  String get budget_recurrenceText => 'Recurrencia';
 
   @override
-  String get budget_recurrenceNoneText => 'None';
+  String get budget_recurrenceNoneText => 'Ninguna';
 
   @override
-  String get budget_recurrenceDailyText => 'Daily';
+  String get budget_recurrenceDailyText => 'Diario';
 
   @override
-  String get budget_recurrenceWeeklyText => 'Weekly';
+  String get budget_recurrenceWeeklyText => 'Semanal';
 
   @override
-  String get budget_recurrenceMonthlyText => 'Monthly';
+  String get budget_recurrenceMonthlyText => 'Mensual';
 
   @override
-  String get budget_recurrenceYearlyText => 'Yearly';
+  String get budget_recurrenceYearlyText => 'Anual';
 
   @override
-  String get budget_saveButtonText => 'save';
+  String get budget_saveButtonText => 'guardar';
 
   @override
-  String get budget_updateButtonText => 'update';
+  String get budget_updateButtonText => 'actualizar';
 
   @override
-  String get budget_pickBothDatesErrorText => 'Pick both dates';
+  String get budget_pickBothDatesErrorText => 'Elija ambas fechas';
 
   @override
   String get budget_selectAtLeastOneCategoryErrorText =>
-      'Select at least one category';
+      'Seleccione al menos una categoría';
 
   @override
   String get budget_allocatedAmountExceedsTotalBudgetText =>
-      'Allocated amount exceeds total budget';
+      'El monto asignado excede el presupuesto total';
 
   @override
   String get transaction_amountControllerText => 'Monto';
@@ -388,7 +393,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get transaction_descriptionControllerText => 'Descripción (opcional)';
 
   @override
-  String get transaction_amountControllerErrorText => 'Enter amount';
+  String get transaction_amountControllerErrorText => 'Ingrese el monto';
 
   @override
   String get transaction_selectAccountLabel => 'Seleccionar cuenta';
@@ -397,30 +402,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String get transaction_selectCategoryLabel => 'Seleccionar categoría';
 
   @override
-  String get transaction_selectTagLabel => 'Select Tag';
+  String get transaction_selectTagLabel => 'Seleccionar etiqueta';
 
   @override
-  String get transaction_addNewCategoryText => 'Add New \nCategory';
+  String get transaction_addNewCategoryText => 'Añadir nueva \ncategoría';
 
   @override
-  String get transaction_addNewTagText => 'Add New Tag';
+  String get transaction_addNewTagText => 'Añadir nueva etiqueta';
 
   @override
-  String get transaction_tagNameControllerText => 'Tag Name';
+  String get transaction_tagNameControllerText => 'Nombre de la etiqueta';
 
   @override
-  String get transaction_saveTagButtonLabel => 'Save Tag';
+  String get transaction_saveTagButtonLabel => 'Guardar etiqueta';
 
   @override
-  String get transaction_saveTransactionButtonLabel => 'Save Transaction';
+  String get transaction_saveTransactionButtonLabel => 'Guardar transacción';
 
   @override
   String get transaction_selectOneAccountErrorText =>
-      'Select at least one Account';
+      'Seleccione al menos una cuenta';
 
   @override
   String get transaction_selectOneCategoryErrorText =>
-      'Select at least one Category';
+      'Seleccione al menos una categoría';
 
   @override
   String get transaction_incomeButtonLabel => 'Ingreso';
@@ -430,25 +435,25 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get statistics_weTrimDownDecimalInfoText =>
-      'We trim down decimal places, please round off if required.';
+      'Reducimos los decimales, por favor redondee si es necesario.';
 
   @override
-  String get statistics_selectPeriodTodayText => 'Today';
+  String get statistics_selectPeriodTodayText => 'Hoy';
 
   @override
-  String get statistics_selectPeriodWeekText => 'Week';
+  String get statistics_selectPeriodWeekText => 'Semana';
 
   @override
-  String get statistics_selectPeriodMonthText => 'Month';
+  String get statistics_selectPeriodMonthText => 'Mes';
 
   @override
-  String get statistics_selectPeriodYearText => 'Year';
+  String get statistics_selectPeriodYearText => 'Año';
 
   @override
-  String get statistics_chartLineIncomeText => 'Income';
+  String get statistics_chartLineIncomeText => 'Ingresos';
 
   @override
-  String get statistics_chartLineExpenseText => 'Expense';
+  String get statistics_chartLineExpenseText => 'Gastos';
 
   @override
   String statistics_chartLineTodayHourText(Object hour) {
@@ -456,20 +461,21 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get statistics_categoryNotPresentText => 'Category not present.';
+  String get statistics_categoryNotPresentText => 'Categoría no presente.';
 
   @override
   String get statistics_transactionNotPresentText =>
-      'Transactions not present.';
+      'Transacciones no presentes.';
 
   @override
-  String get statistics_byCategoryTitleText => 'By Category';
+  String get statistics_byCategoryTitleText => 'Por categoría';
 
   @override
-  String get statistics_recentTransactionsTitleText => 'Recent Transactions';
+  String get statistics_recentTransactionsTitleText =>
+      'Transacciones recientes';
 
   @override
-  String get statistics_metricIncomeText => 'Income';
+  String get statistics_metricIncomeText => 'Ingresos';
 
   @override
   String get statistics_metricExpenseText => 'Expense';
@@ -1994,13 +2000,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String tone_professional_insightSpendingSpikeMessage(
-      String avg, String today) {
+    String avg,
+    String today,
+  ) {
     return 'Daily average: $avg. Today: $today.';
   }
 
   @override
   String tone_professional_insightWeekendAlertMessage(
-      String avg, String current) {
+    String avg,
+    String current,
+  ) {
     return 'Weekend average: $avg. Current: $current.';
   }
 
@@ -2054,13 +2064,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String tone_motivational_insightSpendingSpikeMessage(
-      String avg, String today) {
+    String avg,
+    String today,
+  ) {
     return 'Usually $avg/day. Today\'s $today — be intentional!';
   }
 
   @override
   String tone_motivational_insightWeekendAlertMessage(
-      String avg, String current) {
+    String avg,
+    String current,
+  ) {
     return 'Weekend avg: $avg. This one\'s $current — stay aware!';
   }
 
@@ -2121,37 +2135,61 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String tone_friendly_insightMoneyLeak(
-      String category, int count, String total) {
+    String category,
+    int count,
+    String total,
+  ) {
     return '$category: $count times this month, $total total — small hits add up';
   }
 
   @override
   String tone_friendly_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
     return '$wAvg avg on ${worst}s vs $bAvg on ${best}s — that\'s $saving you could keep';
   }
 
   @override
   String tone_professional_insightMoneyLeak(
-      String category, int count, String total) {
+    String category,
+    int count,
+    String total,
+  ) {
     return '$category: $count transactions, $total total this month.';
   }
 
   @override
   String tone_professional_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
     return '$wAvg avg on ${worst}s vs $bAvg on ${best}s. Potential saving: $saving.';
   }
 
   @override
   String tone_motivational_insightMoneyLeak(
-      String category, int count, String total) {
+    String category,
+    int count,
+    String total,
+  ) {
     return '$category: $count times, $total — small wins add up if you cut back!';
   }
 
   @override
   String tone_motivational_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
     return '$wAvg on ${worst}s vs $bAvg on ${best}s — $saving potential savings!';
   }
 
@@ -2162,7 +2200,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String tone_calm_insightBestDay(
-      String worst, String wAvg, String best, String bAvg, String saving) {
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) {
     return '${worst}s: $wAvg. ${best}s: $bAvg. $saving to keep.';
   }
 

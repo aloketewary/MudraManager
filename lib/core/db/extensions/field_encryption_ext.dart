@@ -210,6 +210,17 @@ extension GoalStreamDecryption on Stream<List<Goal>> {
   }
 }
 
+extension TransactionStreamDecryption on Stream<List<Transaction>> {
+  Stream<List<Transaction>> withDecryption() {
+    return map((list) {
+      for (final item in list) {
+        item.decryptFields();
+      }
+      return list;
+    });
+  }
+}
+
 extension RecurringTransactionStreamDecryption
     on Stream<List<RecurringTransaction>> {
   Stream<List<RecurringTransaction>> withDecryption() {
