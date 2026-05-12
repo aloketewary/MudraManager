@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
-import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -176,27 +175,32 @@ final statsProvider = FutureProvider.autoDispose.family<StatsData, String>((
   final avgDailySpend = expense / (daysInPeriod > 0 ? daysInPeriod : 1);
 
   // Calculate category trends for last 12 months
-  final Map<Category, List<FlSpot>> categoryTrends = {};
+  // BOLT OPTIMIZATION: Single-pass aggregation O(T) instead of O(C * T)
+  final Map<int, List<double>> monthlyValues = {};
+  final Map<int, Category> catMap = {};
   final trendStart = DateTime(now.year, now.month - 11, 1);
-  final expenseTxns =
-      allTxns.where((t) => t.isExpense && t.date.isAfter(trendStart)).toList();
 
-  for (final cat in cats.where((c) => c.categoryType == CategoryType.expense)) {
-    final monthlyData = <int, double>{};
-    for (final txn in expenseTxns) {
-      if (txn.category.value?.id == cat.id) {
-        final monthIndex = (txn.date.year - trendStart.year) * 12 +
-            (txn.date.month - trendStart.month);
-        monthlyData[monthIndex] = (monthlyData[monthIndex] ?? 0) + txn.effectiveAmount;
-      }
-    }
-    if (monthlyData.isNotEmpty) {
-      categoryTrends[cat] = List.generate(
-        12,
-        (i) => FlSpot(i.toDouble(), monthlyData[i] ?? 0),
-      );
+  for (final txn in allTxns) {
+    if (!txn.isExpense || txn.date.isBefore(trendStart)) continue;
+    final cat = txn.category.value;
+    if (cat == null) continue;
+
+    final monthIndex = (txn.date.year - trendStart.year) * 12 +
+        (txn.date.month - trendStart.month);
+
+    if (monthIndex >= 0 && monthIndex < 12) {
+      catMap[cat.id] = cat;
+      monthlyValues.putIfAbsent(cat.id, () => List<double>.filled(12, 0.0));
+      monthlyValues[cat.id]![monthIndex] += txn.effectiveAmount;
     }
   }
+
+  final categoryTrends = monthlyValues.map(
+    (id, values) => MapEntry(
+      catMap[id]!,
+      List.generate(12, (i) => FlSpot(i.toDouble(), values[i])),
+    ),
+  );
 
   return StatsData(
     income: income,
@@ -294,28 +298,33 @@ final customStatsProvider = FutureProvider.autoDispose.family<StatsData, String>
   final avgDailySpend = expense / days;
 
   // Calculate category trends for last 12 months
-  final Map<Category, List<FlSpot>> categoryTrends = {};
+  // BOLT OPTIMIZATION: Single-pass aggregation O(T) instead of O(C * T)
+  final Map<int, List<double>> monthlyValues = {};
+  final Map<int, Category> catMap = {};
   final now = DateTime.now();
   final trendStart = DateTime(now.year, now.month - 11, 1);
-  final expenseTxns =
-      allTxns.where((t) => t.isExpense && t.date.isAfter(trendStart)).toList();
 
-  for (final cat in cats.where((c) => c.categoryType == CategoryType.expense)) {
-    final monthlyData = <int, double>{};
-    for (final txn in expenseTxns) {
-      if (txn.category.value?.id == cat.id) {
-        final monthIndex = (txn.date.year - trendStart.year) * 12 +
-            (txn.date.month - trendStart.month);
-        monthlyData[monthIndex] = (monthlyData[monthIndex] ?? 0) + txn.effectiveAmount;
-      }
-    }
-    if (monthlyData.isNotEmpty) {
-      categoryTrends[cat] = List.generate(
-        12,
-        (i) => FlSpot(i.toDouble(), monthlyData[i] ?? 0),
-      );
+  for (final txn in allTxns) {
+    if (!txn.isExpense || txn.date.isBefore(trendStart)) continue;
+    final cat = txn.category.value;
+    if (cat == null) continue;
+
+    final monthIndex = (txn.date.year - trendStart.year) * 12 +
+        (txn.date.month - trendStart.month);
+
+    if (monthIndex >= 0 && monthIndex < 12) {
+      catMap[cat.id] = cat;
+      monthlyValues.putIfAbsent(cat.id, () => List<double>.filled(12, 0.0));
+      monthlyValues[cat.id]![monthIndex] += txn.effectiveAmount;
     }
   }
+
+  final categoryTrends = monthlyValues.map(
+    (id, values) => MapEntry(
+      catMap[id]!,
+      List.generate(12, (i) => FlSpot(i.toDouble(), values[i])),
+    ),
+  );
 
   return StatsData(
     income: income,
