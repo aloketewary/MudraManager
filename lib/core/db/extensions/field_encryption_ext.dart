@@ -6,8 +6,13 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
+import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 
 /// Encrypt sensitive fields before writing to Isar.
+///
+/// NOTE: FieldEncryptionService internally checks if a string is already encrypted
+/// (via 'ENC:' prefix), making it safe to call these methods on mixed data
+/// during migration or double-save scenarios.
 extension SmsActivityEncryption on SmsActivity {
   void encryptFields() {
     if (!FieldEncryptionService.isReady) return;
@@ -19,6 +24,18 @@ extension SmsActivityEncryption on SmsActivity {
     if (!FieldEncryptionService.isReady) return;
     body = FieldEncryptionService.decrypt(body);
     merchant = FieldEncryptionService.decryptNullable(merchant);
+  }
+}
+
+extension PendingTransactionEncryption on PendingTransaction {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    body = FieldEncryptionService.encrypt(body);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    body = FieldEncryptionService.decrypt(body);
   }
 }
 
@@ -101,6 +118,17 @@ extension SmsActivityListDecryption on Future<List<SmsActivity>> {
     final list = await this;
     for (final item in list) {
       item.decryptFields();
+    }
+    return list;
+  }
+}
+
+extension PendingTransactionListDecryption
+    on Future<List<PendingTransaction?>> {
+  Future<List<PendingTransaction?>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item?.decryptFields();
     }
     return list;
   }

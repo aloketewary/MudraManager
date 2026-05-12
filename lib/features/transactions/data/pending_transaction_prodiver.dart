@@ -2,6 +2,7 @@ import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart' as db_category;
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
@@ -45,24 +46,37 @@ class PendingTransactionService {
   Future<List<PendingTransaction>> saveAll(
     List<PendingTransaction> pendingTransactionList,
   ) async {
+    for (final p in pendingTransactionList) {
+      p.encryptFields();
+    }
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
       await isar.pendingTransactions.putAll(pendingTransactionList);
     });
+    for (final p in pendingTransactionList) {
+      p.decryptFields();
+    }
     return pendingTransactionList;
   }
 
   Future<PendingTransaction> save(PendingTransaction pendingTransaction) async {
+    pendingTransaction.encryptFields();
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
       await isar.pendingTransactions.put(pendingTransaction);
     });
+    // Decrypt after save to keep the object usable in UI
+    pendingTransaction.decryptFields();
     return pendingTransaction;
   }
 
   Future<List<PendingTransaction?>> getAllPendingTransaction() async {
     final isar = await isarService.getInstance();
-    return isar.pendingTransactions.where().sortByDate().findAll();
+    return isar.pendingTransactions
+        .where()
+        .sortByDate()
+        .findAll()
+        .withDecryption();
   }
 
   Future<void> remove(PendingTransaction pendingTx) async {
@@ -151,7 +165,9 @@ class PendingTransactionService {
         pending.amount ??= double.tryParse(info.money ?? '');
         pending.isIncome ??= info.typeOfTransaction == TransactionType.credited;
         // Optionally update the DB record so it stays healed
+        pending.encryptFields();
         await isar.pendingTransactions.put(pending);
+        pending.decryptFields();
       }
     }
 
