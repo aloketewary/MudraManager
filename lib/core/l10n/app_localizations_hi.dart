@@ -974,6 +974,21 @@ class AppLocalizationsHi extends AppLocalizations {
   String get common_reset => 'रीसेट';
 
   @override
+  String get common_calculator => 'Calculator';
+
+  @override
+  String get common_customize => 'Customize';
+
+  @override
+  String get common_download => 'Download';
+
+  @override
+  String get common_notifications => 'Notifications';
+
+  @override
+  String get common_clear => 'Clear';
+
+  @override
   String get common_viewDetails => 'विस्तार से देखें';
 
   @override
@@ -5803,6 +5818,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get category_mergeSelectTarget => 'Target category चुनें';
+
+  @override
+  String get category_selectInstruction =>
+      'Tap to select • Long press parent to select without subcategories';
 
   @override
   String get notif_morningInsightTitle => '☀️ सुबह का पैसा update';

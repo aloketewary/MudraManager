@@ -3330,6 +3330,10 @@
   "category_mergeSuccess": "Categories merged successfully",
   "category_mergeSameError": "Cannot merge a category into itself",
   "category_mergeSelectTarget": "Select target category",
+  "category_selectInstruction": "Tap to select • Long press parent to select without subcategories",
+  "@category_selectInstruction": {
+    "description": "Instruction hint in category selector"
+  },
 
   "notif_morningInsightTitle": "☀️ Your morning money minute",
   "notif_weeklyRecapNudgeTitle": "📊 Your weekly recap is ready",
