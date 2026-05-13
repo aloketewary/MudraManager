@@ -284,10 +284,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String budget_dashboardPieChartLabelText(
-    Object spentPercent,
-    Object title,
-    Object totalPercent,
-  ) {
+      Object spentPercent, Object title, Object totalPercent) {
     return '$title ($totalPercent du total, $spentPercent des dépenses)';
   }
 
@@ -2039,17 +2036,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String tone_professional_insightSpendingSpikeMessage(
-    String avg,
-    String today,
-  ) {
+      String avg, String today) {
     return 'Moyenne quotidienne : $avg. Aujourd\'hui : $today.';
   }
 
   @override
   String tone_professional_insightWeekendAlertMessage(
-    String avg,
-    String current,
-  ) {
+      String avg, String current) {
     return 'Moyenne du week-end : $avg. Actuel : $current.';
   }
 
@@ -2105,17 +2098,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String tone_motivational_insightSpendingSpikeMessage(
-    String avg,
-    String today,
-  ) {
+      String avg, String today) {
     return 'D\'habitude $avg/jour. Aujourd\'hui $today — soyez intentionnel !';
   }
 
   @override
   String tone_motivational_insightWeekendAlertMessage(
-    String avg,
-    String current,
-  ) {
+      String avg, String current) {
     return 'Moyenne week-end : $avg. Celui-ci est à $current — restez conscient !';
   }
 
@@ -2177,61 +2166,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String tone_friendly_insightMoneyLeak(
-    String category,
-    int count,
-    String total,
-  ) {
+      String category, int count, String total) {
     return '$category : $count fois ce mois-ci, $total au total — les petits coups s\'additionnent';
   }
 
   @override
   String tone_friendly_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  ) {
+      String worst, String wAvg, String best, String bAvg, String saving) {
     return '$wAvg en moyenne les ${worst}s contre $bAvg les ${best}s — c\'est $saving que vous pourriez garder';
   }
 
   @override
   String tone_professional_insightMoneyLeak(
-    String category,
-    int count,
-    String total,
-  ) {
+      String category, int count, String total) {
     return '$category : $count transactions, $total au total ce mois-ci.';
   }
 
   @override
   String tone_professional_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  ) {
+      String worst, String wAvg, String best, String bAvg, String saving) {
     return '$wAvg en moyenne les ${worst}s contre $bAvg les ${best}s. Économie potentielle : $saving.';
   }
 
   @override
   String tone_motivational_insightMoneyLeak(
-    String category,
-    int count,
-    String total,
-  ) {
+      String category, int count, String total) {
     return '$category : $count fois, $total — de petites victoires s\'ajoutent si vous réduisez !';
   }
 
   @override
   String tone_motivational_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  ) {
+      String worst, String wAvg, String best, String bAvg, String saving) {
     return '$wAvg les ${worst}s contre $bAvg les ${best}s — $saving d\'économies potentielles !';
   }
 
@@ -2242,12 +2207,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String tone_calm_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  ) {
+      String worst, String wAvg, String best, String bAvg, String saving) {
     return '${worst}s : $wAvg. ${best}s : $bAvg. $saving à garder.';
   }
 
@@ -3055,6 +3015,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String insight_bestDayTitle(String day) {
     return 'Les ${day}s vous coûtent le plus cher';
   }
+
+  @override
+  String get budget_alert_exceededTitle => 'Budget Exceeded!';
+
+  @override
+  String budget_alert_warningTitle(Object percent) {
+    return 'Budget Alert: $percent%';
+  }
+
+  @override
+  String get label_percentage_with_colon => 'Percentage:';
+
+  @override
+  String get label_budget_with_colon => 'Budget:';
+
+  @override
+  String get label_spent_with_colon => 'Spent:';
 
   @override
   String get bills_howBillsWorkTitle => 'Comment fonctionnent les factures';

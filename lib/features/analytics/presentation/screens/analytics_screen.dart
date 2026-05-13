@@ -257,7 +257,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         Icon(LucideIcons.trendingUp, color: color.primary, size: 24),
                         const SizedBox(width: 10),
                         Text(AppLocalizations.of(context)!.analytics_cashFlowForecast, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                      ]),
+                      ],),
                       const SizedBox(height: 16),
                       // Current month projection
                       Container(
@@ -275,7 +275,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                               color: forecast.projectedNet >= 0 ? FinanceColors.incomeColor(Theme.of(context).brightness) : FinanceColors.expenseColor(Theme.of(context).brightness),
                             ),
                           ),
-                        ]),
+                        ],),
                       ),
                       const SizedBox(height: 12),
                       // Next 3 months
@@ -297,9 +297,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                               size: 16,
                               color: m.isPositive ? FinanceColors.incomeColor(Theme.of(context).brightness) : FinanceColors.expenseColor(Theme.of(context).brightness),
                             ),
-                          ]),
-                        ]),
-                      )),
+                          ],),
+                        ],),
+                      ),),
                       const SizedBox(height: 12),
                       // Summary
                       Center(
@@ -314,7 +314,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     ],
                   ),
                 ),
-              )),
+              ),),
               loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const InlineError(),
             ),
@@ -436,7 +436,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       ],
                     ),
                   ),
-                ));
+                ),);
               },
               loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const InlineError(),

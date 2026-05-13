@@ -277,10 +277,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String budget_dashboardPieChartLabelText(
-    Object spentPercent,
-    Object title,
-    Object totalPercent,
-  ) {
+      Object spentPercent, Object title, Object totalPercent) {
     return '$title ($totalPercent कुल का, $spentPercent खर्च का)';
   }
 
@@ -1978,17 +1975,13 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String tone_professional_insightSpendingSpikeMessage(
-    String avg,
-    String today,
-  ) {
+      String avg, String today) {
     return 'Daily average: $avg। आज: $today।';
   }
 
   @override
   String tone_professional_insightWeekendAlertMessage(
-    String avg,
-    String current,
-  ) {
+      String avg, String current) {
     return 'Weekend average: $avg। अभी: $current।';
   }
 
@@ -2039,17 +2032,13 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String tone_motivational_insightSpendingSpikeMessage(
-    String avg,
-    String today,
-  ) {
+      String avg, String today) {
     return 'आमतौर पर $avg/day। आज $today — intentional रहें!';
   }
 
   @override
   String tone_motivational_insightWeekendAlertMessage(
-    String avg,
-    String current,
-  ) {
+      String avg, String current) {
     return 'Weekend avg: $avg। इस बार $current — aware रहें!';
   }
 
@@ -2110,61 +2099,37 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String tone_friendly_insightMoneyLeak(
-    String category,
-    int count,
-    String total,
-  ) {
+      String category, int count, String total) {
     return '$category: इस महीने $count बार, कुल $total — छोटे खर्च भी जोड़ लेते हैं';
   }
 
   @override
   String tone_friendly_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  ) {
+      String worst, String wAvg, String best, String bAvg, String saving) {
     return '${worst}s पर avg $wAvg vs ${best}s पर $bAvg — $saving बचा सकते हैं';
   }
 
   @override
   String tone_professional_insightMoneyLeak(
-    String category,
-    int count,
-    String total,
-  ) {
+      String category, int count, String total) {
     return '$category: $count transactions, कुल $total इस महीने।';
   }
 
   @override
   String tone_professional_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  ) {
+      String worst, String wAvg, String best, String bAvg, String saving) {
     return '${worst}s पर avg $wAvg vs ${best}s पर $bAvg। बचत की संभावना: $saving।';
   }
 
   @override
   String tone_motivational_insightMoneyLeak(
-    String category,
-    int count,
-    String total,
-  ) {
+      String category, int count, String total) {
     return '$category: $count बार, $total — छोटी जीत बड़ा फर्क लाती है!';
   }
 
   @override
   String tone_motivational_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  ) {
+      String worst, String wAvg, String best, String bAvg, String saving) {
     return '${worst}s पर $wAvg vs ${best}s पर $bAvg — $saving बचा सकते हैं!';
   }
 
@@ -2175,12 +2140,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String tone_calm_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  ) {
+      String worst, String wAvg, String best, String bAvg, String saving) {
     return '${worst}s: $wAvg। ${best}s: $bAvg। $saving बचा सकते हैं।';
   }
 
@@ -2963,6 +2923,23 @@ class AppLocalizationsHi extends AppLocalizations {
   String insight_bestDayTitle(String day) {
     return '$day को सबसे ज़्यादा खर्च होता है';
   }
+
+  @override
+  String get budget_alert_exceededTitle => 'Budget Exceeded!';
+
+  @override
+  String budget_alert_warningTitle(Object percent) {
+    return 'Budget Alert: $percent%';
+  }
+
+  @override
+  String get label_percentage_with_colon => 'Percentage:';
+
+  @override
+  String get label_budget_with_colon => 'Budget:';
+
+  @override
+  String get label_spent_with_colon => 'Spent:';
 
   @override
   String get bills_howBillsWorkTitle => 'बिल कैसे काम करते हैं';

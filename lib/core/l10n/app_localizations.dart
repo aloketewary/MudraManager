@@ -98,7 +98,7 @@ import 'app_localizations_zh.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -121,11 +121,11 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -165,7 +165,7 @@ abstract class AppLocalizations {
     Locale('tr'),
     Locale('ur'),
     Locale('vi'),
-    Locale('zh'),
+    Locale('zh')
   ];
 
   /// Manage your money smartly & effortlessly.
@@ -671,10 +671,7 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{title} ({totalPercent} of Total, {spentPercent}of Spent)'**
   String budget_dashboardPieChartLabelText(
-    Object spentPercent,
-    Object title,
-    Object totalPercent,
-  );
+      Object spentPercent, Object title, Object totalPercent);
 
   /// This is text of delete title
   ///
@@ -3795,18 +3792,14 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Daily average: {avg}. Today: {today}.'**
   String tone_professional_insightSpendingSpikeMessage(
-    String avg,
-    String today,
-  );
+      String avg, String today);
 
   /// No description provided for @tone_professional_insightWeekendAlertMessage.
   ///
   /// In en, this message translates to:
   /// **'Weekend average: {avg}. Current: {current}.'**
   String tone_professional_insightWeekendAlertMessage(
-    String avg,
-    String current,
-  );
+      String avg, String current);
 
   /// No description provided for @tone_motivational_insightBillsDueSoon.
   ///
@@ -3885,18 +3878,14 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Usually {avg}/day. Today\'s {today} — be intentional!'**
   String tone_motivational_insightSpendingSpikeMessage(
-    String avg,
-    String today,
-  );
+      String avg, String today);
 
   /// No description provided for @tone_motivational_insightWeekendAlertMessage.
   ///
   /// In en, this message translates to:
   /// **'Weekend avg: {avg}. This one\'s {current} — stay aware!'**
   String tone_motivational_insightWeekendAlertMessage(
-    String avg,
-    String current,
-  );
+      String avg, String current);
 
   /// No description provided for @tone_calm_insightBillsDueSoon.
   ///
@@ -3987,66 +3976,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{category}: {count} times this month, {total} total — small hits add up'**
   String tone_friendly_insightMoneyLeak(
-    String category,
-    int count,
-    String total,
-  );
+      String category, int count, String total);
 
   /// No description provided for @tone_friendly_insightBestDay.
   ///
   /// In en, this message translates to:
   /// **'{wAvg} avg on {worst}s vs {bAvg} on {best}s — that\'s {saving} you could keep'**
   String tone_friendly_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  );
+      String worst, String wAvg, String best, String bAvg, String saving);
 
   /// No description provided for @tone_professional_insightMoneyLeak.
   ///
   /// In en, this message translates to:
   /// **'{category}: {count} transactions, {total} total this month.'**
   String tone_professional_insightMoneyLeak(
-    String category,
-    int count,
-    String total,
-  );
+      String category, int count, String total);
 
   /// No description provided for @tone_professional_insightBestDay.
   ///
   /// In en, this message translates to:
   /// **'{wAvg} avg on {worst}s vs {bAvg} on {best}s. Potential saving: {saving}.'**
   String tone_professional_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  );
+      String worst, String wAvg, String best, String bAvg, String saving);
 
   /// No description provided for @tone_motivational_insightMoneyLeak.
   ///
   /// In en, this message translates to:
   /// **'{category}: {count} times, {total} — small wins add up if you cut back!'**
   String tone_motivational_insightMoneyLeak(
-    String category,
-    int count,
-    String total,
-  );
+      String category, int count, String total);
 
   /// No description provided for @tone_motivational_insightBestDay.
   ///
   /// In en, this message translates to:
   /// **'{wAvg} on {worst}s vs {bAvg} on {best}s — {saving} potential savings!'**
   String tone_motivational_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  );
+      String worst, String wAvg, String best, String bAvg, String saving);
 
   /// No description provided for @tone_calm_insightMoneyLeak.
   ///
@@ -4059,12 +4024,7 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{worst}s: {wAvg}. {best}s: {bAvg}. {saving} to keep.'**
   String tone_calm_insightBestDay(
-    String worst,
-    String wAvg,
-    String best,
-    String bAvg,
-    String saving,
-  );
+      String worst, String wAvg, String best, String bAvg, String saving);
 
   /// No description provided for @tone_friendly_txnNotFound.
   ///
@@ -5397,6 +5357,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{day}s cost you the most'**
   String insight_bestDayTitle(String day);
+
+  /// No description provided for @budget_alert_exceededTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Exceeded!'**
+  String get budget_alert_exceededTitle;
+
+  /// No description provided for @budget_alert_warningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Alert: {percent}%'**
+  String budget_alert_warningTitle(Object percent);
+
+  /// No description provided for @label_percentage_with_colon.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage:'**
+  String get label_percentage_with_colon;
+
+  /// No description provided for @label_budget_with_colon.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget:'**
+  String get label_budget_with_colon;
+
+  /// No description provided for @label_spent_with_colon.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent:'**
+  String get label_spent_with_colon;
 
   /// No description provided for @bills_howBillsWorkTitle.
   ///
@@ -11290,44 +11280,44 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) => <String>[
-    'ar',
-    'as',
-    'bn',
-    'bo',
-    'brx',
-    'de',
-    'doi',
-    'en',
-    'es',
-    'fr',
-    'gu',
-    'hi',
-    'id',
-    'ja',
-    'kn',
-    'ko',
-    'kok',
-    'mai',
-    'ml',
-    'mni',
-    'mr',
-    'ms',
-    'ne',
-    'or',
-    'pa',
-    'pt',
-    'sat',
-    'sd',
-    'si',
-    'sw',
-    'ta',
-    'te',
-    'th',
-    'tr',
-    'ur',
-    'vi',
-    'zh',
-  ].contains(locale.languageCode);
+        'ar',
+        'as',
+        'bn',
+        'bo',
+        'brx',
+        'de',
+        'doi',
+        'en',
+        'es',
+        'fr',
+        'gu',
+        'hi',
+        'id',
+        'ja',
+        'kn',
+        'ko',
+        'kok',
+        'mai',
+        'ml',
+        'mni',
+        'mr',
+        'ms',
+        'ne',
+        'or',
+        'pa',
+        'pt',
+        'sat',
+        'sd',
+        'si',
+        'sw',
+        'ta',
+        'te',
+        'th',
+        'tr',
+        'ur',
+        'vi',
+        'zh'
+      ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -11413,9 +11403,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
-  );
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

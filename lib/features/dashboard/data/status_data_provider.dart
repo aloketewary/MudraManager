@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
