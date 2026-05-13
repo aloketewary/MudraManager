@@ -4,6 +4,8 @@ import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
+import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
+import 'package:mudra_manager/core/db/models/goal.dart';
 
 /// Encrypt sensitive fields before writing to Isar.
 extension SmsActivityEncryption on SmsActivity {
@@ -21,6 +23,18 @@ extension SmsActivityEncryption on SmsActivity {
 }
 
 extension TransactionEncryption on Transaction {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    description = FieldEncryptionService.encryptNullable(description);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    description = FieldEncryptionService.decryptNullable(description);
+  }
+}
+
+extension RecurringTransactionEncryption on RecurringTransaction {
   void encryptFields() {
     if (!FieldEncryptionService.isReady) return;
     description = FieldEncryptionService.encryptNullable(description);
@@ -92,6 +106,39 @@ extension SmsActivityListDecryption on Future<List<SmsActivity>> {
   }
 }
 
+extension GoalEncryption on Goal {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    description = FieldEncryptionService.encryptNullable(description);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    description = FieldEncryptionService.decryptNullable(description);
+  }
+}
+
+extension GoalListDecryption on Future<List<Goal>> {
+  Future<List<Goal>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
+  }
+}
+
+extension RecurringTransactionListDecryption
+    on Future<List<RecurringTransaction>> {
+  Future<List<RecurringTransaction>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
+  }
+}
+
 extension TransactionListDecryption on Future<List<Transaction>> {
   Future<List<Transaction>> withDecryption() async {
     final list = await this;
@@ -115,6 +162,29 @@ extension NotificationRecordListDecryption on Future<List<NotificationRecord>> {
 extension NotificationRecordStreamDecryption
     on Stream<List<NotificationRecord>> {
   Stream<List<NotificationRecord>> withDecryption() {
+    return map((list) {
+      for (final item in list) {
+        item.decryptFields();
+      }
+      return list;
+    });
+  }
+}
+
+extension GoalStreamDecryption on Stream<List<Goal>> {
+  Stream<List<Goal>> withDecryption() {
+    return map((list) {
+      for (final item in list) {
+        item.decryptFields();
+      }
+      return list;
+    });
+  }
+}
+
+extension RecurringTransactionStreamDecryption
+    on Stream<List<RecurringTransaction>> {
+  Stream<List<RecurringTransaction>> withDecryption() {
     return map((list) {
       for (final item in list) {
         item.decryptFields();

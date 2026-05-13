@@ -75,22 +75,21 @@ final monthlyExpenseTrendsProvider =
 
   final categoryMonthlyData = <String, List<double>>{};
 
-  for (int i = 11; i >= 0; i--) {
-    final month = DateTime(now.year, now.month - i);
-    final monthTxns = transactions.where(
-      (tx) =>
-          tx.isExpense &&
-          tx.date.year == month.year &&
-          tx.date.month == month.month,
-    );
+  // OPTIMIZED: Single pass aggregation instead of nested loops
+  for (final tx in transactions) {
+    if (!tx.isExpense) continue;
 
-    for (var tx in monthTxns) {
+    // Calculate month index (0 = 11 months ago, 11 = this month)
+    final monthDiff =
+        (now.year - tx.date.year) * 12 + (now.month - tx.date.month);
+
+    if (monthDiff >= 0 && monthDiff < 12) {
       final categoryName = tx.category.value?.name ?? 'Uncategorized';
-      if (!categoryMonthlyData.containsKey(categoryName)) {
-        categoryMonthlyData[categoryName] =
-            List<double>.generate(12, (_) => 0.0);
-      }
-      categoryMonthlyData[categoryName]![11 - i] += tx.effectiveAmount;
+      categoryMonthlyData.putIfAbsent(
+        categoryName,
+        () => List<double>.filled(12, 0.0),
+      );
+      categoryMonthlyData[categoryName]![11 - monthDiff] += tx.effectiveAmount;
     }
   }
 

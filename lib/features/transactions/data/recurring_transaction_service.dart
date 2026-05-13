@@ -4,6 +4,7 @@ import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
@@ -117,7 +118,8 @@ class RecurringTransactionService {
         .isTransferEqualTo(false)
         .dateBetween(searchStart, searchEnd)
         .amountBetween(recurring.amount - 0.01, recurring.amount + 0.01)
-        .findAll();
+        .findAll()
+        .withDecryption();
 
     // Find one that isn't already linked to a recurring source
     for (final txn in candidates) {
@@ -134,6 +136,7 @@ class RecurringTransactionService {
   Future<void> _linkTransactionToRecurring(
       Isar isar, Transaction txn, RecurringTransaction recurring,) async {
     txn.recurringTransactionSource.value = recurring;
+    txn.encryptFields();
     await isar.writeTxn(() async {
       await isar.transactions.put(txn);
       await txn.recurringTransactionSource.save();
@@ -188,6 +191,7 @@ class RecurringTransactionService {
       ..category.value = recurring.category.value
       ..recurringTransactionSource.value = recurring;
 
+    transaction.encryptFields();
     await isar.writeTxn(() async {
       await isar.transactions.put(transaction);
       await transaction.account.save();
@@ -223,6 +227,7 @@ class RecurringTransactionService {
       recurring.nextDueDate = nextDate;
     }
 
+    recurring.encryptFields();
     await isar.writeTxn(() async {
       await isar.recurringTransactions.put(recurring);
     });
@@ -231,6 +236,7 @@ class RecurringTransactionService {
   Future<void> save(RecurringTransaction recurring) async {
     final isar = await isarService.getInstance();
     final isNew = recurring.id == Isar.autoIncrement;
+    recurring.encryptFields();
     await isar.writeTxn(() async {
       await isar.recurringTransactions.put(recurring);
       await recurring.account.save();
@@ -251,7 +257,7 @@ class RecurringTransactionService {
 
   Future<List<RecurringTransaction>> getAll() async {
     final isar = await isarService.getInstance();
-    final all = await isar.recurringTransactions.where().findAll();
+    final all = await isar.recurringTransactions.where().findAll().withDecryption();
     for (var r in all) {
       await r.category.load();
       await r.account.load();
@@ -262,7 +268,7 @@ class RecurringTransactionService {
   Stream<List<RecurringTransaction>> watchAll() async* {
     final isar = await isarService.getInstance();
     await for (final list
-        in isar.recurringTransactions.where().watch(fireImmediately: true)) {
+        in isar.recurringTransactions.where().watch(fireImmediately: true).withDecryption()) {
       for (var r in list) {
         await r.category.load();
         await r.account.load();

@@ -1,4 +1,6 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
@@ -58,6 +60,8 @@ class _CategorySelectorBottomSheetState
     );
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
@@ -67,7 +71,7 @@ class _CategorySelectorBottomSheetState
       builder: (context, scrollController) => Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(spacing.cardInner),
             child: Column(
               children: [
                 Container(
@@ -78,19 +82,19 @@ class _CategorySelectorBottomSheetState
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: spacing.sectionGap),
                 Row(
                   children: [
                     if (_selectedParent != null)
                       IconButton(
-                        tooltip: 'Back',
+                        tooltip: ctxt.common_back,
                         icon: const Icon(LucideIcons.arrowLeft),
                         onPressed: () => setState(() => _selectedParent = null),
                       ),
                     Expanded(
                       child: Text(
                         _selectedParent == null
-                            ? 'Select Category'
+                            ? ctxt.transaction_selectCategoryLabel
                             : _selectedParent!.name,
                         style: textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -104,9 +108,9 @@ class _CategorySelectorBottomSheetState
                 ),
                 if (_selectedParent == null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 8),
+                    padding: EdgeInsets.only(top: spacing.elementGap),
                     child: Text(
-                      'Tap to select • Long press parent to select without subcategories',
+                      ctxt.category_selectInstruction,
                       style: textTheme.bodySmall?.copyWith(
                         color: color.onSurfaceVariant,
                       ),
@@ -124,7 +128,7 @@ class _CategorySelectorBottomSheetState
                 if (filtered.isEmpty) {
                   return Center(
                     child: Text(
-                      'No categories found',
+                      ctxt.categories_noCategoriesFound,
                       style: textTheme.bodyMedium,
                     ),
                   );
@@ -143,7 +147,7 @@ class _CategorySelectorBottomSheetState
 
                 return GridView.builder(
                   controller: scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: ResponsiveHelper.getGridCrossAxisCount(
                       context,
@@ -188,7 +192,7 @@ class _CategorySelectorBottomSheetState
                             top: 4,
                             right: 4,
                             child: Container(
-                              padding: const EdgeInsets.all(4),
+                              padding: EdgeInsets.all(spacing.elementGapMin),
                               decoration: BoxDecoration(
                                 color: color.primary,
                                 shape: BoxShape.circle,
@@ -206,7 +210,7 @@ class _CategorySelectorBottomSheetState
                 );
               },
               loading: () => GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 12,

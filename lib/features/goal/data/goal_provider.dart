@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
@@ -29,6 +30,7 @@ class GoalService {
 
   Future<void> addGoal(Goal goal) async {
     final isar = await isarService.getInstance();
+    goal.encryptFields();
     await isar.writeTxn(() async {
       await isar.goals.put(goal);
     });
@@ -38,6 +40,7 @@ class GoalService {
 
   Future<void> updateGoal(Goal goal) async {
     final isar = await isarService.getInstance();
+    goal.encryptFields();
     await isar.writeTxn(() async {
       await isar.goals.put(goal);
     });
@@ -60,6 +63,7 @@ class GoalService {
       if (goal != null) {
         goal!.currentAmount += amount;
         goal!.contributions.add(GoalContribution.create(amount));
+        goal!.encryptFields();
         await isar.goals.put(goal!);
       }
     });
@@ -75,7 +79,7 @@ class GoalService {
     if (!(prefs.getBool('smart_alerts_enabled') ?? true)) return;
 
     final isar = await isarService.getInstance();
-    final goals = await isar.goals.where().findAll();
+    final goals = await isar.goals.where().findAll().withDecryption();
     if (goals.isEmpty) {
       // If we want to cancel the specific goal reminder ID, we should use that ID (1)
       // await NotificationService.cancelGoalReminder(); // if we added such a method
@@ -94,6 +98,6 @@ class GoalService {
 
   Stream<List<Goal>> watchAll() async* {
     final isar = await isarService.getInstance();
-    yield* isar.goals.where().watch(fireImmediately: true);
+    yield* isar.goals.where().watch(fireImmediately: true).withDecryption();
   }
 }

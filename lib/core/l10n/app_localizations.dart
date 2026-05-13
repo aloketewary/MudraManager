@@ -10644,6 +10644,12 @@ abstract class AppLocalizations {
   /// **'Select target category'**
   String get category_mergeSelectTarget;
 
+  /// Instruction hint in category selector
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to select • Long press parent to select without subcategories'**
+  String get category_selectInstruction;
+
   /// No description provided for @notif_morningInsightTitle.
   ///
   /// In en, this message translates to:

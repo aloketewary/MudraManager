@@ -240,7 +240,7 @@ class BackupService {
 
     // Backup Recurring Transactions
     final recurringTransactions =
-        await isar.recurringTransactions.where().findAll();
+        await isar.recurringTransactions.where().findAll().withDecryption();
     backupData['RecurringTransaction'] = recurringTransactions
         .map(
           (rt) => RecurringTransactionBackup.fromRecurringTransaction(
@@ -267,7 +267,7 @@ class BackupService {
         .toList();
 
     // Backup Goals
-    final goals = await isar.goals.where().findAll();
+    final goals = await isar.goals.where().findAll().withDecryption();
     backupData['Goal'] =
         goals.map((goal) => GoalBackup.fromGoal(goal).toBackupJson()).toList();
 
@@ -482,6 +482,7 @@ class BackupService {
                   Map<String, dynamic>.from(itemJson),
                   restoredObjects,
                 );
+            rt.encryptFields();
                 await isar.recurringTransactions.put(rt);
                 await rt.category.save();
                 await rt.account.save();
@@ -509,6 +510,7 @@ class BackupService {
                   Map<String, dynamic>.from(itemJson),
                   restoredObjects,
                 );
+                goal.encryptFields();
                 await isar.goals.put(goal);
                 await goal.linkedAccount.save();
                 fullyLinkedModel = goal;

@@ -5831,6 +5831,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get category_mergeSelectTarget => 'Target category বেছে নিন';
 
   @override
+  String get category_selectInstruction =>
+      'Tap to select • Long press parent to select without subcategories';
+
+  @override
   String get notif_morningInsightTitle => '☀️ সকালের টাকার update';
 
   @override
