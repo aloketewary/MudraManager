@@ -975,6 +975,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get common_reset => 'Restablecer';
 
   @override
+  String get common_calculator => 'Calculator';
+
+  @override
+  String get common_customize => 'Customize';
+
+  @override
+  String get common_download => 'Download';
+
+  @override
+  String get common_notifications => 'Notifications';
+
+  @override
+  String get common_clear => 'Clear';
+
+  @override
   String get common_viewDetails => 'View details';
 
   @override

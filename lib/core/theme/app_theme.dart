@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -216,7 +215,7 @@ class AppTheme {
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tone.buttonRadius)),
+            borderRadius: BorderRadius.circular(tone.buttonRadius),),
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -233,7 +232,7 @@ class AppTheme {
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tone.buttonRadius)),
+            borderRadius: BorderRadius.circular(tone.buttonRadius),),
         foregroundColor: colorScheme.primary,
         textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
       ),
@@ -294,7 +293,7 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tone.buttonRadius)),
+            borderRadius: BorderRadius.circular(tone.buttonRadius),),
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         elevation: 1,
@@ -312,7 +311,7 @@ class AppTheme {
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tone.buttonRadius)),
+            borderRadius: BorderRadius.circular(tone.buttonRadius),),
         foregroundColor: colorScheme.primary,
         side: BorderSide(color: colorScheme.outline),
         textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -334,7 +333,7 @@ class AppTheme {
       ),
       errorStyle: textTheme.bodySmall?.copyWith(color: colorScheme.error),
       border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(tone.inputRadius)),
+          borderRadius: BorderRadius.circular(tone.inputRadius),),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(tone.inputRadius),
         borderSide: BorderSide(color: colorScheme.primary, width: 2),

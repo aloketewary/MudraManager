@@ -1975,6 +1975,36 @@ abstract class AppLocalizations {
   /// **'Reset'**
   String get common_reset;
 
+  /// No description provided for @common_calculator.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculator'**
+  String get common_calculator;
+
+  /// No description provided for @common_customize.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize'**
+  String get common_customize;
+
+  /// No description provided for @common_download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get common_download;
+
+  /// No description provided for @common_notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get common_notifications;
+
+  /// No description provided for @common_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get common_clear;
+
   /// No description provided for @common_viewDetails.
   ///
   /// In en, this message translates to:
