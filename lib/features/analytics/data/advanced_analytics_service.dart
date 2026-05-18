@@ -10,22 +10,24 @@ class AdvancedAnalyticsService {
     final now = DateTime.now();
     final transactions = await _transactionService.getAllForDashBoard();
 
+    final monthTotals = List<double>.filled(3, 0.0);
+
+    // OPTIMIZED: Single pass aggregation
+    for (final tx in transactions) {
+      if (!tx.isExpense) continue;
+
+      final monthDiff =
+          (now.year - tx.date.year) * 12 + (now.month - tx.date.month);
+      if (monthDiff >= 1 && monthDiff <= 3) {
+        monthTotals[monthDiff - 1] += tx.effectiveAmount;
+      }
+    }
+
     double total = 0;
     int count = 0;
-
-    for (int i = 1; i <= 3; i++) {
-      final month = DateTime(now.year, now.month - i);
-      final monthTotal = transactions
-          .where(
-            (tx) =>
-                tx.isExpense &&
-                tx.date.year == month.year &&
-                tx.date.month == month.month,
-          )
-          .fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
-
-      if (monthTotal > 0) {
-        total += monthTotal;
+    for (final mTotal in monthTotals) {
+      if (mTotal > 0) {
+        total += mTotal;
         count++;
       }
     }
@@ -39,35 +41,29 @@ class AdvancedAnalyticsService {
     final now = DateTime.now();
     final transactions = await _transactionService.getAllForDashBoard();
 
-    // Build 6-month history
-    final incomeHistory = <double>[];
-    final expenseHistory = <double>[];
-    final months = <DateTime>[];
-
-    for (int i = 1; i <= 6; i++) {
-      final month = DateTime(now.year, now.month - i);
-      months.add(month);
-      double inc = 0, exp = 0;
-      for (final tx in transactions.where((t) =>
-          t.date.year == month.year && t.date.month == month.month && !t.isTransfer,)) {
-        if (tx.isExpense) {
-          exp += tx.effectiveAmount;
-        } else {
-          inc += tx.effectiveAmount;
-        }
-      }
-      incomeHistory.add(inc);
-      expenseHistory.add(exp);
-    }
-
-    // Current month (partial)
+    final incomeHistory = List<double>.filled(6, 0.0);
+    final expenseHistory = List<double>.filled(6, 0.0);
     double currentIncome = 0, currentExpense = 0;
-    for (final tx in transactions.where((t) =>
-        t.date.year == now.year && t.date.month == now.month && !t.isTransfer,)) {
-      if (tx.isExpense) {
-        currentExpense += tx.effectiveAmount;
-      } else {
-        currentIncome += tx.effectiveAmount;
+
+    // OPTIMIZED: Single pass aggregation for history and current month
+    for (final tx in transactions) {
+      if (tx.isTransfer) continue;
+
+      final monthDiff =
+          (now.year - tx.date.year) * 12 + (now.month - tx.date.month);
+
+      if (monthDiff == 0) {
+        if (tx.isExpense) {
+          currentExpense += tx.effectiveAmount;
+        } else {
+          currentIncome += tx.effectiveAmount;
+        }
+      } else if (monthDiff >= 1 && monthDiff <= 6) {
+        if (tx.isExpense) {
+          expenseHistory[monthDiff - 1] += tx.effectiveAmount;
+        } else {
+          incomeHistory[monthDiff - 1] += tx.effectiveAmount;
+        }
       }
     }
 
@@ -129,19 +125,20 @@ class AdvancedAnalyticsService {
     final now = DateTime.now();
     final transactions = await _transactionService.getAllForDashBoard();
 
-    final thisMonth = transactions.where(
-      (tx) =>
-          tx.date.year == now.year &&
-          tx.date.month == now.month &&
-          tx.affectsStats,
-    );
+    double income = 0;
+    double expense = 0;
 
-    final income = thisMonth
-        .where((tx) => !tx.isExpense)
-        .fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
-    final expense = thisMonth
-        .where((tx) => tx.isExpense)
-        .fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
+    // OPTIMIZED: Single pass to calculate current month income and expense
+    for (final tx in transactions) {
+      if (!tx.affectsStats) continue;
+      if (tx.date.year == now.year && tx.date.month == now.month) {
+        if (tx.isExpense) {
+          expense += tx.effectiveAmount;
+        } else {
+          income += tx.effectiveAmount;
+        }
+      }
+    }
 
     if (income == 0) {
       return FinancialHealthScore(
@@ -234,15 +231,17 @@ class AdvancedAnalyticsService {
 
     // Build 6-month history per category
     final catMonths = <String, List<double>>{};
-    for (int i = 0; i < 6; i++) {
-      final month = DateTime(now.year, now.month - i);
-      for (final tx in transactions.where((t) =>
-          t.isExpense &&
-          t.date.year == month.year &&
-          t.date.month == month.month,)) {
+
+    // OPTIMIZED: Single pass aggregation instead of 6 passes with nested filters
+    for (final tx in transactions) {
+      if (!tx.isExpense) continue;
+
+      final monthDiff =
+          (now.year - tx.date.year) * 12 + (now.month - tx.date.month);
+      if (monthDiff >= 0 && monthDiff < 6) {
         final name = tx.category.value?.name ?? 'Uncategorized';
-        catMonths.putIfAbsent(name, () => List.filled(6, 0.0));
-        catMonths[name]![i] += tx.effectiveAmount;
+        catMonths.putIfAbsent(name, () => List<double>.filled(6, 0.0));
+        catMonths[name]![monthDiff] += tx.effectiveAmount;
       }
     }
 
@@ -304,14 +303,14 @@ class AdvancedAnalyticsService {
     final now = DateTime.now();
     final transactions = await _transactionService.getAllForDashBoard();
 
-    final thisMonth = transactions.where(
-      (tx) =>
-          tx.isExpense &&
-          tx.date.year == now.year &&
-          tx.date.month == now.month,
-    );
+    double spent = 0;
 
-    final spent = thisMonth.fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
+    // OPTIMIZED: Single pass to calculate current month spent
+    for (final tx in transactions) {
+      if (tx.isExpense && tx.date.year == now.year && tx.date.month == now.month) {
+        spent += tx.effectiveAmount;
+      }
+    }
     final remaining = budgetAmount - spent;
 
     if (remaining <= 0) return now;
@@ -329,6 +328,7 @@ class AdvancedAnalyticsService {
   Future<Map<String, double>> getSpendingByDayOfWeek() async {
     final transactions = await _transactionService.getAllForDashBoard();
     final now = DateTime.now();
+    final cutoff = now.subtract(const Duration(days: 90));
 
     final byDay = <String, double>{
       'Mon': 0,
@@ -342,12 +342,12 @@ class AdvancedAnalyticsService {
 
     final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-    for (var tx in transactions.where(
-      (t) =>
-          t.isExpense && t.date.isAfter(now.subtract(const Duration(days: 90))),
-    )) {
-      final dayName = days[tx.date.weekday - 1];
-      byDay[dayName] = (byDay[dayName] ?? 0) + tx.effectiveAmount;
+    // OPTIMIZED: Single pass instead of .where() filter and then loop
+    for (final tx in transactions) {
+      if (tx.isExpense && tx.date.isAfter(cutoff)) {
+        final dayName = days[tx.date.weekday - 1];
+        byDay[dayName] = (byDay[dayName] ?? 0) + tx.effectiveAmount;
+      }
     }
 
     return byDay;
