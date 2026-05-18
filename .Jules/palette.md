@@ -9,3 +9,7 @@
 ## 2025-05-25 - [Tactile Feedback & PR Hygiene]
 **Learning:** Adding `HapticFeedback.mediumImpact()` to primary interactive elements (banners, dismiss buttons) significantly enhances the "feel" of the app. To maintain maintainable PRs under 50 lines, only the source `.arb` file should be committed; generated `.dart` localization files should be excluded to avoid cluttering the review with auto-generated code.
 **Action:** Include haptics in new UI components and strictly exclude generated l10n/Isar files from commits.
+
+## 2025-05-26 - [Material Ripple on Decorated Containers]
+**Learning:** To correctly display Material ripple effects over components with custom decorations (gradients, borders), the `InkWell` must be a child of an `Ink` widget (which holds the decoration), all under a transparent `Material` widget. Otherwise, the decoration will obscure the ripple.
+**Action:** Use the `Material -> Ink -> InkWell` hierarchy for all interactive cards with custom backgrounds.
