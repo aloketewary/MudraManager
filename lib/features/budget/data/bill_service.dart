@@ -19,9 +19,10 @@ class BillService {
     for (final bill in bills) {
       if (bill.nextDueDate != null &&
           bill.nextDueDate!.isBefore(today.add(const Duration(days: 1)))) {
+        final hash = 'bill_${bill.id}_${bill.nextDueDate!.millisecondsSinceEpoch}';
         final existing = await isar.pendingTransactions
             .filter()
-            .bodyContains(bill.name)
+            .smsHashEqualTo(hash)
             .findFirst();
 
         if (existing == null) {
@@ -35,8 +36,7 @@ class BillService {
             ..isIncome = false
             ..category = bill.category.value?.name
             ..account = bill.account.value?.name
-            ..smsHash =
-                'bill_${bill.id}_${bill.nextDueDate!.millisecondsSinceEpoch}';
+            ..smsHash = hash;
 
           pending.encryptFields();
           await isar.writeTxn(() async {
@@ -71,6 +71,7 @@ class BillService {
       bill.nextDueDate = nextDate;
       await isar.recurringBills.put(bill);
     });
+    bill.decryptFields();
   }
 
   static Future<void> markBillAsPaid(int billId) async {
@@ -80,11 +81,7 @@ class BillService {
     final bill = await isar.recurringBills.get(billId);
     if (bill != null) {
       bill.decryptFields();
-      await isar.writeTxn(() async {
-        bill.lastPaidDate = DateTime.now();
-        bill.encryptFields();
-        await isar.recurringBills.put(bill);
-      });
+      bill.lastPaidDate = DateTime.now();
 
       await _updateNextDueDate(isar, bill);
     }
