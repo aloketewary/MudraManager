@@ -1,6 +1,9 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
-class CommonColorPickerButton extends StatelessWidget {
+class CommonColorPickerButton extends ConsumerWidget {
   final VoidCallback? onPressed;
   final Color? backgroundColor;
   final String label;
@@ -15,8 +18,9 @@ class CommonColorPickerButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
     
     // Calculate proper text color based on background color brightness
     final bgLuminance = (backgroundColor ?? Colors.blue).computeLuminance();
@@ -25,11 +29,16 @@ class CommonColorPickerButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: onPressed == null
+            ? null
+            : () {
+                HapticFeedback.mediumImpact();
+                onPressed?.call();
+              },
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
-              16,
+              spacing.radiusMedium,
             ), // Adjust the radius for more or less rounding
           ),
           backgroundColor: backgroundColor,

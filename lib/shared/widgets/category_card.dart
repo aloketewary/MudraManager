@@ -1,6 +1,9 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
-class CategoryCard extends StatelessWidget {
+class CategoryCard extends ConsumerWidget {
   final String label;
   final Color color;
   final IconData icon;
@@ -23,24 +26,31 @@ class CategoryCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorTheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final size = MediaQuery.of(context).size;
+    final spacing = ref.watch(spacingProvider);
     
     // Calculate proper text color for category color background
     final categoryLuminance = color.computeLuminance();
     final categoryTextColor = categoryLuminance > 0.5 ? Colors.black : Colors.white;
 
     return GestureDetector(
-      onTap: () => callbackAction(),
-      onLongPress: onLongPress != null ? () => onLongPress!() : null,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        callbackAction();
+      },
+      onLongPress: onLongPress != null ? () {
+        HapticFeedback.mediumImpact();
+        onLongPress!();
+      } : null,
       child: Container(
         width: isUnderWrap ? size.width / 2.5 : isNewCard ? 150 : 150,
         padding: const EdgeInsets.all(8.0),
         margin: isUnderWrap ? null : const EdgeInsets.only(right: 8.0),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16.0),
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
