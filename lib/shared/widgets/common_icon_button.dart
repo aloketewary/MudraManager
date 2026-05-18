@@ -1,7 +1,10 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
-class CommonIconPickerButton extends StatelessWidget {
+class CommonIconPickerButton extends ConsumerWidget {
   final VoidCallback? onPressed;
   final Color? backgroundColor;
   final String label;
@@ -20,17 +23,24 @@ class CommonIconPickerButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: onPressed == null
+            ? null
+            : () {
+                HapticFeedback.mediumImpact();
+                onPressed?.call();
+              },
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
-              16,
+              spacing.radiusMedium,
             ), // Adjust the radius for more or less rounding
           ),
           backgroundColor: backgroundColor,
