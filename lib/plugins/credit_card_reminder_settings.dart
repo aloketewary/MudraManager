@@ -1,5 +1,6 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreditCardReminderSettings extends StatefulWidget {
@@ -111,7 +112,7 @@ class _CreditCardReminderSettingsState extends State<CreditCardReminderSettings>
             children: [
               Text('Credit Cards', style: Theme.of(context).textTheme.titleLarge),
               IconButton(
-                tooltip: 'Add',
+                tooltip: AppLocalizations.of(context)!.common_add,
                 icon: const Icon(LucideIcons.circlePlus),
                 onPressed: _addCard,
               ),
@@ -138,12 +139,12 @@ class _CreditCardReminderSettingsState extends State<CreditCardReminderSettings>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        tooltip: 'Edit',
+                        tooltip: AppLocalizations.of(context)!.common_edit,
                         icon: const Icon(LucideIcons.pencil),
                         onPressed: () => _editCard(index),
                       ),
                       IconButton(
-                        tooltip: 'Delete',
+                        tooltip: AppLocalizations.of(context)!.common_delete,
                         icon: const Icon(LucideIcons.trash2),
                         onPressed: () => _deleteCard(index),
                       ),
