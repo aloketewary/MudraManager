@@ -7,6 +7,7 @@ import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
+import 'package:mudra_manager/core/db/models/recurring_bill.dart';
 
 /// Encrypt sensitive fields before writing to Isar.
 ///
@@ -47,6 +48,20 @@ extension TransactionEncryption on Transaction {
 
   void decryptFields() {
     if (!FieldEncryptionService.isReady) return;
+    description = FieldEncryptionService.decryptNullable(description);
+  }
+}
+
+extension RecurringBillEncryption on RecurringBill {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.encrypt(name);
+    description = FieldEncryptionService.encryptNullable(description);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.decrypt(name);
     description = FieldEncryptionService.decryptNullable(description);
   }
 }
@@ -115,6 +130,16 @@ extension UserProfileEncryption on UserProfile {
 /// Decrypt a list of SmsActivity after Isar read.
 extension SmsActivityListDecryption on Future<List<SmsActivity>> {
   Future<List<SmsActivity>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
+  }
+}
+
+extension RecurringBillListDecryption on Future<List<RecurringBill>> {
+  Future<List<RecurringBill>> withDecryption() async {
     final list = await this;
     for (final item in list) {
       item.decryptFields();

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
+import 'package:mudra_manager/core/db/models/recurring_bill.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 
@@ -86,6 +87,50 @@ void main() {
 
       txn.encryptFields();
       expect(txn.description, isNull);
+    });
+  });
+
+  group('RecurringBill encryption (passthrough)', () {
+    test('encryptFields is no-op when not ready', () {
+      final bill = RecurringBill()
+        ..name = 'Rent'
+        ..description = 'Monthly apartment rent'
+        ..amount = 15000
+        ..dueDate = DateTime.now()
+        ..frequency = BillFrequency.monthly
+        ..isActive = true;
+
+      bill.encryptFields();
+
+      expect(bill.name, equals('Rent'));
+      expect(bill.description, equals('Monthly apartment rent'));
+    });
+
+    test('decryptFields is no-op when not ready', () {
+      final bill = RecurringBill()
+        ..name = 'ENC:fakeiv:fakename'
+        ..description = 'ENC:fakeiv:fakedesc'
+        ..amount = 15000
+        ..dueDate = DateTime.now()
+        ..frequency = BillFrequency.monthly
+        ..isActive = true;
+
+      bill.decryptFields();
+
+      expect(bill.name, equals('ENC:fakeiv:fakename'));
+      expect(bill.description, equals('ENC:fakeiv:fakedesc'));
+    });
+
+    test('encryptFields handles null description', () {
+      final bill = RecurringBill()
+        ..name = 'Rent'
+        ..amount = 15000
+        ..dueDate = DateTime.now()
+        ..frequency = BillFrequency.monthly
+        ..isActive = true;
+
+      bill.encryptFields();
+      expect(bill.description, isNull);
     });
   });
 
