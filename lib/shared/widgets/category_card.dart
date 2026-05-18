@@ -31,63 +31,76 @@ class CategoryCard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final size = MediaQuery.of(context).size;
     final spacing = ref.watch(spacingProvider);
-    
+    final radius = BorderRadius.circular(spacing.radiusLarge);
+
     // Calculate proper text color for category color background
     final categoryLuminance = color.computeLuminance();
-    final categoryTextColor = categoryLuminance > 0.5 ? Colors.black : Colors.white;
+    final categoryTextColor =
+        categoryLuminance > 0.5 ? Colors.black : Colors.white;
 
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        callbackAction();
-      },
-      onLongPress: onLongPress != null ? () {
-        HapticFeedback.mediumImpact();
-        onLongPress!();
-      } : null,
-      child: Container(
-        width: isUnderWrap ? size.width / 2.5 : isNewCard ? 150 : 150,
-        padding: const EdgeInsets.all(8.0),
-        margin: isUnderWrap ? null : const EdgeInsets.only(right: 8.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors:
-                isSelected
-                    ? [colorTheme.primary, colorTheme.primaryFixed, color]
-                    : [Colors.transparent, Colors.transparent, color],
+    return Padding(
+      padding:
+          isUnderWrap ? EdgeInsets.zero : const EdgeInsets.only(right: 8.0),
+      child: Material(
+        color: Colors.transparent,
+        child: Ink(
+          width: isUnderWrap ? size.width / 2.5 : 150,
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isSelected
+                  ? [colorTheme.primary, colorTheme.primaryFixed, color]
+                  : [Colors.transparent, Colors.transparent, color],
+            ),
+            border: Border.all(
+              color: colorTheme.primary,
+              width: isSelected ? 2 : 1,
+            ),
           ),
-          border: Border.all(
-            color: colorTheme.primary,
-            width: 2,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: textTheme.labelLarge?.copyWith(
-                  color: isSelected ? categoryTextColor : colorTheme.primary,
-                ),
-                overflow: TextOverflow.ellipsis,
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              callbackAction();
+            },
+            onLongPress: onLongPress != null
+                ? () {
+                    HapticFeedback.mediumImpact();
+                    onLongPress!();
+                  }
+                : null,
+            borderRadius: radius,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: textTheme.labelLarge?.copyWith(
+                        color:
+                            isSelected ? categoryTextColor : colorTheme.primary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: color,
+                    child: Icon(
+                      icon,
+                      size: 16,
+                      color: categoryTextColor,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 8.0),
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: color,
-              child: Icon(
-                icon,
-                size: 16,
-                color: categoryTextColor,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

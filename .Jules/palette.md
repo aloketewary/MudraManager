@@ -13,3 +13,7 @@
 ## 2025-05-26 - [Safe Haptic Integration in Shared Buttons]
 **Learning:** Wrapping an optional `onPressed` callback in an anonymous function to add haptics will make the button always appear "enabled" in Flutter. This breaks the visual and functional state of the UI when a button is supposed to be disabled.
 **Action:** Always use conditional logic (`onPressed == null ? null : () => ...`) when adding wrappers to button callbacks to preserve the disabled state.
+
+## 2025-05-26 - [Material Ripple on Decorated Containers]
+**Learning:** To correctly display Material ripple effects over components with custom decorations (gradients, borders), the `InkWell` must be a child of an `Ink` widget (which holds the decoration), all under a transparent `Material` widget. Otherwise, the decoration will obscure the ripple.
+**Action:** Use the `Material -> Ink -> InkWell` hierarchy for all interactive cards with custom backgrounds.
