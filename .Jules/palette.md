@@ -9,3 +9,7 @@
 ## 2025-05-25 - [Tactile Feedback & PR Hygiene]
 **Learning:** Adding `HapticFeedback.mediumImpact()` to primary interactive elements (banners, dismiss buttons) significantly enhances the "feel" of the app. To maintain maintainable PRs under 50 lines, only the source `.arb` file should be committed; generated `.dart` localization files should be excluded to avoid cluttering the review with auto-generated code.
 **Action:** Include haptics in new UI components and strictly exclude generated l10n/Isar files from commits.
+
+## 2025-05-26 - [Safe Haptic Integration in Shared Buttons]
+**Learning:** Wrapping an optional `onPressed` callback in an anonymous function to add haptics will make the button always appear "enabled" in Flutter. This breaks the visual and functional state of the UI when a button is supposed to be disabled.
+**Action:** Always use conditional logic (`onPressed == null ? null : () => ...`) when adding wrappers to button callbacks to preserve the disabled state.
