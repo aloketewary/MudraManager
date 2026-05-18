@@ -180,6 +180,7 @@ class GoalScreen extends ConsumerWidget {
                             textTheme,
                             spacing,
                             context,
+                            ref,
                           ),
                         ),
                         childCount: remainingGoals.length,
@@ -620,6 +621,7 @@ class GoalScreen extends ConsumerWidget {
     TextTheme textTheme,
     AppSpacing spacing,
     BuildContext context,
+    WidgetRef ref,
   ) {
     final goalColor =
         goal.colorValue != null ? Color(goal.colorValue!) : color.primary;
@@ -719,15 +721,37 @@ class GoalScreen extends ConsumerWidget {
                 ),
               ),
               SizedBox(width: spacing.elementGap),
-              // Right — mini ring
-              _buildProgressRing(
-                progress,
-                goalColor,
-                color,
-                textTheme,
-                50,
-                24,
-                5,
+              // Right — mini ring + quick deposit
+              Column(
+                children: [
+                  _buildProgressRing(
+                    progress,
+                    goalColor,
+                    color,
+                    textTheme,
+                    50,
+                    24,
+                    5,
+                  ),
+                  SizedBox(height: spacing.elementGapMin),
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      _showQuickDeposit(context, ref, goal);
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.elementGap,
+                        vertical: spacing.elementGapMin,
+                      ),
+                      decoration: BoxDecoration(
+                        color: goalColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                      ),
+                      child: Icon(LucideIcons.plus, size: 14, color: goalColor),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -913,5 +937,105 @@ class GoalScreen extends ConsumerWidget {
   String _formatDaysLeft(int days, AppLocalizations ctxt) {
     if (days > 60) return ctxt.goal_monthsLeft((days / 30).round());
     return ctxt.goal_daysLeft(days);
+  }
+
+  void _showQuickDeposit(BuildContext context, WidgetRef ref, Goal goal) {
+    final controller = TextEditingController();
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.read(spacingProvider);
+    final goalColor =
+        goal.colorValue != null ? Color(goal.colorValue!) : color.primary;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: spacing.cardHorizontalMax,
+          right: spacing.cardHorizontalMax,
+          top: spacing.cardHorizontalMax,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + spacing.cardHorizontalMax,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Icon(IconHelper.getIconData(goal.iconName),
+                    color: goalColor, size: 20),
+                SizedBox(width: spacing.elementGap),
+                Expanded(
+                  child: Text(
+                    goal.name,
+                    style: textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: spacing.sectionGap),
+            TextField(
+              controller: controller,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              autofocus: true,
+              textAlign: TextAlign.center,
+              style: textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: goalColor,
+              ),
+              decoration: InputDecoration(
+                hintText: '0',
+                hintStyle: textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: goalColor.withValues(alpha: 0.2),
+                ),
+                border: InputBorder.none,
+                filled: true,
+                fillColor: goalColor.withValues(alpha: 0.06),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            SizedBox(height: spacing.sectionGap),
+            FilledButton(
+              onPressed: () async {
+                final amount = double.tryParse(
+                    controller.text.replaceAll(',', ''));
+                if (amount == null || amount <= 0) return;
+                await ref
+                    .read(goalServiceProvider)
+                    .addContribution(goal.id, amount);
+                ref.invalidate(goalsProvider);
+                if (ctx.mounted) Navigator.pop(ctx);
+              },
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(double.infinity, 52),
+                backgroundColor: goalColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                ),
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.goal_addToGoal,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
