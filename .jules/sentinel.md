@@ -12,3 +12,8 @@
 **Vulnerability:** Sensitive user-provided descriptions in Recurring Transactions and Goals were stored as plaintext, bypassing the encryption architecture used for regular Transactions.
 **Learning:** Encryption must be applied consistently across all models containing PII or financial notes. Relying on primary service classes for encryption is insufficient if secondary services or UI screens perform direct database writes (e.g., SMS approval flow, recurring processing).
 **Prevention:** Centralize encryption/decryption logic in model extensions and mandate their use in both retrieval (via `withDecryption()`) and persistence (via `encryptFields()`) layers across all feature modules.
+
+## 2025-06-05 - [IsarLinks Decryption Pattern]
+**Vulnerability:** PII in Trip Participants and descriptions in Trip Transactions remained encrypted in the UI because IsarLinks (e.g., `trip.participants`) do not automatically trigger the `.withDecryption()` extension applied to collection queries.
+**Learning:** `IsarLinks` require a manual `.load()` followed by a decryption pass. Centralizing this into extensions like `IsarLinks<TripParticipant>.decryptAll()` prevents redundant code and ensures consistency.
+**Prevention:** When fetching models with `IsarLinks` to encrypted objects, always call a centralized decryption extension on the links immediately after `.load()`.
