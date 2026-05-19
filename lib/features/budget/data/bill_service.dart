@@ -1,5 +1,6 @@
 import 'package:mudra_manager/core/utils/date_arithmetic.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
 
@@ -12,14 +13,16 @@ class BillService {
     final bills = await isar.recurringBills
         .filter()
         .isActiveEqualTo(true)
-        .findAll();
+        .findAll()
+        .withDecryption();
 
     for (final bill in bills) {
       if (bill.nextDueDate != null &&
           bill.nextDueDate!.isBefore(today.add(const Duration(days: 1)))) {
+        final hash = 'bill_${bill.id}_${bill.nextDueDate!.millisecondsSinceEpoch}';
         final existing = await isar.pendingTransactions
             .filter()
-            .bodyContains(bill.name)
+            .smsHashEqualTo(hash)
             .findFirst();
 
         if (existing == null) {
@@ -37,6 +40,7 @@ class BillService {
                 'bill_${bill.id}_${bill.nextDueDate!.millisecondsSinceEpoch}';
 
           await isar.writeTxn(() async {
+            pending.encryptFields();
             await isar.pendingTransactions.put(pending);
           });
         }
@@ -65,6 +69,7 @@ class BillService {
 
     await isar.writeTxn(() async {
       bill.nextDueDate = nextDate;
+      bill.encryptFields();
       await isar.recurringBills.put(bill);
     });
   }
@@ -75,8 +80,10 @@ class BillService {
 
     final bill = await isar.recurringBills.get(billId);
     if (bill != null) {
+      bill.decryptFields();
       await isar.writeTxn(() async {
         bill.lastPaidDate = DateTime.now();
+        bill.encryptFields();
         await isar.recurringBills.put(bill);
       });
 

@@ -7,6 +7,8 @@ import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
+import 'package:mudra_manager/core/db/models/category_rule.dart';
+import 'package:mudra_manager/core/db/models/recurring_bill.dart';
 
 /// Encrypt sensitive fields before writing to Isar.
 ///
@@ -146,8 +148,56 @@ extension GoalEncryption on Goal {
   }
 }
 
+extension CategoryRuleEncryption on CategoryRule {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    recipientName = FieldEncryptionService.encryptNullable(recipientName);
+    merchantName = FieldEncryptionService.encryptNullable(merchantName);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    recipientName = FieldEncryptionService.decryptNullable(recipientName);
+    merchantName = FieldEncryptionService.decryptNullable(merchantName);
+  }
+}
+
+extension RecurringBillEncryption on RecurringBill {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.encrypt(name);
+    description = FieldEncryptionService.encryptNullable(description);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.decrypt(name);
+    description = FieldEncryptionService.decryptNullable(description);
+  }
+}
+
 extension GoalListDecryption on Future<List<Goal>> {
   Future<List<Goal>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
+  }
+}
+
+extension CategoryRuleListDecryption on Future<List<CategoryRule>> {
+  Future<List<CategoryRule>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
+  }
+}
+
+extension RecurringBillListDecryption on Future<List<RecurringBill>> {
+  Future<List<RecurringBill>> withDecryption() async {
     final list = await this;
     for (final item in list) {
       item.decryptFields();
