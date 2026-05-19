@@ -117,9 +117,14 @@ void main() {
       source = readSource('features/analytics/data/analytics_provider.dart');
     });
 
-    test('financialHealthProvider watches transactionChangeProvider', () {
-      final body = extractProvider(source, 'financialHealthProvider');
+    test('analyticsTransactionsProvider watches transactionChangeProvider', () {
+      final body = extractProvider(source, 'analyticsTransactionsProvider');
       expect(body, contains('ref.watch(transactionChangeProvider)'));
+    });
+
+    test('financialHealthProvider watches analyticsTransactionsProvider', () {
+      final body = extractProvider(source, 'financialHealthProvider');
+      expect(body, contains('ref.watch(analyticsTransactionsProvider.future)'));
     });
 
     test('financialHealthProvider watches accountChangeProvider', () {
@@ -127,19 +132,19 @@ void main() {
       expect(body, contains('ref.watch(accountChangeProvider)'));
     });
 
-    test('categoryTrendsProvider watches transactionChangeProvider', () {
+    test('categoryTrendsProvider watches analyticsTransactionsProvider', () {
       final body = extractProvider(source, 'categoryTrendsProvider');
-      expect(body, contains('ref.watch(transactionChangeProvider)'));
+      expect(body, contains('ref.watch(analyticsTransactionsProvider.future)'));
     });
 
-    test('predictedSpendingProvider watches transactionChangeProvider', () {
+    test('predictedSpendingProvider watches analyticsTransactionsProvider', () {
       final body = extractProvider(source, 'predictedSpendingProvider');
-      expect(body, contains('ref.watch(transactionChangeProvider)'));
+      expect(body, contains('ref.watch(analyticsTransactionsProvider.future)'));
     });
 
-    test('cashFlowForecastProvider watches transactionChangeProvider', () {
+    test('cashFlowForecastProvider watches analyticsTransactionsProvider', () {
       final body = extractProvider(source, 'cashFlowForecastProvider');
-      expect(body, contains('ref.watch(transactionChangeProvider)'));
+      expect(body, contains('ref.watch(analyticsTransactionsProvider.future)'));
     });
   });
 
