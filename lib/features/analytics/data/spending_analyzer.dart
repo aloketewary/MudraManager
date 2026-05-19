@@ -50,30 +50,26 @@ class SpendingAnalyzer {
     final now = DateTime.now();
     final last30Days = now.subtract(const Duration(days: 30));
 
-    final expenses = await isar.transactions
+    // OPTIMIZED: Consolidate income and expense queries into a single pass
+    final transactions = await isar.transactions
         .filter()
-        .isExpenseEqualTo(true)
         .isSettlementEqualTo(false)
         .and()
         .dateBetween(last30Days, now)
         .findAll();
 
-    if (expenses.length < 5) return null;
+    double totalIncome = 0;
+    double totalExpense = 0;
+    double essentialAmount = 0;
+    double weekendAmount = 0;
+    double firstHalfExpense = 0;
+    double secondHalfExpense = 0;
+    int expenseCount = 0;
 
-    for (final tx in expenses) {
-      await tx.category.load();
-    }
-
-    // ── Top category ──
     final categorySpending = <String, double>{};
-    for (final tx in expenses) {
-      final cat = tx.category.value?.name ?? 'Other';
-      categorySpending[cat] = (categorySpending[cat] ?? 0) + tx.effectiveAmount;
-    }
-    final topCat =
-        categorySpending.entries.reduce((a, b) => a.value > b.value ? a : b);
+    final dailyTxCount = <String, int>{};
+    final midPoint = last30Days.add(const Duration(days: 15));
 
-    // ── Essential vs discretionary ratio ──
     final essentialKeywords = [
       'grocery',
       'groceries',
@@ -91,65 +87,74 @@ class SpendingAnalyzer {
       'emi',
       'loan',
     ];
-    double essentialAmount = 0;
-    double totalExpense = 0;
-    for (final tx in expenses) {
-      totalExpense += tx.effectiveAmount;
-      final catName = (tx.category.value?.name ?? '').toLowerCase();
-      if (essentialKeywords.any((k) => catName.contains(k))) {
-        essentialAmount += tx.effectiveAmount;
+
+    // OPTIMIZED: Single pass aggregation instead of multiple filtered iterations
+    for (final tx in transactions) {
+      if (!tx.isExpense) {
+        if (!tx.isTransfer) {
+          totalIncome += tx.effectiveAmount;
+        }
+        continue;
+      }
+
+      final amount = tx.effectiveAmount;
+      if (amount <= 0) continue;
+
+      expenseCount++;
+      totalExpense += amount;
+
+      // OPTIMIZED: Use loadSync() inside loop to avoid async overhead
+      tx.category.loadSync();
+      final catName = tx.category.value?.name ?? 'Other';
+      categorySpending[catName] = (categorySpending[catName] ?? 0) + amount;
+
+      if (essentialKeywords.any((k) => catName.toLowerCase().contains(k))) {
+        essentialAmount += amount;
+      }
+
+      if (tx.date.weekday >= 6) {
+        weekendAmount += amount;
+      }
+
+      final dateKey = '${tx.date.year}-${tx.date.month}-${tx.date.day}';
+      dailyTxCount[dateKey] = (dailyTxCount[dateKey] ?? 0) + 1;
+
+      if (tx.date.isBefore(midPoint)) {
+        firstHalfExpense += amount;
+      } else {
+        secondHalfExpense += amount;
       }
     }
+
+    if (expenseCount < 5) return null;
+
+    // ── Top category ──
+    final topCat = categorySpending.entries.isEmpty
+        ? MapEntry('Other', 0.0)
+        : categorySpending.entries.reduce((a, b) => a.value > b.value ? a : b);
+
+    // ── Essential vs discretionary ratio ──
     final essentialRatio =
         totalExpense > 0 ? essentialAmount / totalExpense : 0.0;
 
     // ── Weekend vs weekday ──
-    double weekendAmount = 0;
-    for (final tx in expenses) {
-      if (tx.date.weekday >= 6) weekendAmount += tx.effectiveAmount;
-    }
     final weekendRatio = totalExpense > 0 ? weekendAmount / totalExpense : 0.0;
 
     // ── Impulse detection ──
-    final dailyTxCount = <String, int>{};
-    for (final tx in expenses) {
-      final key = '${tx.date.year}-${tx.date.month}-${tx.date.day}';
-      dailyTxCount[key] = (dailyTxCount[key] ?? 0) + 1;
-    }
     final highActivityDays = dailyTxCount.values.where((c) => c > 3).length;
     final isImpulse = highActivityDays >= 2;
 
     // ── Spending trend ──
-    final midPoint = last30Days.add(const Duration(days: 15));
-    double firstHalf = 0, secondHalf = 0;
-    for (final tx in expenses) {
-      if (tx.date.isBefore(midPoint)) {
-        firstHalf += tx.effectiveAmount;
-      } else {
-        secondHalf += tx.effectiveAmount;
-      }
-    }
-    final trendDiff = firstHalf > 0
-        ? ((secondHalf - firstHalf) / firstHalf * 100).abs()
+    final trendDiff = firstHalfExpense > 0
+        ? ((secondHalfExpense - firstHalfExpense) / firstHalfExpense * 100).abs()
         : 0.0;
     final trend = trendDiff < 10
         ? 'Steady spender'
-        : secondHalf > firstHalf
+        : secondHalfExpense > firstHalfExpense
             ? 'Spending increasing'
             : 'Spending decreasing';
 
     // ── Savings rate ──
-    final income = await isar.transactions
-        .filter()
-        .isExpenseEqualTo(false)
-        .isTransferEqualTo(false)
-        .isSettlementEqualTo(false)
-        .dateBetween(last30Days, now)
-        .findAll();
-    double totalIncome = 0;
-    for (final tx in income) {
-      totalIncome += tx.effectiveAmount;
-    }
     final savingsRate = totalIncome > 0
         ? ((totalIncome - totalExpense) / totalIncome * 100).clamp(0.0, 100.0)
         : 0.0;
@@ -179,8 +184,8 @@ class SpendingAnalyzer {
       savingsRate: savingsRate,
       budgetAdherence: adherence,
       activeGoals: goals.length,
-      txnCount: expenses.length,
-      avgTxnAmount: expenses.isNotEmpty ? totalExpense / expenses.length : 0,
+      txnCount: expenseCount,
+      avgTxnAmount: expenseCount > 0 ? totalExpense / expenseCount : 0,
       weekendRatio: weekendRatio,
       highActivityDays: highActivityDays,
       essentialRatio: essentialRatio,
