@@ -7,6 +7,8 @@ import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
+import 'package:mudra_manager/core/db/models/trip.dart';
+import 'package:mudra_manager/core/db/models/archived_transaction.dart';
 
 /// Encrypt sensitive fields before writing to Isar.
 ///
@@ -40,6 +42,60 @@ extension PendingTransactionEncryption on PendingTransaction {
 }
 
 extension TransactionEncryption on Transaction {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    description = FieldEncryptionService.encryptNullable(description);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    description = FieldEncryptionService.decryptNullable(description);
+  }
+}
+
+extension TripEncryption on Trip {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.encrypt(name);
+    description = FieldEncryptionService.encryptNullable(description);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.decrypt(name);
+    description = FieldEncryptionService.decryptNullable(description);
+  }
+}
+
+extension TripParticipantEncryption on TripParticipant {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.encrypt(name);
+    phone = FieldEncryptionService.encryptNullable(phone);
+    email = FieldEncryptionService.encryptNullable(email);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.decrypt(name);
+    phone = FieldEncryptionService.decryptNullable(phone);
+    email = FieldEncryptionService.decryptNullable(email);
+  }
+}
+
+extension SplitExpenseEncryption on SplitExpense {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    description = FieldEncryptionService.encryptNullable(description);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    description = FieldEncryptionService.decryptNullable(description);
+  }
+}
+
+extension ArchivedTransactionEncryption on ArchivedTransaction {
   void encryptFields() {
     if (!FieldEncryptionService.isReady) return;
     description = FieldEncryptionService.encryptNullable(description);
@@ -115,6 +171,45 @@ extension UserProfileEncryption on UserProfile {
 /// Decrypt a list of SmsActivity after Isar read.
 extension SmsActivityListDecryption on Future<List<SmsActivity>> {
   Future<List<SmsActivity>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
+  }
+}
+
+extension TripListDecryption on Future<List<Trip>> {
+  Future<List<Trip>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
+  }
+}
+
+extension TripDecryption on Future<Trip?> {
+  Future<Trip?> withDecryption() async {
+    final item = await this;
+    item?.decryptFields();
+    return item;
+  }
+}
+
+extension TripStreamDecryption on Stream<List<Trip>> {
+  Stream<List<Trip>> withDecryption() {
+    return map((list) {
+      for (final item in list) {
+        item.decryptFields();
+      }
+      return list;
+    });
+  }
+}
+
+extension ArchivedTransactionListDecryption on Future<List<ArchivedTransaction>> {
+  Future<List<ArchivedTransaction>> withDecryption() async {
     final list = await this;
     for (final item in list) {
       item.decryptFields();

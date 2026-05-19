@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/archived_transaction.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -189,6 +190,9 @@ class CurrencyService {
     }
 
     await _isar.writeTxn(() async {
+      for (final a in archived) {
+        a.encryptFields();
+      }
       await _isar.archivedTransactions.putAll(archived);
       await _isar.transactions.clear();
     });

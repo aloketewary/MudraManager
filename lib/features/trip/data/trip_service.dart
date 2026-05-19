@@ -1,5 +1,6 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/category_seeder.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -16,8 +17,12 @@ class TripService {
   Future<void> createTrip(Trip trip, List<TripParticipant> participants) async {
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
+      for (final p in participants) {
+        p.encryptFields();
+      }
       await isar.tripParticipants.putAll(participants);
       trip.participants.addAll(participants);
+      trip.encryptFields();
       await isar.trips.put(trip);
       await trip.participants.save();
     });
@@ -26,7 +31,7 @@ class TripService {
 
   Future<List<Trip>> getAllTrips() async {
     final isar = await isarService.getInstance();
-    return await isar.trips.where().sortByCreatedAtDesc().findAll();
+    return await isar.trips.where().sortByCreatedAtDesc().findAll().withDecryption();
   }
 
   /// Loads summary data for a trip (participants, total spent, owner share).
@@ -35,6 +40,9 @@ class TripService {
     await trip.transactions.load();
 
     final participants = trip.participants.toList();
+    for (final p in participants) {
+      p.decryptFields();
+    }
     final txns = trip.transactions.toList();
 
     double totalSpent = 0;
@@ -49,6 +57,10 @@ class TripService {
       await tripTxn.transaction.load();
       await tripTxn.splitExpense.load();
       await tripTxn.paidBy.load();
+
+      tripTxn.transaction.value?.decryptFields();
+      tripTxn.splitExpense.value?.decryptFields();
+      tripTxn.paidBy.value?.decryptFields();
 
       final amount = tripTxn.resolvedAmountIn(trip.currencyCode) ?? 0;
       totalSpent += amount;
@@ -84,19 +96,26 @@ class TripService {
         .filter()
         .isActiveEqualTo(true)
         .sortByStartDateDesc()
-        .findAll();
+        .findAll()
+        .withDecryption();
   }
 
   Future<Trip?> getTripById(int id) async {
     final isar = await isarService.getInstance();
-    final trip = await isar.trips.get(id);
+    final trip = await isar.trips.get(id).withDecryption();
     await trip?.participants.load();
     await trip?.transactions.load();
+    for (final p in trip?.participants ?? <TripParticipant>[]) {
+      p.decryptFields();
+    }
     for (final tripTxn in trip?.transactions ?? <TripTransaction>[]) {
       await tripTxn.transaction.load();
       await tripTxn.splitExpense.load();
       await tripTxn.paidBy.load();
       await tripTxn.transaction.value?.category.load();
+      tripTxn.transaction.value?.decryptFields();
+      tripTxn.splitExpense.value?.decryptFields();
+      tripTxn.paidBy.value?.decryptFields();
     }
     return trip;
   }
@@ -124,6 +143,7 @@ class TripService {
     }
 
     await isar.writeTxn(() async {
+      transaction.encryptFields();
       await isar.transactions.put(transaction);
 
       final tripTxn = TripTransaction.create(
@@ -219,7 +239,9 @@ class TripService {
     }
 
     await isar.writeTxn(() async {
+      expense.encryptFields();
       await isar.splitExpenses.put(expense);
+      ledgerTxn.encryptFields();
       await isar.transactions.put(ledgerTxn);
       await ledgerTxn.category.save();
       await ledgerTxn.account.save();
@@ -262,6 +284,10 @@ class TripService {
       await tripTxn.transaction.load();
       await tripTxn.splitExpense.load();
       await tripTxn.paidBy.load();
+
+      tripTxn.transaction.value?.decryptFields();
+      tripTxn.splitExpense.value?.decryptFields();
+      tripTxn.paidBy.value?.decryptFields();
 
       final amount = tripTxn.resolvedAmountIn(trip.currencyCode);
       final paidBy = tripTxn.paidBy.value;
@@ -370,7 +396,9 @@ class TripService {
     );
 
     await isar.writeTxn(() async {
+      expense.encryptFields();
       await isar.splitExpenses.put(expense);
+      ledgerTxn.encryptFields();
       await isar.transactions.put(ledgerTxn);
       await ledgerTxn.category.save();
       await ledgerTxn.account.save();
@@ -443,7 +471,8 @@ class TripService {
     final trip = await isar.trips
         .filter()
         .transactions((q) => q.idEqualTo(tripTxn.id))
-        .findFirst();
+        .findFirst()
+        .withDecryption();
 
     return trip?.name;
   }
@@ -471,7 +500,8 @@ class TripService {
     final trips = await isar.trips
         .filter()
         .anyOf(tripTxnIds, (q, id) => q.transactions((tq) => tq.idEqualTo(id)))
-        .findAll();
+        .findAll()
+        .withDecryption();
 
     final tripMap = <int, String>{};
     for (var trip in trips) {
@@ -530,10 +560,14 @@ class TripService {
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
       // 1. Update Trip Details
+      trip.encryptFields();
       await isar.trips.put(trip);
 
       // 2. Update Participants
       // Save all participants (updates existing ones, creates new ones)
+      for (final p in newParticipants) {
+        p.encryptFields();
+      }
       await isar.tripParticipants.putAll(newParticipants);
 
       // Update the links: Load current, clear, and add new list
