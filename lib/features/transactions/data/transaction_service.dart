@@ -442,10 +442,6 @@ class TransactionService {
       query = query.isExpenseEqualTo(true).isTransferEqualTo(false);
     }
 
-    final txns = await query.sortByDateDesc().findAll();
-    for (final t in txns) {
-      t.decryptFields();
-    }
-    return txns;
+    return await query.sortByDateDesc().findAll().withDecryption();
   }
 }

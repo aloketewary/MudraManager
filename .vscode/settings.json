@@ -1,0 +1,5 @@
+{
+    "saropaLints.enabled": true,
+    "saropaLints.runAnalysisAfterConfigChange": false,
+    "saropaLints.runAnalysisAfterDependencyChange": false
+}
