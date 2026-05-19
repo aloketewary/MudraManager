@@ -18,12 +18,18 @@ extension SmsActivityEncryption on SmsActivity {
     if (!FieldEncryptionService.isReady) return;
     body = FieldEncryptionService.encrypt(body);
     merchant = FieldEncryptionService.encryptNullable(merchant);
+    toAccount = FieldEncryptionService.encryptNullable(toAccount);
+    transactionRef = FieldEncryptionService.encryptNullable(transactionRef);
+    reviewNotes = FieldEncryptionService.encryptNullable(reviewNotes);
   }
 
   void decryptFields() {
     if (!FieldEncryptionService.isReady) return;
     body = FieldEncryptionService.decrypt(body);
     merchant = FieldEncryptionService.decryptNullable(merchant);
+    toAccount = FieldEncryptionService.decryptNullable(toAccount);
+    transactionRef = FieldEncryptionService.decryptNullable(transactionRef);
+    reviewNotes = FieldEncryptionService.decryptNullable(reviewNotes);
   }
 }
 
@@ -31,11 +37,15 @@ extension PendingTransactionEncryption on PendingTransaction {
   void encryptFields() {
     if (!FieldEncryptionService.isReady) return;
     body = FieldEncryptionService.encrypt(body);
+    toAccount = FieldEncryptionService.encryptNullable(toAccount);
+    transactionRef = FieldEncryptionService.encryptNullable(transactionRef);
   }
 
   void decryptFields() {
     if (!FieldEncryptionService.isReady) return;
     body = FieldEncryptionService.decrypt(body);
+    toAccount = FieldEncryptionService.decryptNullable(toAccount);
+    transactionRef = FieldEncryptionService.decryptNullable(transactionRef);
   }
 }
 

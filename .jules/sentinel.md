@@ -12,3 +12,8 @@
 **Vulnerability:** Sensitive user-provided descriptions in Recurring Transactions and Goals were stored as plaintext, bypassing the encryption architecture used for regular Transactions.
 **Learning:** Encryption must be applied consistently across all models containing PII or financial notes. Relying on primary service classes for encryption is insufficient if secondary services or UI screens perform direct database writes (e.g., SMS approval flow, recurring processing).
 **Prevention:** Centralize encryption/decryption logic in model extensions and mandate their use in both retrieval (via `withDecryption()`) and persistence (via `encryptFields()`) layers across all feature modules.
+
+## 2025-05-25 - [Encryption Timing and Pipeline Integrity]
+**Vulnerability:** Calling `encryptFields()` at the start of a service method (like `addActivity`) breaks downstream logic that relies on plaintext (e.g., regex matching, learned category rules). Additionally, linked/paired objects are often missed during encryption cycles.
+**Learning:** Encryption must happen as the *final* step before a database write. Furthermore, any method that modifies and saves a paired or related object (like a transfer pair in `SmsActivityService`) must also explicitly re-encrypt that object, as it may have been fetched and decrypted earlier in the process.
+**Prevention:** Call `encryptFields()` immediately before `isar.put()` calls and ensure all modified objects in a transaction (main and related) are covered. Re-verify matching logic to ensure it operates on plaintext.
