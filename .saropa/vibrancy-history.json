@@ -1,0 +1,401 @@
+{
+  "schemaVersion": 1,
+  "snapshots": [
+    {
+      "timestamp": "2026-05-19T13:13:19.111Z",
+      "extensionVersion": "13.9.1",
+      "packages": {
+        "animations": {
+          "version": "2.1.2",
+          "score": 55,
+          "category": "stable",
+          "grade": "B"
+        },
+        "async": {
+          "version": "2.13.1",
+          "score": 53.9,
+          "category": "stable",
+          "grade": "B"
+        },
+        "auto_size_text": {
+          "version": "3.0.0",
+          "score": 5.2,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "build_runner": {
+          "version": "2.13.1",
+          "score": 80.5,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "confetti": {
+          "version": "0.8.0",
+          "score": 6.5,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "crypto": {
+          "version": "3.0.7",
+          "score": 59.9,
+          "category": "stable",
+          "grade": "B"
+        },
+        "cupertino_icons": {
+          "version": "1.0.9",
+          "score": 52.5,
+          "category": "stable",
+          "grade": "B"
+        },
+        "dynamic_color": {
+          "version": "1.8.1",
+          "score": 26.4,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "encrypt": {
+          "version": "5.0.3",
+          "score": 10.6,
+          "category": "end-of-life",
+          "grade": "F"
+        },
+        "envied": {
+          "version": "1.3.4",
+          "score": 69.4,
+          "category": "stable",
+          "grade": "B"
+        },
+        "envied_generator": {
+          "version": "1.3.4",
+          "score": 68.4,
+          "category": "stable",
+          "grade": "B"
+        },
+        "excel": {
+          "version": "4.0.6",
+          "score": 13.8,
+          "category": "abandoned",
+          "grade": "E"
+        },
+        "file_picker": {
+          "version": "11.0.2",
+          "score": 87.6,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "fl_chart": {
+          "version": "1.2.0",
+          "score": 82,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "flutter_animate": {
+          "version": "4.5.2",
+          "score": 15.2,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "flutter_boring_avatars": {
+          "version": "2.1.0",
+          "score": 65.5,
+          "category": "stable",
+          "grade": "B"
+        },
+        "flutter_launcher_icons": {
+          "version": "0.14.4",
+          "score": 33.1,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "flutter_lints": {
+          "version": "6.0.0",
+          "score": 52.5,
+          "category": "stable",
+          "grade": "B"
+        },
+        "flutter_local_notifications": {
+          "version": "21.0.0",
+          "score": 66.7,
+          "category": "stable",
+          "grade": "B"
+        },
+        "flutter_native_timezone_latest": {
+          "version": "1.0.0",
+          "score": 8.2,
+          "category": "abandoned",
+          "grade": "E"
+        },
+        "flutter_riverpod": {
+          "version": "3.3.1",
+          "score": 65.5,
+          "category": "stable",
+          "grade": "B"
+        },
+        "flutter_secure_storage": {
+          "version": "10.0.0",
+          "score": 79.7,
+          "category": "end-of-life",
+          "grade": "F"
+        },
+        "flutter_svg": {
+          "version": "2.2.4",
+          "score": 55,
+          "category": "stable",
+          "grade": "B"
+        },
+        "go_router": {
+          "version": "17.2.1",
+          "score": 57.1,
+          "category": "stable",
+          "grade": "B"
+        },
+        "google_fonts": {
+          "version": "8.0.2",
+          "score": 53,
+          "category": "stable",
+          "grade": "B"
+        },
+        "google_sign_in": {
+          "version": "7.2.0",
+          "score": 53,
+          "category": "stable",
+          "grade": "B"
+        },
+        "googleapis": {
+          "version": "16.0.0",
+          "score": 62.3,
+          "category": "stable",
+          "grade": "B"
+        },
+        "home_widget": {
+          "version": "0.9.1",
+          "score": 77.1,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "http": {
+          "version": "1.6.0",
+          "score": 48.8,
+          "category": "stable",
+          "grade": "B"
+        },
+        "in_app_purchase": {
+          "version": "3.2.3",
+          "score": 55,
+          "category": "stable",
+          "grade": "B"
+        },
+        "in_app_purchase_android": {
+          "version": "0.4.0+10",
+          "score": 54.1,
+          "category": "stable",
+          "grade": "B"
+        },
+        "in_app_review": {
+          "version": "2.0.11",
+          "score": 82.2,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "in_app_update": {
+          "version": "4.2.5",
+          "score": 35.1,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "intl": {
+          "version": "0.20.2",
+          "score": 16.6,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "isar_community": {
+          "version": "3.3.2",
+          "score": 70.4,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "isar_community_flutter_libs": {
+          "version": "3.3.2",
+          "score": 64,
+          "category": "stable",
+          "grade": "B"
+        },
+        "isar_community_generator": {
+          "version": "3.3.2",
+          "score": 65.5,
+          "category": "stable",
+          "grade": "B"
+        },
+        "json_annotation": {
+          "version": "4.11.0",
+          "score": 78.5,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "json_serializable": {
+          "version": "6.13.0",
+          "score": 86.9,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "local_auth": {
+          "version": "3.0.1",
+          "score": 55,
+          "category": "stable",
+          "grade": "B"
+        },
+        "logger": {
+          "version": "2.7.0",
+          "score": 71.8,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "lucide_icons_flutter": {
+          "version": "3.1.12",
+          "score": 87.3,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "math_expressions": {
+          "version": "3.1.0",
+          "score": 22.9,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "month_picker_dialog": {
+          "version": "6.7.2",
+          "score": 69.5,
+          "category": "stable",
+          "grade": "B"
+        },
+        "mudra_plugin_sdk": {
+          "version": "1.0.0",
+          "score": 0,
+          "category": "abandoned",
+          "grade": "E"
+        },
+        "open_file": {
+          "version": "3.5.11",
+          "score": 56.9,
+          "category": "stable",
+          "grade": "B"
+        },
+        "package_info_plus": {
+          "version": "9.0.1",
+          "score": 76.9,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "path_provider": {
+          "version": "2.1.5",
+          "score": 54,
+          "category": "stable",
+          "grade": "B"
+        },
+        "path_provider_platform_interface": {
+          "version": "2.1.2",
+          "score": 51.6,
+          "category": "stable",
+          "grade": "B"
+        },
+        "pdf": {
+          "version": "3.12.0",
+          "score": 71.8,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "percent_indicator": {
+          "version": "4.2.5",
+          "score": 13.1,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "permission_handler": {
+          "version": "12.0.1",
+          "score": 20.7,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "plugin_platform_interface": {
+          "version": "2.1.8",
+          "score": 51.6,
+          "category": "stable",
+          "grade": "B"
+        },
+        "printing": {
+          "version": "5.14.3",
+          "score": 67.9,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "responsive_framework": {
+          "version": "1.5.1",
+          "score": 11.6,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "riverpod": {
+          "version": "3.2.1",
+          "score": 63.099999999999994,
+          "category": "stable",
+          "grade": "B"
+        },
+        "saropa_lints": {
+          "version": "9.10.0",
+          "score": 70,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "share_plus": {
+          "version": "12.0.2",
+          "score": 74.9,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "shared_preferences": {
+          "version": "2.5.5",
+          "score": 51.5,
+          "category": "stable",
+          "grade": "B"
+        },
+        "table_calendar": {
+          "version": "3.2.0",
+          "score": 13.1,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "timezone": {
+          "version": "0.11.0",
+          "score": 62.2,
+          "category": "end-of-life",
+          "grade": "F"
+        },
+        "url_launcher": {
+          "version": "6.3.2",
+          "score": 53,
+          "category": "stable",
+          "grade": "B"
+        },
+        "uuid": {
+          "version": "4.5.3",
+          "score": 70.8,
+          "category": "vibrant",
+          "grade": "A"
+        },
+        "visibility_detector": {
+          "version": "0.4.0+2",
+          "score": 13.1,
+          "category": "outdated",
+          "grade": "C"
+        },
+        "workmanager": {
+          "version": "0.9.0+3",
+          "score": 30.6,
+          "category": "outdated",
+          "grade": "C"
+        }
+      }
+    }
+  ]
+}

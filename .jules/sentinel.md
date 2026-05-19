@@ -13,6 +13,16 @@
 **Learning:** Encryption must be applied consistently across all models containing PII or financial notes. Relying on primary service classes for encryption is insufficient if secondary services or UI screens perform direct database writes (e.g., SMS approval flow, recurring processing).
 **Prevention:** Centralize encryption/decryption logic in model extensions and mandate their use in both retrieval (via `withDecryption()`) and persistence (via `encryptFields()`) layers across all feature modules.
 
+## 2025-05-22 - [Encryption-Induced Query Regression]
+**Vulnerability:** Core matching and filtering logic (e.g., `CategoryRule` matching, `BillService` duplicate check) failed or became extremely slow after applying field-level encryption.
+**Learning:** Isar cannot filter or search within AES-256 ciphertext at the database level. Attempting to use `.filter().bodyContains()` or `.merchantNameEqualTo()` on encrypted fields returns zero results. Furthermore, fetching and decrypting the entire collection inside a loop (as done initially in `SmsActivityService`) causes $O(N^2)$ performance degradation.
+**Prevention:** 1. Use deterministic non-sensitive indexed fields (like `smsHash`) for lookups where possible. 2. If content-based matching is required, fetch the decrypted collection once outside the loop and perform in-memory filtering.
+
+## 2025-05-28 - [Encrypted Query Failure & Double Encryption Risk]
+**Vulnerability:** Application logic failure (duplicate records) and potential data corruption when querying or saving encrypted fields.
+**Learning:** Standard database filters like `bodyContains()` fail on encrypted fields because the ciphertext does not contain the plaintext substrings. Additionally, calling `encryptFields()` multiple times on the same object (e.g., in nested service calls) leads to double-encryption, making data unrecoverable.
+**Prevention:** Use deterministic, non-encrypted indexed fields (like `smsHash`) for record lookups. Ensure that `encryptFields()` is called exactly once immediately before the final database write in a transaction, and decrypt the object if it needs to be reused.
+
 ## 2025-05-25 - [Encryption Timing and Pipeline Integrity]
 **Vulnerability:** Calling `encryptFields()` at the start of a service method (like `addActivity`) breaks downstream logic that relies on plaintext (e.g., regex matching, learned category rules). Additionally, linked/paired objects are often missed during encryption cycles.
 **Learning:** Encryption must happen as the *final* step before a database write. Furthermore, any method that modifies and saves a paired or related object (like a transfer pair in `SmsActivityService`) must also explicitly re-encrypt that object, as it may have been fetched and decrypted earlier in the process.

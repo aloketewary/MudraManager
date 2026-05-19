@@ -3,6 +3,7 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/category_rule.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -135,9 +136,11 @@ class CategoryMergeService {
       final rules = await isar.categoryRules
           .where()
           .categoryIdEqualTo(sourceId.toString())
-          .findAll();
+          .findAll()
+          .withDecryption();
       for (final rule in rules) {
         rule.categoryId = targetId.toString();
+        rule.encryptFields();
         await isar.categoryRules.put(rule);
       }
       total += rules.length;

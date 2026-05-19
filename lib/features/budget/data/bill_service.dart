@@ -1,5 +1,6 @@
 import 'package:mudra_manager/core/utils/date_arithmetic.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
 
@@ -12,14 +13,16 @@ class BillService {
     final bills = await isar.recurringBills
         .filter()
         .isActiveEqualTo(true)
-        .findAll();
+        .findAll()
+        .withDecryption();
 
     for (final bill in bills) {
       if (bill.nextDueDate != null &&
           bill.nextDueDate!.isBefore(today.add(const Duration(days: 1)))) {
+        final hash = 'bill_${bill.id}_${bill.nextDueDate!.millisecondsSinceEpoch}';
         final existing = await isar.pendingTransactions
             .filter()
-            .bodyContains(bill.name)
+            .smsHashEqualTo(hash)
             .findFirst();
 
         if (existing == null) {
@@ -33,9 +36,9 @@ class BillService {
             ..isIncome = false
             ..category = bill.category.value?.name
             ..account = bill.account.value?.name
-            ..smsHash =
-                'bill_${bill.id}_${bill.nextDueDate!.millisecondsSinceEpoch}';
+            ..smsHash = hash;
 
+          pending.encryptFields();
           await isar.writeTxn(() async {
             await isar.pendingTransactions.put(pending);
           });
@@ -63,10 +66,12 @@ class BillService {
         break;
     }
 
+    bill.encryptFields();
     await isar.writeTxn(() async {
       bill.nextDueDate = nextDate;
       await isar.recurringBills.put(bill);
     });
+    bill.decryptFields();
   }
 
   static Future<void> markBillAsPaid(int billId) async {
@@ -75,10 +80,8 @@ class BillService {
 
     final bill = await isar.recurringBills.get(billId);
     if (bill != null) {
-      await isar.writeTxn(() async {
-        bill.lastPaidDate = DateTime.now();
-        await isar.recurringBills.put(bill);
-      });
+      bill.decryptFields();
+      bill.lastPaidDate = DateTime.now();
 
       await _updateNextDueDate(isar, bill);
     }
