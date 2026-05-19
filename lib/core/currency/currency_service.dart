@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/archived_transaction.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -162,30 +163,31 @@ class CurrencyService {
     final oldBase = await getBaseCurrency();
     if (oldBase == newBase) return 0;
 
-    final allTxns = await _isar.transactions.where().findAll();
+    final allTxns = await _isar.transactions.where().findAll().withDecryption();
     final now = DateTime.now();
 
     final archived = <ArchivedTransaction>[];
     for (final txn in allTxns) {
       await txn.account.load();
       await txn.category.load();
-      archived.add(
-        ArchivedTransaction()
-          ..originalTransactionId = txn.id
-          ..date = txn.date
-          ..amount = txn.amount
-          ..isExpense = txn.isExpense
-          ..description = txn.description
-          ..currencyCode = txn.currencyCode
-          ..convertedAmount = txn.convertedAmount
-          ..rateUsed = txn.rateUsed
-          ..isTransfer = txn.isTransfer
-          ..accountName = txn.account.value?.name
-          ..categoryName = txn.category.value?.name
-          ..archivedFromBase = oldBase
-          ..archivedToBase = newBase
-          ..archivedAt = now,
-      );
+      final aTxn = ArchivedTransaction()
+        ..originalTransactionId = txn.id
+        ..date = txn.date
+        ..amount = txn.amount
+        ..isExpense = txn.isExpense
+        ..description = txn.description
+        ..currencyCode = txn.currencyCode
+        ..convertedAmount = txn.convertedAmount
+        ..rateUsed = txn.rateUsed
+        ..isTransfer = txn.isTransfer
+        ..accountName = txn.account.value?.name
+        ..categoryName = txn.category.value?.name
+        ..archivedFromBase = oldBase
+        ..archivedToBase = newBase
+        ..archivedAt = now;
+
+      aTxn.encryptFields();
+      archived.add(aTxn);
     }
 
     await _isar.writeTxn(() async {

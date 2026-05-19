@@ -1,4 +1,5 @@
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/category_seeder.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -16,8 +17,12 @@ class TripService {
   Future<void> createTrip(Trip trip, List<TripParticipant> participants) async {
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
+      for (final p in participants) {
+        p.encryptFields();
+      }
       await isar.tripParticipants.putAll(participants);
       trip.participants.addAll(participants);
+      trip.encryptFields();
       await isar.trips.put(trip);
       await trip.participants.save();
     });
@@ -26,7 +31,7 @@ class TripService {
 
   Future<List<Trip>> getAllTrips() async {
     final isar = await isarService.getInstance();
-    return await isar.trips.where().sortByCreatedAtDesc().findAll();
+    return await isar.trips.where().sortByCreatedAtDesc().findAll().withDecryption();
   }
 
   /// Loads summary data for a trip (participants, total spent, owner share).
@@ -84,19 +89,21 @@ class TripService {
         .filter()
         .isActiveEqualTo(true)
         .sortByStartDateDesc()
-        .findAll();
+        .findAll()
+        .withDecryption();
   }
 
   Future<Trip?> getTripById(int id) async {
     final isar = await isarService.getInstance();
-    final trip = await isar.trips.get(id);
-    await trip?.participants.load();
-    await trip?.transactions.load();
-    for (final tripTxn in trip?.transactions ?? <TripTransaction>[]) {
-      await tripTxn.transaction.load();
-      await tripTxn.splitExpense.load();
-      await tripTxn.paidBy.load();
-      await tripTxn.transaction.value?.category.load();
+    final trip = await isar.trips.get(id).withDecryption();
+    if (trip != null) {
+      await trip.participants.load();
+      trip.participants.decryptAll();
+      await trip.transactions.load();
+      await trip.transactions.decryptAll();
+      for (final tripTxn in trip.transactions) {
+        await tripTxn.transaction.value?.category.load();
+      }
     }
     return trip;
   }
@@ -124,6 +131,7 @@ class TripService {
     }
 
     await isar.writeTxn(() async {
+      transaction.encryptFields();
       await isar.transactions.put(transaction);
 
       final tripTxn = TripTransaction.create(
@@ -219,7 +227,9 @@ class TripService {
     }
 
     await isar.writeTxn(() async {
+      expense.encryptFields();
       await isar.splitExpenses.put(expense);
+      ledgerTxn.encryptFields();
       await isar.transactions.put(ledgerTxn);
       await ledgerTxn.category.save();
       await ledgerTxn.account.save();
@@ -324,6 +334,7 @@ class TripService {
       description: 'Settlement',
       date: DateTime.now(),
     );
+    expense.encryptFields();
     if (currencyCode != null) {
       expense.currencyCode = currencyCode;
     }
@@ -359,6 +370,7 @@ class TripService {
     )
       ..isSettlement = true
       ..isSharedExpense = true;
+    ledgerTxn.encryptFields();
     if (systemCat != null) ledgerTxn.category.value = systemCat;
     if (primaryAccount != null) ledgerTxn.account.value = primaryAccount;
     if (currencyCode != null) ledgerTxn.currencyCode = currencyCode;
@@ -443,7 +455,8 @@ class TripService {
     final trip = await isar.trips
         .filter()
         .transactions((q) => q.idEqualTo(tripTxn.id))
-        .findFirst();
+        .findFirst()
+        .withDecryption();
 
     return trip?.name;
   }
@@ -471,7 +484,8 @@ class TripService {
     final trips = await isar.trips
         .filter()
         .anyOf(tripTxnIds, (q, id) => q.transactions((tq) => tq.idEqualTo(id)))
-        .findAll();
+        .findAll()
+        .withDecryption();
 
     final tripMap = <int, String>{};
     for (var trip in trips) {
@@ -530,10 +544,14 @@ class TripService {
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
       // 1. Update Trip Details
+      trip.encryptFields();
       await isar.trips.put(trip);
 
       // 2. Update Participants
       // Save all participants (updates existing ones, creates new ones)
+      for (final p in newParticipants) {
+        p.encryptFields();
+      }
       await isar.tripParticipants.putAll(newParticipants);
 
       // Update the links: Load current, clear, and add new list

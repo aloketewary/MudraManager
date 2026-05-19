@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
@@ -218,10 +219,11 @@ Future<void> _migrateCategoryAndParticipantFields(Isar isar) async {
   }
 
   // Re-put all trip participants to write isOwner = false to disk
-  final participants = await isar.tripParticipants.where().findAll();
+  final participants = await isar.tripParticipants.where().findAll().withDecryption();
   if (participants.isNotEmpty) {
     await isar.writeTxn(() async {
       for (final p in participants) {
+        p.encryptFields();
         await isar.tripParticipants.put(p);
       }
     });
