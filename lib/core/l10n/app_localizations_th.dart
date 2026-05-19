@@ -2949,6 +2949,23 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get budget_alert_exceededTitle => 'Budget Exceeded!';
+
+  @override
+  String budget_alert_warningTitle(Object percent) {
+    return 'Budget Alert: $percent%';
+  }
+
+  @override
+  String get label_percentage_with_colon => 'Percentage:';
+
+  @override
+  String get label_budget_with_colon => 'Budget:';
+
+  @override
+  String get label_spent_with_colon => 'Spent:';
+
+  @override
   String get bills_howBillsWorkTitle => 'How Bills Work';
 
   @override
@@ -6183,4 +6200,38 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get cc_utilitySubtitle => 'Due dates, outstanding & limits';
+
+  @override
+  String get plugins_remindMeBefore => 'Remind me before';
+
+  @override
+  String plugins_daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String plugins_billDueOn(int day, String suffix) {
+    return 'Bill due on $day$suffix of every month';
+  }
+
+  @override
+  String get plugins_addCreditCard => 'Add Credit Card';
+
+  @override
+  String get plugins_editCreditCard => 'Edit Credit Card';
+
+  @override
+  String get plugins_cardName => 'Card Name';
+
+  @override
+  String get plugins_cardNameHint => 'e.g., HDFC Regalia';
+
+  @override
+  String get plugins_billDayLabel => 'Bill Day';
 }

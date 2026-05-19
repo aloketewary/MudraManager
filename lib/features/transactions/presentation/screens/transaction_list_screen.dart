@@ -30,6 +30,7 @@ import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/speed_dial_fab.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 
 final _dateHeaderFormatter = DateFormat.yMMMMd();
 
@@ -327,20 +328,20 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             spacing,
           ),
 
-        // ── Active filter chips ──
-        if (_selectedCategoryId != null || _filterStartDate != null || _selectedTagId != null)
-          _buildFilterChips(
-            color,
-            textTheme,
-            spacing,
-          ),
-
         // ── Date header / calendar ──
         _buildDateHeader(
           color,
           textTheme,
           spacing,
         ),
+
+        // ── Sticky filter bar (always visible when filters active) ──
+        if (_selectedCategoryId != null || _filterStartDate != null || _selectedTagId != null)
+          _buildStickyFilterBar(
+            color,
+            textTheme,
+            spacing,
+          ),
 
         // ── Transaction list ──
         Expanded(
@@ -451,73 +452,121 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     );
   }
 
-  // ── FILTER CHIPS ──
-  Widget _buildFilterChips(
+  // ── STICKY FILTER BAR ──
+  Widget _buildStickyFilterBar(
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
+    final ctxt = AppLocalizations.of(context)!;
+    final parts = <String>[];
+    if (_selectedCategoryId != null) parts.add(ctxt.txnList_category);
+    if (_filterStartDate != null) parts.add(ctxt.txnList_dateRange);
+    if (_selectedTagId != null) parts.add(_selectedTagName ?? ctxt.txnList_tag);
+
+    // Check if a budget exists for the selected category
+    BudgetWithProgress? matchingBudget;
+    if (_selectedCategoryId != null) {
+      final budgetsAsync = ref.watch(budgetsWithProgressProvider);
+      budgetsAsync.whenData((budgets) {
+        for (final bwp in budgets) {
+          final catIds = bwp.budget.categories.map((c) => c.id).toSet();
+          if (catIds.contains(_selectedCategoryId)) {
+            matchingBudget = bwp;
+            break;
+          }
+        }
+      });
+    }
+
+    return Container(
+      margin: EdgeInsets.symmetric(
         horizontal: spacing.cardHorizontal,
         vertical: spacing.cardVertical,
       ),
-      child: Wrap(
-        spacing: spacing.elementGap,
-        runSpacing: spacing.elementGap,
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardInner,
+        vertical: spacing.elementGap,
+      ),
+      decoration: BoxDecoration(
+        color: color.primaryContainer.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.primary.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          if (_selectedCategoryId != null)
-            Chip(
-              avatar:
-                  Icon(LucideIcons.layoutGrid, size: 18, color: color.primary),
-              label: Text(AppLocalizations.of(context)!.txnList_category, style: textTheme.labelMedium),
-              deleteIcon: const Icon(LucideIcons.x, size: 18),
-              backgroundColor: color.primaryContainer,
-              side: BorderSide.none,
-              onDeleted: () {
-                HapticFeedback.mediumImpact();
-                setState(() {
-                  _selectedCategoryId = null;
-                  _clearCache();
-                });
-              },
-            ),
-          if (_filterStartDate != null)
-            Chip(
-              avatar: Icon(
-                LucideIcons.calendarRange,
-                size: 18,
-                color: color.primary,
+          Row(
+            children: [
+              Icon(LucideIcons.listFilter, size: 16, color: color.primary),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Text(
+                  parts.join(' · '),
+                  style: textTheme.labelMedium?.copyWith(
+                    color: color.onPrimaryContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              label: Text(AppLocalizations.of(context)!.txnList_dateRange, style: textTheme.labelMedium),
-              deleteIcon: const Icon(LucideIcons.x, size: 18),
-              backgroundColor: color.primaryContainer,
-              side: BorderSide.none,
-              onDeleted: () {
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  setState(() {
+                    _selectedCategoryId = null;
+                    _filterStartDate = null;
+                    _filterEndDate = null;
+                    _selectedTagId = null;
+                    _selectedTagName = null;
+                    _clearCache();
+                  });
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.elementGap,
+                    vertical: spacing.elementGapMin,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                  ),
+                  child: Text(
+                    ctxt.txnList_clear,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: color.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (matchingBudget != null) ...[
+            SizedBox(height: spacing.elementGapMin),
+            GestureDetector(
+              onTap: () {
                 HapticFeedback.mediumImpact();
-                setState(() {
-                  _filterStartDate = null;
-                  _filterEndDate = null;
-                  _clearCache();
-                });
+                context.push(AppRoutes.budgetDetails, extra: matchingBudget);
               },
+              child: Row(
+                children: [
+                  Icon(LucideIcons.chartPie, size: 14, color: color.primary),
+                  SizedBox(width: spacing.elementGapMin),
+                  Text(
+                    ctxt.budget_dashboardPageTitle,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: color.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(LucideIcons.arrowRight, size: 12, color: color.primary),
+                ],
+              ),
             ),
-          if (_selectedTagId != null)
-            Chip(
-              avatar: Icon(LucideIcons.tag, size: 18, color: color.tertiary),
-              label: Text(_selectedTagName ?? AppLocalizations.of(context)!.txnList_tag, style: textTheme.labelMedium),
-              deleteIcon: const Icon(LucideIcons.x, size: 18),
-              backgroundColor: color.tertiaryContainer,
-              side: BorderSide.none,
-              onDeleted: () {
-                HapticFeedback.mediumImpact();
-                setState(() {
-                  _selectedTagId = null;
-                  _selectedTagName = null;
-                  _clearCache();
-                });
-              },
-            ),
+          ],
         ],
       ),
     );

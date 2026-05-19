@@ -42,7 +42,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboard_enterYourNameToPersonalizeYourExperience =>
-      'Enter your name to personalize your experience.';
+      'Masukkan nama Anda untuk mempersonalisasi pengalaman Anda.';
 
   @override
   String get onboard_enterYourName => 'Masukkan nama Anda';
@@ -52,7 +52,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboard_letsCreateYourFirstAccount =>
-      'Let\'s create your first account (let say: Cash).';
+      'Mari buat akun pertama Anda (misal: Kas).';
 
   @override
   String get onboard_accountName => 'Nama akun';
@@ -62,16 +62,16 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboard_youCanUpdateOtherDetailsLaterAsWell =>
-      'You can update other details later as well.';
+      'Anda juga dapat memperbarui detail lainnya nanti.';
 
   @override
   String onboard_pleaseFillThe(Object inputName) {
-    return 'Please fill the \"$inputName\"';
+    return 'Harap isi \"$inputName\"';
   }
 
   @override
   String onboard_pleaseEnterAValidNumberFor(Object hintText) {
-    return 'Please enter a valid number for \"$hintText\"';
+    return 'Harap masukkan angka yang valid untuk \"$hintText\"';
   }
 
   @override
@@ -79,40 +79,41 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboard_letsStartManagingYourMoneyWisely =>
-      'Let\'s start managing your money wisely.';
+      'Mari mulai mengelola uang Anda dengan bijak.';
 
   @override
-  String get app_settings_appbar_title => 'App Settings';
+  String get app_settings_appbar_title => 'Pengaturan Aplikasi';
 
   @override
-  String get language_settings_appbar_title => 'Choose Language';
+  String get language_settings_appbar_title => 'Pilih Bahasa';
 
   @override
-  String get app_settings_language_title => 'Language';
+  String get app_settings_language_title => 'Bahasa';
 
   @override
-  String get app_settings_language_subtitle => 'Choose your language';
+  String get app_settings_language_subtitle => 'Pilih bahasa Anda';
 
   @override
-  String get app_settings_theme_mode_title => 'Theme Mode';
+  String get app_settings_theme_mode_title => 'Mode Tema';
 
   @override
-  String get app_settings_theme_mode_light => 'Light';
+  String get app_settings_theme_mode_light => 'Terang';
 
   @override
-  String get app_settings_theme_mode_dark => 'Dark';
+  String get app_settings_theme_mode_dark => 'Gelap';
 
   @override
-  String get app_settings_theme_mode_system_default => 'System Default';
+  String get app_settings_theme_mode_system_default => 'Default Sistem';
 
   @override
   String get app_settings_theme_mode_amoled => 'AMOLED';
 
   @override
-  String get app_settings_theme_mode_subtitle => 'Choose your preferred theme';
+  String get app_settings_theme_mode_subtitle => 'Pilih tema pilihan Anda';
 
   @override
-  String get app_settings_daily_reminder_title => 'Daily Expense Reminder';
+  String get app_settings_daily_reminder_title =>
+      'Pengingat Pengeluaran Harian';
 
   @override
   String get home_screen_title => 'Beranda';
@@ -127,31 +128,31 @@ class AppLocalizationsId extends AppLocalizations {
   String get profile_screen_title => 'Profil';
 
   @override
-  String get add_edit_transaction_screen_title => 'Add Transaction';
+  String get add_edit_transaction_screen_title => 'Tambah Transaksi';
 
   @override
-  String get transaction_list_screen_title => 'Transaction List';
+  String get transaction_list_screen_title => 'Daftar Transaksi';
 
   @override
-  String get transaction_listViewGroupTodayLabel => 'Today';
+  String get transaction_listViewGroupTodayLabel => 'Hari Ini';
 
   @override
-  String get transaction_listViewGroupYesterdayLabel => 'Yesterday';
+  String get transaction_listViewGroupYesterdayLabel => 'Kemarin';
 
   @override
-  String get greeting_good_morning_text => 'Good Morning';
+  String get greeting_good_morning_text => 'Selamat Pagi';
 
   @override
-  String get greeting_good_afternoon_text => 'Good Afternoon';
+  String get greeting_good_afternoon_text => 'Selamat Siang';
 
   @override
-  String get greeting_good_evening_text => 'Good Evening';
+  String get greeting_good_evening_text => 'Selamat Sore';
 
   @override
-  String get greeting_good_night_text => 'Good Night';
+  String get greeting_good_night_text => 'Selamat Malam';
 
   @override
-  String get greeting_hello_text => 'Hello';
+  String get greeting_hello_text => 'Halo';
 
   @override
   String get transaction_type_income => 'Pemasukan';
@@ -185,13 +186,13 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get dashboard_mini_budget_not_found_text =>
-      'No Budgets Defined, Add One!';
+      'Belum Ada Anggaran, Tambahkan Satu!';
 
   @override
-  String get dashboard_mini_budget_add_text => 'Add Budget';
+  String get dashboard_mini_budget_add_text => 'Tambah Anggaran';
 
   @override
-  String get transaction_list_cash_flow_screen_title => 'Transactions';
+  String get transaction_list_cash_flow_screen_title => 'Transaksi';
 
   @override
   String get transaction_list_filter_all => 'Semua';
@@ -204,10 +205,10 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get transaction_list_pending_transaction_message_text =>
-      '⚡ New transactions found! Review now';
+      '⚡ Transaksi baru ditemukan! Tinjau sekarang';
 
   @override
-  String get transaction_listPendingTransactionMessageActionLabel => 'Review';
+  String get transaction_listPendingTransactionMessageActionLabel => 'Tinjau';
 
   @override
   String get transaction_noTransactionFoundText => 'Belum ada transaksi.';
@@ -216,7 +217,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get transaction_deleteAlertTitleText => 'Hapus transaksi?';
 
   @override
-  String get transaction_deleteAlertBodyText => 'This action cannot be undone.';
+  String get transaction_deleteAlertBodyText =>
+      'Tindakan ini tidak dapat dibatalkan.';
 
   @override
   String get transaction_deleteButtonActionText => 'Hapus';
@@ -225,160 +227,161 @@ class AppLocalizationsId extends AppLocalizations {
   String get transaction_cancelButtonActionText => 'Batal';
 
   @override
-  String get transaction_filterCategoryText => 'Filter Transactions';
+  String get transaction_filterCategoryText => 'Filter Transaksi';
 
   @override
   String transaction_noteDescriptionText(Object description) {
-    return 'note: $description';
+    return 'catatan: $description';
   }
 
   @override
-  String get calendar_week_monday_initial_text => 'M';
+  String get calendar_week_monday_initial_text => 'S';
 
   @override
-  String get calendar_week_tuesday_initial_text => 'T';
+  String get calendar_week_tuesday_initial_text => 'S';
 
   @override
-  String get calendar_week_wednesday_initial_text => 'W';
+  String get calendar_week_wednesday_initial_text => 'R';
 
   @override
-  String get calendar_week_thursday_initial_text => 'T';
+  String get calendar_week_thursday_initial_text => 'K';
 
   @override
-  String get calendar_week_friday_initial_text => 'F';
+  String get calendar_week_friday_initial_text => 'J';
 
   @override
   String get calendar_week_saturday_initial_text => 'S';
 
   @override
-  String get calendar_week_sunday_initial_text => 'S';
+  String get calendar_week_sunday_initial_text => 'M';
 
   @override
-  String get dashboard_netWorthTitle => 'Net Worth';
+  String get dashboard_netWorthTitle => 'Kekayaan Bersih';
 
   @override
-  String get budget_dashboardMiniCardBudgetTitleText => 'Budget';
+  String get budget_dashboardMiniCardBudgetTitleText => 'Anggaran';
 
   @override
-  String get budget_dashboardMiniCardSpentTitleText => 'Spent';
+  String get budget_dashboardMiniCardSpentTitleText => 'Terpakai';
 
   @override
-  String get budget_dashboardPageTitle => 'Budgets Details';
+  String get budget_dashboardPageTitle => 'Detail Anggaran';
 
   @override
-  String get budget_dashboardNotFoundText => 'No Budgets Defined, Add One!';
+  String get budget_dashboardNotFoundText =>
+      'Belum Ada Anggaran, Tambahkan Satu!';
 
   @override
-  String get budget_dashboardAddBudgetText => 'Add Budget';
+  String get budget_dashboardAddBudgetText => 'Tambah Anggaran';
 
   @override
-  String get budget_categoriesTitle => 'Categories';
+  String get budget_categoriesTitle => 'Kategori';
 
   @override
   String budget_dashboardPieChartLabelText(
       Object spentPercent, Object title, Object totalPercent) {
-    return '$title ($totalPercent of Total, ${spentPercent}of Spent)';
+    return '$title ($totalPercent dari Total, $spentPercent dari Terpakai)';
   }
 
   @override
-  String get budget_buttonDeleteTitleText => 'Delete Budget?';
+  String get budget_buttonDeleteTitleText => 'Hapus Anggaran?';
 
   @override
   String get budget_buttonDeleteBodyText =>
-      'This will remove the Budget and its allocations, this action cannot be undone.';
+      'Ini akan menghapus Anggaran dan alokasinya, tindakan ini tidak dapat dibatalkan.';
 
   @override
-  String get budget_buttonDeleteActionText => 'Delete';
+  String get budget_buttonDeleteActionText => 'Hapus';
 
   @override
-  String get budget_buttonCancelActionText => 'Cancel';
+  String get budget_buttonCancelActionText => 'Batal';
 
   @override
-  String get budget_buttonAddText => 'Add Budget';
+  String get budget_buttonAddText => 'Tambah Anggaran';
 
   @override
-  String get budget_buttonEditText => 'Edit Budget';
+  String get budget_buttonEditText => 'Edit Anggaran';
 
   @override
-  String get budget_budgetNameControllerText => 'Budget Name';
+  String get budget_budgetNameControllerText => 'Nama Anggaran';
 
   @override
-  String get budget_budgetAmountControllerText => 'Total Amount';
+  String get budget_budgetAmountControllerText => 'Jumlah Total';
 
   @override
-  String get budget_recurrenceControllerText => 'Recurrence';
+  String get budget_recurrenceControllerText => 'Pengulangan';
 
   @override
-  String get budget_nameRequiredHintText => 'Budget name is required';
+  String get budget_nameRequiredHintText => 'Nama anggaran diperlukan';
 
   @override
-  String get budget_amountRequiredHintText => 'Valid Amount is required';
+  String get budget_amountRequiredHintText => 'Jumlah yang valid diperlukan';
 
   @override
-  String get budget_selectStartDateText => 'Select Start Date';
+  String get budget_selectStartDateText => 'Pilih Tanggal Mulai';
 
   @override
   String budget_selectedStartDateText(Object startDate) {
-    return 'Start: $startDate';
+    return 'Mulai: $startDate';
   }
 
   @override
-  String get budget_selectEndDateText => 'Select End Date';
+  String get budget_selectEndDateText => 'Pilih Tanggal Selesai';
 
   @override
   String budget_selectedEndDateText(Object endDate) {
-    return 'End: $endDate';
+    return 'Selesai: $endDate';
   }
 
   @override
-  String get budget_categoryTitle => 'Select Categories & Allocations';
+  String get budget_categoryTitle => 'Pilih Kategori & Alokasi';
 
   @override
-  String get budget_allocateAmountText => 'Allocate Amount';
+  String get budget_allocateAmountText => 'Alokasikan Jumlah';
 
   @override
   String get budget_categoryMessageInfoText =>
-      'You can manually enter category allocations, or leave them blank to auto-distribute the remaining amount equally.';
+      'Anda dapat memasukkan alokasi kategori secara manual, atau mengosongkannya untuk mendistribusikan sisa jumlah secara otomatis secara merata.';
 
   @override
   String budget_totalAllocatedBudgetText(Object totalAlloc) {
-    return 'Total Allocated: $totalAlloc';
+    return 'Total Dialokasikan: $totalAlloc';
   }
 
   @override
-  String get budget_recurrenceText => 'Recurrence';
+  String get budget_recurrenceText => 'Pengulangan';
 
   @override
-  String get budget_recurrenceNoneText => 'None';
+  String get budget_recurrenceNoneText => 'Tidak Ada';
 
   @override
-  String get budget_recurrenceDailyText => 'Daily';
+  String get budget_recurrenceDailyText => 'Harian';
 
   @override
-  String get budget_recurrenceWeeklyText => 'Weekly';
+  String get budget_recurrenceWeeklyText => 'Mingguan';
 
   @override
-  String get budget_recurrenceMonthlyText => 'Monthly';
+  String get budget_recurrenceMonthlyText => 'Bulanan';
 
   @override
-  String get budget_recurrenceYearlyText => 'Yearly';
+  String get budget_recurrenceYearlyText => 'Tahunan';
 
   @override
-  String get budget_saveButtonText => 'save';
+  String get budget_saveButtonText => 'simpan';
 
   @override
-  String get budget_updateButtonText => 'update';
+  String get budget_updateButtonText => 'perbarui';
 
   @override
-  String get budget_pickBothDatesErrorText => 'Pick both dates';
+  String get budget_pickBothDatesErrorText => 'Pilih kedua tanggal';
 
   @override
   String get budget_selectAtLeastOneCategoryErrorText =>
-      'Select at least one category';
+      'Pilih setidaknya satu kategori';
 
   @override
   String get budget_allocatedAmountExceedsTotalBudgetText =>
-      'Allocated amount exceeds total budget';
+      'Jumlah yang dialokasikan melebihi total anggaran';
 
   @override
   String get transaction_amountControllerText => 'Jumlah';
@@ -387,7 +390,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get transaction_descriptionControllerText => 'Deskripsi (opsional)';
 
   @override
-  String get transaction_amountControllerErrorText => 'Enter amount';
+  String get transaction_amountControllerErrorText => 'Masukkan jumlah';
 
   @override
   String get transaction_selectAccountLabel => 'Pilih akun';
@@ -396,30 +399,30 @@ class AppLocalizationsId extends AppLocalizations {
   String get transaction_selectCategoryLabel => 'Pilih kategori';
 
   @override
-  String get transaction_selectTagLabel => 'Select Tag';
+  String get transaction_selectTagLabel => 'Pilih Tag';
 
   @override
-  String get transaction_addNewCategoryText => 'Add New \nCategory';
+  String get transaction_addNewCategoryText => 'Tambah\nKategori Baru';
 
   @override
-  String get transaction_addNewTagText => 'Add New Tag';
+  String get transaction_addNewTagText => 'Tambah Tag Baru';
 
   @override
-  String get transaction_tagNameControllerText => 'Tag Name';
+  String get transaction_tagNameControllerText => 'Nama Tag';
 
   @override
-  String get transaction_saveTagButtonLabel => 'Save Tag';
+  String get transaction_saveTagButtonLabel => 'Simpan Tag';
 
   @override
-  String get transaction_saveTransactionButtonLabel => 'Save Transaction';
+  String get transaction_saveTransactionButtonLabel => 'Simpan Transaksi';
 
   @override
   String get transaction_selectOneAccountErrorText =>
-      'Select at least one Account';
+      'Pilih setidaknya satu Akun';
 
   @override
   String get transaction_selectOneCategoryErrorText =>
-      'Select at least one Category';
+      'Pilih setidaknya satu Kategori';
 
   @override
   String get transaction_incomeButtonLabel => 'Pemasukan';
@@ -429,223 +432,222 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get statistics_weTrimDownDecimalInfoText =>
-      'We trim down decimal places, please round off if required.';
+      'Kami memangkas tempat desimal, silakan bulatkan jika diperlukan.';
 
   @override
-  String get statistics_selectPeriodTodayText => 'Today';
+  String get statistics_selectPeriodTodayText => 'Hari Ini';
 
   @override
-  String get statistics_selectPeriodWeekText => 'Week';
+  String get statistics_selectPeriodWeekText => 'Minggu';
 
   @override
-  String get statistics_selectPeriodMonthText => 'Month';
+  String get statistics_selectPeriodMonthText => 'Bulan';
 
   @override
-  String get statistics_selectPeriodYearText => 'Year';
+  String get statistics_selectPeriodYearText => 'Tahun';
 
   @override
-  String get statistics_chartLineIncomeText => 'Income';
+  String get statistics_chartLineIncomeText => 'Pemasukan';
 
   @override
-  String get statistics_chartLineExpenseText => 'Expense';
+  String get statistics_chartLineExpenseText => 'Pengeluaran';
 
   @override
   String statistics_chartLineTodayHourText(Object hour) {
-    return '${hour}h';
+    return '${hour}j';
   }
 
   @override
-  String get statistics_categoryNotPresentText => 'Category not present.';
+  String get statistics_categoryNotPresentText => 'Kategori tidak ada.';
 
   @override
-  String get statistics_transactionNotPresentText =>
-      'Transactions not present.';
+  String get statistics_transactionNotPresentText => 'Transaksi tidak ada.';
 
   @override
-  String get statistics_byCategoryTitleText => 'By Category';
+  String get statistics_byCategoryTitleText => 'Berdasarkan Kategori';
 
   @override
-  String get statistics_recentTransactionsTitleText => 'Recent Transactions';
+  String get statistics_recentTransactionsTitleText => 'Transaksi Terakhir';
 
   @override
-  String get statistics_metricIncomeText => 'Income';
+  String get statistics_metricIncomeText => 'Pemasukan';
 
   @override
-  String get statistics_metricExpenseText => 'Expense';
+  String get statistics_metricExpenseText => 'Pengeluaran';
 
   @override
-  String get statistics_metricNetText => 'Net';
+  String get statistics_metricNetText => 'Neto';
 
   @override
-  String get statistics_showAllButtonText => 'Show All';
+  String get statistics_showAllButtonText => 'Tampilkan Semua';
 
   @override
-  String get statistics_exportToPdfButtonText => 'Export to PDF';
+  String get statistics_exportToPdfButtonText => 'Ekspor ke PDF';
 
   @override
-  String get statistics_exportToExcelButtonText => 'Export to Excel';
+  String get statistics_exportToExcelButtonText => 'Ekspor ke Excel';
 
   @override
-  String get profile_userProfileTitleText => 'User Profile';
+  String get profile_userProfileTitleText => 'Profil Pengguna';
 
   @override
   String get profile_userProfileSubtitleText =>
-      'Change profile image, name, and email';
+      'Ubah gambar profil, nama, dan email';
 
   @override
-  String get profile_nameControllerText => 'Name';
+  String get profile_nameControllerText => 'Nama';
 
   @override
-  String get profile_nameControllerHintText => 'Enter your name';
+  String get profile_nameControllerHintText => 'Masukkan nama Anda';
 
   @override
-  String get profile_nameRequiredHintText => 'Name is required';
+  String get profile_nameRequiredHintText => 'Nama diperlukan';
 
   @override
   String get profile_emailControllerText => 'Email';
 
   @override
-  String get profile_emailControllerHintText => 'Enter your email';
+  String get profile_emailControllerHintText => 'Masukkan email Anda';
 
   @override
-  String get profile_phoneControllerText => 'Phone';
+  String get profile_phoneControllerText => 'Telepon';
 
   @override
-  String get profile_phoneControllerHintText => 'Enter your phone number';
+  String get profile_phoneControllerHintText => 'Masukkan nomor telepon Anda';
 
   @override
   String get profile_weAreNotStoringInfoText =>
-      'All your data lives on this device. No servers, no cloud, no tracking.';
+      'Semua data Anda berada di perangkat ini. Tidak ada server, tidak ada cloud, tidak ada pelacakan.';
 
   @override
-  String get profile_saveButtonText => 'save';
+  String get profile_saveButtonText => 'simpan';
 
   @override
-  String get profile_editUserProfileAppTitle => 'Edit User Profile';
+  String get profile_editUserProfileAppTitle => 'Edit Profil Pengguna';
 
   @override
   String get pendingTranx_reviewPendingTransactionsScreenTitle =>
-      'Pending Transactions';
+      'Transaksi Tertunda';
 
   @override
-  String get statistics_quickOverviewTitle => 'Quick Overview';
+  String get statistics_quickOverviewTitle => 'Ringkasan Cepat';
 
   @override
-  String get statistics_insightsTitle => 'Insights';
+  String get statistics_insightsTitle => 'Wawasan';
 
   @override
-  String get statistics_detailedAnalysisTitle => 'Detailed Analysis';
+  String get statistics_detailedAnalysisTitle => 'Analisis Detail';
 
   @override
-  String get statistics_categoryBreakdownSubtitle => 'View category breakdown';
+  String get statistics_categoryBreakdownSubtitle => 'Lihat rincian kategori';
 
   @override
-  String get statistics_expenseTrendsTitle => 'Expense Trends';
+  String get statistics_expenseTrendsTitle => 'Tren Pengeluaran';
 
   @override
-  String get statistics_expenseTrendsSubtitle => 'Last 12 months trends';
+  String get statistics_expenseTrendsSubtitle => 'Tren 12 bulan terakhir';
 
   @override
-  String get statistics_recentTransactionsSubtitle => 'Last 5 transactions';
+  String get statistics_recentTransactionsSubtitle => '5 transaksi terakhir';
 
   @override
-  String get statistics_categoryBreakdownTitle => 'Category Breakdown';
+  String get statistics_categoryBreakdownTitle => 'Rincian Kategori';
 
   @override
-  String get statistics_recentTransactionsModalTitle => 'Recent Transactions';
+  String get statistics_recentTransactionsModalTitle => 'Transaksi Terakhir';
 
   @override
-  String get transfer_screenTitle => 'Transfer Funds';
+  String get transfer_screenTitle => 'Transfer Dana';
 
   @override
   String get transfer_resetTooltip => 'Reset';
 
   @override
-  String get transfer_selectAccountsLabel => 'SELECT ACCOUNTS';
+  String get transfer_selectAccountsLabel => 'PILIH AKUN';
 
   @override
-  String get transfer_fromLabel => 'FROM';
+  String get transfer_fromLabel => 'DARI';
 
   @override
-  String get transfer_toLabel => 'TO';
+  String get transfer_toLabel => 'KE';
 
   @override
-  String get transfer_detailsLabel => 'TRANSFER DETAILS';
+  String get transfer_detailsLabel => 'DETAIL TRANSFER';
 
   @override
-  String get transfer_amountLabel => 'Amount';
+  String get transfer_amountLabel => 'Jumlah';
 
   @override
-  String get transfer_amountValidationError => 'Enter valid amount';
+  String get transfer_amountValidationError => 'Masukkan jumlah yang valid';
 
   @override
-  String get transfer_dateLabel => 'Date';
+  String get transfer_dateLabel => 'Tanggal';
 
   @override
-  String get transfer_noteLabel => 'Note (optional)';
+  String get transfer_noteLabel => 'Catatan (opsional)';
 
   @override
   String get transfer_buttonLabel => 'Transfer';
 
   @override
-  String get transfer_updateButtonLabel => 'Update Transfer';
+  String get transfer_updateButtonLabel => 'Perbarui Transfer';
 
   @override
-  String get transfer_errorLoadingAccounts => 'Error loading accounts';
+  String get transfer_errorLoadingAccounts => 'Kesalahan memuat akun';
 
   @override
-  String get app_settings_themeModeModalTitle => 'Theme Mode';
+  String get app_settings_themeModeModalTitle => 'Mode Tema';
 
   @override
-  String get category_expenseLabel => 'EXPENSE';
+  String get category_expenseLabel => 'PENGELUARAN';
 
   @override
-  String get category_incomeLabel => 'INCOME';
+  String get category_incomeLabel => 'PEMASUKAN';
 
   @override
-  String get category_addTitle => 'Add Category';
+  String get category_addTitle => 'Tambah Kategori';
 
   @override
-  String get category_editTitle => 'Edit Category';
+  String get category_editTitle => 'Edit Kategori';
 
   @override
-  String get category_tapToChangeIcon => 'Tap to change icon';
+  String get category_tapToChangeIcon => 'Ketuk untuk mengubah ikon';
 
   @override
-  String get category_nameLabel => 'Category Name';
+  String get category_nameLabel => 'Nama Kategori';
 
   @override
-  String get category_nameRequired => 'Required';
+  String get category_nameRequired => 'Diperlukan';
 
   @override
-  String get category_typeLabel => 'Category Type';
+  String get category_typeLabel => 'Tipe Kategori';
 
   @override
-  String get category_colorLabel => 'Color';
+  String get category_colorLabel => 'Warna';
 
   @override
-  String get category_tapToChangeColor => 'TAP TO CHANGE COLOR';
+  String get category_tapToChangeColor => 'KETUK UNTUK MENGUBAH WARNA';
 
   @override
-  String get category_saveButton => 'SAVE CATEGORY';
+  String get category_saveButton => 'SIMPAN KATEGORI';
 
   @override
-  String get category_updateButton => 'UPDATE CATEGORY';
+  String get category_updateButton => 'PERBARUI KATEGORI';
 
   @override
-  String get dashboard_incomeLabel => 'Income';
+  String get dashboard_incomeLabel => 'Pemasukan';
 
   @override
-  String get dashboard_spentLabel => 'Spent';
+  String get dashboard_spentLabel => 'Terpakai';
 
   @override
-  String get dashboard_noDataLabel => 'No data';
+  String get dashboard_noDataLabel => 'Tidak ada data';
 
   @override
   String get dashboard_editLabel => 'Edit';
 
   @override
-  String get dashboard_archiveLabel => 'Archive';
+  String get dashboard_archiveLabel => 'Arsip';
 
   @override
   String get currency_crore_short => 'Cr';
@@ -658,41 +660,41 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String common_errorText(Object error) {
-    return 'Error: $error';
+    return 'Kesalahan: $error';
   }
 
   @override
-  String get statistics_expenseShort => 'Exp';
+  String get statistics_expenseShort => 'Keluar';
 
   @override
-  String get statistics_incomeShort => 'Inc';
+  String get statistics_incomeShort => 'Masuk';
 
   @override
-  String get transaction_categoryFilter => 'Category Filter';
+  String get transaction_categoryFilter => 'Filter Kategori';
 
   @override
-  String get transaction_dateFilter => 'Date Filter';
+  String get transaction_dateFilter => 'Filter Tanggal';
 
   @override
-  String get transaction_allCategories => 'All Categories';
+  String get transaction_allCategories => 'Semua Kategori';
 
   @override
-  String get transaction_applyFilters => 'APPLY FILTERS';
+  String get transaction_applyFilters => 'TERAPKAN FILTER';
 
   @override
-  String get sms_selectTransactions => 'Select Transactions';
+  String get sms_selectTransactions => 'Pilih Transaksi';
 
   @override
-  String get common_addLabel => 'Add';
+  String get common_addLabel => 'Tambah';
 
   @override
-  String get dashboard_removeLabel => 'Remove';
+  String get dashboard_removeLabel => 'Hapus';
 
   @override
-  String get dashboard_viewAllLabel => 'View All';
+  String get dashboard_viewAllLabel => 'Lihat Semua';
 
   @override
-  String get common_noAccountsYet => 'No accounts yet';
+  String get common_noAccountsYet => 'Belum ada akun';
 
   @override
   String get common_loading => 'Memuat...';
@@ -701,129 +703,130 @@ class AppLocalizationsId extends AppLocalizations {
   String get common_editLabel => 'Edit';
 
   @override
-  String get common_deleteLabel => 'Delete';
+  String get common_deleteLabel => 'Hapus';
 
   @override
-  String get common_fromLabel => 'From';
+  String get common_fromLabel => 'Dari';
 
   @override
-  String get common_toLabel => 'To';
+  String get common_toLabel => 'Ke';
 
   @override
-  String get theme_chooseThemeTitle => 'Choose Theme';
+  String get theme_chooseThemeTitle => 'Pilih Tema';
 
   @override
-  String get theme_applyThemeLabel => 'Apply Theme';
+  String get theme_applyThemeLabel => 'Terapkan Tema';
 
   @override
-  String get theme_themeAppliedMessage => 'Theme applied!';
+  String get theme_themeAppliedMessage => 'Tema diterapkan!';
 
   @override
-  String get backup_backupRestoreTitle => 'Backup & Restore';
+  String get backup_backupRestoreTitle => 'Cadangkan & Pulihkan';
 
   @override
-  String get backup_backupDataTitle => 'Backup Data';
+  String get backup_backupDataTitle => 'Cadangkan Data';
 
   @override
-  String get backup_backupDataSubtitle => 'Export all database and settings';
+  String get backup_backupDataSubtitle =>
+      'Ekspor semua database dan pengaturan';
 
   @override
-  String get backup_restoreBackupTitle => 'Restore Backup';
+  String get backup_restoreBackupTitle => 'Pulihkan Cadangan';
 
   @override
-  String get backup_restoreBackupSubtitle => 'Import database and settings';
+  String get backup_restoreBackupSubtitle => 'Impor database dan pengaturan';
 
   @override
-  String get backup_includeAttachmentsTitle => 'Include Attachments?';
+  String get backup_includeAttachmentsTitle => 'Sertakan Lampiran?';
 
   @override
   String get backup_includeAttachmentsMessage =>
-      'Include receipt images in backup? This will increase file size.';
+      'Sertakan gambar tanda terima dalam cadangan? Ini akan menambah ukuran file.';
 
   @override
-  String get backup_yesLabel => 'Yes';
+  String get backup_yesLabel => 'Ya';
 
   @override
-  String get backup_noLabel => 'No';
+  String get backup_noLabel => 'Tidak';
 
   @override
-  String get backup_completedMessage => 'Backup completed';
+  String get backup_completedMessage => 'Cadangan selesai';
 
   @override
-  String get backup_restoreSuccessMessage => 'Restore successful';
+  String get backup_restoreSuccessMessage => 'Pemulihan berhasil';
 
   @override
   String backup_lastBackupLabel(Object date) {
-    return 'Last backup: $date';
+    return 'Cadangan terakhir: $date';
   }
 
   @override
-  String get backup_noBackupFoundLabel => 'No backup found';
+  String get backup_noBackupFoundLabel => 'Tidak ada cadangan ditemukan';
 
   @override
-  String get categories_manageCategoriesTitle => 'Manage Categories';
+  String get categories_manageCategoriesTitle => 'Kelola Kategori';
 
   @override
-  String get categories_noCategoriesFound => 'No categories found.';
+  String get categories_noCategoriesFound => 'Kategori tidak ditemukan.';
 
   @override
   String categories_transactionCount(Object count, Object plural) {
-    return '$count transaction$plural';
+    return '$count transaksi';
   }
 
   @override
-  String get categories_addCategoryLabel => 'Add Category';
+  String get categories_addCategoryLabel => 'Tambah Kategori';
 
   @override
-  String get categories_deleteCategoryTitle => 'Delete Category';
+  String get categories_deleteCategoryTitle => 'Hapus Kategori';
 
   @override
   String get categories_deleteCategoryMessage =>
-      'Are you sure you want to delete this category?\nAll associated transactions will also be removed.';
+      'Apakah Anda yakin ingin menghapus kategori ini?\nSemua transaksi terkait juga akan dihapus.';
 
   @override
   String get categories_categoryDeletedMessage =>
-      'Category and its transactions deleted';
+      'Kategori dan transaksinya telah dihapus';
 
   @override
-  String get accounts_manageAccountsTitle => 'Manage Accounts';
+  String get accounts_manageAccountsTitle => 'Kelola Akun';
 
   @override
-  String get accounts_noAccountsAddedYet => 'No accounts added yet';
+  String get accounts_noAccountsAddedYet => 'Belum ada akun yang ditambahkan';
 
   @override
-  String get accounts_addAccountLabel => 'Add Account';
+  String get accounts_addAccountLabel => 'Tambah Akun';
 
   @override
-  String get accounts_deleteAccountTitle => 'Delete Account';
+  String get accounts_deleteAccountTitle => 'Hapus Akun';
 
   @override
   String accounts_deleteAccountMessage(Object accountName) {
-    return 'Are you sure you want to delete \"$accountName\"?';
+    return 'Apakah Anda yakin ingin menghapus \"$accountName\"?';
   }
 
   @override
-  String get accounts_archiveAccountTitle => 'Archive Account';
+  String get accounts_archiveAccountTitle => 'Arsipkan Akun';
 
   @override
   String accounts_archiveAccountMessage(Object accountName) {
-    return 'Are you sure you want to archive \"$accountName\"?';
+    return 'Apakah Anda yakin ingin mengarsipkan \"$accountName\"?';
   }
 
   @override
-  String get accounts_cancelLabel => 'Cancel';
+  String get accounts_cancelLabel => 'Batal';
 
   @override
-  String get accounts_archiveLabel => 'Archive';
+  String get accounts_archiveLabel => 'Arsip';
 
   @override
   String accounts_accountArchivedMessage(Object accountName) {
-    return '\"$accountName\" archived';
+    return '\"$accountName\" diarsipkan';
   }
 
   @override
   String get accounts_atLeastOneAccountRequired =>
-      'At least 1 account required to continue';
+      'Setidaknya 1 akun diperlukan untuk melanjutkan';
 
   @override
   String get transaction_tripLabel => 'TRIP';
@@ -1575,465 +1578,474 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get tone_professional_txnUpdated =>
-      'Transaction updated.|Changes applied.|Record updated successfully.';
+      'Transaksi diperbarui.|Perubahan diterapkan.|Catatan berhasil diperbarui.';
 
   @override
   String get tone_professional_txnDeleted =>
-      'Transaction deleted.|Record removed.|Entry deleted successfully.';
+      'Transaksi dihapus.|Catatan dihapus.|Entri berhasil dihapus.';
 
   @override
   String get tone_professional_txnFailed =>
-      'Failed to save transaction. Please retry.';
+      'Gagal menyimpan transaksi. Silakan coba lagi.';
 
   @override
-  String get tone_professional_enterAmount => 'Please enter a valid amount.';
+  String get tone_professional_enterAmount =>
+      'Silakan masukkan jumlah yang valid.';
 
   @override
-  String get tone_professional_pickAccount => 'Please select an account.';
+  String get tone_professional_pickAccount => 'Silakan pilih akun.';
 
   @override
-  String get tone_professional_pickCategory => 'Please select a category.';
+  String get tone_professional_pickCategory => 'Silakan pilih kategori.';
 
   @override
   String get tone_professional_fillAllFields =>
-      'All required fields must be completed.';
+      'Semua bidang yang diperlukan harus diisi.';
 
   @override
-  String get tone_professional_invalidAmount => 'Invalid amount entered.';
+  String get tone_professional_invalidAmount =>
+      'Jumlah yang dimasukkan tidak valid.';
 
   @override
   String get tone_professional_budgetCreated =>
-      'Budget created.|Budget configured successfully.|New budget is active.';
+      'Anggaran dibuat.|Anggaran berhasil dikonfigurasi.|Anggaran baru telah aktif.';
 
   @override
-  String get tone_professional_budgetUpdated => 'Budget updated.';
+  String get tone_professional_budgetUpdated => 'Anggaran diperbarui.';
 
   @override
-  String get tone_professional_budgetDeleted => 'Budget deleted.';
+  String get tone_professional_budgetDeleted => 'Anggaran dihapus.';
 
   @override
   String get tone_professional_goalCreated =>
-      'Goal created.|Savings goal configured.|New goal is active.';
+      'Target dibuat.|Target tabungan dikonfigurasi.|Target baru telah aktif.';
 
   @override
-  String get tone_professional_goalUpdated => 'Goal updated.';
+  String get tone_professional_goalUpdated => 'Target diperbarui.';
 
   @override
-  String get tone_professional_goalDeleted => 'Goal deleted.';
+  String get tone_professional_goalDeleted => 'Target dihapus.';
 
   @override
-  String get tone_professional_accountCreated => 'Account added.';
+  String get tone_professional_accountCreated => 'Akun ditambahkan.';
 
   @override
   String get tone_professional_billAdded =>
-      'Bill added. Reminders will be sent.';
+      'Tagihan ditambahkan. Pengingat akan dikirimkan.';
 
   @override
   String get tone_professional_billPaid =>
-      'Bill marked as paid.|Payment recorded.|Bill settled.';
+      'Tagihan ditandai lunas.|Pembayaran dicatat.|Tagihan diselesaikan.';
 
   @override
   String get tone_professional_backupSuccess =>
-      'Backup completed successfully.';
+      'Cadangan berhasil diselesaikan.';
 
   @override
-  String get tone_professional_restoreSuccess => 'Data restored successfully.';
+  String get tone_professional_restoreSuccess => 'Data berhasil dipulihkan.';
 
   @override
   String get tone_professional_noTransactions =>
-      'No transactions recorded.\nAdd your first entry.|No records found.\nBegin by adding a transaction.|Transaction history is empty.\nStart recording.';
+      'Tidak ada transaksi tercatat.\nTambahkan entri pertama Anda.|Catatan tidak ditemukan.\nMulailah dengan menambahkan transaksi.|Riwayat transaksi kosong.\nMulai mencatat.';
 
   @override
-  String get tone_professional_noBudgets => 'No budgets configured.';
+  String get tone_professional_noBudgets =>
+      'Tidak ada anggaran yang dikonfigurasi.';
 
   @override
-  String get tone_professional_noGoals => 'No goals set.';
+  String get tone_professional_noGoals => 'Tidak ada target yang ditetapkan.';
 
   @override
-  String get tone_professional_genericError => 'An error occurred.';
+  String get tone_professional_genericError => 'Terjadi kesalahan.';
 
   @override
-  String get tone_professional_smsImportEnabled => 'Auto-import enabled.';
+  String get tone_professional_smsImportEnabled => 'Impor otomatis diaktifkan.';
 
   @override
   String get tone_professional_dashboardAllCaughtUp =>
-      'All items are up to date.|No pending actions.|Everything is current.';
+      'Semua item sudah terbaru.|Tidak ada tindakan tertunda.|Semuanya mutakhir.';
 
   @override
   String get tone_professional_dailySummaryEmpty =>
-      'No transactions recorded yesterday.|Yesterday had no recorded activity.|No entries for the previous day.';
+      'Tidak ada transaksi tercatat kemarin.|Kemarin tidak ada aktivitas tercatat.|Tidak ada entri untuk hari sebelumnya.';
 
   @override
   String tone_professional_streakMessage(int days) {
-    return '$days consecutive days of tracking.';
+    return '$days hari berturut-turut melakukan pelacakan.';
   }
 
   @override
   String tone_professional_budgetExceededBy(String amount) {
-    return 'Budget exceeded by $amount.';
+    return 'Anggaran terlampaui sebesar $amount.';
   }
 
   @override
   String get tone_motivational_txnAdded =>
-      'Great move! Transaction saved! 💪|Logged! You\'re on a roll 💪|Another one tracked! Keep the momentum! ✨|Saved! Every entry is a step forward! 🚀';
+      'Langkah bagus! Transaksi disimpan! 💪|Berhasil dicatat! Anda sedang bersemangat 💪|Satu lagi terlacak! Jaga momentumnya! ✨|Tersimpan! Setiap entri adalah langkah maju! 🚀';
 
   @override
   String get tone_motivational_txnUpdated =>
-      'Nice update! Staying sharp! ✨|Updated! Precision matters! ✨|Changes saved! You\'re on it! 👍';
+      'Pembaruan yang bagus! Tetap tajam! ✨|Diperbarui! Presisi itu penting! ✨|Perubahan disimpan! Anda hebat! 👍';
 
   @override
   String get tone_motivational_txnDeleted =>
-      'Cleared out! One less to worry about|Removed! Keeping things clean! 💪|Gone! Focus on what matters';
+      'Dibersihkan! Satu beban berkurang|Dihapus! Menjaga semuanya tetap rapi! 💪|Selesai! Fokus pada yang penting';
 
   @override
   String get tone_motivational_txnFailed =>
-      'Didn\'t go through — give it another shot!';
+      'Tidak berhasil — coba sekali lagi!';
 
   @override
   String get tone_motivational_enterAmount =>
-      'Every rupee counts — enter the amount!';
+      'Setiap rupiah berharga — masukkan jumlahnya!';
 
   @override
-  String get tone_motivational_pickAccount =>
-      'Pick an account to keep things organized!';
+  String get tone_motivational_pickAccount => 'Pilih akun agar tetap teratur!';
 
   @override
   String get tone_motivational_pickCategory =>
-      'Categorize it — you\'ll thank yourself later!';
+      'Kategorikan — Anda akan berterima kasih pada diri sendiri nanti!';
 
   @override
   String get tone_motivational_fillAllFields =>
-      'Almost there! Fill in everything to continue';
+      'Hampir sampai! Isi semuanya untuk lanjut';
 
   @override
   String get tone_motivational_invalidAmount =>
-      'That amount doesn\'t look right — try again!';
+      'Jumlah itu sepertinya tidak benar — coba lagi!';
 
   @override
   String get tone_motivational_budgetCreated =>
-      'Smart move! Budget is set! 💪|Budget locked in! You\'re taking control! 💪|That\'s discipline! Budget ready! 📊';
+      'Langkah cerdas! Anggaran diatur! 💪|Anggaran terkunci! Anda memegang kendali! 💪|Itulah disiplin! Anggaran siap! 📊';
 
   @override
   String get tone_motivational_budgetUpdated =>
-      'Budget adjusted — staying flexible!';
+      'Anggaran disesuaikan — tetap fleksibel!';
 
   @override
-  String get tone_motivational_budgetDeleted => 'Budget removed';
+  String get tone_motivational_budgetDeleted => 'Anggaran dihapus';
 
   @override
   String get tone_motivational_goalCreated =>
-      'Love the ambition! Goal set! 🎯|Big dreams start here! Goal locked in! 🎯|That\'s the spirit! New goal ready! 🚀';
+      'Suka ambisinya! Target ditetapkan! 🎯|Mimpi besar dimulai di sini! Target terkunci! 🎯|Itu semangatnya! Target baru siap! 🚀';
 
   @override
-  String get tone_motivational_goalUpdated => 'Goal refined — keep pushing!';
+  String get tone_motivational_goalUpdated =>
+      'Target disempurnakan — terus berjuang!';
 
   @override
   String get tone_motivational_goalDeleted =>
-      'Goal removed — new priorities, new plans';
+      'Target dihapus — prioritas baru, rencana baru';
 
   @override
   String get tone_motivational_accountCreated =>
-      'Account added! You\'re getting organized! 🏦';
+      'Akun ditambahkan! Anda semakin teratur! 🏦';
 
   @override
   String get tone_motivational_billAdded =>
-      'Bill tracked! You\'re staying ahead! 🔔';
+      'Tagihan terlacak! Anda tetap di depan! 🔔';
 
   @override
   String get tone_motivational_billPaid =>
-      'Bill paid! One less thing to worry about! ✅|Crushed it! Bill is done! ✅|Paid and done! You\'re ahead of the game! 💪';
+      'Tagihan lunas! Satu hal lagi berkurang! ✅|Hebat! Tagihan selesai! ✅|Lunas dan beres! Anda unggul dalam permainan ini! 💪';
 
   @override
   String get tone_motivational_backupSuccess =>
-      'Backed up! Your progress is safe! 🛡️';
+      'Dicadangkan! Kemajuan Anda aman! 🛡️';
 
   @override
   String get tone_motivational_restoreSuccess =>
-      'Restored! Right back on track! 🎉';
+      'Dipulihkan! Kembali ke jalur yang benar! 🎉';
 
   @override
   String get tone_motivational_noTransactions =>
-      'Fresh start! 🌟\nAdd your first transaction — every journey begins with one step|Empty slate! 🌟\nYour first entry is waiting — let\'s go!|Nothing yet! 💪\nOne transaction and you\'re on your way!';
+      'Awal baru! 🌟\nTambah transaksi pertama Anda — setiap perjalanan dimulai dengan satu langkah|Lembaran baru! 🌟\nEntri pertama Anda menunggu — ayo!|Belum ada apa-apa! 💪\nSatu transaksi dan Anda sedang menuju tujuan!';
 
   @override
   String get tone_motivational_noBudgets =>
-      'No budgets yet\nSet one up — your future self will thank you! 💪';
+      'Belum ada anggaran\nAtur satu — diri Anda di masa depan akan berterima kasih! 💪';
 
   @override
   String get tone_motivational_noGoals =>
-      'No goals yet\nDream big — set your first goal! 🎯';
+      'Belum ada target\nBermimpi besar — buat target pertama Anda! 🎯';
 
   @override
-  String get tone_motivational_genericError =>
-      'Something went wrong — try again!';
+  String get tone_motivational_genericError => 'Ada yang salah — coba lagi!';
 
   @override
   String get tone_motivational_smsImportEnabled =>
-      'Auto-import on! Your finances track themselves now! 📩';
+      'Impor otomatis aktif! Keuangan Anda melacak dirinya sendiri sekarang! 📩';
 
   @override
   String get tone_motivational_dashboardAllCaughtUp =>
-      'All caught up — you\'re ahead of the game! 🏆|Nothing pending — you\'re on top of it 💪|All clear! Keep this energy going 🏆';
+      'Semua beres — Anda unggul dalam permainan ini! 🏆|Tidak ada yang tertunda — Anda hebat 💪|Semua bersih! Jaga energi ini 🏆';
 
   @override
   String get tone_motivational_dailySummaryEmpty =>
-      'Zero spend yesterday — your wallet thanks you! ✨|Nothing spent yesterday — that\'s willpower! 💪|A no-spend day! That\'s a win! 🏆';
+      'Nol pengeluaran kemarin — dompet Anda berterima kasih! ✨|Tidak ada yang dihabiskan kemarin — itulah kekuatan kemauan! 💪|Hari tanpa belanja! Itu sebuah kemenangan! 🏆';
 
   @override
   String tone_motivational_streakMessage(int days) {
-    return '$days day streak! Unstoppable! 🔥';
+    return 'Sequensi $days hari! Tak terhentikan! 🔥';
   }
 
   @override
   String tone_motivational_budgetExceededBy(String amount) {
-    return 'Over by $amount — you can course-correct! 💪';
+    return 'Lebih $amount — Anda bisa memperbaikinya! 💪';
   }
 
   @override
-  String get tone_calm_txnAdded => 'Noted.|Recorded.|Saved quietly.';
+  String get tone_calm_txnAdded => 'Dicatat.|Terekam.|Disimpan dengan tenang.';
 
   @override
-  String get tone_calm_txnUpdated => 'Updated.|Adjusted.|Changes saved.';
+  String get tone_calm_txnUpdated =>
+      'Diperbarui.|Disesuaikan.|Perubahan disimpan.';
 
   @override
-  String get tone_calm_txnDeleted => 'Released.|Removed.|Let go.';
+  String get tone_calm_txnDeleted => 'Dilepaskan.|Dihapus.|Biarkan berlalu.';
 
   @override
-  String get tone_calm_txnFailed => 'That didn\'t land. Try once more.';
+  String get tone_calm_txnFailed => 'Tidak berhasil. Coba sekali lagi.';
 
   @override
-  String get tone_calm_enterAmount => 'An amount is needed.';
+  String get tone_calm_enterAmount => 'Jumlah diperlukan.';
 
   @override
-  String get tone_calm_pickAccount => 'Choose where this belongs.';
+  String get tone_calm_pickAccount => 'Pilih tempat ini berasal.';
 
   @override
-  String get tone_calm_pickCategory => 'Give it a purpose.';
+  String get tone_calm_pickCategory => 'Beri tujuan.';
 
   @override
-  String get tone_calm_fillAllFields => 'A few things are still empty.';
+  String get tone_calm_fillAllFields => 'Beberapa hal masih kosong.';
 
   @override
-  String get tone_calm_invalidAmount => 'The amount needs adjusting.';
+  String get tone_calm_invalidAmount => 'Jumlah perlu disesuaikan.';
 
   @override
   String get tone_calm_budgetCreated =>
-      'Boundary set.|Budget in place.|Limits defined.';
+      'Batas ditetapkan.|Anggaran terpasang.|Batasan ditentukan.';
 
   @override
-  String get tone_calm_budgetUpdated => 'Adjusted.';
+  String get tone_calm_budgetUpdated => 'Disesuaikan.';
 
   @override
-  String get tone_calm_budgetDeleted => 'Released.';
+  String get tone_calm_budgetDeleted => 'Dilepaskan.';
 
   @override
   String get tone_calm_goalCreated =>
-      'Intention set.|A new direction.|Goal planted.';
+      'Niat ditetapkan.|Arah baru.|Target ditanam.';
 
   @override
-  String get tone_calm_goalUpdated => 'Refined.';
+  String get tone_calm_goalUpdated => 'Disempurnakan.';
 
   @override
-  String get tone_calm_goalDeleted => 'Released.';
+  String get tone_calm_goalDeleted => 'Dilepaskan.';
 
   @override
-  String get tone_calm_accountCreated => 'Account opened.';
+  String get tone_calm_accountCreated => 'Akun dibuka.';
 
   @override
-  String get tone_calm_billAdded => 'Noted. You\'ll be reminded.';
+  String get tone_calm_billAdded => 'Dicatat. Anda akan diingatkan.';
 
   @override
   String get tone_calm_billPaid =>
-      'Settled.|Paid. One less.|Done. Peace of mind.';
+      'Diselesaikan.|Dibayar. Satu beban berkurang.|Selesai. Ketenangan pikiran.';
 
   @override
-  String get tone_calm_backupSuccess => 'Safely stored.';
+  String get tone_calm_backupSuccess => 'Tersimpan dengan aman.';
 
   @override
-  String get tone_calm_restoreSuccess => 'Restored. Welcome back.';
+  String get tone_calm_restoreSuccess => 'Dipulihkan. Selamat datang kembali.';
 
   @override
   String get tone_calm_noTransactions =>
-      'A clean slate.\nBegin when you\'re ready.|Nothing here yet.\nStart gently.|Empty.\nA fresh beginning awaits.';
+      'Lembaran bersih.\nMulailah saat Anda siap.|Belum ada apa-apa di sini.\nMulai dengan perlahan.|Kosong.\nAwal yang segar menanti.';
 
   @override
   String get tone_calm_noBudgets =>
-      'No boundaries yet.\nSet one when it feels right.';
+      'Belum ada batas.\nAtur satu jika terasa benar.';
 
   @override
-  String get tone_calm_noGoals =>
-      'No intentions yet.\nSet one when you\'re ready.';
+  String get tone_calm_noGoals => 'Belum ada niat.\nAtur satu saat Anda siap.';
 
   @override
-  String get tone_calm_genericError => 'Something shifted. Try again.';
+  String get tone_calm_genericError => 'Sesuatu bergeser. Coba lagi.';
 
   @override
   String get tone_calm_smsImportEnabled =>
-      'Quietly watching your transactions.';
+      'Mengamati transaksi Anda dengan tenang.';
 
   @override
   String get tone_calm_dashboardAllCaughtUp =>
-      'Everything is in order.|Nothing needs attention.|All is well.';
+      'Semuanya teratur.|Tidak ada yang perlu perhatian.|Semua baik.';
 
   @override
   String get tone_calm_dailySummaryEmpty =>
-      'A quiet day. Nothing recorded.|Yesterday was still. No entries.|Nothing spent. A restful day.';
+      'Hari yang tenang. Tidak ada yang dicatat.|Kemarin sunyi. Tidak ada entri.|Tidak ada pengeluaran. Hari yang damai.';
 
   @override
   String tone_calm_streakMessage(int days) {
-    return '$days days of mindful tracking.';
+    return '$days hari pelacakan dengan penuh kesadaran.';
   }
 
   @override
   String tone_calm_budgetExceededBy(String amount) {
-    return 'Over by $amount. A moment to reflect.';
+    return 'Lebih $amount. Saatnya untuk merenung.';
   }
 
   @override
-  String get tone_friendly_insightBillsDueSoon => 'Heads up — bills incoming';
+  String get tone_friendly_insightBillsDueSoon =>
+      'Hati-hati — ada tagihan masuk';
 
   @override
-  String get tone_friendly_insightOverBudget => 'Over budget';
+  String get tone_friendly_insightOverBudget => 'Melebihi anggaran';
 
   @override
-  String get tone_friendly_insightNearBudget => 'Getting close...';
+  String get tone_friendly_insightNearBudget => 'Sudah dekat...';
 
   @override
-  String get tone_friendly_insightOverspending => 'Spending outpacing income';
+  String get tone_friendly_insightOverspending =>
+      'Pengeluaran melampaui pemasukan';
 
   @override
-  String get tone_friendly_insightSpendingSpike => 'Spending spike today';
+  String get tone_friendly_insightSpendingSpike =>
+      'Lonjakan pengeluaran hari ini';
 
   @override
-  String get tone_friendly_insightWeekendAlert => 'Weekend spending alert';
+  String get tone_friendly_insightWeekendAlert =>
+      'Peringatan pengeluaran akhir pekan';
 
   @override
-  String get tone_friendly_insightGetStarted => 'Let\'s get started! 🚀';
+  String get tone_friendly_insightGetStarted => 'Ayo mulai! 🚀';
 
   @override
   String get tone_friendly_insightGetStartedMessage =>
-      'Add your first transaction — it only takes a sec';
+      'Tambah transaksi pertama Anda — cuma butuh sedetik';
 
   @override
   String tone_friendly_insightBillsDueMessage(int count) {
-    return '$count bill(s) due soon, don\'t forget!';
+    return '$count tagihan akan jatuh tempo, jangan lupa!';
   }
 
   @override
   String tone_friendly_insightOverBudgetMessage(int count) {
-    return '$count budget(s) went over this month — worth a look';
+    return '$count anggaran terlampaui bulan ini — layak diperiksa';
   }
 
   @override
   String tone_friendly_insightNearBudgetMessage(int count) {
-    return '$count budget(s) past 80% — still time to rein it in';
+    return '$count anggaran melewati 80% — masih ada waktu untuk mengerem';
   }
 
   @override
   String tone_friendly_insightOverspendingMessage(String amount) {
-    return 'You\'re $amount over your income this month — might want to slow down';
+    return 'Anda $amount di atas pemasukan bulan ini — mungkin ingin melambat';
   }
 
   @override
   String tone_friendly_insightSpendingSpikeMessage(String avg, String today) {
-    return 'You usually spend $avg/day. Today\'s already $today.';
+    return 'Biasanya Anda belanja $avg/hari. Hari ini sudah $today.';
   }
 
   @override
   String tone_friendly_insightWeekendAlertMessage(String avg, String current) {
-    return 'You usually spend $avg on weekends. This one\'s already $current.';
+    return 'Biasanya Anda belanja $avg di akhir pekan. Kali ini sudah $current.';
   }
 
   @override
-  String get tone_professional_insightBillsDueSoon => 'Upcoming bills';
+  String get tone_professional_insightBillsDueSoon => 'Tagihan mendatang';
 
   @override
-  String get tone_professional_insightOverBudget => 'Budget exceeded';
+  String get tone_professional_insightOverBudget => 'Anggaran terlampaui';
 
   @override
-  String get tone_professional_insightNearBudget => 'Approaching budget limit';
+  String get tone_professional_insightNearBudget => 'Mendekati batas anggaran';
 
   @override
-  String get tone_professional_insightOverspending => 'Expenses exceed income';
+  String get tone_professional_insightOverspending =>
+      'Pengeluaran melebihi pemasukan';
 
   @override
   String get tone_professional_insightSpendingSpike =>
-      'Elevated spending today';
+      'Pengeluaran meningkat hari ini';
 
   @override
   String get tone_professional_insightWeekendAlert =>
-      'Weekend spending elevated';
+      'Pengeluaran akhir pekan meningkat';
 
   @override
-  String get tone_professional_insightGetStarted => 'Get started';
+  String get tone_professional_insightGetStarted => 'Mulai';
 
   @override
   String get tone_professional_insightGetStartedMessage =>
-      'Record your first transaction to begin tracking.';
+      'Catat transaksi pertama Anda untuk mulai melacak.';
 
   @override
   String tone_professional_insightBillsDueMessage(int count) {
-    return '$count bill(s) due within the next few days.';
+    return '$count tagihan jatuh tempo dalam beberapa hari ke depan.';
   }
 
   @override
   String tone_professional_insightOverBudgetMessage(int count) {
-    return '$count budget(s) exceeded this month.';
+    return '$count anggaran terlampaui bulan ini.';
   }
 
   @override
   String tone_professional_insightNearBudgetMessage(int count) {
-    return '$count budget(s) above 80% utilization.';
+    return '$count anggaran di atas 80% penggunaan.';
   }
 
   @override
   String tone_professional_insightOverspendingMessage(String amount) {
-    return 'Expenditure exceeds income by $amount this month.';
+    return 'Pengeluaran melebihi pemasukan sebesar $amount bulan ini.';
   }
 
   @override
   String tone_professional_insightSpendingSpikeMessage(
       String avg, String today) {
-    return 'Daily average: $avg. Today: $today.';
+    return 'Rata-rata harian: $avg. Hari ini: $today.';
   }
 
   @override
   String tone_professional_insightWeekendAlertMessage(
       String avg, String current) {
-    return 'Weekend average: $avg. Current: $current.';
+    return 'Rata-rata akhir pekan: $avg. Saat ini: $current.';
   }
 
   @override
-  String get tone_motivational_insightBillsDueSoon => 'Bills coming up! 📋';
+  String get tone_motivational_insightBillsDueSoon => 'Tagihan datang! 📋';
 
   @override
   String get tone_motivational_insightOverBudget =>
-      'Over budget — time to regroup';
+      'Melebihi anggaran — saatnya atur strategi';
 
   @override
-  String get tone_motivational_insightNearBudget => 'Almost at the limit';
+  String get tone_motivational_insightNearBudget => 'Hampir mencapai batas';
 
   @override
   String get tone_motivational_insightOverspending =>
-      'Spending exceeding income';
+      'Pengeluaran melebihi pemasukan';
 
   @override
-  String get tone_motivational_insightSpendingSpike => 'Spending spike today';
+  String get tone_motivational_insightSpendingSpike =>
+      'Lonjakan pengeluaran hari ini';
 
   @override
-  String get tone_motivational_insightWeekendAlert => 'Weekend spending alert';
+  String get tone_motivational_insightWeekendAlert =>
+      'Peringatan pengeluaran akhir pekan';
 
   @override
   String get tone_motivational_insightGetStarted =>
-      'Let\'s build something great! 🚀';
+      'Mari bangun sesuatu yang hebat! 🚀';
 
   @override
   String get tone_motivational_insightGetStartedMessage =>
-      'Add your first transaction — you\'re one step away!';
+      'Tambah transaksi pertama Anda — Anda selangkah lagi!';
 
   @override
   String tone_motivational_insightBillsDueMessage(int count) {
-    return '$count bill(s) due soon — stay ahead!';
+    return '$count tagihan segera datang — tetap di depan!';
   }
 
   @override
@@ -2763,7 +2775,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String notif_streakDaysTitle(int days) {
-    return '🔥 $days days straight!';
+    return '🔥 $days hari berturut-turut!';
   }
 
   @override
@@ -2773,155 +2785,155 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String notif_budgetsOverLimitTitle(int count) {
-    return '🚨 $count budget(s) over limit';
+    return '🚨 $count anggaran melebihi batas';
   }
 
   @override
   String notif_budgetsGettingTightTitle(int count) {
-    return '⚠️ $count budget(s) getting tight';
+    return '⚠️ $count anggaran menipis';
   }
 
   @override
   String notif_billDueTitle(String name, String label) {
-    return '📅 $name is due $label';
+    return '📅 $name jatuh tempo $label';
   }
 
   @override
-  String get notif_fundsGettingLowTitle => '📉 Funds getting low';
+  String get notif_fundsGettingLowTitle => '📉 Dana menipis';
 
   @override
   String notif_categoryCreepingUpTitle(String category) {
-    return '💡 $category is creeping up';
+    return '💡 $category meningkat';
   }
 
   @override
-  String get notif_bigDayTitle => '📈 Whoa, big day';
+  String get notif_bigDayTitle => '📈 Wah, hari yang besar';
 
   @override
   String notif_smsFoundTitle(int count) {
-    return '📱 $count SMS transactions found';
+    return '📱 $count transaksi SMS ditemukan';
   }
 
   @override
-  String get notif_smallSpendsTitle => '💧 Small spends adding up';
+  String get notif_smallSpendsTitle => '💧 Pengeluaran kecil menumpuk';
 
   @override
-  String get notif_missYouTitle => '👋 We miss you';
+  String get notif_missYouTitle => '👋 Kami merindukanmu';
 
   @override
   String notif_daysUntrackedTitle(int days) {
-    return '📊 $days days untracked';
+    return '📊 $days hari tidak terlacak';
   }
 
   @override
   String notif_streakEndedTitle(int days) {
-    return '💔 $days-day streak ended';
+    return '💔 Sequensi $days hari berakhir';
   }
 
   @override
-  String get notif_fewDaysUntrackedTitle => '📊 A few days untracked';
+  String get notif_fewDaysUntrackedTitle => '📊 Beberapa hari tidak terlacak';
 
   @override
   String notif_budgetExceededBody(String name) {
-    return '$name is over budget — time to review';
+    return '$name melebihi anggaran — waktunya meninjau';
   }
 
   @override
   String notif_budgetExceededBodyMulti(String names) {
-    return '$names are over budget';
+    return '$names melebihi anggaran';
   }
 
   @override
   String notif_budgetWarningBody(String name) {
-    return '$name is nearing the limit';
+    return '$name mendekati batas';
   }
 
   @override
   String notif_budgetWarningBodyMulti(String names) {
-    return '$names are nearing their limits';
+    return '$names mendekati batasnya';
   }
 
   @override
   String notif_budgetWarningPctBody(String name, String pct) {
-    return '$name: $pct% used';
+    return '$name: $pct% terpakai';
   }
 
   @override
   String notif_billPaidAutoTitle(String name) {
-    return '✅ $name — auto-matched';
+    return '✅ $name — dicocokkan otomatis';
   }
 
   @override
   String notif_billPaidRecordedTitle(String name) {
-    return '✅ $name — recorded';
+    return '✅ $name — dicatatkan';
   }
 
   @override
-  String get notif_smsLoggedTitle => '✅ Transaction logged';
+  String get notif_smsLoggedTitle => '✅ Transaksi dicatat';
 
   @override
-  String get notif_smsNeedsReviewTitle => '👀 Needs your review';
+  String get notif_smsNeedsReviewTitle => '👀 Perlu tinjauan Anda';
 
   @override
   String notif_smsLoggedBody(String amount, String sender) {
-    return '$amount from $sender — auto-saved';
+    return '$amount dari $sender — disimpan otomatis';
   }
 
   @override
   String notif_smsLoggedBodyNoAmount(String sender) {
-    return 'From $sender — auto-saved';
+    return 'Dari $sender — disimpan otomatis';
   }
 
   @override
   String notif_smsNeedsReviewBody(String sender) {
-    return 'Transaction from $sender — tap to review';
+    return 'Transaksi dari $sender — ketuk untuk meninjau';
   }
 
   @override
-  String get notif_smsGotItTitle => '✅ Got it!';
+  String get notif_smsGotItTitle => '✅ Dimengerti!';
 
   @override
-  String get notif_smsAllCaughtUpTitle => '✅ All caught up!';
+  String get notif_smsAllCaughtUpTitle => '✅ Semua beres!';
 
   @override
-  String get notif_smsAlmostThereTitle => '📋 Almost there!';
+  String get notif_smsAlmostThereTitle => '📋 Hampir sampai!';
 
   @override
-  String get notif_smsNeedHelpTitle => '👋 Hey, need your help!';
+  String get notif_smsNeedHelpTitle => '👋 Hei, butuh bantuanmu!';
 
   @override
   String notif_streakOnLineTitle(int days) {
-    return '🔥 $days-day streak on the line!';
+    return '🔥 Sequensi $days hari terancam!';
   }
 
   @override
-  String get notif_quickActionTitle => '⚡ 5 seconds is all it takes';
+  String get notif_quickActionTitle => '⚡ Hanya butuh 5 detik';
 
   @override
-  String get notif_dailyReminderTitle => '📊 Your day in numbers';
+  String get notif_dailyReminderTitle => '📊 Harimu dalam angka';
 
   @override
   String get notif_dailyReminderBody =>
-      'Here\'s how yesterday went — take a quick look';
+      'Inilah progres kemarin — lihat sebentar';
 
   @override
-  String get notif_weeklyReminderTitle => '📅 Your week wrapped up';
+  String get notif_weeklyReminderTitle => '📅 Rekap mingguan Anda';
 
   @override
   String get notif_weeklyReminderBody =>
-      'Let\'s see how the week went — tap to check';
+      'Mari lihat bagaimana minggu ini berjalan — ketuk untuk memeriksa';
 
   @override
-  String get notif_goalStatusTitle => '🎯 Monthly Goal Status';
+  String get notif_goalStatusTitle => '🎯 Status Target Bulanan';
 
   @override
   String notif_goalStatusBody(int count, String name, String pct) {
-    return 'You have $count active goals. $name is $pct% complete!';
+    return 'Anda punya $count target aktif. $name sudah $pct% selesai!';
   }
 
   @override
   String notif_streakCountingTitle(int days) {
-    return '🔥 $days days and counting!';
+    return '🔥 $days hari dan terus bertambah!';
   }
 
   @override
@@ -2947,6 +2959,23 @@ class AppLocalizationsId extends AppLocalizations {
   String insight_bestDayTitle(String day) {
     return '${day}s cost you the most';
   }
+
+  @override
+  String get budget_alert_exceededTitle => 'Budget Exceeded!';
+
+  @override
+  String budget_alert_warningTitle(Object percent) {
+    return 'Budget Alert: $percent%';
+  }
+
+  @override
+  String get label_percentage_with_colon => 'Percentage:';
+
+  @override
+  String get label_budget_with_colon => 'Budget:';
+
+  @override
+  String get label_spent_with_colon => 'Spent:';
 
   @override
   String get bills_howBillsWorkTitle => 'How Bills Work';
@@ -6183,4 +6212,38 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get cc_utilitySubtitle => 'Due dates, outstanding & limits';
+
+  @override
+  String get plugins_remindMeBefore => 'Remind me before';
+
+  @override
+  String plugins_daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String plugins_billDueOn(int day, String suffix) {
+    return 'Bill due on $day$suffix of every month';
+  }
+
+  @override
+  String get plugins_addCreditCard => 'Add Credit Card';
+
+  @override
+  String get plugins_editCreditCard => 'Edit Credit Card';
+
+  @override
+  String get plugins_cardName => 'Card Name';
+
+  @override
+  String get plugins_cardNameHint => 'e.g., HDFC Regalia';
+
+  @override
+  String get plugins_billDayLabel => 'Bill Day';
 }

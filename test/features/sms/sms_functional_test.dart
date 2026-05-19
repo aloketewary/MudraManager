@@ -292,7 +292,7 @@ void main() {
       expect(activity.body, contains('debited'));
       expect(activity.smsHash, isNotEmpty);
       expect(activity.confidence, isNotNull);
-      expect(activity.confidence!, greaterThan(0));
+      expect(activity.confidence, greaterThan(0));
       expect(activity.status, isNotNull);
 
       // Verify persisted in DB
@@ -443,7 +443,7 @@ void main() {
       expect(activity.smsHash, isNotEmpty);
       expect(activity.date, isNotNull);
       expect(activity.confidence, isNotNull);
-      expect(activity.confidence!, greaterThan(0));
+      expect(activity.confidence, greaterThan(0));
       expect(activity.body, contains('credited'));
     });
 

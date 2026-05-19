@@ -10,328 +10,331 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboard_manageYourMoneyDescription =>
-      '100% offline. Your data never leaves your device.';
+      '100% دون اتصال بالإنترنت. بياناتك لا تغادر جهازك أبدًا.';
 
   @override
   String onboard_welcomeToApp(Object appName) {
-    return 'Welcome to $appName';
+    return 'مرحبًا بك في $appName';
   }
 
   @override
-  String get onboard_TrackYourTransactions => 'Auto-track from Bank SMS';
+  String get onboard_TrackYourTransactions =>
+      'تتبع تلقائي من الرسائل القصيرة للبنك';
 
   @override
   String get onboard_SeeWhereYourMoneyGoes =>
-      'Auto-import from bank SMS & notifications. Works with 50+ banks.';
+      'استيراد تلقائي من الرسائل القصيرة للبنك والإشعارات. يعمل مع أكثر من 50 بنكًا.';
 
   @override
-  String get onboard_SetBudgetsAndGoals => 'Budgets, Goals & Smart Alerts';
+  String get onboard_SetBudgetsAndGoals =>
+      'الميزانيات، الأهداف والتنبيهات الذكية';
 
   @override
   String get onboard_stayOnTrackAndAchieveYourDream =>
-      'Get warnings before you overspend. Save for what matters.';
+      'احصل على تحذيرات قبل الإفراط في الإنفاق. وفر لما يهم.';
 
   @override
-  String get onboard_GetStarted => 'Get Started!';
+  String get onboard_GetStarted => 'ابدأ الآن!';
 
   @override
-  String get onboard_letsSetupYourAccount => 'Let\'s set up your account.';
+  String get onboard_letsSetupYourAccount => 'لنقم بإعداد حسابك.';
 
   @override
-  String get onboard_howShouldWeCallYou => 'How should we call you?';
+  String get onboard_howShouldWeCallYou => 'كيف يجب أن نناديك؟';
 
   @override
   String get onboard_enterYourNameToPersonalizeYourExperience =>
-      'Enter your name to personalize your experience.';
+      'أدخل اسمك لتخصيص تجربتك.';
 
   @override
-  String get onboard_enterYourName => 'Enter your name';
+  String get onboard_enterYourName => 'أدخل اسمك';
 
   @override
-  String get onboard_setupYourFirstAccount => 'Setup Your First Account';
+  String get onboard_setupYourFirstAccount => 'إعداد حسابك الأول';
 
   @override
   String get onboard_letsCreateYourFirstAccount =>
-      'Let\'s create your first account (let say: Cash).';
+      'لنقم بإنشاء حسابك الأول (لنقل: نقدي).';
 
   @override
-  String get onboard_accountName => 'Account Name';
+  String get onboard_accountName => 'اسم الحساب';
 
   @override
-  String get onboard_initialBalance => 'Initial Balance';
+  String get onboard_initialBalance => 'الرصيد الأولي';
 
   @override
   String get onboard_youCanUpdateOtherDetailsLaterAsWell =>
-      'You can update other details later as well.';
+      'يمكنك تحديث التفاصيل الأخرى لاحقًا أيضًا.';
 
   @override
   String onboard_pleaseFillThe(Object inputName) {
-    return 'Please fill the \"$inputName\"';
+    return 'يرجى ملء \"$inputName\"';
   }
 
   @override
   String onboard_pleaseEnterAValidNumberFor(Object hintText) {
-    return 'Please enter a valid number for \"$hintText\"';
+    return 'يرجى إدخال رقم صالح لـ \"$hintText\"';
   }
 
   @override
-  String get onboard_youAreAllSet => 'You\'re all set!';
+  String get onboard_youAreAllSet => 'كل شيء جاهز!';
 
   @override
   String get onboard_letsStartManagingYourMoneyWisely =>
-      'Let\'s start managing your money wisely.';
+      'لنبدأ في إدارة أموالك بحكمة.';
 
   @override
-  String get app_settings_appbar_title => 'App Settings';
+  String get app_settings_appbar_title => 'إعدادات التطبيق';
 
   @override
-  String get language_settings_appbar_title => 'Choose Language';
+  String get language_settings_appbar_title => 'اختر اللغة';
 
   @override
-  String get app_settings_language_title => 'Language';
+  String get app_settings_language_title => 'اللغة';
 
   @override
-  String get app_settings_language_subtitle => 'Choose your language';
+  String get app_settings_language_subtitle => 'اختر لغتك';
 
   @override
-  String get app_settings_theme_mode_title => 'Theme Mode';
+  String get app_settings_theme_mode_title => 'وضع السمة';
 
   @override
-  String get app_settings_theme_mode_light => 'Light';
+  String get app_settings_theme_mode_light => 'فاتح';
 
   @override
-  String get app_settings_theme_mode_dark => 'Dark';
+  String get app_settings_theme_mode_dark => 'داكن';
 
   @override
-  String get app_settings_theme_mode_system_default => 'System Default';
+  String get app_settings_theme_mode_system_default => 'افتراضي النظام';
 
   @override
-  String get app_settings_theme_mode_amoled => 'AMOLED';
+  String get app_settings_theme_mode_amoled => 'أموليد (AMOLED)';
 
   @override
-  String get app_settings_theme_mode_subtitle => 'Choose your preferred theme';
+  String get app_settings_theme_mode_subtitle => 'اختر السمة المفضلة لديك';
 
   @override
-  String get app_settings_daily_reminder_title => 'Daily Expense Reminder';
+  String get app_settings_daily_reminder_title => 'تذكير المصاريف اليومية';
 
   @override
-  String get home_screen_title => 'Home';
+  String get home_screen_title => 'الرئيسية';
 
   @override
-  String get transaction_screen_title => 'Activity';
+  String get transaction_screen_title => 'النشاط';
 
   @override
-  String get statistics_screen_title => 'Statistics';
+  String get statistics_screen_title => 'الإحصائيات';
 
   @override
-  String get profile_screen_title => 'Profile';
+  String get profile_screen_title => 'الملف الشخصي';
 
   @override
-  String get add_edit_transaction_screen_title => 'Add Transaction';
+  String get add_edit_transaction_screen_title => 'إضافة عملية';
 
   @override
-  String get transaction_list_screen_title => 'Transaction List';
+  String get transaction_list_screen_title => 'قائمة العمليات';
 
   @override
-  String get transaction_listViewGroupTodayLabel => 'Today';
+  String get transaction_listViewGroupTodayLabel => 'اليوم';
 
   @override
-  String get transaction_listViewGroupYesterdayLabel => 'Yesterday';
+  String get transaction_listViewGroupYesterdayLabel => 'أمس';
 
   @override
-  String get greeting_good_morning_text => 'Good Morning';
+  String get greeting_good_morning_text => 'صباح الخير';
 
   @override
-  String get greeting_good_afternoon_text => 'Good Afternoon';
+  String get greeting_good_afternoon_text => 'مساء الخير';
 
   @override
-  String get greeting_good_evening_text => 'Good Evening';
+  String get greeting_good_evening_text => 'مساء الخير';
 
   @override
-  String get greeting_good_night_text => 'Good Night';
+  String get greeting_good_night_text => 'تصبح على خير';
 
   @override
-  String get greeting_hello_text => 'Hello';
+  String get greeting_hello_text => 'مرحباً';
 
   @override
-  String get transaction_type_income => 'Income';
+  String get transaction_type_income => 'دخل';
 
   @override
-  String get transaction_type_expense => 'Expense';
+  String get transaction_type_expense => 'مصروف';
 
   @override
-  String get dashboard_add_transaction_text => 'Add transaction';
+  String get dashboard_add_transaction_text => 'إضافة عملية';
 
   @override
-  String get dashboard_add_transfer_text => 'Transfer';
+  String get dashboard_add_transfer_text => 'تحويل';
 
   @override
-  String get dashboard_cash_flow_text => 'Cash Flow';
+  String get dashboard_cash_flow_text => 'التدفق النقدي';
 
   @override
-  String get cash_flow_filter_type_day => 'Day';
+  String get cash_flow_filter_type_day => 'يوم';
 
   @override
-  String get cash_flow_filter_type_week => 'Week';
+  String get cash_flow_filter_type_week => 'أسبوع';
 
   @override
-  String get cash_flow_filter_type_month => 'Month';
+  String get cash_flow_filter_type_month => 'شهر';
 
   @override
-  String get cash_flow_filter_type_year => 'Year';
+  String get cash_flow_filter_type_year => 'سنة';
 
   @override
-  String get dashboard_mini_budget_text => 'Budget';
+  String get dashboard_mini_budget_text => 'ميزانية';
 
   @override
   String get dashboard_mini_budget_not_found_text =>
-      'No Budgets Defined, Add One!';
+      'لا توجد ميزانيات، أضف واحدة!';
 
   @override
-  String get dashboard_mini_budget_add_text => 'Add Budget';
+  String get dashboard_mini_budget_add_text => 'إضافة ميزانية';
 
   @override
-  String get transaction_list_cash_flow_screen_title => 'Transactions';
+  String get transaction_list_cash_flow_screen_title => 'العمليات';
 
   @override
-  String get transaction_list_filter_all => 'All';
+  String get transaction_list_filter_all => 'الكل';
 
   @override
-  String get transaction_list_filter_income => 'Income';
+  String get transaction_list_filter_income => 'دخل';
 
   @override
-  String get transaction_list_filter_expense => 'Expense';
+  String get transaction_list_filter_expense => 'مصروف';
 
   @override
   String get transaction_list_pending_transaction_message_text =>
-      '⚡ New transactions found! Review now';
+      '⚡ تم العثور على عمليات جديدة! راجع الآن';
 
   @override
-  String get transaction_listPendingTransactionMessageActionLabel => 'Review';
+  String get transaction_listPendingTransactionMessageActionLabel => 'مراجعة';
 
   @override
-  String get transaction_noTransactionFoundText => 'No transactions found.';
+  String get transaction_noTransactionFoundText => 'لم يتم العثور على عمليات.';
 
   @override
-  String get transaction_deleteAlertTitleText => 'Delete Transaction?';
+  String get transaction_deleteAlertTitleText => 'حذف العملية؟';
 
   @override
-  String get transaction_deleteAlertBodyText => 'This action cannot be undone.';
+  String get transaction_deleteAlertBodyText =>
+      'هذا الإجراء لا يمكن التراجع عنه.';
 
   @override
-  String get transaction_deleteButtonActionText => 'Delete';
+  String get transaction_deleteButtonActionText => 'حذف';
 
   @override
-  String get transaction_cancelButtonActionText => 'Cancel';
+  String get transaction_cancelButtonActionText => 'إلغاء';
 
   @override
-  String get transaction_filterCategoryText => 'Filter Transactions';
+  String get transaction_filterCategoryText => 'تصفية العمليات';
 
   @override
   String transaction_noteDescriptionText(Object description) {
-    return 'note: $description';
+    return 'ملاحظة: $description';
   }
 
   @override
-  String get calendar_week_monday_initial_text => 'M';
+  String get calendar_week_monday_initial_text => 'ن';
 
   @override
-  String get calendar_week_tuesday_initial_text => 'T';
+  String get calendar_week_tuesday_initial_text => 'ث';
 
   @override
-  String get calendar_week_wednesday_initial_text => 'W';
+  String get calendar_week_wednesday_initial_text => 'ر';
 
   @override
-  String get calendar_week_thursday_initial_text => 'T';
+  String get calendar_week_thursday_initial_text => 'خ';
 
   @override
-  String get calendar_week_friday_initial_text => 'F';
+  String get calendar_week_friday_initial_text => 'ج';
 
   @override
-  String get calendar_week_saturday_initial_text => 'S';
+  String get calendar_week_saturday_initial_text => 'س';
 
   @override
-  String get calendar_week_sunday_initial_text => 'S';
+  String get calendar_week_sunday_initial_text => 'ح';
 
   @override
-  String get dashboard_netWorthTitle => 'Net Worth';
+  String get dashboard_netWorthTitle => 'صافي القيمة';
 
   @override
-  String get budget_dashboardMiniCardBudgetTitleText => 'Budget';
+  String get budget_dashboardMiniCardBudgetTitleText => 'ميزانية';
 
   @override
-  String get budget_dashboardMiniCardSpentTitleText => 'Spent';
+  String get budget_dashboardMiniCardSpentTitleText => 'المنفق';
 
   @override
-  String get budget_dashboardPageTitle => 'Budgets Details';
+  String get budget_dashboardPageTitle => 'تفاصيل الميزانيات';
 
   @override
-  String get budget_dashboardNotFoundText => 'No Budgets Defined, Add One!';
+  String get budget_dashboardNotFoundText => 'لا توجد ميزانيات، أضف واحدة!';
 
   @override
-  String get budget_dashboardAddBudgetText => 'Add Budget';
+  String get budget_dashboardAddBudgetText => 'إضافة ميزانية';
 
   @override
-  String get budget_categoriesTitle => 'Categories';
+  String get budget_categoriesTitle => 'الفئات';
 
   @override
   String budget_dashboardPieChartLabelText(
       Object spentPercent, Object title, Object totalPercent) {
-    return '$title ($totalPercent of Total, ${spentPercent}of Spent)';
+    return '$title ($totalPercent من الإجمالي، $spentPercent من المنفق)';
   }
 
   @override
-  String get budget_buttonDeleteTitleText => 'Delete Budget?';
+  String get budget_buttonDeleteTitleText => 'حذف الميزانية؟';
 
   @override
   String get budget_buttonDeleteBodyText =>
-      'This will remove the Budget and its allocations, this action cannot be undone.';
+      'سيؤدي هذا إلى إزالة الميزانية وتخصيصاتها، هذا الإجراء لا يمكن التراجع عنه.';
 
   @override
-  String get budget_buttonDeleteActionText => 'Delete';
+  String get budget_buttonDeleteActionText => 'حذف';
 
   @override
-  String get budget_buttonCancelActionText => 'Cancel';
+  String get budget_buttonCancelActionText => 'إلغاء';
 
   @override
-  String get budget_buttonAddText => 'Add Budget';
+  String get budget_buttonAddText => 'إضافة ميزانية';
 
   @override
-  String get budget_buttonEditText => 'Edit Budget';
+  String get budget_buttonEditText => 'تعديل الميزانية';
 
   @override
-  String get budget_budgetNameControllerText => 'Budget Name';
+  String get budget_budgetNameControllerText => 'اسم الميزانية';
 
   @override
-  String get budget_budgetAmountControllerText => 'Total Amount';
+  String get budget_budgetAmountControllerText => 'المبلغ الإجمالي';
 
   @override
-  String get budget_recurrenceControllerText => 'Recurrence';
+  String get budget_recurrenceControllerText => 'التكرار';
 
   @override
-  String get budget_nameRequiredHintText => 'Budget name is required';
+  String get budget_nameRequiredHintText => 'اسم الميزانية مطلوب';
 
   @override
-  String get budget_amountRequiredHintText => 'Valid Amount is required';
+  String get budget_amountRequiredHintText => 'مبلغ صالح مطلوب';
 
   @override
-  String get budget_selectStartDateText => 'Select Start Date';
+  String get budget_selectStartDateText => 'اختر تاريخ البدء';
 
   @override
   String budget_selectedStartDateText(Object startDate) {
-    return 'Start: $startDate';
+    return 'البدء: $startDate';
   }
 
   @override
-  String get budget_selectEndDateText => 'Select End Date';
+  String get budget_selectEndDateText => 'اختر تاريخ الانتهاء';
 
   @override
   String budget_selectedEndDateText(Object endDate) {
-    return 'End: $endDate';
+    return 'الانتهاء: $endDate';
   }
 
   @override
-  String get budget_categoryTitle => 'Select Categories & Allocations';
+  String get budget_categoryTitle => 'اختر الفئات والتخصيصات';
 
   @override
   String get budget_allocateAmountText => 'Allocate Amount';
@@ -2947,6 +2950,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String insight_bestDayTitle(String day) {
     return '${day}s cost you the most';
   }
+
+  @override
+  String get budget_alert_exceededTitle => 'Budget Exceeded!';
+
+  @override
+  String budget_alert_warningTitle(Object percent) {
+    return 'Budget Alert: $percent%';
+  }
+
+  @override
+  String get label_percentage_with_colon => 'Percentage:';
+
+  @override
+  String get label_budget_with_colon => 'Budget:';
+
+  @override
+  String get label_spent_with_colon => 'Spent:';
 
   @override
   String get bills_howBillsWorkTitle => 'How Bills Work';
@@ -6183,4 +6203,38 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cc_utilitySubtitle => 'Due dates, outstanding & limits';
+
+  @override
+  String get plugins_remindMeBefore => 'Remind me before';
+
+  @override
+  String plugins_daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String plugins_billDueOn(int day, String suffix) {
+    return 'Bill due on $day$suffix of every month';
+  }
+
+  @override
+  String get plugins_addCreditCard => 'Add Credit Card';
+
+  @override
+  String get plugins_editCreditCard => 'Edit Credit Card';
+
+  @override
+  String get plugins_cardName => 'Card Name';
+
+  @override
+  String get plugins_cardNameHint => 'e.g., HDFC Regalia';
+
+  @override
+  String get plugins_billDayLabel => 'Bill Day';
 }

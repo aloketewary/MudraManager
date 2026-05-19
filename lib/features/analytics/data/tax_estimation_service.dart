@@ -152,7 +152,7 @@ class TaxEstimationService {
         rate: bracket.rate * 100,
         taxableAmount: taxable.toDouble(),
         tax: tax,
-      ));
+      ),);
       remaining -= taxable;
     }
 
@@ -183,7 +183,7 @@ class TaxEstimationService {
         rate: bracket.rate * 100,
         taxableAmount: taxable.toDouble(),
         tax: tax,
-      ));
+      ),);
       remaining -= taxable;
     }
 

@@ -46,28 +46,37 @@ class PendingTransactionService {
   Future<List<PendingTransaction>> saveAll(
     List<PendingTransaction> pendingTransactionList,
   ) async {
-    final isar = await isarService.getInstance();
-    for (final pt in pendingTransactionList) {
-      pt.encryptFields();
+    for (final p in pendingTransactionList) {
+      p.encryptFields();
     }
+    final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
       await isar.pendingTransactions.putAll(pendingTransactionList);
     });
+    for (final p in pendingTransactionList) {
+      p.decryptFields();
+    }
     return pendingTransactionList;
   }
 
   Future<PendingTransaction> save(PendingTransaction pendingTransaction) async {
-    final isar = await isarService.getInstance();
     pendingTransaction.encryptFields();
+    final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
       await isar.pendingTransactions.put(pendingTransaction);
     });
+    // Decrypt after save to keep the object usable in UI
+    pendingTransaction.decryptFields();
     return pendingTransaction;
   }
 
   Future<List<PendingTransaction?>> getAllPendingTransaction() async {
     final isar = await isarService.getInstance();
-    return isar.pendingTransactions.where().sortByDate().findAll().withDecryption();
+    return isar.pendingTransactions
+        .where()
+        .sortByDate()
+        .findAll()
+        .withDecryption();
   }
 
   Future<void> remove(PendingTransaction pendingTx) async {
@@ -158,6 +167,7 @@ class PendingTransactionService {
         // Optionally update the DB record so it stays healed
         pending.encryptFields();
         await isar.pendingTransactions.put(pending);
+        pending.decryptFields();
       }
     }
 

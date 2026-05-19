@@ -5358,6 +5358,36 @@ abstract class AppLocalizations {
   /// **'{day}s cost you the most'**
   String insight_bestDayTitle(String day);
 
+  /// No description provided for @budget_alert_exceededTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Exceeded!'**
+  String get budget_alert_exceededTitle;
+
+  /// No description provided for @budget_alert_warningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Alert: {percent}%'**
+  String budget_alert_warningTitle(Object percent);
+
+  /// No description provided for @label_percentage_with_colon.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage:'**
+  String get label_percentage_with_colon;
+
+  /// No description provided for @label_budget_with_colon.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget:'**
+  String get label_budget_with_colon;
+
+  /// No description provided for @label_spent_with_colon.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent:'**
+  String get label_spent_with_colon;
+
   /// No description provided for @bills_howBillsWorkTitle.
   ///
   /// In en, this message translates to:
@@ -11237,6 +11267,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Due dates, outstanding & limits'**
   String get cc_utilitySubtitle;
+
+  /// No description provided for @plugins_remindMeBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me before'**
+  String get plugins_remindMeBefore;
+
+  /// No description provided for @plugins_daysCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String plugins_daysCount(int count);
+
+  /// No description provided for @plugins_billDueOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill due on {day}{suffix} of every month'**
+  String plugins_billDueOn(int day, String suffix);
+
+  /// No description provided for @plugins_addCreditCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Credit Card'**
+  String get plugins_addCreditCard;
+
+  /// No description provided for @plugins_editCreditCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Credit Card'**
+  String get plugins_editCreditCard;
+
+  /// No description provided for @plugins_cardName.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Name'**
+  String get plugins_cardName;
+
+  /// No description provided for @plugins_cardNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., HDFC Regalia'**
+  String get plugins_cardNameHint;
+
+  /// No description provided for @plugins_billDayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill Day'**
+  String get plugins_billDayLabel;
 }
 
 class _AppLocalizationsDelegate

@@ -1,3 +1,403 @@
 {
-  "@@locale": "ar"
+  "@@locale": "ar",
+  "onboard_manageYourMoneyDescription": "100% دون اتصال بالإنترنت. بياناتك لا تغادر جهازك أبدًا.",
+  "@onboard_manageYourMoneyDescription": {
+    "description": "Manage your money smartly & effortlessly."
+  },
+  "onboard_welcomeToApp": "مرحبًا بك في {appName}",
+  "@onboard_welcomeToApp": {
+    "description": "Welcome to Application"
+  },
+  "onboard_TrackYourTransactions": "تتبع تلقائي من الرسائل القصيرة للبنك",
+  "@onboard_TrackYourTransactions": {
+    "description": "Track your Transactions"
+  },
+  "onboard_SeeWhereYourMoneyGoes": "استيراد تلقائي من الرسائل القصيرة للبنك والإشعارات. يعمل مع أكثر من 50 بنكًا.",
+  "@onboard_SeeWhereYourMoneyGoes": {
+    "description": "See where your money goes, every day."
+  },
+  "onboard_SetBudgetsAndGoals": "الميزانيات، الأهداف والتنبيهات الذكية",
+  "@onboard_SetBudgetsAndGoals": {
+    "description": "Set Budgets and Goals"
+  },
+  "onboard_stayOnTrackAndAchieveYourDream": "احصل على تحذيرات قبل الإفراط في الإنفاق. وفر لما يهم.",
+  "@onboard_stayOnTrackAndAchieveYourDream": {
+    "description": "Stay on track and achieve your dreams."
+  },
+  "onboard_GetStarted": "ابدأ الآن!",
+  "@onboard_GetStarted": {
+    "description": "Get Started!"
+  },
+  "onboard_letsSetupYourAccount": "لنقم بإعداد حسابك.",
+  "@onboard_letsSetupYourAccount": {
+    "description": "Let's set up your account."
+  },
+  "onboard_howShouldWeCallYou": "كيف يجب أن نناديك؟",
+  "@onboard_howShouldWeCallYou": {
+    "description": "How should we call you?"
+  },
+  "onboard_enterYourNameToPersonalizeYourExperience": "أدخل اسمك لتخصيص تجربتك.",
+  "@onboard_enterYourNameToPersonalizeYourExperience": {
+    "description": "Enter your name to personalize your experience."
+  },
+  "onboard_enterYourName": "أدخل اسمك",
+  "@onboard_enterYourName": {
+    "description": "Enter your name"
+  },
+  "onboard_setupYourFirstAccount": "إعداد حسابك الأول",
+  "@onboard_setupYourFirstAccount": {
+    "description": "Setup Your First Account"
+  },
+  "onboard_letsCreateYourFirstAccount": "لنقم بإنشاء حسابك الأول (لنقل: نقدي).",
+  "@onboard_letsCreateYourFirstAccount": {
+    "description": "Let's start managing your money wisely."
+  },
+  "onboard_accountName": "اسم الحساب",
+  "@onboard_accountName": {
+    "description": "Account Name"
+  },
+  "onboard_initialBalance": "الرصيد الأولي",
+  "@onboard_initialBalance": {
+    "description": "Initial Balance"
+  },
+  "onboard_youCanUpdateOtherDetailsLaterAsWell": "يمكنك تحديث التفاصيل الأخرى لاحقًا أيضًا.",
+  "@onboard_youCanUpdateOtherDetailsLaterAsWell": {
+    "description": "You can update other details later as well."
+  },
+  "onboard_pleaseFillThe": "يرجى ملء \"{inputName}\"",
+  "@onboard_pleaseFillThe": {
+    "description": "Please fill the "
+  },
+  "onboard_pleaseEnterAValidNumberFor": "يرجى إدخال رقم صالح لـ \"{hintText}\"",
+  "@onboard_pleaseEnterAValidNumberFor": {
+    "description": "Please enter a valid number for "
+  },
+  "onboard_youAreAllSet": "كل شيء جاهز!",
+  "@onboard_youAreAllSet": {
+    "description": "You're all set!"
+  },
+  "onboard_letsStartManagingYourMoneyWisely": "لنبدأ في إدارة أموالك بحكمة.",
+  "@onboard_letsStartManagingYourMoneyWisely": {
+    "description": "Let's start managing your money wisely."
+  },
+  "app_settings_appbar_title": "إعدادات التطبيق",
+  "@app_settings_appbar_title": {
+    "description": "This is title of screen page"
+  },
+  "language_settings_appbar_title": "اختر اللغة",
+  "@language_settings_appbar_title": {
+    "description": "This is title of Choose Language page"
+  },
+  "app_settings_language_title": "اللغة",
+  "@app_settings_language_title": {
+    "description": "This is title of Language tile"
+  },
+  "app_settings_language_subtitle": "اختر لغتك",
+  "@app_settings_language_subtitle": {
+    "description": "This is subtitle of Language tile"
+  },
+  "app_settings_theme_mode_title": "وضع السمة",
+  "@app_settings_theme_mode_title": {
+    "description": "This is title of Theme Mode tile"
+  },
+  "app_settings_theme_mode_light": "فاتح",
+  "@app_settings_theme_mode_light": {
+    "description": "This is text of Theme Mode light"
+  },
+  "app_settings_theme_mode_dark": "داكن",
+  "@app_settings_theme_mode_dark": {
+    "description": "This is text of Theme Mode dark"
+  },
+  "app_settings_theme_mode_system_default": "افتراضي النظام",
+  "@app_settings_theme_mode_system_default": {
+    "description": "This is text of Theme Mode system default"
+  },
+  "app_settings_theme_mode_amoled": "أموليد (AMOLED)",
+  "@app_settings_theme_mode_amoled": {
+    "description": "This is text of Theme Mode AMOLED dark"
+  },
+  "app_settings_theme_mode_subtitle": "اختر السمة المفضلة لديك",
+  "@app_settings_theme_mode_subtitle": {
+    "description": "This is subtitle of Theme Mode tile"
+  },
+  "app_settings_daily_reminder_title": "تذكير المصاريف اليومية",
+  "@app_settings_daily_reminder_title": {
+    "description": "This is text of Daily reminder title"
+  },
+  "home_screen_title": "الرئيسية",
+  "@home_screen_title": {
+    "description": "This is title of Home screen"
+  },
+  "transaction_screen_title": "النشاط",
+  "@transaction_screen_title": {
+    "description": "This is title of Activity screen"
+  },
+  "statistics_screen_title": "الإحصائيات",
+  "@statistics_screen_title": {
+    "description": "This is title of Statistics screen"
+  },
+  "profile_screen_title": "الملف الشخصي",
+  "@profile_screen_title": {
+    "description": "This is title of Profile screen"
+  },
+  "add_edit_transaction_screen_title": "إضافة عملية",
+  "@add_edit_transaction_screen_title": {
+    "description": "This is title of Add Transaction screen"
+  },
+  "transaction_list_screen_title": "قائمة العمليات",
+  "@transaction_list_screen_title": {
+    "description": "This is title of Transaction List screen"
+  },
+  "transaction_listViewGroupTodayLabel": "اليوم",
+  "@transaction_listViewGroupTodayLabel": {
+    "description": "This is text of Today"
+  },
+  "transaction_listViewGroupYesterdayLabel": "أمس",
+  "@transaction_listViewGroupYesterdayLabel": {
+    "description": "This is text of Yesterday"
+  },
+  "greeting_good_morning_text": "صباح الخير",
+  "@greeting_good_morning_text": {
+    "description": "This is text of Good Morning"
+  },
+  "greeting_good_afternoon_text": "مساء الخير",
+  "@greeting_good_afternoon_text": {
+    "description": "This is text of Good Afternoon"
+  },
+  "greeting_good_evening_text": "مساء الخير",
+  "@greeting_good_evening_text": {
+    "description": "This is text of Good Evening"
+  },
+  "greeting_good_night_text": "تصبح على خير",
+  "@greeting_good_night_text": {
+    "description": "This is text of Good Night"
+  },
+  "greeting_hello_text": "مرحباً",
+  "@greeting_hello_text": {
+    "description": "This is text of Hello"
+  },
+  "transaction_type_income": "دخل",
+  "@transaction_type_income": {
+    "description": "This is text of Income"
+  },
+  "transaction_type_expense": "مصروف",
+  "@transaction_type_expense": {
+    "description": "This is text of Expense"
+  },
+  "dashboard_add_transaction_text": "إضافة عملية",
+  "@dashboard_add_transaction_text": {
+    "description": "This is text of add transaction button"
+  },
+  "dashboard_add_transfer_text": "تحويل",
+  "@dashboard_add_transfer_text": {
+    "description": "This is text of add Transfer button"
+  },
+  "dashboard_cash_flow_text": "التدفق النقدي",
+  "@dashboard_cash_flow_text": {
+    "description": "This is text of Cash Flow"
+  },
+  "cash_flow_filter_type_day": "يوم",
+  "@cash_flow_filter_type_day": {
+    "description": "This is text of Day"
+  },
+  "cash_flow_filter_type_week": "أسبوع",
+  "@cash_flow_filter_type_week": {
+    "description": "This is text of Week"
+  },
+  "cash_flow_filter_type_month": "شهر",
+  "@cash_flow_filter_type_month": {
+    "description": "This is text of Month"
+  },
+  "cash_flow_filter_type_year": "سنة",
+  "@cash_flow_filter_type_year": {
+    "description": "This is text of Year"
+  },
+  "dashboard_mini_budget_text": "ميزانية",
+  "@dashboard_mini_budget_text": {
+    "description": "This is text of Budget"
+  },
+  "dashboard_mini_budget_not_found_text": "لا توجد ميزانيات، أضف واحدة!",
+  "@dashboard_mini_budget_not_found_text": {
+    "description": "This is text of budget not found"
+  },
+  "dashboard_mini_budget_add_text": "إضافة ميزانية",
+  "@dashboard_mini_budget_add_text": {
+    "description": "This is text of add budget"
+  },
+  "transaction_list_cash_flow_screen_title": "العمليات",
+  "@transaction_list_cash_flow_screen_title": {
+    "description": "This is title of Transactions List from cash flow screen"
+  },
+  "transaction_list_filter_all": "الكل",
+  "@transaction_list_filter_all": {
+    "description": "This is text of All"
+  },
+  "transaction_list_filter_income": "دخل",
+  "@transaction_list_filter_income": {
+    "description": "This is text of Income"
+  },
+  "transaction_list_filter_expense": "مصروف",
+  "@transaction_list_filter_expense": {
+    "description": "This is text of Expense"
+  },
+  "transaction_list_pending_transaction_message_text": "⚡ تم العثور على عمليات جديدة! راجع الآن",
+  "@transaction_list_pending_transaction_message_text": {
+    "description": "This is text of pending transaction message"
+  },
+  "transaction_listPendingTransactionMessageActionLabel": "مراجعة",
+  "@transaction_listPendingTransactionMessageActionLabel": {
+    "description": "This is text of pending transaction message action"
+  },
+  "transaction_noTransactionFoundText": "لم يتم العثور على عمليات.",
+  "@transaction_noTransactionFoundText": {
+    "description": "This is text of no transaction found"
+  },
+  "transaction_deleteAlertTitleText": "حذف العملية؟",
+  "@transaction_deleteAlertTitleText": {
+    "description": "This is text of Delete Transaction"
+  },
+  "transaction_deleteAlertBodyText": "هذا الإجراء لا يمكن التراجع عنه.",
+  "@transaction_deleteAlertBodyText": {
+    "description": "This is text of Delete Transaction body"
+  },
+  "transaction_deleteButtonActionText": "حذف",
+  "@transaction_deleteButtonActionText": {
+    "description": "This is text of Delete Transaction action"
+  },
+  "transaction_cancelButtonActionText": "إلغاء",
+  "@transaction_cancelButtonActionText": {
+    "description": "This is text of Cancel Transaction action"
+  },
+  "transaction_filterCategoryText": "تصفية العمليات",
+  "@transaction_filterCategoryText": {
+    "description": "This is text of Filter Category"
+  },
+  "transaction_noteDescriptionText": "ملاحظة: {description}",
+  "@transaction_noteDescriptionText": {
+    "description": "This is text of note description"
+  },
+  "calendar_week_monday_initial_text": "ن",
+  "@calendar_week_monday_initial_text": {
+    "description": "This is text of Monday initial"
+  },
+  "calendar_week_tuesday_initial_text": "ث",
+  "@calendar_week_tuesday_initial_text": {
+    "description": "This is text of Tuesday initial"
+  },
+  "calendar_week_wednesday_initial_text": "ر",
+  "@calendar_week_wednesday_initial_text": {
+    "description": "This is text of Wednesday initial"
+  },
+  "calendar_week_thursday_initial_text": "خ",
+  "@calendar_week_thursday_initial_text": {
+    "description": "This is text of Thursday initial"
+  },
+  "calendar_week_friday_initial_text": "ج",
+  "@calendar_week_friday_initial_text": {
+    "description": "This is text of Friday initial"
+  },
+  "calendar_week_saturday_initial_text": "س",
+  "@calendar_week_saturday_initial_text": {
+    "description": "This is text of Saturday initial"
+  },
+  "calendar_week_sunday_initial_text": "ح",
+  "@calendar_week_sunday_initial_text": {
+    "description": "This is text of Sunday initial"
+  },
+  "dashboard_netWorthTitle": "صافي القيمة",
+  "@dashboard_netWorthTitle": {
+    "description": "This is title of Net Worth"
+  },
+  "budget_dashboardMiniCardBudgetTitleText": "ميزانية",
+  "@budget_dashboardMiniCardBudgetTitleText": {
+    "description": "This is title of Budget"
+  },
+  "budget_dashboardMiniCardSpentTitleText": "المنفق",
+  "@budget_dashboardMiniCardSpentTitleText": {
+    "description": "This is title of Spent"
+  },
+  "budget_dashboardPageTitle": "تفاصيل الميزانيات",
+  "@budget_dashboardPageTitle": {
+    "description": "This is title of Budgets Details"
+  },
+  "budget_dashboardNotFoundText": "لا توجد ميزانيات، أضف واحدة!",
+  "@budget_dashboardNotFoundText": {
+    "description": "This is text of budget not found"
+  },
+  "budget_dashboardAddBudgetText": "إضافة ميزانية",
+  "@budget_dashboardAddBudgetText": {
+    "description": "This is text of add budget"
+  },
+  "budget_categoriesTitle": "الفئات",
+  "@budget_categoriesTitle": {
+    "description": "This is text of categories title"
+  },
+  "budget_dashboardPieChartLabelText": "{title} ({totalPercent} من الإجمالي، {spentPercent} من المنفق)",
+  "@budget_dashboardPieChartLabelText": {
+    "description": "This is text of pie chart label"
+  },
+  "budget_buttonDeleteTitleText": "حذف الميزانية؟",
+  "@budget_buttonDeleteTitleText": {
+    "description": "This is text of delete title"
+  },
+  "budget_buttonDeleteBodyText": "سيؤدي هذا إلى إزالة الميزانية وتخصيصاتها، هذا الإجراء لا يمكن التراجع عنه.",
+  "@budget_buttonDeleteBodyText": {
+    "description": "This is text of delete body"
+  },
+  "budget_buttonDeleteActionText": "حذف",
+  "@budget_buttonDeleteActionText": {
+    "description": "This is text of delete action"
+  },
+  "budget_buttonCancelActionText": "إلغاء",
+  "@budget_buttonCancelActionText": {
+    "description": "This is text of cancel action"
+  },
+  "budget_buttonAddText": "إضافة ميزانية",
+  "@budget_buttonAddText": {
+    "description": "This is text of add budget"
+  },
+  "budget_buttonEditText": "تعديل الميزانية",
+  "@budget_buttonEditText": {
+    "description": "This is text of edit budget"
+  },
+  "budget_budgetNameControllerText": "اسم الميزانية",
+  "@budget_budgetNameControllerText": {
+    "description": "This is text of Budget Name title"
+  },
+  "budget_budgetAmountControllerText": "المبلغ الإجمالي",
+  "@budget_budgetAmountControllerText": {
+    "description": "This is text of Total Amount title"
+  },
+  "budget_recurrenceControllerText": "التكرار",
+  "@budget_recurrenceControllerText": {
+    "description": "This is text of Recurrence title"
+  },
+  "budget_nameRequiredHintText": "اسم الميزانية مطلوب",
+  "@budget_nameRequiredHintText": {
+    "description": "This is text of Budget name is required text"
+  },
+  "budget_amountRequiredHintText": "مبلغ صالح مطلوب",
+  "@budget_amountRequiredHintText": {
+    "description": "This is text of Amount is required text"
+  },
+  "budget_selectStartDateText": "اختر تاريخ البدء",
+  "@budget_selectStartDateText": {
+    "description": "This is text of Select Start Date"
+  },
+  "budget_selectedStartDateText": "البدء: {startDate}",
+  "@budget_selectedStartDateText": {
+    "description": "This is text of Select End Date"
+  },
+  "budget_selectEndDateText": "اختر تاريخ الانتهاء",
+  "@budget_selectEndDateText": {
+    "description": "This is text of Select End Date"
+  },
+  "budget_selectedEndDateText": "الانتهاء: {endDate}",
+  "@budget_selectedEndDateText": {
+    "description": "This is text of Select End Date"
+  },
+  "budget_categoryTitle": "اختر الفئات والتخصيصات",
+  "@budget_categoryTitle": {
+    "description": "This is text of Select Categories & Allocations title"
+  }
 }

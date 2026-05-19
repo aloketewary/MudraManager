@@ -163,14 +163,14 @@ class CurrencyService {
     final oldBase = await getBaseCurrency();
     if (oldBase == newBase) return 0;
 
-    final allTxns = await _isar.transactions.where().findAll();
+    final allTxns = await _isar.transactions.where().findAll().withDecryption();
     final now = DateTime.now();
 
     final archived = <ArchivedTransaction>[];
     for (final txn in allTxns) {
       await txn.account.load();
       await txn.category.load();
-      final a = ArchivedTransaction()
+      final record = ArchivedTransaction()
         ..originalTransactionId = txn.id
         ..date = txn.date
         ..amount = txn.amount
@@ -185,8 +185,9 @@ class CurrencyService {
         ..archivedFromBase = oldBase
         ..archivedToBase = newBase
         ..archivedAt = now;
-      a.encryptFields();
-      archived.add(a);
+
+      record.encryptFields();
+      archived.add(record);
     }
 
     await _isar.writeTxn(() async {

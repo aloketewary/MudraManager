@@ -883,25 +883,25 @@ class AppLocalizationsHi extends AppLocalizations {
   String get sms_approveTransactionTitle => 'लेनदेन अनुमोदित करें';
 
   @override
-  String get onboard_SmartSmsTracking => 'Smart SMS Tracking';
+  String get onboard_SmartSmsTracking => 'स्मार्ट SMS ट्रैकिंग';
 
   @override
   String get onboard_SmartSmsTrackingDesc =>
-      'Bank SMS से transactions अपने आप detect और import होंगे।';
+      'अपने बैंक SMS संदेशों से स्वचालित रूप से लेनदेन का पता लगाएं और आयात करें।';
 
   @override
   String get onboard_InsightsAndAnalytics => 'Insights और Analytics';
 
   @override
   String get onboard_InsightsAndAnalyticsDesc =>
-      'Charts, trends और smart insights से अपनी spending habits समझें।';
+      'अपने खर्च की आदतों को विस्तृत चार्ट, रुझान और स्मार्ट अंतर्दृष्टि के साथ समझें।';
 
   @override
-  String get onboard_SecureAndPrivate => 'Safe और Private';
+  String get onboard_SecureAndPrivate => 'सुरक्षित और निजी';
 
   @override
   String get onboard_SecureAndPrivateDesc =>
-      'Data आपके phone में ही रहता है। कोई cloud नहीं, कोई tracking नहीं।';
+      'आपका डेटा आपके डिवाइस पर रहता है। कोई क्लाउड नहीं, कोई ट्रैकिंग नहीं — बस एन्क्रिप्टेड लोकल स्टोरेज।';
 
   @override
   String get onboard_SmartAutoTracking => 'Smart Auto Tracking';
@@ -2925,6 +2925,23 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get budget_alert_exceededTitle => 'Budget Exceeded!';
+
+  @override
+  String budget_alert_warningTitle(Object percent) {
+    return 'Budget Alert: $percent%';
+  }
+
+  @override
+  String get label_percentage_with_colon => 'Percentage:';
+
+  @override
+  String get label_budget_with_colon => 'Budget:';
+
+  @override
+  String get label_spent_with_colon => 'Spent:';
+
+  @override
   String get bills_howBillsWorkTitle => 'बिल कैसे काम करते हैं';
 
   @override
@@ -3186,7 +3203,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String budget_daysRemaining(Object count) {
-    return '$count दिन';
+    return '$count दिन शेष';
   }
 
   @override
@@ -3221,12 +3238,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String budget_dailyActual(Object amount) {
-    return '$amount/दिन खर्च';
+    return '$amount/दिन वास्तविक';
   }
 
   @override
   String budget_dailyAllowed(Object amount) {
-    return '$amount/दिन सीमा';
+    return '$amount/दिन अनुमति';
   }
 
   @override
@@ -3312,7 +3329,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String budget_categoryDeleteWarning(Object count) {
-    return 'यह category $count budget(s) में है। हटाने से budget tracking प्रभावित होगी।';
+    return 'यह श्रेणी $count बजट में उपयोग की गई है। इसे हटाने से बजट ट्रैकिंग प्रभावित होगी।';
   }
 
   @override
@@ -3321,7 +3338,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String budget_pastBudgets(int count) {
-    return '$count पुराने budget';
+    return '$count पुराने बजट';
   }
 
   @override
@@ -3575,32 +3592,32 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String stats_trendUp(Object category, Object percent) {
-    return '$category बढ़ रहा है — कुल खर्च का $percent%';
+    return '$category ऊपर की ओर रुझान कर रहा है — कुल खर्च का $percent%';
   }
 
   @override
   String stats_trendDown(Object category) {
-    return '$category इस महीने कम हो रहा है 📉';
+    return '$category इस महीने नीचे की ओर रुझान कर रहा है 📉';
   }
 
   @override
   String stats_topCategory(Object category, Object percent) {
-    return '$category सबसे ज़्यादा है — $percent% खर्च';
+    return '$category आपकी शीर्ष श्रेणी है — खर्च का $percent%';
   }
 
   @override
   String stats_weekendPeak(Object day) {
-    return 'Weekend पर ज़्यादा खर्च — $day सबसे भारी';
+    return 'आप सप्ताहांत पर अधिक खर्च करते हैं — $day आपका चरम दिन है';
   }
 
   @override
   String stats_weekdayPeak(Object day) {
-    return 'Weekday में ज़्यादा खर्च — $day सबसे भारी';
+    return 'कार्यदिवसों में अधिक खर्च होता है — $day आपका सबसे बड़ा दिन है';
   }
 
   @override
   String stats_peakAndQuiet(Object peak, Object quiet) {
-    return '$peak सबसे भारी दिन, $quiet सबसे हल्का';
+    return '$peak आपका चरम खर्च वाला दिन है, $quiet सबसे शांत है';
   }
 
   @override
@@ -3635,12 +3652,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String stats_projectedThisMonth(Object amount) {
-    return 'अनुमान: इस महीने $amount';
+    return 'अनुमानित: इस महीने $amount';
   }
 
   @override
   String stats_byDay(Object day, Object amount, Object month) {
-    return 'दिन $day तक: $month में $amount';
+    return '$month में $day दिन तक: $amount';
   }
 
   @override
@@ -4570,7 +4587,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String categories_deleteWithTransactions(String name, int count) {
-    return 'यह \"$name\" और $count जुड़े लेनदेन स्थायी रूप से हटा देगा। यह क्रिया वापस नहीं हो सकती।';
+    return 'यह \"$name\" और $count जुड़े हुए लेनदेन को स्थायी रूप से हटा देगा। यह क्रिया वापस नहीं ली जा सकती।';
   }
 
   @override
@@ -4625,7 +4642,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String exchange_unitInfo(String base) {
-    return 'विदेशी मुद्रा की 1 इकाई = X $base। संपादित करने के लिए टैप करें।';
+    return 'विदेशी मुद्रा की 1 इकाई = X $base। संपादित करने के लिए किसी भी दर पर टैप करें।';
   }
 
   @override
@@ -4633,7 +4650,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String exchange_rateUpdated(String code) {
-    return '$code दर अपडेट हो गई';
+    return '$code दर अपडेट की गई';
   }
 
   @override
@@ -4732,7 +4749,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String notifSettings_weeklySchedule(String day) {
-    return 'हर $day सुबह 9:00 बजे';
+    return 'प्रत्येक $day सुबह 9:00 बजे';
   }
 
   @override
@@ -4828,17 +4845,17 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String goal_progressLeft(Object percent, Object amount) {
-    return '$percent% हो गया • $amount बाकी';
+    return '$percent% वहां • $amount शेष';
   }
 
   @override
   String goal_paceDaily(Object daily, Object monthly) {
-    return 'इस रफ़्तार से $daily/दिन चाहिए।\nयानी $monthly/महीना।';
+    return 'इस गति से, आपको अपने लक्ष्य तक पहुँचने के लिए $daily/दिन की आवश्यकता है।\nवह $monthly/महीना है।';
   }
 
   @override
   String goal_daysRemaining(Object count) {
-    return '$count दिन बाकी';
+    return '$count दिन शेष';
   }
 
   @override
@@ -4856,8 +4873,8 @@ class AppLocalizationsHi extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count goals चल रहे हैं',
-      one: '1 goal चल रहा है',
+      other: '$count लक्ष्य प्रगति पर',
+      one: '1 लक्ष्य प्रगति पर',
     );
     return '$_temp0';
   }
@@ -4891,8 +4908,8 @@ class AppLocalizationsHi extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count goals में',
-      one: '1 goal में',
+      other: '$count लक्ष्यों में',
+      one: '1 लक्ष्य में',
     );
     return '$_temp0';
   }
@@ -4920,7 +4937,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String goal_monthsLeft(Object count) {
-    return '$count महीने बाकी';
+    return '$count महीने शेष';
   }
 
   @override
@@ -5131,7 +5148,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String backup_recordCount(int count) {
-    return '$count records';
+    return '$count रिकॉर्ड';
   }
 
   @override
@@ -5139,7 +5156,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String account_resetTo(String code) {
-    return '$code पर reset करें';
+    return '$code पर रीसेट करें';
   }
 
   @override
@@ -5148,7 +5165,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String account_foreignCurrencyInfo(String code, String base) {
-    return 'Transactions $code में record होंगे और $base में convert होंगे।';
+    return 'लेनदेन $code में रिकॉर्ड किए जाएंगे और कुल योग के लिए $base में बदले जाएंगे।';
   }
 
   @override
@@ -5174,12 +5191,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String appearance_toneActivated(String name) {
-    return '$name tone सक्रिय';
+    return '$name टोन सक्रिय';
   }
 
   @override
   String dashboard_cardsActive(int visible, int total) {
-    return '$total में से $visible cards सक्रिय';
+    return '$total में से $visible कार्ड सक्रिय';
   }
 
   @override
@@ -5355,7 +5372,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String about_packageCount(int count) {
-    return '$count open source packages';
+    return '$count ओपन सोर्स पैकेज';
   }
 
   @override
@@ -5413,7 +5430,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String statistics_percentOfExpenses(String percent) {
-    return '$percent% खर्चों का';
+    return 'खर्चों का $percent%';
   }
 
   @override
@@ -6156,4 +6173,38 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get cc_utilitySubtitle => 'Due dates, बकाया और limits';
+
+  @override
+  String get plugins_remindMeBefore => 'Remind me before';
+
+  @override
+  String plugins_daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String plugins_billDueOn(int day, String suffix) {
+    return 'Bill due on $day$suffix of every month';
+  }
+
+  @override
+  String get plugins_addCreditCard => 'Add Credit Card';
+
+  @override
+  String get plugins_editCreditCard => 'Edit Credit Card';
+
+  @override
+  String get plugins_cardName => 'Card Name';
+
+  @override
+  String get plugins_cardNameHint => 'e.g., HDFC Regalia';
+
+  @override
+  String get plugins_billDayLabel => 'Bill Day';
 }

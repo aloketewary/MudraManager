@@ -83,7 +83,7 @@ void main() {
   group('Bug 4 — Merge Validation', () {
     test('4a: uses percentage-based tolerance, not hardcoded 1', () {
       expect(listScreen, contains('expense.amount * 0.01'));
-      expect(listScreen, isNot(contains("Amounts must match (within ₹1)")));
+      expect(listScreen, isNot(contains('Amounts must match (within ₹1)')));
     });
 
     test('4b: same-account check exists', () {

@@ -91,26 +91,25 @@ class AppLocalizationsBn extends AppLocalizations {
   String get app_settings_language_title => 'ভাষা';
 
   @override
-  String get app_settings_language_subtitle => 'আপনার ভাষা নির্বাচন করুন';
+  String get app_settings_language_subtitle => 'আপনার ভাষা চয়ন করুন';
 
   @override
   String get app_settings_theme_mode_title => 'থিম মোড';
 
   @override
-  String get app_settings_theme_mode_light => 'Light';
+  String get app_settings_theme_mode_light => 'লাইট';
 
   @override
-  String get app_settings_theme_mode_dark => 'Dark';
+  String get app_settings_theme_mode_dark => 'ডার্ক';
 
   @override
   String get app_settings_theme_mode_system_default => 'সিস্টেম ডিফল্ট';
 
   @override
-  String get app_settings_theme_mode_amoled => 'AMOLED ডার্ক';
+  String get app_settings_theme_mode_amoled => 'অ্যামোলেড (AMOLED)';
 
   @override
-  String get app_settings_theme_mode_subtitle =>
-      'আপনার পছন্দের থিম নির্বাচন করুন';
+  String get app_settings_theme_mode_subtitle => 'আপনার পছন্দের থিম চয়ন করুন';
 
   @override
   String get app_settings_daily_reminder_title => 'দৈনিক ব্যয়ের অনুস্মারক';
@@ -721,27 +720,27 @@ class AppLocalizationsBn extends AppLocalizations {
   String get theme_themeAppliedMessage => 'থিম প্রয়োগ করা হয়েছে!';
 
   @override
-  String get backup_backupRestoreTitle => 'ব্যাকআপ ও রিস্টোর';
+  String get backup_backupRestoreTitle => 'ব্যাকআপ এবং রিস্টোর';
 
   @override
   String get backup_backupDataTitle => 'ডেটা ব্যাকআপ করুন';
 
   @override
-  String get backup_backupDataSubtitle => 'সব ডেটাবেস ও সেটিংস এক্সপোর্ট করুন';
+  String get backup_backupDataSubtitle =>
+      'সমস্ত ডাটাবেস এবং সেটিংস এক্সপোর্ট করুন';
 
   @override
   String get backup_restoreBackupTitle => 'ব্যাকআপ রিস্টোর করুন';
 
   @override
-  String get backup_restoreBackupSubtitle => 'ডেটাবেস ও সেটিংস আমদানি করুন';
+  String get backup_restoreBackupSubtitle => 'ডাটাবেস এবং সেটিংস ইমপোর্ট করুন';
 
   @override
-  String get backup_includeAttachmentsTitle =>
-      'অ্যাটাচমেন্ট অন্তর্ভুক্ত করবেন?';
+  String get backup_includeAttachmentsTitle => 'সংযুক্তি অন্তর্ভুক্ত করবেন?';
 
   @override
   String get backup_includeAttachmentsMessage =>
-      'ব্যাকআপে রসিদের ছবি অন্তর্ভুক্ত করবেন? এটি ফাইলের আকার বাড়়াবে।';
+      'ব্যাকআপে রসিদের ছবি অন্তর্ভুক্ত করবেন? এতে ফাইলের আকার বাড়বে।';
 
   @override
   String get backup_yesLabel => 'হ্যাঁ';
@@ -750,10 +749,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get backup_noLabel => 'না';
 
   @override
-  String get backup_completedMessage => 'ব্যাকআপ সম্পন্ন';
+  String get backup_completedMessage => 'ব্যাকআপ সম্পন্ন হয়েছে';
 
   @override
-  String get backup_restoreSuccessMessage => 'রিস্টোর সফল';
+  String get backup_restoreSuccessMessage => 'রিস্টোর সফল হয়েছে';
 
   @override
   String backup_lastBackupLabel(Object date) {
@@ -764,46 +763,46 @@ class AppLocalizationsBn extends AppLocalizations {
   String get backup_noBackupFoundLabel => 'কোনো ব্যাকআপ পাওয়া যায়নি';
 
   @override
-  String get categories_manageCategoriesTitle => 'ক্যাটাগরি পরিচালনা করুন';
+  String get categories_manageCategoriesTitle => 'ক্যাটেগরি পরিচালনা করুন';
 
   @override
-  String get categories_noCategoriesFound => 'কোনো ক্যাটাগরি পাওয়া যায়নি।';
+  String get categories_noCategoriesFound => 'কোনো ক্যাটেগরি পাওয়া যায়নি।';
 
   @override
   String categories_transactionCount(Object count, Object plural) {
-    return '$countটি লেনদেন$plural';
+    return '$count টি লেনদেন';
   }
 
   @override
-  String get categories_addCategoryLabel => 'ক্যাটাগরি যোগ করুন';
+  String get categories_addCategoryLabel => 'ক্যাটেগরি যোগ করুন';
 
   @override
-  String get categories_deleteCategoryTitle => 'ক্যাটাগরি মুছে ফেলুন';
+  String get categories_deleteCategoryTitle => 'ক্যাটেগরি ডিলিট করুন';
 
   @override
   String get categories_deleteCategoryMessage =>
-      'আপনি কি নিশ্চিত এই ক্যাটাগরি মুছে ফেলতে চান?\\nসব সংশ্লিষ্ট লেনদেনও সরিয়ে দেওয়া হবে।';
+      'আপনি কি নিশ্চিত যে আপনি এই ক্যাটেগরি ডিলিট করতে চান?\nএর সাথে যুক্ত সমস্ত লেনদেনও মুছে ফেলা হবে।';
 
   @override
   String get categories_categoryDeletedMessage =>
-      'ক্যাটাগরি ও এর লেনদেন মুছে দেওয়া হয়েছে';
+      'ক্যাটেগরি এবং এর লেনদেনগুলো ডিলিট করা হয়েছে';
 
   @override
   String get accounts_manageAccountsTitle => 'অ্যাকাউন্ট পরিচালনা করুন';
 
   @override
   String get accounts_noAccountsAddedYet =>
-      'অভী পর্যন্ত কোনো অ্যাকাউন্ট যোগ করা হয়নি';
+      'এখনও কোনো অ্যাকাউন্ট যোগ করা হয়নি';
 
   @override
   String get accounts_addAccountLabel => 'অ্যাকাউন্ট যোগ করুন';
 
   @override
-  String get accounts_deleteAccountTitle => 'অ্যাকাউন্ট মুছে ফেলুন';
+  String get accounts_deleteAccountTitle => 'অ্যাকাউন্ট ডিলিট করুন';
 
   @override
   String accounts_deleteAccountMessage(Object accountName) {
-    return 'আপনি কি নিশ্চিত \"$accountName\" মুছে ফেলতে চান?';
+    return 'আপনি কি নিশ্চিত যে আপনি \"$accountName\" ডিলিট করতে চান?';
   }
 
   @override
@@ -811,11 +810,11 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String accounts_archiveAccountMessage(Object accountName) {
-    return 'আপনি কি নিশ্চিত \"$accountName\" আর্কাইভ করতে চান?';
+    return 'আপনি কি নিশ্চিত যে আপনি \"$accountName\" আর্কাইভ করতে চান?';
   }
 
   @override
-  String get accounts_cancelLabel => 'বাতিল করুন';
+  String get accounts_cancelLabel => 'বাতিল';
 
   @override
   String get accounts_archiveLabel => 'আর্কাইভ';
@@ -827,7 +826,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get accounts_atLeastOneAccountRequired =>
-      'চালু রাখতে কমপক্ষে ১টি অ্যাকাউন্ট প্রয়োজন';
+      'চালিয়ে যাওয়ার জন্য কমপক্ষে ১টি অ্যাকাউন্ট প্রয়োজন';
 
   @override
   String get transaction_tripLabel => 'ভ্রমণ';
@@ -2938,6 +2937,23 @@ class AppLocalizationsBn extends AppLocalizations {
   }
 
   @override
+  String get budget_alert_exceededTitle => 'Budget Exceeded!';
+
+  @override
+  String budget_alert_warningTitle(Object percent) {
+    return 'Budget Alert: $percent%';
+  }
+
+  @override
+  String get label_percentage_with_colon => 'Percentage:';
+
+  @override
+  String get label_budget_with_colon => 'Budget:';
+
+  @override
+  String get label_spent_with_colon => 'Spent:';
+
+  @override
   String get bills_howBillsWorkTitle => 'বিল কীভাবে কাজ করে';
 
   @override
@@ -3585,32 +3601,32 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String stats_trendUp(Object category, Object percent) {
-    return '$category বাড়ছে — মোট খরচের $percent%';
+    return '$category ব্যয়ের প্রবণতা ঊর্ধ্বমুখী — মোট ব্যয়ের $percent%';
   }
 
   @override
   String stats_trendDown(Object category) {
-    return '$category এই মাসে কমেছে 📉';
+    return 'এই মাসে $category ব্যয়ের প্রবণতা নিম্নগামী 📉';
   }
 
   @override
   String stats_topCategory(Object category, Object percent) {
-    return '$category সবচেয়ে বেশি — $percent% খরচ';
+    return '$category আপনার শীর্ষ ক্যাটেগরি — ব্যয়ের $percent%';
   }
 
   @override
   String stats_weekendPeak(Object day) {
-    return 'Weekend-এ বেশি খরচ — $day সবচেয়ে ভারী';
+    return 'আপনি উইকএন্ডে বেশি ব্যয় করেন — $day আপনার সর্বোচ্চ ব্যয়ের দিন';
   }
 
   @override
   String stats_weekdayPeak(Object day) {
-    return 'Weekday-এ বেশি খরচ — $day সবচেয়ে ভারী';
+    return 'কাজের দিনগুলিতে বেশি ব্যয় হয় — $day আপনার সবচেয়ে বড় দিন';
   }
 
   @override
   String stats_peakAndQuiet(Object peak, Object quiet) {
-    return '$peak সবচেয়ে ভারী দিন, $quiet সবচেয়ে হালকা';
+    return '$peak আপনার সর্বাধিক ব্যয়ের দিন, $quiet সবচেয়ে কম';
   }
 
   @override
@@ -3645,12 +3661,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String stats_projectedThisMonth(Object amount) {
-    return 'অনুমান: এই মাসে $amount';
+    return 'পূর্বাভাস: এই মাসে $amount';
   }
 
   @override
   String stats_byDay(Object day, Object amount, Object month) {
-    return 'দিন $day পর্যন্ত: $month-এ $amount';
+    return '$month মাসে $day দিন পর্যন্ত: $amount';
   }
 
   @override
@@ -4428,12 +4444,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String reconcile_incomeAdjustment(String amount) {
-    return '$amount এর আয় সমন্বয় যোগ করা হবে।';
+    return '$amount আয়ের সমন্বয় যোগ করা হবে।';
   }
 
   @override
   String reconcile_expenseAdjustment(String amount) {
-    return '$amount এর ব্যয় সমন্বয় যোগ করা হবে।';
+    return '$amount ব্যয়ের সমন্বয় যোগ করা হবে।';
   }
 
   @override
@@ -4580,7 +4596,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String categories_deleteWithTransactions(String name, int count) {
-    return 'এটি \"$name\" এবং $count টি সংযুক্ত লেনদেন স্থায়ীভাবে মুছে দেবে। এই কাজটি ফেরানো যাবে না।';
+    return 'এটি স্থায়ীভাবে \"$name\" এবং $count টি যুক্ত লেনদেন ডিলিট করে দেবে। এই পদক্ষেপটি পূর্বাবস্থায় ফেরানো যাবে না।';
   }
 
   @override
@@ -4635,7 +4651,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String exchange_unitInfo(String base) {
-    return 'বিদেশী মুদ্রার ১ ইউনিট = X $base। সম্পাদনা করতে ট্যাপ করুন।';
+    return '১ ইউনিট বিদেশি মুদ্রা = X $base। এডিট করতে যেকোনো রেটে ট্যাপ করুন।';
   }
 
   @override
@@ -4643,12 +4659,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String exchange_rateUpdated(String code) {
-    return '$code হার আপডেট হয়েছে';
+    return '$code রেট আপডেট করা হয়েছে';
   }
 
   @override
   String exchange_editRate(String code) {
-    return '$code হার সম্পাদনা';
+    return '$code রেট এডিট করুন';
   }
 
   @override
@@ -4684,7 +4700,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String security_protectionsActive(int count, int total) {
-    return '$total এর মধ্যে $count সুরক্ষা সক্রিয়';
+    return '$total এর মধ্যে $count টি সুরক্ষা সক্রিয়';
   }
 
   @override
@@ -4729,7 +4745,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String notifSettings_activeCount(int count) {
-    return '৫ এর মধ্যে $count সক্রিয়';
+    return '৫টির মধ্যে $countটি সক্রিয়';
   }
 
   @override
@@ -4820,7 +4836,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String goal_emotionMoreToGo(Object amount) {
-    return 'আর মাত্র $amount বাকি 💪';
+    return 'লক্ষ্যে পৌঁছাতে আরও $amount প্রয়োজন 💪';
   }
 
   @override
@@ -4837,12 +4853,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String goal_progressLeft(Object percent, Object amount) {
-    return '$percent% হয়েছে • $amount বাকি';
+    return '$percent% সম্পন্ন • $amount বাকি';
   }
 
   @override
   String goal_paceDaily(Object daily, Object monthly) {
-    return 'এই গতিতে $daily/দিন লাগবে।\nমানে $monthly/মাস।';
+    return 'এই গতিতে, লক্ষ্যে পৌঁছাতে আপনার প্রতিদিন $daily প্রয়োজন।\nএটি মাসে $monthly।';
   }
 
   @override
@@ -4852,7 +4868,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String goal_daysLeft(Object count) {
-    return '$count দিন বাকি আছে';
+    return '$count দিন বাকি';
   }
 
   @override
@@ -4865,8 +4881,8 @@ class AppLocalizationsBn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$countটি goals চলছে',
-      one: '1টি goal চলছে',
+      other: '$countটি লক্ষ্য চলমান',
+      one: '১টি লক্ষ্য চলমান',
     );
     return '$_temp0';
   }
@@ -4900,8 +4916,8 @@ class AppLocalizationsBn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$countটি goals-এ',
-      one: '1টি goal-এ',
+      other: '$countটি লক্ষ্যে',
+      one: '১টি লক্ষ্যে',
     );
     return '$_temp0';
   }
@@ -5131,7 +5147,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String backup_hoursAgo(int count) {
-    return '$count ঘন্টা আগে';
+    return '$count ঘণ্টা আগে';
   }
 
   @override
@@ -5141,7 +5157,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String backup_recordCount(int count) {
-    return '$count records';
+    return '$count টি রেকর্ড';
   }
 
   @override
@@ -5149,7 +5165,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String account_resetTo(String code) {
-    return '$code-এ reset করুন';
+    return '$code-এ রিসেট করুন';
   }
 
   @override
@@ -5158,7 +5174,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String account_foreignCurrencyInfo(String code, String base) {
-    return 'Transactions $code-এ record হবে এবং $base-এ convert হবে।';
+    return 'লেনদেন $code-এ রেকর্ড করা হবে এবং মোটের জন্য $base-এ রূপান্তর করা হবে।';
   }
 
   @override
@@ -5184,12 +5200,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String appearance_toneActivated(String name) {
-    return '$name tone সক্রিয়';
+    return '$name টোন সক্রিয় করা হয়েছে';
   }
 
   @override
   String dashboard_cardsActive(int visible, int total) {
-    return '$total এর মধ্যে $visibleটি card সক্রিয়';
+    return '$total এর মধ্যে $visible টি কার্ড সক্রিয়';
   }
 
   @override
@@ -5271,12 +5287,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String plugins_enabled(String name) {
-    return '$name সক্রিয়';
+    return '$name সক্রিয় করা হয়েছে';
   }
 
   @override
   String plugins_disabled(String name) {
-    return '$name নিষ্ক্রিয়';
+    return '$name নিষ্ক্রিয় করা হয়েছে';
   }
 
   @override
@@ -5284,7 +5300,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String plugins_activeCount(int active, int total) {
-    return '$total এর মধ্যে $active সক্রিয়';
+    return '$total এর মধ্যে $active টি সক্রিয়';
   }
 
   @override
@@ -5345,12 +5361,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String help_articleCount(int count) {
-    return '$countটি নিবন্ধ';
+    return '$count টি নিবন্ধ';
   }
 
   @override
   String help_resultCount(int count) {
-    return '$countটি ফলাফল';
+    return '$count টি ফলাফল';
   }
 
   @override
@@ -5365,7 +5381,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String about_packageCount(int count) {
-    return '$countটি open source packages';
+    return '$count টি ওপেন সোর্স প্যাকেজ';
   }
 
   @override
@@ -5424,7 +5440,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String statistics_percentOfExpenses(String percent) {
-    return '$percent% খরচের';
+    return 'ব্যয়ের $percent%';
   }
 
   @override
@@ -6163,4 +6179,38 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get cc_utilitySubtitle => 'Due dates, বকেয়া ও limits';
+
+  @override
+  String get plugins_remindMeBefore => 'Remind me before';
+
+  @override
+  String plugins_daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String plugins_billDueOn(int day, String suffix) {
+    return 'Bill due on $day$suffix of every month';
+  }
+
+  @override
+  String get plugins_addCreditCard => 'Add Credit Card';
+
+  @override
+  String get plugins_editCreditCard => 'Edit Credit Card';
+
+  @override
+  String get plugins_cardName => 'Card Name';
+
+  @override
+  String get plugins_cardNameHint => 'e.g., HDFC Regalia';
+
+  @override
+  String get plugins_billDayLabel => 'Bill Day';
 }

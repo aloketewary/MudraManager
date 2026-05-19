@@ -1,3 +1,2754 @@
 {
-  "@@locale": "de"
+  "@@locale": "de",
+  "onboard_manageYourMoneyDescription": "100% offline. Ihre Daten verlassen niemals Ihr Gerät.",
+  "@onboard_manageYourMoneyDescription": {
+    "description": "Manage your money smartly & effortlessly."
+  },
+  "onboard_welcomeToApp": "Willkommen bei {appName}",
+  "@onboard_welcomeToApp": {
+    "description": "Welcome to Application"
+  },
+  "onboard_TrackYourTransactions": "Automatische Verfolgung durch Bank-SMS",
+  "@onboard_TrackYourTransactions": {
+    "description": "Track your Transactions"
+  },
+  "onboard_SeeWhereYourMoneyGoes": "Automatischer Import von Bank-SMS und Benachrichtigungen. Funktioniert mit über 50 Banken.",
+  "@onboard_SeeWhereYourMoneyGoes": {
+    "description": "See where your money goes, every day."
+  },
+  "onboard_SetBudgetsAndGoals": "Budgets, Ziele & intelligente Warnungen",
+  "@onboard_SetBudgetsAndGoals": {
+    "description": "Set Budgets and Goals"
+  },
+  "onboard_stayOnTrackAndAchieveYourDream": "Erhalten Sie Warnungen, bevor Sie zu viel ausgeben. Sparen Sie für das, was wichtig ist.",
+  "@onboard_stayOnTrackAndAchieveYourDream": {
+    "description": "Stay on track and achieve your dreams."
+  },
+  "onboard_GetStarted": "Loslegen!",
+  "@onboard_GetStarted": {
+    "description": "Get Started!"
+  },
+  "onboard_letsSetupYourAccount": "Lassen Sie uns Ihr Konto einrichten.",
+  "@onboard_letsSetupYourAccount": {
+    "description": "Let's set up your account."
+  },
+  "onboard_howShouldWeCallYou": "Wie sollen wir Sie nennen?",
+  "@onboard_howShouldWeCallYou": {
+    "description": "How should we call you?"
+  },
+  "onboard_enterYourNameToPersonalizeYourExperience": "Geben Sie Ihren Namen ein, um Ihre Erfahrung zu personalisieren.",
+  "@onboard_enterYourNameToPersonalizeYourExperience": {
+    "description": "Enter your name to personalize your experience."
+  },
+  "onboard_enterYourName": "Geben Sie Ihren Namen ein",
+  "@onboard_enterYourName": {
+    "description": "Enter your name"
+  },
+  "onboard_setupYourFirstAccount": "Erstes Konto einrichten",
+  "@onboard_setupYourFirstAccount": {
+    "description": "Setup Your First Account"
+  },
+  "onboard_letsCreateYourFirstAccount": "Lassen Sie uns Ihr erstes Konto erstellen (z. B. Bargeld).",
+  "@onboard_letsCreateYourFirstAccount": {
+    "description": "Let's start managing your money wisely."
+  },
+  "onboard_accountName": "Kontoname",
+  "@onboard_accountName": {
+    "description": "Account Name"
+  },
+  "onboard_initialBalance": "Anfangssaldo",
+  "@onboard_initialBalance": {
+    "description": "Initial Balance"
+  },
+  "onboard_youCanUpdateOtherDetailsLaterAsWell": "Sie können andere Details auch später noch aktualisieren.",
+  "@onboard_youCanUpdateOtherDetailsLaterAsWell": {
+    "description": "You can update other details later as well."
+  },
+  "onboard_pleaseFillThe": "Bitte füllen Sie das Feld \"{inputName}\" aus",
+  "@onboard_pleaseFillThe": {
+    "description": "Please fill the "
+  },
+  "onboard_pleaseEnterAValidNumberFor": "Bitte geben Sie eine gültige Zahl für \"{hintText}\" ein",
+  "@onboard_pleaseEnterAValidNumberFor": {
+    "description": "Please enter a valid number for "
+  },
+  "onboard_youAreAllSet": "Alles bereit!",
+  "@onboard_youAreAllSet": {
+    "description": "You're all set!"
+  },
+  "onboard_letsStartManagingYourMoneyWisely": "Fangen wir an, Ihr Geld klug zu verwalten.",
+  "@onboard_letsStartManagingYourMoneyWisely": {
+    "description": "Let's start managing your money wisely."
+  },
+  "app_settings_appbar_title": "App-Einstellungen",
+  "@app_settings_appbar_title": {
+    "description": "This is title of screen page"
+  },
+  "language_settings_appbar_title": "Sprache wählen",
+  "@language_settings_appbar_title": {
+    "description": "This is title of Choose Language page"
+  },
+  "app_settings_language_title": "Sprache",
+  "@app_settings_language_title": {
+    "description": "This is title of Language tile"
+  },
+  "app_settings_language_subtitle": "Wählen Sie Ihre Sprache",
+  "@app_settings_language_subtitle": {
+    "description": "This is subtitle of Language tile"
+  },
+  "app_settings_theme_mode_title": "Design-Modus",
+  "@app_settings_theme_mode_title": {
+    "description": "This is title of Theme Mode tile"
+  },
+  "app_settings_theme_mode_light": "Hell",
+  "@app_settings_theme_mode_light": {
+    "description": "This is text of Theme Mode light"
+  },
+  "app_settings_theme_mode_dark": "Dunkel",
+  "@app_settings_theme_mode_dark": {
+    "description": "This is text of Theme Mode dark"
+  },
+  "app_settings_theme_mode_system_default": "Systemstandard",
+  "@app_settings_theme_mode_system_default": {
+    "description": "This is text of Theme Mode system default"
+  },
+  "app_settings_theme_mode_amoled": "AMOLED",
+  "@app_settings_theme_mode_amoled": {
+    "description": "This is text of Theme Mode AMOLED dark"
+  },
+  "app_settings_theme_mode_subtitle": "Wählen Sie Ihr bevorzugtes Design",
+  "@app_settings_theme_mode_subtitle": {
+    "description": "This is subtitle of Theme Mode tile"
+  },
+  "app_settings_daily_reminder_title": "Tägliche Ausgabenerinnerung",
+  "@app_settings_daily_reminder_title": {
+    "description": "This is text of Daily reminder title"
+  },
+  "home_screen_title": "Start",
+  "@home_screen_title": {
+    "description": "This is title of Home screen"
+  },
+  "transaction_screen_title": "Aktivität",
+  "@transaction_screen_title": {
+    "description": "This is title of Activity screen"
+  },
+  "statistics_screen_title": "Statistiken",
+  "@statistics_screen_title": {
+    "description": "This is title of Statistics screen"
+  },
+  "profile_screen_title": "Profil",
+  "@profile_screen_title": {
+    "description": "This is title of Profile screen"
+  },
+  "add_edit_transaction_screen_title": "Transaktion hinzufügen",
+  "@add_edit_transaction_screen_title": {
+    "description": "This is title of Add Transaction screen"
+  },
+  "transaction_list_screen_title": "Transaktionsliste",
+  "@transaction_list_screen_title": {
+    "description": "This is title of Transaction List screen"
+  },
+  "transaction_listViewGroupTodayLabel": "Heute",
+  "@transaction_listViewGroupTodayLabel": {
+    "description": "This is text of Today"
+  },
+  "transaction_listViewGroupYesterdayLabel": "Gestern",
+  "@transaction_listViewGroupYesterdayLabel": {
+    "description": "This is text of Yesterday"
+  },
+  "greeting_good_morning_text": "Guten Morgen",
+  "@greeting_good_morning_text": {
+    "description": "This is text of Good Morning"
+  },
+  "greeting_good_afternoon_text": "Guten Tag",
+  "@greeting_good_afternoon_text": {
+    "description": "This is text of Good Afternoon"
+  },
+  "greeting_good_evening_text": "Guten Abend",
+  "@greeting_good_evening_text": {
+    "description": "This is text of Good Evening"
+  },
+  "greeting_good_night_text": "Gute Nacht",
+  "@greeting_good_night_text": {
+    "description": "This is text of Good Night"
+  },
+  "greeting_hello_text": "Hallo",
+  "@greeting_hello_text": {
+    "description": "This is text of Hello"
+  },
+  "transaction_type_income": "Einkommen",
+  "@transaction_type_income": {
+    "description": "This is text of Income"
+  },
+  "transaction_type_expense": "Ausgabe",
+  "@transaction_type_expense": {
+    "description": "This is text of Expense"
+  },
+  "dashboard_add_transaction_text": "Transaktion hinzufügen",
+  "@dashboard_add_transaction_text": {
+    "description": "This is text of add transaction button"
+  },
+  "dashboard_add_transfer_text": "Überweisung",
+  "@dashboard_add_transfer_text": {
+    "description": "This is text of add Transfer button"
+  },
+  "dashboard_cash_flow_text": "Cashflow",
+  "@dashboard_cash_flow_text": {
+    "description": "This is text of Cash Flow"
+  },
+  "cash_flow_filter_type_day": "Tag",
+  "@cash_flow_filter_type_day": {
+    "description": "This is text of Day"
+  },
+  "cash_flow_filter_type_week": "Woche",
+  "@cash_flow_filter_type_week": {
+    "description": "This is text of Week"
+  },
+  "cash_flow_filter_type_month": "Monat",
+  "@cash_flow_filter_type_month": {
+    "description": "This is text of Month"
+  },
+  "cash_flow_filter_type_year": "Jahr",
+  "@cash_flow_filter_type_year": {
+    "description": "This is text of Year"
+  },
+  "dashboard_mini_budget_text": "Budget",
+  "@dashboard_mini_budget_text": {
+    "description": "This is text of Budget"
+  },
+  "dashboard_mini_budget_not_found_text": "Keine Budgets definiert, fügen Sie eines hinzu!",
+  "@dashboard_mini_budget_not_found_text": {
+    "description": "This is text of budget not found"
+  },
+  "dashboard_mini_budget_add_text": "Budget hinzufügen",
+  "@dashboard_mini_budget_add_text": {
+    "description": "This is text of add budget"
+  },
+  "transaction_list_cash_flow_screen_title": "Transaktionen",
+  "@transaction_list_cash_flow_screen_title": {
+    "description": "This is title of Transactions List from cash flow screen"
+  },
+  "transaction_list_filter_all": "Alle",
+  "@transaction_list_filter_all": {
+    "description": "This is text of All"
+  },
+  "transaction_list_filter_income": "Einkommen",
+  "@transaction_list_filter_income": {
+    "description": "This is text of Income"
+  },
+  "transaction_list_filter_expense": "Ausgabe",
+  "@transaction_list_filter_expense": {
+    "description": "This is text of Expense"
+  },
+  "transaction_list_pending_transaction_message_text": "⚡ Neue Transaktionen gefunden! Jetzt prüfen",
+  "@transaction_list_pending_transaction_message_text": {
+    "description": "This is text of pending transaction message"
+  },
+  "transaction_listPendingTransactionMessageActionLabel": "Prüfen",
+  "@transaction_listPendingTransactionMessageActionLabel": {
+    "description": "This is text of pending transaction message action"
+  },
+  "transaction_noTransactionFoundText": "Keine Transaktionen gefunden.",
+  "@transaction_noTransactionFoundText": {
+    "description": "This is text of no transaction found"
+  },
+  "transaction_deleteAlertTitleText": "Transaktion löschen?",
+  "@transaction_deleteAlertTitleText": {
+    "description": "This is text of Delete Transaction"
+  },
+  "transaction_deleteAlertBodyText": "Diese Aktion kann nicht rückgängig gemacht werden.",
+  "@transaction_deleteAlertBodyText": {
+    "description": "This is text of Delete Transaction body"
+  },
+  "transaction_deleteButtonActionText": "Löschen",
+  "@transaction_deleteButtonActionText": {
+    "description": "This is text of Delete Transaction action"
+  },
+  "transaction_cancelButtonActionText": "Abbrechen",
+  "@transaction_cancelButtonActionText": {
+    "description": "This is text of Cancel Transaction action"
+  },
+  "transaction_filterCategoryText": "Transaktionen filtern",
+  "@transaction_filterCategoryText": {
+    "description": "This is text of Filter Category"
+  },
+  "transaction_noteDescriptionText": "Hinweis: {description}",
+  "@transaction_noteDescriptionText": {
+    "description": "This is text of note description"
+  },
+  "calendar_week_monday_initial_text": "M",
+  "@calendar_week_monday_initial_text": {
+    "description": "This is text of Monday initial"
+  },
+  "calendar_week_tuesday_initial_text": "D",
+  "@calendar_week_tuesday_initial_text": {
+    "description": "This is text of Tuesday initial"
+  },
+  "calendar_week_wednesday_initial_text": "M",
+  "@calendar_week_wednesday_initial_text": {
+    "description": "This is text of Wednesday initial"
+  },
+  "calendar_week_thursday_initial_text": "D",
+  "@calendar_week_thursday_initial_text": {
+    "description": "This is text of Thursday initial"
+  },
+  "calendar_week_friday_initial_text": "F",
+  "@calendar_week_friday_initial_text": {
+    "description": "This is text of Friday initial"
+  },
+  "calendar_week_saturday_initial_text": "S",
+  "@calendar_week_saturday_initial_text": {
+    "description": "This is text of Saturday initial"
+  },
+  "calendar_week_sunday_initial_text": "S",
+  "@calendar_week_sunday_initial_text": {
+    "description": "This is text of Sunday initial"
+  },
+  "dashboard_netWorthTitle": "Nettovermögen",
+  "@dashboard_netWorthTitle": {
+    "description": "This is title of Net Worth"
+  },
+  "budget_dashboardMiniCardBudgetTitleText": "Budget",
+  "@budget_dashboardMiniCardBudgetTitleText": {
+    "description": "This is title of Budget"
+  },
+  "budget_dashboardMiniCardSpentTitleText": "Ausgegeben",
+  "@budget_dashboardMiniCardSpentTitleText": {
+    "description": "This is title of Spent"
+  },
+  "budget_dashboardPageTitle": "Budget-Details",
+  "@budget_dashboardPageTitle": {
+    "description": "This is title of Budgets Details"
+  },
+  "budget_dashboardNotFoundText": "Keine Budgets definiert, fügen Sie eines hinzu!",
+  "@budget_dashboardNotFoundText": {
+    "description": "This is text of budget not found"
+  },
+  "budget_dashboardAddBudgetText": "Budget hinzufügen",
+  "@budget_dashboardAddBudgetText": {
+    "description": "This is text of add budget"
+  },
+  "budget_categoriesTitle": "Kategorien",
+  "@budget_categoriesTitle": {
+    "description": "This is text of categories title"
+  },
+  "budget_dashboardPieChartLabelText": "{title} ({totalPercent} des Gesamtwerts, {spentPercent} des ausgegebenen Betrags)",
+  "@budget_dashboardPieChartLabelText": {
+    "description": "This is text of pie chart label"
+  },
+  "budget_buttonDeleteTitleText": "Budget löschen?",
+  "@budget_buttonDeleteTitleText": {
+    "description": "This is text of delete title"
+  },
+  "budget_buttonDeleteBodyText": "Dies entfernt das Budget und seine Zuweisungen. Diese Aktion kann nicht rückgängig gemacht werden.",
+  "@budget_buttonDeleteBodyText": {
+    "description": "This is text of delete body"
+  },
+  "budget_buttonDeleteActionText": "Löschen",
+  "@budget_buttonDeleteActionText": {
+    "description": "This is text of delete action"
+  },
+  "budget_buttonCancelActionText": "Abbrechen",
+  "@budget_buttonCancelActionText": {
+    "description": "This is text of cancel action"
+  },
+  "budget_buttonAddText": "Budget hinzufügen",
+  "@budget_buttonAddText": {
+    "description": "This is text of add budget"
+  },
+  "budget_buttonEditText": "Budget bearbeiten",
+  "@budget_buttonEditText": {
+    "description": "This is text of edit budget"
+  },
+  "budget_budgetNameControllerText": "Budgetname",
+  "@budget_budgetNameControllerText": {
+    "description": "This is text of Budget Name title"
+  },
+  "budget_budgetAmountControllerText": "Gesamtbetrag",
+  "@budget_budgetAmountControllerText": {
+    "description": "This is text of Total Amount title"
+  },
+  "budget_recurrenceControllerText": "Wiederholung",
+  "@budget_recurrenceControllerText": {
+    "description": "This is text of Recurrence title"
+  },
+  "budget_nameRequiredHintText": "Budgetname ist erforderlich",
+  "@budget_nameRequiredHintText": {
+    "description": "This is text of Budget name is required text"
+  },
+  "budget_amountRequiredHintText": "Gültiger Betrag ist erforderlich",
+  "@budget_amountRequiredHintText": {
+    "description": "This is text of Amount is required text"
+  },
+  "budget_selectStartDateText": "Startdatum wählen",
+  "@budget_selectStartDateText": {
+    "description": "This is text of Select Start Date"
+  },
+  "budget_selectedStartDateText": "Start: {startDate}",
+  "@budget_selectedStartDateText": {
+    "description": "This is text of Selected Start Date"
+  },
+  "budget_selectEndDateText": "Enddatum wählen",
+  "@budget_selectEndDateText": {
+    "description": "This is text of Select End Date"
+  },
+  "budget_selectedEndDateText": "Ende: {endDate}",
+  "@budget_selectedEndDateText": {
+    "description": "This is text of Selected End Date"
+  },
+  "budget_categoryTitle": "Kategorien & Zuweisungen wählen",
+  "@budget_categoryTitle": {
+    "description": "This is text of Select Categories & Allocations title"
+  },
+  "budget_allocateAmountText": "Betrag zuweisen",
+  "@budget_allocateAmountText": {
+    "description": "This is text of Allocate Amount"
+  },
+  "budget_categoryMessageInfoText": "Sie können Kategoriezuweisungen manuell eingeben oder sie leer lassen, um den verbleibenden Betrag automatisch gleichmäßig zu verteilen.",
+  "@budget_categoryMessageInfoText": {
+    "description": "This is text of category message info"
+  },
+  "budget_totalAllocatedBudgetText": "Gesamt zugewiesen: {totalAlloc}",
+  "@budget_totalAllocatedBudgetText": {
+    "description": "This is text of Total Allocated"
+  },
+  "budget_recurrenceText": "Wiederholung",
+  "@budget_recurrenceText": {
+    "description": "This is text of Recurrence text"
+  },
+  "budget_recurrenceNoneText": "Keine",
+  "@budget_recurrenceNoneText": {
+    "description": "This is text of None text"
+  },
+  "budget_recurrenceDailyText": "Täglich",
+  "@budget_recurrenceDailyText": {
+    "description": "This is text of Daily text"
+  },
+  "budget_recurrenceWeeklyText": "Wöchentlich",
+  "@budget_recurrenceWeeklyText": {
+    "description": "This is text of Weekly text"
+  },
+  "budget_recurrenceMonthlyText": "Monatlich",
+  "@budget_recurrenceMonthlyText": {
+    "description": "This is text of Monthly text"
+  },
+  "budget_recurrenceYearlyText": "Jährlich",
+  "@budget_recurrenceYearlyText": {
+    "description": "This is text of Yearly text"
+  },
+  "budget_saveButtonText": "Speichern",
+  "@budget_saveButtonText": {
+    "description": "This is text of save button"
+  },
+  "budget_updateButtonText": "Aktualisieren",
+  "@budget_updateButtonText": {
+    "description": "This is text of update button"
+  },
+  "budget_pickBothDatesErrorText": "Wählen Sie beide Daten",
+  "@budget_pickBothDatesErrorText": {
+    "description": "This is text of Pick both dates"
+  },
+  "budget_selectAtLeastOneCategoryErrorText": "Wählen Sie mindestens eine Kategorie",
+  "@budget_selectAtLeastOneCategoryErrorText": {
+    "description": "This is text of Select at least one category"
+  },
+  "budget_allocatedAmountExceedsTotalBudgetText": "Der zugewiesene Betrag übersteigt das Gesamtbudget",
+  "@budget_allocatedAmountExceedsTotalBudgetText": {
+    "description": "This is text of Allocated amount exceeds total budget"
+  },
+  "transaction_amountControllerText": "Betrag",
+  "@transaction_amountControllerText": {
+    "description": "This is text of Amount title"
+  },
+  "transaction_descriptionControllerText": "Beschreibung (optional)",
+  "@transaction_descriptionControllerText": {
+    "description": "This is text of Description title"
+  },
+  "transaction_amountControllerErrorText": "Betrag eingeben",
+  "@transaction_amountControllerErrorText": {
+    "description": "This is text of Enter amount title"
+  },
+  "transaction_selectAccountLabel": "Konto wählen",
+  "@transaction_selectAccountLabel": {
+    "description": "This is text of Select Account"
+  },
+  "transaction_selectCategoryLabel": "Kategorie wählen",
+  "@transaction_selectCategoryLabel": {
+    "description": "This is text of Select Category"
+  },
+  "transaction_selectTagLabel": "Tag wählen",
+  "@transaction_selectTagLabel": {
+    "description": "This is text of Select Tag"
+  },
+  "transaction_addNewCategoryText": "Neue \nKategorie",
+  "@transaction_addNewCategoryText": {
+    "description": "This is text of Add New Category"
+  },
+  "transaction_addNewTagText": "Neuen Tag hinzufügen",
+  "@transaction_addNewTagText": {
+    "description": "This is text of Add New Tag"
+  },
+  "transaction_tagNameControllerText": "Tag-Name",
+  "@transaction_tagNameControllerText": {
+    "description": "This is text of Tag Name"
+  },
+  "transaction_saveTagButtonLabel": "Tag speichern",
+  "@transaction_saveTagButtonLabel": {
+    "description": "This is text of Save Tag"
+  },
+  "transaction_saveTransactionButtonLabel": "Transaktion speichern",
+  "@transaction_saveTransactionButtonLabel": {
+    "description": "This is text of Save Transaction"
+  },
+  "transaction_selectOneAccountErrorText": "Wählen Sie mindestens ein Konto",
+  "@transaction_selectOneAccountErrorText": {
+    "description": "This is text of Select one Account"
+  },
+  "transaction_selectOneCategoryErrorText": "Wählen Sie mindestens eine Kategorie",
+  "@transaction_selectOneCategoryErrorText": {
+    "description": "This is text of Select one Category"
+  },
+  "transaction_incomeButtonLabel": "EINKOMMEN",
+  "@transaction_incomeButtonLabel": {
+    "description": "This is text of Income"
+  },
+  "transaction_expenseButtonLabel": "AUSGABE",
+  "@transaction_expenseButtonLabel": {
+    "description": "This is text of Expense"
+  },
+  "statistics_weTrimDownDecimalInfoText": "Wir runden Dezimalstellen ab, bitte runden Sie bei Bedarf auf.",
+  "@statistics_weTrimDownDecimalInfoText": {
+    "description": "This is text of We trim down decimal places, please round off if required."
+  },
+  "statistics_selectPeriodTodayText": "Heute",
+  "@statistics_selectPeriodTodayText": {
+    "description": "This is text of Today"
+  },
+  "statistics_selectPeriodWeekText": "Woche",
+  "@statistics_selectPeriodWeekText": {
+    "description": "This is text of Week"
+  },
+  "statistics_selectPeriodMonthText": "Monat",
+  "@statistics_selectPeriodMonthText": {
+    "description": "This is text of Month"
+  },
+  "statistics_selectPeriodYearText": "Jahr",
+  "@statistics_selectPeriodYearText": {
+    "description": "This is text of Year"
+  },
+  "statistics_chartLineIncomeText": "Einkommen",
+  "@statistics_chartLineIncomeText": {
+    "description": "This is text of Income"
+  },
+  "statistics_chartLineExpenseText": "Ausgabe",
+  "@statistics_chartLineExpenseText": {
+    "description": "This is text of Expense"
+  },
+  "statistics_chartLineTodayHourText": "{hour}h",
+  "@statistics_chartLineTodayHourText": {
+    "description": "This is text of h"
+  },
+  "statistics_categoryNotPresentText": "Kategorie nicht vorhanden.",
+  "@statistics_categoryNotPresentText": {
+    "description": "This is text of Category not present"
+  },
+  "statistics_transactionNotPresentText": "Keine Transaktionen vorhanden.",
+  "@statistics_transactionNotPresentText": {
+    "description": "This is text of Transactions not present."
+  },
+  "statistics_byCategoryTitleText": "Nach Kategorie",
+  "@statistics_byCategoryTitleText": {
+    "description": "This is text of By Category"
+  },
+  "statistics_recentTransactionsTitleText": "Letzte Transaktionen",
+  "@statistics_recentTransactionsTitleText": {
+    "description": "This is text of Recent Transactions"
+  },
+  "statistics_metricIncomeText": "Einkommen",
+  "@statistics_metricIncomeText": {
+    "description": "This is text of Income"
+  },
+  "statistics_metricExpenseText": "Ausgabe",
+  "@statistics_metricExpenseText": {
+    "description": "This is text of Expense"
+  },
+  "statistics_metricNetText": "Netto",
+  "@statistics_metricNetText": {
+    "description": "This is text of Net"
+  },
+  "statistics_showAllButtonText": "Alle anzeigen",
+  "@statistics_showAllButtonText": {
+    "description": "This is text of Show All"
+  },
+  "statistics_exportToPdfButtonText": "Als PDF exportieren",
+  "@statistics_exportToPdfButtonText": {
+    "description": "This is text of Export to PDF"
+  },
+  "statistics_exportToExcelButtonText": "Nach Excel exportieren",
+  "@statistics_exportToExcelButtonText": {
+    "description": "This is text of Export to Excel"
+  },
+  "profile_userProfileTitleText": "Benutzerprofil",
+  "@profile_userProfileTitleText": {
+    "description": "This is text of User Profile"
+  },
+  "profile_userProfileSubtitleText": "Profilbild, Name und E-Mail ändern",
+  "@profile_userProfileSubtitleText": {
+    "description": "This is text of User Profile subtitle"
+  },
+  "profile_nameControllerText": "Name",
+  "@profile_nameControllerText": {
+    "description": "This is text of Name"
+  },
+  "profile_nameControllerHintText": "Geben Sie Ihren Namen ein",
+  "@profile_nameControllerHintText": {
+    "description": "This is text of Enter your name"
+  },
+  "profile_nameRequiredHintText": "Name ist erforderlich",
+  "@profile_nameRequiredHintText": {
+    "description": "This is text of Name is required"
+  },
+  "profile_emailControllerText": "E-Mail",
+  "@profile_emailControllerText": {
+    "description": "This is text of Email"
+  },
+  "profile_emailControllerHintText": "Geben Sie Ihre E-Mail ein",
+  "@profile_emailControllerHintText": {
+    "description": "This is text of Enter your name"
+  },
+  "profile_phoneControllerText": "Telefon",
+  "@profile_phoneControllerText": {
+    "description": "This is text of Phone"
+  },
+  "profile_phoneControllerHintText": "Geben Sie Ihre Telefonnummer ein",
+  "@profile_phoneControllerHintText": {
+    "description": "This is text of Enter your phone number"
+  },
+  "profile_weAreNotStoringInfoText": "Alle Ihre Daten verbleiben auf diesem Gerät. Keine Server, keine Cloud, kein Tracking.",
+  "@profile_weAreNotStoringInfoText": {
+    "description": "This is text of We are not storing"
+  },
+  "profile_saveButtonText": "Speichern",
+  "@profile_saveButtonText": {
+    "description": "This is text of save button"
+  },
+  "profile_editUserProfileAppTitle": "Benutzerprofil bearbeiten",
+  "@profile_editUserProfileAppTitle": {
+    "description": "This is text of Edit User Profile"
+  },
+  "pendingTranx_reviewPendingTransactionsScreenTitle": "Ausstehende Transaktionen",
+  "@pendingTranx_reviewPendingTransactionsScreenTitle": {
+    "description": "This is title of Review Pending Transactions"
+  },
+  "statistics_quickOverviewTitle": "Schnellübersicht",
+  "@statistics_quickOverviewTitle": {
+    "description": "This is title of Quick Overview section"
+  },
+  "statistics_insightsTitle": "Einblicke",
+  "@statistics_insightsTitle": {
+    "description": "This is title of Insights section"
+  },
+  "statistics_detailedAnalysisTitle": "Detaillierte Analyse",
+  "@statistics_detailedAnalysisTitle": {
+    "description": "This is title of Detailed Analysis section"
+  },
+  "statistics_categoryBreakdownSubtitle": "Kategorienaufschlüsselung anzeigen",
+  "@statistics_categoryBreakdownSubtitle": {
+    "description": "This is subtitle for category breakdown"
+  },
+  "statistics_expenseTrendsTitle": "Ausgabentrends",
+  "@statistics_expenseTrendsTitle": {
+    "description": "This is title for expense trends"
+  },
+  "statistics_expenseTrendsSubtitle": "Trends der letzten 12 Monate",
+  "@statistics_expenseTrendsSubtitle": {
+    "description": "This is subtitle for expense trends"
+  },
+  "statistics_recentTransactionsSubtitle": "Letzte 5 Transaktionen",
+  "@statistics_recentTransactionsSubtitle": {
+    "description": "This is subtitle for recent transactions"
+  },
+  "statistics_categoryBreakdownTitle": "Kategorienaufschlüsselung",
+  "@statistics_categoryBreakdownTitle": {
+    "description": "This is title for category breakdown modal"
+  },
+  "statistics_recentTransactionsModalTitle": "Letzte Transaktionen",
+  "@statistics_recentTransactionsModalTitle": {
+    "description": "This is title for recent transactions modal"
+  },
+  "transfer_screenTitle": "Geld überweisen",
+  "@transfer_screenTitle": {
+    "description": "This is title of Transfer screen"
+  },
+  "transfer_resetTooltip": "Zurücksetzen",
+  "@transfer_resetTooltip": {
+    "description": "This is tooltip for reset button"
+  },
+  "transfer_selectAccountsLabel": "KONTEN WÄHLEN",
+  "@transfer_selectAccountsLabel": {
+    "description": "This is label for select accounts section"
+  },
+  "transfer_fromLabel": "VON",
+  "@transfer_fromLabel": {
+    "description": "This is label for from account"
+  },
+  "transfer_toLabel": "NACH",
+  "@transfer_toLabel": {
+    "description": "This is label for to account"
+  },
+  "transfer_detailsLabel": "ÜBERWEISUNGSDETAILS",
+  "@transfer_detailsLabel": {
+    "description": "This is label for transfer details section"
+  },
+  "transfer_amountLabel": "Betrag",
+  "@transfer_amountLabel": {
+    "description": "This is label for amount field"
+  },
+  "transfer_amountValidationError": "Gültigen Betrag eingeben",
+  "@transfer_amountValidationError": {
+    "description": "This is validation error for amount field"
+  },
+  "transfer_dateLabel": "Datum",
+  "@transfer_dateLabel": {
+    "description": "This is label for date field"
+  },
+  "transfer_noteLabel": "Notiz (optional)",
+  "@transfer_noteLabel": {
+    "description": "This is label for note field"
+  },
+  "transfer_buttonLabel": "Überweisen",
+  "@transfer_buttonLabel": {
+    "description": "This is label for transfer button"
+  },
+  "transfer_updateButtonLabel": "Überweisung aktualisieren",
+  "@transfer_updateButtonLabel": {
+    "description": "This is label for update transfer button"
+  },
+  "transfer_errorLoadingAccounts": "Fehler beim Laden der Konten",
+  "@transfer_errorLoadingAccounts": {
+    "description": "This is error message for loading accounts"
+  },
+  "app_settings_themeModeModalTitle": "Design-Modus",
+  "@app_settings_themeModeModalTitle": {
+    "description": "This is title for theme mode modal"
+  },
+  "category_expenseLabel": "AUSGABE",
+  "@category_expenseLabel": {
+    "description": "This is label for expense category type"
+  },
+  "category_incomeLabel": "EINKOMMEN",
+  "@category_incomeLabel": {
+    "description": "This is label for income category type"
+  },
+  "category_addTitle": "Kategorie hinzufügen",
+  "@category_addTitle": {
+    "description": "This is title for add category screen"
+  },
+  "category_editTitle": "Kategorie bearbeiten",
+  "@category_editTitle": {
+    "description": "This is title for edit category screen"
+  },
+  "category_tapToChangeIcon": "Zum Ändern des Icons tippen",
+  "@category_tapToChangeIcon": {
+    "description": "This is instruction to change icon"
+  },
+  "category_nameLabel": "Kategoriename",
+  "@category_nameLabel": {
+    "description": "This is label for category name field"
+  },
+  "category_nameRequired": "Erforderlich",
+  "@category_nameRequired": {
+    "description": "This is validation message for required field"
+  },
+  "category_typeLabel": "Kategorietyp",
+  "@category_typeLabel": {
+    "description": "This is label for category type"
+  },
+  "category_colorLabel": "Farbe",
+  "@category_colorLabel": {
+    "description": "This is label for color selection"
+  },
+  "category_tapToChangeColor": "ZUM ÄNDERN DER FARBE TIPPEN",
+  "@category_tapToChangeColor": {
+    "description": "This is instruction to change color"
+  },
+  "category_saveButton": "KATEGORIE SPEICHERN",
+  "@category_saveButton": {
+    "description": "This is label for save category button"
+  },
+  "category_updateButton": "KATEGORIE AKTUALISIEREN",
+  "@category_updateButton": {
+    "description": "This is label for update category button"
+  },
+  "dashboard_incomeLabel": "Einkommen",
+  "@dashboard_incomeLabel": {
+    "description": "This is label for income in dashboard"
+  },
+  "dashboard_spentLabel": "Ausgegeben",
+  "@dashboard_spentLabel": {
+    "description": "This is label for spent in dashboard"
+  },
+  "dashboard_noDataLabel": "Keine Daten",
+  "@dashboard_noDataLabel": {
+    "description": "This is label when no data is available"
+  },
+  "dashboard_editLabel": "Bearbeiten",
+  "@dashboard_editLabel": {
+    "description": "This is label for edit action"
+  },
+  "dashboard_archiveLabel": "Archivieren",
+  "@dashboard_archiveLabel": {
+    "description": "This is label for archive action"
+  },
+  "common_reset": "Zurücksetzen",
+  "common_viewDetails": "Details anzeigen",
+  "common_apply": "Anwenden",
+  "common_yes": "Ja",
+  "common_no": "Nein",
+  "common_ok": "OK",
+  "common_retry": "Wiederholen",
+  "common_noData": "Keine Daten",
+  "common_error": "Etwas ist schiefgelaufen",
+  "common_required": "Erforderlich",
+  "title_budgets": "Budgets",
+  "title_goals": "Ziele",
+  "title_bills": "Rechnungen",
+  "title_groups": "Gruppen",
+  "title_trips": "Reisen",
+  "title_shared": "Geteilt",
+  "title_achievements": "Erfolge",
+  "title_notifications": "Benachrichtigungen",
+  "title_appearance": "Erscheinungsbild",
+  "title_currency": "Währung",
+  "title_security": "Sicherheit",
+  "title_about": "Über",
+  "title_analytics": "Analysen",
+  "title_netWorth": "Nettovermögen",
+  "title_financialHealth": "Finanzielle Gesundheit",
+  "title_spendingPersonality": "Ausgabenpersönlichkeit",
+  "title_monthlyRecap": "Monatlicher Rückblick",
+  "title_compareMonths": "Monate vergleichen",
+  "title_smsImport": "SMS-Import",
+  "title_backupShare": "Backup & Teilen",
+  "title_exchangeRates": "Wechselkurse",
+  "title_recurringTransactions": "Wiederkehrende Transaktionen",
+  "title_billControlCenter": "Rechnungskontrollzentrum",
+  "title_plugins": "Plugins",
+  "title_editCategory": "Kategorie bearbeiten",
+  "title_allCategories": "Alle Kategorien",
+  "title_exportOptions": "Exportoptionen",
+  "title_dashboardLayout": "Dashboard-Layout",
+  "section_activeMoney": "Aktives Geld",
+  "section_planning": "Planung",
+  "section_insights": "Einblicke",
+  "section_coreSettings": "Kerneinstellungen",
+  "section_appData": "App & Daten",
+  "section_appearance": "Erscheinungsbild",
+  "section_advanced": "Erweitert",
+  "section_supportLegal": "Support & Rechtliches",
+  "section_active": "Aktiv",
+  "section_ongoing": "Laufend",
+  "section_archive": "Archiv",
+  "label_income": "Einkommen",
+  "label_expense": "Ausgabe",
+  "label_balance": "Saldo",
+  "label_savings": "Ersparnisse",
+  "label_total": "Gesamt",
+  "label_amount": "Betrag",
+  "label_date": "Datum",
+  "label_category": "Kategorie",
+  "label_account": "Konto",
+  "label_description": "Beschreibung",
+  "label_type": "Typ",
+  "label_transfer": "Überweisung",
+  "label_from": "Von",
+  "label_to": "Nach",
+  "label_all": "Alle",
+  "label_today": "Heute",
+  "label_yesterday": "Gestern",
+  "label_thisWeek": "Diese Woche",
+  "label_thisMonth": "Diesen Monat",
+  "label_thisYear": "Dieses Jahr",
+  "label_custom": "Benutzerdefiniert",
+  "label_daily": "Täglich",
+  "label_weekly": "Wöchentlich",
+  "label_monthly": "Monatlich",
+  "label_yearly": "Jährlich",
+  "label_none": "Keine",
+  "label_frequency": "Häufigkeit",
+  "label_repeatEvery": "Wiederholen alle",
+  "label_days": "Tage",
+  "label_weeks": "Wochen",
+  "label_months": "Monate",
+  "label_years": "Jahre",
+  "trip_expenses": "Ausgaben",
+  "trip_settlements": "Abrechnungen",
+  "trip_balances": "Salden",
+  "trip_report": "Bericht",
+  "trip_createTrip": "Reise erstellen",
+  "trip_createGroup": "Geteilte Gruppe erstellen",
+  "trip_editTrip": "Reise bearbeiten",
+  "trip_editGroup": "Gruppe bearbeiten",
+  "trip_archiveTrip": "Reise archivieren",
+  "trip_archiveGroup": "Gruppe archivieren",
+  "trip_allSettled": "Alles erledigt!",
+  "trip_archiveToSettle": "Archivieren zum Abrechnen",
+  "trip_trackTravel": "Reiseausgaben mit Daten & Budget verfolgen",
+  "trip_splitBills": "Rechnungen mit Freunden teilen",
+  "trip_live": "Live",
+  "budget_spendingLimits": "Ausgabenlimits",
+  "budget_savingsProgress": "Sparfortschritt",
+  "budget_upcomingRecurring": "Anstehend & wiederkehrend",
+  "budget_tripsAndSplits": "Reisen & Teilungen",
+  "currency_crore_short": "Cr",
+  "@currency_crore_short": {
+    "description": "Short form for crore (10 million)"
+  },
+  "currency_lakh_short": "L",
+  "@currency_lakh_short": {
+    "description": "Short form for lakh (100 thousand)"
+  },
+  "currency_thousand_short": "k",
+  "@currency_thousand_short": {
+    "description": "Short form for thousand"
+  },
+  "common_errorText": "Fehler: {error}",
+  "@common_errorText": {
+    "description": "Generic error message"
+  },
+  "statistics_expenseShort": "Ausg.",
+  "@statistics_expenseShort": {
+    "description": "Short form for Expense"
+  },
+  "statistics_incomeShort": "Eink.",
+  "@statistics_incomeShort": {
+    "description": "Short form for Income"
+  },
+  "transaction_categoryFilter": "Kategoriefilter",
+  "@transaction_categoryFilter": {
+    "description": "Label for category filter"
+  },
+  "transaction_dateFilter": "Datumsfilter",
+  "@transaction_dateFilter": {
+    "description": "Label for date filter"
+  },
+  "transaction_allCategories": "Alle Kategorien",
+  "@transaction_allCategories": {
+    "description": "Label for all categories option"
+  },
+  "transaction_applyFilters": "FILTER ANWENDEN",
+  "@transaction_applyFilters": {
+    "description": "Label for apply filters button"
+  },
+  "sms_selectTransactions": "Transaktionen wählen",
+  "@sms_selectTransactions": {
+    "description": "Title for SMS transaction selection"
+  },
+  "common_addLabel": "Hinzufügen",
+  "@common_addLabel": {
+    "description": "Generic add label"
+  },
+  "dashboard_removeLabel": "Entfernen",
+  "@dashboard_removeLabel": {
+    "description": "Label for remove action"
+  },
+  "dashboard_viewAllLabel": "Alle anzeigen",
+  "@dashboard_viewAllLabel": {
+    "description": "Label for view all action"
+  },
+  "common_noAccountsYet": "Noch keine Konten",
+  "@common_noAccountsYet": {
+    "description": "Message when no accounts are available"
+  },
+  "common_loading": "Laden...",
+  "@common_loading": {
+    "description": "Loading text"
+  },
+  "common_editLabel": "Bearbeiten",
+  "@common_editLabel": {
+    "description": "Edit button label"
+  },
+  "common_deleteLabel": "Löschen",
+  "@common_deleteLabel": {
+    "description": "Delete button label"
+  },
+  "common_fromLabel": "Von",
+  "@common_fromLabel": {
+    "description": "From label for transfers"
+  },
+  "common_toLabel": "Nach",
+  "@common_toLabel": {
+    "description": "To label for transfers"
+  },
+  "theme_chooseThemeTitle": "Design wählen",
+  "@theme_chooseThemeTitle": {
+    "description": "Title for theme picker screen"
+  },
+  "theme_applyThemeLabel": "Design anwenden",
+  "@theme_applyThemeLabel": {
+    "description": "Label for apply theme button"
+  },
+  "theme_themeAppliedMessage": "Design angewendet!",
+  "@theme_themeAppliedMessage": {
+    "description": "Success message when theme is applied"
+  },
+  "backup_backupRestoreTitle": "Backup & Wiederherstellung",
+  "@backup_backupRestoreTitle": {
+    "description": "Title for backup and restore screen"
+  },
+  "backup_backupDataTitle": "Daten sichern",
+  "@backup_backupDataTitle": {
+    "description": "Title for backup data option"
+  },
+  "backup_backupDataSubtitle": "Alle Datenbanken und Einstellungen exportieren",
+  "@backup_backupDataSubtitle": {
+    "description": "Subtitle for backup data option"
+  },
+  "backup_restoreBackupTitle": "Backup wiederherstellen",
+  "@backup_restoreBackupTitle": {
+    "description": "Title for restore backup option"
+  },
+  "backup_restoreBackupSubtitle": "Datenbank und Einstellungen importieren",
+  "@backup_restoreBackupSubtitle": {
+    "description": "Subtitle for restore backup option"
+  },
+  "backup_includeAttachmentsTitle": "Anhänge einschließen?",
+  "@backup_includeAttachmentsTitle": {
+    "description": "Title for include attachments dialog"
+  },
+  "backup_includeAttachmentsMessage": "Belegbilder im Backup einschließen? Dies erhöht die Dateigröße.",
+  "@backup_includeAttachmentsMessage": {
+    "description": "Message for include attachments dialog"
+  },
+  "backup_yesLabel": "Ja",
+  "@backup_yesLabel": {
+    "description": "Yes button label"
+  },
+  "backup_noLabel": "Nein",
+  "@backup_noLabel": {
+    "description": "No button label"
+  },
+  "backup_completedMessage": "Backup abgeschlossen",
+  "@backup_completedMessage": {
+    "description": "Success message when backup is completed"
+  },
+  "backup_restoreSuccessMessage": "Wiederherstellung erfolgreich",
+  "@backup_restoreSuccessMessage": {
+    "description": "Success message when restore is successful"
+  },
+  "backup_lastBackupLabel": "Letztes Backup: {date}",
+  "@backup_lastBackupLabel": {
+    "description": "Label showing last backup date"
+  },
+  "backup_noBackupFoundLabel": "Kein Backup gefunden",
+  "@backup_noBackupFoundLabel": {
+    "description": "Label when no backup is found"
+  },
+  "categories_manageCategoriesTitle": "Kategorien verwalten",
+  "@categories_manageCategoriesTitle": {
+    "description": "Title for manage categories screen"
+  },
+  "categories_noCategoriesFound": "Keine Kategorien gefunden.",
+  "@categories_noCategoriesFound": {
+    "description": "Message when no categories are found"
+  },
+  "categories_transactionCount": "{count} Transaktion{plural}",
+  "@categories_transactionCount": {
+    "description": "Transaction count for category"
+  },
+  "categories_addCategoryLabel": "Kategorie hinzufügen",
+  "@categories_addCategoryLabel": {
+    "description": "Label for add category button"
+  },
+  "categories_deleteCategoryTitle": "Kategorie löschen",
+  "@categories_deleteCategoryTitle": {
+    "description": "Title for delete category dialog"
+  },
+  "categories_deleteCategoryMessage": "Sind Sie sicher, dass Sie diese Kategorie löschen möchten?\nAlle verknüpften Transaktionen werden ebenfalls entfernt.",
+  "@categories_deleteCategoryMessage": {
+    "description": "Message for delete category dialog"
+  },
+  "categories_categoryDeletedMessage": "Kategorie und ihre Transaktionen gelöscht",
+  "@categories_categoryDeletedMessage": {
+    "description": "Success message when category is deleted"
+  },
+  "accounts_manageAccountsTitle": "Konten verwalten",
+  "@accounts_manageAccountsTitle": {
+    "description": "Title for manage accounts screen"
+  },
+  "accounts_noAccountsAddedYet": "Noch keine Konten hinzugefügt",
+  "@accounts_noAccountsAddedYet": {
+    "description": "Message when no accounts are added"
+  },
+  "accounts_addAccountLabel": "Konto hinzufügen",
+  "@accounts_addAccountLabel": {
+    "description": "Label for add account button"
+  },
+  "accounts_deleteAccountTitle": "Konto löschen",
+  "@accounts_deleteAccountTitle": {
+    "description": "Title for delete account dialog"
+  },
+  "accounts_deleteAccountMessage": "Sind Sie sicher, dass Sie \"{accountName}\" löschen möchten?",
+  "@accounts_deleteAccountMessage": {
+    "description": "Message for delete account dialog"
+  },
+  "accounts_archiveAccountTitle": "Konto archivieren",
+  "@accounts_archiveAccountTitle": {
+    "description": "Title for archive account dialog"
+  },
+  "accounts_archiveAccountMessage": "Sind Sie sicher, dass Sie \"{accountName}\" archivieren möchten?",
+  "@accounts_archiveAccountMessage": {
+    "description": "Message for archive account dialog"
+  },
+  "accounts_cancelLabel": "Abbrechen",
+  "@accounts_cancelLabel": {
+    "description": "Cancel button label"
+  },
+  "accounts_archiveLabel": "Archivieren",
+  "@accounts_archiveLabel": {
+    "description": "Archive button label"
+  },
+  "accounts_accountArchivedMessage": "\"{accountName}\" archiviert",
+  "@accounts_accountArchivedMessage": {
+    "description": "Success message when account is archived"
+  },
+  "accounts_atLeastOneAccountRequired": "Mindestens 1 Konto erforderlich, um fortzufahren",
+  "@accounts_atLeastOneAccountRequired": {
+    "description": "Warning message when trying to delete the last account"
+  },
+  "transaction_tripLabel": "REISE",
+  "@transaction_tripLabel": {
+    "description": "Label for trip transactions"
+  },
+  "transaction_tripPartOfMessage": "Diese Transaktion ist Teil der folgenden Reise(n)",
+  "@transaction_tripPartOfMessage": {
+    "description": "Message indicating transaction is part of trips"
+  },
+  "sms_autoAddTooltip": "Autom. Hinzufügen",
+  "@sms_autoAddTooltip": {
+    "description": "Tooltip for auto add button"
+  },
+  "sms_clearAllTooltip": "Alle löschen",
+  "@sms_clearAllTooltip": {
+    "description": "Tooltip for clear all button"
+  },
+  "sms_importedFromSmsDescription": "Autom. importiert",
+  "@sms_importedFromSmsDescription": {
+    "description": "Description for auto imported transactions"
+  },
+  "sms_selectAtLeastOneMessage": "Bitte wählen Sie mindestens eine Transaktion aus",
+  "@sms_selectAtLeastOneMessage": {
+    "description": "Warning message to select at least one transaction"
+  },
+  "dashboard_allTimeLabel": "Gesamtzeit",
+  "@dashboard_allTimeLabel": {
+    "description": "Label for all time period"
+  },
+  "transaction_editTransactionTitle": "Transaktion bearbeiten",
+  "@transaction_editTransactionTitle": {
+    "description": "Title for edit transaction screen"
+  },
+  "transaction_addExpenseTitle": "Ausgabe hinzufügen",
+  "transaction_addIncomeTitle": "Einkommen hinzufügen",
+  "transaction_accountRequired": "Konto ist erforderlich",
+  "transaction_categoryRequired": "Kategorie ist erforderlich",
+  "transaction_dateLabel": "Datum",
+  "@transaction_dateLabel": {
+    "description": "Label for date field"
+  },
+  "transaction_addNoteHint": "Notiz hinzufügen",
+  "@transaction_addNoteHint": {
+    "description": "Hint text for note field"
+  },
+  "transaction_enterValidAmountError": "Bitte geben Sie einen gültigen Betrag ein.",
+  "@transaction_enterValidAmountError": {
+    "description": "Error message for invalid amount"
+  },
+  "sms_noPendingTransactions": "Keine ausstehenden Transaktionen",
+  "@sms_noPendingTransactions": {
+    "description": "Message when no pending transactions"
+  },
+  "sms_approveLabel": "Genehmigen",
+  "@sms_approveLabel": {
+    "description": "Label for approve action"
+  },
+  "sms_approveTransactionTitle": "Transaktion genehmigen",
+  "@sms_approveTransactionTitle": {
+    "description": "Title for approve transaction dialog"
+  },
+  "onboard_SmartSmsTracking": "Intelligentes SMS-Tracking",
+  "@onboard_SmartSmsTracking": {
+    "description": "Auto-detect bank SMS transactions"
+  },
+  "onboard_SmartSmsTrackingDesc": "Erkennen und importieren Sie Transaktionen automatisch aus Ihren Bank-SMS-Nachrichten.",
+  "@onboard_SmartSmsTrackingDesc": {
+    "description": "Description for SMS tracking onboarding page"
+  },
+  "onboard_InsightsAndAnalytics": "Einblicke & Analysen",
+  "@onboard_InsightsAndAnalytics": {
+    "description": "Financial insights and analytics"
+  },
+  "onboard_InsightsAndAnalyticsDesc": "Verstehen Sie Ihre Ausgabengewohnheiten mit detaillierten Diagrammen, Trends und intelligenten Einblicken.",
+  "@onboard_InsightsAndAnalyticsDesc": {
+    "description": "Description for insights onboarding page"
+  },
+  "onboard_SecureAndPrivate": "Sicher & Privat",
+  "@onboard_SecureAndPrivate": {
+    "description": "Data security and privacy"
+  },
+  "onboard_SecureAndPrivateDesc": "Ihre Daten bleiben auf Ihrem Gerät. Keine Cloud, kein Tracking – nur verschlüsselter lokaler Speicher.",
+  "@onboard_SecureAndPrivateDesc": {
+    "description": "Description for security onboarding page"
+  },
+  "onboard_SmartAutoTracking": "Intelligentes Auto-Tracking",
+  "@onboard_SmartAutoTracking": {
+    "description": "Auto-detect transactions from notifications"
+  },
+  "onboard_SmartAutoTrackingDesc": "Erkennen und importieren Sie Transaktionen automatisch aus Ihren Bank-Benachrichtigungen.",
+  "@onboard_SmartAutoTrackingDesc": {
+    "description": "Description for auto tracking onboarding page"
+  },
+  "nav_activity": "Aktivität",
+  "nav_manage": "Verwalten",
+  "nav_insights": "Einblicke",
+  "common_save": "Speichern",
+  "common_cancel": "Abbrechen",
+  "common_next": "Weiter",
+  "common_back": "Zurück",
+  "common_undo": "Rückgängig",
+  "common_delete": "Löschen",
+  "common_edit": "Bearbeiten",
+  "common_add": "Hinzufügen",
+  "common_done": "Fertig",
+  "common_close": "Schließen",
+  "common_confirm": "Bestätigen",
+  "common_archive": "Archivieren",
+  "common_create": "Erstellen",
+  "common_update": "Aktualisieren",
+  "common_remove": "Entfernen",
+  "common_search": "Suche",
+  "common_filter": "Filter",
+  "import_importing": "{count} Transaktionen werden importiert...",
+  "@import_importing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "import_dontClose": "Bitte schließen Sie die App nicht",
+  "import_complete": "Import abgeschlossen!",
+  "import_failed": "Import fehlgeschlagen",
+  "import_imported": "Importiert",
+  "import_duplicatesSkipped": "Duplikate übersprungen",
+  "import_errorsSkipped": "Fehler/übersprungen",
+  "import_categoriesCreated": "Kategorien erstellt",
+  "import_previewImport": "Vorschau Import",
+  "recap_yourMonthAtGlance": "Ihr Monat auf einen Blick",
+  "recap_trackProgressOverTime": "Fortschritt im Laufe der Zeit verfolgen",
+  "recap_transactions": "{count} Transaktionen",
+  "@recap_transactions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recap_downloadPdf": "PDF herunterladen",
+  "comparison_current": "Aktuell",
+  "comparison_byDay": "Bis Tag {day}",
+  "@comparison_byDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "comparison_topCategories": "Top-Kategorien",
+  "comparison_categoryImpact": "KATEGORIE-AUSWIRKUNG",
+  "comparison_dailySpendingPace": "Tägliches Ausgabentempo",
+  "comparison_projected": "Prognostiziert: {amount} diesen Monat",
+  "@comparison_projected": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "utility_customizeUtilities": "Tools anpassen",
+  "utility_addUtilities": "Tools hinzufügen",
+  "utility_analyticsSubtitle": "Gesundheits-Score, Trends & Prognosen",
+  "utility_cashFlowSubtitle": "Einnahmen vs. Ausgaben Prognosen",
+  "utility_spendingTrendsSubtitle": "Kategorieweise Ausgabenmuster",
+  "utility_taxSubtitle": "Einkommensteuer schätzen",
+  "profile_accounts": "Konten",
+  "profile_manageAccounts": "Verwalten Sie Ihre Konten",
+  "profile_categories": "Kategorien",
+  "profile_manageCategories": "Verwalten Sie Ihre Kategorien",
+  "profile_language": "Sprache",
+  "profile_notifications": "Benachrichtigungen",
+  "profile_dailyWeeklySummaries": "Tägliche & wöchentliche Zusammenfassungen",
+  "profile_autoImport": "Autom. Import",
+  "profile_autoImportDesc": "Autom. Import aus Bank-Benachrichtigungen",
+  "profile_importExport": "Import & Export",
+  "profile_importExportDesc": "Excel Import & Export",
+  "profile_backupRestore": "Backup & Wiederherstellung",
+  "profile_manageData": "Verwalten Sie Ihre Daten",
+  "profile_themeDisplay": "Design, Ton & Anzeige",
+  "profile_customizeWidgets": "Widgets & Karten anpassen",
+  "profile_manageExtensions": "Erweiterungen verwalten",
+  "profile_helpSupport": "Hilfe & Support",
+  "profile_faqs": "FAQs und Funktionsleitfäden",
+  "profile_aboutApp": "Über die App",
+  "profile_versionInfo": "Version & Info",
+  "profile_pinFingerprint": "PIN oder Fingerabdruck",
+  "profile_upgradePro": "Auf Pro upgraden",
+  "profile_unlimitedFeatures": "Unbegrenzte Konten, Analysen & mehr",
+  "profile_freeTier": "Kostenlose Stufe",
+  "profile_fullAccess": "Vollzugriff",
+  "profile_proActive": "Pro Aktiv",
+  "profile_yourAchievements": "Ihre Erfolge",
+  "profile_bestStreak": "Beste Serie",
+  "trips_active": "AKTIV",
+  "trips_live": "Live",
+  "trips_allSettled": "Alles abgerechnet",
+  "tone_friendly_txnAdded": "Erledigt! Transaktion gespeichert ✨|Hab's! Alles protokolliert 👍|Gespeichert! Du hast es voll im Griff ✨|Notiert! Eine weitere verfolgt 📝",
+  "tone_friendly_txnUpdated": "Aktualisiert! Sieht gut aus 👍|Änderungen gespeichert! ✓|Alles aktualisiert! 👌",
+  "tone_friendly_txnDeleted": "Weg! Transaktion entfernt 🗑️|Gelöscht! Eine weniger zu verfolgen|Entfernt! Tabula rasa 🗑️",
+  "tone_friendly_txnFailed": "Hmm, konnte das nicht speichern. Erneut versuchen?",
+  "tone_friendly_enterAmount": "Wie viel war es? Gib einen Betrag ein",
+  "tone_friendly_pickAccount": "Welches Konto? Wähle eines aus, um fortzufahren",
+  "tone_friendly_pickCategory": "Wofür war es? Wähle eine Kategorie",
+  "tone_friendly_fillAllFields": "Fast geschafft — fülle alle Felder aus",
+  "tone_friendly_invalidAmount": "Das sieht nicht richtig aus — gib einen gültigen Betrag ein",
+  "tone_friendly_budgetCreated": "Budget festgelegt! Bleiben wir auf Kurs 💪|Budget fixiert! Du planst voraus 💪|Schön! Das Budget ist startklar 📊",
+  "tone_friendly_budgetUpdated": "Budget aktualisiert!",
+  "tone_friendly_budgetDeleted": "Budget entfernt",
+  "tone_friendly_goalCreated": "Ziel gesetzt! Du schaffst das 🎯|Neues Ziel! Packen wir's an 🎯|Ziel fixiert! Den Preis fest im Blick 🎯",
+  "tone_friendly_goalUpdated": "Ziel aktualisiert!",
+  "tone_friendly_goalDeleted": "Ziel entfernt",
+  "tone_friendly_accountCreated": "Konto hinzugefügt! 🏦",
+  "tone_friendly_billAdded": "Rechnung erfasst! Ich erinnere dich 🔔",
+  "tone_friendly_billPaid": "Super, Rechnung als bezahlt markiert! ✅|Rechnung erledigt! Eine Sorge weniger ✅|Bezahlt! Das ist eine Erleichterung ✅",
+  "tone_friendly_backupSuccess": "Backup erledigt! Deine Daten sind sicher 🛡️",
+  "tone_friendly_restoreSuccess": "Wiederhergestellt! Willkommen zurück 🎉",
+  "tone_friendly_noTransactions": "Hier gibt es noch nichts\nFüge deine erste Transaktion hinzu, um loszulegen|Momentan leer\nFang an zu tracken — es dauert nur eine Sekunde|Noch keine Transaktionen\nDeine finanzielle Reise beginnt mit einem Eintrag",
+  "tone_friendly_noBudgets": "Noch keine Budgets\nRichte eines ein, um deine Ausgaben zu verfolgen",
+  "tone_friendly_noGoals": "Noch keine Ziele\nTräume groß — setze dein erstes Ziel!",
+  "tone_friendly_genericError": "Etwas ist schiefgelaufen. Erneut versuchen?",
+  "tone_friendly_smsImportEnabled": "Auto-Import ist an! Ich verfolge deine Transaktionen 📩",
+  "tone_friendly_dashboardAllCaughtUp": "Du bist auf dem Laufenden! 🎉|Nichts braucht deine Aufmerksamkeit — schön! ✨|Alles bestens hier! Genieße deinen Tag 🎉",
+  "tone_friendly_dailySummaryEmpty": "Gestern wurde nichts aufgezeichnet — entweder ein Null-Ausgaben-Sieg oder Zeit aufzuholen!|Ruhiger Tag gestern — dein Geldbeutel dankt es dir!|Keine Transaktionen gestern — heute Neuanfang!",
+  "tone_friendly_streakMessage": "{days} Tage Serie! Mach weiter so! 🔥",
+  "@tone_friendly_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_budgetExceededBy": "Du hast dein Budget um {amount} überschritten 😬",
+  "@tone_friendly_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_txnAdded": "Transaktion aufgezeichnet.|Eintrag erfolgreich gespeichert.|Transaktion protokolliert.",
+  "tone_professional_txnUpdated": "Transaktion aktualisiert.|Änderungen übernommen.|Eintrag erfolgreich aktualisiert.",
+  "tone_professional_txnDeleted": "Transaktion gelöscht.|Eintrag entfernt.|Eintrag erfolgreich gelöscht.",
+  "tone_professional_txnFailed": "Transaktion konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+  "tone_professional_enterAmount": "Bitte geben Sie einen gültigen Betrag ein.",
+  "tone_professional_pickAccount": "Bitte wählen Sie ein Konto aus.",
+  "tone_professional_pickCategory": "Bitte wählen Sie eine Kategorie aus.",
+  "tone_professional_fillAllFields": "Alle Pflichtfelder müssen ausgefüllt werden.",
+  "tone_professional_invalidAmount": "Ungültiger Betrag eingegeben.",
+  "tone_professional_budgetCreated": "Budget erstellt.|Budget erfolgreich konfiguriert.|Neues Budget ist aktiv.",
+  "tone_professional_budgetUpdated": "Budget aktualisiert.",
+  "tone_professional_budgetDeleted": "Budget gelöscht.",
+  "tone_professional_goalCreated": "Ziel erstellt.|Sparziel konfiguriert.|Neues Ziel ist aktiv.",
+  "tone_professional_goalUpdated": "Ziel aktualisiert.",
+  "tone_professional_goalDeleted": "Ziel gelöscht.",
+  "tone_professional_streakMessage": "{days} aufeinanderfolgende Tage der Verfolgung.",
+  "@tone_professional_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_budgetExceededBy": "Budget um {amount} überschritten.",
+  "@tone_professional_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_txnAdded": "Toller Schritt! Transaktion gespeichert! 💪|Erfasst! Du bist in Fahrt 💪|Noch eine verfolgt! Behalte den Schwung bei! ✨|Gespeichert! Jeder Eintrag ist ein Schritt nach vorn! 🚀",
+  "tone_motivational_txnUpdated": "Schönes Update! Bleib wachsam! ✨|Aktualisiert! Präzision zählt! ✨|Änderungen gespeichert! Du bist dran! 👍",
+  "tone_motivational_txnDeleted": "Aufgeräumt! Eine Sorge weniger|Entfernt! Alles sauber halten! 💪|Weg! Konzentriere dich auf das, was zählt",
+  "tone_motivational_txnFailed": "Hat nicht geklappt — versuch's noch mal!",
+  "tone_motivational_enterAmount": "Jeder Euro zählt — gib den Betrag ein!",
+  "tone_motivational_pickAccount": "Wähle ein Konto, um organisiert zu bleiben!",
+  "tone_motivational_pickCategory": "Kategorisiere es — du wirst es dir später danken!",
+  "tone_motivational_fillAllFields": "Fast geschafft! Fülle alles aus, um fortzufahren",
+  "tone_motivational_invalidAmount": "Dieser Betrag sieht nicht richtig aus — versuch's noch mal!",
+  "tone_motivational_budgetCreated": "Kluger Schachzug! Budget steht! 💪|Budget fixiert! Du übernimmst die Kontrolle! 💪|Das ist Disziplin! Budget bereit! 📊",
+  "tone_motivational_budgetUpdated": "Budget angepasst — bleib flexibel!",
+  "tone_motivational_budgetDeleted": "Budget entfernt",
+  "tone_motivational_goalCreated": "Ich liebe diesen Ehrgeiz! Ziel gesetzt! 🎯|Große Träume beginnen hier! Ziel fixiert! 🎯|Das ist der Geist! Neues Ziel bereit! 🚀",
+  "tone_motivational_goalUpdated": "Ziel verfeinert — bleib dran!",
+  "tone_motivational_goalDeleted": "Ziel entfernt — neue Prioritäten, neue Pläne",
+  "tone_motivational_accountCreated": "Konto hinzugefügt! Du wirst organisiert! 🏦",
+  "tone_motivational_billAdded": "Rechnung erfasst! Du bleibst vorn! 🔔",
+  "tone_motivational_billPaid": "Rechnung bezahlt! Eine Sorge weniger! ✅|Geschafft! Rechnung ist erledigt! ✅|Bezahlt und erledigt! Du bist dem Spiel voraus! 💪",
+  "tone_motivational_backupSuccess": "Gesichert! Dein Fortschritt ist sicher! 🛡️",
+  "tone_motivational_restoreSuccess": "Wiederhergestellt! Direkt wieder auf Kurs! 🎉",
+  "tone_motivational_noTransactions": "Neuanfang! 🌟\nFüge deine erste Transaktion hinzu — jede Reise beginnt mit einem Schritt|Unbeschriebenes Blatt! 🌟\nDein erster Eintrag wartet — los geht's!|Noch nichts! 💪\nEine Transaktion und du bist auf dem Weg!",
+  "tone_motivational_noBudgets": "Noch keine Budgets\nErstelle eines — dein zukünftiges Ich wird es dir danken! 💪",
+  "tone_motivational_noGoals": "Noch keine Ziele\nTräume groß — setze dein erstes Ziel! 🎯",
+  "tone_motivational_genericError": "Etwas ist schiefgelaufen — versuch's noch mal!",
+  "tone_motivational_smsImportEnabled": "Auto-Import an! Deine Finanzen verfolgen sich jetzt von selbst! 📩",
+  "tone_motivational_dashboardAllCaughtUp": "Alles erledigt — du bist dem Spiel voraus! 🏆|Nichts ausstehend — du hast es voll im Griff 💪|Alles klar! Behalte diese Energie bei 🏆",
+  "tone_motivational_dailySummaryEmpty": "Null Ausgaben gestern — dein Geldbeutel dankt es dir! ✨|Gestern nichts ausgegeben — das ist Willenskraft! 💪|Ein Tag ohne Ausgaben! Das ist ein Sieg! 🏆",
+  "tone_motivational_streakMessage": "{days} Tage Serie! Unaufhaltsam! 🔥",
+  "@tone_motivational_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_budgetExceededBy": "Um {amount} drüber — du kannst das korrigieren! 💪",
+  "@tone_motivational_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_txnAdded": "Notiert.|Aufgezeichnet.|Ruhig gespeichert.",
+  "tone_calm_txnUpdated": "Aktualisiert.|Angepasst.|Änderungen gespeichert.",
+  "tone_calm_txnDeleted": "Losgelassen.|Entfernt.|Gehen gelassen.",
+  "tone_calm_txnFailed": "Das hat nicht geklappt. Versuche es noch einmal sanft.",
+  "tone_calm_enterAmount": "Ein Betrag wird benötigt.",
+  "tone_calm_pickAccount": "Wähle, wohin dies gehört.",
+  "tone_calm_pickCategory": "Gib ihm einen Zweck.",
+  "tone_calm_fillAllFields": "Ein paar Dinge sind noch leer.",
+  "tone_calm_invalidAmount": "Der Betrag muss angepasst werden.",
+  "tone_calm_budgetCreated": "Grenze gesetzt.|Budget steht.|Limits definiert.",
+  "tone_calm_budgetUpdated": "Angepasst.",
+  "tone_calm_budgetDeleted": "Losgelassen.",
+  "tone_calm_goalCreated": "Absicht gesetzt.|Eine neue Richtung.|Ziel gepflanzt.",
+  "tone_calm_goalUpdated": "Verfeinert.",
+  "tone_calm_goalDeleted": "Losgelassen.",
+  "tone_calm_accountCreated": "Konto eröffnet.",
+  "tone_calm_billAdded": "Notiert. Du wirst erinnert werden.",
+  "tone_calm_billPaid": "Erledigt.|Bezahlt. Eines weniger.|Fertig. Seelenfrieden.",
+  "tone_calm_backupSuccess": "Sicher aufbewahrt.",
+  "tone_calm_restoreSuccess": "Wiederhergestellt. Willkommen zurück.",
+  "tone_calm_noTransactions": "Ein unbeschriebenes Blatt.\nBeginne, wenn du bereit bist.|Hier ist noch nichts.\nBeginne sanft.|Leer.\nEin Neuanfang wartet.",
+  "tone_calm_noBudgets": "Noch keine Grenzen.\nSetze eine, wenn es sich richtig anfühlt.",
+  "tone_calm_noGoals": "Noch keine Absichten.\nSetze eine, wenn du bereit bist.",
+  "tone_calm_genericError": "Etwas hat sich verschoben. Versuche es erneut.",
+  "tone_calm_smsImportEnabled": "Beobachtet leise deine Transaktionen.",
+  "tone_calm_dashboardAllCaughtUp": "Alles ist in Ordnung.|Nichts braucht Aufmerksamkeit.|Alles ist gut.",
+  "tone_calm_dailySummaryEmpty": "Ein ruhiger Tag. Nichts aufgezeichnet.|Gestern war es still. Keine Einträge.|Nichts ausgegeben. Ein erholsamer Tag.",
+  "tone_calm_streakMessage": "{days} Tage achtsame Verfolgung.",
+  "@tone_calm_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_budgetExceededBy": "Um {amount} drüber. Ein Moment zum Nachdenken.",
+  "@tone_calm_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightBillsDueSoon": "Achtung — Rechnungen kommen",
+  "tone_friendly_insightOverBudget": "Über Budget",
+  "tone_friendly_insightNearBudget": "Es wird knapp...",
+  "tone_friendly_insightOverspending": "Ausgaben übersteigen Einkommen",
+  "tone_friendly_insightSpendingSpike": "Ausgabenspitze heute",
+  "tone_friendly_insightWeekendAlert": "Wochenend-Ausgaben-Warnung",
+  "tone_friendly_insightGetStarted": "Los geht's! 🚀",
+  "tone_friendly_insightGetStartedMessage": "Füge deine erste Transaktion hinzu — es dauert nur eine Sekunde",
+  "tone_friendly_insightBillsDueMessage": "{count} Rechnung(en) bald fällig, nicht vergessen!",
+  "@tone_friendly_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_insightOverBudgetMessage": "{count} Budget(s) diesen Monat überschritten — schau mal nach",
+  "@tone_friendly_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_insightNearBudgetMessage": "{count} Budget(s) über 80% — noch Zeit, einzubremsen",
+  "@tone_friendly_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_insightOverspendingMessage": "Du bist {amount} über deinem Einkommen diesen Monat — vielleicht etwas langsamer machen",
+  "@tone_friendly_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightSpendingSpikeMessage": "Normalerweise gibst du {avg}/Tag aus. Heute sind es schon {today}.",
+  "@tone_friendly_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightWeekendAlertMessage": "Normalerweise gibst du am Wochenende {avg} aus. Dieses Mal sind es schon {current}.",
+  "@tone_friendly_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightBillsDueSoon": "Anstehende Rechnungen",
+  "tone_professional_insightOverBudget": "Budget überschritten",
+  "tone_professional_insightNearBudget": "Budgetlimit nähert sich",
+  "tone_professional_insightOverspending": "Ausgaben übersteigen Einkommen",
+  "tone_professional_insightSpendingSpike": "Erhöhte Ausgaben heute",
+  "tone_professional_insightWeekendAlert": "Wochenendausgaben erhöht",
+  "tone_professional_insightGetStarted": "Loslegen",
+  "tone_professional_insightGetStartedMessage": "Erfassen Sie Ihre erste Transaktion, um mit der Verfolgung zu beginnen.",
+  "tone_professional_insightBillsDueMessage": "{count} Rechnung(en) in den nächsten Tagen fällig.",
+  "@tone_professional_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_insightOverBudgetMessage": "{count} Budget(s) diesen Monat überschritten.",
+  "@tone_professional_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_insightNearBudgetMessage": "{count} Budget(s) über 80% Auslastung.",
+  "@tone_professional_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_insightOverspendingMessage": "Die Ausgaben übersteigen das Einkommen diesen Monat um {amount}.",
+  "@tone_professional_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightSpendingSpikeMessage": "Täglicher Durchschnitt: {avg}. Heute: {today}.",
+  "@tone_professional_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightWeekendAlertMessage": "Wochenend-Durchschnitt: {avg}. Aktuell: {current}.",
+  "@tone_professional_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_accountLocked": "Konto gesperrt. Pro-Abonnement erforderlich.",
+  "tone_professional_categoryCreated": "Kategorie hinzugefügt.",
+  "tone_professional_categoryDeleted": "Kategorie entfernt.",
+  "tone_professional_categoryNameRequired": "Kategoriename ist erforderlich.",
+  "tone_professional_billDeleted": "Rechnung entfernt.",
+  "tone_professional_backupFailed": "Backup fehlgeschlagen. Bitte versuchen Sie es erneut.",
+  "tone_professional_restoreFailed": "Wiederherstellung fehlgeschlagen. Überprüfen Sie die Backup-Datei.",
+  "tone_professional_invalidBackupFile": "Ungültiges Backup-Dateiformat.",
+  "tone_professional_corruptBackup": "Backup-Datei ist beschädigt.",
+  "tone_professional_settingsSaved": "Einstellungen gespeichert.",
+  "tone_professional_reminderUpdated": "Erinnerungszeit aktualisiert.",
+  "tone_professional_biometricFailed": "Authentifizierung fehlgeschlagen.",
+  "tone_professional_incorrectPin": "Falsche PIN.",
+  "tone_professional_notificationAccessDenied": "Benachrichtigungszugriff ist für den Auto-Import erforderlich.",
+  "tone_professional_noBills": "Keine wiederkehrenden Rechnungen.",
+  "tone_professional_noAccounts": "Keine Konten konfiguriert.",
+  "tone_professional_noCategories": "Keine Kategorien definiert.",
+  "tone_professional_noNotifications": "Keine Benachrichtigungen.",
+  "tone_professional_noData": "Unzureichende Daten.\nFahren Sie mit der Erfassung von Transaktionen fort.",
+  "tone_professional_noRecurring": "Keine wiederkehrenden Transaktionen konfiguriert.",
+  "tone_professional_exportSuccess": "Bericht exportiert.",
+  "tone_professional_purchaseFailed": "Kauf fehlgeschlagen. Bitte versuchen Sie es erneut.",
+  "tone_professional_playNotAvailable": "Google Play Dienste nicht verfügbar.",
+  "tone_professional_deleteTitle": "Löschen bestätigen",
+  "tone_professional_deleteCancel": "Abbrechen",
+  "tone_professional_deleteConfirm": "Löschen",
+  "tone_professional_logoutTitle": "Abmeldung bestätigen",
+  "tone_professional_logoutMessage": "Alle lokalen Daten werden gelöscht.",
+  "tone_professional_logoutConfirm": "Abmelden",
+  "tone_professional_currencyChanged": "Basiswährung aktualisiert.",
+  "tone_professional_currencyChangeTitle": "Basiswährung ändern",
+  "tone_professional_currencyChangeCancel": "Abbrechen",
+  "tone_professional_currencyPickerTitle": "Währung wählen",
+  "tone_professional_dashboardWelcomeBack": "Willkommen zurück. Hier ist Ihre Zusammenfassung.",
+  "tone_motivational_insightBillsDueSoon": "Rechnungen stehen an! 📋",
+  "tone_motivational_insightOverBudget": "Über Budget — Zeit zum Umorientieren",
+  "tone_motivational_insightNearBudget": "Fast am Limit",
+  "tone_motivational_insightOverspending": "Ausgaben übersteigen Einkommen",
+  "tone_motivational_insightSpendingSpike": "Ausgabenspitze heute",
+  "tone_motivational_insightWeekendAlert": "Wochenend-Ausgaben-Warnung",
+  "tone_motivational_insightGetStarted": "Lass uns etwas Großes aufbauen! 🚀",
+  "tone_motivational_insightGetStartedMessage": "Füge deine erste Transaktion hinzu — du bist nur einen Schritt entfernt!",
+  "tone_motivational_insightBillsDueMessage": "{count} Rechnung(en) bald fällig — bleib dran!",
+  "@tone_motivational_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_insightOverBudgetMessage": "{count} Budget(s) überschritten — du kannst das korrigieren!",
+  "@tone_motivational_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_insightNearBudgetMessage": "{count} Budget(s) über 80% — du schaffst das, bleib achtsam!",
+  "@tone_motivational_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_insightOverspendingMessage": "{amount} über Einkommen — kleine Anpassungen machen einen großen Unterschied!",
+  "@tone_motivational_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightSpendingSpikeMessage": "Normalerweise {avg}/Tag. Heute sind es {today} — sei bewusst!",
+  "@tone_motivational_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightWeekendAlertMessage": "Wochenend-Durchschnitt: {avg}. Dieses Mal sind es {current} — bleib aufmerksam!",
+  "@tone_motivational_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightBillsDueSoon": "Rechnungen nähren sich",
+  "tone_calm_insightOverBudget": "Über der Linie",
+  "tone_calm_insightNearBudget": "Nahe am Rand",
+  "tone_calm_insightOverspending": "Abfluss übersteigt Zufluss",
+  "tone_calm_insightSpendingSpike": "Ein schwererer Tag",
+  "tone_calm_insightWeekendAlert": "Wochenend-Ausgaben",
+  "tone_calm_insightGetStarted": "Ein Neuanfang",
+  "tone_calm_insightGetStartedMessage": "Beginne mit deiner ersten Transaktion.",
+  "tone_calm_insightBillsDueMessage": "{count} Rechnung(en) treffen bald ein.",
+  "@tone_calm_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_insightOverBudgetMessage": "{count} Budget(s) überschritten. Reflektiere und passe an.",
+  "@tone_calm_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_insightNearBudgetMessage": "{count} Budget(s) über 80%. Achtsames Ausgeben hilft.",
+  "@tone_calm_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_insightOverspendingMessage": "{amount} mehr ausgegeben als eingenommen. Ein Moment zum Innehalten.",
+  "@tone_calm_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightSpendingSpikeMessage": "Normalerweise {avg}/Tag. Heute {today}.",
+  "@tone_calm_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightWeekendAlertMessage": "Normalerweise {avg}. Dieses Wochenende {current}.",
+  "@tone_calm_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightMoneyLeak": "{category}: {count} Mal diesen Monat, {total} insgesamt — kleine Beträge summieren sich",
+  "@tone_friendly_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightBestDay": "{wAvg} Durchschn. an {worst}en vs {bAvg} an {best}en — das sind {saving}, die du behalten könntest",
+  "@tone_friendly_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightMoneyLeak": "{category}: {count} Transaktionen, {total} insgesamt diesen Monat.",
+  "@tone_professional_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightBestDay": "{wAvg} Durchschn. an {worst}en vs {bAvg} an {best}en. Mögliche Ersparnis: {saving}.",
+  "@tone_professional_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightMoneyLeak": "{category}: {count} Mal, {total} — kleine Siege summieren sich, wenn du sparst!",
+  "@tone_motivational_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightBestDay": "{wAvg} an {worst}en vs {bAvg} an {best}en — {saving} potenzielle Ersparnis!",
+  "@tone_motivational_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightMoneyLeak": "{category}: {count} Mal, {total}. Kleine Ströme bilden große Flüsse.",
+  "@tone_calm_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightBestDay": "{worst}e: {wAvg}. {best}e: {bAvg}. {saving} zum Behalten.",
+  "@tone_calm_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_logoutMessage": "Alle Daten auf diesem Gerät werden gelöscht.",
+  "tone_motivational_logoutConfirm": "Abmelden",
+  "tone_motivational_currencyChanged": "Währung gewechselt! Neues Kapitel! 💱",
+  "tone_motivational_currencyChangeTitle": "Bereit zum Wechseln?",
+  "tone_motivational_currencyChangeCancel": "Noch nicht",
+  "tone_motivational_currencyPickerTitle": "Wähle deine Währung! 🌍",
+  "tone_motivational_dashboardWelcomeBack": "Du bist zurück! Lass uns den Fortschritt fortsetzen! 🚀",
+  "tone_calm_txnNotFound": "Nicht gefunden. Es könnte weitergezogen sein.",
+  "tone_calm_futureDate": "Bleibe in der Gegenwart.",
+  "tone_calm_selectAccountAndCategory": "Konto und Kategorie, bitte.",
+  "tone_calm_addParticipant": "Füge jemanden zum Teilen hinzu.",
+  "tone_calm_budgetExceededAdjust": "Grenze überschritten. Halte inne und überlege neu.",
+  "tone_calm_budgetGreatDiscipline": "Gut innerhalb der Grenzen. Friedlich.",
+  "tone_calm_comparisonSpentSame": "Die Ausgaben fließen im gleichen Tempo.",
+  "tone_calm_accountUpdated": "Angepasst.",
+  "tone_calm_accountDeleted": "Geschlossen.",
+  "tone_calm_accountLocked": "Dieses ruht gerade. Pro schaltet es frei.",
+  "tone_calm_categoryCreated": "Hinzugefügt.",
+  "tone_calm_categoryDeleted": "Entfernt.",
+  "tone_calm_categoryNameRequired": "Ein Name, bitte.",
+  "tone_calm_billDeleted": "Losgelassen.",
+  "tone_calm_backupFailed": "Konnte nicht speichern. Versuche es sanft erneut.",
+  "tone_calm_restoreFailed": "Konnte nicht wiederherstellen. Überprüfe die Datei.",
+  "tone_calm_invalidBackupFile": "Diese Datei fühlt sich nicht richtig an.",
+  "tone_calm_corruptBackup": "Die Datei scheint beschädigt zu sein.",
+  "tone_calm_settingsSaved": "Gespeichert.",
+  "tone_calm_reminderUpdated": "Erinnerung angepasst.",
+  "tone_calm_biometricFailed": "Nicht erkannt. Versuche es erneut.",
+  "tone_calm_incorrectPin": "Nicht ganz. Versuche es erneut.",
+  "tone_calm_notificationAccessDenied": "Berechtigung für leises Tracking erforderlich.",
+  "tone_calm_noBills": "Nichts Wiederkehrendes.\nFriedlich.",
+  "tone_calm_noAccounts": "Noch keine Konten.\nBeginne einfach.",
+  "tone_calm_noCategories": "Noch keine Kategorien.",
+  "tone_calm_noNotifications": "Stille.\nNichts braucht Aufmerksamkeit.",
+  "tone_calm_noData": "Noch nicht genug.\nEs wird mit der Zeit kommen.",
+  "tone_calm_noRecurring": "Nichts Wiederkehrendes.\nFüge hinzu, wenn du bereit bist.",
+  "tone_calm_exportSuccess": "Exportiert.",
+  "tone_calm_purchaseFailed": "Kauf wurde nicht abgeschlossen. Versuche es erneut.",
+  "tone_calm_playNotAvailable": "Play Store hier nicht verfügbar.",
+  "tone_calm_deleteTitle": "Loslassen?",
+  "tone_calm_deleteCancel": "Warten",
+  "tone_calm_deleteConfirm": "Freigeben",
+  "tone_calm_logoutTitle": "Weiterziehen?",
+  "tone_calm_logoutMessage": "Deine Daten hier werden gelöscht.",
+  "tone_calm_logoutConfirm": "Verlassen",
+  "tone_calm_currencyChanged": "Währung verschoben.",
+  "tone_calm_currencyChangeTitle": "Eine neue Währung?",
+  "tone_calm_currencyChangeCancel": "Bleiben",
+  "tone_calm_currencyPickerTitle": "Wähle deine Währung",
+  "tone_calm_dashboardWelcomeBack": "Willkommen zurück.",
+  "notif_quietDayTitle": "📊 Ruhiger Tag gestern",
+  "notif_heresYesterdayTitle": "📊 Hier ist der gestrige Tag",
+  "notif_weekInReviewTitle": "📅 Rückblick auf die Woche",
+  "notif_yourWeekInReviewTitle": "📅 Dein Rückblick auf die Woche",
+  "notif_niceOneTitle": "🏆 Gut gemacht!",
+  "notif_streakDaysTitle": "🔥 {days} Tage in Folge!",
+  "@notif_streakDaysTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_levelUpTitle": "🎉 Level {level}!",
+  "@notif_levelUpTitle": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_budgetsOverLimitTitle": "🚨 {count} Budget(s) über Limit",
+  "@notif_budgetsOverLimitTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_budgetsGettingTightTitle": "⚠️ {count} Budget(s) werden knapp",
+  "@notif_budgetsGettingTightTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_billDueTitle": "📅 {name} ist am {label} fällig",
+  "@notif_billDueTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_fundsGettingLowTitle": "📉 Guthaben wird niedrig",
+  "notif_categoryCreepingUpTitle": "💡 {category} steigt an",
+  "@notif_categoryCreepingUpTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_bigDayTitle": "📈 Whoa, großer Tag",
+  "notif_smsFoundTitle": "📱 {count} SMS-Transaktionen gefunden",
+  "@notif_smsFoundTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_smallSpendsTitle": "💧 Kleinvieh macht auch Mist",
+  "notif_missYouTitle": "👋 Wir vermissen dich",
+  "notif_daysUntrackedTitle": "📊 {days} Tage nicht verfolgt",
+  "@notif_daysUntrackedTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_streakEndedTitle": "💔 {days}-Tage-Serie beendet",
+  "@notif_streakEndedTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_fewDaysUntrackedTitle": "📊 Ein paar Tage nicht verfolgt",
+  "notif_budgetExceededBody": "{name} ist über Budget — Zeit für eine Überprüfung",
+  "@notif_budgetExceededBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_budgetExceededBodyMulti": "{names} sind über Budget",
+  "@notif_budgetExceededBodyMulti": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_budgetWarningBody": "{name} nähert sich dem Limit",
+  "@notif_budgetWarningBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_budgetWarningBodyMulti": "{names} nähern sich ihren Limits",
+  "@notif_budgetWarningBodyMulti": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_budgetWarningPctBody": "{name}: {pct}% verbraucht",
+  "@notif_budgetWarningPctBody": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "pct": {
+          "type": "String"
+        }
+      }
+    }
+  },
+  "notif_billPaidAutoTitle": "✅ {name} — autom. abgeglichen",
+  "@notif_billPaidAutoTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_billPaidRecordedTitle": "✅ {name} — erfasst",
+  "@notif_billPaidRecordedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_smsLoggedTitle": "✅ Transaktion protokolliert",
+  "notif_smsNeedsReviewTitle": "👀 Braucht deine Überprüfung",
+  "notif_smsLoggedBody": "{amount} von {sender} — autom. gespeichert",
+  "@notif_smsLoggedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_smsLoggedBodyNoAmount": "Von {sender} — autom. gespeichert",
+  "@notif_smsLoggedBodyNoAmount": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_smsNeedsReviewBody": "Transaktion von {sender} — zum Überprüfen tippen",
+  "@notif_smsNeedsReviewBody": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_smsGotItTitle": "✅ Verstanden!",
+  "notif_smsAllCaughtUpTitle": "✅ Alles erledigt!",
+  "notif_smsAlmostThereTitle": "📋 Fast geschafft!",
+  "notif_smsNeedHelpTitle": "👋 Hey, brauche deine Hilfe!",
+  "notif_streakOnLineTitle": "🔥 {days}-Tage-Serie steht auf dem Spiel!",
+  "@notif_streakOnLineTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_quickActionTitle": "⚡ 5 Sekunden reichen aus",
+  "notif_dailyReminderTitle": "📊 Dein Tag in Zahlen",
+  "notif_dailyReminderBody": "So lief es gestern — wirf einen kurzen Blick darauf",
+  "notif_weeklyReminderTitle": "📅 Deine Woche zusammengefasst",
+  "notif_weeklyReminderBody": "Lass uns sehen, wie die Woche lief — zum Überprüfen tippen",
+  "notif_goalStatusTitle": "🎯 Monatlicher Zielstatus",
+  "notif_goalStatusBody": "Du hast {count} aktive Ziele. {name} ist zu {pct}% abgeschlossen!",
+  "@notif_goalStatusBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "notif_streakCountingTitle": "🔥 {days} Tage und es geht weiter!",
+  "@notif_streakCountingTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_achievementBody": "{title} — das sind +{xp} XP für dich",
+  "@notif_achievementBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "notif_levelUpBody": "Du bist gerade ein Level aufgestiegen — mach weiter so!",
+  "notif_streakMilestoneBody": "Das ist Hingabe — deine Serie brennt",
+  "notif_weeklyZeroBody": "Null Ausgaben diese Woche — das ist beeindruckend 💪",
+  "insight_moneyLeakTitle": "Leises Geldleck 💧",
+  "insight_bestDayTitle": "{day}s kosten dich am meisten",
+  "@insight_bestDayTitle": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_accountCreated": "Konto erfolgreich hinzugefügt.",
+  "tone_professional_billAdded": "Rechnung hinzugefügt. Sie erhalten rechtzeitig Erinnerungen.",
+  "tone_professional_billPaid": "Rechnung als bezahlt markiert.|Zahlung erfasst.|Rechnung beglichen.",
+  "tone_professional_backupSuccess": "Sicherung erfolgreich abgeschlossen.",
+  "tone_professional_restoreSuccess": "Daten erfolgreich wiederhergestellt.",
+  "tone_professional_noTransactions": "Keine Transaktionen erfasst.\nFügen Sie Ihren ersten Eintrag hinzu.|Keine Datensätze gefunden.\nBeginnen Sie mit einer Transaktion.|Transaktionsverlauf ist leer.\nStarten Sie die Aufzeichnung.",
+  "tone_professional_noBudgets": "Keine Budgets konfiguriert.",
+  "tone_professional_noGoals": "Keine Ziele gesetzt.",
+  "tone_professional_genericError": "Ein Fehler ist aufgetreten.",
+  "tone_professional_smsImportEnabled": "Auto-Import ist aktiviert.",
+  "tone_professional_dashboardAllCaughtUp": "Alles auf dem neuesten Stand.|Keine anstehenden Aktionen.|Alles aktuell.",
+  "tone_professional_dailySummaryEmpty": "Gestern wurden keine Transaktionen erfasst.|Gestern gab es keine Aktivitäten.|Keine Einträge für den vorangegangenen Tag.",
+  "tone_friendly_txnNotFound": "Transaktion unauffindbar",
+  "tone_friendly_futureDate": "Nimm heute oder ein Datum davor",
+  "tone_friendly_selectAccountAndCategory": "Wähle erst ein Konto & eine Kategorie",
+  "tone_friendly_addParticipant": "Füge mindestens eine Person zum Aufteilen hinzu",
+  "tone_friendly_budgetExceededAdjust": "Budget überschritten. Vielleicht etwas kürzer treten?",
+  "tone_friendly_budgetGreatDiscipline": "Starke Disziplin! Du bist voll im Budget ✨",
+  "tone_friendly_comparisonSpentSame": "Du hast etwa so viel ausgegeben wie letzten Monat — stabil!",
+  "tone_friendly_accountUpdated": "Konto aktualisiert!",
+  "tone_friendly_accountDeleted": "Konto entfernt",
+  "tone_friendly_accountLocked": "Konto gesperrt — hol dir Pro für vollen Zugriff 🔒",
+  "tone_friendly_categoryCreated": "Kategorie ist da!",
+  "tone_friendly_categoryDeleted": "Kategorie gelöscht",
+  "tone_friendly_categoryNameRequired": "Gib der Sache einen Namen!",
+  "tone_friendly_billDeleted": "Rechnung entfernt",
+  "tone_friendly_backupFailed": "Backup hat nicht geklappt — noch mal versuchen?",
+  "tone_friendly_restoreFailed": "Wiederherstellung fehlgeschlagen — ist die Datei okay?",
+  "tone_friendly_invalidBackupFile": "Das sieht nicht nach einer gültigen Backup-Datei aus",
+  "tone_friendly_corruptBackup": "Dieses Backup scheint beschädigt zu sein 😕",
+  "tone_friendly_settingsSaved": "Gespeichert! ✓",
+  "tone_friendly_reminderUpdated": "Erinnerung steht ⏰",
+  "tone_friendly_biometricFailed": "Authentifizierung fehlgeschlagen — probier's noch mal",
+  "tone_friendly_incorrectPin": "Falsche PIN — versuch's noch mal",
+  "tone_friendly_notificationAccessDenied": "Brauche Zugriff auf Benachrichtigungen für den Auto-Import",
+  "tone_friendly_noBills": "Noch keine Rechnungen\nFüge wiederkehrende Kosten hinzu, um nichts zu verpassen",
+  "tone_friendly_noAccounts": "Noch keine Konten\nLeg eins an, um loszulegen",
+  "tone_friendly_noCategories": "Noch keine Kategorien",
+  "tone_friendly_noNotifications": "Alles ruhig hier\nNoch keine Benachrichtigungen",
+  "tone_friendly_noData": "Noch nicht genug Daten\nTracke weiter für mehr Einblicke",
+  "tone_friendly_noRecurring": "Keine wiederkehrenden Zahlungen\nFüge Rechnungen für automatisches Tracking hinzu",
+  "tone_friendly_exportSuccess": "Bericht exportiert! 📄",
+  "tone_friendly_purchaseFailed": "Kauf hat nicht geklappt — noch mal versuchen?",
+  "tone_friendly_playNotAvailable": "Google Play ist auf diesem Gerät nicht verfügbar",
+  "tone_friendly_deleteTitle": "Bist du sicher?",
+  "tone_friendly_deleteCancel": "Behalten",
+  "tone_friendly_deleteConfirm": "Löschen",
+  "tone_friendly_logoutTitle": "Schon fertig?",
+  "tone_friendly_logoutMessage": "Alle deine Daten werden von diesem Gerät gelöscht.",
+  "tone_friendly_logoutConfirm": "Abmelden",
+  "tone_friendly_currencyChanged": "Währung aktualisiert! 💱",
+  "tone_friendly_currencyChangeTitle": "Währung ändern?",
+  "tone_friendly_currencyChangeCancel": "Behalten",
+  "tone_friendly_currencyPickerTitle": "Wähle deine Währung",
+  "tone_friendly_dashboardWelcomeBack": "Willkommen zurück! Schauen wir uns den Stand an",
+  "tone_professional_txnNotFound": "Transaktion nicht gefunden.",
+  "tone_professional_futureDate": "Zukunftsdaten sind nicht zulässig.",
+  "tone_professional_selectAccountAndCategory": "Konto und Kategorie sind erforderlich.",
+  "tone_professional_addParticipant": "Mindestens ein Teilnehmer ist erforderlich.",
+  "tone_professional_budgetExceededAdjust": "Budget überschritten. Ausgaben prüfen oder Limit anpassen.",
+  "tone_professional_budgetGreatDiscipline": "Gut im Budget. Hervorragende Finanzdisziplin.",
+  "tone_professional_comparisonSpentSame": "Die Ausgaben sind konsistent zum Vormonat.",
+  "tone_professional_accountUpdated": "Konto aktualisiert.",
+  "tone_professional_accountDeleted": "Konto entfernt.",
+  "tone_motivational_txnNotFound": "Unauffindbar — vielleicht wurde es gelöscht?",
+  "tone_motivational_futureDate": "Bleib im Jetzt — wähle heute oder früher",
+  "tone_motivational_selectAccountAndCategory": "Konto & Kategorie zuerst — du hast es fast geschafft!",
+  "tone_motivational_addParticipant": "Füge jemanden zum Aufteilen hinzu!",
+  "tone_motivational_budgetExceededAdjust": "Über Budget — aber jeder Tag ist eine neue Chance! 💪",
+  "tone_motivational_budgetGreatDiscipline": "Wahnsinns-Disziplin! Du bist weit voraus! 🏆",
+  "tone_motivational_comparisonSpentSame": "Stabil! Konstante Ausgaben zeigen Kontrolle 💪",
+  "tone_motivational_accountUpdated": "Konto aktualisiert!",
+  "tone_motivational_accountDeleted": "Konto entfernt",
+  "tone_motivational_accountLocked": "Konto gesperrt — hol dir Pro zum Freischalten! 🔒",
+  "tone_motivational_categoryCreated": "Neue Kategorie hinzugefügt!",
+  "tone_motivational_categoryDeleted": "Kategorie entfernt",
+  "tone_motivational_categoryNameRequired": "Gib der Sache einen Namen!",
+  "tone_motivational_billDeleted": "Rechnung entfernt",
+  "tone_motivational_backupFailed": "Backup fehlgeschlagen — versuch's noch mal!",
+  "tone_motivational_restoreFailed": "Wiederherstellung fehlgeschlagen — Datei prüfen und erneut versuchen",
+  "tone_motivational_invalidBackupFile": "Das sieht nicht nach einem gültigen Backup aus",
+  "tone_motivational_corruptBackup": "Backup scheint beschädigt zu sein",
+  "tone_motivational_settingsSaved": "Gespeichert! ✓",
+  "tone_motivational_reminderUpdated": "Erinnerung steht! ⏰",
+  "tone_motivational_biometricFailed": "Authentifizierung fehlgeschlagen — noch mal probieren!",
+  "tone_motivational_incorrectPin": "Falsche PIN — du schaffst das, versuch's noch mal!",
+  "tone_motivational_notificationAccessDenied": "Brauche Zugriff auf Benachrichtigungen für automatisches Tracking",
+  "tone_motivational_noBills": "Keine Rechnungen erfasst\nBleib vorn, indem du deine Fixkosten hinzufügst",
+  "tone_motivational_noAccounts": "Noch keine Konten\nLeg eins an und starte deine Reise!",
+  "tone_motivational_noCategories": "Noch keine Kategorien",
+  "tone_motivational_noNotifications": "Alles klar!\nKeine Benachrichtigungen — du hast alles im Griff",
+  "tone_motivational_noData": "Weiter so! 📈\nMehr Daten bedeuten bessere Einblicke",
+  "tone_motivational_noRecurring": "Keine wiederkehrenden Kosten\nAutomatisiere deine Rechnungen!",
+  "tone_motivational_exportSuccess": "Bericht exportiert! 📄",
+  "tone_motivational_purchaseFailed": "Kauf fehlgeschlagen — noch mal versuchen?",
+  "tone_motivational_playNotAvailable": "Google Play ist auf diesem Gerät nicht verfügbar",
+  "tone_motivational_deleteTitle": "Bist du sicher?",
+  "tone_motivational_deleteCancel": "Behalten",
+  "tone_motivational_deleteConfirm": "Löschen",
+  "tone_motivational_logoutTitle": "Schon am Gehen?",
+  "goal_deleteGoalTitle": "Ziel löschen?",
+  "goal_editGoal": "Ziel bearbeiten",
+  "goal_deleteGoal": "Ziel löschen",
+  "goal_saved": "Gespart",
+  "goal_target": "Ziel",
+  "goal_quickDeposit": "Schnelleinzahlung",
+  "goal_targetDate": "Zieldatum",
+  "goal_milestones": "Meilensteine",
+  "goal_recentActivity": "Letzte Aktivitäten",
+  "goal_addToGoal": "Zum Ziel hinzufügen",
+  "goal_goalReached": "Ziel erreicht!",
+  "goal_whatsThisAbout": "Wofür ist dieses Ziel?",
+  "goal_icon": "Icon",
+  "goal_color": "Farbe",
+  "dashboard_enableCards": "Karten aktivieren",
+  "recurring_fixedExpenses": "Fixkosten",
+  "goal_freePlanLimit": "Kostenlose Version erlaubt bis zu 2 Ziele. Upgrade auf Pro für unbegrenzte Ziele.",
+  "goal_editGoalTitle": "Ziel bearbeiten",
+  "goal_newGoalTitle": "Neues Ziel",
+  "goal_yourGoal": "Dein Ziel",
+  "goal_appearance": "Erscheinungsbild",
+  "goal_goalName": "Zielname",
+  "goal_giveGoalName": "Gib deinem Ziel einen Namen",
+  "goal_targetAmount": "Zielbetrag",
+  "goal_enterValidTarget": "Gib einen gültigen Zielbetrag ein",
+  "goal_alreadySaved": "Bereits gespart",
+  "goal_targetDateLabel": "Zieldatum",
+  "goal_setTargetDate": "Zieldatum setzen (optional)",
+  "goal_smartInsight": "Smarter Einblick",
+  "goal_onTrack": "Auf Kurs",
+  "goal_onTrackDesc": "Dieses Ziel ist sehr gut erreichbar 👍",
+  "goal_needsEffort": "Braucht Anstrengung",
+  "goal_needsEffortDesc": "Benötigt etwas mehr Spardisziplin",
+  "goal_ambitious": "Ambitioniert",
+  "goal_ambitiousDesc": "Überlege, die Frist zu verlängern",
+  "goal_addNote": "Notiz hinzufügen (optional)",
+  "goal_note": "Notiz",
+  "goal_updateGoal": "Ziel aktualisieren",
+  "goal_createGoal": "Ziel erstellen",
+  "profile_developerMode": "Entwicklermodus aktiviert! 🚀",
+  "profile_couldNotOpenLink": "Link konnte nicht geöffnet werden",
+  "profile_about": "Über",
+  "profile_unableToCheckUpdates": "Update-Prüfung fehlgeschlagen",
+  "profile_openSourceLicenses": "Open-Source-Lizenzen",
+  "account_totalValue": "Gesamtwert",
+  "account_gainLoss": "Gewinn/Verlust",
+  "account_holdings": "Bestände",
+  "account_addHolding": "Bestand hinzufügen",
+  "account_addMissingTransaction": "Fehlende Transaktion hinzufügen",
+  "account_whatWasThisFor": "Wofür war diese Transaktion?",
+  "budget_used": "Verbraucht",
+  "budget_selectAtLeastOneTag": "Bitte wähle mindestens einen Tag",
+  "budget_over": "drüber",
+  "budget_left": "übrig",
+  "budget_breakdown": "AUFSCHLÜSSELUNG",
+  "budget_basicInfo": "Basis-Informationen",
+  "budget_duration": "Dauer",
+  "budget_budgetType": "Budget-Typ",
+  "budget_selectType": "Typ wählen",
+  "budget_categoryAllocation": "Kategorie-Zuweisung",
+  "budget_totalBudget": "Gesamtbudget",
+  "budget_allocated": "Zugewiesen",
+  "budget_remaining": "Verbleibend",
+  "budget_overBudget": "Über Budget",
+  "budget_safeToSpend": "Sicher auszugeben",
+  "budget_startDate": "Startdatum",
+  "budget_endDate": "Enddatum",
+  "budget_selectTags": "Tags wählen",
+  "budget_tagInfo": "Alle Ausgaben mit den gewählten Tags zählen für dieses Budget.",
+  "budget_noTags": "Noch keine Tags. Füge zuerst Tags zu deinen Transaktionen hinzu.",
+  "budget_freePlanLimit": "Kostenlose Version erlaubt bis zu 2 Budgets. Upgrade auf Pro für unbegrenzte Budgets.",
+  "budget_daysRemaining": "{count} Tage",
+  "@budget_daysRemaining": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "budget_delete": "Löschen",
+  "budget_emotionUnderControl": "Ausgaben unter Kontrolle 💪",
+  "budget_emotionHalfway": "Hälfte des Monats geschafft ✨",
+  "budget_emotionAlmostThere": "Wird knapp, sei vorsichtig ⚠️",
+  "budget_emotionExceeded": "Budget überschritten, Zeit gegenzusteuern 🔴",
+  "budget_highlightLabel": "Braucht Aufmerksamkeit",
+  "budget_overBudgetSection": "Über Budget",
+  "budget_activeBudgets": "Aktive Budgets",
+  "budget_onTrackSection": "Auf Kurs",
+  "budget_spendingPace": "Ausgabentempo",
+  "budget_dailyActual": "{amount}/Tag tatsächlich",
+  "@budget_dailyActual": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "budget_dailyAllowed": "{amount}/Tag erlaubt",
+  "@budget_dailyAllowed": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "budget_stepNote0": "Gib deinem Budget einen Namen und lege fest, wie viel du ausgeben möchtest.",
+  "budget_stepNote1": "Wähle, wie oft sich dieses Budget wiederholt und lege die Daten fest.",
+  "budget_stepNote2": "Wähle aus, welche Kategorien oder Tags dieses Budget verfolgen soll.",
+  "budget_autoDistributed": "auto",
+  "budget_categoriesCount": "{count, plural, =1{1 Kategorie} other{{count} Kategorien}}",
+  "@budget_categoriesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "budget_tagsCount": "{count, plural, =1{1 Tag} other{{count} Tags}}",
+  "@budget_tagsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "budget_typeCategoryWise": "Kategorieweise",
+  "budget_typeTagWise": "Tag-weise",
+  "budget_typeDayWise": "Täglich",
+  "budget_typeFestival": "Festival/Event",
+  "budget_typeTravel": "Reise",
+  "budget_typeDescCategoryWise": "Budgets für bestimmte Ausgabenkategorien",
+  "budget_typeDescTagWise": "Budgets für bestimmte Tags",
+  "budget_typeDescDayWise": "Tägliches Ausgabenlimit festlegen",
+  "budget_typeDescFestival": "Budget für Feste und besondere Anlässe",
+  "budget_typeDescTravel": "Budget für Reiseausgaben",
+  "budget_reviewTitle": "Prüfen & Speichern",
+  "budget_selectCategories": "Kategorien wählen",
+  "budget_noActiveTrip": "Keine aktive Reise. Starte erst eine Reise, um das Reisebudget zu nutzen.",
+  "budget_stepNote3": "Prüfe alles vor dem Speichern. Tippe auf einen Bereich zum Bearbeiten.",
+  "budget_categoryDeleteWarning": "Diese Kategorie wird in {count} Budget(s) verwendet. Löschen beeinflusst das Budget-Tracking.",
+  "@budget_categoryDeleteWarning": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "budget_invalidCategories": "Einige Kategorien wurden gelöscht. Bearbeite das Budget zum Fixen.",
+  "budget_pastBudgets": "{count} vergangene {count, plural, =1{Budget} other{Budgets}}",
+  "@budget_pastBudgets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "category_categoryName": "Kategoriename",
+  "category_keywords": "Keywords (Komma-getrennt)",
+  "category_noneTopLevel": "Keine (Hauptebene)",
+  "common_searchCurrency": "Währung suchen...",
+  "common_selectCategory": "Kategorie wählen",
+  "common_noDescription": "Keine Beschreibung",
+  "common_errors": "Fehler",
+  "dashboard_enableCardsDesc": "Aktiviere Dashboard-Karten für deinen Finanzüberblick",
+  "dashboard_customizeDashboard": "Dashboard anpassen",
+  "dashboard_newToApp": "Neu bei Mudra Manager?",
+  "dashboard_tapToExploreHelp": "Tippe für die Hilfe-Übersicht",
+  "dashboard_tapToReviewTxn": "Tippe zum Prüfen von Transaktionen",
+  "dashboard_autoImportPaused": "Auto-Import pausiert",
+  "dashboard_enable": "Aktivieren",
+  "dashboard_enableAutoImport": "Auto-Import aktivieren",
+  "dashboard_autoTrackDesc": "Transaktionen automatisch aus Bank-Benachrichtigungen erfassen",
+  "profile_awesomeUser": "Super User",
+  "profile_logout": "Abmelden",
+  "profile_proActiveLabel": "Pro Aktiv",
+  "profile_freeTierLabel": "Kostenlose Stufe",
+  "profile_fullAccessLabel": "Vollzugriff",
+  "profile_upgradeToProLabel": "Auf Pro upgraden",
+  "profile_fullAccessEnjoy": "Vollzugriff — genieße alle Features!",
+  "profile_fullAccessDaysRemaining": "Vollzugriff — {days} Tage verbleibend",
+  "@profile_fullAccessDaysRemaining": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "profile_fullAccessEndsIn": "Vollzugriff endet in {days} Tagen",
+  "@profile_fullAccessEndsIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "profile_trialEnded": "Testzeitraum beendet — Upgrade für alle Features",
+  "profile_unlimitedDesc": "Unbegrenzte Konten, Analysen & mehr",
+  "profile_expiredRenew": "Abgelaufen — zum Erneuern tippen",
+  "profile_expiresToday": "Läuft heute ab",
+  "profile_renewsTomorrow": "Erneuert sich morgen",
+  "profile_renewsInDays": "Erneuert sich in {days} Tagen",
+  "@profile_renewsInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "profile_activeSubscription": "Aktives Abo",
+  "profile_unknown": "Unbekannt",
+  "profile_accountsLabel": "Konten",
+  "profile_categoriesLabel": "Kategorien",
+  "profile_budgetsLabel": "Budgets",
+  "profile_bestStreakLabel": "Beste Serie",
+  "profile_yourAchievementsLabel": "Deine Erfolge",
+  "profile_aboutMudra": "Über Mudra Manager",
+  "profile_aboutMudraDesc": "Dein persönlicher Finanzbegleiter. Tracke Ausgaben, verwalte Budgets und verstehe dein Geld.",
+  "txnList_searchHint": "Transaktionen suchen...",
+  "txnList_category": "Kategorie",
+  "txnList_dateRange": "Zeitraum",
+  "txnList_tag": "Tag",
+  "txnList_allTransactions": "Alle Transaktionen",
+  "txnList_tapStartEnd": "Start- und Enddatum wählen",
+  "txnList_scrollToLoad": "Scrollen zum Laden",
+  "txnList_month": "Monat",
+  "txnList_previousMonth": "Vorheriger Monat",
+  "txnList_resetToCurrentMonth": "Zum aktuellen Monat",
+  "txnList_selectMonth": "Monat wählen",
+  "txnList_nextMonth": "Nächster Monat",
+  "txnList_monthView": "Monatsansicht",
+  "txnList_subscriptionTagRemoved": "Abo-Tag entfernt",
+  "txnList_filterByTag": "Nach Tag filtern",
+  "txnList_noTagsYet": "Noch keine Tags. Füge Tags zu Transaktionen hinzu.",
+  "txnList_clear": "Leeren",
+  "txnList_filterOptions": "Filteroptionen",
+  "txnList_transactionType": "Transaktionstyp",
+  "txnList_allCategories": "Alle Kategorien",
+  "txnList_selectDateRange": "Zeitraum wählen",
+  "txnList_clearDateRange": "Zeitraum leeren",
+  "txnList_convertToTransfer": "In Überweisung umwandeln",
+  "txnList_convertToTransferDesc": "Dies war eigentlich eine Überweisung zwischen Konten",
+  "txnList_convertedToTransfer": "In Überweisung umgewandelt",
+  "stats_today": "Heute",
+  "stats_week": "Woche",
+  "stats_month": "Monat",
+  "stats_year": "Jahr",
+  "stats_custom": "Benutzerdefiniert",
+  "stats_unableToLoad": "Statistiken konnten nicht geladen werden",
+  "stats_overview": "Übersicht",
+  "stats_trends": "Trends",
+  "stats_spendingByDay": "Ausgaben pro Tag",
+  "stats_insights": "Einblicke",
+  "stats_nextMonthForecast": "Prognose nächster Monat",
+  "stats_topSpending": "Top Ausgaben",
+  "stats_12MonthTrend": "12-Monats-Trend",
+  "stats_trendUp": "{category} steigt — {percent}% der Gesamtausgaben",
+  "@stats_trendUp": {
+    "placeholders": {
+      "category": {},
+      "percent": {}
+    }
+  },
+  "stats_trendDown": "{category} ist diesen Monat rückläufig 📉",
+  "@stats_trendDown": {
+    "placeholders": {
+      "category": {}
+    }
+  },
+  "stats_topCategory": "{category} ist deine Top-Kategorie — {percent}% der Ausgaben",
+  "@stats_topCategory": {
+    "placeholders": {
+      "category": {},
+      "percent": {}
+    }
+  },
+  "stats_weekendPeak": "Du gibst am Wochenende mehr aus — {day} ist dein Spitzentag",
+  "@stats_weekendPeak": {
+    "placeholders": {
+      "day": {}
+    }
+  },
+  "stats_weekdayPeak": "Wochentage kosten mehr — {day} ist dein größter Tag",
+  "@stats_weekdayPeak": {
+    "placeholders": {
+      "day": {}
+    }
+  },
+  "stats_peakAndQuiet": "{peak} ist dein Spitzentag, {quiet} der ruhigste",
+  "@stats_peakAndQuiet": {
+    "placeholders": {
+      "peak": {},
+      "quiet": {}
+    }
+  },
+  "stats_categoryTrends": "Kategorie-Trends",
+  "stats_spendingByTag": "Ausgaben nach Tag",
+  "stats_netWorth": "Nettovermögen",
+  "stats_savings": "Ersparnisse",
+  "stats_categoryImpact": "KATEGORIE-EINFLUSS",
+  "stats_income": "Einkommen",
+  "stats_expense": "Ausgabe",
+  "stats_net": "Netto",
+  "stats_dailySpendingPace": "Tägliches Ausgabentempo",
+  "stats_topCategories": "Top-Kategorien",
+  "stats_projectedThisMonth": "Hochrechnung: {amount} diesen Monat",
+  "@stats_projectedThisMonth": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "stats_byDay": "Bis Tag {day}: {amount} im {month}",
+  "@stats_byDay": {
+    "placeholders": {
+      "day": {},
+      "amount": {},
+      "month": {}
+    }
+  },
+  "stats_steadyHeadline": "Alles im grünen Bereich",
+  "stats_steadyDetail": "Deine Ausgaben sind konstant — das zeugt von Disziplin.",
+  "stats_doingGreatHeadline": "Du machst das super 🌟",
+  "stats_spendingUpHeadline": "Achtung — die Ausgaben steigen",
+  "stats_downloadPdf": "PDF herunterladen",
+  "stats_generating": "Wird generiert...",
+  "recap_belowAvg": "Unter Durchschnitt",
+  "recap_aboveAvg": "Über Durchschnitt",
+  "recap_recurring": "Wiederkehrend",
+  "recap_oneTime": "Einmalig",
+  "recap_recapTitle": "Rückblick",
+  "notifSettings_dailySummary": "Tages-Zusammenfassung",
+  "notifSettings_weeklySummary": "Wochen-Zusammenfassung",
+  "notifSettings_comeBackNudges": "Erinnerungs-Stupser",
+  "notifSettings_streakReminder": "Serie-Erinnerung",
+  "notifSettings_smartAlerts": "Smarte Alarme",
+  "notifSettings_selectDay": "Tag wählen",
+  "notifSettings_summariesDesc": "Zusammenfassungen zeigen Ausgaben, Einkommen, Top-Kategorie & Saldo",
+  "notifSettings_reminderTime": "Erinnerungszeit",
+  "notifSettings_sendTestNotif": "Test-Benachrichtigung senden",
+  "notifSettings_testNotifSent": "Test-Benachrichtigung gesendet",
+  "notifSettings_dailyNudgeStreak": "Täglicher Stupser, um deine Serie zu halten",
+  "notifSettings_summaryDay": "Tag der Zusammenfassung",
+  "notifSettings_gentleReminders": "Sanfte Erinnerungen, wenn du die App länger nicht geöffnet hast",
+  "notifSettings_budgetWarningsDesc": "Budget-Warnungen, Ausgabenspitzen, Rechnungs-Erinnerungen",
+  "notifSettings_localNotifDisclaimer": "Benachrichtigungen werden lokal auf deinem Gerät erstellt. Es werden keine Daten an einen Server gesendet.",
+  "smsImport_autoImport": "Auto-Import",
+  "smsImport_permissions": "Berechtigungen",
+  "smsImport_notifAccess": "Benachrichtigungs-Zugriff",
+  "smsImport_notifAccessEnabled": "Benachrichtigungs-Zugriff aktiviert",
+  "smsImport_allowReadingNotif": "Bank-Benachrichtigungen lesen erlauben",
+  "smsImport_autoDetectTxn": "Transaktionen automatisch aus Benachrichtigungen erkennen",
+  "smsImport_privacyNote": "Benachrichtigungen werden lokal auf deinem Gerät gelesen, um Transaktionen zu finden. Es wird niemals etwas hochgeladen oder geteilt.",
+  "smsImport_tools": "Tools",
+  "smsImport_txnActivity": "Transaktions-Aktivität",
+  "smsImport_viewDetectedTxn": "Alle erkannten Transaktionen anzeigen",
+  "smsImport_clearHistory": "Verlauf leeren",
+  "smsImport_resetDetection": "Erkennungsverlauf zurücksetzen",
+  "smsImport_howItWorks": "So funktioniert's",
+  "smsImport_readsBankNotif": "Liest Bank- & Wallet-Benachrichtigungen",
+  "smsImport_dataStaysOnDevice": "Alle Daten bleiben auf deinem Gerät",
+  "smsImport_autoCreatesTxn": "Erstellt Transaktionen automatisch",
+  "smsImport_personalIgnored": "Private Nachrichten werden ignoriert",
+  "smsImport_noDataSent": "Keine Datenübertragung an Server",
+  "smsImport_active": "Aktiv",
+  "smsImport_inactive": "Inaktiv",
+  "smsImport_grantAccess": "Benachrichtigungs-Zugriff gewähren, um loszulegen",
+  "smsImport_notAvailableIos": "Nicht verfügbar auf iOS",
+  "smsImport_enableAccessFirst": "Aktiviere erst den Benachrichtigungs-Zugriff",
+  "smsImport_notifAccessRequired": "Benachrichtigungs-Zugriff erforderlich",
+  "smsImport_notifAccessDesc": "Mudra Manager braucht Zugriff auf Benachrichtigungen, um Transaktionen deiner Bank-Apps automatisch zu erkennen.",
+  "smsImport_onlyBankRead": "Nur Bank-/Wallet-Meldungen werden gelesen",
+  "smsImport_personalNeverRead": "Private Nachrichten werden niemals gelesen",
+  "smsImport_openSettings": "Einstellungen öffnen",
+  "smsImport_clearHistoryConfirm": "Verlauf leeren?",
+  "smsImport_clearHistoryWarning": "Zuvor erkannte Meldungen werden erneut verarbeitet, was Duplikate erzeugen kann.",
+  "smsImport_tapAgainSettings": "Nochmal tippen, um die Systemeinstellungen zu öffnen",
+  "upgrade_purchaseFailed": "Kauf fehlgeschlagen. Bitte versuche es erneut.",
+  "upgrade_purchasePending": "Kauf ausstehend. Pro wird aktiviert, sobald die Zahlung abgeschlossen ist.",
+  "upgrade_welcomePro": "Willkommen bei Pro!",
+  "upgrade_allFeaturesUnlocked": "Alle Funktionen sind jetzt freigeschaltet. Danke für deine Unterstützung!",
+  "upgrade_startExploring": "Jetzt erkunden",
+  "upgrade_yourProFeatures": "Deine Pro-Features",
+  "upgrade_manageSubscription": "Um dein Abo zu verwalten, gehe zum Google Play Store > Abonnements.",
+  "upgrade_everythingInPro": "Alles in Pro",
+  "upgrade_chooseYourPlan": "Wähle dein Paket",
+  "upgrade_yearly": "Jährlich",
+  "upgrade_save43": "43% sparen",
+  "upgrade_monthly": "Monatlich",
+  "upgrade_continue": "Weiter",
+  "upgrade_restorePurchases": "Käufe wiederherstellen",
+  "upgrade_renewsToday": "Erneuert sich heute",
+  "upgrade_mudraManagerPro": "Mudra Manager Pro",
+  "upgrade_unlockFullPower": "Entfessle die volle Power deiner Finanzen",
+  "day_monday": "Montag",
+  "day_tuesday": "Dienstag",
+  "day_wednesday": "Mittwoch",
+  "day_thursday": "Donnerstag",
+  "day_friday": "Freitag",
+  "day_saturday": "Samstag",
+  "day_sunday": "Sonntag",
+  "recap_income": "Einkommen",
+  "recap_expense": "Ausgabe",
+  "recap_saved": "Gespart",
+  "recap_dailySpending": "Tägliche Ausgaben",
+  "recap_spendingPace": "Ausgabentempo",
+  "recap_recurringVsOneTime": "Wiederkehrend vs. Einmalig",
+  "recap_topCategories": "Top-Kategorien",
+  "recap_mostFrequent": "Am häufigsten",
+  "recap_incomeSources": "Einnahmequellen",
+  "recap_byAccount": "Nach Konto",
+  "recap_budgetHealth": "Budget-Gesundheit",
+  "recap_biggestExpenses": "Größte Ausgaben",
+  "recap_biggestIncome": "Größte Einnahmen",
+  "recap_generating": "Wird erstellt...",
+  "recap_avgPerDay": "Schnitt/Tag",
+  "recap_weekdayAvg": "Wochentag Schnitt",
+  "recap_weekendAvg": "Wochenende Schnitt",
+  "recap_budgets": "Budgets",
+  "recap_badges": "Abzeichen",
+  "recap_streak": "Serie",
+  "recap_best": "Bestleistung",
+  "recap_savings": "Ersparnisse",
+  "about_developerMode": "Entwicklermodus aktiviert!",
+  "about_couldNotOpenLink": "Link konnte nicht geöffnet werden",
+  "about_title": "Über",
+  "about_privacyDesc": "Alles bleibt auf deinem Gerät. Keine Konten, keine Cloud, keine Datensammlung. Deine Finanzen gehören dir allein.",
+  "about_legalTransparency": "Rechtliches & Transparenz",
+  "about_privacyPolicy": "Datenschutzerklärung",
+  "about_privacyPolicyDesc": "Wie wir deine Daten schützen",
+  "about_termsOfService": "Nutzungsbedingungen",
+  "about_termsDesc": "Bedingungen für die App-Nutzung",
+  "about_openSourceLicenses": "Open-Source-Lizenzen",
+  "about_openSourceDesc": "Drittanbieter-Bibliotheken, die wir nutzen",
+  "about_supportConnect": "Support & Kontakt",
+  "about_checkForUpdates": "Nach Updates suchen",
+  "about_checkForUpdatesDesc": "App-Version manuell prüfen",
+  "about_latestVersion": "Du nutzt die neueste Version",
+  "about_unableToCheck": "Prüfung fehlgeschlagen",
+  "about_officialWebsite": "Offizielle Webseite",
+  "about_visitWebsite": "Besuche mudramanager.com",
+  "about_contactSupport": "Support kontaktieren",
+  "about_contactSupportDesc": "Hilfe erhalten oder Fehler melden",
+  "about_rateApp": "App bewerten",
+  "about_rateAppDesc": "Teile deine Erfahrung im Store",
+  "about_developerModeSection": "Entwicklermodus",
+  "about_mudraManager": "Mudra Manager",
+  "about_secureFinancial": "Deine finanzielle Kommandozentrale",
+  "about_loadingLicenses": "Lizenzen werden geladen...",
+  "appearance_title": "Erscheinungsbild",
+  "appearance_themeMode": "Design-Modus",
+  "appearance_display": "Anzeige",
+  "appearance_toneVoice": "Ton & Stimme",
+  "appearance_changesApplyInstantly": "Änderungen werden sofort übernommen.",
+  "appearance_darkAppearance": "Dunkles Design",
+  "appearance_lightAppearance": "Helles Design",
+  "appearance_accountStyle": "Konto-Stil",
+  "appearance_cards": "Karten",
+  "appearance_stack": "Stapel",
+  "appearance_bento": "Bento",
+  "appearance_highContrast": "Hoher Kontrast",
+  "appearance_highContrastDesc": "Bessere Lesbarkeit bei Sehschwäche",
+  "appearance_guestMode": "Gastmodus",
+  "appearance_guestModeOnDesc": "Echte Beträge sind versteckt",
+  "appearance_guestModeOffDesc": "Sensible Finanzdaten verbergen",
+  "appearance_lightMode": "Helles Design",
+  "appearance_darkMode": "Dunkles Design",
+  "appearance_systemDefault": "Systemstandard",
+  "analytics_financialHealthScore": "Finanz-Score",
+  "analytics_savingsRate": "Sparquote",
+  "analytics_expenseRatio": "Ausgabenquote",
+  "analytics_insights": "Einblicke",
+  "analytics_spendingPrediction": "Ausgaben-Prognose",
+  "analytics_nextMonth": "Nächster Monat",
+  "analytics_basedOnAvg": "Basierend auf dem Schnitt der letzten 3 Monate",
+  "analytics_categoryTrends": "Kategorie-Trends",
+  "analytics_spendingByDay": "Ausgaben nach Wochentag",
+  "trip_notFound": "Reise nicht gefunden",
+  "trip_notFoundMsg": "Reise unauffindbar",
+  "trip_tripLabel": "Reise",
+  "trip_groupLabel": "Gruppe",
+  "trip_archiveTripTitle": "Reise archivieren",
+  "trip_archiveMsg": "Diese Reise wird ins Archiv verschoben. Alle Daten und Abrechnungen bleiben erhalten.",
+  "trip_archiveConfirm": "Archivieren",
+  "trip_totalSpent": "Gesamt ausgegeben",
+  "trip_splitExpense": "Ausgabe aufteilen",
+  "trip_allPeople": "Alle Personen",
+  "trip_allCategories": "Alle Kategorien",
+  "trip_uncategorized": "Nicht kategorisiert"
 }

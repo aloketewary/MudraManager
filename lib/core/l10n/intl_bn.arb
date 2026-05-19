@@ -23,13 +23,13 @@
   "app_settings_appbar_title": "অ্যাপ সেটিংস",
   "language_settings_appbar_title": "ভাষা নির্বাচন করুন",
   "app_settings_language_title": "ভাষা",
-  "app_settings_language_subtitle": "আপনার ভাষা নির্বাচন করুন",
+  "app_settings_language_subtitle": "আপনার ভাষা চয়ন করুন",
   "app_settings_theme_mode_title": "থিম মোড",
-  "app_settings_theme_mode_light": "Light",
-  "app_settings_theme_mode_dark": "Dark",
+  "app_settings_theme_mode_light": "লাইট",
+  "app_settings_theme_mode_dark": "ডার্ক",
   "app_settings_theme_mode_system_default": "সিস্টেম ডিফল্ট",
-  "app_settings_theme_mode_amoled": "AMOLED ডার্ক",
-  "app_settings_theme_mode_subtitle": "আপনার পছন্দের থিম নির্বাচন করুন",
+  "app_settings_theme_mode_amoled": "অ্যামোলেড (AMOLED)",
+  "app_settings_theme_mode_subtitle": "আপনার পছন্দের থিম চয়ন করুন",
   "app_settings_daily_reminder_title": "দৈনিক ব্যয়ের অনুস্মারক",
   "home_screen_title": "হোম",
   "transaction_screen_title": "ক্রিয়াকলাপ",
@@ -223,37 +223,37 @@
   "theme_chooseThemeTitle": "থিম নির্বাচন করুন",
   "theme_applyThemeLabel": "থিম প্রয়োগ করুন",
   "theme_themeAppliedMessage": "থিম প্রয়োগ করা হয়েছে!",
-  "backup_backupRestoreTitle": "ব্যাকআপ ও রিস্টোর",
+  "backup_backupRestoreTitle": "ব্যাকআপ এবং রিস্টোর",
   "backup_backupDataTitle": "ডেটা ব্যাকআপ করুন",
-  "backup_backupDataSubtitle": "সব ডেটাবেস ও সেটিংস এক্সপোর্ট করুন",
+  "backup_backupDataSubtitle": "সমস্ত ডাটাবেস এবং সেটিংস এক্সপোর্ট করুন",
   "backup_restoreBackupTitle": "ব্যাকআপ রিস্টোর করুন",
-  "backup_restoreBackupSubtitle": "ডেটাবেস ও সেটিংস আমদানি করুন",
-  "backup_includeAttachmentsTitle": "অ্যাটাচমেন্ট অন্তর্ভুক্ত করবেন?",
-  "backup_includeAttachmentsMessage": "ব্যাকআপে রসিদের ছবি অন্তর্ভুক্ত করবেন? এটি ফাইলের আকার বাড়়াবে।",
+  "backup_restoreBackupSubtitle": "ডাটাবেস এবং সেটিংস ইমপোর্ট করুন",
+  "backup_includeAttachmentsTitle": "সংযুক্তি অন্তর্ভুক্ত করবেন?",
+  "backup_includeAttachmentsMessage": "ব্যাকআপে রসিদের ছবি অন্তর্ভুক্ত করবেন? এতে ফাইলের আকার বাড়বে।",
   "backup_yesLabel": "হ্যাঁ",
   "backup_noLabel": "না",
-  "backup_completedMessage": "ব্যাকআপ সম্পন্ন",
-  "backup_restoreSuccessMessage": "রিস্টোর সফল",
+  "backup_completedMessage": "ব্যাকআপ সম্পন্ন হয়েছে",
+  "backup_restoreSuccessMessage": "রিস্টোর সফল হয়েছে",
   "backup_lastBackupLabel": "শেষ ব্যাকআপ: {date}",
   "backup_noBackupFoundLabel": "কোনো ব্যাকআপ পাওয়া যায়নি",
-  "categories_manageCategoriesTitle": "ক্যাটাগরি পরিচালনা করুন",
-  "categories_noCategoriesFound": "কোনো ক্যাটাগরি পাওয়া যায়নি।",
-  "categories_transactionCount": "{count}টি লেনদেন{plural}",
-  "categories_addCategoryLabel": "ক্যাটাগরি যোগ করুন",
-  "categories_deleteCategoryTitle": "ক্যাটাগরি মুছে ফেলুন",
-  "categories_deleteCategoryMessage": "আপনি কি নিশ্চিত এই ক্যাটাগরি মুছে ফেলতে চান?\\nসব সংশ্লিষ্ট লেনদেনও সরিয়ে দেওয়া হবে।",
-  "categories_categoryDeletedMessage": "ক্যাটাগরি ও এর লেনদেন মুছে দেওয়া হয়েছে",
+  "categories_manageCategoriesTitle": "ক্যাটেগরি পরিচালনা করুন",
+  "categories_noCategoriesFound": "কোনো ক্যাটেগরি পাওয়া যায়নি।",
+  "categories_transactionCount": "{count} টি লেনদেন",
+  "categories_addCategoryLabel": "ক্যাটেগরি যোগ করুন",
+  "categories_deleteCategoryTitle": "ক্যাটেগরি ডিলিট করুন",
+  "categories_deleteCategoryMessage": "আপনি কি নিশ্চিত যে আপনি এই ক্যাটেগরি ডিলিট করতে চান?\nএর সাথে যুক্ত সমস্ত লেনদেনও মুছে ফেলা হবে।",
+  "categories_categoryDeletedMessage": "ক্যাটেগরি এবং এর লেনদেনগুলো ডিলিট করা হয়েছে",
   "accounts_manageAccountsTitle": "অ্যাকাউন্ট পরিচালনা করুন",
-  "accounts_noAccountsAddedYet": "অভী পর্যন্ত কোনো অ্যাকাউন্ট যোগ করা হয়নি",
+  "accounts_noAccountsAddedYet": "এখনও কোনো অ্যাকাউন্ট যোগ করা হয়নি",
   "accounts_addAccountLabel": "অ্যাকাউন্ট যোগ করুন",
-  "accounts_deleteAccountTitle": "অ্যাকাউন্ট মুছে ফেলুন",
-  "accounts_deleteAccountMessage": "আপনি কি নিশ্চিত \"{accountName}\" মুছে ফেলতে চান?",
+  "accounts_deleteAccountTitle": "অ্যাকাউন্ট ডিলিট করুন",
+  "accounts_deleteAccountMessage": "আপনি কি নিশ্চিত যে আপনি \"{accountName}\" ডিলিট করতে চান?",
   "accounts_archiveAccountTitle": "অ্যাকাউন্ট আর্কাইভ করুন",
-  "accounts_archiveAccountMessage": "আপনি কি নিশ্চিত \"{accountName}\" আর্কাইভ করতে চান?",
-  "accounts_cancelLabel": "বাতিল করুন",
+  "accounts_archiveAccountMessage": "আপনি কি নিশ্চিত যে আপনি \"{accountName}\" আর্কাইভ করতে চান?",
+  "accounts_cancelLabel": "বাতিল",
   "accounts_archiveLabel": "আর্কাইভ",
   "accounts_accountArchivedMessage": "\"{accountName}\" আর্কাইভ করা হয়েছে",
-  "accounts_atLeastOneAccountRequired": "চালু রাখতে কমপক্ষে ১টি অ্যাকাউন্ট প্রয়োজন",
+  "accounts_atLeastOneAccountRequired": "চালিয়ে যাওয়ার জন্য কমপক্ষে ১টি অ্যাকাউন্ট প্রয়োজন",
   "transaction_tripLabel": "ভ্রমণ",
   "transaction_tripPartOfMessage": "এই লেনদেন নিচের ভ্রমণ(গুলি)র অংশ",
   "sms_autoAddTooltip": "স্বয়ংক্রিয় যোগ",
@@ -1238,33 +1238,105 @@
   "notif_streakEndedTitle": "💔 {days} দিনের streak ভেঙেছে",
   "notif_fewDaysUntrackedTitle": "📊 কয়েকদিন untracked",
   "notif_budgetExceededBody": "{name} budget পার হয়ে গেছে — check করুন",
-  "@notif_budgetExceededBody": { "placeholders": { "name": { "type": "String" } } },
+  "@notif_budgetExceededBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notif_budgetExceededBodyMulti": "{names} budget পার হয়ে গেছে",
-  "@notif_budgetExceededBodyMulti": { "placeholders": { "names": { "type": "String" } } },
+  "@notif_budgetExceededBodyMulti": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
   "notif_budgetWarningBody": "{name} limit-এর কাছাকাছি",
-  "@notif_budgetWarningBody": { "placeholders": { "name": { "type": "String" } } },
+  "@notif_budgetWarningBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notif_budgetWarningBodyMulti": "{names} limit-এর কাছাকাছি",
-  "@notif_budgetWarningBodyMulti": { "placeholders": { "names": { "type": "String" } } },
+  "@notif_budgetWarningBodyMulti": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
   "notif_budgetWarningPctBody": "{name}: {pct}% খরচ",
-  "@notif_budgetWarningPctBody": { "placeholders": { "name": { "type": "String" }, "pct": { "type": "String" } } },
+  "@notif_budgetWarningPctBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
   "notif_billPaidAutoTitle": "✅ {name} — auto-match হয়েছে",
-  "@notif_billPaidAutoTitle": { "placeholders": { "name": { "type": "String" } } },
+  "@notif_billPaidAutoTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notif_billPaidRecordedTitle": "✅ {name} — record হয়েছে",
-  "@notif_billPaidRecordedTitle": { "placeholders": { "name": { "type": "String" } } },
+  "@notif_billPaidRecordedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "notif_smsLoggedTitle": "✅ Transaction save হয়েছে",
   "notif_smsNeedsReviewTitle": "👀 Review করুন",
   "notif_smsLoggedBody": "{sender} থেকে {amount} — auto-save হয়েছে",
-  "@notif_smsLoggedBody": { "placeholders": { "amount": { "type": "String" }, "sender": { "type": "String" } } },
+  "@notif_smsLoggedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
   "notif_smsLoggedBodyNoAmount": "{sender} থেকে — auto-save হয়েছে",
-  "@notif_smsLoggedBodyNoAmount": { "placeholders": { "sender": { "type": "String" } } },
+  "@notif_smsLoggedBodyNoAmount": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
   "notif_smsNeedsReviewBody": "{sender} থেকে transaction — tap করে দেখুন",
-  "@notif_smsNeedsReviewBody": { "placeholders": { "sender": { "type": "String" } } },
+  "@notif_smsNeedsReviewBody": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
   "notif_smsGotItTitle": "✅ হয়ে গেছে!",
   "notif_smsAllCaughtUpTitle": "✅ সব হয়ে গেছে!",
   "notif_smsAlmostThereTitle": "📋 প্রায় হয়ে গেছে!",
   "notif_smsNeedHelpTitle": "👋 একটু help চাই!",
   "notif_streakOnLineTitle": "🔥 {days} দিনের streak দাঁড়ে!",
-  "@notif_streakOnLineTitle": { "placeholders": { "days": { "type": "int" } } },
+  "@notif_streakOnLineTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "notif_quickActionTitle": "⚡ মাত্র 5 second-এর কাজ",
   "notif_dailyReminderTitle": "📊 আপনার দিন numbers-এ",
   "notif_dailyReminderBody": "গতকাল কেমন ছিল — একটু দেখুন",
@@ -1272,11 +1344,38 @@
   "notif_weeklyReminderBody": "সপ্তাহের হাল দেখুন — tap করুন",
   "notif_goalStatusTitle": "🎯 Goal Status",
   "notif_goalStatusBody": "আপনার {count}টি goal active। {name} {pct}% complete!",
-  "@notif_goalStatusBody": { "placeholders": { "count": { "type": "int" }, "name": { "type": "String" }, "pct": { "type": "String" } } },
+  "@notif_goalStatusBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
   "notif_streakCountingTitle": "🔥 {days} দিন এবং counting!",
-  "@notif_streakCountingTitle": { "placeholders": { "days": { "type": "int" } } },
+  "@notif_streakCountingTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "notif_achievementBody": "{title} — +{xp} XP পেলেন!",
-  "@notif_achievementBody": { "placeholders": { "title": { "type": "String" }, "xp": { "type": "int" } } },
+  "@notif_achievementBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
   "notif_levelUpBody": "Level up হয়েছে — চালিয়ে যান!",
   "notif_streakMilestoneBody": "দারুণ dedication — streak fire-এ আছে 🔥",
   "notif_weeklyZeroBody": "এই সপ্তাহে zero খরচ — impressive 💪",
@@ -1566,12 +1665,12 @@
   "stats_nextMonthForecast": "পরের মাসের পূর্বাভাস",
   "stats_topSpending": "সবচেয়ে বেশি খরচ",
   "stats_12MonthTrend": "12 মাসের Trend",
-  "stats_trendUp": "{category} বাড়ছে — মোট খরচের {percent}%",
-  "stats_trendDown": "{category} এই মাসে কমেছে 📉",
-  "stats_topCategory": "{category} সবচেয়ে বেশি — {percent}% খরচ",
-  "stats_weekendPeak": "Weekend-এ বেশি খরচ — {day} সবচেয়ে ভারী",
-  "stats_weekdayPeak": "Weekday-এ বেশি খরচ — {day} সবচেয়ে ভারী",
-  "stats_peakAndQuiet": "{peak} সবচেয়ে ভারী দিন, {quiet} সবচেয়ে হালকা",
+  "stats_trendUp": "{category} ব্যয়ের প্রবণতা ঊর্ধ্বমুখী — মোট ব্যয়ের {percent}%",
+  "stats_trendDown": "এই মাসে {category} ব্যয়ের প্রবণতা নিম্নগামী 📉",
+  "stats_topCategory": "{category} আপনার শীর্ষ ক্যাটেগরি — ব্যয়ের {percent}%",
+  "stats_weekendPeak": "আপনি উইকএন্ডে বেশি ব্যয় করেন — {day} আপনার সর্বোচ্চ ব্যয়ের দিন",
+  "stats_weekdayPeak": "কাজের দিনগুলিতে বেশি ব্যয় হয় — {day} আপনার সবচেয়ে বড় দিন",
+  "stats_peakAndQuiet": "{peak} আপনার সর্বাধিক ব্যয়ের দিন, {quiet} সবচেয়ে কম",
   "stats_categoryTrends": "Category Trends",
   "stats_spendingByTag": "Tag অনুসারে খরচ",
   "stats_netWorth": "Net Worth",
@@ -1580,8 +1679,8 @@
   "stats_net": "নেট",
   "stats_dailySpendingPace": "দৈনিক খরচের গতি",
   "stats_topCategories": "শীর্ষ Categories",
-  "stats_projectedThisMonth": "অনুমান: এই মাসে {amount}",
-  "stats_byDay": "দিন {day} পর্যন্ত: {month}-এ {amount}",
+  "stats_projectedThisMonth": "পূর্বাভাস: এই মাসে {amount}",
+  "stats_byDay": "{month} মাসে {day} দিন পর্যন্ত: {amount}",
   "stats_steadyHeadline": "স্থির চলছে",
   "stats_steadyDetail": "আপনার খরচ একসমান — এটা শৃঙ্খলা।",
   "stats_doingGreatHeadline": "অনেক ভালো চলছে 🌟",
@@ -1851,8 +1950,8 @@
   "reconcile_actualBalance": "প্রকৃত ব্যাংক ব্যালেন্স",
   "reconcile_balanced": "সমন্বিত!",
   "reconcile_difference": "পার্থক্য",
-  "reconcile_incomeAdjustment": "{amount} এর আয় সমন্বয় যোগ করা হবে।",
-  "reconcile_expenseAdjustment": "{amount} এর ব্যয় সমন্বয় যোগ করা হবে।",
+  "reconcile_incomeAdjustment": "{amount} আয়ের সমন্বয় যোগ করা হবে।",
+  "reconcile_expenseAdjustment": "{amount} ব্যয়ের সমন্বয় যোগ করা হবে।",
   "balanceHistory_currentBalance": "বর্তমান ব্যালেন্স",
   "balanceHistory_highest": "সর্বোচ্চ",
   "balanceHistory_lowest": "সর্বনিম্ন",
@@ -1900,7 +1999,7 @@
   "accounts_primary": "প্রাথমিক",
   "categories_label": "শ্রেণী",
   "categories_transactionsLabel": "লেনদেন",
-  "categories_deleteWithTransactions": "এটি \"{name}\" এবং {count} টি সংযুক্ত লেনদেন স্থায়ীভাবে মুছে দেবে। এই কাজটি ফেরানো যাবে না।",
+  "categories_deleteWithTransactions": "এটি স্থায়ীভাবে \"{name}\" এবং {count} টি যুক্ত লেনদেন ডিলিট করে দেবে। এই পদক্ষেপটি পূর্বাবস্থায় ফেরানো যাবে না।",
   "categories_deleteAll": "সব মুছুন",
   "categories_edit": "শ্রেণী সম্পাদনা",
   "categories_delete": "শ্রেণী মুছুন",
@@ -1917,10 +2016,10 @@
   "currency_exchangeRates": "বিনিময় হার",
   "currency_exchangeRatesDesc": "রূপান্তর হার দেখুন এবং সম্পাদনা করুন",
   "currency_archivedDesc": "পূর্ববর্তী মুদ্রার লেনদেন দেখুন",
-  "exchange_unitInfo": "বিদেশী মুদ্রার ১ ইউনিট = X {base}। সম্পাদনা করতে ট্যাপ করুন।",
+  "exchange_unitInfo": "১ ইউনিট বিদেশি মুদ্রা = X {base}। এডিট করতে যেকোনো রেটে ট্যাপ করুন।",
   "exchange_search": "মুদ্রা খুঁজুন...",
-  "exchange_rateUpdated": "{code} হার আপডেট হয়েছে",
-  "exchange_editRate": "{code} হার সম্পাদনা",
+  "exchange_rateUpdated": "{code} রেট আপডেট করা হয়েছে",
+  "exchange_editRate": "{code} রেট এডিট করুন",
   "exchange_rateLabel": "হার",
   "exchange_invalidRate": "একটি বৈধ হার লিখুন",
   "archived_transaction": "লেনদেন",
@@ -1931,7 +2030,7 @@
   "security_basic": "বেসিক",
   "security_strong": "শক্তিশালী",
   "security_unprotectedDesc": "আপনার ডেটা সুরক্ষিত করতে PIN বা বায়োমেট্রিক্স সক্রিয় করুন",
-  "security_protectionsActive": "{total} এর মধ্যে {count} সুরক্ষা সক্রিয়",
+  "security_protectionsActive": "{total} এর মধ্যে {count} টি সুরক্ষা সক্রিয়",
   "security_authentication": "প্রমাণীকরণ",
   "security_pinLock": "PIN লক",
   "security_pinActive": "৪ অঙ্কের PIN সক্রিয়",
@@ -1945,7 +2044,7 @@
   "security_biometricEnabled": "বায়োমেট্রিক সক্রিয়",
   "security_biometricDisabled": "বায়োমেট্রিক অক্ষম",
   "security_infoText": "আপনার PIN এই ডিভাইসে নিরাপদে সংরক্ষিত — এটি কখনো সার্ভারে যায় না।",
-  "notifSettings_activeCount": "৫ এর মধ্যে {count} সক্রিয়",
+  "notifSettings_activeCount": "৫টির মধ্যে {count}টি সক্রিয়",
   "notifSettings_summaryDesc": "সারাংশে খরচ, আয়, শীর্ষ শ্রেণী এবং ব্যালেন্স দেখায়",
   "notifSettings_dailySummaryDesc": "গতকালের খরচের সারাংশ",
   "notifSettings_weeklySchedule": "প্রতি {day} সকাল ৯:০০ টায়",
@@ -1973,17 +2072,17 @@
   "goal_amount": "রাশি",
   "goal_emotionReached": "Goal পূরণ হয়েছে! 🎉",
   "goal_emotionProgress": "ভালো progress ✨",
-  "goal_emotionMoreToGo": "আর মাত্র {amount} বাকি 💪",
+  "goal_emotionMoreToGo": "লক্ষ্যে পৌঁছাতে আরও {amount} প্রয়োজন 💪",
   "goal_emotionSetTarget": "Target সেট করুন 🎯",
   "goal_emotionWhatSaving": "কিসের জন্য সঞ্চয় করছেন?",
   "goal_exceededTarget": "Target ছাড়িয়ে গেছে! 🎉",
   "goal_alreadyReached": "Goal আগেই পূরণ হয়েছে! 🎉",
-  "goal_progressLeft": "{percent}% হয়েছে • {amount} বাকি",
-  "goal_paceDaily": "এই গতিতে {daily}/দিন লাগবে।\nমানে {monthly}/মাস।",
+  "goal_progressLeft": "{percent}% সম্পন্ন • {amount} বাকি",
+  "goal_paceDaily": "এই গতিতে, লক্ষ্যে পৌঁছাতে আপনার প্রতিদিন {daily} প্রয়োজন।\nএটি মাসে {monthly}।",
   "goal_daysRemaining": "{count} দিন বাকি",
-  "goal_daysLeft": "{count} দিন বাকি আছে",
+  "goal_daysLeft": "{count} দিন বাকি",
   "goal_startSaving": "{amount} সঞ্চয় শুরু করুন",
-  "goal_goalsInProgress": "{count, plural, =1{1টি goal চলছে} other{{count}টি goals চলছে}}",
+  "goal_goalsInProgress": "{count, plural, =1{১টি লক্ষ্য চলমান} other{{count}টি লক্ষ্য চলমান}}",
   "goal_completedSection": "সম্পন্ন 🎉",
   "goal_emotionAlmost": "প্রায় হয়ে গেছে 🚀",
   "goal_emotionHalfway": "অর্ধেক পথ 💪",
@@ -1992,7 +2091,7 @@
   "goal_emotionKeepPushing": "চালিয়ে যান 🔥",
   "goal_emotionJustStarted": "সবে মাত্র শুরু 🌱",
   "goal_closestToCompletion": "সম্পন্ন হওয়ার সবচেয়ে কাছে",
-  "goal_acrossGoals": "{count, plural, =1{1টি goal-এ} other{{count}টি goals-এ}}",
+  "goal_acrossGoals": "{count, plural, =1{১টি লক্ষ্যে} other{{count}টি লক্ষ্যে}}",
   "goal_suffixSaved": "সঞ্চিত",
   "goal_suffixLeft": "বাকি",
   "goal_suffixDone": "হয়েছে",
@@ -2061,21 +2160,21 @@
   "backup_infoText": "Backups আপনার password দিয়ে encrypt হয়ে .mudra files-এ save হয়। Password সুরক্ষিত রাখুন — এটি recover করা যায় না।",
   "backup_justNow": "এইমাত্র",
   "backup_minutesAgo": "{count} মিনিট আগে",
-  "backup_hoursAgo": "{count} ঘন্টা আগে",
+  "backup_hoursAgo": "{count} ঘণ্টা আগে",
   "backup_daysAgo": "{count} দিন আগে",
-  "backup_recordCount": "{count} records",
+  "backup_recordCount": "{count} টি রেকর্ড",
   "account_changeCurrency": "মুদ্রা পরিবর্তন করবেন?",
-  "account_resetTo": "{code}-এ reset করুন",
+  "account_resetTo": "{code}-এ রিসেট করুন",
   "account_baseCurrencyInfo": "এই অ্যাকাউন্টের transactions আপনার base currency-তে।",
-  "account_foreignCurrencyInfo": "Transactions {code}-এ record হবে এবং {base}-এ convert হবে।",
+  "account_foreignCurrencyInfo": "লেনদেন {code}-এ রেকর্ড করা হবে এবং মোটের জন্য {base}-এ রূপান্তর করা হবে।",
   "account_warningNoConvert": "বিদ্যমান balance স্বয়ংক্রিয়ভাবে convert হবে না।",
   "account_warningNewCurrency": "নতুন transactions নতুন মুদ্রায় হবে।",
   "account_warningManualAdjust": "আপনাকে balance ম্যানুয়ালি adjust করতে হতে পারে।",
   "category_selectParent": "মূল শ্রেণী বেছে নিন",
   "appearance_colorTheme": "Color Theme",
   "appearance_amoledMode": "AMOLED Mode",
-  "appearance_toneActivated": "{name} tone সক্রিয়",
-  "dashboard_cardsActive": "{total} এর মধ্যে {visible}টি card সক্রিয়",
+  "appearance_toneActivated": "{name} টোন সক্রিয় করা হয়েছে",
+  "dashboard_cardsActive": "{total} এর মধ্যে {visible} টি কার্ড সক্রিয়",
   "dashboard_dragToReorder": "ক্রম পরিবর্তন করতে drag করুন, দেখাতে/লুকাতে toggle করুন",
   "dashboard_smartOrdering": "Smart ক্রম",
   "dashboard_catEssential": "অপরিহার্য",
@@ -2100,10 +2199,10 @@
   "importExport_infoText": "Export সব transaction details সহ Excel file তৈরি করে। Import অন্য finance apps বা manual spreadsheets থেকে .xlsx files support করে।",
   "plugins_subtitle": "Mudra Manager-কে powerful plugins দিয়ে বাড়ান",
   "plugins_official": "Official",
-  "plugins_enabled": "{name} সক্রিয়",
-  "plugins_disabled": "{name} নিষ্ক্রিয়",
+  "plugins_enabled": "{name} সক্রিয় করা হয়েছে",
+  "plugins_disabled": "{name} নিষ্ক্রিয় করা হয়েছে",
   "plugins_configure": "Plugin configure করুন",
-  "plugins_activeCount": "{total} এর মধ্যে {active} সক্রিয়",
+  "plugins_activeCount": "{total} এর মধ্যে {active} টি সক্রিয়",
   "plugins_toggleDesc": "App features বাড়াতে plugins toggle করুন",
   "plugins_default": "Default",
   "plugins_configureSettings": "Plugin settings configure করুন",
@@ -2122,12 +2221,12 @@
   "help_tryDifferent": "অন্য শব্দ চেষ্টা করুন",
   "help_howToUse": "কীভাবে ব্যবহার করবেন",
   "help_tips": "পরামর্শ",
-  "help_articleCount": "{count}টি নিবন্ধ",
-  "help_resultCount": "{count}টি ফলাফল",
+  "help_articleCount": "{count} টি নিবন্ধ",
+  "help_resultCount": "{count} টি ফলাফল",
   "help_infoText": "যা দরকার তা পাচ্ছেন না? About → Contact Support-এ যান।",
   "about_legalCount": "3টি আইটেম",
   "about_supportCount": "4টি আইটেম",
-  "about_packageCount": "{count}টি open source packages",
+  "about_packageCount": "{count} টি ওপেন সোর্স প্যাকেজ",
   "onboard_continue": "এগিয়ে যান",
   "onboard_restoreFromBackup": "Backup থেকে restore করুন",
   "onboard_accountNameRequired": "অ্যাকাউন্টের নাম দরকার",
@@ -2145,7 +2244,7 @@
   "statistics_topCategory": "টপ Category",
   "statistics_dailyAverage": "দৈনিক গড়",
   "statistics_perDay": "প্রতিদিন",
-  "statistics_percentOfExpenses": "{percent}% খরচের",
+  "statistics_percentOfExpenses": "ব্যয়ের {percent}%",
   "sms_infoTitle": "SMS Import কিভাবে কাজ করে",
   "sms_infoOnlyScans": "শুধু bank ও wallet SMS scan করে",
   "sms_infoStaysOnDevice": "সব data আপনার device-এই থাকে",
@@ -2183,13 +2282,37 @@
   "achieve_dailyCheckIn": "Daily Check-in",
   "achieve_budgetAdherence": "Budget মেনে চলা",
   "achieve_bestDays": "Best: {count} দিন",
-  "@achieve_bestDays": { "placeholders": { "count": { "type": "int" } } },
+  "@achieve_bestDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "achieve_noBadgesYet": "এখনও কোনো {category} badge নেই",
-  "@achieve_noBadgesYet": { "placeholders": { "category": { "type": "String" } } },
+  "@achieve_noBadgesYet": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
   "achieve_levelUpSnack": "🎉 Level Up! আপনি Level {level}-এ!",
-  "@achieve_levelUpSnack": { "placeholders": { "level": { "type": "int" } } },
+  "@achieve_levelUpSnack": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
   "achieve_levelLabel": "Level {level}",
-  "@achieve_levelLabel": { "placeholders": { "level": { "type": "int" } } },
+  "@achieve_levelLabel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
   "achieve_catBudgeting": "Budgeting",
   "achieve_catSavings": "সঞ্চয়",
   "achieve_catTracking": "Tracking",
@@ -2198,19 +2321,49 @@
   "achieve_catAll": "সব",
   "alert_actionNeeded": "Action দরকার",
   "alert_billsDueTomorrow": "আগামীকাল {count}টি bill due",
-  "@alert_billsDueTomorrow": { "placeholders": { "count": { "type": "int" } } },
+  "@alert_billsDueTomorrow": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "alert_upcomingBills": "আসন্ন Bills",
   "alert_billsDueInDays": "2 দিনে {count}টি bill due",
-  "@alert_billsDueInDays": { "placeholders": { "count": { "type": "int" } } },
+  "@alert_billsDueInDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "alert_budgetAlert": "Budget Alert",
   "alert_budgetsExceeded": "{count}টি budget পার হয়েছে",
-  "@alert_budgetsExceeded": { "placeholders": { "count": { "type": "int" } } },
+  "@alert_budgetsExceeded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "alert_budgetWarning": "Budget Warning",
   "alert_budgetsNearLimit": "{count}টি budget limit-এর কাছে",
-  "@alert_budgetsNearLimit": { "placeholders": { "count": { "type": "int" } } },
+  "@alert_budgetsNearLimit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "alert_goalProgress": "Goal Progress",
   "alert_goalsAlmostComplete": "{count}টি goal প্রায় শেষ!",
-  "@alert_goalsAlmostComplete": { "placeholders": { "count": { "type": "int" } } },
+  "@alert_goalsAlmostComplete": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "analytics_cashFlowForecast": "Cash Flow পূর্বাভাস",
   "analytics_thisMonthProjected": "এই মাসে (অনুমানিত)",
   "analytics_savingOnAverage": "গড়ে সঞ্চয় হচ্ছে",
@@ -2222,10 +2375,22 @@
   "health_emergency": "Emergency Fund",
   "health_liquidityRunway": "Liquidity Runway",
   "health_balanceCoversMonths": "আপনার balance {months} মাসের খরচ cover করে",
-  "@health_balanceCoversMonths": {"placeholders": {"months": {"type": "String"}}},
+  "@health_balanceCoversMonths": {
+    "placeholders": {
+      "months": {
+        "type": "String"
+      }
+    }
+  },
   "health_days": "দিন",
   "health_nDays": "{n} দিন",
-  "@health_nDays": {"placeholders": {"n": {"type": "String"}}},
+  "@health_nDays": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
   "health_safe": "Safe",
   "health_moderate": "মাঝামাঝি",
   "health_risk": "Risk",
@@ -2262,14 +2427,22 @@
   "common_income": "আয়",
   "common_expense": "খরচ",
   "common_transactions": "Transactions",
-
   "tax_title": "Tax Estimation",
   "tax_projected": "Projected (বছর এখনও চলছে)",
   "tax_estimatedTax": "আনুমানিক Tax",
   "tax_effectiveRate": "Effective Rate",
   "tax_monthlyTax": "Monthly",
   "tax_fyProgress": "{total}-এর মধ্যে {elapsed} {elapsed, plural, =1{দিন} other{দিন}}",
-  "@tax_fyProgress": { "placeholders": { "elapsed": { "type": "int" }, "total": { "type": "int" } } },
+  "@tax_fyProgress": {
+    "placeholders": {
+      "elapsed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "tax_slabBreakdown": "Slab Breakdown",
   "tax_totalSlabTax": "মোট Slab Tax",
   "tax_computation": "Tax Computation",
@@ -2289,27 +2462,45 @@
   "tax_oldRegime": "Old Regime",
   "tax_regimeComparison": "কোন Regime-এ বেশি সাশ্রয়?",
   "tax_regimeSavings": "{regime}-এ সাশ্রয়",
-  "@tax_regimeSavings": { "placeholders": { "regime": { "type": "String" } } },
+  "@tax_regimeSavings": {
+    "placeholders": {
+      "regime": {
+        "type": "String"
+      }
+    }
+  },
   "tax_oldRegimeDisclaimer": "Old Regime estimate শুধু standard deduction-এর উপর। HRA, 80C, 80D deductions থাকলে সাশ্রয় আরও বেশি হতে পারে।",
-
   "category_merge": "Category merge করুন",
   "category_mergeInto": "এটাতে merge করুন",
   "category_mergeConfirm": "Merge",
   "category_mergePreview": "{count}টি item {target}-এ move হবে",
-  "@category_mergePreview": { "placeholders": { "count": { "type": "int" }, "target": { "type": "String" } } },
+  "@category_mergePreview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
   "category_mergeSuccess": "Categories merge হয়ে গেছে ✅",
   "category_mergeSameError": "একই category-তে merge করা যাবে না",
   "category_mergeSelectTarget": "Target category বেছে নিন",
-
   "notif_morningInsightTitle": "☀️ সকালের টাকার update",
   "notif_weeklyRecapNudgeTitle": "📊 সপ্তাহের recap তৈরি",
   "notif_yesterdaySpendTitle": "💰 গতকালের খরচ",
   "notif_weeklyRecapReadyTitle": "📊 Weekly recap অপেক্ষা করছে",
   "notif_underBudgetStreakTitle": "🔥 {days} দিন budget-এর মধ্যে!",
-  "@notif_underBudgetStreakTitle": { "placeholders": { "days": { "type": "int" } } },
+  "@notif_underBudgetStreakTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "dashboard_bgSyncIssueTitle": "Background sync-এ সমস্যা হতে পারে",
   "dashboard_bgSyncIssueDesc": "Bills ও alerts-এ দেরি হতে পারে। App আবার খুলুন।",
-
   "onboard_whatDidYouSpend": "আজ কী খরচ করেছেন?",
   "onboard_addFewToStart": "কিছু add করুন — dashboard সাথে সাথে live হয়ে যাবে",
   "onboard_skipAddLater": "Skip — পরে করব",
@@ -2318,8 +2509,13 @@
   "onboard_starterLunch": "খাবার",
   "onboard_starterGroceries": "Groceries",
   "onboard_starterAdded": "{count}টি expense add হয়েছে!",
-  "@onboard_starterAdded": { "placeholders": { "count": { "type": "int" } } },
-
+  "@onboard_starterAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "dashboard_listeningTitle": "Transactions শুনছি...",
   "dashboard_waitingForSms": "পরের bank notification এখানে আপনা আপনি চলে আসবে",
   "dashboard_meanwhile": "এতোমধ্যে, try করুন:",
@@ -2330,11 +2526,9 @@
   "dashboard_testTip": "💡 Tip: একটি ছোট UPI payment পাঠান — auto-import দেখুন!",
   "dashboard_addFirstExpense": "প্রথম খরচ add করুন",
   "dashboard_addFirstExpenseDesc": "আজ কী খরচ করেছেন? Tap করে বলুন",
-
   "quickAdd_title": "Quick Add",
   "quickAdd_recentCategories": "Recent categories",
   "quickAdd_moreOptions": "আরও options",
-
   "mode_simple": "Simple",
   "mode_full": "Full",
   "mode_simpleDesc": "Expenses, budgets ও SMS tracking",
@@ -2343,12 +2537,17 @@
   "mode_switchToSimple": "Simple Mode-এ যান",
   "mode_pickTitle": "Mudra কীভাবে use করতে চান?",
   "mode_pickDesc": "পরে settings থেকে বদলাতে পারবেন",
-
   "backup_cloudBackup": "Cloud Backup",
   "backup_cloudRestore": "Cloud থেকে Restore করুন",
   "backup_signInGoogle": "Google দিয়ে Sign in করুন",
   "backup_signedInAs": "{email} দিয়ে signed in",
-  "@backup_signedInAs": { "placeholders": { "email": { "type": "String" } } },
+  "@backup_signedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "backup_uploadingToDrive": "Google Drive-এ upload হচ্ছে...",
   "backup_uploadSuccess": "Backup Google Drive-এ upload হয়েছে",
   "backup_uploadFailed": "Backup upload হয়নি",
@@ -2358,7 +2557,6 @@
   "backup_signInRequired": "Cloud backup-এর জন্য Google দিয়ে sign in করুন",
   "backup_signOut": "Sign out",
   "backup_cloudSubtitle": "Google Drive-এ encrypted backup",
-
   "backup_autoBackup": "Auto Backup",
   "backup_autoBackupDesc": "Automatic local backup, শেষ 7 দিন রাখে",
   "backup_autoFrequency": "Backup frequency",
@@ -2367,53 +2565,114 @@
   "backup_autoWeekly": "Weekly",
   "backup_autoSetPassword": "Auto backup-এর জন্য password set করুন",
   "backup_autoEnabled": "Auto backup on ({frequency})",
-  "@backup_autoEnabled": { "placeholders": { "frequency": { "type": "String" } } },
+  "@backup_autoEnabled": {
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      }
+    }
+  },
   "backup_autoLastRun": "শেষ auto backup: {date}",
-  "@backup_autoLastRun": { "placeholders": { "date": { "type": "String" } } },
+  "@backup_autoLastRun": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "backup_passwordSet": "Backup password set হয়েছে",
   "backup_proRequired": "Pro feature",
-
   "onboard_skip": "Skip করুন",
   "onboard_languages": "ভাষা",
   "onboard_smartTrackingMergedDesc": "Bank SMS থেকে auto-import, budget তৈরি করুন, goals track করুন — সব এক জায়গায়।",
-
   "sms_celebrationTitle": "প্রথম SMS transaction! 🎉",
   "sms_celebrationBody": "Mudra আপনার bank SMS থেকে নিজে থেকেই transaction save করেছে। এখন থেকে খরচ আপনা আপনি track হবে।",
   "sms_celebrationCta": "চলো, শুরু করি!",
-
   "milestone_shareButton": "Story-তে Share করুন",
   "milestone_goalReachedTitle": "Goal সম্পূর্ণ!",
   "milestone_goalReachedDesc": "{amount} সেভ করে target পূরণ করেছেন 🌟",
-  "@milestone_goalReachedDesc": { "placeholders": { "amount": { "type": "String" } } },
+  "@milestone_goalReachedDesc": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "milestone_streakTitle": "{days} দিনের Streak!",
-  "@milestone_streakTitle": { "placeholders": { "days": { "type": "int" } } },
+  "@milestone_streakTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "milestone_streakDesc": "লাগাতার {days} দিন খরচ track করেছেন",
-  "@milestone_streakDesc": { "placeholders": { "days": { "type": "int" } } },
+  "@milestone_streakDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "milestone_underBudgetTitle": "Budget-এর মধ্যে!",
   "milestone_underBudgetDesc": "পুরো মাস budget-এর মধ্যে ছিলেন 💪",
-
   "account_creditLimit": "Credit Limit",
   "account_statementDay": "Statement Day",
   "account_dueDay": "Due Day",
   "account_daysUntilDue": "{days} দিন বাকি",
-  "@account_daysUntilDue": { "placeholders": { "days": { "type": "int" } } },
+  "@account_daysUntilDue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "account_dueToday": "আজ due!",
   "account_overdue": "{days} দিন overdue",
-  "@account_overdue": { "placeholders": { "days": { "type": "int" } } },
-
+  "@account_overdue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "subscription_title": "Subscriptions ধরা পড়েছে",
   "subscription_monthlyTotal": "প্রতি মাসে {amount}",
-  "@subscription_monthlyTotal": { "placeholders": { "amount": { "type": "String" } } },
+  "@subscription_monthlyTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "subscription_occurrences": "4 মাসে {count} বার",
-  "@subscription_occurrences": { "placeholders": { "count": { "type": "int" } } },
+  "@subscription_occurrences": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "subscription_none": "এখনও কোনো subscription detect হয়নি",
   "subscription_dayOfMonth": "প্রতি মাসে {day} তারিখের আশেপাশে",
-  "@subscription_dayOfMonth": { "placeholders": { "day": { "type": "int" } } },
+  "@subscription_dayOfMonth": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
   "subscription_trackAsRecurring": "Recurring bill হিসেবে track করুন",
   "cc_title": "Credit Card Bills",
   "cc_totalOutstanding": "মোট বকেয়া",
   "cc_acrossCards": "{count} টি card-এ",
-  "@cc_acrossCards": { "placeholders": { "count": { "type": "int" } } },
+  "@cc_acrossCards": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "cc_noCards": "কোনো credit card নেই",
   "cc_noCardsHint": "Bills track করতে credit card account যোগ করুন",
   "cc_minimumDue": "Min. Due",
@@ -2423,5 +2682,414 @@
   "cc_nextDue": "Due",
   "cc_payMinimum": "Minimum দিন",
   "cc_payFull": "পুরোটা দিন",
-  "cc_utilitySubtitle": "Due dates, বকেয়া ও limits"
+  "cc_utilitySubtitle": "Due dates, বকেয়া ও limits",
+  "@about_packageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@account_foreignCurrencyInfo": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "@account_resetTo": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@accounts_accountArchivedMessage": {
+    "description": "Success message when account is archived"
+  },
+  "@accounts_addAccountLabel": {
+    "description": "Label for add account button"
+  },
+  "@accounts_archiveAccountMessage": {
+    "description": "Message for archive account dialog"
+  },
+  "@accounts_archiveAccountTitle": {
+    "description": "Title for archive account dialog"
+  },
+  "@accounts_archiveLabel": {
+    "description": "Archive button label"
+  },
+  "@accounts_atLeastOneAccountRequired": {
+    "description": "Warning message when trying to delete the last account"
+  },
+  "@accounts_cancelLabel": {
+    "description": "Cancel button label"
+  },
+  "@accounts_deleteAccountMessage": {
+    "description": "Message for delete account dialog"
+  },
+  "@accounts_deleteAccountTitle": {
+    "description": "Title for delete account dialog"
+  },
+  "@accounts_manageAccountsTitle": {
+    "description": "Title for manage accounts screen"
+  },
+  "@accounts_noAccountsAddedYet": {
+    "description": "Message when no accounts are added"
+  },
+  "@add_edit_transaction_screen_title": {
+    "description": "This is title of Add Transaction screen"
+  },
+  "@app_settings_appbar_title": {
+    "description": "This is title of screen page"
+  },
+  "@app_settings_daily_reminder_title": {
+    "description": "This is text of Daily reminder title"
+  },
+  "@app_settings_language_subtitle": {
+    "description": "This is subtitle of Language tile"
+  },
+  "@app_settings_language_title": {
+    "description": "This is title of Language tile"
+  },
+  "@app_settings_themeModeModalTitle": {
+    "description": "This is title for theme mode modal"
+  },
+  "@app_settings_theme_mode_amoled": {
+    "description": "This is text of Theme Mode AMOLED dark"
+  },
+  "@app_settings_theme_mode_dark": {
+    "description": "This is text of Theme Mode dark"
+  },
+  "@app_settings_theme_mode_light": {
+    "description": "This is text of Theme Mode light"
+  },
+  "@app_settings_theme_mode_subtitle": {
+    "description": "This is subtitle of Theme Mode tile"
+  },
+  "@app_settings_theme_mode_system_default": {
+    "description": "This is text of Theme Mode system default"
+  },
+  "@app_settings_theme_mode_title": {
+    "description": "This is title of Theme Mode tile"
+  },
+  "@appearance_toneActivated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@backup_backupDataSubtitle": {
+    "description": "Subtitle for backup data option"
+  },
+  "@backup_backupDataTitle": {
+    "description": "Title for backup data option"
+  },
+  "@backup_backupRestoreTitle": {
+    "description": "Title for backup and restore screen"
+  },
+  "@backup_completedMessage": {
+    "description": "Success message when backup is completed"
+  },
+  "@backup_daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@backup_hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@backup_includeAttachmentsMessage": {
+    "description": "Message for include attachments dialog"
+  },
+  "@backup_includeAttachmentsTitle": {
+    "description": "Title for include attachments dialog"
+  },
+  "@backup_lastBackupLabel": {
+    "description": "Label showing last backup date"
+  },
+  "@backup_minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@backup_noBackupFoundLabel": {
+    "description": "Label when no backup is found"
+  },
+  "@backup_noLabel": {
+    "description": "No button label"
+  },
+  "@backup_recordCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@backup_restoreBackupSubtitle": {
+    "description": "Subtitle for restore backup option"
+  },
+  "@backup_restoreBackupTitle": {
+    "description": "Title for restore backup option"
+  },
+  "@backup_restoreSuccessMessage": {
+    "description": "Success message when restore is successful"
+  },
+  "@backup_yesLabel": {
+    "description": "Yes button label"
+  },
+  "@categories_addCategoryLabel": {
+    "description": "Label for add category button"
+  },
+  "@categories_categoryDeletedMessage": {
+    "description": "Success message when category is deleted"
+  },
+  "@categories_deleteCategoryMessage": {
+    "description": "Message for delete category dialog"
+  },
+  "@categories_deleteCategoryTitle": {
+    "description": "Title for delete category dialog"
+  },
+  "@categories_deleteWithTransactions": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@categories_manageCategoriesTitle": {
+    "description": "Title for manage categories screen"
+  },
+  "@categories_noCategoriesFound": {
+    "description": "Message when no categories are found"
+  },
+  "@categories_transactionCount": {
+    "description": "Transaction count for category"
+  },
+  "@dashboard_cardsActive": {
+    "placeholders": {
+      "visible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@exchange_editRate": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@exchange_rateUpdated": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@exchange_unitInfo": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "@goal_acrossGoals": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_daysAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_daysLeft": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_daysRemaining": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_emotionMoreToGo": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "@goal_goalsInProgress": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_monthsLeft": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "@goal_paceDaily": {
+    "placeholders": {
+      "daily": {},
+      "monthly": {}
+    }
+  },
+  "@goal_progressLeft": {
+    "placeholders": {
+      "percent": {},
+      "amount": {}
+    }
+  },
+  "@goal_startSaving": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "@help_articleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@help_resultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@notifSettings_activeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@notifSettings_weeklySchedule": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "@plugins_activeCount": {
+    "placeholders": {
+      "active": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@plugins_disabled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@plugins_enabled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@reconcile_expenseAdjustment": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@reconcile_incomeAdjustment": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@security_protectionsActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@statistics_percentOfExpenses": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "@stats_byDay": {
+    "placeholders": {
+      "day": {},
+      "amount": {},
+      "month": {}
+    }
+  },
+  "@stats_peakAndQuiet": {
+    "placeholders": {
+      "peak": {},
+      "quiet": {}
+    }
+  },
+  "@stats_projectedThisMonth": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "@stats_topCategory": {
+    "placeholders": {
+      "category": {},
+      "percent": {}
+    }
+  },
+  "@stats_trendDown": {
+    "placeholders": {
+      "category": {}
+    }
+  },
+  "@stats_trendUp": {
+    "placeholders": {
+      "category": {},
+      "percent": {}
+    }
+  },
+  "@stats_weekdayPeak": {
+    "placeholders": {
+      "day": {}
+    }
+  },
+  "@stats_weekendPeak": {
+    "placeholders": {
+      "day": {}
+    }
+  }
 }

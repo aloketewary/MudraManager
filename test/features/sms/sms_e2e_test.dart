@@ -62,11 +62,11 @@ void main() {
   }
 
   /// In-memory dedup (same as NotificationListenerBridge._isDuplicate).
-  final _seenHashes = <String>{};
+  final seenHashes = <String>{};
   bool isDuplicate(String hash) {
     if (hash.isEmpty) return true;
-    if (_seenHashes.contains(hash)) return true;
-    _seenHashes.add(hash);
+    if (seenHashes.contains(hash)) return true;
+    seenHashes.add(hash);
     return false;
   }
 
@@ -107,7 +107,7 @@ void main() {
   }
 
   setUp(() async {
-    _seenHashes.clear();
+    seenHashes.clear();
 
     SharedPreferences.setMockInitialValues({'sms_import_enabled': true});
     final prefs = await SharedPreferences.getInstance();
@@ -285,7 +285,7 @@ void main() {
       expect(r1, isNot(ParseResult.skipped));
 
       // Simulate new drain session — clear in-memory dedup
-      _seenHashes.clear();
+      seenHashes.clear();
 
       // Same SMS again — in-memory dedup passes, but Dart hash dedup catches it
       final r2 = await processNotification(title: 'HDFCBK', body: body, timestamp: ts);

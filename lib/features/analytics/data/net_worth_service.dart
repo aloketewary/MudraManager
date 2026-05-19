@@ -45,18 +45,26 @@ final netWorthProvider = FutureProvider.autoDispose((ref) async {
   final netWorth = totalAssets - totalLiabilities;
 
   // Calculate monthly change from balance history
+  // BOLT OPTIMIZATION: Parallelize async calls to reduce sequential wait time
   final now = DateTime.now();
   final lastMonth = DateTime(now.year, now.month - 1, now.day);
-  double lastMonthNetWorth = 0.0;
 
-  for (final account in accounts) {
-    final lastBalance = await ref.read(balanceHistoryServiceProvider)
-        .getBalanceOnDate(account.id, lastMonth);
-    if (lastBalance != null) {
-      if (account.accountType == AccountType.creditCard) {
-        lastMonthNetWorth -= lastBalance.abs();
+  final lastBalances = await Future.wait(
+    accounts.map(
+      (a) => ref
+          .read(balanceHistoryServiceProvider)
+          .getBalanceOnDate(a.id, lastMonth),
+    ),
+  );
+
+  double lastMonthNetWorth = 0.0;
+  for (int i = 0; i < accounts.length; i++) {
+    final balance = lastBalances[i];
+    if (balance != null) {
+      if (accounts[i].accountType == AccountType.creditCard) {
+        lastMonthNetWorth -= balance.abs();
       } else {
-        lastMonthNetWorth += lastBalance;
+        lastMonthNetWorth += balance;
       }
     }
   }
@@ -80,15 +88,23 @@ final netWorthHistoryProvider = FutureProvider.autoDispose((ref) async {
 
   final dailyNetWorth = <NetWorthHistoryPoint>[];
 
+  // BOLT OPTIMIZATION: Parallelize balance lookups to avoid O(D * A) sequential awaits.
+  // Each day depends on all accounts, so we can parallelize by day or by account.
+  // Parallelizing by day ensures we get results as fast as the slowest day.
   for (int i = 0; i <= 30; i++) {
     final date = startDate.add(Duration(days: i));
-    double dayNetWorth = 0.0;
 
-    for (final account in accounts) {
-      final balance = await ref.read(balanceHistoryServiceProvider)
-          .getBalanceOnDate(account.id, date);
+    final balances = await Future.wait(
+      accounts.map(
+        (a) => ref.read(balanceHistoryServiceProvider).getBalanceOnDate(a.id, date),
+      ),
+    );
+
+    double dayNetWorth = 0.0;
+    for (int j = 0; j < accounts.length; j++) {
+      final balance = balances[j];
       if (balance != null) {
-        if (account.accountType == AccountType.creditCard) {
+        if (accounts[j].accountType == AccountType.creditCard) {
           dayNetWorth -= balance.abs();
         } else {
           dayNetWorth += balance;
