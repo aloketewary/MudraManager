@@ -1,0 +1,5549 @@
+{
+  "audit_metadata": {
+    "timestamp": "2026-05-19T13:13:19.088Z",
+    "flutter_version": "3.41.6",
+    "dart_version": "3.11.4",
+    "total_packages_scanned": 65,
+    "execution_time_ms": 73642
+  },
+  "summary": {
+    "total": 65,
+    "vibrant": 16,
+    "stable": 29,
+    "outdated": 14,
+    "abandoned": 3,
+    "end_of_life": 3
+  },
+  "packages": [
+    {
+      "name": "animations",
+      "installed_version": "2.1.2",
+      "latest_version": "2.2.0",
+      "status": "Stable",
+      "vibrancy_score": 55,
+      "pub_points": 160,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/animations",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/animations",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 37463010,
+      "bloat_rating": 3,
+      "file_usage_count": 3,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/page_transitions.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/router/home_screen.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/router/app_router.dart",
+          "line": 3,
+          "import_line": 3
+        }
+      ]
+    },
+    {
+      "name": "async",
+      "installed_version": "2.13.1",
+      "latest_version": "2.13.1",
+      "status": "Stable",
+      "vibrancy_score": 53.9,
+      "pub_points": 150,
+      "stars": 68,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/async",
+      "repository_url": "https://github.com/dart-lang/core/tree/main/pkgs/async",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 85402,
+      "bloat_rating": 4,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/features/dashboard/presentation/providers/dashboard_data_provider.dart",
+          "line": 2,
+          "import_line": 2
+        }
+      ]
+    },
+    {
+      "name": "auto_size_text",
+      "installed_version": "3.0.0",
+      "latest_version": "3.0.0",
+      "status": "Outdated",
+      "vibrancy_score": 5.2,
+      "pub_points": 150,
+      "stars": 2137,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/auto_size_text",
+      "repository_url": "https://github.com/leisim/auto_size_text",
+      "license": "MIT",
+      "archive_size_bytes": 71601,
+      "bloat_rating": 1,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/adaptive_text.dart",
+          "line": 2,
+          "import_line": 2
+        }
+      ]
+    },
+    {
+      "name": "build_runner",
+      "installed_version": "2.13.1",
+      "latest_version": "2.15.0",
+      "status": "Vibrant",
+      "vibrancy_score": 80.5,
+      "pub_points": 140,
+      "stars": 848,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/build_runner",
+      "repository_url": "https://github.com/dart-lang/build/tree/master/build_runner",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 285967,
+      "bloat_rating": 6,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "confetti",
+      "installed_version": "0.8.0",
+      "latest_version": "0.8.0",
+      "status": "Outdated",
+      "vibrancy_score": 6.5,
+      "pub_points": 160,
+      "stars": 458,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/confetti",
+      "repository_url": "https://github.com/funwithflutter/flutter_confetti/",
+      "license": "MIT",
+      "archive_size_bytes": 485922,
+      "bloat_rating": 2,
+      "file_usage_count": 4,
+      "file_usages": [
+        {
+          "file_path": "lib/features/goal/presentation/screens/goal_details_screen.dart",
+          "line": 24,
+          "import_line": 24
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/sms_success_celebration_sheet.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/upgrade/presentation/screens/upgrade_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/gamification/screens/achievements_screen.dart",
+          "line": 8,
+          "import_line": 8
+        }
+      ]
+    },
+    {
+      "name": "crypto",
+      "installed_version": "3.0.7",
+      "latest_version": "3.0.7",
+      "status": "Stable",
+      "vibrancy_score": 59.9,
+      "pub_points": 160,
+      "stars": 68,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/crypto",
+      "repository_url": "https://github.com/dart-lang/core/tree/main/pkgs/crypto",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 615595,
+      "bloat_rating": 2,
+      "file_usage_count": 7,
+      "file_usages": [
+        {
+          "file_path": "test/features/sms/sms_e2e_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "test/features/sms/sms_functional_test.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "test/features/sms/sms_full_flow_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/core/services/notification_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/services/backup_restore_service.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/core/entitlement/entitlement_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/sms/data/sms_processor_service.dart",
+          "line": 7,
+          "import_line": 7
+        }
+      ]
+    },
+    {
+      "name": "cupertino_icons",
+      "installed_version": "1.0.9",
+      "latest_version": "1.0.9",
+      "status": "Stable",
+      "vibrancy_score": 52.5,
+      "pub_points": 160,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/cupertino_icons",
+      "repository_url": "https://github.com/flutter/packages/tree/main/third_party/packages/cupertino_icons",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 2601144,
+      "bloat_rating": 0,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "dynamic_color",
+      "installed_version": "1.8.1",
+      "latest_version": "1.8.1",
+      "status": "Outdated",
+      "vibrancy_score": 26.4,
+      "pub_points": 150,
+      "stars": 862,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/dynamic_color",
+      "repository_url": "https://github.com/material-foundation/flutter-packages/tree/main/packages/dynamic_color",
+      "license": "Apache-2.0",
+      "archive_size_bytes": 1009678,
+      "bloat_rating": 0,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/main.dart",
+          "line": 40,
+          "import_line": 40
+        }
+      ]
+    },
+    {
+      "name": "encrypt",
+      "installed_version": "5.0.3",
+      "latest_version": "5.0.3",
+      "status": "End of Life",
+      "vibrancy_score": 10.6,
+      "pub_points": 130,
+      "stars": 366,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/encrypt",
+      "repository_url": "https://github.com/leocavalcante/encrypt",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 14734,
+      "bloat_rating": 1,
+      "file_usage_count": 4,
+      "file_usages": [
+        {
+          "file_path": "test/service/auto_backup_dispatcher_test.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/backup_restore_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/core/services/backup_restore_service.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/core/db/field_encryption_service.dart",
+          "line": 5,
+          "import_line": 5
+        }
+      ]
+    },
+    {
+      "name": "envied",
+      "installed_version": "1.3.4",
+      "latest_version": "1.3.5",
+      "status": "Stable",
+      "vibrancy_score": 69.4,
+      "pub_points": 160,
+      "stars": 220,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/envied",
+      "repository_url": "https://github.com/petercinibulk/envied",
+      "license": "MIT",
+      "archive_size_bytes": 9521,
+      "bloat_rating": 0,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/core/constants/env.dart",
+          "line": 1,
+          "import_line": 1
+        }
+      ]
+    },
+    {
+      "name": "envied_generator",
+      "installed_version": "1.3.4",
+      "latest_version": "1.3.5",
+      "status": "Stable",
+      "vibrancy_score": 68.4,
+      "pub_points": 160,
+      "stars": 220,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/envied_generator",
+      "repository_url": "https://github.com/petercinibulk/envied",
+      "license": "MIT",
+      "archive_size_bytes": 15856,
+      "bloat_rating": 2,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "excel",
+      "installed_version": "4.0.6",
+      "latest_version": "4.0.6",
+      "status": "Abandoned",
+      "vibrancy_score": 13.8,
+      "pub_points": 115,
+      "stars": 480,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/excel",
+      "repository_url": "https://github.com/justkawal/excel",
+      "license": "MIT",
+      "archive_size_bytes": 174385,
+      "bloat_rating": 5,
+      "file_usage_count": 4,
+      "file_usages": [
+        {
+          "file_path": "lib/plugins/export_plugins/standard_excel_export.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/plugins/export_plugins/business_excel_export.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/import_export/data/excel_export_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/import_export/data/excel_import_service.dart",
+          "line": 2,
+          "import_line": 2
+        }
+      ]
+    },
+    {
+      "name": "file_picker",
+      "installed_version": "11.0.2",
+      "latest_version": "11.0.2",
+      "status": "Vibrant",
+      "vibrancy_score": 87.6,
+      "pub_points": 140,
+      "stars": 1538,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/file_picker",
+      "repository_url": "https://github.com/miguelpruivo/flutter_file_picker",
+      "license": "MIT",
+      "archive_size_bytes": 20267528,
+      "bloat_rating": 3,
+      "file_usage_count": 3,
+      "file_usages": [
+        {
+          "file_path": "lib/features/import_export/presentation/screens/import_export_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/core/utils/file_utils.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/core/services/backup_restore_service.dart",
+          "line": 8,
+          "import_line": 8
+        }
+      ]
+    },
+    {
+      "name": "fl_chart",
+      "installed_version": "1.2.0",
+      "latest_version": "1.2.0",
+      "status": "Vibrant",
+      "vibrancy_score": 82,
+      "pub_points": 160,
+      "stars": 7515,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/fl_chart",
+      "repository_url": "https://github.com/imaNNeo/fl_chart",
+      "license": "MIT",
+      "archive_size_bytes": 20333273,
+      "bloat_rating": 6,
+      "file_usage_count": 17,
+      "file_usages": [
+        {
+          "file_path": "lib/features/analytics/presentation/spending_trends_screen.dart",
+          "line": 14,
+          "import_line": 14
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/screens/analytics_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/net_worth_screen.dart",
+          "line": 18,
+          "import_line": 18
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/cash_flow_forecast_screen.dart",
+          "line": 15,
+          "import_line": 15
+        },
+        {
+          "file_path": "lib/features/goal/presentation/screens/goal_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/goal/presentation/screens/goal_details_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/account/presentation/widgets/balance_history_chart.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/split_detail_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/trip_detail_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/net_worth_card.dart",
+          "line": 14,
+          "import_line": 14
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/modern_cashflow_card.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/net_worth_mini_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/data/status_data_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/expense_trend_widget.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/category_pie_chart.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/hero_chart_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/statistics_screen.dart",
+          "line": 14,
+          "import_line": 14
+        }
+      ]
+    },
+    {
+      "name": "flutter_animate",
+      "installed_version": "4.5.2",
+      "latest_version": "4.5.2",
+      "status": "Outdated",
+      "vibrancy_score": 15.2,
+      "pub_points": 150,
+      "stars": 1090,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/flutter_animate",
+      "repository_url": "https://github.com/gskinner/flutter_animate",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 246092,
+      "bloat_rating": 4,
+      "file_usage_count": 16,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/ambient_brand_section.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/shared/widgets/no_data_found.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/skeleton_loader.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/add_transaction_widgets.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/financial_health_card.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/spending_personality_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/hero_moment_card.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/recent_transactions_card.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/dashboard_home.dart",
+          "line": 36,
+          "import_line": 36
+        },
+        {
+          "file_path": "lib/core/router/home_screen.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/widgets/skeleton_loader.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/achievement_unlock_dialog.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/streak_indicator.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/achievement_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/core/animations/app_animations.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/utility_screen.dart",
+          "line": 8,
+          "import_line": 8
+        }
+      ]
+    },
+    {
+      "name": "flutter_boring_avatars",
+      "installed_version": "2.1.0",
+      "latest_version": "2.1.0",
+      "status": "Stable",
+      "vibrancy_score": 65.5,
+      "pub_points": 160,
+      "stars": 14,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/flutter_boring_avatars",
+      "repository_url": "https://github.com/xioxin/flutter_boring_avatars",
+      "license": "MIT",
+      "archive_size_bytes": 170494,
+      "bloat_rating": 2,
+      "file_usage_count": 8,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/settlement_card.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/edit_trip_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/expense_detail_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/split_detail_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/trip_detail_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/profile_screen.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/edit_user_profile_screen.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/router/home_screen.dart",
+          "line": 37,
+          "import_line": 37
+        }
+      ]
+    },
+    {
+      "name": "flutter_launcher_icons",
+      "installed_version": "0.14.4",
+      "latest_version": "0.14.4",
+      "status": "Outdated",
+      "vibrancy_score": 33.1,
+      "pub_points": 160,
+      "stars": 2112,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/flutter_launcher_icons",
+      "repository_url": "https://github.com/fluttercommunity/flutter_launcher_icons/",
+      "license": "MIT",
+      "archive_size_bytes": 1276191,
+      "bloat_rating": 3,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "flutter_lints",
+      "installed_version": "6.0.0",
+      "latest_version": "6.0.0",
+      "status": "Stable",
+      "vibrancy_score": 52.5,
+      "pub_points": 160,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/flutter_lints",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/flutter_lints",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 4980,
+      "bloat_rating": 0,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "flutter_local_notifications",
+      "installed_version": "21.0.0",
+      "latest_version": "21.0.0",
+      "status": "Stable",
+      "vibrancy_score": 66.7,
+      "pub_points": 160,
+      "stars": 2652,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/flutter_local_notifications",
+      "repository_url": "https://github.com/MaikuB/flutter_local_notifications/tree/master/flutter_local_notifications",
+      "license": null,
+      "archive_size_bytes": 727307,
+      "bloat_rating": 4,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/core/services/notification_service.dart",
+          "line": 6,
+          "import_line": 6
+        }
+      ]
+    },
+    {
+      "name": "flutter_native_timezone_latest",
+      "installed_version": "1.0.0",
+      "latest_version": "1.0.0",
+      "status": "Abandoned",
+      "vibrancy_score": 8.2,
+      "pub_points": 130,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/flutter_native_timezone_latest",
+      "repository_url": "https://github.com/Mohamed-Nagdy/flutter_native_timezone_latest",
+      "license": "MIT",
+      "archive_size_bytes": 212007,
+      "bloat_rating": 0,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/core/services/notification_service.dart",
+          "line": 7,
+          "import_line": 7
+        }
+      ]
+    },
+    {
+      "name": "flutter_riverpod",
+      "installed_version": "3.3.1",
+      "latest_version": "3.3.1",
+      "status": "Stable",
+      "vibrancy_score": 65.5,
+      "pub_points": 140,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/flutter_riverpod",
+      "repository_url": "https://github.com/rrousselGit/riverpod",
+      "license": "MIT",
+      "archive_size_bytes": 54407,
+      "bloat_rating": 3,
+      "file_usage_count": 196,
+      "file_usages": [
+        {
+          "file_path": "lib/main.dart",
+          "line": 14,
+          "import_line": 14
+        },
+        {
+          "file_path": "lib/shared/widgets/account_selector.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/shared/widgets/category_card.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/common_text_input_field.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/shared/widgets/common_color_button.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/milestone_share_sheet.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/shared/widgets/ambient_brand_section.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/shared/widgets/app_card.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/common_button.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/pro_gate.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/shared/widgets/account_selector_bottom_sheet.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/shared/widgets/app_list_tile.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/common_icon_button.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/shared/widgets/speed_dial_fab.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/shared/widgets/page_transitions.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/shared/widgets/animated_balance.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/category_selector.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/shared/widgets/category_selector_bottom_sheet.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/shared/screens/notification_page_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/budget/presentation/widgets/budget_overview_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/budget/presentation/screens/adaptive_budget_dashboard.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/budget/presentation/screens/add_budget_screen.dart",
+          "line": 14,
+          "import_line": 14
+        },
+        {
+          "file_path": "lib/features/budget/presentation/screens/budget_details_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "test/features/transactions/tag_analytics_test.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/budget/data/overspend_prediction_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/budget/data/budget_alert_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/budget/data/budget_service_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/spending_trends_screen.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/screens/analytics_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/financial_health_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/net_worth_screen.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/tax_estimation_screen.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/spending_personality_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/cash_flow_forecast_screen.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/analytics/data/net_worth_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/analytics/data/analytics_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/goal/presentation/screens/goal_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/goal/presentation/screens/goal_details_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/goal/presentation/screens/add_edit_goal_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/goal/data/goal_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/onboarding/presentation/screens/account_setup_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/onboarding/presentation/screens/onboarding_screen.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/backup/data/enhanced_backup_service.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/account/presentation/widgets/balance_history_chart.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/account/presentation/screens/investment_portfolio_screen.dart",
+          "line": 13,
+          "import_line": 13
+        },
+        {
+          "file_path": "lib/features/account/presentation/screens/balance_history_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/account/presentation/screens/reconciliation_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/account/presentation/screens/credit_card_bills_screen.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/account/data/reconciliation_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/account/data/account_providers.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/account/data/account_access_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/account/data/balance_history_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/account/data/credit_card_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/trip/presentation/widgets/active_trip_mini_card.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/edit_trip_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/expense_detail_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/split_detail_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/add_trip_transaction_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/trip_detail_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/trips_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/group_detail_dispatcher.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/trip/data/trip_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/trip/data/trip_services_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/icon_picker_bottom_sheet.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/account_form.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/guest_mode_toggle.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/currency_settings_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/help_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/choose_language_screen.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/about_app.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/exchange_rate_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/archived_transactions_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/manage_account_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/appearance_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/notification_settings_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/manage_categories_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/profile_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/setting_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/sms_import_setting_screen.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/backup_restore_screen.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/theme_picker_screen.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/edit_user_profile_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/add_edit_category_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/app_settings_page.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/profile/data/guest_mode_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/profile/data/help_guide_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/profile/data/user_profile_provider.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_card.dart",
+          "line": 19,
+          "import_line": 19
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/add_transaction_widgets.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/subscription_list_card.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/sms_activity_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/transfer_screen_new.dart",
+          "line": 13,
+          "import_line": 13
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/add_recurring_transaction_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/bill_control_center_screen.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/transaction_list_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/add_edit_transaction_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/providers/smart_defaults_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/data/pending_transaction_prodiver.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/transactions/data/transaction_provider.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/transactions/data/paginated_transaction_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/data/tag_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/data/tag_analytics_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/data/subscription_detector_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/data/recurring_transaction_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/category/data/category_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/category/data/category_management_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/financial_health_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/spending_personality_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/spending_prediction_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/sms_success_celebration_sheet.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/hero_moment_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/recurring_expenses_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/net_worth_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/modern_cashflow_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/net_worth_mini_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/swipeable_account_card.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/goal_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/recent_transactions_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/dashboard_action_button.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/budget_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/import_export/presentation/screens/import_export_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/import_export/presentation/screens/import_preview_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/dashboard_home.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/recurring_expenses_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/dashboard_customize_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/command_center_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/providers/ai_insight_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/providers/smart_order_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/providers/permission_provider.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/providers/dashboard_data_provider.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/providers/widget_preferences_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/providers/account_display_style_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/data/background_health_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/data/priority_alert_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/data/greeting_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/data/status_data_provider.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/data/summary_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/data/historical_data_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/net_worth_widget_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/hero_moment_widget_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/quick_actions_widget_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/accounts_widget_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/goals_widget_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/budget_alert_widget_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/recurring_expenses_widget_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/budget_overview_widget_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/cash_flow_widget_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/ai_insight_widget_plugin.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/recent_transactions_widget_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/upgrade/presentation/screens/upgrade_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/core/router/home_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/marketplace/screens/plugin_groups_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/core/widgets/skeleton_loader.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/widgets/dashboard_widget_plugin.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/recap/presentation/screens/monthly_recap_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/core/utils/auth_gate.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/core/utils/simple_color_picker.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/badge_showcase.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/debug_gamification_button.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/streak_indicator.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/level_badge.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/recent_achievement_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/debug_button.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/providers/notification_record_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/providers/app_mode_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/providers/isar_provider.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/providers/singleton_providers.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/providers/spacing_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/providers/l10n_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/providers/date_change_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/providers/auth_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/providers/app_filter_chip.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/core/providers/filter_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/providers/collection_watchers.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/providers/state_value.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/services/widget_service.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/core/services/google_drive_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/gamification/screens/achievements_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/detail_action_card.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/insight_grid_card.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/logging/app_log.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/logging/logger_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/gamification/providers/gamification_providers.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/gamification/providers/achievement_unlock_listener.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/export_options_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/utility_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/monthly_comparison_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/statistics_screen.dart",
+          "line": 13,
+          "import_line": 13
+        },
+        {
+          "file_path": "lib/core/currency/currency_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/tone/tone_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/sms/presentation/widgets/sms_info_card.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/entitlement/billing_provider.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/entitlement/entitlement_provider.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/sms/presentation/screens/sms_activity_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/core/theme/theme_provider.dart",
+          "line": 1,
+          "import_line": 1
+        }
+      ]
+    },
+    {
+      "name": "flutter_secure_storage",
+      "installed_version": "10.0.0",
+      "latest_version": "10.2.0",
+      "status": "End of Life",
+      "vibrancy_score": 79.7,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/flutter_secure_storage",
+      "repository_url": "https://github.com/mogol/flutter_secure_storage/tree/develop/flutter_secure_storage",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 377443,
+      "bloat_rating": 2,
+      "file_usage_count": 3,
+      "file_usages": [
+        {
+          "file_path": "lib/core/providers/auth_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/services/auto_backup_service.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/core/db/field_encryption_service.dart",
+          "line": 6,
+          "import_line": 6
+        }
+      ]
+    },
+    {
+      "name": "flutter_svg",
+      "installed_version": "2.2.4",
+      "latest_version": "2.3.0",
+      "status": "Stable",
+      "vibrancy_score": 55,
+      "pub_points": 160,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/flutter_svg",
+      "repository_url": "https://github.com/flutter/packages/tree/main/third_party/packages/flutter_svg",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 505319,
+      "bloat_rating": 2,
+      "file_usage_count": 2,
+      "file_usages": [
+        {
+          "file_path": "lib/core/router/home_screen.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/marketplace/screens/plugin_groups_screen.dart",
+          "line": 6,
+          "import_line": 6
+        }
+      ]
+    },
+    {
+      "name": "go_router",
+      "installed_version": "17.2.1",
+      "latest_version": "17.2.3",
+      "status": "Stable",
+      "vibrancy_score": 57.1,
+      "pub_points": 150,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/go_router",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/go_router",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 330703,
+      "bloat_rating": 5,
+      "file_usage_count": 82,
+      "file_usages": [
+        {
+          "file_path": "lib/main.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/account_selector.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/shared/widgets/pro_gate.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/shared/widgets/speed_dial_fab.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/shared/widgets/category_selector.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/shared/widgets/common_dialog_screen.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/pending_splits_section.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/shared/screens/notification_page_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/budget/presentation/widgets/budget_overview_card.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/budget/presentation/screens/adaptive_budget_dashboard.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/budget/presentation/screens/add_budget_screen.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/features/budget/presentation/screens/budget_details_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/screens/analytics_screen.dart",
+          "line": 19,
+          "import_line": 19
+        },
+        {
+          "file_path": "lib/features/goal/presentation/screens/goal_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/goal/presentation/screens/goal_details_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/goal/presentation/screens/add_edit_goal_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/onboarding/presentation/screens/account_setup_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/onboarding/presentation/screens/onboarding_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/account/presentation/screens/investment_portfolio_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/account/presentation/screens/credit_card_bills_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/trip/presentation/widgets/active_trip_mini_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/edit_trip_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/expense_detail_screen.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/split_detail_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/add_trip_transaction_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/trip_detail_screen.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/trips_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/icon_picker_bottom_sheet.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/account_form.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/guest_mode_toggle.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/currency_settings_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/manage_account_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/appearance_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/manage_categories_screen.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/profile_screen.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/sms_import_setting_screen.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/theme_picker_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/edit_user_profile_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/add_edit_category_screen.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/app_settings_page.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/add_transaction_widgets.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/subscription_list_card.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/sms_activity_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/transfer_screen_new.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/add_recurring_transaction_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/bill_control_center_screen.dart",
+          "line": 27,
+          "import_line": 27
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/transaction_list_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/add_edit_transaction_screen.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/financial_health_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/spending_personality_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/spending_prediction_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/recurring_expenses_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/net_worth_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/modern_cashflow_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/swipeable_account_card.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/goal_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/recent_transactions_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/dashboard_action_button.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/budget_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/import_export/presentation/screens/import_export_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/import_export/presentation/screens/import_preview_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/dashboard_home.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/dashboard_customize_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/command_center_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/recurring_expenses_widget_plugin.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/budget_overview_widget_plugin.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/cash_flow_widget_plugin.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/ai_insight_widget_plugin.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/recent_transactions_widget_plugin.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/upgrade/presentation/screens/upgrade_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/core/router/home_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/core/router/app_router.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/marketplace/screens/plugin_groups_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/core/utils/auth_gate.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/badge_showcase.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/recent_achievement_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/core/providers/app_filter_chip.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/services/notification_service.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/utility_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/statistics_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/sms/presentation/screens/sms_activity_screen.dart",
+          "line": 11,
+          "import_line": 11
+        }
+      ]
+    },
+    {
+      "name": "google_fonts",
+      "installed_version": "8.0.2",
+      "latest_version": "8.1.0",
+      "status": "Stable",
+      "vibrancy_score": 53,
+      "pub_points": 160,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/google_fonts",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/google_fonts",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 1852300,
+      "bloat_rating": 10,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "google_sign_in",
+      "installed_version": "7.2.0",
+      "latest_version": "7.2.0",
+      "status": "Stable",
+      "vibrancy_score": 53,
+      "pub_points": 160,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/google_sign_in",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/google_sign_in/google_sign_in",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 243654,
+      "bloat_rating": 2,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/core/services/google_drive_service.dart",
+          "line": 3,
+          "import_line": 3
+        }
+      ]
+    },
+    {
+      "name": "googleapis",
+      "installed_version": "16.0.0",
+      "latest_version": "16.0.0",
+      "status": "Stable",
+      "vibrancy_score": 62.3,
+      "pub_points": 155,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/googleapis",
+      "repository_url": "https://github.com/google/googleapis.dart/tree/master/generated/googleapis",
+      "license": null,
+      "archive_size_bytes": 9811451,
+      "bloat_rating": 10,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/core/services/google_drive_service.dart",
+          "line": 4,
+          "import_line": 4
+        }
+      ]
+    },
+    {
+      "name": "home_widget",
+      "installed_version": "0.9.1",
+      "latest_version": "0.9.1",
+      "status": "Vibrant",
+      "vibrancy_score": 77.1,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/home_widget",
+      "repository_url": "https://github.com/ABausG/home_widget",
+      "license": null,
+      "archive_size_bytes": 1588947,
+      "bloat_rating": 1,
+      "file_usage_count": 3,
+      "file_usages": [
+        {
+          "file_path": "lib/main.dart",
+          "line": 15,
+          "import_line": 15
+        },
+        {
+          "file_path": "lib/core/router/home_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/core/services/widget_service.dart",
+          "line": 3,
+          "import_line": 3
+        }
+      ]
+    },
+    {
+      "name": "http",
+      "installed_version": "1.6.0",
+      "latest_version": "1.6.0",
+      "status": "Stable",
+      "vibrancy_score": 48.8,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/http",
+      "repository_url": "https://github.com/dart-lang/http/tree/master/pkgs/http",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 46315,
+      "bloat_rating": 3,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/core/services/google_drive_service.dart",
+          "line": 5,
+          "import_line": 5
+        }
+      ]
+    },
+    {
+      "name": "in_app_purchase",
+      "installed_version": "3.2.3",
+      "latest_version": "3.2.3",
+      "status": "Stable",
+      "vibrancy_score": 55,
+      "pub_points": 160,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/in_app_purchase",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/in_app_purchase/in_app_purchase",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 1229673,
+      "bloat_rating": 0,
+      "file_usage_count": 2,
+      "file_usages": [
+        {
+          "file_path": "lib/features/upgrade/presentation/screens/upgrade_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/core/entitlement/billing_service.dart",
+          "line": 2,
+          "import_line": 2
+        }
+      ]
+    },
+    {
+      "name": "in_app_purchase_android",
+      "installed_version": "0.4.0+10",
+      "latest_version": "0.4.0+10",
+      "status": "Stable",
+      "vibrancy_score": 54.1,
+      "pub_points": 150,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/in_app_purchase_android",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/in_app_purchase/in_app_purchase_android",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 103343,
+      "bloat_rating": 4,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/core/entitlement/billing_service.dart",
+          "line": 7,
+          "import_line": 7
+        }
+      ]
+    },
+    {
+      "name": "in_app_review",
+      "installed_version": "2.0.11",
+      "latest_version": "2.0.12",
+      "status": "Vibrant",
+      "vibrancy_score": 82.2,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/in_app_review",
+      "repository_url": "https://github.com/britannio/in_app_review",
+      "license": "MIT",
+      "archive_size_bytes": 540229,
+      "bloat_rating": 0,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/features/profile/presentation/screens/about_app.dart",
+          "line": 7,
+          "import_line": 7
+        }
+      ]
+    },
+    {
+      "name": "in_app_update",
+      "installed_version": "4.2.5",
+      "latest_version": "4.2.5",
+      "status": "Outdated",
+      "vibrancy_score": 35.1,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/in_app_update",
+      "repository_url": "https://github.com/jonasbark/flutter_in_app_update",
+      "license": "MIT",
+      "archive_size_bytes": 19426,
+      "bloat_rating": 0,
+      "file_usage_count": 2,
+      "file_usages": [
+        {
+          "file_path": "lib/features/profile/presentation/screens/about_app.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/core/services/app_update_service.dart",
+          "line": 2,
+          "import_line": 2
+        }
+      ]
+    },
+    {
+      "name": "intl",
+      "installed_version": "0.20.2",
+      "latest_version": "0.20.2",
+      "status": "Outdated",
+      "vibrancy_score": 16.6,
+      "pub_points": 150,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/intl",
+      "repository_url": "https://github.com/dart-lang/i18n/tree/main/pkgs/intl",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 305265,
+      "bloat_rating": 7,
+      "file_usage_count": 95,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/transaction_form/date_time_row.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/shared/widgets/swipeable_week_calendar.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/shared/widgets/weekly_calendar.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/shared/widgets/settlement_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/shared/widgets/currency_text.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/period_calendar_selector.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/shared/widgets/month_picker_sheet.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/shared/widgets/transaction_filter_sheet.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/shared/widgets/month_tab_selector.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/pending_splits_section.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/shared/screens/notification_page_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/budget/presentation/screens/add_budget_screen.dart",
+          "line": 15,
+          "import_line": 15
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/screens/analytics_screen.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/cash_flow_forecast_screen.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/goal/domain/goal_health.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/account/presentation/screens/credit_card_bills_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/trip/presentation/widgets/active_trip_mini_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/trip/presentation/widgets/trip_expense_item.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/edit_trip_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/expense_detail_screen.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/split_detail_screen.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/trip_detail_screen.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/trips_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/date_time_picker.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/date_range_selector.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_month_picker.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/sms_activity_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_calendar_header.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/transfer_screen_new.dart",
+          "line": 14,
+          "import_line": 14
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/add_recurring_transaction_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/bill_control_center_screen.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/transaction_list_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/add_edit_transaction_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/modern_cashflow_card.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/recent_transactions_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/plugins/export_plugins/standard_pdf_export.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/plugins/export_plugins/standard_excel_export.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/plugins/export_plugins/business_pdf_export.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/plugins/export_plugins/business_excel_export.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/import_export/data/excel_export_service.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/import_export/data/excel_import_service.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/recap/presentation/screens/monthly_recap_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/core/utils/safe_date_format.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/utils/transaction_msg_util.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/utils/export_excel_pdf.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/achievement_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/recap/data/monthly_recap_pdf.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/services/auto_backup_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/services/backup_restore_service.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/expense_trend_widget.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/period_selector.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/hero_chart_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/core/extension/localization_extenstion.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/logging/slf4j_printer.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/export_options_screen.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_pa.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_en.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_ml.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_pt.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_de.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_ur.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_ta.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_mni.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_ms.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_bo.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_ja.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_sat.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_or.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_tr.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_zh.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_bn.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_brx.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_mr.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_es.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_ar.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_mai.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_th.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_doi.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_te.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_vi.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_sw.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_as.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_id.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_si.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_hi.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_gu.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_ko.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_kn.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_sd.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_ne.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_fr.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/l10n/app_localizations_kok.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/currency/currency_meta.dart",
+          "line": 2,
+          "import_line": 2
+        }
+      ]
+    },
+    {
+      "name": "isar_community",
+      "installed_version": "3.3.2",
+      "latest_version": "3.3.2",
+      "status": "Vibrant",
+      "vibrancy_score": 70.4,
+      "pub_points": 140,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/isar_community",
+      "repository_url": "https://github.com/isar-community/isar-community",
+      "license": null,
+      "archive_size_bytes": 75098,
+      "bloat_rating": 5,
+      "file_usage_count": 115,
+      "file_usages": [
+        {
+          "file_path": "lib/main.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "test/service/auto_backup_dispatcher_test.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "test/features/budget/budget_spending_by_type_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "test/features/analytics/advanced_analytics_service_test.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "test/features/onboarding/starter_txn_e2e_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "test/features/account/reconciliation_integration_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/budget/presentation/screens/add_budget_screen.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "test/features/transactions/tag_analytics_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "test/features/transactions/merge_as_transfer_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "test/features/transactions/transaction_integration_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "test/features/transactions/transaction_service_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "test/features/transactions/transaction_update_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/budget/data/budget_service_provider.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/budget/data/bill_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/budget/data/budget_alert_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "test/features/sms/sms_e2e_test.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "test/features/sms/sms_functional_test.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/analytics/data/tax_estimation_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/analytics/data/spending_analyzer.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/goal/data/goal_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/onboarding/presentation/screens/account_setup_screen.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/notifications/data/checks/budget_alerts_check.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/notifications/data/checks/pending_sms_check.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/notifications/data/checks/savings_opportunity_check.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/notifications/data/checks/weekly_recap_nudge_check.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/notifications/data/checks/money_leak_check.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/notifications/data/checks/upcoming_bills_check.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/notifications/data/checks/morning_insight_check.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/notifications/data/checks/unusual_spending_check.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/notifications/data/checks/balance_drop_check.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/notifications/data/checks/re_engagement_check.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/notifications/data/smart_notification_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/notifications/data/smart_check.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/account/data/investment_portfolio_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/account/data/reconciliation_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/account/data/balance_history_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/account/data/account_providers.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/account/data/credit_card_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/trip/data/trip_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/account_form.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/archived_transactions_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/add_edit_category_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/profile/data/user_profile_provider.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/sms_activity_card.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/bill_control_center_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/transaction_list_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/add_edit_transaction_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/providers/smart_defaults_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/transactions/data/pending_transaction_prodiver.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/transactions/data/transaction_provider.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/transactions/data/tag_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/transactions/data/tag_analytics_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/transactions/data/subscription_detector_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/transactions/data/recurring_transaction_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/data/transaction_service.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/category/data/category_merge_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/category/data/category_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/category/data/category_management_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/import_export/data/excel_export_service.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/import_export/data/excel_import_service.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/providers/dashboard_data_provider.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/providers/widget_preferences_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/dashboard/data/priority_alert_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/dashboard/data/status_data_provider.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/dashboard/data/historical_data_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/utils/credit_card_migration.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/utils/budget_spent_calculator.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/recap/data/monthly_recap_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/providers/notification_record_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/providers/app_filter_chip.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/gamification/services/gamification_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/services/settlement_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/services/widget_service.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/core/services/mudra_api_impl.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/services/active_trip_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/services/category_rule_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/services/app_config_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/services/notification_service.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/core/services/backup_restore_service.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/features/gamification/models/achievement.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/monthly_comparison_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/core/currency/currency_service.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/core/entitlement/entitlement_provider.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/core/entitlement/entitlement_service.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/sms/presentation/screens/sms_activity_screen.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/core/db/encryption_migration.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/category_seeder.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/isar_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/sms/data/recurring_detector_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/sms/data/notification_listener_service.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/sms/data/sms_activity_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/sms/data/tag_matcher_service.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/goal.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/recurring_bill.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/notification_record.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/recurring_transaction.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/reconciliation_status.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/transaction.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/trip.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/archived_transaction.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/investment_holding.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/balance_snapshot.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/budget_category_allocation.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/user_profile.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/db/models/exchange_rate.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/category.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/tag.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/backup_metadata.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/pending_notifications.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/account.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/budget.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/dashboard_widget_preference.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/category_rule.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/pending_transaction.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/db/models/sms_activity.dart",
+          "line": 1,
+          "import_line": 1
+        }
+      ]
+    },
+    {
+      "name": "isar_community_flutter_libs",
+      "installed_version": "3.3.2",
+      "latest_version": "3.3.2",
+      "status": "Stable",
+      "vibrancy_score": 64,
+      "pub_points": 125,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/isar_community_flutter_libs",
+      "repository_url": "https://github.com/isar-community/isar-community",
+      "license": null,
+      "archive_size_bytes": 10995658,
+      "bloat_rating": 0,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "isar_community_generator",
+      "installed_version": "3.3.2",
+      "latest_version": "3.3.2",
+      "status": "Stable",
+      "vibrancy_score": 65.5,
+      "pub_points": 125,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/isar_community_generator",
+      "repository_url": "https://github.com/isar-community/isar-community",
+      "license": null,
+      "archive_size_bytes": 23715,
+      "bloat_rating": 3,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "json_annotation",
+      "installed_version": "4.11.0",
+      "latest_version": "4.12.0",
+      "status": "Vibrant",
+      "vibrancy_score": 78.5,
+      "pub_points": 150,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/json_annotation",
+      "repository_url": "https://github.com/google/json_serializable.dart/tree/master/json_annotation",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 13940,
+      "bloat_rating": 2,
+      "file_usage_count": 15,
+      "file_usages": [
+        {
+          "file_path": "lib/core/db/models/goal.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/notification_record.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/recurring_transaction.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/reconciliation_status.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/transaction.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/investment_holding.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/balance_snapshot.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/budget_category_allocation.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/user_profile.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/core/db/models/category.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/tag.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/pending_notifications.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/account.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/budget.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/db/models/pending_transaction.dart",
+          "line": 2,
+          "import_line": 2
+        }
+      ]
+    },
+    {
+      "name": "json_serializable",
+      "installed_version": "6.13.0",
+      "latest_version": "6.14.0",
+      "status": "Vibrant",
+      "vibrancy_score": 86.9,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/json_serializable",
+      "repository_url": "https://github.com/google/json_serializable.dart/tree/master/json_serializable",
+      "license": null,
+      "archive_size_bytes": 177395,
+      "bloat_rating": 4,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "local_auth",
+      "installed_version": "3.0.1",
+      "latest_version": "3.0.1",
+      "status": "Stable",
+      "vibrancy_score": 55,
+      "pub_points": 160,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/local_auth",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/local_auth/local_auth",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 247265,
+      "bloat_rating": 0,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/core/providers/auth_service.dart",
+          "line": 3,
+          "import_line": 3
+        }
+      ]
+    },
+    {
+      "name": "logger",
+      "installed_version": "2.7.0",
+      "latest_version": "2.7.0",
+      "status": "Vibrant",
+      "vibrancy_score": 71.8,
+      "pub_points": 150,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/logger",
+      "repository_url": "https://github.com/SourceHorizon/logger",
+      "license": "MIT",
+      "archive_size_bytes": 313964,
+      "bloat_rating": 2,
+      "file_usage_count": 4,
+      "file_usages": [
+        {
+          "file_path": "test/features/analytics/advanced_analytics_service_test.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/core/logging/slf4j_printer.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/logging/app_log.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/logging/logger_provider.dart",
+          "line": 3,
+          "import_line": 3
+        }
+      ]
+    },
+    {
+      "name": "lucide_icons_flutter",
+      "installed_version": "3.1.12",
+      "latest_version": "3.1.14+1",
+      "status": "Vibrant",
+      "vibrancy_score": 87.3,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/lucide_icons_flutter",
+      "repository_url": "https://github.com/vqh2602/lucide-flutter-main",
+      "license": null,
+      "archive_size_bytes": 8239686,
+      "bloat_rating": 10,
+      "file_usage_count": 178,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/transaction_form/date_time_row.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/shared/widgets/transaction_form/hero_amount_input.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/shared/widgets/transaction_form/type_toggle.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/shared/widgets/currency_picker.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/swipe_action_wrapper.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/budget_alert_banner.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/currency_badge.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/swipeable_week_calendar.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/account_selector.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/common_text_input_field.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/shared/widgets/milestone_share_sheet.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/shared/widgets/ambient_brand_section.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/shared/widgets/pro_gate.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/shared/widgets/weekly_calendar.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/trend_indicator.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/common_icon_button.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/shared/widgets/live_balance_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/settlement_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/period_calendar_selector.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/month_picker_sheet.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/shared/widgets/speed_dial_fab.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/shared/widgets/transaction_filter_sheet.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/approve_transaction_sheet.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/category_selector.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/inline_error.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/widgets/category_selector_bottom_sheet.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/widgets/pending_splits_section.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/shared/screens/notification_page_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "test/features/onboarding/onboarding_funnel_test.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/shared/models/onboarding_page_model.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/budget/presentation/widgets/budget_overview_card.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/budget/presentation/widgets/budget_category_allocation.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/budget/presentation/screens/adaptive_budget_dashboard.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/budget/presentation/screens/add_budget_screen.dart",
+          "line": 16,
+          "import_line": 16
+        },
+        {
+          "file_path": "lib/features/budget/presentation/screens/budget_details_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "test/features/dashboard/milestone_and_widget_test.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/spending_trends_screen.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/screens/analytics_screen.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/financial_health_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/net_worth_screen.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/tax_estimation_screen.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/spending_personality_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/cash_flow_forecast_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/analytics/data/personality_archetype.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/goal/presentation/screens/goal_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/goal/presentation/screens/goal_details_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/goal/presentation/screens/add_edit_goal_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/onboarding/presentation/screens/account_setup_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/features/onboarding/presentation/screens/onboarding_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/account/presentation/screens/investment_portfolio_screen.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/account/presentation/screens/balance_history_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/account/presentation/screens/reconciliation_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/account/presentation/screens/credit_card_bills_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/trip/presentation/widgets/active_trip_mini_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/trip/presentation/widgets/trip_expense_item.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/trip/presentation/widgets/trip_participant_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/edit_trip_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/expense_detail_screen.dart",
+          "line": 13,
+          "import_line": 13
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/split_detail_screen.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/add_trip_transaction_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/trip_detail_screen.dart",
+          "line": 13,
+          "import_line": 13
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/trips_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/icon_picker_bottom_sheet.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/pin_entry_dialog.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/account_form.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/profile_menu_item.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/profile/presentation/widgets/guest_mode_toggle.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/currency_settings_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/help_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/choose_language_screen.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/about_app.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/exchange_rate_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/archived_transactions_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/manage_account_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/appearance_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/notification_settings_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/manage_categories_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/profile_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/setting_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/sms_import_setting_screen.dart",
+          "line": 13,
+          "import_line": 13
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/backup_restore_screen.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/theme_picker_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/edit_user_profile_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/add_edit_category_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/app_settings_page.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/description_input.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/date_time_picker.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/date_range_selector.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_filter_chips_widget.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/amount_input.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/frequency_selector.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/add_transaction_widgets.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/subscription_list_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_search_bar.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_filter_chips.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_search_bar_widget.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_month_picker.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/sms_activity_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_tag_chip.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/widgets/transaction_calendar_header.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/transfer_screen_new.dart",
+          "line": 15,
+          "import_line": 15
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/add_recurring_transaction_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/bill_control_center_screen.dart",
+          "line": 13,
+          "import_line": 13
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/transaction_list_screen.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/add_edit_transaction_screen.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/plugins/credit_card_reminder_settings.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/financial_health_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/spending_personality_card.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/dashboard_animated_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/spending_prediction_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/sms_success_celebration_sheet.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/hero_moment_card.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/recurring_expenses_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/net_worth_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/modern_cashflow_card.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/net_worth_mini_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/swipeable_account_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/goal_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/recent_transactions_card.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/dashboard_action_button.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/budget_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/import_export/presentation/screens/import_export_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/import_export/presentation/screens/import_preview_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/dashboard_home.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/recurring_expenses_screen.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/dashboard_customize_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/screens/command_center_screen.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/net_worth_widget_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/hero_moment_widget_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/quick_actions_widget_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/accounts_widget_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/goals_widget_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/budget_alert_widget_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/recurring_expenses_widget_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/budget_overview_widget_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/cash_flow_widget_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/ai_insight_widget_plugin.dart",
+          "line": 7,
+          "import_line": 7
+        },
+        {
+          "file_path": "lib/features/dashboard/plugin/recent_transactions_widget_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/upgrade/presentation/screens/upgrade_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/core/router/home_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/marketplace/screens/plugin_groups_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/recap/presentation/screens/monthly_recap_screen.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/core/utils/auth_gate.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/utils/icon_helper.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/utils/simple_color_picker.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/core/utils/snackbar_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/utils/dialog_utils.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/achievement_unlock_dialog.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/badge_showcase.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/debug_gamification_button.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/streak_indicator.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/level_badge.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/recent_achievement_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/debug_button.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/achievement_card.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/core/providers/l10n_provider.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/providers/app_filter_chip.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/gamification/screens/achievements_screen.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/expense_trend_widget.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/detail_action_card.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/insight_grid_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/period_selector.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/gamification/models/user_rank.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/metric_carousel_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/widgets/hero_chart_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/extension/account_type_extenstion.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/export_options_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/utility_screen.dart",
+          "line": 10,
+          "import_line": 10
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/monthly_comparison_screen.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/statistics_screen.dart",
+          "line": 15,
+          "import_line": 15
+        },
+        {
+          "file_path": "lib/core/currency/currency_meta.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/sms/presentation/widgets/sms_info_card.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/sms/presentation/widgets/settings_action_card.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/entitlement/entitlement_provider.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/sms/presentation/screens/sms_activity_screen.dart",
+          "line": 13,
+          "import_line": 13
+        },
+        {
+          "file_path": "lib/core/theme/theme_preview_screen.dart",
+          "line": 1,
+          "import_line": 1
+        }
+      ]
+    },
+    {
+      "name": "math_expressions",
+      "installed_version": "3.1.0",
+      "latest_version": "3.1.0",
+      "status": "Outdated",
+      "vibrancy_score": 22.9,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/math_expressions",
+      "repository_url": "https://github.com/fkleon/math-expressions",
+      "license": null,
+      "archive_size_bytes": 50629,
+      "bloat_rating": 4,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/simple_calculator.dart",
+          "line": 3,
+          "import_line": 3
+        }
+      ]
+    },
+    {
+      "name": "month_picker_dialog",
+      "installed_version": "6.7.2",
+      "latest_version": "6.7.2",
+      "status": "Stable",
+      "vibrancy_score": 69.5,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/month_picker_dialog",
+      "repository_url": "https://github.com/Macacoazul01/month_picker_dialog",
+      "license": null,
+      "archive_size_bytes": 153604,
+      "bloat_rating": 3,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "mudra_plugin_sdk",
+      "installed_version": "1.0.0",
+      "latest_version": "",
+      "status": "Abandoned",
+      "vibrancy_score": 0,
+      "pub_points": 0,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/mudra_plugin_sdk",
+      "repository_url": "",
+      "license": null,
+      "archive_size_bytes": null,
+      "bloat_rating": null,
+      "file_usage_count": 16,
+      "file_usages": [
+        {
+          "file_path": "lib/plugins/credit_card_reminder_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/plugins/category_alert_plugin.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/plugins/export_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/plugins/backup_sync_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/plugins/large_expense_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/plugins/savings_milestone_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/plugins/sms_parser_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/plugins/budget_guard_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/plugins/daily_summary_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/plugins/bill_reminder_plugin.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/plugins/sms_alert_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/plugins/low_balance_alert_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/plugins/goal_tracker_plugin.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/services/mudra_api_impl.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/services/permission_guarded_api.dart",
+          "line": 1,
+          "import_line": 1
+        },
+        {
+          "file_path": "lib/core/services/plugin_service.dart",
+          "line": 39,
+          "import_line": 39
+        }
+      ]
+    },
+    {
+      "name": "open_file",
+      "installed_version": "3.5.11",
+      "latest_version": "3.5.11",
+      "status": "Stable",
+      "vibrancy_score": 56.9,
+      "pub_points": 150,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/open_file",
+      "repository_url": "https://github.com/crazecoder/open_file",
+      "license": null,
+      "archive_size_bytes": 15764086,
+      "bloat_rating": 0,
+      "file_usage_count": 2,
+      "file_usages": [
+        {
+          "file_path": "lib/features/backup/data/enhanced_backup_service.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/utils/file_utils.dart",
+          "line": 5,
+          "import_line": 5
+        }
+      ]
+    },
+    {
+      "name": "package_info_plus",
+      "installed_version": "9.0.1",
+      "latest_version": "10.1.0",
+      "status": "Vibrant",
+      "vibrancy_score": 76.9,
+      "pub_points": 150,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/package_info_plus",
+      "repository_url": "https://github.com/fluttercommunity/plus_plugins/tree/main/packages/package_info_plus/package_info_plus",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 297793,
+      "bloat_rating": 1,
+      "file_usage_count": 2,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/ambient_brand_section.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/about_app.dart",
+          "line": 13,
+          "import_line": 13
+        }
+      ]
+    },
+    {
+      "name": "path_provider",
+      "installed_version": "2.1.5",
+      "latest_version": "2.1.5",
+      "status": "Stable",
+      "vibrancy_score": 54,
+      "pub_points": 160,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/path_provider",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 164271,
+      "bloat_rating": 0,
+      "file_usage_count": 7,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/milestone_share_sheet.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/features/backup/data/enhanced_backup_service.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/utils/file_utils.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/achievement_unlock_dialog.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/core/services/auto_backup_service.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/services/backup_restore_service.dart",
+          "line": 43,
+          "import_line": 43
+        },
+        {
+          "file_path": "lib/core/db/isar_service.dart",
+          "line": 28,
+          "import_line": 28
+        }
+      ]
+    },
+    {
+      "name": "path_provider_platform_interface",
+      "installed_version": "2.1.2",
+      "latest_version": "2.1.2",
+      "status": "Stable",
+      "vibrancy_score": 51.6,
+      "pub_points": 150,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/path_provider_platform_interface",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_platform_interface",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 7121,
+      "bloat_rating": 0,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "test/util/file_utils_test.dart",
+          "line": 4,
+          "import_line": 4
+        }
+      ]
+    },
+    {
+      "name": "pdf",
+      "installed_version": "3.12.0",
+      "latest_version": "3.12.0",
+      "status": "Vibrant",
+      "vibrancy_score": 71.8,
+      "pub_points": 150,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/pdf",
+      "repository_url": "https://github.com/DavBfr/dart_pdf",
+      "license": null,
+      "archive_size_bytes": 382715,
+      "bloat_rating": 7,
+      "file_usage_count": 5,
+      "file_usages": [
+        {
+          "file_path": "lib/features/trip/presentation/screens/split_detail_screen.dart",
+          "line": 23,
+          "import_line": 23
+        },
+        {
+          "file_path": "lib/features/trip/presentation/screens/trip_detail_screen.dart",
+          "line": 24,
+          "import_line": 24
+        },
+        {
+          "file_path": "lib/plugins/export_plugins/standard_pdf_export.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/plugins/export_plugins/business_pdf_export.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/recap/data/monthly_recap_pdf.dart",
+          "line": 4,
+          "import_line": 4
+        }
+      ]
+    },
+    {
+      "name": "percent_indicator",
+      "installed_version": "4.2.5",
+      "latest_version": "4.2.5",
+      "status": "Outdated",
+      "vibrancy_score": 13.1,
+      "pub_points": 140,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/percent_indicator",
+      "repository_url": "https://github.com/diegoveloper/flutter_percent_indicator/",
+      "license": "BSD-2-Clause",
+      "archive_size_bytes": 1446361,
+      "bloat_rating": 2,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "permission_handler",
+      "installed_version": "12.0.1",
+      "latest_version": "12.0.1",
+      "status": "Outdated",
+      "vibrancy_score": 20.7,
+      "pub_points": 150,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/permission_handler",
+      "repository_url": "https://github.com/baseflow/flutter-permission-handler",
+      "license": "MIT",
+      "archive_size_bytes": 149679,
+      "bloat_rating": 0,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "plugin_platform_interface",
+      "installed_version": "2.1.8",
+      "latest_version": "2.1.8",
+      "status": "Stable",
+      "vibrancy_score": 51.6,
+      "pub_points": 150,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/plugin_platform_interface",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/plugin_platform_interface",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 7084,
+      "bloat_rating": 0,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "test/util/file_utils_test.dart",
+          "line": 5,
+          "import_line": 5
+        }
+      ]
+    },
+    {
+      "name": "printing",
+      "installed_version": "5.14.3",
+      "latest_version": "5.14.3",
+      "status": "Vibrant",
+      "vibrancy_score": 67.9,
+      "pub_points": 140,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/printing",
+      "repository_url": "https://github.com/DavBfr/dart_pdf",
+      "license": null,
+      "archive_size_bytes": 451456,
+      "bloat_rating": 8,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "responsive_framework",
+      "installed_version": "1.5.1",
+      "latest_version": "1.5.1",
+      "status": "Outdated",
+      "vibrancy_score": 11.6,
+      "pub_points": 150,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/responsive_framework",
+      "repository_url": "https://github.com/Codelessly/ResponsiveFramework",
+      "license": null,
+      "archive_size_bytes": 5576060,
+      "bloat_rating": 3,
+      "file_usage_count": 2,
+      "file_usages": [
+        {
+          "file_path": "lib/main.dart",
+          "line": 41,
+          "import_line": 41
+        },
+        {
+          "file_path": "lib/shared/widgets/responsive_helper.dart",
+          "line": 2,
+          "import_line": 2
+        }
+      ]
+    },
+    {
+      "name": "riverpod",
+      "installed_version": "3.2.1",
+      "latest_version": "3.2.1",
+      "status": "Stable",
+      "vibrancy_score": 63.099999999999994,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/riverpod",
+      "repository_url": "https://github.com/rrousselGit/riverpod",
+      "license": null,
+      "archive_size_bytes": 215038,
+      "bloat_rating": 5,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "saropa_lints",
+      "installed_version": "9.10.0",
+      "latest_version": "13.10.0",
+      "status": "Vibrant",
+      "vibrancy_score": 70,
+      "pub_points": 0,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/saropa_lints",
+      "repository_url": "https://github.com/saropa/saropa_lints",
+      "license": "MIT",
+      "archive_size_bytes": 6308096,
+      "bloat_rating": 10,
+      "file_usage_count": 0,
+      "file_usages": []
+    },
+    {
+      "name": "share_plus",
+      "installed_version": "12.0.2",
+      "latest_version": "13.1.0",
+      "status": "Vibrant",
+      "vibrancy_score": 74.9,
+      "pub_points": 150,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/share_plus",
+      "repository_url": "https://github.com/fluttercommunity/plus_plugins/tree/main/packages/share_plus/share_plus",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 292773,
+      "bloat_rating": 1,
+      "file_usage_count": 2,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/milestone_share_sheet.dart",
+          "line": 13,
+          "import_line": 13
+        },
+        {
+          "file_path": "lib/features/gamification/widgets/achievement_unlock_dialog.dart",
+          "line": 10,
+          "import_line": 10
+        }
+      ]
+    },
+    {
+      "name": "shared_preferences",
+      "installed_version": "2.5.5",
+      "latest_version": "2.5.5",
+      "status": "Stable",
+      "vibrancy_score": 51.5,
+      "pub_points": 160,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/shared_preferences",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 14100667,
+      "bloat_rating": 2,
+      "file_usage_count": 36,
+      "file_usages": [
+        {
+          "file_path": "lib/main.dart",
+          "line": 39,
+          "import_line": 39
+        },
+        {
+          "file_path": "test/service/sms_cleanup_service_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "test/service/auto_backup_dispatcher_test.dart",
+          "line": 23,
+          "import_line": 23
+        },
+        {
+          "file_path": "lib/shared/widgets/swipe_action_wrapper.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "test/features/onboarding/app_mode_and_prefs_test.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "test/features/onboarding/starter_txn_e2e_test.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "test/features/account/reconciliation_integration_test.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "test/features/transactions/tag_analytics_test.dart",
+          "line": 15,
+          "import_line": 15
+        },
+        {
+          "file_path": "test/features/transactions/merge_as_transfer_test.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "test/features/transactions/transaction_integration_test.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "test/features/transactions/transaction_service_test.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "test/features/transactions/transaction_update_test.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "test/features/sms/sms_e2e_test.dart",
+          "line": 20,
+          "import_line": 20
+        },
+        {
+          "file_path": "test/features/sms/sms_functional_test.dart",
+          "line": 23,
+          "import_line": 23
+        },
+        {
+          "file_path": "test/features/sms/sms_celebration_test.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/features/goal/data/goal_provider.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/features/notifications/data/checks/re_engagement_check.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/notifications/data/smart_notification_service.dart",
+          "line": 13,
+          "import_line": 13
+        },
+        {
+          "file_path": "lib/features/profile/presentation/screens/notification_settings_screen.dart",
+          "line": 13,
+          "import_line": 13
+        },
+        {
+          "file_path": "lib/features/profile/data/guest_mode_provider.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/add_edit_transaction_screen.dart",
+          "line": 38,
+          "import_line": 38
+        },
+        {
+          "file_path": "lib/plugins/credit_card_reminder_settings.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/features/dashboard/data/summary_scheduler.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/marketplace/services/marketplace_service.dart",
+          "line": 4,
+          "import_line": 4
+        },
+        {
+          "file_path": "lib/features/marketplace/screens/plugin_groups_screen.dart",
+          "line": 21,
+          "import_line": 21
+        },
+        {
+          "file_path": "lib/core/utils/error_tracker.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/core/providers/shared_preference_provider.dart",
+          "line": 5,
+          "import_line": 5
+        },
+        {
+          "file_path": "lib/core/services/background_task_manager.dart",
+          "line": 14,
+          "import_line": 14
+        },
+        {
+          "file_path": "lib/core/services/mudra_api_impl.dart",
+          "line": 9,
+          "import_line": 9
+        },
+        {
+          "file_path": "lib/core/services/notification_service.dart",
+          "line": 20,
+          "import_line": 20
+        },
+        {
+          "file_path": "lib/core/services/plugin_analytics.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/gamification/screens/achievements_screen.dart",
+          "line": 16,
+          "import_line": 16
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/utility_screen.dart",
+          "line": 16,
+          "import_line": 16
+        },
+        {
+          "file_path": "lib/core/db/encryption_migration.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/sms/data/sms_cleanup_service.dart",
+          "line": 3,
+          "import_line": 3
+        },
+        {
+          "file_path": "lib/core/theme/theme_provider.dart",
+          "line": 3,
+          "import_line": 3
+        }
+      ]
+    },
+    {
+      "name": "table_calendar",
+      "installed_version": "3.2.0",
+      "latest_version": "3.2.0",
+      "status": "Outdated",
+      "vibrancy_score": 13.1,
+      "pub_points": 140,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/table_calendar",
+      "repository_url": "https://github.com/aleksanderwozniak/table_calendar",
+      "license": "Apache-2.0",
+      "archive_size_bytes": 125667,
+      "bloat_rating": 3,
+      "file_usage_count": 2,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/period_calendar_selector.dart",
+          "line": 6,
+          "import_line": 6
+        },
+        {
+          "file_path": "lib/features/transactions/presentation/screens/transaction_list_screen.dart",
+          "line": 31,
+          "import_line": 31
+        }
+      ]
+    },
+    {
+      "name": "timezone",
+      "installed_version": "0.11.0",
+      "latest_version": "0.11.0",
+      "status": "End of Life",
+      "vibrancy_score": 62.2,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/timezone",
+      "repository_url": "https://github.com/dart-lang/labs/tree/main/pkgs/timezone",
+      "license": "BSD-2-Clause",
+      "archive_size_bytes": 664044,
+      "bloat_rating": 9,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/core/services/notification_service.dart",
+          "line": 18,
+          "import_line": 18
+        }
+      ]
+    },
+    {
+      "name": "url_launcher",
+      "installed_version": "6.3.2",
+      "latest_version": "6.3.2",
+      "status": "Stable",
+      "vibrancy_score": 53,
+      "pub_points": 160,
+      "stars": 5207,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/url_launcher",
+      "repository_url": "https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher",
+      "license": "BSD-3-Clause",
+      "archive_size_bytes": 194701,
+      "bloat_rating": 1,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/features/profile/presentation/screens/about_app.dart",
+          "line": 14,
+          "import_line": 14
+        }
+      ]
+    },
+    {
+      "name": "uuid",
+      "installed_version": "4.5.3",
+      "latest_version": "4.5.3",
+      "status": "Vibrant",
+      "vibrancy_score": 70.8,
+      "pub_points": 160,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/uuid",
+      "repository_url": "https://github.com/Daegalus/dart-uuid",
+      "license": "MIT",
+      "archive_size_bytes": 237574,
+      "bloat_rating": 3,
+      "file_usage_count": 1,
+      "file_usages": [
+        {
+          "file_path": "lib/core/logging/app_log.dart",
+          "line": 4,
+          "import_line": 4
+        }
+      ]
+    },
+    {
+      "name": "visibility_detector",
+      "installed_version": "0.4.0+2",
+      "latest_version": "0.4.0+2",
+      "status": "Outdated",
+      "vibrancy_score": 13.1,
+      "pub_points": 140,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/visibility_detector",
+      "repository_url": "https://github.com/google/flutter.widgets/tree/master/packages/visibility_detector",
+      "license": null,
+      "archive_size_bytes": 19687,
+      "bloat_rating": 1,
+      "file_usage_count": 5,
+      "file_usages": [
+        {
+          "file_path": "lib/shared/widgets/lazy_load_widget.dart",
+          "line": 2,
+          "import_line": 2
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/financial_health_screen.dart",
+          "line": 11,
+          "import_line": 11
+        },
+        {
+          "file_path": "lib/features/analytics/presentation/spending_personality_screen.dart",
+          "line": 8,
+          "import_line": 8
+        },
+        {
+          "file_path": "lib/features/dashboard/presentation/widgets/financial_health_card.dart",
+          "line": 12,
+          "import_line": 12
+        },
+        {
+          "file_path": "lib/features/statistics/presentation/screens/statistics_screen.dart",
+          "line": 28,
+          "import_line": 28
+        }
+      ]
+    },
+    {
+      "name": "workmanager",
+      "installed_version": "0.9.0+3",
+      "latest_version": "0.9.0+3",
+      "status": "Outdated",
+      "vibrancy_score": 30.6,
+      "pub_points": 140,
+      "stars": 0,
+      "is_discontinued": false,
+      "is_unlisted": false,
+      "pub_dev_url": "https://pub.dev/packages/workmanager",
+      "repository_url": "https://github.com/fluttercommunity/flutter_workmanager",
+      "license": "MIT",
+      "archive_size_bytes": 13544,
+      "bloat_rating": 0,
+      "file_usage_count": 2,
+      "file_usages": [
+        {
+          "file_path": "lib/core/services/background_task_manager.dart",
+          "line": 15,
+          "import_line": 15
+        },
+        {
+          "file_path": "lib/core/services/auto_backup_service.dart",
+          "line": 8,
+          "import_line": 8
+        }
+      ]
+    }
+  ]
+}

@@ -22,3 +22,8 @@
 **Vulnerability:** Application logic failure (duplicate records) and potential data corruption when querying or saving encrypted fields.
 **Learning:** Standard database filters like `bodyContains()` fail on encrypted fields because the ciphertext does not contain the plaintext substrings. Additionally, calling `encryptFields()` multiple times on the same object (e.g., in nested service calls) leads to double-encryption, making data unrecoverable.
 **Prevention:** Use deterministic, non-encrypted indexed fields (like `smsHash`) for record lookups. Ensure that `encryptFields()` is called exactly once immediately before the final database write in a transaction, and decrypt the object if it needs to be reused.
+
+## 2025-05-25 - [Encryption Timing and Pipeline Integrity]
+**Vulnerability:** Calling `encryptFields()` at the start of a service method (like `addActivity`) breaks downstream logic that relies on plaintext (e.g., regex matching, learned category rules). Additionally, linked/paired objects are often missed during encryption cycles.
+**Learning:** Encryption must happen as the *final* step before a database write. Furthermore, any method that modifies and saves a paired or related object (like a transfer pair in `SmsActivityService`) must also explicitly re-encrypt that object, as it may have been fetched and decrypted earlier in the process.
+**Prevention:** Call `encryptFields()` immediately before `isar.put()` calls and ensure all modified objects in a transaction (main and related) are covered. Re-verify matching logic to ensure it operates on plaintext.

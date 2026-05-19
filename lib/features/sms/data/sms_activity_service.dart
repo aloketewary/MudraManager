@@ -253,9 +253,6 @@ class SmsActivityService {
       _log.d('[$corrId] RCS confidence penalty applied: ${activity.confidence}%');
     }
 
-    // ── Encrypt sensitive fields before any Isar write
-    activity.encryptFields();
-
     // ── 1. Check for transfer pair (opposite direction, same amount, different account, within 15 min)
     final transferPair = await _claimTransferPair(activity);
 
@@ -264,6 +261,7 @@ class SmsActivityService {
       activity.transactionType = 'Transfer';
       activity.status = ActivityStatus.pending;
 
+      activity.encryptFields();
       await isar.writeTxn(() async {
         // Save activity first to get ID
         final activityId = await isar.smsActivitys.put(activity);
@@ -271,6 +269,8 @@ class SmsActivityService {
         // Finalize pairing
         transferPair.pairedActivityId = activityId;
         activity.pairedActivityId = transferPair.id;
+
+        transferPair.encryptFields();
         await isar.smsActivitys.put(transferPair);
         await isar.smsActivitys.put(activity);
       });
@@ -356,6 +356,8 @@ class SmsActivityService {
         transaction.account.value = matchResult.account;
         transaction.category.value = matchResult.category;
 
+        activity.encryptFields();
+        transaction.encryptFields();
         await isar.writeTxn(() async {
           // Save activity FIRST (with pending status to satisfy late field)
           activity.status = ActivityStatus.pending;
@@ -393,6 +395,7 @@ class SmsActivityService {
       }
     }
 
+    activity.encryptFields();
     await isar.writeTxn(() async {
       await isar.smsActivitys.put(activity);
     });
@@ -440,6 +443,8 @@ class SmsActivityService {
     transaction.isFromSms = true;
     transaction.smsActivityId = activity.id;
 
+    activity.encryptFields();
+    transaction.encryptFields();
     await isar.writeTxn(() async {
       await isar.transactions.put(transaction);
       await transaction.account.save();
@@ -635,9 +640,10 @@ class SmsActivityService {
   Future<void> rejectActivity(SmsActivity activity, String? reason) async {
     final isar = await _getIsar();
 
+    activity.status = ActivityStatus.rejected;
+    activity.reviewNotes = reason;
+    activity.encryptFields();
     await isar.writeTxn(() async {
-      activity.status = ActivityStatus.rejected;
-      activity.reviewNotes = reason;
       await isar.smsActivitys.put(activity);
     });
 
@@ -691,8 +697,9 @@ class SmsActivityService {
   Future<void> markTransferApproved(SmsActivity activity) async {
     final isar = await _getIsar();
 
+    activity.status = ActivityStatus.approved;
+    activity.encryptFields();
     await isar.writeTxn(() async {
-      activity.status = ActivityStatus.approved;
       await isar.smsActivitys.put(activity);
 
       // Also mark the paired activity if it exists
@@ -700,6 +707,7 @@ class SmsActivityService {
         final pair = await isar.smsActivitys.get(activity.pairedActivityId!);
         if (pair != null && pair.status != ActivityStatus.approved) {
           pair.status = ActivityStatus.approved;
+          pair.encryptFields();
           await isar.smsActivitys.put(pair);
         }
       }
@@ -713,9 +721,10 @@ class SmsActivityService {
   Future<void> markAsNotDuplicate(SmsActivity activity) async {
     final isar = await _getIsar();
 
+    activity.isPotentialDuplicate = false;
+    activity.status = ActivityStatus.pending;
+    activity.encryptFields();
     await isar.writeTxn(() async {
-      activity.isPotentialDuplicate = false;
-      activity.status = ActivityStatus.pending;
       await isar.smsActivitys.put(activity);
     });
   }
@@ -802,6 +811,7 @@ class SmsActivityService {
       if (candidate == null) return null;
 
       candidate.pairedActivityId = -1;
+      candidate.encryptFields();
       await isar.smsActivitys.put(candidate);
 
       return candidate;
@@ -820,11 +830,13 @@ class SmsActivityService {
       if (a1 != null) {
         a1.status = ActivityStatus.approved;
         a1.transactionId = transactionId;
+        a1.encryptFields();
         await isar.smsActivitys.put(a1);
       }
       if (a2 != null) {
         a2.status = ActivityStatus.approved;
         a2.transactionId = transactionId;
+        a2.encryptFields();
         await isar.smsActivitys.put(a2);
       }
     });
