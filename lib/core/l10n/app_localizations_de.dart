@@ -1028,6 +1028,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get common_required => 'Erforderlich';
 
   @override
+  String get common_maybeLater => 'Maybe later';
+
+  @override
   String get title_budgets => 'Budgets';
 
   @override
@@ -3986,6 +3989,16 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get upgrade_unlockFullPower =>
       'Entfessle die volle Power deiner Finanzen';
+
+  @override
+  String upgrade_unlockAccountsTitle(int count) {
+    return 'Unlock all $count accounts';
+  }
+
+  @override
+  String upgrade_accountsFreePlanLimit(int max) {
+    return 'Free plan includes $max accounts. Upgrade to Pro to use all your accounts.';
+  }
 
   @override
   String get day_monday => 'Montag';

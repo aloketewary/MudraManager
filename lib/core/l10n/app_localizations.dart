@@ -2059,6 +2059,12 @@ abstract class AppLocalizations {
   /// **'Required'**
   String get common_required;
 
+  /// No description provided for @common_maybeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get common_maybeLater;
+
   /// No description provided for @title_budgets.
   ///
   /// In en, this message translates to:
@@ -7133,6 +7139,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unlock the full power of your finances'**
   String get upgrade_unlockFullPower;
+
+  /// No description provided for @upgrade_unlockAccountsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock all {count} accounts'**
+  String upgrade_unlockAccountsTitle(int count);
+
+  /// No description provided for @upgrade_accountsFreePlanLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plan includes {max} accounts. Upgrade to Pro to use all your accounts.'**
+  String upgrade_accountsFreePlanLimit(int max);
 
   /// No description provided for @day_monday.
   ///
