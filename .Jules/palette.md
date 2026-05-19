@@ -5,3 +5,7 @@
 ## 2025-05-24 - [Accessibility & Localization of Tooltips]
 **Learning:** Icon-only buttons must have localized tooltips to be accessible for screen reader users across different languages. In this project, adding keys to `intl_en.arb` and updating `localization_extension.dart` is the correct way to ensure these strings are available via `AppLocalizations`.
 **Action:** When adding or auditing icon buttons, ensure `tooltip` is assigned a localized string.
+
+## 2025-05-30 - [Consistent Plugin Polish]
+**Learning:** Plugins often lag behind the core app in terms of UX patterns. Auditing plugins for hardcoded strings, missing haptics, and inconsistent input components (like using basic TextField instead of CommonTextInputField) provides high-impact micro-UX wins.
+**Action:** When working on plugins, check for "Common" component usage and localized tooltips.

@@ -543,6 +543,27 @@ extension AppLocalizationsHelper on AppLocalizations {
       case 'trips_allSettled':
         return trips_allSettled;
 
+      case 'common_previous':
+        return common_previous;
+      case 'cc_reminders_title':
+        return cc_reminders_title;
+      case 'cc_reminders_remind_before':
+        return cc_reminders_remind_before;
+      case 'cc_reminders_cards':
+        return cc_reminders_cards;
+      case 'cc_reminders_no_cards':
+        return cc_reminders_no_cards;
+      case 'cc_reminders_add_card':
+        return cc_reminders_add_card;
+      case 'cc_reminders_edit_card':
+        return cc_reminders_edit_card;
+      case 'cc_reminders_card_name':
+        return cc_reminders_card_name;
+      case 'cc_reminders_card_name_hint':
+        return cc_reminders_card_name_hint;
+      case 'cc_reminders_bill_day':
+        return cc_reminders_bill_day;
+
       default:
         return key;
     }

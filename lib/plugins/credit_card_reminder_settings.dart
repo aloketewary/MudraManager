@@ -1,6 +1,9 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/shared/widgets/common_text_input_field.dart';
 
 class CreditCardReminderSettings extends StatefulWidget {
   const CreditCardReminderSettings({super.key});
@@ -71,14 +74,16 @@ class _CreditCardReminderSettingsState extends State<CreditCardReminderSettings>
   }
 
   void _deleteCard(int index) {
+    HapticFeedback.mediumImpact();
     setState(() => _cards.removeAt(index));
     _saveSettings();
   }
 
   @override
   Widget build(BuildContext context) {
+    final ctxt = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Credit Card Reminders')),
+      appBar: AppBar(title: Text(ctxt.cc_reminders_title)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -88,15 +93,18 @@ class _CreditCardReminderSettingsState extends State<CreditCardReminderSettings>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Remind me before', style: Theme.of(context).textTheme.titleMedium),
+                  Text(ctxt.cc_reminders_remind_before, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   Slider(
                     value: _reminderDays.toDouble(),
                     min: 1,
                     max: 7,
                     divisions: 6,
-                    label: '$_reminderDays day${_reminderDays > 1 ? 's' : ''}',
+                    label: ctxt.cc_reminders_days_plural(_reminderDays),
                     onChanged: (value) {
+                      if (value.toInt() != _reminderDays) {
+                        HapticFeedback.selectionClick();
+                      }
                       setState(() => _reminderDays = value.toInt());
                       _saveSettings();
                     },
@@ -109,20 +117,23 @@ class _CreditCardReminderSettingsState extends State<CreditCardReminderSettings>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Credit Cards', style: Theme.of(context).textTheme.titleLarge),
+              Text(ctxt.cc_reminders_cards, style: Theme.of(context).textTheme.titleLarge),
               IconButton(
-                tooltip: 'Add',
+                tooltip: ctxt.common_add,
                 icon: const Icon(LucideIcons.circlePlus),
-                onPressed: _addCard,
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  _addCard();
+                },
               ),
             ],
           ),
           const SizedBox(height: 8),
           if (_cards.isEmpty)
-            const Card(
+            Card(
               child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Center(child: Text('No credit cards added')),
+                padding: const EdgeInsets.all(32),
+                child: Center(child: Text(ctxt.cc_reminders_no_cards)),
               ),
             )
           else
@@ -133,17 +144,20 @@ class _CreditCardReminderSettingsState extends State<CreditCardReminderSettings>
                 child: ListTile(
                   leading: const Icon(LucideIcons.creditCard),
                   title: Text(card.name),
-                  subtitle: Text('Bill due on ${card.billDay}${_getDaySuffix(card.billDay)} of every month'),
+                  subtitle: Text(ctxt.cc_reminders_bill_due_every_month(card.billDay, _getDaySuffix(card.billDay))),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        tooltip: 'Edit',
+                        tooltip: ctxt.common_edit,
                         icon: const Icon(LucideIcons.pencil),
-                        onPressed: () => _editCard(index),
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          _editCard(index);
+                        },
                       ),
                       IconButton(
-                        tooltip: 'Delete',
+                        tooltip: ctxt.common_delete,
                         icon: const Icon(LucideIcons.trash2),
                         onPressed: () => _deleteCard(index),
                       ),
@@ -204,22 +218,21 @@ class _CardDialogState extends State<_CardDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final ctxt = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: Text(widget.card == null ? 'Add Credit Card' : 'Edit Credit Card'),
+      title: Text(widget.card == null ? ctxt.cc_reminders_add_card : ctxt.cc_reminders_edit_card),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          TextField(
+          CommonTextInputField(
             controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Card Name',
-              hintText: 'e.g., HDFC Regalia',
-            ),
+            labelText: ctxt.cc_reminders_card_name,
+            hintText: ctxt.cc_reminders_card_name_hint,
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              const Text('Bill Day: '),
+              Text('${ctxt.cc_reminders_bill_day}: '),
               const SizedBox(width: 16),
               Expanded(
                 child: DropdownButton<int>(
@@ -231,7 +244,10 @@ class _CardDialogState extends State<_CardDialog> {
                             child: Text('$day'),
                           ),)
                       .toList(),
-                  onChanged: (value) => setState(() => _billDay = value!),
+                  onChanged: (value) {
+                    HapticFeedback.lightImpact();
+                    setState(() => _billDay = value!);
+                  },
                 ),
               ),
             ],
@@ -241,16 +257,17 @@ class _CardDialogState extends State<_CardDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(ctxt.common_cancel),
         ),
         FilledButton(
           onPressed: () {
             if (_nameController.text.trim().isNotEmpty) {
+              HapticFeedback.mediumImpact();
               widget.onSave(_nameController.text.trim(), _billDay);
               Navigator.pop(context);
             }
           },
-          child: const Text('Save'),
+          child: Text(ctxt.common_save),
         ),
       ],
     );

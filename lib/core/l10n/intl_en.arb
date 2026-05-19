@@ -1114,6 +1114,7 @@
   "common_save": "Save",
   "common_cancel": "Cancel",
   "common_next": "Next",
+  "common_previous": "Previous",
   "common_back": "Back",
   "common_undo": "Undo",
   "common_delete": "Delete",
@@ -3458,5 +3459,27 @@
   "cc_nextDue": "Due",
   "cc_payMinimum": "Pay Minimum",
   "cc_payFull": "Pay Full",
-  "cc_utilitySubtitle": "Due dates, outstanding & limits"
+  "cc_utilitySubtitle": "Due dates, outstanding & limits",
+  "cc_reminders_title": "Credit Card Reminders",
+  "cc_reminders_remind_before": "Remind me before",
+  "cc_reminders_cards": "Credit Cards",
+  "cc_reminders_no_cards": "No credit cards added",
+  "cc_reminders_bill_due_every_month": "Bill due on {day}{suffix} of every month",
+  "@cc_reminders_bill_due_every_month": {
+    "placeholders": {
+      "day": { "type": "int" },
+      "suffix": { "type": "String" }
+    }
+  },
+  "cc_reminders_add_card": "Add Credit Card",
+  "cc_reminders_edit_card": "Edit Credit Card",
+  "cc_reminders_card_name": "Card Name",
+  "cc_reminders_card_name_hint": "e.g., HDFC Regalia",
+  "cc_reminders_bill_day": "Bill Day",
+  "cc_reminders_days_plural": "{count, plural, =1{1 day} other{{count} days}}",
+  "@cc_reminders_days_plural": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

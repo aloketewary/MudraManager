@@ -933,6 +933,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get common_next => 'পরেরটা';
 
   @override
+  String get common_previous => 'Previous';
+
+  @override
   String get common_back => 'পেছনে';
 
   @override
@@ -6163,4 +6166,47 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get cc_utilitySubtitle => 'Due dates, বকেয়া ও limits';
+
+  @override
+  String get cc_reminders_title => 'Credit Card Reminders';
+
+  @override
+  String get cc_reminders_remind_before => 'Remind me before';
+
+  @override
+  String get cc_reminders_cards => 'Credit Cards';
+
+  @override
+  String get cc_reminders_no_cards => 'No credit cards added';
+
+  @override
+  String cc_reminders_bill_due_every_month(int day, String suffix) {
+    return 'Bill due on $day$suffix of every month';
+  }
+
+  @override
+  String get cc_reminders_add_card => 'Add Credit Card';
+
+  @override
+  String get cc_reminders_edit_card => 'Edit Credit Card';
+
+  @override
+  String get cc_reminders_card_name => 'Card Name';
+
+  @override
+  String get cc_reminders_card_name_hint => 'e.g., HDFC Regalia';
+
+  @override
+  String get cc_reminders_bill_day => 'Bill Day';
+
+  @override
+  String cc_reminders_days_plural(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 
 /// Shows a bottom sheet with year navigation and a 3×4 month grid.
 /// Returns `DateTime(year, month, 1)` or null if dismissed.
@@ -76,10 +77,13 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                tooltip: 'Previous',
+                tooltip: AppLocalizations.of(context)!.common_previous,
                 icon: const Icon(LucideIcons.chevronLeft, size: 20),
                 onPressed: _year > widget.first.year
-                    ? () => setState(() => _year--)
+                    ? () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _year--);
+                      }
                     : null,
               ),
               Text(
@@ -87,10 +91,13 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
                 style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
               IconButton(
-                tooltip: 'Next',
+                tooltip: AppLocalizations.of(context)!.common_next,
                 icon: const Icon(LucideIcons.chevronRight, size: 20),
                 onPressed: _year < widget.last.year
-                    ? () => setState(() => _year++)
+                    ? () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _year++);
+                      }
                     : null,
               ),
             ],

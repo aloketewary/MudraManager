@@ -1885,6 +1885,12 @@ abstract class AppLocalizations {
   /// **'Next'**
   String get common_next;
 
+  /// No description provided for @common_previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get common_previous;
+
   /// No description provided for @common_back.
   ///
   /// In en, this message translates to:
@@ -11237,6 +11243,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Due dates, outstanding & limits'**
   String get cc_utilitySubtitle;
+
+  /// No description provided for @cc_reminders_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Card Reminders'**
+  String get cc_reminders_title;
+
+  /// No description provided for @cc_reminders_remind_before.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me before'**
+  String get cc_reminders_remind_before;
+
+  /// No description provided for @cc_reminders_cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Cards'**
+  String get cc_reminders_cards;
+
+  /// No description provided for @cc_reminders_no_cards.
+  ///
+  /// In en, this message translates to:
+  /// **'No credit cards added'**
+  String get cc_reminders_no_cards;
+
+  /// No description provided for @cc_reminders_bill_due_every_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill due on {day}{suffix} of every month'**
+  String cc_reminders_bill_due_every_month(int day, String suffix);
+
+  /// No description provided for @cc_reminders_add_card.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Credit Card'**
+  String get cc_reminders_add_card;
+
+  /// No description provided for @cc_reminders_edit_card.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Credit Card'**
+  String get cc_reminders_edit_card;
+
+  /// No description provided for @cc_reminders_card_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Name'**
+  String get cc_reminders_card_name;
+
+  /// No description provided for @cc_reminders_card_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., HDFC Regalia'**
+  String get cc_reminders_card_name_hint;
+
+  /// No description provided for @cc_reminders_bill_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill Day'**
+  String get cc_reminders_bill_day;
+
+  /// No description provided for @cc_reminders_days_plural.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String cc_reminders_days_plural(int count);
 }
 
 class _AppLocalizationsDelegate
