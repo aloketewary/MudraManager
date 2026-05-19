@@ -3463,5 +3463,30 @@
   "cc_nextDue": "Due",
   "cc_payMinimum": "Pay Minimum",
   "cc_payFull": "Pay Full",
-  "cc_utilitySubtitle": "Due dates, outstanding & limits"
+  "cc_utilitySubtitle": "Due dates, outstanding & limits",
+  "plugins_remindMeBefore": "Remind me before",
+  "plugins_daysCount": "{count, plural, =1{1 day} other{{count} days}}",
+  "@plugins_daysCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "plugins_billDueOn": "Bill due on {day}{suffix} of every month",
+  "@plugins_billDueOn": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "plugins_addCreditCard": "Add Credit Card",
+  "plugins_editCreditCard": "Edit Credit Card",
+  "plugins_cardName": "Card Name",
+  "plugins_cardNameHint": "e.g., HDFC Regalia",
+  "plugins_billDayLabel": "Bill Day"
 }

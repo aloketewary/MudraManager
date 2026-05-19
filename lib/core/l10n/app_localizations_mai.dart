@@ -6200,4 +6200,38 @@ class AppLocalizationsMai extends AppLocalizations {
 
   @override
   String get cc_utilitySubtitle => 'Due dates, outstanding & limits';
+
+  @override
+  String get plugins_remindMeBefore => 'Remind me before';
+
+  @override
+  String plugins_daysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String plugins_billDueOn(int day, String suffix) {
+    return 'Bill due on $day$suffix of every month';
+  }
+
+  @override
+  String get plugins_addCreditCard => 'Add Credit Card';
+
+  @override
+  String get plugins_editCreditCard => 'Edit Credit Card';
+
+  @override
+  String get plugins_cardName => 'Card Name';
+
+  @override
+  String get plugins_cardNameHint => 'e.g., HDFC Regalia';
+
+  @override
+  String get plugins_billDayLabel => 'Bill Day';
 }

@@ -354,17 +354,27 @@ final totalAccountBalanceProvider =
 
   double totalBalance = 0.0;
   for (final account in accounts) {
-    final transactions = await isar.transactions
-        .filter()
-        .account((q) => q.idEqualTo(account.id))
-        .findAll();
+    // BOLT OPTIMIZATION: Use Isar's aggregate sum instead of fetching all objects
+    final results = await Future.wait([
+      isar.transactions
+          .filter()
+          .account((q) => q.idEqualTo(account.id))
+          .isExpenseEqualTo(false)
+          .amountProperty()
+          .sum(),
+      isar.transactions
+          .filter()
+          .account((q) => q.idEqualTo(account.id))
+          .isExpenseEqualTo(true)
+          .amountProperty()
+          .sum(),
+    ]);
+
+    final income = results[0];
+    final expense = results[1];
 
     // Balance in account's own currency
-    final rawBalance = account.initialBalance +
-        transactions.fold<double>(
-          0,
-          (sum, txn) => sum + (txn.isExpense ? -txn.amount : txn.amount),
-        );
+    final rawBalance = account.initialBalance + income - expense;
 
     // Convert to base currency if account is foreign
     if (account.currencyCode != null) {

@@ -253,9 +253,6 @@ class SmsActivityService {
       _log.d('[$corrId] RCS confidence penalty applied: ${activity.confidence}%');
     }
 
-    // ── Encrypt sensitive fields before any Isar write
-    activity.encryptFields();
-
     // ── 1. Check for transfer pair (opposite direction, same amount, different account, within 15 min)
     final transferPair = await _claimTransferPair(activity);
 
@@ -264,6 +261,7 @@ class SmsActivityService {
       activity.transactionType = 'Transfer';
       activity.status = ActivityStatus.pending;
 
+      activity.encryptFields();
       await isar.writeTxn(() async {
         // Save activity first to get ID
         final activityId = await isar.smsActivitys.put(activity);
@@ -271,6 +269,8 @@ class SmsActivityService {
         // Finalize pairing
         transferPair.pairedActivityId = activityId;
         activity.pairedActivityId = transferPair.id;
+
+        transferPair.encryptFields();
         await isar.smsActivitys.put(transferPair);
         await isar.smsActivitys.put(activity);
       });
@@ -356,6 +356,8 @@ class SmsActivityService {
         transaction.account.value = matchResult.account;
         transaction.category.value = matchResult.category;
 
+        activity.encryptFields();
+        transaction.encryptFields();
         await isar.writeTxn(() async {
           // Save activity FIRST (with pending status to satisfy late field)
           activity.status = ActivityStatus.pending;
@@ -393,6 +395,7 @@ class SmsActivityService {
       }
     }
 
+    activity.encryptFields();
     await isar.writeTxn(() async {
       await isar.smsActivitys.put(activity);
     });
@@ -440,6 +443,8 @@ class SmsActivityService {
     transaction.isFromSms = true;
     transaction.smsActivityId = activity.id;
 
+    activity.encryptFields();
+    transaction.encryptFields();
     await isar.writeTxn(() async {
       await isar.transactions.put(transaction);
       await transaction.account.save();
@@ -514,16 +519,23 @@ class SmsActivityService {
       (k) => k.length >= 3 && !_smsNoiseWords.contains(k),
     );
 
-    for (final key in validKeys) {
-      await _upsertRule(key, category, isar);
+    if (validKeys.isNotEmpty) {
+      final allRules = await isar.categoryRules.where().findAll().withDecryption();
+      for (final key in validKeys) {
+        await _upsertRule(key, category, isar, allRules);
+      }
     }
   }
 
-  Future<void> _upsertRule(String key, Category category, Isar isar) async {
-    final existing = await isar.categoryRules
-        .filter()
-        .merchantNameEqualTo(key, caseSensitive: false)
-        .findFirst();
+  Future<void> _upsertRule(
+    String key,
+    Category category,
+    Isar isar,
+    List<CategoryRule> existingRules,
+  ) async {
+    final existing = existingRules
+        .where((r) => r.merchantName?.toLowerCase() == key.toLowerCase())
+        .firstOrNull;
 
     await isar.writeTxn(() async {
       if (existing != null) {
@@ -531,6 +543,7 @@ class SmsActivityService {
         existing.matchCount++;
         existing.confidence = (existing.confidence + 10).clamp(0, 100);
         existing.lastUsed = DateTime.now();
+        existing.encryptFields();
         await isar.categoryRules.put(existing);
         _log.i(
           'Rule updated: $key → ${category.name} (confidence: ${existing.confidence}, matches: ${existing.matchCount})',
@@ -542,6 +555,7 @@ class SmsActivityService {
           confidence: 60,
           matchCount: 1,
         );
+        rule.encryptFields();
         await isar.categoryRules.put(rule);
         _log.i('Rule created: $key → ${category.name}');
       }
@@ -569,26 +583,29 @@ class SmsActivityService {
       keys.add(recipient.split('@').first.toLowerCase().trim());
     }
 
-    for (final key in keys) {
-      if (key.length < 3) continue;
-      final rule = await isar.categoryRules
-          .filter()
-          .merchantNameEqualTo(key, caseSensitive: false)
-          .and()
-          .confidenceGreaterThan(40)
-          .findFirst();
+    if (keys.isNotEmpty) {
+      final allRules =
+          await isar.categoryRules.where().findAll().withDecryption();
+      for (final key in keys) {
+        if (key.length < 3) continue;
+        final rule = allRules
+            .where((r) =>
+                r.merchantName?.toLowerCase() == key.toLowerCase() &&
+                r.confidence > 40)
+            .firstOrNull;
 
-      if (rule == null) continue;
+        if (rule == null) continue;
 
-      final categoryId = int.tryParse(rule.categoryId);
-      if (categoryId == null) continue;
+        final categoryId = int.tryParse(rule.categoryId);
+        if (categoryId == null) continue;
 
-      final matched = categories.where((c) => c.id == categoryId).firstOrNull;
-      if (matched != null) {
-        _log.i(
-          'Learned rule matched: $key → ${matched.name} (confidence: ${rule.confidence})',
-        );
-        return matched;
+        final matched = categories.where((c) => c.id == categoryId).firstOrNull;
+        if (matched != null) {
+          _log.i(
+            'Learned rule matched: $key → ${matched.name} (confidence: ${rule.confidence})',
+          );
+          return matched;
+        }
       }
     }
     return null;
@@ -623,22 +640,28 @@ class SmsActivityService {
   Future<void> rejectActivity(SmsActivity activity, String? reason) async {
     final isar = await _getIsar();
 
+    activity.status = ActivityStatus.rejected;
+    activity.reviewNotes = reason;
+    activity.encryptFields();
     await isar.writeTxn(() async {
-      activity.status = ActivityStatus.rejected;
-      activity.reviewNotes = reason;
       await isar.smsActivitys.put(activity);
     });
 
     // Negative learning: penalize the rule that led to wrong categorization
     if (activity.merchant != null || activity.toAccount != null) {
-      await _penalizeRules(activity, isar);
+      final allRules = await isar.categoryRules.where().findAll().withDecryption();
+      await _penalizeRules(activity, isar, allRules);
     }
 
     _log.i('Activity rejected: ID ${activity.id}');
   }
 
   /// Penalize rules when user rejects or corrects a categorization.
-  Future<void> _penalizeRules(SmsActivity activity, Isar isar) async {
+  Future<void> _penalizeRules(
+    SmsActivity activity,
+    Isar isar,
+    List<CategoryRule> allRules,
+  ) async {
     final keys = <String>[];
     if (activity.merchant != null) {
       keys.add(activity.merchant!.toLowerCase().trim());
@@ -649,10 +672,10 @@ class SmsActivityService {
 
     for (final key in keys) {
       if (key.length < 3) continue;
-      final rule = await isar.categoryRules
-          .filter()
-          .merchantNameEqualTo(key, caseSensitive: false)
-          .findFirst();
+      final rule = allRules
+          .where((r) => r.merchantName?.toLowerCase() == key.toLowerCase())
+          .firstOrNull;
+
       if (rule == null) continue;
 
       await isar.writeTxn(() async {
@@ -662,6 +685,7 @@ class SmsActivityService {
           await isar.categoryRules.delete(rule.id);
           _log.i('Rule deleted (zero confidence): $key');
         } else {
+          rule.encryptFields();
           await isar.categoryRules.put(rule);
           _log.i('Rule penalized: $key (confidence: ${rule.confidence})');
         }
@@ -673,8 +697,9 @@ class SmsActivityService {
   Future<void> markTransferApproved(SmsActivity activity) async {
     final isar = await _getIsar();
 
+    activity.status = ActivityStatus.approved;
+    activity.encryptFields();
     await isar.writeTxn(() async {
-      activity.status = ActivityStatus.approved;
       await isar.smsActivitys.put(activity);
 
       // Also mark the paired activity if it exists
@@ -682,6 +707,7 @@ class SmsActivityService {
         final pair = await isar.smsActivitys.get(activity.pairedActivityId!);
         if (pair != null && pair.status != ActivityStatus.approved) {
           pair.status = ActivityStatus.approved;
+          pair.encryptFields();
           await isar.smsActivitys.put(pair);
         }
       }
@@ -695,9 +721,10 @@ class SmsActivityService {
   Future<void> markAsNotDuplicate(SmsActivity activity) async {
     final isar = await _getIsar();
 
+    activity.isPotentialDuplicate = false;
+    activity.status = ActivityStatus.pending;
+    activity.encryptFields();
     await isar.writeTxn(() async {
-      activity.isPotentialDuplicate = false;
-      activity.status = ActivityStatus.pending;
       await isar.smsActivitys.put(activity);
     });
   }
@@ -784,6 +811,7 @@ class SmsActivityService {
       if (candidate == null) return null;
 
       candidate.pairedActivityId = -1;
+      candidate.encryptFields();
       await isar.smsActivitys.put(candidate);
 
       return candidate;
@@ -802,11 +830,13 @@ class SmsActivityService {
       if (a1 != null) {
         a1.status = ActivityStatus.approved;
         a1.transactionId = transactionId;
+        a1.encryptFields();
         await isar.smsActivitys.put(a1);
       }
       if (a2 != null) {
         a2.status = ActivityStatus.approved;
         a2.transactionId = transactionId;
+        a2.encryptFields();
         await isar.smsActivitys.put(a2);
       }
     });

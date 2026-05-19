@@ -1,4 +1,5 @@
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/category_rule.dart';
 import 'package:mudra_manager/core/utils/category_matcher.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
@@ -10,7 +11,7 @@ class CategoryRuleService {
 
   /// Get all category rules
   Future<List<CategoryRule>> getAllRules() async {
-    return await isar.categoryRules.where().findAll();
+    return await isar.categoryRules.where().findAll().withDecryption();
   }
 
   /// Suggest category for a transaction based on learned rules
@@ -27,6 +28,7 @@ class CategoryRuleService {
     final existingRules = await getAllRules();
     final rule = CategoryMatcher.createOrUpdateRule(txn, categoryId, existingRules);
 
+    rule.encryptFields();
     await isar.writeTxn(() async {
       await isar.categoryRules.put(rule);
     });
