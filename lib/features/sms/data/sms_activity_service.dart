@@ -514,16 +514,23 @@ class SmsActivityService {
       (k) => k.length >= 3 && !_smsNoiseWords.contains(k),
     );
 
-    for (final key in validKeys) {
-      await _upsertRule(key, category, isar);
+    if (validKeys.isNotEmpty) {
+      final allRules = await isar.categoryRules.where().findAll().withDecryption();
+      for (final key in validKeys) {
+        await _upsertRule(key, category, isar, allRules);
+      }
     }
   }
 
-  Future<void> _upsertRule(String key, Category category, Isar isar) async {
-    final existing = await isar.categoryRules
-        .filter()
-        .merchantNameEqualTo(key, caseSensitive: false)
-        .findFirst();
+  Future<void> _upsertRule(
+    String key,
+    Category category,
+    Isar isar,
+    List<CategoryRule> existingRules,
+  ) async {
+    final existing = existingRules
+        .where((r) => r.merchantName?.toLowerCase() == key.toLowerCase())
+        .firstOrNull;
 
     await isar.writeTxn(() async {
       if (existing != null) {
@@ -531,6 +538,7 @@ class SmsActivityService {
         existing.matchCount++;
         existing.confidence = (existing.confidence + 10).clamp(0, 100);
         existing.lastUsed = DateTime.now();
+        existing.encryptFields();
         await isar.categoryRules.put(existing);
         _log.i(
           'Rule updated: $key → ${category.name} (confidence: ${existing.confidence}, matches: ${existing.matchCount})',
@@ -542,6 +550,7 @@ class SmsActivityService {
           confidence: 60,
           matchCount: 1,
         );
+        rule.encryptFields();
         await isar.categoryRules.put(rule);
         _log.i('Rule created: $key → ${category.name}');
       }
@@ -569,26 +578,29 @@ class SmsActivityService {
       keys.add(recipient.split('@').first.toLowerCase().trim());
     }
 
-    for (final key in keys) {
-      if (key.length < 3) continue;
-      final rule = await isar.categoryRules
-          .filter()
-          .merchantNameEqualTo(key, caseSensitive: false)
-          .and()
-          .confidenceGreaterThan(40)
-          .findFirst();
+    if (keys.isNotEmpty) {
+      final allRules =
+          await isar.categoryRules.where().findAll().withDecryption();
+      for (final key in keys) {
+        if (key.length < 3) continue;
+        final rule = allRules
+            .where((r) =>
+                r.merchantName?.toLowerCase() == key.toLowerCase() &&
+                r.confidence > 40)
+            .firstOrNull;
 
-      if (rule == null) continue;
+        if (rule == null) continue;
 
-      final categoryId = int.tryParse(rule.categoryId);
-      if (categoryId == null) continue;
+        final categoryId = int.tryParse(rule.categoryId);
+        if (categoryId == null) continue;
 
-      final matched = categories.where((c) => c.id == categoryId).firstOrNull;
-      if (matched != null) {
-        _log.i(
-          'Learned rule matched: $key → ${matched.name} (confidence: ${rule.confidence})',
-        );
-        return matched;
+        final matched = categories.where((c) => c.id == categoryId).firstOrNull;
+        if (matched != null) {
+          _log.i(
+            'Learned rule matched: $key → ${matched.name} (confidence: ${rule.confidence})',
+          );
+          return matched;
+        }
       }
     }
     return null;
@@ -631,14 +643,19 @@ class SmsActivityService {
 
     // Negative learning: penalize the rule that led to wrong categorization
     if (activity.merchant != null || activity.toAccount != null) {
-      await _penalizeRules(activity, isar);
+      final allRules = await isar.categoryRules.where().findAll().withDecryption();
+      await _penalizeRules(activity, isar, allRules);
     }
 
     _log.i('Activity rejected: ID ${activity.id}');
   }
 
   /// Penalize rules when user rejects or corrects a categorization.
-  Future<void> _penalizeRules(SmsActivity activity, Isar isar) async {
+  Future<void> _penalizeRules(
+    SmsActivity activity,
+    Isar isar,
+    List<CategoryRule> allRules,
+  ) async {
     final keys = <String>[];
     if (activity.merchant != null) {
       keys.add(activity.merchant!.toLowerCase().trim());
@@ -649,10 +666,10 @@ class SmsActivityService {
 
     for (final key in keys) {
       if (key.length < 3) continue;
-      final rule = await isar.categoryRules
-          .filter()
-          .merchantNameEqualTo(key, caseSensitive: false)
-          .findFirst();
+      final rule = allRules
+          .where((r) => r.merchantName?.toLowerCase() == key.toLowerCase())
+          .firstOrNull;
+
       if (rule == null) continue;
 
       await isar.writeTxn(() async {
@@ -662,6 +679,7 @@ class SmsActivityService {
           await isar.categoryRules.delete(rule.id);
           _log.i('Rule deleted (zero confidence): $key');
         } else {
+          rule.encryptFields();
           await isar.categoryRules.put(rule);
           _log.i('Rule penalized: $key (confidence: ${rule.confidence})');
         }

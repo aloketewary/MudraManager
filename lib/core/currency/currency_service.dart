@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/archived_transaction.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -169,23 +170,23 @@ class CurrencyService {
     for (final txn in allTxns) {
       await txn.account.load();
       await txn.category.load();
-      archived.add(
-        ArchivedTransaction()
-          ..originalTransactionId = txn.id
-          ..date = txn.date
-          ..amount = txn.amount
-          ..isExpense = txn.isExpense
-          ..description = txn.description
-          ..currencyCode = txn.currencyCode
-          ..convertedAmount = txn.convertedAmount
-          ..rateUsed = txn.rateUsed
-          ..isTransfer = txn.isTransfer
-          ..accountName = txn.account.value?.name
-          ..categoryName = txn.category.value?.name
-          ..archivedFromBase = oldBase
-          ..archivedToBase = newBase
-          ..archivedAt = now,
-      );
+      final a = ArchivedTransaction()
+        ..originalTransactionId = txn.id
+        ..date = txn.date
+        ..amount = txn.amount
+        ..isExpense = txn.isExpense
+        ..description = txn.description
+        ..currencyCode = txn.currencyCode
+        ..convertedAmount = txn.convertedAmount
+        ..rateUsed = txn.rateUsed
+        ..isTransfer = txn.isTransfer
+        ..accountName = txn.account.value?.name
+        ..categoryName = txn.category.value?.name
+        ..archivedFromBase = oldBase
+        ..archivedToBase = newBase
+        ..archivedAt = now;
+      a.encryptFields();
+      archived.add(a);
     }
 
     await _isar.writeTxn(() async {
