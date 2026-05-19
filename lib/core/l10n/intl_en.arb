@@ -1143,6 +1143,7 @@
   "common_noData": "No data",
   "common_error": "Something went wrong",
   "common_required": "Required",
+  "common_maybeLater": "Maybe later",
   "title_budgets": "Budgets",
   "title_goals": "Goals",
   "title_bills": "Bills",
@@ -2518,6 +2519,22 @@
   "upgrade_renewsToday": "Renews today",
   "upgrade_mudraManagerPro": "Mudra Manager Pro",
   "upgrade_unlockFullPower": "Unlock the full power of your finances",
+  "upgrade_unlockAccountsTitle": "Unlock all {count} accounts",
+  "@upgrade_unlockAccountsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "upgrade_accountsFreePlanLimit": "Free plan includes {max} accounts. Upgrade to Pro to use all your accounts.",
+  "@upgrade_accountsFreePlanLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "day_monday": "Monday",
   "day_tuesday": "Tuesday",
   "day_wednesday": "Wednesday",

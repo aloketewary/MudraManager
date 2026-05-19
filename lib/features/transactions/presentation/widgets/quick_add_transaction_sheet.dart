@@ -9,6 +9,7 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
@@ -76,6 +77,7 @@ class _QuickAddTransactionSheetState
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
     final accentColor = _isExpense ? color.error : color.primary;
 
     final accountsAsync = ref.watch(accountsProvider);
@@ -103,15 +105,19 @@ class _QuickAddTransactionSheetState
             Row(
               children: [
                 Text(
-                  'Quick Add',
+                  ctxt.quickAdd_title,
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const Spacer(),
                 IconButton(
+                  tooltip: ctxt.common_close,
                   icon: const Icon(LucideIcons.x),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.pop(context);
+                  },
                 ),
               ],
             ),
@@ -492,7 +498,7 @@ class _QuickAddTransactionSheetState
               TextField(
               controller: _noteController,
               decoration: InputDecoration(
-                hintText: 'Add note (optional)',
+                hintText: ctxt.transaction_descriptionControllerText,
                 prefixIcon: Icon(LucideIcons.fileText,
                     size: 18, color: color.onSurfaceVariant,),
                 border: OutlineInputBorder(
@@ -519,7 +525,7 @@ class _QuickAddTransactionSheetState
                 onPressed: () => setState(() => _showFullMode = true),
                 icon: Icon(LucideIcons.chevronDown, size: 16, color: color.onSurfaceVariant),
                 label: Text(
-                  'More options',
+                  ctxt.quickAdd_moreOptions,
                   style: textTheme.labelMedium?.copyWith(
                     color: color.onSurfaceVariant,
                   ),
@@ -531,7 +537,10 @@ class _QuickAddTransactionSheetState
 
             // ── Save ──
             FilledButton(
-              onPressed: _saving ? null : _save,
+              onPressed: _saving ? null : () {
+                HapticFeedback.mediumImpact();
+                _save();
+              },
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 52),
                 shape: RoundedRectangleBorder(
@@ -547,9 +556,9 @@ class _QuickAddTransactionSheetState
                         color: color.onPrimary,
                       ),
                     )
-                  : const Text(
-                      'Save',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                  : Text(
+                      ctxt.common_save,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
             ),
           ],
@@ -706,6 +715,7 @@ class _QuickAddTransactionSheetState
   void _showUnlockPrompt(BuildContext context, int totalAccounts) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -721,14 +731,13 @@ class _QuickAddTransactionSheetState
               Icon(LucideIcons.lock, size: 40, color: color.primary),
               const SizedBox(height: 16),
               Text(
-                'Unlock all $totalAccounts accounts',
+                ctxt.upgrade_unlockAccountsTitle(totalAccounts),
                 style: textTheme.titleLarge
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Free plan includes ${FreeTierLimits.maxAccounts} accounts. '
-                'Upgrade to Pro to use all your accounts.',
+                ctxt.upgrade_accountsFreePlanLimit(FreeTierLimits.maxAccounts),
                 style: textTheme.bodyMedium
                     ?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
@@ -736,24 +745,25 @@ class _QuickAddTransactionSheetState
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: () {
+                  HapticFeedback.mediumImpact();
                   Navigator.pop(ctx);
                   Navigator.pop(context);
                   context.push(AppRoutes.upgrade);
                 },
                 icon: const Icon(LucideIcons.sparkles, size: 18),
-                label: const Text('Upgrade to Pro',
-                    style: TextStyle(fontWeight: FontWeight.w600),),
+                label: Text(ctxt.profile_upgradeToProLabel,
+                    style: const TextStyle(fontWeight: FontWeight.w600),),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size(double.infinity, 52),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(ref.read(spacingProvider).radiusMedium),
                   ),
                 ),
               ),
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: Text('Maybe later',
+                child: Text(ctxt.common_maybeLater,
                     style: textTheme.bodyMedium
                         ?.copyWith(color: color.onSurfaceVariant),),
               ),
