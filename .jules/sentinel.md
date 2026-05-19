@@ -12,3 +12,8 @@
 **Vulnerability:** Sensitive user-provided descriptions in Recurring Transactions and Goals were stored as plaintext, bypassing the encryption architecture used for regular Transactions.
 **Learning:** Encryption must be applied consistently across all models containing PII or financial notes. Relying on primary service classes for encryption is insufficient if secondary services or UI screens perform direct database writes (e.g., SMS approval flow, recurring processing).
 **Prevention:** Centralize encryption/decryption logic in model extensions and mandate their use in both retrieval (via `withDecryption()`) and persistence (via `encryptFields()`) layers across all feature modules.
+
+## 2025-05-28 - [Encrypted Query Failure & Double Encryption Risk]
+**Vulnerability:** Application logic failure (duplicate records) and potential data corruption when querying or saving encrypted fields.
+**Learning:** Standard database filters like `bodyContains()` fail on encrypted fields because the ciphertext does not contain the plaintext substrings. Additionally, calling `encryptFields()` multiple times on the same object (e.g., in nested service calls) leads to double-encryption, making data unrecoverable.
+**Prevention:** Use deterministic, non-encrypted indexed fields (like `smsHash`) for record lookups. Ensure that `encryptFields()` is called exactly once immediately before the final database write in a transaction, and decrypt the object if it needs to be reused.
