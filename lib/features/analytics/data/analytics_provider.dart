@@ -5,38 +5,45 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/analytics/data/tax_estimation_service.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
 
 final analyticsServiceProvider =
     Provider.autoDispose<AdvancedAnalyticsService>((ref) {
-  final txnService = ref.watch(transactionProvider);
-  return AdvancedAnalyticsService(txnService);
+  return AdvancedAnalyticsService();
+});
+
+/// Shared provider for transactions used in analytics (last 365 days)
+final analyticsTransactionsProvider = FutureProvider.autoDispose<List<Transaction>>((ref) async {
+  ref.watch(transactionChangeProvider);
+  final transactionService = ref.watch(transactionProvider);
+  return await transactionService.getAllForDashBoard();
 });
 
 final predictedSpendingProvider =
     FutureProvider.autoDispose<double>((ref) async {
-  ref.watch(transactionChangeProvider);
+  final transactions = await ref.watch(analyticsTransactionsProvider.future);
   final service = ref.watch(analyticsServiceProvider);
-  return await service.predictMonthlySpending();
+  return await service.predictMonthlySpending(transactions);
 });
 
 final financialHealthProvider =
     FutureProvider.autoDispose<FinancialHealthScore>((
   ref,
 ) async {
-  ref.watch(transactionChangeProvider);
+  final transactions = await ref.watch(analyticsTransactionsProvider.future);
   ref.watch(accountChangeProvider);
   final service = ref.watch(analyticsServiceProvider);
   final totalBalance = await ref.watch(totalAccountBalanceProvider.future);
-  return await service.calculateHealthScore(totalBalance);
+  return await service.calculateHealthScore(transactions, totalBalance);
 });
 
 final categoryTrendsProvider =
     FutureProvider.autoDispose<Map<String, CategoryTrend>>((
   ref,
 ) async {
-  ref.watch(transactionChangeProvider);
+  final transactions = await ref.watch(analyticsTransactionsProvider.future);
   final service = ref.watch(analyticsServiceProvider);
-  return await service.getCategoryTrends();
+  return await service.getCategoryTrends(transactions);
 });
 
 /// Categories with rising spending trend — sorted by change percentage.
@@ -59,18 +66,16 @@ final anomalyCategoriesProvider =
 
 final spendingByDayProvider =
     FutureProvider.autoDispose<Map<String, double>>((ref) async {
-  ref.watch(transactionChangeProvider);
+  final transactions = await ref.watch(analyticsTransactionsProvider.future);
   final service = ref.watch(analyticsServiceProvider);
-  return await service.getSpendingByDayOfWeek();
+  return await service.getSpendingByDayOfWeek(transactions);
 });
 
 final monthlyExpenseTrendsProvider =
     FutureProvider.autoDispose<Map<String, List<double>>>((
   ref,
 ) async {
-  ref.watch(transactionChangeProvider);
-  final transactionService = ref.watch(transactionProvider);
-  final transactions = await transactionService.getAllForDashBoard();
+  final transactions = await ref.watch(analyticsTransactionsProvider.future);
   final now = DateTime.now();
 
   final categoryMonthlyData = <String, List<double>>{};
@@ -99,9 +104,9 @@ final monthlyExpenseTrendsProvider =
 
 final cashFlowForecastProvider =
     FutureProvider.autoDispose<CashFlowForecast>((ref) async {
-  ref.watch(transactionChangeProvider);
+  final transactions = await ref.watch(analyticsTransactionsProvider.future);
   final service = ref.watch(analyticsServiceProvider);
-  return await service.forecastCashFlow();
+  return await service.forecastCashFlow(transactions);
 });
 
 final taxEstimationServiceProvider =
