@@ -59,7 +59,7 @@ class GoalService {
     final isar = await isarService.getInstance();
     Goal? goal;
     await isar.writeTxn(() async {
-      goal = await isar.goals.get(goalId);
+      goal = await isar.goals.get(goalId).withDecryption();
       if (goal != null) {
         goal!.currentAmount += amount;
         goal!.contributions.add(GoalContribution.create(amount));
