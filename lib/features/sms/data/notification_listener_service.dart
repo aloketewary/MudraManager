@@ -391,50 +391,48 @@ class NotificationListenerBridge with WidgetsBindingObserver {
 
     if (cleaned.isEmpty) return 0;
 
-    // 2. If both '.' and ',' exist → detect format
+    // 2. Multiple dots (e.g. 1.234.567) → all are thousand separators
+    final dotCount = '.'.allMatches(cleaned).length;
+    if (dotCount > 1 && !cleaned.contains(',')) {
+      // All dots are thousand separators
+      cleaned = cleaned.replaceAll('.', '');
+      return double.tryParse(cleaned) ?? 0;
+    }
+
+    // 3. If both '.' and ',' exist → detect format
     if (cleaned.contains('.') && cleaned.contains(',')) {
       final lastDot = cleaned.lastIndexOf('.');
       final lastComma = cleaned.lastIndexOf(',');
 
       if (lastDot > lastComma) {
-        // US/India style: 1,234.56
+        // US/India style: 1,234.56 → comma is thousands
         cleaned = cleaned.replaceAll(',', '');
       } else {
-        // European style: 1.234,56
+        // European style: 1.234,56 → dot is thousands, comma is decimal
         cleaned = cleaned.replaceAll('.', '').replaceAll(',', '.');
       }
     }
 
-    // 3. Only comma exists
+    // 4. Only comma exists
     else if (cleaned.contains(',')) {
       final parts = cleaned.split(',');
-
-      if (parts.length > 1 && parts.last.length == 2) {
-        // Likely decimal: 1234,56 → 1234.56
+      // Indian/US style: commas are ALWAYS thousands separators for amounts
+      // e.g. 1,500 = 1500, 10,00,000 = 1000000, 1,23,456 = 123456
+      // Only treat as decimal if single comma with exactly 2 trailing digits
+      // AND the left part is not a valid Indian grouping (1-3 digits)
+      if (parts.length == 2 &&
+          parts.last.length == 2 &&
+          parts.first.length > 3) {
+        // Likely European decimal: 1234,56 → 1234.56
         cleaned = cleaned.replaceAll(',', '.');
       } else {
-        // Thousand separator: 1,234 → 1234
+        // Thousand separator: 1,500 → 1500, 1,00,000 → 100000
         cleaned = cleaned.replaceAll(',', '');
       }
     }
 
-    // 4. Only dot exists → assume standard decimal (safe default)
-    // If only dot and looks like thousand format
-    if (cleaned.contains('.') && !cleaned.contains(',')) {
-      final parts = cleaned.split('.');
-      if (parts.length > 1 && parts.last.length == 3) {
-        cleaned = cleaned.replaceAll('.', '');
-      }
-    }
-
-    // 5. Edge case: multiple dots (bad format like 1.234.567)
-    final dotCount = '.'.allMatches(cleaned).length;
-    if (dotCount > 1) {
-      // Assume all but last are thousand separators
-      final lastDot = cleaned.lastIndexOf('.');
-      cleaned = cleaned.substring(0, lastDot).replaceAll('.', '') +
-          cleaned.substring(lastDot);
-    }
+    // 5. Only dot exists → standard decimal (do NOT strip it)
+    // Indian banks always use dot as decimal: Rs.1500.00, Rs.25.50
 
     return double.tryParse(cleaned) ?? 0;
   }

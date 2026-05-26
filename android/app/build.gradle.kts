@@ -109,3 +109,13 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("org.json:json:20231013")
 }
+
+
+configurations.all {
+    resolutionStrategy {
+        // home_widget uses "1.+" for glance which resolves to 1.3.0-alpha01
+        // requiring compileSdk 37 + AGP 9.1.0. Pin to last compatible version.
+        force("androidx.glance:glance-appwidget:1.1.1")
+        force("androidx.glance:glance:1.1.1")
+    }
+}
