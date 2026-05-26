@@ -13,17 +13,19 @@ class AdvancedAnalyticsService {
     double total = 0;
     int count = 0;
 
-    for (int i = 1; i <= 3; i++) {
-      final month = DateTime(now.year, now.month - i);
-      final monthTotal = transactions
-          .where(
-            (tx) =>
-                tx.isExpense &&
-                tx.date.year == month.year &&
-                tx.date.month == month.month,
-          )
-          .fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
+    // BOLT OPTIMIZATION: Single pass aggregation (O(N)) instead of O(3*N)
+    final totals = <int, double>{};
+    for (final tx in transactions) {
+      if (!tx.isExpense) continue;
+      final monthDiff =
+          (now.year - tx.date.year) * 12 + (now.month - tx.date.month);
+      if (monthDiff >= 1 && monthDiff <= 3) {
+        totals[monthDiff] = (totals[monthDiff] ?? 0) + tx.effectiveAmount;
+      }
+    }
 
+    for (int i = 1; i <= 3; i++) {
+      final monthTotal = totals[i] ?? 0;
       if (monthTotal > 0) {
         total += monthTotal;
         count++;
@@ -42,33 +44,30 @@ class AdvancedAnalyticsService {
     // Build 6-month history
     final incomeHistory = <double>[];
     final expenseHistory = <double>[];
-    final months = <DateTime>[];
 
-    for (int i = 1; i <= 6; i++) {
-      final month = DateTime(now.year, now.month - i);
-      months.add(month);
-      double inc = 0, exp = 0;
-      for (final tx in transactions.where((t) =>
-          t.date.year == month.year && t.date.month == month.month && !t.isTransfer,)) {
+    // BOLT OPTIMIZATION: Single pass aggregation (O(N)) instead of O(7*N)
+    final historyIncome = List<double>.filled(7, 0.0);
+    final historyExpense = List<double>.filled(7, 0.0);
+
+    for (final tx in transactions) {
+      if (tx.isTransfer) continue;
+      final monthDiff =
+          (now.year - tx.date.year) * 12 + (now.month - tx.date.month);
+      if (monthDiff >= 0 && monthDiff <= 6) {
         if (tx.isExpense) {
-          exp += tx.effectiveAmount;
+          historyExpense[monthDiff] += tx.effectiveAmount;
         } else {
-          inc += tx.effectiveAmount;
+          historyIncome[monthDiff] += tx.effectiveAmount;
         }
       }
-      incomeHistory.add(inc);
-      expenseHistory.add(exp);
     }
 
-    // Current month (partial)
-    double currentIncome = 0, currentExpense = 0;
-    for (final tx in transactions.where((t) =>
-        t.date.year == now.year && t.date.month == now.month && !t.isTransfer,)) {
-      if (tx.isExpense) {
-        currentExpense += tx.effectiveAmount;
-      } else {
-        currentIncome += tx.effectiveAmount;
-      }
+    final currentIncome = historyIncome[0];
+    final currentExpense = historyExpense[0];
+
+    for (int i = 1; i <= 6; i++) {
+      incomeHistory.add(historyIncome[i]);
+      expenseHistory.add(historyExpense[i]);
     }
 
     // Project current month to full month
@@ -234,15 +233,16 @@ class AdvancedAnalyticsService {
 
     // Build 6-month history per category
     final catMonths = <String, List<double>>{};
-    for (int i = 0; i < 6; i++) {
-      final month = DateTime(now.year, now.month - i);
-      for (final tx in transactions.where((t) =>
-          t.isExpense &&
-          t.date.year == month.year &&
-          t.date.month == month.month,)) {
+
+    // BOLT OPTIMIZATION: Single pass aggregation (O(N)) instead of O(6*N)
+    for (final tx in transactions) {
+      if (!tx.isExpense) continue;
+      final monthDiff =
+          (now.year - tx.date.year) * 12 + (now.month - tx.date.month);
+      if (monthDiff >= 0 && monthDiff < 6) {
         final name = tx.category.value?.name ?? 'Uncategorized';
         catMonths.putIfAbsent(name, () => List.filled(6, 0.0));
-        catMonths[name]![i] += tx.effectiveAmount;
+        catMonths[name]![monthDiff] += tx.effectiveAmount;
       }
     }
 

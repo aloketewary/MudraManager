@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
-import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -176,24 +175,31 @@ final statsProvider = FutureProvider.autoDispose.family<StatsData, String>((
   final avgDailySpend = expense / (daysInPeriod > 0 ? daysInPeriod : 1);
 
   // Calculate category trends for last 12 months
-  final Map<Category, List<FlSpot>> categoryTrends = {};
+  // BOLT OPTIMIZATION: Single pass aggregation (O(N)) instead of O(Cats * Txns)
+  final Map<int, List<double>> trendData = {};
   final trendStart = DateTime(now.year, now.month - 11, 1);
-  final expenseTxns =
-      allTxns.where((t) => t.isExpense && t.date.isAfter(trendStart)).toList();
 
-  for (final cat in cats.where((c) => c.categoryType == CategoryType.expense)) {
-    final monthlyData = <int, double>{};
-    for (final txn in expenseTxns) {
-      if (txn.category.value?.id == cat.id) {
-        final monthIndex = (txn.date.year - trendStart.year) * 12 +
-            (txn.date.month - trendStart.month);
-        monthlyData[monthIndex] = (monthlyData[monthIndex] ?? 0) + txn.effectiveAmount;
-      }
+  for (final txn in allTxns) {
+    if (!txn.isExpense || txn.date.isBefore(trendStart)) continue;
+    final catId = txn.category.value?.id;
+    if (catId == null) continue;
+
+    final monthIndex =
+        (txn.date.year - trendStart.year) * 12 + (txn.date.month - trendStart.month);
+
+    if (monthIndex >= 0 && monthIndex < 12) {
+      trendData.putIfAbsent(catId, () => List<double>.filled(12, 0.0));
+      trendData[catId]![monthIndex] += txn.effectiveAmount;
     }
-    if (monthlyData.isNotEmpty) {
+  }
+
+  final Map<Category, List<FlSpot>> categoryTrends = {};
+  for (final cat in cats) {
+    final data = trendData[cat.id];
+    if (data != null) {
       categoryTrends[cat] = List.generate(
         12,
-        (i) => FlSpot(i.toDouble(), monthlyData[i] ?? 0),
+        (i) => FlSpot(i.toDouble(), data[i]),
       );
     }
   }
@@ -294,25 +300,32 @@ final customStatsProvider = FutureProvider.autoDispose.family<StatsData, String>
   final avgDailySpend = expense / days;
 
   // Calculate category trends for last 12 months
-  final Map<Category, List<FlSpot>> categoryTrends = {};
+  // BOLT OPTIMIZATION: Single pass aggregation (O(N)) instead of O(Cats * Txns)
+  final Map<int, List<double>> trendData = {};
   final now = DateTime.now();
   final trendStart = DateTime(now.year, now.month - 11, 1);
-  final expenseTxns =
-      allTxns.where((t) => t.isExpense && t.date.isAfter(trendStart)).toList();
 
-  for (final cat in cats.where((c) => c.categoryType == CategoryType.expense)) {
-    final monthlyData = <int, double>{};
-    for (final txn in expenseTxns) {
-      if (txn.category.value?.id == cat.id) {
-        final monthIndex = (txn.date.year - trendStart.year) * 12 +
-            (txn.date.month - trendStart.month);
-        monthlyData[monthIndex] = (monthlyData[monthIndex] ?? 0) + txn.effectiveAmount;
-      }
+  for (final txn in allTxns) {
+    if (!txn.isExpense || txn.date.isBefore(trendStart)) continue;
+    final catId = txn.category.value?.id;
+    if (catId == null) continue;
+
+    final monthIndex =
+        (txn.date.year - trendStart.year) * 12 + (txn.date.month - trendStart.month);
+
+    if (monthIndex >= 0 && monthIndex < 12) {
+      trendData.putIfAbsent(catId, () => List<double>.filled(12, 0.0));
+      trendData[catId]![monthIndex] += txn.effectiveAmount;
     }
-    if (monthlyData.isNotEmpty) {
+  }
+
+  final Map<Category, List<FlSpot>> categoryTrends = {};
+  for (final cat in cats) {
+    final data = trendData[cat.id];
+    if (data != null) {
       categoryTrends[cat] = List.generate(
         12,
-        (i) => FlSpot(i.toDouble(), monthlyData[i] ?? 0),
+        (i) => FlSpot(i.toDouble(), data[i]),
       );
     }
   }

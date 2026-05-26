@@ -106,6 +106,17 @@ extension SmsActivityListDecryption on Future<List<SmsActivity>> {
   }
 }
 
+extension TransactionStreamDecryption on Stream<List<Transaction>> {
+  Stream<List<Transaction>> withDecryption() {
+    return map((list) {
+      for (final item in list) {
+        item.decryptFields();
+      }
+      return list;
+    });
+  }
+}
+
 extension GoalEncryption on Goal {
   void encryptFields() {
     if (!FieldEncryptionService.isReady) return;
