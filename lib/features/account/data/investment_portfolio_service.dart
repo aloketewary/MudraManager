@@ -3,6 +3,7 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/investment_holding.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 
@@ -21,6 +22,7 @@ class InvestmentPortfolioService {
         throw Exception('Account not found');
       }
       holding.account.value = account;
+      holding.encryptFields();
       await isar.writeTxn(() async {
         await isar.investmentHoldings.put(holding);
         await holding.account.save();
@@ -34,9 +36,10 @@ class InvestmentPortfolioService {
 
   Future<void> updatePrice(int holdingId, double newPrice) async {
     final isar = await isarService.getInstance();
-    final holding = await isar.investmentHoldings.get(holdingId);
+    final holding = await isar.investmentHoldings.get(holdingId).withDecryption();
     if (holding != null) {
       holding.currentPrice = newPrice;
+      holding.encryptFields();
       await isar.writeTxn(() => isar.investmentHoldings.put(holding));
       _log.i('Price updated for ${holding.symbol}: ${BaseCurrency.symbol}$newPrice');
     }
@@ -44,7 +47,7 @@ class InvestmentPortfolioService {
 
   Future<List<InvestmentHolding>> getPortfolio(int accountId) async {
     final isar = await isarService.getInstance();
-    final holdings = await isar.investmentHoldings.where().findAll();
+    final holdings = await isar.investmentHoldings.where().findAll().withDecryption();
     for (var h in holdings) {
       await h.account.load();
     }

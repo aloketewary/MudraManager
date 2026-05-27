@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/budget_type.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
@@ -39,7 +40,8 @@ final budgetWithProgressProvider =
   final budgets = await isar.budgets
       .where()
       .isArchivedEqualTo(false)
-      .findAll();
+      .findAll()
+      .withDecryption();
 
   final List<(Budget, double, DateTime, DateTime)> result = [];
   final now = DateTime.now();
@@ -88,7 +90,8 @@ class BudgetService {
     yield* isar.budgets
         .where()
         .isArchivedEqualTo(false)
-        .watch(fireImmediately: true);
+        .watch(fireImmediately: true)
+        .withDecryption();
   }
 
   Future<double> calculateSpentAmount(
@@ -110,7 +113,8 @@ class BudgetService {
     final budgets = await isar.budgets
         .where()
         .isArchivedEqualTo(false)
-        .findAll();
+        .findAll()
+        .withDecryption();
 
     final now = DateTime.now();
 
@@ -257,6 +261,7 @@ class BudgetService {
   Future<void> save(Budget bud, {List<BudgetCategoryAllocation> newAllocations = const []}) async {
     final isar = await isarService.getInstance();
     final isNew = bud.id == Isar.autoIncrement;
+    bud.encryptFields();
     await isar.writeTxn(() async {
       await isar.budgets.put(bud);
       await bud.categories.save();
@@ -295,7 +300,7 @@ class BudgetService {
   /// Fetch a single budget by ID
   Future<Budget?> getBudget(int budgetId) async {
     final isar = await isarService.getInstance();
-    return await isar.budgets.get(budgetId);
+    return await isar.budgets.get(budgetId).withDecryption();
   }
 
   // Archiving
@@ -317,7 +322,8 @@ class BudgetService {
         .startDateLessThan(now)
         .and()
         .endDateGreaterThan(now)
-        .findAll();
+        .findAll()
+        .withDecryption();
     return budgets;
   }
 
@@ -337,7 +343,8 @@ class BudgetService {
         .filter()
         .isArchivedEqualTo(true)
         .sortByStartDateDesc()
-        .findAll();
+        .findAll()
+        .withDecryption();
 
     final results = <ArchivedBudgetSummary>[];
     for (final budget in budgets) {

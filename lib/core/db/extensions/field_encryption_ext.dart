@@ -8,8 +8,10 @@ import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
+import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
+import 'package:mudra_manager/core/db/models/investment_holding.dart';
 
 /// Encrypt sensitive fields before writing to Isar.
 ///
@@ -19,26 +21,38 @@ import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 extension SmsActivityEncryption on SmsActivity {
   void encryptFields() {
     if (!FieldEncryptionService.isReady) return;
+    sender = FieldEncryptionService.encrypt(sender);
     body = FieldEncryptionService.encrypt(body);
     merchant = FieldEncryptionService.encryptNullable(merchant);
+    toAccount = FieldEncryptionService.encryptNullable(toAccount);
+    transactionRef = FieldEncryptionService.encryptNullable(transactionRef);
   }
 
   void decryptFields() {
     if (!FieldEncryptionService.isReady) return;
+    sender = FieldEncryptionService.decrypt(sender);
     body = FieldEncryptionService.decrypt(body);
     merchant = FieldEncryptionService.decryptNullable(merchant);
+    toAccount = FieldEncryptionService.decryptNullable(toAccount);
+    transactionRef = FieldEncryptionService.decryptNullable(transactionRef);
   }
 }
 
 extension PendingTransactionEncryption on PendingTransaction {
   void encryptFields() {
     if (!FieldEncryptionService.isReady) return;
+    sender = FieldEncryptionService.encrypt(sender);
     body = FieldEncryptionService.encrypt(body);
+    toAccount = FieldEncryptionService.encryptNullable(toAccount);
+    transactionRef = FieldEncryptionService.encryptNullable(transactionRef);
   }
 
   void decryptFields() {
     if (!FieldEncryptionService.isReady) return;
+    sender = FieldEncryptionService.decrypt(sender);
     body = FieldEncryptionService.decrypt(body);
+    toAccount = FieldEncryptionService.decryptNullable(toAccount);
+    transactionRef = FieldEncryptionService.decryptNullable(transactionRef);
   }
 }
 
@@ -281,12 +295,59 @@ extension PendingTransactionListDecryption
 extension GoalEncryption on Goal {
   void encryptFields() {
     if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.encrypt(name);
     description = FieldEncryptionService.encryptNullable(description);
   }
 
   void decryptFields() {
     if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.decrypt(name);
     description = FieldEncryptionService.decryptNullable(description);
+  }
+}
+
+extension BudgetEncryption on Budget {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.encrypt(name);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.decrypt(name);
+  }
+}
+
+extension InvestmentHoldingEncryption on InvestmentHolding {
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.encrypt(name);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    name = FieldEncryptionService.decrypt(name);
+  }
+}
+
+extension BudgetListDecryption on Future<List<Budget>> {
+  Future<List<Budget>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
+  }
+}
+
+extension BudgetStreamDecryption on Stream<List<Budget>> {
+  Stream<List<Budget>> withDecryption() {
+    return map((list) {
+      for (final item in list) {
+        item.decryptFields();
+      }
+      return list;
+    });
   }
 }
 
@@ -343,6 +404,16 @@ extension NotificationRecordStreamDecryption
   }
 }
 
+extension InvestmentHoldingListDecryption on Future<List<InvestmentHolding>> {
+  Future<List<InvestmentHolding>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
+  }
+}
+
 extension GoalStreamDecryption on Stream<List<Goal>> {
   Stream<List<Goal>> withDecryption() {
     return map((list) {
@@ -382,6 +453,46 @@ extension UserProfileDecryption on Future<UserProfile?> {
     final profile = await this;
     profile?.decryptFields();
     return profile;
+  }
+}
+
+extension InvestmentHoldingDecryption on Future<InvestmentHolding?> {
+  Future<InvestmentHolding?> withDecryption() async {
+    final holding = await this;
+    holding?.decryptFields();
+    return holding;
+  }
+}
+
+extension GoalDecryption on Future<Goal?> {
+  Future<Goal?> withDecryption() async {
+    final goal = await this;
+    goal?.decryptFields();
+    return goal;
+  }
+}
+
+extension BudgetDecryption on Future<Budget?> {
+  Future<Budget?> withDecryption() async {
+    final budget = await this;
+    budget?.decryptFields();
+    return budget;
+  }
+}
+
+extension RecurringBillDecryption on Future<RecurringBill?> {
+  Future<RecurringBill?> withDecryption() async {
+    final bill = await this;
+    bill?.decryptFields();
+    return bill;
+  }
+}
+
+extension RecurringTransactionDecryption on Future<RecurringTransaction?> {
+  Future<RecurringTransaction?> withDecryption() async {
+    final rt = await this;
+    rt?.decryptFields();
+    return rt;
   }
 }
 

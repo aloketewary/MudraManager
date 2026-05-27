@@ -272,7 +272,7 @@ class BackupService {
         goals.map((goal) => GoalBackup.fromGoal(goal).toBackupJson()).toList();
 
     // Backup Budgets
-    final budgets = await isar.budgets.where().findAll();
+    final budgets = await isar.budgets.where().findAll().withDecryption();
     backupData['Budget'] = budgets
         .map((budget) => BudgetBackup.fromBudget(budget).toBackupJson())
         .toList();
@@ -520,6 +520,7 @@ class BackupService {
                   Map<String, dynamic>.from(itemJson),
                   restoredObjects,
                 );
+                budget.encryptFields();
                 await isar.budgets.put(budget);
                 await budget.categories.save();
                 await budget.allocations.save();
