@@ -50,7 +50,16 @@ class ReEngagementCheck extends SmartCheck {
         await isar.streaks.filter().typeEqualTo('daily_checkin').findFirst();
     final currentStreak = streak?.currentCount ?? 0;
 
-    if (currentStreak >= 1) {
+    final prefs = await SharedPreferences.getInstance();
+    final lastCheckInStr = prefs.getString('last_daily_check_in');
+    final lastCheckIn = lastCheckInStr != null ? DateTime.tryParse(lastCheckInStr) : null;
+    final now = DateTime.now();
+    final alreadyCheckedInToday = lastCheckIn != null &&
+        lastCheckIn.year == now.year &&
+        lastCheckIn.month == now.month &&
+        lastCheckIn.day == now.day;
+
+    if (currentStreak >= 1 && !alreadyCheckedInToday) {
       await SmartNotificationEmitter.emit(
         isar,
         type: 're_engage_streak_risk',

@@ -9,6 +9,7 @@ class SharedPrefsUtil {
 
   static late SharedPrefsUtil instance;
   static const _lastBackupKey = 'last_backup_date';
+  static const _usageHoursKey = 'typical_usage_hours';
   static const _lowBalanceThresholdKey = 'low_balance_threshold';
   static const _setSmsImportEnabledKey = 'sms_import_enabled';
   static const _hasSeenHelpGuideKey = 'has_seen_help_guide';
@@ -192,6 +193,31 @@ class SharedPrefsUtil {
 
   Future<void> setLastDailyCheckIn(DateTime date) async {
     await _prefs.setString(_lastDailyCheckInKey, date.toIso8601String());
+    await _recordUsageTime(date);
+  }
+
+  Future<void> _recordUsageTime(DateTime date) async {
+    final hour = date.hour;
+    final hours = _prefs.getStringList(_usageHoursKey) ?? [];
+    hours.add(hour.toString());
+    // Keep last 20 sessions to determine pattern
+    if (hours.length > 20) hours.removeAt(0);
+    await _prefs.setStringList(_usageHoursKey, hours);
+  }
+
+  int getTypicalUsageHour() {
+    final hours = _prefs.getStringList(_usageHoursKey) ?? [];
+    if (hours.isEmpty) return 20; // Default to 8 PM
+
+    final counts = <int, int>{};
+    for (final h in hours) {
+      final hour = int.parse(h);
+      counts[hour] = (counts[hour] ?? 0) + 1;
+    }
+
+    final sorted = counts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    return sorted.first.key;
   }
 
   Future<void> setString(
