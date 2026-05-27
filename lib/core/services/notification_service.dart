@@ -619,7 +619,10 @@ class NotificationService {
     );
   }
 
-  static Future<void> scheduleStreakReminder(int currentStreak) async {
+  static Future<void> scheduleStreakReminder(
+    int currentStreak, {
+    bool forceNextDay = false,
+  }) async {
     final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     final enabled = prefs.getBool('streak_reminder_enabled') ?? true;
 
@@ -640,7 +643,7 @@ class NotificationService {
       time.minute,
     );
 
-    if (scheduledDate.isBefore(now)) {
+    if (forceNextDay || scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
