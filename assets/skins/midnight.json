@@ -1,0 +1,40 @@
+{
+  "id": "midnight",
+  "name": "Midnight",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "pro",
+  "palette": {
+    "light": {
+      "seed": "#1A237E",
+      "primary": "#1A237E",
+      "secondary": "#283593",
+      "tertiary": "#5C6BC0",
+      "primaryContainer": "#C5CAE9",
+      "secondaryContainer": "#D1D9FF",
+      "tertiaryContainer": "#E8EAF6"
+    },
+    "dark": {
+      "seed": "#1A237E",
+      "primary": "#7986CB",
+      "secondary": "#9FA8DA",
+      "tertiary": "#536DFE",
+      "primaryContainer": "#0D1259",
+      "secondaryContainer": "#1A237E",
+      "tertiaryContainer": "#1A1F6E"
+    }
+  },
+  "style": {
+    "cardRadius": 16,
+    "cardElevation": 0,
+    "buttonRadius": 12,
+    "inputRadius": 12,
+    "borderOpacity": 0.12,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "Premium dark",
+    "tags": ["indigo", "dark", "premium"]
+  }
+}

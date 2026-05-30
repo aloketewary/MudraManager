@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1100,8 +1101,8 @@ class _AddEditTransactionScreenState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (sheetContext) {
         return Padding(
@@ -1128,7 +1129,7 @@ class _AddEditTransactionScreenState
                   hintText: 'e.g., Travel, Food, Shopping',
                   prefixIcon: const Icon(LucideIcons.tag),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   ),
                 ),
               ),
@@ -1153,7 +1154,7 @@ class _AddEditTransactionScreenState
                 style: FilledButton.styleFrom(
                   minimumSize: const Size(double.infinity, 48),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   ),
                 ),
                 child: Text(
@@ -1181,8 +1182,8 @@ class _AddEditTransactionScreenState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
@@ -1308,14 +1309,14 @@ class _AddEditTransactionScreenState
                           });
                           setModalState(() {});
                         },
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? color.primaryContainer.withValues(alpha: 0.2)
                                 : color.surface,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                             border: Border.all(
                               color: isSelected
                                   ? color.primary.withValues(alpha: 0.5)
@@ -1503,7 +1504,7 @@ class _AddEditTransactionScreenState
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     ),
                   ),
                   child: Text(AppLocalizations.of(context)!.common_done),
@@ -1525,8 +1526,8 @@ class _AddEditTransactionScreenState
 
       showModalBottomSheet(
           context: context,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
           ),
           builder: (ctx) => Padding(
             padding: const EdgeInsets.all(24),
@@ -1628,8 +1629,8 @@ class _AddEditTransactionScreenState
 
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
@@ -1660,7 +1661,7 @@ class _AddEditTransactionScreenState
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
               ),
               child: const Text(

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +31,7 @@ class BadgeShowcase extends ConsumerWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: color.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
                 child: Row(
                   children: [
@@ -83,7 +84,7 @@ class BadgeShowcase extends ConsumerWidget {
                     semanticsLabel: 'Progress',
                     value: total > 0 ? unlocked.length / total : 0,
                     backgroundColor: color.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
                   ),
                 ),
                 const SizedBox(width: 12),

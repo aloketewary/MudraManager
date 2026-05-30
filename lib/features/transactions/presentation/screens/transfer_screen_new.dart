@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
@@ -772,7 +773,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                   padding: EdgeInsets.all(spacing.elementGap),
                   decoration: BoxDecoration(
                     color: acColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   ),
                   child: Icon(
                     account.accountType.icon,

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -152,7 +153,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                 decoration: BoxDecoration(
                                   color: isActive ? color.onPrimary : color.primary,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                                 ),
                                 child: Text(
                                   '$unreadAll',

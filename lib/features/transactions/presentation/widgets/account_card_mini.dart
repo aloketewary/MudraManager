@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -46,7 +47,7 @@ class AccountCardMini extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         border: Border.all(
           color: selected ? color.tertiary : color.primary,
           width: 2,

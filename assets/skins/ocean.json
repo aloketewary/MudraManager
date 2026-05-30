@@ -1,0 +1,40 @@
+{
+  "id": "ocean",
+  "name": "Ocean",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "pro",
+  "palette": {
+    "light": {
+      "seed": "#0077B6",
+      "primary": "#006494",
+      "secondary": "#0096C7",
+      "tertiary": "#48CAE4",
+      "primaryContainer": "#CAE9FF",
+      "secondaryContainer": "#D4F1F9",
+      "tertiaryContainer": "#E0F7FA"
+    },
+    "dark": {
+      "seed": "#0077B6",
+      "primary": "#48CAE4",
+      "secondary": "#90E0EF",
+      "tertiary": "#ADE8F4",
+      "primaryContainer": "#003554",
+      "secondaryContainer": "#004E71",
+      "tertiaryContainer": "#005F85"
+    }
+  },
+  "style": {
+    "cardRadius": 16,
+    "cardElevation": 0,
+    "buttonRadius": 12,
+    "inputRadius": 12,
+    "borderOpacity": 0.12,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "Calm & focused",
+    "tags": ["blue", "deep", "ocean"]
+  }
+}

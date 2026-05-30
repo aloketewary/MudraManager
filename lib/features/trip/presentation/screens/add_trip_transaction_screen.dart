@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:flutter/material.dart';
@@ -273,7 +274,7 @@ class _AddTripTransactionScreenState
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         border: Border.all(
                           color: color.outlineVariant.withValues(alpha: 0.5),
                         ),
@@ -282,7 +283,7 @@ class _AddTripTransactionScreenState
                         style: ButtonStyle(
                           shape: WidgetStateProperty.all(
                             RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                             ),
                           ),
                           padding: WidgetStateProperty.all(
@@ -386,7 +387,7 @@ class _AddTripTransactionScreenState
                               }
                             });
                           },
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -397,7 +398,7 @@ class _AddTripTransactionScreenState
                                   ? color.primaryContainer
                                       .withValues(alpha: 0.2)
                                   : color.surface,
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                               border: Border.all(
                                 color: isChecked
                                     ? color.primary.withValues(alpha: 0.5)

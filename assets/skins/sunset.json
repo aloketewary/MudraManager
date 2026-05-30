@@ -1,0 +1,40 @@
+{
+  "id": "sunset",
+  "name": "Sunset",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "pro",
+  "palette": {
+    "light": {
+      "seed": "#E85D04",
+      "primary": "#D84315",
+      "secondary": "#E65100",
+      "tertiary": "#FF6D00",
+      "primaryContainer": "#FFCCBC",
+      "secondaryContainer": "#FFE0B2",
+      "tertiaryContainer": "#FFF3E0"
+    },
+    "dark": {
+      "seed": "#E85D04",
+      "primary": "#FF8A65",
+      "secondary": "#FFAB40",
+      "tertiary": "#FFD180",
+      "primaryContainer": "#4E1A00",
+      "secondaryContainer": "#5D2E00",
+      "tertiaryContainer": "#6D3F00"
+    }
+  },
+  "style": {
+    "cardRadius": 16,
+    "cardElevation": 0,
+    "buttonRadius": 12,
+    "inputRadius": 12,
+    "borderOpacity": 0.12,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "Warm & vibrant",
+    "tags": ["orange", "warm", "vibrant"]
+  }
+}

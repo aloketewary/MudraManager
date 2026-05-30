@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -165,8 +166,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: color.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) => Container(
@@ -330,24 +331,24 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
               staggerIndex: 0,
             ),
             SizedBox(height: spacing.elementGap),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: spacing.elementGap,
-              crossAxisSpacing: spacing.elementGap,
-              childAspectRatio: 1.5,
+            Wrap(
+              spacing: spacing.elementGap,
+              runSpacing: spacing.elementGap,
               children: activeVisible
                   .asMap()
                   .entries
                   .map(
-                    (e) => _buildCard(
-                      e.value,
-                      color,
-                      textTheme,
-                      spacing,
-                      e.key,
-                      l10n,
+                    (e) => SizedBox(
+                      width: (MediaQuery.of(context).size.width - spacing.cardHorizontal * 2 - spacing.elementGap) / 2,
+                      height: 130,
+                      child: _buildCard(
+                        e.value,
+                        color,
+                        textTheme,
+                        spacing,
+                        e.key,
+                        l10n,
+                      ),
                     ),
                   )
                   .toList(),
@@ -366,30 +367,33 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
               staggerIndex: 2,
             ),
             SizedBox(height: spacing.elementGap),
-            Row(
-              children: planningVisible
-                  .asMap()
-                  .entries
-                  .map(
-                    (e) => Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          right: e.key != planningVisible.length - 1
-                              ? spacing.elementGap
-                              : 0,
-                        ),
-                        child: _buildCard(
-                          e.value,
-                          color,
-                          textTheme,
-                          spacing,
-                          e.key + 2,
-                          l10n,
+            SizedBox(
+              height: 130,
+              child: Row(
+                children: planningVisible
+                    .asMap()
+                    .entries
+                    .map(
+                      (e) => Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            right: e.key != planningVisible.length - 1
+                                ? spacing.elementGap
+                                : 0,
+                          ),
+                          child: _buildCard(
+                            e.value,
+                            color,
+                            textTheme,
+                            spacing,
+                            e.key + 2,
+                            l10n,
+                          ),
                         ),
                       ),
-                    ),
-                  )
-                  .toList(),
+                    )
+                    .toList(),
+              ),
             ),
             SizedBox(height: spacing.sectionGap),
           ],
@@ -582,8 +586,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
           context.push(item.route);
         },
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        child: SizedBox(
-          child: Stack(
+        child: Stack(
             children: [
               // Large background icon — slow float
               Positioned(
@@ -618,11 +621,11 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                       padding: EdgeInsets.all(spacing.elementGap),
                       decoration: BoxDecoration(
                         color: color.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       ),
                       child: Icon(item.icon, size: 20, color: color.primary),
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 16),
                     Text(
                       l10n.translate(item.titleKey),
                       style: textTheme.titleSmall
@@ -642,7 +645,6 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
             ],
           ),
         ),
-      ),
     ).animate().fadeIn(duration: 250.ms, delay: (50 * index).ms).slideY(
           begin: 0.3,
           end: 0,
@@ -707,7 +709,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                     padding: EdgeInsets.all(spacing.elementGap),
                     decoration: BoxDecoration(
                       color: color.secondary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     ),
                     child: Icon(item.icon, size: 18, color: color.secondary),
                   ),

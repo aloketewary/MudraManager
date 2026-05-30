@@ -1,0 +1,56 @@
+{
+  "id": "brutalist",
+  "name": "Neo Brutalist",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#000000",
+      "primary": "#000000",
+      "secondary": "#333333",
+      "tertiary": "#CCFF00",
+      "primaryContainer": "#F5F5F5",
+      "secondaryContainer": "#EEEEEE",
+      "tertiaryContainer": "#F5FFD6",
+      "surface": "#FFFFFF",
+      "surfaceContainer": "#FAFAFA",
+      "surfaceContainerLow": "#FCFCFC",
+      "onSurface": "#000000",
+      "onSurfaceVariant": "#555555",
+      "outline": "#000000",
+      "outlineVariant": "#000000"
+    },
+    "dark": {
+      "seed": "#FFFFFF",
+      "primary": "#FFFFFF",
+      "secondary": "#CCCCCC",
+      "tertiary": "#CCFF00",
+      "primaryContainer": "#1A1A1A",
+      "secondaryContainer": "#222222",
+      "tertiaryContainer": "#1A2600",
+      "surface": "#000000",
+      "surfaceContainer": "#0A0A0A",
+      "surfaceContainerLow": "#050505",
+      "surfaceContainerHigh": "#141414",
+      "onSurface": "#FFFFFF",
+      "onSurfaceVariant": "#AAAAAA",
+      "outline": "#FFFFFF",
+      "outlineVariant": "#666666"
+    }
+  },
+  "style": {
+    "cardRadius": 0,
+    "cardElevation": 0,
+    "buttonRadius": 0,
+    "inputRadius": 0,
+    "borderOpacity": 1.0,
+    "borderWidth": 2,
+    "dividerStyle": "standard",
+    "numberFont": "GeistMono"
+  },
+  "meta": {
+    "description": "Raw, confident, architectural",
+    "tags": ["brutalist", "raw", "contrast", "neon", "bold"]
+  }
+}

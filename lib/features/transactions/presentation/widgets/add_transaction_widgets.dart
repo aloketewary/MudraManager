@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -41,7 +42,7 @@ class AccountSelectorSkeleton extends StatelessWidget {
           width: 150,
           decoration: BoxDecoration(
             color: color.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
           ),
         ),
       ),
@@ -67,7 +68,7 @@ class CategorySelectorSkeleton extends StatelessWidget {
           width: 110,
           decoration: BoxDecoration(
             color: color.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
           ),
         ),
       ),
@@ -93,7 +94,7 @@ class TagSelectorSkeleton extends StatelessWidget {
           height: 32,
           decoration: BoxDecoration(
             color: color.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
           ),
         ),
       ),

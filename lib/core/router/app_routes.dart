@@ -56,6 +56,8 @@ abstract class AppRoutes {
   static const smsImport = '/sms-import';
   static const chooseLanguage = '/choose-language';
   static const themePicker = '/theme-picker';
+  static const skinPicker = '/skin-picker';
+  static const skinEditor = '/skin-editor';
   static const backupRestore = '/backup-restore';
   static const about = '/about';
   static const help = '/help';

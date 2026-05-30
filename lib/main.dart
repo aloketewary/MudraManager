@@ -25,6 +25,7 @@ import 'package:mudra_manager/core/services/app_update_service.dart';
 import 'package:mudra_manager/core/services/background_task_manager.dart';
 import 'package:mudra_manager/core/services/auto_backup_service.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/core/skin/skin.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
@@ -289,11 +290,15 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
   @override
   Widget build(BuildContext context) {
     final activeTone = ref.watch(tonePackProvider);
-    Tone.sync(activeTone);
+    final activeSkin = ref.watch(activeSkinProvider).value;
+    // Merge skin style into tone for radii/elevation
+    final effectiveTone = activeSkin != null
+        ? SkinAwareTone(activeTone, activeSkin.style)
+        : activeTone;
+    Tone.sync(effectiveTone);
 
     final appThemeMode = ref.watch(themeModeProvider);
     final appTheme = AppTheme.instance;
-    final appColorTheme = ref.watch(themeNotifierProvider);
 
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
@@ -301,7 +306,7 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
         ColorScheme darkScheme;
         ColorScheme amoledScheme;
 
-        if (appColorTheme == AppColorTheme.dynamic &&
+        if (activeSkin != null && activeSkin.id == 'dynamic' &&
             lightDynamic != null &&
             darkDynamic != null) {
           lightScheme = lightDynamic.harmonized();
@@ -309,18 +314,24 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
           amoledScheme = darkDynamic.harmonized().copyWith(
                 surface: Colors.black,
               );
+        } else if (activeSkin != null) {
+          lightScheme = SkinToTheme.lightScheme(activeSkin);
+          darkScheme = SkinToTheme.darkScheme(activeSkin);
+          amoledScheme = SkinToTheme.amoledScheme(activeSkin);
         } else {
-          lightScheme = appColorTheme.lightColorScheme();
-          darkScheme = appColorTheme.darkColorScheme();
-          amoledScheme = appColorTheme.amoledColorScheme();
+          // Fallback while skin loads
+          lightScheme = AppColorTheme.finance.lightColorScheme();
+          darkScheme = AppColorTheme.finance.darkColorScheme();
+          amoledScheme = AppColorTheme.finance.amoledColorScheme();
         }
 
         return MaterialApp.router(
+          key: ValueKey(activeSkin?.id ?? 'default'),
           title: 'Mudra Manager',
-          theme: appTheme.buildTheme(lightScheme, activeTone),
+          theme: appTheme.buildTheme(lightScheme, effectiveTone),
           darkTheme: appThemeMode == AppThemeMode.amoled
-              ? appTheme.buildTheme(amoledScheme, activeTone)
-              : appTheme.buildTheme(darkScheme, activeTone),
+              ? appTheme.buildTheme(amoledScheme, effectiveTone)
+              : appTheme.buildTheme(darkScheme, effectiveTone),
           themeMode: switch (appThemeMode) {
             AppThemeMode.light => ThemeMode.light,
             AppThemeMode.dark => ThemeMode.dark,

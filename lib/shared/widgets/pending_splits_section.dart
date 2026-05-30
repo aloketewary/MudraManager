@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,7 @@ class PendingSplitsSection extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: color.errorContainer,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
                 child: Text(
                   '${pendingTransactions.length}',
@@ -105,7 +106,7 @@ class PendingSplitsSection extends StatelessWidget {
                     elevation: 0,
                     color: color.surfaceContainerHighest,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       onTap: () {
                         HapticFeedback.lightImpact();
                         _showSplitOptions(context, txn);
@@ -263,12 +264,12 @@ class _SplitOptionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
           border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Column(

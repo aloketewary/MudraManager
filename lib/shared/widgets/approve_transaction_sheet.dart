@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -80,7 +81,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
       ),
       decoration: BoxDecoration(
         color: color.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -108,7 +109,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: color.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               child: Row(
                 children: [
@@ -172,7 +173,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
                   child: CurrencyBadge(code: BaseCurrency.code, size: 14),
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
               ),
             ),
@@ -195,7 +196,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   border: Border.all(color: color.outline),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
                 child: Row(
                   children: [
@@ -242,7 +243,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 52),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
               ),
               child: Text(

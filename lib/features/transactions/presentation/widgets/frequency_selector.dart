@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -67,7 +68,7 @@ class FrequencySelector extends StatelessWidget {
               labelText: 'Repeat every',
               suffixText: _getIntervalSuffix(),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
             ),
             onChanged: (value) {

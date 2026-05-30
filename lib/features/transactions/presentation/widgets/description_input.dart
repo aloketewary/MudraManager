@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 
@@ -23,7 +24,7 @@ class DescriptionInput extends StatelessWidget {
         hintText: hintText ?? 'Enter description',
         prefixIcon: const Icon(LucideIcons.fileText),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         ),
       ),
     );

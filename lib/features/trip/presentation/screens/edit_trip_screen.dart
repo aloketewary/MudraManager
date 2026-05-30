@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
+import 'package:mudra_manager/core/db/field_encryption_service.dart';
 
 class ManageTripScreen extends ConsumerStatefulWidget {
   final int? tripId;
@@ -86,8 +88,8 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: color.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
@@ -134,7 +136,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                 labelText: AppLocalizations.of(context)!.editTrip_name,
                 hintText: AppLocalizations.of(context)!.editTrip_enterName,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
                 prefixIcon: const Icon(LucideIcons.user),
               ),
@@ -149,7 +151,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       ),
                     ),
                     child: Text(AppLocalizations.of(context)!.common_cancel),
@@ -173,7 +175,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       ),
                     ),
                     child: const Text('Add'),
@@ -302,7 +304,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted && _participants.isEmpty) {
               setState(() {
-                _ownerName = profile.name;
+                _ownerName = FieldEncryptionService.safeDisplay(profile.name, 'User');
                 _participants.add(
                   TripParticipant.create(name: _ownerName!, isOwner: true),
                 );
@@ -514,9 +516,9 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     final picked = await showModalBottomSheet<String>(
                       context: context,
                       isScrollControlled: true,
-                      shape: const RoundedRectangleBorder(
+                      shape: RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(20)),
+                            BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
                       ),
                       builder: (_) => _TripCurrencyPicker(
                         selected: _tripCurrency,
@@ -1068,7 +1070,7 @@ class _TripCurrencyPickerState extends State<_TripCurrencyPicker> {
                 hintText: 'Search currency...',
                 prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   borderSide: BorderSide(color: color.outlineVariant),
                 ),
                 isDense: true,

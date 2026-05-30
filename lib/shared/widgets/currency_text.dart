@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 
 /// Displays a currency amount: `₹12.5K`, `$1,234`, `AED 367`
@@ -79,7 +80,10 @@ class CurrencyText extends StatelessWidget {
         '${prefixText != null ? '$prefixText ' : ''}$numberText${suffixText != null ? ' $suffixText' : ''}';
 
     // Style: symbol slightly muted, number inherits full style
-    final effectiveStyle = style ?? DefaultTextStyle.of(context).style;
+    final effectiveStyle = (style ?? DefaultTextStyle.of(context).style).copyWith(
+      fontFamily: Tone.current.numberFont,
+      fontFeatures: const [FontFeature.tabularFigures(), FontFeature.slashedZero()],
+    );
     final symbolStyle = effectiveStyle.copyWith(
       color: (effectiveStyle.color ?? Theme.of(context).colorScheme.onSurface)
           .withValues(alpha: 0.7),

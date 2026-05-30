@@ -1,0 +1,53 @@
+{
+  "id": "luminescent",
+  "name": "Luminescent",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#00E5FF",
+      "primary": "#006B7A",
+      "secondary": "#0097A7",
+      "tertiary": "#7C4DFF",
+      "primaryContainer": "#D4F7FC",
+      "secondaryContainer": "#E0F7FA",
+      "tertiaryContainer": "#EDE7F6",
+      "surface": "#F8FDFE",
+      "surfaceContainer": "#EEF9FA",
+      "surfaceContainerLow": "#F3FBFC",
+      "onSurface": "#0A1A1C"
+    },
+    "dark": {
+      "seed": "#00E5FF",
+      "primary": "#00E5FF",
+      "secondary": "#00BCD4",
+      "tertiary": "#B388FF",
+      "primaryContainer": "#003840",
+      "secondaryContainer": "#00363D",
+      "tertiaryContainer": "#1A0040",
+      "surface": "#050A0C",
+      "surfaceContainer": "#0A1214",
+      "surfaceContainerLow": "#080E10",
+      "surfaceContainerHigh": "#0F1A1E",
+      "onSurface": "#E0F7FA",
+      "onSurfaceVariant": "#80CBC4",
+      "outline": "#00696E",
+      "outlineVariant": "#004D52"
+    }
+  },
+  "style": {
+    "cardRadius": 12,
+    "cardElevation": 0,
+    "buttonRadius": 8,
+    "inputRadius": 8,
+    "borderOpacity": 0.4,
+    "borderWidth": 1,
+    "dividerStyle": "hairline",
+    "numberFont": "GeistMono"
+  },
+  "meta": {
+    "description": "High-tech glow with radial light leaks",
+    "tags": ["dark", "glow", "futuristic", "neon", "cyber"]
+  }
+}

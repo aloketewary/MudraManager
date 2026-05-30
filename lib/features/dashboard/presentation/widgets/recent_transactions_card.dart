@@ -128,7 +128,7 @@ class RecentTransactionsCard extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: Color(category?.colorValue ?? 0xFF6200EE)
                                 .withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
                           ),
                           child: Icon(
                             IconHelper.getIconData(category?.iconName),

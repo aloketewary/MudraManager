@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -430,8 +431,8 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => DraggableScrollableSheet(
         initialChildSize: 0.7,
@@ -462,7 +463,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: color.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   ),
                   child: Icon(icon, color: color.primary, size: 24),
                 ),

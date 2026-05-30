@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +29,7 @@ class NetWorthCard extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isGuestMode = ref.watch(guestModeProvider);
+    final spacing = ref.watch(spacingProvider);
 
     return dashboardAsync.when(
       data: (dashboardData) {
@@ -61,7 +64,7 @@ class NetWorthCard extends ConsumerWidget {
                   HapticFeedback.mediumImpact();
                   context.push(AppRoutes.netWorth);
                 },
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(spacing.radiusLarge),
                 child: Stack(
                   children: [
                     // Background chart
@@ -196,7 +199,7 @@ class NetWorthCard extends ConsumerWidget {
                                               : color.onPrimaryContainer
                                                   .withValues(alpha: 0.1),
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                              BorderRadius.circular(spacing.radiusMedium),
                                         ),
                                         child: Text(
                                           '${savingsRate.toStringAsFixed(0)}% savings',
@@ -288,7 +291,7 @@ class NetWorthCard extends ConsumerWidget {
         .toList();
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(Tone.current.borderRadius * 1.25),
       child: LineChart(
         LineChartData(
           gridData: const FlGridData(show: false),
@@ -346,7 +349,7 @@ class _MetricChip extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: colorScheme.onPrimaryContainer.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

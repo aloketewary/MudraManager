@@ -84,6 +84,18 @@ class FieldEncryptionService {
   static bool isEncrypted(String? value) =>
       value != null && value.startsWith(_prefix);
 
+  /// Safe display helper — guarantees no encrypted text reaches UI.
+  /// Use this as a last-resort guard when displaying any potentially
+  /// encrypted string. Returns decrypted value or empty string on failure.
+  static String safeDisplay(String? value, [String fallback = '']) {
+    if (value == null || value.isEmpty) return fallback;
+    if (!value.startsWith(_prefix)) return value;
+    if (!isReady) return fallback;
+    final decrypted = decrypt(value);
+    // If decrypt returned the raw ciphertext (failure), show fallback
+    return decrypted.startsWith(_prefix) ? fallback : decrypted;
+  }
+
   static Future<enc.Key> _getOrCreateKey() async {
     var keyStr = await _storage.read(key: _keyName);
     if (keyStr == null) {

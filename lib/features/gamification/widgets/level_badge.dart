@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +23,7 @@ class LevelBadge extends ConsumerWidget {
             gradient: LinearGradient(
               colors: [color.primary, color.tertiary],
             ),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

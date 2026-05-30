@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -278,7 +279,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
         Container(
           decoration: BoxDecoration(
             color: color.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             border: Border.all(
               color: color.outlineVariant.withValues(alpha: 0.3),
             ),
@@ -350,7 +351,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: accent.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
                               ),
                               child: Text(
                                 a.title,
@@ -524,7 +525,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: accent.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         ),
         child: Column(
           children: [
@@ -600,7 +601,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: accent.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                           ),
                           child: Icon(icon, color: accent, size: 20),
                         ),
@@ -631,7 +632,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                           ),
                           decoration: BoxDecoration(
                             color: accent.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                           ),
                           child: Text(
                             '${streak.currentCount}',

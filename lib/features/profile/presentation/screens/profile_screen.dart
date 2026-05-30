@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:go_router/go_router.dart';
@@ -28,6 +29,7 @@ import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/db/field_encryption_service.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -76,7 +78,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ? Padding(
                           padding: const EdgeInsets.only(right: 16),
                           child: Text(
-                            profile?.name ?? l10n.profile_awesomeUser,
+                            FieldEncryptionService.safeDisplay(profile?.name, l10n.profile_awesomeUser),
                             style: textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: color.onSurface,
@@ -306,7 +308,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           SkeletonLoader(
             width: double.infinity,
             height: 220,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
           ),
           const SizedBox(height: 16),
           ...List.generate(
@@ -316,7 +318,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: SkeletonLoader(
                 width: double.infinity,
                 height: 70,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
             ),
           ),
@@ -360,7 +362,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       decoration: BoxDecoration(
                         color: (isPro ? color.primary : color.error)
                             .withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       ),
                       child: Icon(
                         isPro ? LucideIcons.shieldCheck : LucideIcons.shieldOff,
@@ -409,7 +411,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: Icon(
                           LucideIcons.crown,
@@ -464,7 +466,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.tertiary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: Icon(
                           LucideIcons.timer,
@@ -509,7 +511,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.error.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child:
                             Icon(LucideIcons.ban, color: color.error, size: 20),
@@ -616,7 +618,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: accent.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: Icon(
                           info.isPro
@@ -655,7 +657,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     decoration: BoxDecoration(
                                       color:
                                           color.primary.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(4),
+                                      borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
                                     ),
                                     child: Text(
                                       '${info.trialDaysRemaining}d LEFT',
@@ -677,7 +679,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: accent.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(4),
+                                      borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
                                     ),
                                     child: Text(
                                       'ACTIVE',
@@ -800,7 +802,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          profile?.name ?? l10n.profile_unknown,
+                          FieldEncryptionService.safeDisplay(profile?.name, l10n.profile_unknown),
                           style: textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w900,
                           ),
@@ -817,7 +819,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   if (profile?.email != null && profile!.email!.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
-                      profile.email!,
+                      FieldEncryptionService.safeDisplay(profile.email),
                       style: textTheme.bodySmall?.copyWith(
                         color: color.onSurfaceVariant,
                       ),
@@ -877,7 +879,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           height: 64,
           child: ClipOval(
             child: BoringAvatar(
-              name: profile?.name ?? l10n.profile_awesomeUser,
+              name: FieldEncryptionService.safeDisplay(profile?.name, l10n.profile_awesomeUser),
               palette: BoringAvatarPalette([
                 color.primary,
                 color.tertiary,
@@ -901,7 +903,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: color.primary,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
                 child: Text(
                   'Lv${level.level}',
@@ -931,7 +933,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1230,7 +1232,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: Icon(
                           item.icon,
@@ -1321,7 +1323,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     decoration: BoxDecoration(
                       color: color.error,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     ),
                     child: Text(
                       '$pendingCount',
@@ -1354,8 +1356,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),

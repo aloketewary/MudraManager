@@ -1,6 +1,7 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SwipeActionWrapper extends StatefulWidget {
@@ -124,7 +125,7 @@ class _SwipeActionWrapperState extends State<SwipeActionWrapper>
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
           color: Colors.blue,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         ),
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 20),
@@ -147,7 +148,7 @@ class _SwipeActionWrapperState extends State<SwipeActionWrapper>
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
           color: color.error,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
@@ -208,7 +209,7 @@ class _PeekOverlay extends AnimatedWidget {
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
                 color: color.error,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: 20),
@@ -237,7 +238,7 @@ class _PeekOverlay extends AnimatedWidget {
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.blue,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.only(left: 20),

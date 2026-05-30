@@ -1,0 +1,40 @@
+{
+  "id": "lavender",
+  "name": "Lavender",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "pro",
+  "palette": {
+    "light": {
+      "seed": "#7C3AED",
+      "primary": "#6D28D9",
+      "secondary": "#7E57C2",
+      "tertiary": "#EC407A",
+      "primaryContainer": "#E1D5F5",
+      "secondaryContainer": "#EDE7F6",
+      "tertiaryContainer": "#FCE4EC"
+    },
+    "dark": {
+      "seed": "#7C3AED",
+      "primary": "#B39DDB",
+      "secondary": "#CE93D8",
+      "tertiary": "#F48FB1",
+      "primaryContainer": "#311B92",
+      "secondaryContainer": "#4A148C",
+      "tertiaryContainer": "#4A0E2E"
+    }
+  },
+  "style": {
+    "cardRadius": 16,
+    "cardElevation": 0,
+    "buttonRadius": 12,
+    "inputRadius": 12,
+    "borderOpacity": 0.12,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "Soft & elegant",
+    "tags": ["purple", "elegant", "soft"]
+  }
+}

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -124,7 +125,7 @@ class CommandCenterScreen extends ConsumerWidget {
                               decoration: BoxDecoration(
                                 color:
                                     color.errorContainer.withValues(alpha: 0.3),
-                                borderRadius: BorderRadius.circular(24),
+                                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                                 border: Border.all(
                                   color: color.error.withValues(alpha: 0.3),
                                   width: 1,
@@ -175,7 +176,7 @@ class CommandCenterScreen extends ConsumerWidget {
                                   color.primary.withValues(alpha: 0.7),
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                               boxShadow: [
                                 BoxShadow(
                                   color: color.primary.withValues(alpha: 0.3),

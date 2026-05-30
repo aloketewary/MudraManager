@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -103,8 +104,8 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
               HapticFeedback.mediumImpact();
               showModalBottomSheet(
                 context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
                 ),
                 builder: (_) => Padding(
                   padding: const EdgeInsets.all(16),
@@ -181,7 +182,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
       color: color.surfaceContainer,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -190,7 +191,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: color.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
                 child: Icon(icon, color: color.primary, size: 24),
               ),

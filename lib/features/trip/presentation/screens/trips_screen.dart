@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -515,8 +516,8 @@ class TripsScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: color.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => SafeArea(
         child: Padding(

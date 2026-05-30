@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -535,7 +536,7 @@ class FinancialHealthScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
           color: color.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         ),
         child: Text(
           ctxt.health_stable,
@@ -556,7 +557,7 @@ class FinancialHealthScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: trendColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
       ),
       child: Text(
         label,

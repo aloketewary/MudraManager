@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -78,7 +79,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
           child: Container(
             decoration: BoxDecoration(
               color: isSameDay ? color.secondary : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             ),
             child: Center(
               child: Padding(

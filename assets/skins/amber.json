@@ -1,0 +1,40 @@
+{
+  "id": "amber",
+  "name": "Amber",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "pro",
+  "palette": {
+    "light": {
+      "seed": "#F59E0B",
+      "primary": "#F57F17",
+      "secondary": "#FF8F00",
+      "tertiary": "#6D4C41",
+      "primaryContainer": "#FFF8E1",
+      "secondaryContainer": "#FFF3E0",
+      "tertiaryContainer": "#D7CCC8"
+    },
+    "dark": {
+      "seed": "#F59E0B",
+      "primary": "#FFCA28",
+      "secondary": "#FFD54F",
+      "tertiary": "#BCAAA4",
+      "primaryContainer": "#5D4200",
+      "secondaryContainer": "#6D5000",
+      "tertiaryContainer": "#3E2723"
+    }
+  },
+  "style": {
+    "cardRadius": 16,
+    "cardElevation": 0,
+    "buttonRadius": 12,
+    "inputRadius": 12,
+    "borderOpacity": 0.12,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "Energetic & warm",
+    "tags": ["gold", "warm", "energetic"]
+  }
+}

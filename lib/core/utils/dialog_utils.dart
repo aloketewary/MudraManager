@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -16,8 +17,8 @@ class DialogUtils {
     return showModalBottomSheet<bool>(
       context: context,
       backgroundColor: color.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (context) => SafeArea(
         child: Padding(
@@ -56,7 +57,7 @@ class DialogUtils {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: color.outline),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
                       ),
                       child: Text(
                         (cancelText ?? BuddyMessages.deleteCancel).toUpperCase(),
@@ -72,7 +73,7 @@ class DialogUtils {
                         backgroundColor: color.error,
                         foregroundColor: color.onError,
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
                       ),
                       child: Text(
                         (deleteText ?? BuddyMessages.deleteConfirm).toUpperCase(),
@@ -103,8 +104,8 @@ class DialogUtils {
     return showModalBottomSheet<bool>(
       context: context,
       backgroundColor: color.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (context) => SafeArea(
         child: Padding(
@@ -145,7 +146,7 @@ class DialogUtils {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: color.outline),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
                       ),
                       child: Text(
                         (cancelText ?? 'CANCEL').toUpperCase(),
@@ -159,7 +160,7 @@ class DialogUtils {
                       onPressed: () => Navigator.pop(context, true),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
                       ),
                       child: Text(
                         (confirmText ?? 'CONFIRM').toUpperCase(),
@@ -187,8 +188,8 @@ class DialogUtils {
       context: context,
       backgroundColor: color.surface,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (context) => _PasswordDialogContent(isRestore: isRestore, color: color, textTheme: textTheme),
     );
@@ -208,8 +209,8 @@ class DialogUtils {
     return showModalBottomSheet<String>(
       context: context,
       backgroundColor: color.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (context) => SafeArea(
         child: Padding(
@@ -319,7 +320,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
             obscureText: true,
             decoration: InputDecoration(
               labelText: 'Password',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
               prefixIcon: const Icon(LucideIcons.keyRound),
             ),
           ),
@@ -330,7 +331,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
                 prefixIcon: const Icon(LucideIcons.keyRound),
               ),
             ),
@@ -343,7 +344,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
                   ),
                   child: const Text('CANCEL', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
@@ -368,7 +369,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
                   },
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
                   ),
                   child: const Text('CONTINUE', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),

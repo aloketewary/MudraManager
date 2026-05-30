@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -23,8 +24,8 @@ class GuestModeToggle extends ConsumerWidget {
           HapticFeedback.mediumImpact();
           showModalBottomSheet(
             context: context,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
             ),
             builder: (ctx) => Padding(
               padding: const EdgeInsets.all(24),
@@ -63,7 +64,7 @@ class GuestModeToggle extends ConsumerWidget {
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                             ),
                           ),
                           child: Text(AppLocalizations.of(context)!.common_cancel),
@@ -79,7 +80,7 @@ class GuestModeToggle extends ConsumerWidget {
                           style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                             ),
                           ),
                           child: Text(isGuestMode ? 'Disable' : 'Enable'),
@@ -92,7 +93,7 @@ class GuestModeToggle extends ConsumerWidget {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -101,7 +102,7 @@ class GuestModeToggle extends ConsumerWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: color.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
                 child: Icon(LucideIcons.eyeOff, color: color.primary, size: 24),
               ),

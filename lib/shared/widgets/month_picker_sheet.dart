@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -14,8 +15,8 @@ Future<DateTime?> showMonthPicker({
   return showModalBottomSheet<DateTime>(
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
     ),
     builder: (_) => _MonthPickerSheet(
       initial: initialMonth,
@@ -127,7 +128,7 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
                           HapticFeedback.lightImpact();
                           Navigator.of(context).pop(date);
                         },
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   child: Container(
                     decoration: BoxDecoration(
                       color: isSelected
@@ -135,7 +136,7 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
                           : isCurrent
                               ? color.primary.withValues(alpha: 0.1)
                               : color.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     ),
                     alignment: Alignment.center,
                     child: Text(

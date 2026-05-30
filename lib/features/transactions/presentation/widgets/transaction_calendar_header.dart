@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,7 +57,7 @@ class TransactionCalendarHeader extends StatelessWidget {
           HapticFeedback.mediumImpact();
           onToggleCalendar();
         },
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -65,7 +66,7 @@ class TransactionCalendarHeader extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: color.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
                 child: Icon(LucideIcons.calendar, color: color.primary, size: 20),
               ),
@@ -94,7 +95,7 @@ class TransactionCalendarHeader extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   color: color.surface,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

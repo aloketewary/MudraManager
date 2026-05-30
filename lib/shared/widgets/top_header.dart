@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/material.dart';
 
 class TopHeader extends StatelessWidget {
@@ -12,7 +13,7 @@ class TopHeader extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)), // Optional rounded bottom
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(Tone.current.borderRadius * 2)), // Optional rounded bottom
       ),
       padding: const EdgeInsets.only(top: 40.0, left: 16.0, right: 16.0, bottom: 24.0),
       child: Column(

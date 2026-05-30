@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +32,7 @@ class BudgetAmountInput extends StatelessWidget {
         ),
         errorText: errorText,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         ),
       ),
     );

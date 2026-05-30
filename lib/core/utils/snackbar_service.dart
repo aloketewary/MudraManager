@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -68,7 +69,7 @@ class SnackbarService {
               ),
         backgroundColor: bg,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         padding: EdgeInsets.symmetric(
           horizontal: 16,

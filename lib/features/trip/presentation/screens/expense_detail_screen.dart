@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
@@ -547,8 +548,8 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) {
@@ -659,14 +660,14 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                           });
                           setModalState(() {});
                         },
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? color.primaryContainer.withValues(alpha: 0.2)
                                 : color.surface,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                             border: Border.all(
                               color: isSelected
                                   ? color.primary.withValues(alpha: 0.5)

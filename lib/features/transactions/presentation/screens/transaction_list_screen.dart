@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:async';
@@ -621,7 +622,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: color.primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                           ),
                           child: Icon(
                             LucideIcons.calendar,
@@ -1596,8 +1597,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) {
         return Consumer(

@@ -38,6 +38,7 @@ import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/speed_dial_fab.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/db/field_encryption_service.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   final int initialIndex;
@@ -359,7 +360,6 @@ class HomePageState extends ConsumerState<HomePage>
                 );
               },
               child: IndexedStack(
-                key: ValueKey<int>(stackIndex),
                 index: stackIndex,
                 children: [
                   const DashboardHome(),
@@ -417,7 +417,7 @@ class HomePageState extends ConsumerState<HomePage>
                     height: 32,
                     child: ClipOval(
                       child: BoringAvatar(
-                        name: profile?.name ?? 'User',
+                        name: FieldEncryptionService.safeDisplay(profile?.name, 'User'),
                         palette: BoringAvatarPalette([
                           color.primary,
                           color.tertiary,
@@ -453,7 +453,7 @@ class HomePageState extends ConsumerState<HomePage>
                       profileAsync.when(
                         data: (profile) => AnimatedGreeting(
                           greeting: '${ctxt.translate(toneGreeting)},',
-                          name: profile?.name ?? 'Awesome User',
+                          name: FieldEncryptionService.safeDisplay(profile?.name, 'Awesome User'),
                           greetingStyle: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w400,
                           ),
@@ -713,7 +713,7 @@ class HomePageState extends ConsumerState<HomePage>
                 categoryDataMap: data.categoryDataMap,
                 startDate: DateTime.now().subtract(const Duration(days: 30)),
                 endDate: DateTime.now(),
-                userName: profile?.name,
+                userName: FieldEncryptionService.safeDisplay(profile?.name),
               ),
             ),
           ),

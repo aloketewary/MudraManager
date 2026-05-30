@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -217,7 +218,7 @@ class _MonthlyComparisonScreenState
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: color.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -529,7 +530,7 @@ class _MonthlyComparisonScreenState
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: color.primary.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               child: Text(
                 'By day ${DateTime.now().day}: ${formatCurrencyCompact(lastExpByThisDay, code: code)} in ${lastName.split(' ').first}',
@@ -599,7 +600,7 @@ class _MonthlyComparisonScreenState
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: dColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             ),
             child: Text(
               customDelta ??
@@ -677,7 +678,7 @@ class _MonthlyComparisonScreenState
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: accent.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             ),
             child: Icon(icon, size: 18, color: accent),
           ),
@@ -879,7 +880,7 @@ class _MonthlyComparisonScreenState
               height: 32,
               decoration: BoxDecoration(
                 color: deltaColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               child: Icon(
                 IconHelper.getIconData(cat.iconName),
@@ -911,7 +912,7 @@ class _MonthlyComparisonScreenState
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: deltaColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               child: Text(
                 isZero ? '—' : '${isUp ? '+' : ''}${pct.toStringAsFixed(0)}%',
@@ -994,7 +995,7 @@ class _MonthlyComparisonScreenState
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: color.primary.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               child: Row(
                 children: [
@@ -1100,7 +1101,7 @@ class _MonthlyComparisonScreenState
               decoration: BoxDecoration(
                 color: (isUp ? color.primary : color.tertiary)
                     .withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               child: Text(
                 '${isUp ? '+' : ''}$delta',

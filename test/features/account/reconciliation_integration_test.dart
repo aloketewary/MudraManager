@@ -113,7 +113,7 @@ void main() {
   group('Credit card balance calculation', () {
     test('initial outstanding + expenses increases debt', () async {
       final cc = await seedAccount('HDFC CC', AccountType.creditCard,
-          initialBalance: 5000);
+          initialBalance: 5000,);
       await addTxn(cc, 500, isExpense: true);
 
       final balance = await accountsService.getAccountBalance(cc.id);
@@ -122,7 +122,7 @@ void main() {
 
     test('payment (income) reduces credit card debt', () async {
       final cc = await seedAccount('HDFC CC', AccountType.creditCard,
-          initialBalance: 5000);
+          initialBalance: 5000,);
       await addTxn(cc, 2000, isExpense: false); // payment
 
       final balance = await accountsService.getAccountBalance(cc.id);
@@ -131,7 +131,7 @@ void main() {
 
     test('full payment brings credit card to zero', () async {
       final cc = await seedAccount('HDFC CC', AccountType.creditCard,
-          initialBalance: 5000);
+          initialBalance: 5000,);
       await addTxn(cc, 5000, isExpense: false); // full payment
 
       final balance = await accountsService.getAccountBalance(cc.id);
@@ -145,7 +145,7 @@ void main() {
     test('reconcile CC with ₹5000 debt to 0 creates income (payment) adjustment',
         () async {
       final cc = await seedAccount('HDFC CC', AccountType.creditCard,
-          initialBalance: 5000);
+          initialBalance: 5000,);
 
       // Calculated balance = 5000 (outstanding debt)
       // User says actual = 0 (paid off)
@@ -172,7 +172,7 @@ void main() {
     test('reconcile CC with ₹3000 debt to ₹5000 creates expense adjustment',
         () async {
       final cc = await seedAccount('HDFC CC', AccountType.creditCard,
-          initialBalance: 3000);
+          initialBalance: 3000,);
 
       // Calculated = 3000, actual = 5000 (more debt than tracked)
       // diff = 5000 - 3000 = +2000
@@ -195,7 +195,7 @@ void main() {
 
     test('reconcile CC with existing transactions to 0', () async {
       final cc = await seedAccount('HDFC CC', AccountType.creditCard,
-          initialBalance: 0);
+          initialBalance: 0,);
       // Spend 3000 on CC
       await addTxn(cc, 3000, isExpense: true);
       // Pay 1000
@@ -219,7 +219,7 @@ void main() {
 
     test('reconcile CC already at correct balance is no-op', () async {
       final cc = await seedAccount('HDFC CC', AccountType.creditCard,
-          initialBalance: 5000);
+          initialBalance: 5000,);
 
       final adj = await reconciliationService.reconcileBalance(
         account: cc,
@@ -239,7 +239,7 @@ void main() {
   group('Regular account reconciliation', () {
     test('reconcile bank account with less money creates expense', () async {
       final bank = await seedAccount('SBI', AccountType.bank,
-          initialBalance: 10000);
+          initialBalance: 10000,);
 
       // Calculated = 10000, actual = 8000 (money missing)
       final adj = await reconciliationService.reconcileBalance(
@@ -260,7 +260,7 @@ void main() {
 
     test('reconcile bank account with more money creates income', () async {
       final bank = await seedAccount('SBI', AccountType.bank,
-          initialBalance: 10000);
+          initialBalance: 10000,);
 
       final adj = await reconciliationService.reconcileBalance(
         account: bank,
@@ -280,7 +280,7 @@ void main() {
 
     test('reconcile bank to 0 creates expense for full amount', () async {
       final bank = await seedAccount('Cash', AccountType.cash,
-          initialBalance: 5000);
+          initialBalance: 5000,);
 
       final adj = await reconciliationService.reconcileBalance(
         account: bank,
@@ -299,7 +299,7 @@ void main() {
   group('Double reconciliation', () {
     test('reconcile CC twice converges to correct balance', () async {
       final cc = await seedAccount('Axis CC', AccountType.creditCard,
-          initialBalance: 10000);
+          initialBalance: 10000,);
 
       // First: reconcile to 5000
       await reconciliationService.reconcileBalance(
@@ -324,7 +324,7 @@ void main() {
 
     test('reconcile bank twice converges to correct balance', () async {
       final bank = await seedAccount('HDFC', AccountType.bank,
-          initialBalance: 10000);
+          initialBalance: 10000,);
 
       await reconciliationService.reconcileBalance(
         account: bank,

@@ -1,0 +1,40 @@
+{
+  "id": "mint",
+  "name": "Mint",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#81C9D4",
+      "primary": "#3DA5B5",
+      "secondary": "#5AAFB8",
+      "tertiary": "#8BBFC7",
+      "primaryContainer": "#D0F0F5",
+      "secondaryContainer": "#DDF4F7",
+      "tertiaryContainer": "#E8F6F8"
+    },
+    "dark": {
+      "seed": "#81C9D4",
+      "primary": "#80D4DE",
+      "secondary": "#99DDE5",
+      "tertiary": "#B3E6EC",
+      "primaryContainer": "#143A40",
+      "secondaryContainer": "#1A4248",
+      "tertiaryContainer": "#204A50"
+    }
+  },
+  "style": {
+    "cardRadius": 16,
+    "cardElevation": 0,
+    "buttonRadius": 12,
+    "inputRadius": 12,
+    "borderOpacity": 0.12,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "Soft & calming",
+    "tags": ["teal", "pastel", "soft"]
+  }
+}

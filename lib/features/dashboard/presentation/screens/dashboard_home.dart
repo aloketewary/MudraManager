@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'dart:io' show Platform;
@@ -101,8 +102,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     prefs.setSmsFirstImportCelebrated();
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (_) => const SmsSuccessCelebrationSheet(),
     );
@@ -1040,11 +1041,11 @@ class _QuickActionChip extends StatelessWidget {
           HapticFeedback.mediumImpact();
           onTap();
         },
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.625),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.625),
             color: color.surfaceContainerHighest.withValues(alpha: 0.5),
           ),
           child: Row(

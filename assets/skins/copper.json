@@ -1,0 +1,55 @@
+{
+  "id": "copper",
+  "name": "Copper",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#B87333",
+      "primary": "#8B4513",
+      "secondary": "#B87333",
+      "tertiary": "#DAA520",
+      "primaryContainer": "#FFF0E0",
+      "secondaryContainer": "#FFECD4",
+      "tertiaryContainer": "#FFF8E1",
+      "surface": "#FFFCF8",
+      "surfaceContainer": "#FFF6EE",
+      "surfaceContainerLow": "#FFF9F3",
+      "onSurface": "#2E1A08",
+      "onSurfaceVariant": "#8B6B4A",
+      "outline": "#D4A87A",
+      "outlineVariant": "#EEDCC8"
+    },
+    "dark": {
+      "seed": "#B87333",
+      "primary": "#D4956A",
+      "secondary": "#B87333",
+      "tertiary": "#F0C040",
+      "primaryContainer": "#3D2010",
+      "secondaryContainer": "#4A2A14",
+      "tertiaryContainer": "#3D3000",
+      "surface": "#120C06",
+      "surfaceContainer": "#1E140A",
+      "surfaceContainerLow": "#181008",
+      "surfaceContainerHigh": "#2A1E10",
+      "onSurface": "#FFF0E0",
+      "onSurfaceVariant": "#B89878",
+      "outline": "#5C3D20",
+      "outlineVariant": "#3D2810"
+    }
+  },
+  "style": {
+    "cardRadius": 6,
+    "cardElevation": 0,
+    "buttonRadius": 4,
+    "inputRadius": 6,
+    "borderOpacity": 0.2,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "Premium, warm metallic, editorial",
+    "tags": ["copper", "gold", "premium", "warm", "luxury"]
+  }
+}

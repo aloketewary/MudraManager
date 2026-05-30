@@ -46,7 +46,7 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
         vertical: spacing.cardVertical,
       ),
       decoration: BoxDecoration(
-        color: color.surfaceContainerLowest,
+        color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
       ),
       child: Column(

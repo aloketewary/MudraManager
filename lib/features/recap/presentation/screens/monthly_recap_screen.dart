@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -554,7 +555,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
       ],),),
       if (changePct != 0) Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(color: changeColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(color: changeColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
         child: Text("${isUp ? "+" : ""}${changePct.toStringAsFixed(0)}%", style: textTheme.labelSmall?.copyWith(color: changeColor, fontWeight: FontWeight.w700)),
       ),
     ],);
@@ -1355,7 +1356,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                       height: 36,
                       decoration: BoxDecoration(
                         color: accent.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       ),
                       child: Center(
                         child: Text(

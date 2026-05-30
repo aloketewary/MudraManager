@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -50,7 +51,7 @@ class DateRangeSelector extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
         border: Border.all(
           color: color.outlineVariant.withValues(alpha: 0.5),
           width: 1,
@@ -64,7 +65,7 @@ class DateRangeSelector extends StatelessWidget {
             HapticFeedback.mediumImpact();
             onToggleCalendar();
           },
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -73,7 +74,7 @@ class DateRangeSelector extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: color.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   ),
                   child: Icon(
                     LucideIcons.calendar,
@@ -109,7 +110,7 @@ class DateRangeSelector extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     color: color.surface,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

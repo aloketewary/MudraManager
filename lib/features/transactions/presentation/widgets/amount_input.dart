@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -50,7 +51,7 @@ class AmountInput extends StatelessWidget {
               )
             : null,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         ),
       ),
     );

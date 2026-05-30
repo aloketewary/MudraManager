@@ -296,7 +296,7 @@ class _TaxContent extends ConsumerWidget {
                     ),
                   ],
                 ),
-              )),
+              ),),
           Divider(color: color.outlineVariant.withValues(alpha: 0.5)),
           SizedBox(height: spacing.elementGapMin),
           Row(
@@ -478,7 +478,7 @@ class _TaxContent extends ConsumerWidget {
               ctxt.tax_regimeComparison,
               style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
             ),
-          ]),
+          ],),
           SizedBox(height: spacing.sectionGap),
           // Side-by-side comparison
           Row(children: [
@@ -487,15 +487,15 @@ class _TaxContent extends ConsumerWidget {
               tax.totalTax,
               newBetter,
               color, textTheme, isGuestMode, betterColor,
-            )),
+            ),),
             SizedBox(width: spacing.elementGap),
             Expanded(child: _regimeColumn(
               ctxt.tax_oldRegime,
               oldRegime.totalTax,
               !newBetter,
               color, textTheme, isGuestMode, betterColor,
-            )),
-          ]),
+            ),),
+          ],),
           SizedBox(height: spacing.sectionGap),
           // Verdict
           Container(
@@ -568,12 +568,12 @@ class _TaxContent extends ConsumerWidget {
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text(label, style: textTheme.labelMedium?.copyWith(
             fontWeight: FontWeight.w600,
-          )),
+          ),),
           if (isBetter) ...[
             SizedBox(width: spacing.elementGapMin),
             Icon(LucideIcons.circleCheck, size: 14, color: betterColor),
           ],
-        ]),
+        ],),
         SizedBox(height: spacing.elementGapMin),
         CurrencyText(
           amount: GuestModeUtil.applyGuestMode(totalTax, isGuestMode),
@@ -583,7 +583,7 @@ class _TaxContent extends ConsumerWidget {
             color: isBetter ? betterColor : color.onSurface,
           ),
         ),
-      ]),
+      ],),
     );
   }
 
@@ -642,7 +642,7 @@ class _TaxContent extends ConsumerWidget {
                     ),
                   ],
                 ),
-              )),
+              ),),
         ],
       ),
     );

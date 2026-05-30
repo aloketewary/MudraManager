@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'dart:math';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -164,7 +165,7 @@ class AchievementUnlockDialog extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     border: Border.all(
                       color: accent.withValues(alpha: 0.3),
                     ),
@@ -204,7 +205,7 @@ class AchievementUnlockDialog extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: [accent, accent.withValues(alpha: 0.8)],
                       ),
-                      borderRadius: BorderRadius.circular(28),
+                      borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
                       boxShadow: [
                         BoxShadow(
                           color: accent.withValues(alpha: 0.4),
@@ -295,14 +296,14 @@ class _ShareCardPreview extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
               ),
             ),
             const SizedBox(height: 20),
 
             // ── CARD PREVIEW ──
             ClipRRect(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               child: RepaintBoundary(
                 key: _cardKey,
                 child: _ShareCard(
@@ -330,7 +331,7 @@ class _ShareCardPreview extends StatelessWidget {
                 style: FilledButton.styleFrom(
                   backgroundColor: accent,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   ),
                 ),
               ),
@@ -451,7 +452,7 @@ class _ShareCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: accent.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         border: Border.all(
                           color: accent.withValues(alpha: 0.4),
                         ),
@@ -565,7 +566,7 @@ class _ShareCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: accent.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         border: Border.all(
                           color: accent.withValues(alpha: 0.4),
                         ),

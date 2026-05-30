@@ -1,0 +1,55 @@
+{
+  "id": "vapor",
+  "name": "Vapor",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#A855F7",
+      "primary": "#7C3AED",
+      "secondary": "#EC4899",
+      "tertiary": "#06B6D4",
+      "primaryContainer": "#F3E8FF",
+      "secondaryContainer": "#FCE7F3",
+      "tertiaryContainer": "#E0FFFE",
+      "surface": "#FEFCFF",
+      "surfaceContainer": "#F8F4FC",
+      "surfaceContainerLow": "#FBF8FE",
+      "onSurface": "#1C1024",
+      "onSurfaceVariant": "#7E6B8A",
+      "outline": "#D4BDE6",
+      "outlineVariant": "#EDE4F5"
+    },
+    "dark": {
+      "seed": "#A855F7",
+      "primary": "#C084FC",
+      "secondary": "#F472B6",
+      "tertiary": "#22D3EE",
+      "primaryContainer": "#2E1065",
+      "secondaryContainer": "#4A0E2E",
+      "tertiaryContainer": "#083344",
+      "surface": "#0C0612",
+      "surfaceContainer": "#14091E",
+      "surfaceContainerLow": "#100818",
+      "surfaceContainerHigh": "#1E1028",
+      "onSurface": "#F5F0FA",
+      "onSurfaceVariant": "#A78BBF",
+      "outline": "#4C2D6E",
+      "outlineVariant": "#2E1A42"
+    }
+  },
+  "style": {
+    "cardRadius": 24,
+    "cardElevation": 0,
+    "buttonRadius": 20,
+    "inputRadius": 16,
+    "borderOpacity": 0.1,
+    "borderWidth": 1,
+    "dividerStyle": "none"
+  },
+  "meta": {
+    "description": "Dreamy, gradient-heavy, soft",
+    "tags": ["vapor", "pastel", "dreamy", "gradient", "soft"]
+  }
+}

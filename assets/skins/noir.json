@@ -1,0 +1,53 @@
+{
+  "id": "noir",
+  "name": "Noir",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#D09C60",
+      "primary": "#9A5129",
+      "secondary": "#D09C60",
+      "tertiary": "#5E544B",
+      "primaryContainer": "#FDECD4",
+      "secondaryContainer": "#FFF3E0",
+      "tertiaryContainer": "#EDE8E3",
+      "surface": "#FFF9F4",
+      "surfaceContainer": "#F5EDE5",
+      "onSurface": "#1C1410"
+    },
+    "dark": {
+      "seed": "#D09C60",
+      "primary": "#D09C60",
+      "secondary": "#E8B87A",
+      "tertiary": "#9A5129",
+      "primaryContainer": "#3D2814",
+      "secondaryContainer": "#4A3520",
+      "tertiaryContainer": "#2E1E12",
+      "surface": "#0B0908",
+      "surfaceContainer": "#1A1614",
+      "surfaceContainerLow": "#141110",
+      "surfaceContainerHigh": "#242018",
+      "onSurface": "#E8E0D8",
+      "onSurfaceVariant": "#A89888",
+      "outline": "#5E544B",
+      "outlineVariant": "#3A3330"
+    }
+  },
+  "style": {
+    "cardRadius": 2,
+    "cardElevation": 0,
+    "buttonRadius": 4,
+    "inputRadius": 4,
+    "borderOpacity": 0.15,
+    "borderWidth": 1,
+    "dividerStyle": "hairline",
+    "numberFont": "GeistMono",
+    "pdfFont": "NotoSans"
+  },
+  "meta": {
+    "description": "Dark cyberpunk with warm amber accents",
+    "tags": ["dark", "premium", "minimal", "cyberpunk"]
+  }
+}

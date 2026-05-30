@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/material.dart';
 
 class AppInfoCard extends StatelessWidget {
@@ -26,7 +27,7 @@ class AppInfoCard extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: color.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               child: Icon(icon, color: color.primary),
             ),

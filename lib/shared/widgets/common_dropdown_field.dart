@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/material.dart';
 
 class CommonDropdownField<T> extends StatelessWidget {
@@ -39,10 +40,10 @@ class CommonDropdownField<T> extends StatelessWidget {
         decoration: InputDecoration(
           labelText: labelText,
           hintText: hintText,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
           fillColor: Colors.transparent,
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             borderSide: BorderSide(color: color.secondary),
           ),
           contentPadding: const EdgeInsets.symmetric(

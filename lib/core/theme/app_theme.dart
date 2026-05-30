@@ -149,18 +149,36 @@ class AppTheme {
       inputDecorationTheme: _inputDecorationTheme(colorScheme, textTheme, tone),
       cardTheme: _cardTheme(colorScheme, tone),
       dialogTheme: _dialogTheme(colorScheme, textTheme),
-      chipTheme: _chipTheme(colorScheme, textTheme),
+      chipTheme: _chipTheme(colorScheme, textTheme, tone),
       tabBarTheme: _tabBarTheme(colorScheme),
       tooltipTheme: _tooltipTheme(colorScheme, textTheme),
       listTileTheme: _listTileTheme(colorScheme, textTheme),
-      floatingActionButtonTheme: _fabTheme(colorScheme),
+      floatingActionButtonTheme: _fabTheme(colorScheme, tone),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(tone.borderRadius),
+            ),
+          ),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(tone.borderRadius * 2),
+          ),
+        ),
+      ),
       navigationBarTheme: _navigationBarTheme(colorScheme, textTheme),
       bottomNavigationBarTheme: _bottomNavTheme(colorScheme, textTheme),
       scaffoldBackgroundColor: isAmoled ? Colors.black : colorScheme.surface,
       dividerTheme: DividerThemeData(
-        color: colorScheme.outlineVariant,
-        thickness: 1,
-        space: 1,
+        color: tone.dividerStyle == 'hairline'
+            ? colorScheme.outlineVariant.withValues(alpha: tone.borderOpacity)
+            : colorScheme.outlineVariant,
+        thickness: tone.borderWidth,
+        space: tone.borderWidth,
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: colorScheme.inverseSurface,
@@ -239,12 +257,12 @@ class AppTheme {
     );
   }
 
-  FloatingActionButtonThemeData _fabTheme(ColorScheme colorScheme) {
+  FloatingActionButtonThemeData _fabTheme(ColorScheme colorScheme, TonePack tone) {
     return FloatingActionButtonThemeData(
       backgroundColor: colorScheme.primaryContainer,
       foregroundColor: colorScheme.onPrimaryContainer,
       elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(tone.borderRadius)),
     );
   }
 
@@ -357,17 +375,20 @@ class AppTheme {
   }
 
   CardThemeData _cardTheme(ColorScheme colorScheme, TonePack tone) {
+    // Hairline style: transparent cards with faint border (cross-grid look)
+    final isHairline = tone.useTransparentCards;
+
     return CardThemeData(
       elevation: tone.cardElevation,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(tone.borderRadius),
         side: BorderSide(
-          color: colorScheme.outline.withValues(alpha: 0.12),
-          width: 1,
+          color: colorScheme.outline.withValues(alpha: tone.borderOpacity),
+          width: tone.borderWidth,
         ),
       ),
-      color: colorScheme.surfaceContainer,
-      surfaceTintColor: colorScheme.surfaceTint,
+      color: isHairline ? Colors.transparent : colorScheme.surfaceContainer,
+      surfaceTintColor: isHairline ? Colors.transparent : colorScheme.surfaceTint,
     );
   }
 
@@ -385,14 +406,14 @@ class AppTheme {
     );
   }
 
-  ChipThemeData _chipTheme(ColorScheme colorScheme, TextTheme textTheme) {
+  ChipThemeData _chipTheme(ColorScheme colorScheme, TextTheme textTheme, TonePack tone) {
     return ChipThemeData(
       backgroundColor: colorScheme.surfaceContainerLow,
       selectedColor: colorScheme.secondaryContainer,
       labelStyle: textTheme.labelLarge?.copyWith(
         color: colorScheme.onSurfaceVariant,
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(tone.borderRadius)),
       side: BorderSide.none,
     );
   }

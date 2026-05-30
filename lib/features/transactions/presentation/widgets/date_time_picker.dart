@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +22,7 @@ class DateTimePicker extends StatelessWidget {
       subtitle: Text(DateFormat.yMMMd().format(selectedDate)),
       trailing: const Icon(LucideIcons.chevronRight),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       onTap: () async {

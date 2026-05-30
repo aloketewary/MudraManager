@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -145,7 +146,7 @@ class _CategoryCard extends StatelessWidget {
             ? color.primaryContainer
             : color.surfaceContainerHighest,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
           side: isSelected
               ? BorderSide(color: color.primary, width: 2)
               : BorderSide.none,

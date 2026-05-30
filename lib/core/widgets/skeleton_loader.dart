@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -159,7 +160,7 @@ class QuickActionsSkeleton extends ConsumerWidget {
                     _Bone(
                       width: 48,
                       height: 48,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     ),
                     const SizedBox(height: 6),
                     const _Bone(width: 40, height: 10),
@@ -372,7 +373,7 @@ class TransactionCardSkeleton extends ConsumerWidget {
               _Bone(
                 width: 48,
                 height: 48,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               SizedBox(width: spacing.cardInner),
               Expanded(

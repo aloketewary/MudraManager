@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -112,7 +113,7 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
       ),
       child: Stack(
         children: [
@@ -170,7 +171,7 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                       Container(
                         decoration: BoxDecoration(
                           color: textColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: PopupMenuButton<Menu>(
                           popUpAnimationStyle: _animationStyle,

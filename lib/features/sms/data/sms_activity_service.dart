@@ -591,7 +591,7 @@ class SmsActivityService {
         final rule = allRules
             .where((r) =>
                 r.merchantName?.toLowerCase() == key.toLowerCase() &&
-                r.confidence > 40)
+                r.confidence > 40,)
             .firstOrNull;
 
         if (rule == null) continue;

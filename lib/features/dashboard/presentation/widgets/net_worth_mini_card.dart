@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -40,6 +42,7 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
     final double totalBalance = _balanceMap.values.fold(
       0.0,
       (sum, value) => sum + value,
@@ -59,8 +62,12 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
           child: Card(
             elevation: 0,
             color: color.surfaceContainerHighest,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              side: BorderSide(color: color.outlineVariant),
+            ),
             child: InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
               onTap: () {
                 HapticFeedback.mediumImpact();
               },
@@ -76,7 +83,7 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: color.secondary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                           ),
                           child: Icon(
                             LucideIcons.wallet,

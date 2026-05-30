@@ -6,13 +6,13 @@ import 'package:mudra_manager/shared/widgets/milestone_share_sheet.dart';
 void main() {
   group('MilestoneData', () {
     test('stores all fields correctly', () {
-      final data = MilestoneData(
+      final data = const MilestoneData(
         emoji: '🎯',
         title: 'Goal Reached!',
         stat: 'Emergency Fund',
         description: 'Saved ₹50,000 and hit the target',
         icon: LucideIcons.target,
-        accent: const Color(0xFF4CAF50),
+        accent: Color(0xFF4CAF50),
       );
 
       expect(data.emoji, '🎯');
@@ -24,13 +24,13 @@ void main() {
     });
 
     test('streak milestone data', () {
-      final data = MilestoneData(
+      final data = const MilestoneData(
         emoji: '🔥',
         title: '30-Day Streak!',
         stat: '30 Days',
         description: 'Tracked expenses every day for 30 days',
         icon: LucideIcons.flame,
-        accent: const Color(0xFFFF9800),
+        accent: Color(0xFFFF9800),
       );
 
       expect(data.emoji, '🔥');
@@ -38,13 +38,13 @@ void main() {
     });
 
     test('under budget milestone data', () {
-      final data = MilestoneData(
+      final data = const MilestoneData(
         emoji: '💪',
         title: 'Under Budget!',
         stat: '₹2,500 saved',
         description: 'Stayed within budget for the entire month',
         icon: LucideIcons.piggyBank,
-        accent: const Color(0xFF2196F3),
+        accent: Color(0xFF2196F3),
       );
 
       expect(data.title, 'Under Budget!');

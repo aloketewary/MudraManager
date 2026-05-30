@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -69,7 +70,7 @@ class AccountSelector extends ConsumerWidget {
                         color: isSelected
                             ? color.primaryContainer
                             : color.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         border: isSelected
                             ? Border.all(color: color.primary, width: 2)
                             : null,
@@ -182,7 +183,7 @@ class _AddAccountButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: color.surface,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
           border: Border.all(color: color.error, width: 2),
         ),
         child: Column(

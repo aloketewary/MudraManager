@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,8 +9,8 @@ Future<String?> showCurrencyPicker(BuildContext context, {String? selected}) {
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
     ),
     builder: (_) => _CurrencyPickerSheet(selected: selected),
   );
@@ -64,7 +65,7 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                 hintText: 'Search currency...',
                 prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   borderSide: BorderSide(color: color.outlineVariant),
                 ),
                 isDense: true,

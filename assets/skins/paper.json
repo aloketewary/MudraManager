@@ -1,0 +1,55 @@
+{
+  "id": "paper",
+  "name": "Paper",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#8B7355",
+      "primary": "#5C4033",
+      "secondary": "#8B7355",
+      "tertiary": "#C17817",
+      "primaryContainer": "#F5EDE4",
+      "secondaryContainer": "#F0E8DF",
+      "tertiaryContainer": "#FFF3E0",
+      "surface": "#FDF8F3",
+      "surfaceContainer": "#F7F0E8",
+      "surfaceContainerLow": "#FAF5EF",
+      "onSurface": "#2C1E12",
+      "onSurfaceVariant": "#7A6652",
+      "outline": "#C4B5A3",
+      "outlineVariant": "#DDD2C4"
+    },
+    "dark": {
+      "seed": "#8B7355",
+      "primary": "#D4B896",
+      "secondary": "#B89B78",
+      "tertiary": "#E8A84C",
+      "primaryContainer": "#3D2E1F",
+      "secondaryContainer": "#4A3828",
+      "tertiaryContainer": "#3D2A0F",
+      "surface": "#1A1410",
+      "surfaceContainer": "#231C16",
+      "surfaceContainerLow": "#1E1812",
+      "surfaceContainerHigh": "#2E261E",
+      "onSurface": "#F0E8DF",
+      "onSurfaceVariant": "#B8A898",
+      "outline": "#5C4D3E",
+      "outlineVariant": "#3D3228"
+    }
+  },
+  "style": {
+    "cardRadius": 6,
+    "cardElevation": 0,
+    "buttonRadius": 4,
+    "inputRadius": 4,
+    "borderOpacity": 0.15,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "Analog, nostalgic, warm",
+    "tags": ["paper", "sepia", "warm", "notebook", "analog"]
+  }
+}

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
@@ -159,7 +160,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
                   : (isFutureDate && !widget.allowFutureDateSelection
                         ? Colors.grey[700]
                         : Colors.transparent),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             ),
             child: Center(
               child: Padding(

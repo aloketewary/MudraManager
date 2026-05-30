@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:math_expressions/math_expressions.dart';
@@ -67,7 +68,7 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
       child: Container(
         decoration: BoxDecoration(
           color: color.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -171,10 +172,10 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
 
     return Material(
       color: bgColor,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
       child: InkWell(
         onTap: () => onButtonPressed(text),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         child: Container(
           height: 56,
           alignment: Alignment.center,

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -61,7 +62,7 @@ class _MilestoneShareSheet extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: color.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
         ),
         padding: EdgeInsets.fromLTRB(
           spacing.cardHorizontalMax,
@@ -209,7 +210,7 @@ class _MilestoneShareCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: data.accent.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         border: Border.all(
                           color: data.accent.withValues(alpha: 0.4),
                         ),

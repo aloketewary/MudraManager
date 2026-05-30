@@ -171,7 +171,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                                     decoration: BoxDecoration(
                                       color: color.surfaceContainerHighest
                                           .withValues(alpha: 0.4),
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                                     ),
                                     child: Row(
                                       crossAxisAlignment:
@@ -271,6 +271,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
     final categoryColor = Color(widget.category?.colorValue ?? 0xFF000000);
 
     return Row(
@@ -280,7 +281,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
           height: 48.0,
           decoration: BoxDecoration(
             color: categoryColor.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
           ),
           child: Icon(
             IconHelper.getIconData(widget.category?.iconName),
@@ -377,6 +378,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
     final categoryColor = Color(widget.category?.colorValue ?? 0xFF000000);
     final brightness = Theme.of(context).brightness;
 
@@ -391,7 +393,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
               height: 48,
               decoration: BoxDecoration(
                 color: categoryColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
               child: Icon(
                 IconHelper.getIconData(widget.category?.iconName),
@@ -521,6 +523,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
     final categoryColor = Color(widget.category?.colorValue ?? 0xFF000000);
     final brightness = Theme.of(context).brightness;
 
@@ -535,7 +538,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
               height: 48,
               decoration: BoxDecoration(
                 color: categoryColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
               child: Icon(
                 IconHelper.getIconData(widget.category?.iconName),

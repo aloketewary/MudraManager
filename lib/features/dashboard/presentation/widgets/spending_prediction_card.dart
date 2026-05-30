@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +20,7 @@ class SpendingPredictionCard extends ConsumerWidget {
     final data = ref.watch(dashboardDataProvider).value;
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     if (data == null) return const SizedBox.shrink();
 
@@ -76,7 +78,7 @@ class SpendingPredictionCard extends ConsumerWidget {
               HapticFeedback.mediumImpact();
               context.push(AppRoutes.statistics);
             },
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(spacing.radiusLarge),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -85,7 +87,7 @@ class SpendingPredictionCard extends ConsumerWidget {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: accent.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
                     child: Icon(icon, color: accent, size: 24),
                   ),

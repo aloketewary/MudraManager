@@ -654,7 +654,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     color: isSelected
                         ? accent.withValues(alpha: isDark ? 0.2 : 0.12)
                         : color.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     border: Border.all(
                       color: isSelected
                           ? accent.withValues(alpha: 0.5)
@@ -693,8 +693,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
               final picked = await showModalBottomSheet<String>(
                 context: context,
                 isScrollControlled: true,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
                 ),
                 builder: (_) => _AllCurrenciesSheet(
                   selected: _selectedCurrency,
@@ -1597,7 +1597,7 @@ class _AllCurrenciesSheetState extends State<_AllCurrenciesSheet> {
                 hintText: AppLocalizations.of(context)!.common_searchCurrency,
                 prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   borderSide: BorderSide(color: color.outlineVariant),
                 ),
                 isDense: true,

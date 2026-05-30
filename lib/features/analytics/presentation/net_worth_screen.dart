@@ -596,17 +596,16 @@ class NetWorthScreen extends ConsumerWidget {
     if (items.isEmpty) return const SizedBox.shrink();
     final itemColor = isAsset ? color.primary : color.error;
 
-    return Card(
-      elevation: 0,
-      color: color.surfaceContainerLow,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: items.asMap().entries.map((entry) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+      child: Container(
+        decoration: BoxDecoration(
+          color: color.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+        ),
+        child: Column(
+          children: items.asMap().entries.map((entry) {
           final index = entry.key;
           final item = entry.value;
           final isLast = index == items.length - 1;
@@ -700,6 +699,7 @@ class NetWorthScreen extends ConsumerWidget {
             ],
           );
         }).toList(),
+      ),
       ),
     );
   }

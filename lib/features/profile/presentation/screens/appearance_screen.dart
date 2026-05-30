@@ -207,7 +207,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             ),
             child: Icon(
               LucideIcons.layoutDashboard,
@@ -279,7 +279,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
-          context.push(AppRoutes.themePicker);
+          context.push(AppRoutes.skinPicker);
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -289,7 +289,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: currentColorTheme.seedColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
                 child: Container(
                   width: 20,
@@ -387,7 +387,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                         decoration: BoxDecoration(
                           color: (isSelected ? color.primary : color.onSurface)
                               .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: Icon(
                           icon,
@@ -544,7 +544,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                                     ? color.tertiary
                                     : color.onSurface)
                                 .withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                           ),
                           child: Icon(
                             icon,
@@ -679,7 +679,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             ),
             child: Icon(icon, color: color.primary, size: 20),
           ),

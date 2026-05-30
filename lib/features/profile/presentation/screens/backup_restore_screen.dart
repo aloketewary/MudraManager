@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -357,7 +358,7 @@ class BackupRestoreScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: color.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               child: Icon(icon, color: color.primary, size: 20),
             ),
@@ -406,7 +407,7 @@ class BackupRestoreScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.tertiary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             ),
             child: Icon(LucideIcons.archive, color: color.tertiary, size: 20),
           ),
@@ -696,7 +697,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: _isLoading
                             ? SizedBox(
@@ -753,7 +754,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: Icon(LucideIcons.cloudDownload,
                             color: color.primary, size: 20,),
@@ -786,7 +787,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                                     horizontal: 8, vertical: 2,),
                                 decoration: BoxDecoration(
                                   color: color.primary.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                                 ),
                                 child: Text(
                                   '${backups.length}',
@@ -873,8 +874,8 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => DraggableScrollableSheet(
         initialChildSize: 0.5,
@@ -933,7 +934,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: color.tertiary.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                             ),
                             child: Icon(LucideIcons.cloud,
                                 color: color.tertiary, size: 20,),
@@ -1101,7 +1102,7 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
                   padding: EdgeInsets.all(spacing.elementGap),
                   decoration: BoxDecoration(
                     color: color.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   ),
                   child: Icon(LucideIcons.timer, color: color.primary, size: 20),
                 ),
@@ -1179,12 +1180,12 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
               padding: EdgeInsets.symmetric(horizontal: spacing.cardInner),
               child: InkWell(
                 onTap: _setPassword,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 child: Container(
                   padding: EdgeInsets.all(spacing.elementGap + 4),
                   decoration: BoxDecoration(
                     color: color.errorContainer.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     border: Border.all(
                       color: color.error.withValues(alpha: 0.3),
                     ),

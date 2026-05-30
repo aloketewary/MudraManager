@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -52,7 +53,7 @@ class _LazyLoadWidgetState extends State<LazyLoadWidget> {
       child: SkeletonLoader(
         width: double.infinity,
         height: 200,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
       ),
     );
   }

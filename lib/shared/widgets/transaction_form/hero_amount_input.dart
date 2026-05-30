@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
@@ -36,7 +37,7 @@ class HeroAmountInput extends StatelessWidget {
             accentColor.withValues(alpha: 0.03),
           ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         boxShadow: [
           BoxShadow(
             color: accentColor.withValues(alpha: 0.08),

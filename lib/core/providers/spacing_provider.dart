@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/skin/provider/skin_provider.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 
 class AppSpacing {
   // ── Layout Spacing ──
@@ -160,12 +160,12 @@ class AppSpacing {
 
 final spacingProvider = Provider<AppSpacing>((ref) {
   final highContrast = ref.watch(highContrastModeProvider);
-  final tone = ref.watch(tonePackProvider);
+  final skinStyle = ref.watch(skinStyleProvider);
 
-  // Derived radii from TonePack
-  final rMed = tone.borderRadius;
-  final rSmall = (rMed * 0.6).clamp(4.0, 12.0);
-  final rLarge = (rMed * 1.4).clamp(16.0, 32.0);
+  // Derived radii from active skin style
+  final rMed = skinStyle.cardRadius;
+  final rSmall = (rMed * 0.6).clamp(0.0, 12.0);
+  final rLarge = (rMed * 1.4).clamp(rMed, 32.0);
 
   if (highContrast) {
     return AppSpacing.comfortable(

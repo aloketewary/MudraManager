@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'dart:math' as math;
 
@@ -107,10 +108,10 @@ class BudgetOverviewCard extends ConsumerWidget {
                         height: 10,
                         decoration: BoxDecoration(
                           color: color.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                           child: TweenAnimationBuilder<double>(
                             duration: const Duration(milliseconds: 1500),
                             curve: Curves.easeOutCubic,

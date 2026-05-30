@@ -1,0 +1,40 @@
+{
+  "id": "graphite",
+  "name": "Graphite",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "pro",
+  "palette": {
+    "light": {
+      "seed": "#616161",
+      "primary": "#424242",
+      "secondary": "#757575",
+      "tertiary": "#BFA76A",
+      "primaryContainer": "#E0E0E0",
+      "secondaryContainer": "#EEEEEE",
+      "tertiaryContainer": "#F5F0E1"
+    },
+    "dark": {
+      "seed": "#616161",
+      "primary": "#BDBDBD",
+      "secondary": "#9E9E9E",
+      "tertiary": "#D4AF37",
+      "primaryContainer": "#2C2C2C",
+      "secondaryContainer": "#383838",
+      "tertiaryContainer": "#3D3520"
+    }
+  },
+  "style": {
+    "cardRadius": 12,
+    "cardElevation": 0,
+    "buttonRadius": 8,
+    "inputRadius": 8,
+    "borderOpacity": 0.10,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "Clean & minimal",
+    "tags": ["gray", "minimal", "neutral"]
+  }
+}

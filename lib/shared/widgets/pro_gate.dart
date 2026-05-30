@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -144,7 +145,7 @@ class _BlurUpgradeOverlay extends StatelessWidget {
                         },
                         style: FilledButton.styleFrom(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                           ),
                         ),
                         child: const Row(

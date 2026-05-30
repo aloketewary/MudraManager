@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
@@ -132,7 +133,7 @@ class SettlementCard extends StatelessWidget {
                               color: isPaid
                                   ? color.surfaceContainerHigh
                                   : color.errorContainer,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
                               border: Border.all(
                                 color: isPaid
                                     ? color.onSurfaceVariant
@@ -197,7 +198,7 @@ class SettlementCard extends StatelessWidget {
                               color: isPaid
                                   ? color.surfaceContainerHigh
                                   : color.primaryContainer,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                             ),
                             child: Text(
                               'Gets',
@@ -224,7 +225,7 @@ class SettlementCard extends StatelessWidget {
                       minimumSize: const Size(double.infinity, 44),
                       backgroundColor: color.primary,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       ),
                     ),
                   ),

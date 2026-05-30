@@ -1,0 +1,52 @@
+{
+  "id": "bento",
+  "name": "Bento Grid",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#4A4A4A",
+      "primary": "#2D2D2D",
+      "secondary": "#6B6B6B",
+      "tertiary": "#E85D04",
+      "primaryContainer": "#F0EDED",
+      "secondaryContainer": "#E8E5E2",
+      "tertiaryContainer": "#FFF0E5",
+      "surface": "#FDFCFB",
+      "surfaceContainer": "#F5F3F1",
+      "surfaceContainerLow": "#F9F7F6",
+      "onSurface": "#1C1B1A"
+    },
+    "dark": {
+      "seed": "#4A4A4A",
+      "primary": "#E0DCD8",
+      "secondary": "#A8A4A0",
+      "tertiary": "#FF7B3A",
+      "primaryContainer": "#2E2C2A",
+      "secondaryContainer": "#3A3836",
+      "tertiaryContainer": "#3D2510",
+      "surface": "#121110",
+      "surfaceContainer": "#1E1D1B",
+      "surfaceContainerLow": "#181716",
+      "surfaceContainerHigh": "#282624",
+      "onSurface": "#EDEAE7",
+      "onSurfaceVariant": "#A8A4A0",
+      "outline": "#4A4744",
+      "outlineVariant": "#333130"
+    }
+  },
+  "style": {
+    "cardRadius": 20,
+    "cardElevation": 0,
+    "buttonRadius": 14,
+    "inputRadius": 14,
+    "borderOpacity": 0.08,
+    "borderWidth": 1,
+    "dividerStyle": "none"
+  },
+  "meta": {
+    "description": "Modular, organized, tactile",
+    "tags": ["grid", "bento", "modular", "warm", "asymmetric"]
+  }
+}

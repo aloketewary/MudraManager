@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/providers/state_value.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
@@ -393,8 +394,8 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(16),
@@ -558,7 +559,7 @@ class _ActivityCard extends ConsumerWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 ),
                 child: Icon(
                   _getStatusIcon(),
@@ -711,8 +712,8 @@ class _ActivityCard extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (_) => _ActivityDetailsSheet(activity: activity),
     );

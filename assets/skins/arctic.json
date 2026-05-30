@@ -1,0 +1,55 @@
+{
+  "id": "arctic",
+  "name": "Arctic",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#90CAF9",
+      "primary": "#1565C0",
+      "secondary": "#42A5F5",
+      "tertiary": "#0097A7",
+      "primaryContainer": "#E3F2FD",
+      "secondaryContainer": "#E1F5FE",
+      "tertiaryContainer": "#E0F7FA",
+      "surface": "#FAFEFF",
+      "surfaceContainer": "#F0F8FF",
+      "surfaceContainerLow": "#F5FBFF",
+      "onSurface": "#0A1929",
+      "onSurfaceVariant": "#607D8B",
+      "outline": "#B0D4E8",
+      "outlineVariant": "#E0F0FA"
+    },
+    "dark": {
+      "seed": "#90CAF9",
+      "primary": "#90CAF9",
+      "secondary": "#64B5F6",
+      "tertiary": "#4DD0E1",
+      "primaryContainer": "#0D2137",
+      "secondaryContainer": "#0A2A44",
+      "tertiaryContainer": "#003840",
+      "surface": "#060D14",
+      "surfaceContainer": "#0C1620",
+      "surfaceContainerLow": "#091018",
+      "surfaceContainerHigh": "#121E2A",
+      "onSurface": "#E3F2FD",
+      "onSurfaceVariant": "#78A4C0",
+      "outline": "#1E3A50",
+      "outlineVariant": "#142838"
+    }
+  },
+  "style": {
+    "cardRadius": 4,
+    "cardElevation": 0,
+    "buttonRadius": 4,
+    "inputRadius": 4,
+    "borderOpacity": 0.1,
+    "borderWidth": 1,
+    "dividerStyle": "hairline"
+  },
+  "meta": {
+    "description": "Cold, crisp, high-altitude",
+    "tags": ["arctic", "ice", "blue", "scandinavian", "crisp"]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "id": "forest",
+  "name": "Forest",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "pro",
+  "palette": {
+    "light": {
+      "seed": "#2D6A4F",
+      "primary": "#1B5E20",
+      "secondary": "#558B2F",
+      "tertiary": "#8D6E63",
+      "primaryContainer": "#C8E6C9",
+      "secondaryContainer": "#DCEDC8",
+      "tertiaryContainer": "#D7CCC8"
+    },
+    "dark": {
+      "seed": "#2D6A4F",
+      "primary": "#66BB6A",
+      "secondary": "#9CCC65",
+      "tertiary": "#BCAAA4",
+      "primaryContainer": "#1B3A1B",
+      "secondaryContainer": "#2E4A1E",
+      "tertiaryContainer": "#3E2723"
+    }
+  },
+  "style": {
+    "cardRadius": 16,
+    "cardElevation": 0,
+    "buttonRadius": 12,
+    "inputRadius": 12,
+    "borderOpacity": 0.12,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "Deep & grounded",
+    "tags": ["green", "earth", "natural"]
+  }
+}

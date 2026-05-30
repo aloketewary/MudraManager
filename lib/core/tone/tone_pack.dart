@@ -240,4 +240,12 @@ abstract class TonePack {
   double get cardElevation;
   double get buttonRadius;
   double get inputRadius;
+
+  // ── Skin-driven styling (overridable) ──
+  double get borderOpacity => 0.12;
+  double get borderWidth => 1.0;
+  bool get useTransparentCards => false;
+  String get dividerStyle => 'standard';
+  String? get numberFont => null;
+  String? get pdfFont => null;
 }

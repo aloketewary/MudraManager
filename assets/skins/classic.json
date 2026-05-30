@@ -1,0 +1,28 @@
+{
+  "id": "classic",
+  "name": "Classic",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#5B7FA5"
+    },
+    "dark": {
+      "seed": "#5B7FA5"
+    }
+  },
+  "style": {
+    "cardRadius": 16,
+    "cardElevation": 0,
+    "buttonRadius": 12,
+    "inputRadius": 12,
+    "borderOpacity": 0.12,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "Trust & security",
+    "tags": ["blue", "professional", "calm"]
+  }
+}

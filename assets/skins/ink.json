@@ -1,0 +1,55 @@
+{
+  "id": "ink",
+  "name": "Ink",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#424242",
+      "primary": "#212121",
+      "secondary": "#616161",
+      "tertiary": "#424242",
+      "primaryContainer": "#F5F5F5",
+      "secondaryContainer": "#EEEEEE",
+      "tertiaryContainer": "#E0E0E0",
+      "surface": "#FAFAFA",
+      "surfaceContainer": "#F5F5F5",
+      "surfaceContainerLow": "#F8F8F8",
+      "onSurface": "#121212",
+      "onSurfaceVariant": "#757575",
+      "outline": "#E0E0E0",
+      "outlineVariant": "#EEEEEE"
+    },
+    "dark": {
+      "seed": "#BDBDBD",
+      "primary": "#E0E0E0",
+      "secondary": "#9E9E9E",
+      "tertiary": "#BDBDBD",
+      "primaryContainer": "#212121",
+      "secondaryContainer": "#2C2C2C",
+      "tertiaryContainer": "#333333",
+      "surface": "#121212",
+      "surfaceContainer": "#1A1A1A",
+      "surfaceContainerLow": "#161616",
+      "surfaceContainerHigh": "#222222",
+      "onSurface": "#EEEEEE",
+      "onSurfaceVariant": "#9E9E9E",
+      "outline": "#3D3D3D",
+      "outlineVariant": "#2A2A2A"
+    }
+  },
+  "style": {
+    "cardRadius": 2,
+    "cardElevation": 0,
+    "buttonRadius": 2,
+    "inputRadius": 2,
+    "borderOpacity": 0.12,
+    "borderWidth": 1,
+    "dividerStyle": "standard"
+  },
+  "meta": {
+    "description": "E-ink inspired, pure reading focus",
+    "tags": ["ink", "kindle", "eink", "paper", "monochrome", "reading"]
+  }
+}

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -245,7 +246,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 elevation: 0,
                 color: color.surfaceContainerLow,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
                 ),
                 child: Padding(
@@ -264,7 +265,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: forecast.projectedNet >= 0 ? FinanceColors.incomeColor(Theme.of(context).brightness).withValues(alpha: 0.08) : FinanceColors.expenseColor(Theme.of(context).brightness).withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                           Text(AppLocalizations.of(context)!.analytics_thisMonthProjected, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
@@ -609,7 +610,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         elevation: 0,
         color: color.surfaceContainerLow,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
           side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: Padding(

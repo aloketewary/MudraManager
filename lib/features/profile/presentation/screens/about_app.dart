@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:flutter/foundation.dart';
@@ -385,7 +386,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
                 border: Border.all(color: accent.withValues(alpha: 0.3)),
               ),
               child: Row(
@@ -590,7 +591,7 @@ class LicenseScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -633,7 +634,7 @@ class LicenseScreen extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: color.primary.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                             ),
                             child: Text(
                               'Version $version',
@@ -679,7 +680,7 @@ class LicenseScreen extends StatelessWidget {
                         elevation: 0,
                         color: color.surfaceContainerLow,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                           side: BorderSide(
                             color: color.outlineVariant.withValues(alpha: 0.5),
                           ),

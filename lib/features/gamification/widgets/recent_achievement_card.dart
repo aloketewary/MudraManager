@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -79,12 +80,12 @@ class _AchievementCard extends StatelessWidget {
         elevation: 1,
         shadowColor: color.shadow.withValues(alpha: 0.2),
 
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
 
         color: color.surfaceContainerHighest,
 
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
 
           onTap: () {
             HapticFeedback.selectionClick();
@@ -133,7 +134,7 @@ class _IconBadge extends StatelessWidget {
 
       decoration: BoxDecoration(
         color: color.primaryContainer,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
       ),
 
       child: Text(icon, style: const TextStyle(fontSize: 26)),
@@ -213,7 +214,7 @@ class _AchievementSkeleton extends StatelessWidget {
         color: color.surfaceContainerHighest,
         elevation: 0,
 
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
 
         child: const Padding(
           padding: EdgeInsets.all(16),
@@ -261,7 +262,7 @@ class _SkeletonBox extends StatelessWidget {
 
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
       ),
     );
   }

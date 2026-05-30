@@ -59,7 +59,7 @@ class QuickActionButton extends ConsumerWidget {
                   if (i > 0) const SizedBox(height: 8),
                   _DashboardActionButton(
                     data: actions[i],
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     isRow: true,
                   ),
                 ],
@@ -75,9 +75,9 @@ class QuickActionButton extends ConsumerWidget {
                   child: _DashboardActionButton(
                     data: actions[i],
                     borderRadius: BorderRadius.horizontal(
-                      left: Radius.circular(i == 0 ? 16 : 0),
+                      left: Radius.circular(i == 0 ? spacing.radiusMedium : 0),
                       right: Radius.circular(
-                        i == actions.length - 1 ? 16 : 0,
+                        i == actions.length - 1 ? spacing.radiusMedium : 0,
                       ),
                     ),
                   ),

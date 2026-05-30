@@ -1,0 +1,55 @@
+{
+  "id": "calm",
+  "name": "Calm",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#8B9DAF",
+      "primary": "#4A5568",
+      "secondary": "#718096",
+      "tertiary": "#8B9DAF",
+      "primaryContainer": "#F7F8FA",
+      "secondaryContainer": "#F0F2F5",
+      "tertiaryContainer": "#EDF0F4",
+      "surface": "#FFFFFF",
+      "surfaceContainer": "#FAFBFC",
+      "surfaceContainerLow": "#FCFCFD",
+      "onSurface": "#1A202C",
+      "onSurfaceVariant": "#A0AEC0",
+      "outline": "#E2E8F0",
+      "outlineVariant": "#EDF2F7"
+    },
+    "dark": {
+      "seed": "#8B9DAF",
+      "primary": "#CBD5E0",
+      "secondary": "#A0AEC0",
+      "tertiary": "#8B9DAF",
+      "primaryContainer": "#1A202C",
+      "secondaryContainer": "#2D3748",
+      "tertiaryContainer": "#2D3748",
+      "surface": "#0D1117",
+      "surfaceContainer": "#141A22",
+      "surfaceContainerLow": "#111820",
+      "surfaceContainerHigh": "#1A222D",
+      "onSurface": "#F7FAFC",
+      "onSurfaceVariant": "#718096",
+      "outline": "#2D3748",
+      "outlineVariant": "#1E2736"
+    }
+  },
+  "style": {
+    "cardRadius": 0,
+    "cardElevation": 0,
+    "buttonRadius": 0,
+    "inputRadius": 0,
+    "borderOpacity": 0.0,
+    "borderWidth": 0,
+    "dividerStyle": "none"
+  },
+  "meta": {
+    "description": "Minimal, focused, peaceful",
+    "tags": ["minimal", "calm", "whitespace", "typography", "zen"]
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "id": "terminal",
+  "name": "Terminal",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#00C853",
+      "primary": "#1B5E20",
+      "secondary": "#2E7D32",
+      "tertiary": "#00C853",
+      "primaryContainer": "#E8F5E9",
+      "secondaryContainer": "#E0F2E0",
+      "tertiaryContainer": "#DCFFE4",
+      "surface": "#F5FFF5",
+      "surfaceContainer": "#EDFAED",
+      "surfaceContainerLow": "#F2FCF2",
+      "onSurface": "#0A1A0A"
+    },
+    "dark": {
+      "seed": "#00FF41",
+      "primary": "#00FF41",
+      "secondary": "#00C853",
+      "tertiary": "#76FF03",
+      "primaryContainer": "#002200",
+      "secondaryContainer": "#003300",
+      "tertiaryContainer": "#1A3300",
+      "surface": "#000000",
+      "surfaceContainer": "#001A00",
+      "surfaceContainerLow": "#000D00",
+      "surfaceContainerHigh": "#002600",
+      "onSurface": "#00FF41",
+      "onSurfaceVariant": "#00AA2A",
+      "outline": "#004D00",
+      "outlineVariant": "#003300"
+    }
+  },
+  "style": {
+    "cardRadius": 0,
+    "cardElevation": 0,
+    "buttonRadius": 0,
+    "inputRadius": 0,
+    "borderOpacity": 0.6,
+    "borderWidth": 1,
+    "dividerStyle": "standard",
+    "numberFont": "GeistMono"
+  },
+  "meta": {
+    "description": "Hacker, retro, monochrome green",
+    "tags": ["terminal", "hacker", "green", "retro", "crt"]
+  }
+}

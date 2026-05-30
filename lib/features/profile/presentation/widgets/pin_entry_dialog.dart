@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -47,7 +48,7 @@ class _PinEntryDialogState extends State<PinEntryDialog> {
     final color = Theme.of(context).colorScheme;
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 80),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

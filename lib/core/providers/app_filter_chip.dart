@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:go_router/go_router.dart';
@@ -176,7 +177,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             _selectedColor.withValues(alpha: 0.06),
           ],
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
       ),
       child: Stack(
         children: [
@@ -239,7 +240,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                           ),
                           decoration: BoxDecoration(
                             color: _selectedColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                           ),
                           child: Text(
                             _selectedType.label,
@@ -307,7 +308,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               color: isSelected
                   ? _selectedColor.withValues(alpha: 0.12)
                   : color.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               border: Border.all(
                 color: isSelected
                     ? _selectedColor
@@ -347,7 +348,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       elevation: 0,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         side: BorderSide(
           color: color.outlineVariant.withValues(alpha: 0.3),
         ),
@@ -448,7 +449,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       elevation: 0,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         side: BorderSide(
           color: color.outlineVariant.withValues(alpha: 0.3),
         ),

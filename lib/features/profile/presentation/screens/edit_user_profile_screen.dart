@@ -12,6 +12,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
+import 'package:mudra_manager/core/db/field_encryption_service.dart';
 
 class EditUserProfileScreen extends ConsumerStatefulWidget {
   const EditUserProfileScreen({super.key});
@@ -39,9 +40,9 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
 
   void _loadProfile(UserProfile? profile) {
     _profile = profile ?? UserProfile();
-    _nameController.text = profile?.name ?? '';
-    _emailController.text = profile?.email ?? '';
-    _phoneController.text = profile?.phone ?? '';
+    _nameController.text = FieldEncryptionService.safeDisplay(profile?.name);
+    _emailController.text = FieldEncryptionService.safeDisplay(profile?.email);
+    _phoneController.text = FieldEncryptionService.safeDisplay(profile?.phone);
     _didInit = true;
   }
 

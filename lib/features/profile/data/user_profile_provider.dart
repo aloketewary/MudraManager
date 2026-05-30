@@ -24,10 +24,21 @@ class UserProfileService {
 
   Future<void> saveProfile(UserProfile profile) async {
     final isar = await isarService.getInstance();
-    profile.encryptFields();
+    // Create a copy for storage so the caller's object stays decrypted
+    final toStore = UserProfile()
+      ..id = profile.id
+      ..name = profile.name
+      ..email = profile.email
+      ..phone = profile.phone
+      ..avatarIndex = profile.avatarIndex
+      ..createdAt = profile.createdAt
+      ..updateAt = profile.updateAt;
+    toStore.encryptFields();
     await isar.writeTxn(() async {
-      await isar.userProfiles.put(profile);
+      await isar.userProfiles.put(toStore);
     });
+    // Sync the ID back in case it was a new profile
+    profile.id = toStore.id;
   }
 
   Future<UserProfile?> getProfile() async {

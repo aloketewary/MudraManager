@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/trend_indicator.dart';
@@ -38,7 +39,7 @@ class StatPanelCard extends StatelessWidget {
         elevation: 0,
         color: accent.withValues(alpha: 0.12),
         shape: RoundedRectangleBorder(
-          borderRadius: borderRadius ?? BorderRadius.circular(12),
+          borderRadius: borderRadius ?? BorderRadius.circular(Tone.current.borderRadius),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),

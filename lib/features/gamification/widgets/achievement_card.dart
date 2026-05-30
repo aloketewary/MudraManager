@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,7 +43,7 @@ class AchievementCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       color: isUnlocked ? null : color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         side: BorderSide(
           color: isUnlocked
               ? accent.withValues(alpha: 0.4)
@@ -55,7 +56,7 @@ class AchievementCard extends StatelessWidget {
           HapticFeedback.lightImpact();
           _showShowcase(context);
         },
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         child: Container(
           decoration: isUnlocked
               ? BoxDecoration(
@@ -178,7 +179,7 @@ class AchievementCard extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -199,7 +200,7 @@ class AchievementCard extends StatelessWidget {
                 Column(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(3),
+                      borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
                       child: LinearProgressIndicator(
                         semanticsLabel: 'Progress',
                         value: progress,
@@ -464,7 +465,7 @@ class _AchievementShowcase extends StatelessWidget {
                     child: Column(
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
                           child: LinearProgressIndicator(
                             semanticsLabel: 'Progress',
                             value: progress,
@@ -509,7 +510,7 @@ class _AchievementShowcase extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         border: Border.all(
           color: accent.withValues(alpha: 0.25),
         ),

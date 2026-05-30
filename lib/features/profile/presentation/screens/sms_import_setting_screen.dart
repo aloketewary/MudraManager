@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/extension/case_extention.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -656,8 +657,8 @@ class _SmsImportSettingsScreenState
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),
@@ -701,7 +702,7 @@ class _SmsImportSettingsScreenState
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: color.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 border: Border.all(
                   color: color.outlineVariant.withValues(alpha: 0.5),
                 ),
@@ -747,7 +748,7 @@ class _SmsImportSettingsScreenState
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       ),
                     ),
                     child: Text(ctxt.common_cancel),
@@ -761,7 +762,7 @@ class _SmsImportSettingsScreenState
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       ),
                     ),
                     child: Text(
@@ -803,8 +804,8 @@ class _SmsImportSettingsScreenState
 
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),
@@ -841,7 +842,7 @@ class _SmsImportSettingsScreenState
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: color.errorContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                 border: Border.all(color: color.error.withValues(alpha: 0.3)),
               ),
               child: Row(
@@ -872,7 +873,7 @@ class _SmsImportSettingsScreenState
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       ),
                     ),
                     child: Text(ctxt.common_cancel),
@@ -887,7 +888,7 @@ class _SmsImportSettingsScreenState
                       foregroundColor: color.error,
                       side: BorderSide(color: color.error),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                       ),
                     ),
                     child: Text(ctxt.txnList_clear),

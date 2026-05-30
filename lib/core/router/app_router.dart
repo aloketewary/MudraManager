@@ -46,6 +46,8 @@ import 'package:mudra_manager/features/profile/presentation/screens/notification
 import 'package:mudra_manager/features/profile/presentation/screens/setting_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/sms_import_setting_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/theme_picker_screen.dart';
+import 'package:mudra_manager/features/skin/presentation/screens/skin_picker_screen.dart';
+import 'package:mudra_manager/features/skin/presentation/screens/skin_editor_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/account_form.dart';
 import 'package:mudra_manager/features/recap/presentation/screens/monthly_recap_screen.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
@@ -260,6 +262,14 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.themePicker,
                 builder: (context, state) => const ThemePickerScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.skinPicker,
+                builder: (context, state) => const SkinPickerScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.skinEditor,
+                builder: (context, state) => const SkinEditorScreen(),
               ),
               GoRoute(
                 path: AppRoutes.backupRestore,

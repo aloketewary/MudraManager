@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/providers/app_mode_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
@@ -156,7 +157,7 @@ class ExpandableFabState extends ConsumerState<ExpandableFab>
             color.surfaceContainerHigh,
             t,
           ),
-          borderRadius: BorderRadius.circular(26),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius * 1.5),
           boxShadow: [
             BoxShadow(
               color: color.shadow.withValues(alpha: 0.1 + (t * 0.1)),
@@ -179,7 +180,7 @@ class ExpandableFabState extends ConsumerState<ExpandableFab>
                   ignoring: t > 0.1,
                   child: InkWell(
                     onTap: _toggle,
-                    borderRadius: BorderRadius.circular(26),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius * 1.5),
                     child: Semantics(
                       button: true,
                       label: 'Add transaction',

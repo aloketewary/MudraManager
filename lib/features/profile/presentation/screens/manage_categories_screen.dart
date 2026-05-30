@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -399,7 +400,7 @@ class _CategoryRowState extends State<_CategoryRow> {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: categoryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                   ),
                   child: Icon(
                     IconHelper.getIconData(widget.category.iconName),
@@ -589,8 +590,8 @@ class _CategoryRowState extends State<_CategoryRow> {
     showModalBottomSheet(
       context: context,
       backgroundColor: color.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => SafeArea(
         child: Column(
@@ -614,7 +615,7 @@ class _CategoryRowState extends State<_CategoryRow> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: catColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     ),
                     child: Icon(
                       IconHelper.getIconData(category.iconName),
@@ -705,8 +706,8 @@ class _CategoryRowState extends State<_CategoryRow> {
     showModalBottomSheet(
       context: context,
       backgroundColor: color.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => SafeArea(
         child: Column(

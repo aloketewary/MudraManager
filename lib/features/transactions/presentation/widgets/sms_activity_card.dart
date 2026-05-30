@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
@@ -198,14 +199,14 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
       elevation: 0,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
         side: BorderSide(color: statusColor.withValues(alpha: 0.3), width: 2),
       ),
       child: Column(
         children: [
           InkWell(
             onTap: () => setState(() => _isExpanded = !_isExpanded),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: Row(
@@ -217,7 +218,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                         height: 48.0,
                         decoration: BoxDecoration(
                           color: statusColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: Icon(
                           widget.activity.isIncome == true

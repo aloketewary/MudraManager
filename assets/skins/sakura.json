@@ -1,0 +1,55 @@
+{
+  "id": "sakura",
+  "name": "Sakura",
+  "author": "Mudra",
+  "version": 1,
+  "tier": "free",
+  "palette": {
+    "light": {
+      "seed": "#F48FB1",
+      "primary": "#AD1457",
+      "secondary": "#C2185B",
+      "tertiary": "#6D4C41",
+      "primaryContainer": "#FCE4EC",
+      "secondaryContainer": "#FFF0F3",
+      "tertiaryContainer": "#F5EDE8",
+      "surface": "#FFFBFC",
+      "surfaceContainer": "#FFF5F7",
+      "surfaceContainerLow": "#FFF8F9",
+      "onSurface": "#2C1620",
+      "onSurfaceVariant": "#8C6B78",
+      "outline": "#E8C4D0",
+      "outlineVariant": "#F5E0E8"
+    },
+    "dark": {
+      "seed": "#F48FB1",
+      "primary": "#F48FB1",
+      "secondary": "#F06292",
+      "tertiary": "#BCAAA4",
+      "primaryContainer": "#4A0E24",
+      "secondaryContainer": "#5C1030",
+      "tertiaryContainer": "#3E2E28",
+      "surface": "#140A0E",
+      "surfaceContainer": "#1E1014",
+      "surfaceContainerLow": "#180C10",
+      "surfaceContainerHigh": "#28181E",
+      "onSurface": "#FFF0F3",
+      "onSurfaceVariant": "#C48B9C",
+      "outline": "#5C3040",
+      "outlineVariant": "#3D1E2A"
+    }
+  },
+  "style": {
+    "cardRadius": 14,
+    "cardElevation": 0,
+    "buttonRadius": 10,
+    "inputRadius": 10,
+    "borderOpacity": 0.08,
+    "borderWidth": 1,
+    "dividerStyle": "hairline"
+  },
+  "meta": {
+    "description": "Elegant, Japanese-inspired, seasonal",
+    "tags": ["sakura", "pink", "elegant", "japanese", "delicate"]
+  }
+}

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -28,7 +29,7 @@ class SkeletonLoader extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest,
-        borderRadius: borderRadius ?? BorderRadius.circular(12),
+        borderRadius: borderRadius ?? BorderRadius.circular(Tone.current.borderRadius),
       ),
     )
         .animate(onComplete: (controller) => controller.repeat())
@@ -55,7 +56,7 @@ class TransactionCardSkeleton extends StatelessWidget {
       elevation: 0,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -64,7 +65,7 @@ class TransactionCardSkeleton extends StatelessWidget {
             SkeletonLoader(
               width: 48,
               height: 48,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             ),
             const SizedBox(width: 16.0),
             const Expanded(
@@ -121,7 +122,7 @@ class AccountCardSkeleton extends StatelessWidget {
           padding: const EdgeInsets.all(24.0),
           decoration: BoxDecoration(
             color: color.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +159,7 @@ class BudgetCardSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: color.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
         ),
         child: Row(
           children: [
@@ -223,7 +224,7 @@ class DashboardCardSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
         ),
         child: Row(
           children: [
@@ -288,14 +289,14 @@ class PersonalityCardSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
         ),
         child: Row(
           children: [
             SkeletonLoader(
               width: 64,
               height: 64,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
             ),
             const SizedBox(width: 16),
             const Expanded(

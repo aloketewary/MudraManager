@@ -110,10 +110,10 @@ class BudgetCard extends ConsumerWidget {
                                 height: 10,
                                 decoration: BoxDecoration(
                                   color: color.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                                 ),
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                                   child: TweenAnimationBuilder<double>(
                                     duration: const Duration(milliseconds: 1500),
                                     curve: Curves.easeOutCubic,

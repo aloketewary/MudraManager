@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -91,7 +92,7 @@ class AiInsightWidgetPlugin extends DashboardWidgetPlugin {
                       gradient: LinearGradient(
                         colors: [color.primary, color.tertiary],
                       ),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -302,7 +303,7 @@ class _InsightTile extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: accent.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
               ),
               child: Icon(_icon(), color: accent, size: 20),
             ),

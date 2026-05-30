@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -50,7 +51,7 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
         child: Container(
           decoration: BoxDecoration(
             color: color.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
             border: Border.all(
               color: color.primary.withValues(alpha: 0.3),
               width: 1.5,
@@ -74,11 +75,11 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
                   labelText: 'Search by sender',
                   prefixIcon: Icon(LucideIcons.search, color: color.primary),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3)),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                     borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3)),
                   ),
                 ),

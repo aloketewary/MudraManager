@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
@@ -27,7 +28,7 @@ class ThemePreviewCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
           border: Border.all(
             color: isSelected ? colorScheme.primary : Colors.transparent,
             width: 3,
@@ -42,7 +43,7 @@ class ThemePreviewCard extends StatelessWidget {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
           child: Stack(
             children: [
               // Mini App Preview
@@ -86,7 +87,7 @@ class ThemePreviewCard extends StatelessWidget {
                             height: 60,
                             decoration: BoxDecoration(
                               color: colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
                             ),
                             padding: const EdgeInsets.all(8),
                             child: Row(
