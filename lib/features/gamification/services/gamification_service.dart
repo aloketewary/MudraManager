@@ -738,8 +738,14 @@ class GamificationService {
     // Already checked today
     if (last != null && _isSameDay(last, now)) {
       log.i('⏭️ Already checked in today. Last: $last, Now: $now');
-      // Cancel today's reminder since user already checked in
-      await NotificationService.cancelStreakReminder();
+      // Even if already checked in, ensure next day's reminder is scheduled
+      final currentStreak = existing.currentCount;
+      if (currentStreak >= 1) {
+        await NotificationService.scheduleStreakReminder(
+          currentStreak,
+          forceNextDay: true,
+        );
+      }
       return null;
     }
 
@@ -769,9 +775,12 @@ class GamificationService {
 
     final newStreak = existing.currentCount;
 
-    // Schedule reminder for next day if streak >= 3
-    if (newStreak >= 3) {
-      await NotificationService.scheduleStreakReminder(newStreak);
+    // Schedule reminder for next day if streak >= 1
+    if (newStreak >= 1) {
+      await NotificationService.scheduleStreakReminder(
+        newStreak,
+        forceNextDay: true,
+      );
     }
 
     // -------------------------------

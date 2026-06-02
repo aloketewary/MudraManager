@@ -3091,5 +3091,15 @@
     "placeholders": {
       "day": {}
     }
-  }
+  },
+  "streak_savedTitle": "Streak রক্ষা হল!",
+  "streak_savedBody": "আপনি আপনার {days} দিনের streak বাঁচিয়ে রাখলেন! 🔥",
+  "@streak_savedBody": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "streak_keepGoing": "চলতে থাকুন!"
 }

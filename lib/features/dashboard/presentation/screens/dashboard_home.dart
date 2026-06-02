@@ -34,6 +34,7 @@ import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/sms_success_celebration_sheet.dart';
+import 'package:mudra_manager/features/gamification/presentation/widgets/streak_saved_celebration_sheet.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class DashboardHome extends ConsumerStatefulWidget {
@@ -71,6 +72,9 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     final lastCheckIn = prefs.getLastDailyCheckIn();
     final now = DateTime.now();
 
+    final isDelayed = lastCheckIn != null &&
+        now.difference(lastCheckIn).inHours >= 24;
+
     if (lastCheckIn == null ||
         !(lastCheckIn.year == now.year &&
             lastCheckIn.month == now.month &&
@@ -83,9 +87,22 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           RegExp(r'Day (\d+)').firstMatch(result)?.group(1) ?? '',
         );
         if (streakCount != null && streakCount > 1) {
-          SnackbarService.success(
-            '🔥 ${BuddyMessages.streakMessage(streakCount)}',
-          );
+          if (isDelayed && mounted) {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              builder: (_) => StreakSavedCelebrationSheet(
+                streakCount: streakCount,
+              ),
+            );
+          } else {
+            SnackbarService.success(
+              '🔥 ${BuddyMessages.streakMessage(streakCount)}',
+            );
+          }
         } else {
           SnackbarService.success('🔥 $result');
         }

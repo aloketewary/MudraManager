@@ -45,6 +45,35 @@ class ReEngagementCheck extends SmartCheck {
   }
 
   Future<void> _day1(Isar isar) async {
+    // Priority 1: Streak at risk
+    final streak =
+        await isar.streaks.filter().typeEqualTo('daily_checkin').findFirst();
+    final currentStreak = streak?.currentCount ?? 0;
+
+    final prefs = await SharedPreferences.getInstance();
+    final lastCheckInStr = prefs.getString('last_daily_check_in');
+    final lastCheckIn = lastCheckInStr != null ? DateTime.tryParse(lastCheckInStr) : null;
+    final now = DateTime.now();
+    final alreadyCheckedInToday = lastCheckIn != null &&
+        lastCheckIn.year == now.year &&
+        lastCheckIn.month == now.month &&
+        lastCheckIn.day == now.day;
+
+    if (currentStreak >= 1 && !alreadyCheckedInToday) {
+      await SmartNotificationEmitter.emit(
+        isar,
+        type: 're_engage_streak_risk',
+        title: Tone.appL10n?.notif_streakOnLineTitle(currentStreak) ??
+            '🔥 $currentStreak-day streak on the line!',
+        body: Tone.current.streakAtRisk(currentStreak),
+        channel: 're_engagement',
+        channelName: 'Re-engagement',
+        primaryAction: 'Keep Streak',
+        actionData: '{"type": "open_home"}',
+      );
+      return;
+    }
+
     final txnCount = await isar.transactions.count();
     if (txnCount == 0) return;
 
