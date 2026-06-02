@@ -243,7 +243,7 @@ class BackupService {
     for (var blockNum = 1; blocks.length < keyLength; blockNum++) {
       final blockBytes = [...salt, ..._int32BigEndian(blockNum)];
       var u = hmacSha256.convert(blockBytes).bytes;
-      var result = List<int>.from(u);
+      final result = List<int>.from(u);
       for (var i = 1; i < iterations; i++) {
         u = hmacSha256.convert(u).bytes;
         for (var j = 0; j < result.length; j++) {

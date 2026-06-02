@@ -13,6 +13,8 @@ import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 
 enum ParseResult { approved, pending, needsReview, duplicate, skipped, error }
 
+typedef ParseOutput = ({ParseResult result, double? amount});
+
 class SmsProcessorService {
   static final SmsProcessorService instance = SmsProcessorService._();
   static final AppLog _log = AppLog(getLogger(), 'SmsProcessorService');
@@ -78,7 +80,7 @@ class SmsProcessorService {
     }
   }
 
-  Future<ParseResult> parseAndSaveTransaction({
+  Future<ParseOutput> parseAndSaveTransaction({
     required String body,
     required String address,
     String? sender,
@@ -90,7 +92,7 @@ class SmsProcessorService {
 
     if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) {
       _log.i('[$corrId] Already processed, skipping sender: $address');
-      return ParseResult.skipped;
+      return (result: ParseResult.skipped, amount: null);
     }
 
     try {
@@ -110,7 +112,7 @@ class SmsProcessorService {
         //    generic parser which would create low-quality activities.
         if (!checkForTransactionalMessage(body)) {
           _log.i('[$corrId] Filtered (not transactional) sender: $address');
-          return ParseResult.skipped;
+          return (result: ParseResult.skipped, amount: null);
         }
 
         // 3. Legacy parser fallback
@@ -125,15 +127,16 @@ class SmsProcessorService {
       // Only store hash after successful processing
       SharedPrefsUtil.instance.storeProcessedHash(smsHash);
 
-      return switch (activity.status) {
+      final parsedResult = switch (activity.status) {
         ActivityStatus.approved => ParseResult.approved,
         ActivityStatus.duplicate => ParseResult.duplicate,
         ActivityStatus.needsReview => ParseResult.needsReview,
         _ => ParseResult.pending,
       };
+      return (result: parsedResult, amount: activity.amount);
     } catch (e) {
       _log.e('Failed to parse and save transaction', e);
-      return ParseResult.error;
+      return (result: ParseResult.error, amount: null);
     }
   }
 
@@ -167,7 +170,7 @@ class SmsProcessorService {
       );
 
       PluginService().emitSms(sender, '');
-      _log.i('[$corrId] Plugin-parsed, sender: ${sender.length > 4 ? '${sender.substring(0, 4)}***' : sender}, amount: ${parsedSms.amount != null ? '***' : 'null'}');
+      _log.i('[$corrId] Plugin-parsed, sender: ${sender.length > 4 ? '${sender.substring(0, 4)}***' : sender}, amount: ***');
       return activity;
     } catch (e) {
       _log.e('[$corrId] Failed to process plugin-parsed SMS', e);

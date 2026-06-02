@@ -190,7 +190,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
           _log.i('[$corrId] RCS from $sender (${data['package']})');
         }
 
-        final parseResult = await _safeProcess(
+        final parseOutput = await _safeProcess(
           PendingNotifications.create(
             body: rawBody,
             sender: sender,
@@ -201,31 +201,14 @@ class NotificationListenerBridge with WidgetsBindingObserver {
           isRcs: isRcs,
         );
 
-        switch (parseResult) {
+        switch (parseOutput.result) {
           case ParseResult.approved:
             approved++;
             // Mark first-ever SMS import for celebration on dashboard
             if (!SharedPrefsUtil.instance.getSmsFirstImportCelebrated()) {
               SharedPrefsUtil.instance.setSmsFirstImportReady();
             }
-            final matches = RegExp(
-              r'(?:(?:[\p{Sc}]|[A-Z]{3})\s*)?(\d{1,3}(?:[,\s.]\d{3})*(?:[.,]\d{1,2})?)',
-              unicode: true,
-            ).allMatches(rawBody);
-
-            double txnAmount = 0;
-
-            for (final m in matches) {
-              final value = parseAmount(m.group(1) ?? '');
-
-              // heuristic: ignore large "balance-like" values
-              if (value > 0 && value < 10000000) {
-                // tweak if needed
-                txnAmount = value;
-                break;
-              }
-            }
-
+            final txnAmount = parseOutput.amount ?? 0;
             totalAmount += txnAmount;
             _showPerTxnNotification(
               isApproved: true,
@@ -437,7 +420,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     return double.tryParse(cleaned) ?? 0;
   }
 
-  Future<ParseResult> _safeProcess(
+  Future<ParseOutput> _safeProcess(
     PendingNotifications item, {
     bool isRetry = false,
     String corrId = '',
@@ -447,7 +430,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
         ? corrId
         : (item.hash.length >= 8 ? item.hash.substring(0, 8) : item.hash);
     try {
-      final result = await SmsProcessorService.instance.parseAndSaveTransaction(
+      final output = await SmsProcessorService.instance.parseAndSaveTransaction(
         body: item.body,
         address: item.sender,
         sender: item.sender,
@@ -457,16 +440,16 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       );
 
       // ✅ SUCCESS → remove from DB
-      if (result == ParseResult.approved ||
-          result == ParseResult.pending ||
-          result == ParseResult.needsReview) {
+      if (output.result == ParseResult.approved ||
+          output.result == ParseResult.pending ||
+          output.result == ParseResult.needsReview) {
         final isar = await _getIsar();
         await isar.writeTxn(() async {
           await isar.pendingNotifications.delete(item.id);
         });
       }
 
-      return result;
+      return output;
     } catch (e) {
       _log.e('[$cid] Processing failed for ${item.hash}', e);
       ErrorTracker.record(
@@ -493,7 +476,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
         _log.w('Max retries exceeded, dropping: ${item.hash}');
       }
 
-      return ParseResult.error;
+      return (result: ParseResult.error, amount: null);
     }
   }
 

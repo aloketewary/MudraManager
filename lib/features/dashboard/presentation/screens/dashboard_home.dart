@@ -247,22 +247,24 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           for (final widget in widgets) {
             await widget.refresh(ref);
           }
+          if (mounted) {
+            SnackbarService.success(
+              AppLocalizations.of(context)!.tone_friendly_dashboardAllCaughtUp.split('|').first,
+            );
+          }
         }),
         child: CustomScrollView(
           key: const PageStorageKey('dashboard_scroll'),
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            if (!hasSeenHelp)
-              SliverToBoxAdapter(child: RepaintBoundary(child: _HelpBanner())),
-            if (!hasSeenHelp && alerts.isNotEmpty)
-              SliverToBoxAdapter(
-                child: RepaintBoundary(child: _AlertBanner(alerts: alerts)),
+            // Priority-ranked: only ONE banner shows at a time
+            SliverToBoxAdapter(
+              child: RepaintBoundary(
+                child: _PrioritizedBanner(
+                  hasSeenHelp: hasSeenHelp,
+                  alerts: alerts,
+                ),
               ),
-            SliverToBoxAdapter(
-              child: RepaintBoundary(child: _AutoImportBanner()),
-            ),
-            SliverToBoxAdapter(
-              child: RepaintBoundary(child: _BackgroundHealthBanner()),
             ),
             // Zero-state: first-transaction nudge for new users
             if (!hasTransactions && !nudgeDismissed)
@@ -380,24 +382,59 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
   }
 }
 
-class _AlertBanner extends ConsumerWidget {
+/// Shows only the highest-priority banner. One slot, one message.
+/// Priority: BackgroundHealth > BudgetAlert > AutoImport > Help
+class _PrioritizedBanner extends ConsumerWidget {
+  final bool hasSeenHelp;
   final List<BudgetAlert> alerts;
 
-  const _AlertBanner({required this.alerts});
+  const _PrioritizedBanner({
+    required this.hasSeenHelp,
+    required this.alerts,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        BudgetAlertBanner(
-          alerts: alerts,
-          onDismiss: () {
-            ref.read(budgetAlertsProvider.notifier).dismissAlert(alerts.first);
-          },
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
+    // P0: Background health issue (system broken)
+    final unhealthy = ref.watch(backgroundTaskUnhealthyProvider).value ?? false;
+    if (unhealthy) return _BackgroundHealthBanner();
+
+    // P1: Budget alerts (money at risk)
+    if (alerts.isNotEmpty) {
+      return Column(
+        children: [
+          BudgetAlertBanner(
+            alerts: alerts,
+            onDismiss: () {
+              ref.read(budgetAlertsProvider.notifier).dismissAlert(alerts.first);
+            },
+          ),
+          const SizedBox(height: 16),
+        ],
+      );
+    }
+
+    // P2: Auto-import setup/pending
+    if (Platform.isAndroid) {
+      final granted = ref.watch(smsPermissionGrantedProvider);
+      if (!granted.isLoading) {
+        final isGranted = granted.value == true;
+        final autoImportOn = SharedPrefsUtil.instance.getSmsImportEnabled();
+        if (isGranted && autoImportOn) {
+          final pending = ref.watch(pendingCountProvider).value ?? 0;
+          if (pending > 0) return _AutoImportBanner();
+        } else if (isGranted && !autoImportOn) {
+          return _AutoImportBanner();
+        } else if (!SharedPrefsUtil.instance.getSmsbannerDismiss()) {
+          return _AutoImportBanner();
+        }
+      }
+    }
+
+    // P3: Help guide for new users
+    if (!hasSeenHelp) return _HelpBanner();
+
+    return const SizedBox.shrink();
   }
 }
 

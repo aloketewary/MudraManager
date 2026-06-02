@@ -3515,5 +3515,89 @@
       }
     }
   },
-  "streak_keepGoing": "Let's Keep Going"
+  "streak_keepGoing": "Let's Keep Going",
+  "briefing_available": "Available: {amount}",
+  "@briefing_available": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "briefing_billDueToday": "{name} ({amount}) is due today. Pay it now to avoid a missed payment.",
+  "@briefing_billDueToday": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "briefing_payNow": "Pay Now",
+  "briefing_budgetExceeded": "{name} is {amount} over budget. Pause non-essential spending in this category.",
+  "@briefing_budgetExceeded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "briefing_review": "Review",
+  "briefing_spendingDrift": "{category} spending is {percent} above your normal pattern. Reduce {category} this week.",
+  "@briefing_spendingDrift": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "briefing_viewPattern": "View Pattern",
+  "briefing_billDueSoon": "{name} is due in {days} day(s). Make sure you have funds ready.",
+  "@briefing_billDueSoon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "briefing_viewBills": "View Bills",
+  "briefing_overspending": "You've spent {amount} more than you earned this month. Cut discretionary spending to close the gap.",
+  "@briefing_overspending": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "briefing_viewBudget": "View Budget",
+  "briefing_improvement": "You're spending {percent}% less than this point last month. Keep it up.",
+  "@briefing_improvement": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "briefing_greetingWithName": "{greeting}, {name}",
+  "@briefing_greetingWithName": {
+    "placeholders": {
+      "greeting": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

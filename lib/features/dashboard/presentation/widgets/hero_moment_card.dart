@@ -216,10 +216,6 @@ class _HeroMomentCardState extends ConsumerState<HeroMomentCard>
 
     _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _sizeFactor = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-
-    if (!_dismissedThisSession) {
-      Future.delayed(const Duration(seconds: 10), _dismiss);
-    }
   }
 
   void _dismiss() {

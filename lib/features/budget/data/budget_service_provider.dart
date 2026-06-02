@@ -191,7 +191,7 @@ class BudgetService {
           categorySpendings: [],
           startDate: s,
           endDate: e,
-        ));
+        ),);
         continue;
       }
 
@@ -211,7 +211,7 @@ class BudgetService {
             category: cat,
             allocated: alloc.amount,
             spent: spent,
-          ));
+          ),);
         }
       } else {
         final periodExpenses = allExpenses
@@ -230,7 +230,7 @@ class BudgetService {
             category: entry.value.$1,
             allocated: budget.amount * (entry.value.$2 / (totalSpent > 0 ? totalSpent : 1)),
             spent: entry.value.$2,
-          ));
+          ),);
         }
         catSpendings.sort((a, b2) => b2.spent.compareTo(a.spent));
       }
@@ -252,7 +252,7 @@ class BudgetService {
         startDate: s,
         endDate: e,
         hasInvalidCategories: hasInvalid,
-      ));
+      ),);
     }
     return list;
   }
@@ -354,7 +354,7 @@ class BudgetService {
         budget: budget,
         spent: spent,
         wasUnderBudget: spent <= budget.amount,
-      ));
+      ),);
     }
     return results;
   }

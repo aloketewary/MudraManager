@@ -532,7 +532,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
             ],
           );
         },
-        loading: () =>  Padding(padding: EdgeInsets.all(spacing.cardInner), child: AccountCardSkeleton()),
+        loading: () =>  Padding(padding: EdgeInsets.all(spacing.cardInner), child: const AccountCardSkeleton()),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );

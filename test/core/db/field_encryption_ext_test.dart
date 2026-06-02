@@ -139,9 +139,12 @@ void main() {
       expect(FieldEncryptionService.isReady, isFalse);
     });
 
-    test('encrypt/decrypt are identity functions when not ready', () {
+    test('encrypt throws and decrypt is identity when not ready', () {
       const input = 'sensitive data 12345';
-      expect(FieldEncryptionService.encrypt(input), equals(input));
+      expect(
+        () => FieldEncryptionService.encrypt(input),
+        throwsA(isA<StateError>()),
+      );
       expect(FieldEncryptionService.decrypt(input), equals(input));
     });
   });

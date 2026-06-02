@@ -18,7 +18,7 @@ class QuickActionButton extends ConsumerWidget {
 
     final actions = [
       _ActionData(
-        label: 'Add Expense',
+        label: ctxt.transaction_addExpenseTitle,
         icon: LucideIcons.trendingDown,
         color: color.error,
         onTap: () => context.push(
@@ -27,7 +27,7 @@ class QuickActionButton extends ConsumerWidget {
         ),
       ),
       _ActionData(
-        label: 'Add Income',
+        label: ctxt.transaction_addIncomeTitle,
         icon: LucideIcons.trendingUp,
         color: color.primary,
         onTap: () => context.push(

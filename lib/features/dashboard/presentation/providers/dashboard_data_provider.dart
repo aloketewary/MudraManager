@@ -3,6 +3,7 @@ import 'package:async/async.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -87,6 +88,7 @@ final dashboardDataProvider =
     for (final t in txns) {
       await t.category.load();
       await t.account.load();
+      t.decryptFields();
     }
     return txns;
   }
@@ -115,7 +117,14 @@ final dashboardDataProvider =
       final accountBalances = results[2] as Map<int, double>;
       final budgets = results[3] as List<BudgetWithProgress>;
       final recurringExpenses = results[4] as List<RecurringTransaction>;
+      for (final r in recurringExpenses) {
+        await r.category.load();
+        r.decryptFields();
+      }
       final goals = results[5] as List<Goal>;
+      for (final g in goals) {
+        g.decryptFields();
+      }
       final baseBalances = results[6] as Map<int, double>;
 
       // Calculate totals once

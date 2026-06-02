@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
@@ -58,7 +59,7 @@ class RecurringExpensesCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Bill Control Center',
+                        AppLocalizations.of(context)!.title_billControlCenter,
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -66,7 +67,7 @@ class RecurringExpensesCard extends ConsumerWidget {
                       ),
                       SizedBox(height: spacing.elementGapMin),
                       Text(
-                        '${formatCurrency(monthlyTotal, decimals: 0)}/month • ${expenses.length} bills',
+                        '${formatCurrency(monthlyTotal, decimals: 0)}/${AppLocalizations.of(context)!.label_monthly.toLowerCase()} • ${expenses.length} ${AppLocalizations.of(context)!.title_bills.toLowerCase()}',
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onSurfaceVariant,
                         ),

@@ -7,9 +7,12 @@ void main() {
       expect(FieldEncryptionService.isReady, isFalse);
     });
 
-    test('encrypt returns original when not ready', () {
+    test('encrypt throws when not ready', () {
       const plain = 'sensitive bank SMS body';
-      expect(FieldEncryptionService.encrypt(plain), equals(plain));
+      expect(
+        () => FieldEncryptionService.encrypt(plain),
+        throwsA(isA<StateError>()),
+      );
     });
 
     test('decrypt returns original when not ready', () {
@@ -37,8 +40,11 @@ void main() {
       expect(FieldEncryptionService.isEncrypted('ENC:'), isTrue);
     });
 
-    test('encryptNullable passes through non-null when not ready', () {
-      expect(FieldEncryptionService.encryptNullable('hello'), equals('hello'));
+    test('encryptNullable throws when not ready', () {
+      expect(
+        () => FieldEncryptionService.encryptNullable('hello'),
+        throwsA(isA<StateError>()),
+      );
     });
 
     test('decryptNullable passes through non-null when not ready', () {

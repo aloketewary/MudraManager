@@ -97,13 +97,14 @@ void main() {
     if (!checkForTransactionalMessage(rawBody)) return ParseResult.skipped;
 
     // Step 6: Full SmsProcessorService pipeline (parser + DB save)
-    return await SmsProcessorService.instance.parseAndSaveTransaction(
+    final output = await SmsProcessorService.instance.parseAndSaveTransaction(
       body: rawBody,
       address: sender,
       sender: sender,
       timestamp: timestamp,
       corrId: ktHash.substring(0, 8),
     );
+    return output.result;
   }
 
   setUp(() async {

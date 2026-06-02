@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
@@ -99,7 +100,7 @@ class BudgetCard extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Monthly Budget',
+                                AppLocalizations.of(context)!.dashboard_mini_budget_text,
                                 style: textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -139,7 +140,7 @@ class BudgetCard extends ConsumerWidget {
                                 children: [
                                   Expanded(
                                     child: _buildMetricItem(
-                                      'Remaining',
+                                      AppLocalizations.of(context)!.budget_remaining,
                                       formatCurrency(remaining, decimals: 0),
                                       LucideIcons.wallet,
                                       progressColor,
@@ -150,7 +151,7 @@ class BudgetCard extends ConsumerWidget {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: _buildMetricItem(
-                                      'Per Day',
+                                      AppLocalizations.of(context)!.budget_safeToSpend,
                                       formatCurrency(dailySafe.toDouble(), decimals: 0),
                                       LucideIcons.calendar,
                                       color.primary,

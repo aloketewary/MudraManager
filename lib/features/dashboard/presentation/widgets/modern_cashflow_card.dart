@@ -1,5 +1,4 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +10,6 @@ import 'package:mudra_manager/core/providers/filter_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
-import 'package:mudra_manager/features/dashboard/data/historical_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
@@ -225,22 +223,14 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
                     child: Container(
                       height: 80,
                       alignment: Alignment.centerLeft,
-                      child: Stack(
-                        children: [
-                          _buildSparklingLineChart(isExpense),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: AnimatedBalance(
-                              value: amount,
-                              style: textTheme.headlineLarge?.copyWith(
-                                color: accent,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              fixedStringLength: 0,
-                              overflow: TextOverflow.fade,
-                            ),
-                          ),
-                        ],
+                      child: AnimatedBalance(
+                        value: amount,
+                        style: textTheme.headlineLarge?.copyWith(
+                          color: accent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        fixedStringLength: 0,
+                        overflow: TextOverflow.fade,
                       ),
                     ),
                   ),
@@ -260,82 +250,5 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
     );
   }
 
-  Widget _buildSparklingLineChart(bool isExpense) {
-    final brightness = Theme.of(context).brightness;
-    final accent = isExpense
-        ? FinanceColors.expenseColor(brightness)
-        : FinanceColors.incomeColor(brightness);
 
-    return Positioned.fill(
-      child: Consumer(
-        builder: (context, ref, child) {
-          final historyAsync = ref.watch(
-            isExpense ? historicalExpenseProvider : historicalIncomeProvider,
-          );
-          return historyAsync.when(
-            data: (history) {
-              if (history.isEmpty) return const SizedBox();
-              if (history.every((v) => v == 0)) {
-                final spots = history.asMap().entries.map((e) {
-                  return FlSpot(e.key.toDouble(), 10.0);
-                }).toList();
-                return LineChart(
-                  LineChartData(
-                    gridData: const FlGridData(show: false),
-                    titlesData: const FlTitlesData(show: false),
-                    borderData: FlBorderData(show: false),
-                    lineTouchData: const LineTouchData(enabled: false),
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: spots,
-                        isCurved: true,
-                        color: accent.withValues(alpha: 0.15),
-                        barWidth: 2,
-                        dotData: const FlDotData(show: false),
-                        belowBarData: BarAreaData(
-                          show: true,
-                          color: accent.withValues(alpha: 0.05),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              final maxVal = history.reduce((a, b) => a > b ? a : b);
-              final minVal = history.reduce((a, b) => a < b ? a : b);
-              final range = maxVal - minVal;
-              final spots = history.asMap().entries.map((e) {
-                final normalized =
-                    range > 0 ? ((e.value - minVal) / range) * 40 + 10 : 25;
-                return FlSpot(e.key.toDouble(), normalized.toDouble());
-              }).toList();
-              return LineChart(
-                LineChartData(
-                  gridData: const FlGridData(show: false),
-                  titlesData: const FlTitlesData(show: false),
-                  borderData: FlBorderData(show: false),
-                  lineTouchData: const LineTouchData(enabled: false),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: spots,
-                      isCurved: true,
-                      color: accent.withValues(alpha: 0.15),
-                      barWidth: 2,
-                      dotData: const FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: accent.withValues(alpha: 0.05),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-            loading: () => const SizedBox(),
-            error: (_, __) => const SizedBox(),
-          );
-        },
-      ),
-    );
-  }
 }

@@ -25,7 +25,7 @@ class DailyBriefingWidgetPlugin extends DashboardWidgetPlugin {
   WidgetSize get defaultSize => WidgetSize.medium;
 
   @override
-  bool get canBeDisabled => false;
+  bool get canBeDisabled => true;
 
   @override
   String get description => 'Your daily financial briefing — what changed, what needs attention, what to do';

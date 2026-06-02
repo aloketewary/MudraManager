@@ -11351,6 +11351,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Let\'s Keep Going'**
   String get streak_keepGoing;
+
+  /// No description provided for @briefing_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available: {amount}'**
+  String briefing_available(String amount);
+
+  /// No description provided for @briefing_billDueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} ({amount}) is due today. Pay it now to avoid a missed payment.'**
+  String briefing_billDueToday(String name, String amount);
+
+  /// No description provided for @briefing_payNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay Now'**
+  String get briefing_payNow;
+
+  /// No description provided for @briefing_budgetExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is {amount} over budget. Pause non-essential spending in this category.'**
+  String briefing_budgetExceeded(String name, String amount);
+
+  /// No description provided for @briefing_review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get briefing_review;
+
+  /// No description provided for @briefing_spendingDrift.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} spending is {percent} above your normal pattern. Reduce {category} this week.'**
+  String briefing_spendingDrift(String category, String percent);
+
+  /// No description provided for @briefing_viewPattern.
+  ///
+  /// In en, this message translates to:
+  /// **'View Pattern'**
+  String get briefing_viewPattern;
+
+  /// No description provided for @briefing_billDueSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is due in {days} day(s). Make sure you have funds ready.'**
+  String briefing_billDueSoon(String name, int days);
+
+  /// No description provided for @briefing_viewBills.
+  ///
+  /// In en, this message translates to:
+  /// **'View Bills'**
+  String get briefing_viewBills;
+
+  /// No description provided for @briefing_overspending.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve spent {amount} more than you earned this month. Cut discretionary spending to close the gap.'**
+  String briefing_overspending(String amount);
+
+  /// No description provided for @briefing_viewBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'View Budget'**
+  String get briefing_viewBudget;
+
+  /// No description provided for @briefing_improvement.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re spending {percent}% less than this point last month. Keep it up.'**
+  String briefing_improvement(int percent);
+
+  /// No description provided for @briefing_greetingWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'{greeting}, {name}'**
+  String briefing_greetingWithName(String greeting, String name);
 }
 
 class _AppLocalizationsDelegate

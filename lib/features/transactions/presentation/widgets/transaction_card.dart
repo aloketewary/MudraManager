@@ -19,6 +19,7 @@ import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/shared/widgets/safe_text.dart';
 import 'package:mudra_manager/shared/widgets/swipe_action_wrapper.dart';
 
 class TransactionCard extends ConsumerStatefulWidget {
@@ -186,7 +187,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
-                                            widget.description!,
+                                            widget.description.safe(),
                                             style:
                                                 textTheme.bodySmall?.copyWith(
                                               color: color.onSurfaceVariant,

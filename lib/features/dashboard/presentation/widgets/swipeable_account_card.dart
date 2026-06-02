@@ -33,6 +33,7 @@ class _AnimatedSwipeableAccountCardsState
   int _currentPage = 0;
   int balanceViewIndex = -1;
   bool _accountsExpanded = false;
+  bool _accountsExpandedInitialized = false;
   late PageController _pageController;
 
   // Stack state
@@ -98,6 +99,12 @@ class _AnimatedSwipeableAccountCardsState
           iconData: LucideIcons.wallet,
         ),
       );
+    }
+
+    // Auto-expand for ≤3 accounts on first build, collapsed for 4+
+    if (!_accountsExpandedInitialized) {
+      _accountsExpanded = accounts.length <= 3;
+      _accountsExpandedInitialized = true;
     }
 
     final balanceMap = data.accountBalances;

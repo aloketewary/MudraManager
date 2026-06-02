@@ -62,7 +62,7 @@ class RecentTransactionsCard extends ConsumerWidget {
                   ),
                   SizedBox(width: spacing.cardVertical),
                   AdaptiveText(
-                    'Recent Transactions',
+                    AppLocalizations.of(context)!.statistics_recentTransactionsTitleText,
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: color.primary,
@@ -223,9 +223,9 @@ class RecentTransactionsCard extends ConsumerWidget {
     final transactionDate = DateTime(date.year, date.month, date.day);
 
     if (transactionDate == today) {
-      return 'Today';
+      return ctxt.label_today;
     } else if (transactionDate == yesterday) {
-      return 'Yesterday';
+      return ctxt.label_yesterday;
     } else if (now.difference(date).inDays < 7) {
       return DateFormat('EEEE', ctxt.localeName).format(date);
     } else {

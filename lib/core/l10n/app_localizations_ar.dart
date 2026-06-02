@@ -6261,4 +6261,59 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get streak_keepGoing => 'Let\'s Keep Going';
+
+  @override
+  String briefing_available(String amount) {
+    return 'Available: $amount';
+  }
+
+  @override
+  String briefing_billDueToday(String name, String amount) {
+    return '$name ($amount) is due today. Pay it now to avoid a missed payment.';
+  }
+
+  @override
+  String get briefing_payNow => 'Pay Now';
+
+  @override
+  String briefing_budgetExceeded(String name, String amount) {
+    return '$name is $amount over budget. Pause non-essential spending in this category.';
+  }
+
+  @override
+  String get briefing_review => 'Review';
+
+  @override
+  String briefing_spendingDrift(String category, String percent) {
+    return '$category spending is $percent above your normal pattern. Reduce $category this week.';
+  }
+
+  @override
+  String get briefing_viewPattern => 'View Pattern';
+
+  @override
+  String briefing_billDueSoon(String name, int days) {
+    return '$name is due in $days day(s). Make sure you have funds ready.';
+  }
+
+  @override
+  String get briefing_viewBills => 'View Bills';
+
+  @override
+  String briefing_overspending(String amount) {
+    return 'You\'ve spent $amount more than you earned this month. Cut discretionary spending to close the gap.';
+  }
+
+  @override
+  String get briefing_viewBudget => 'View Budget';
+
+  @override
+  String briefing_improvement(int percent) {
+    return 'You\'re spending $percent% less than this point last month. Keep it up.';
+  }
+
+  @override
+  String briefing_greetingWithName(String greeting, String name) {
+    return '$greeting, $name';
+  }
 }

@@ -19,7 +19,7 @@ bool isSameMonth(DateTime a, DateTime b) =>
 bool isSameYear(DateTime a, DateTime b) => a.year == b.year;
 
 Map<String, double> sumIncomeExpense(
-    List<({double baseAmount, bool isExpense})> txns) {
+    List<({double baseAmount, bool isExpense})> txns,) {
   double income = 0;
   double expense = 0;
   for (final txn in txns) {
@@ -36,7 +36,7 @@ void main() {
   group('isSameDay', () {
     test('same day returns true', () {
       expect(isSameDay(DateTime(2024, 3, 15, 10), DateTime(2024, 3, 15, 22)),
-          true);
+          true,);
     });
 
     test('different day returns false', () {

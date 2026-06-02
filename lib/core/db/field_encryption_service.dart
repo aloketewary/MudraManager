@@ -120,11 +120,24 @@ class FieldEncryptionService {
   /// encrypted string. Returns decrypted value or empty string on failure.
   static String safeDisplay(String? value, [String fallback = '']) {
     if (value == null || value.isEmpty) return fallback;
-    if (!value.startsWith(_prefix)) return value;
-    if (!isReady) return fallback;
-    final decrypted = decrypt(value);
-    // If decrypt returned the raw ciphertext (failure), show fallback
-    return decrypted.startsWith(_prefix) ? fallback : decrypted;
+    // Full-field encrypted
+    if (value.startsWith(_prefix)) {
+      if (!isReady) return fallback;
+      final decrypted = decrypt(value);
+      return decrypted.startsWith(_prefix) ? fallback : decrypted;
+    }
+    // Embedded ENC: token mid-string — strip it out
+    if (value.contains(_prefix)) {
+      if (!isReady) return fallback;
+      return value.replaceAllMapped(
+        RegExp(r'ENC:[A-Za-z0-9+/=]+:[A-Za-z0-9+/=]+'),
+        (m) {
+          final decrypted = decrypt(m.group(0)!);
+          return decrypted.startsWith(_prefix) ? '' : decrypted;
+        },
+      );
+    }
+    return value;
   }
 
   static Future<enc.Key> _getOrCreateKey() async {

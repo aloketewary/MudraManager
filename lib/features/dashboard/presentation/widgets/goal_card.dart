@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
@@ -82,7 +83,7 @@ class GoalCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Savings Goals',
+                        AppLocalizations.of(context)!.title_goals,
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -122,7 +123,7 @@ class GoalCard extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: _buildMetricItem(
-                              '${activeGoals.length} active',
+                              '${activeGoals.length} ${AppLocalizations.of(context)!.section_active.toLowerCase()}',
                               formatCurrency(totalSaved, decimals: 0),
                               LucideIcons.target,
                               color.primary,
@@ -133,7 +134,7 @@ class GoalCard extends ConsumerWidget {
                           SizedBox(width: spacing.radiusMedium),
                           Expanded(
                             child: _buildMetricItem(
-                              'Remaining',
+                              AppLocalizations.of(context)!.budget_remaining,
                               formatCurrency((totalTarget - totalSaved), decimals: 0),
                               LucideIcons.trendingUp,
                               color.tertiary,

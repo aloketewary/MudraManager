@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
@@ -36,7 +37,8 @@ class UpcomingBillsCheck extends SmartCheck {
               : 'in $days days';
 
       final name = bill.description?.isNotEmpty == true
-          ? bill.description!
+          ? FieldEncryptionService.safeDisplay(
+              bill.description, bill.category.value?.name ?? 'Bill',)
           : bill.category.value?.name ?? 'Bill';
 
       await SmartNotificationEmitter.emit(
