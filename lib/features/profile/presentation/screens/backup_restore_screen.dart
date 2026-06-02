@@ -4,6 +4,7 @@ import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:mudra_manager/core/services/google_drive_service.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
@@ -1004,7 +1005,15 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
       final fileContent = await file.readAsString();
       final backupData = jsonDecode(fileContent);
 
-      final key = BackupService.deriveKey(password);
+      final encrypt.Key key;
+      if (backupData['kdf'] == 'pbkdf2' && backupData['salt'] != null) {
+        final salt = base64Decode(backupData['salt'] as String);
+        final (derivedKey, _) = BackupService.deriveKeyWithSalt(password, Uint8List.fromList(salt));
+        key = derivedKey;
+      } else {
+        // ignore: deprecated_member_use_from_same_package
+        key = BackupService.deriveKeyLegacy(password);
+      }
       final iv = encrypt.IV.fromBase64(backupData['iv']);
       final encrypter = encrypt.Encrypter(encrypt.AES(key));
 

@@ -65,6 +65,7 @@ import 'package:mudra_manager/features/trip/presentation/screens/trips_screen.da
 import 'package:mudra_manager/features/upgrade/presentation/screens/upgrade_screen.dart';
 import 'package:mudra_manager/features/import_export/presentation/screens/import_export_screen.dart';
 import 'package:mudra_manager/features/import_export/presentation/screens/import_preview_screen.dart';
+import 'package:mudra_manager/features/dashboard/presentation/screens/widget_analytics_screen.dart';
 import 'package:mudra_manager/features/account/presentation/screens/credit_card_bills_screen.dart';
 import 'package:mudra_manager/plugins/credit_card_reminder_settings.dart';
 import 'package:mudra_manager/shared/screens/notification_page_screen.dart';
@@ -621,6 +622,10 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.importExport,
                 builder: (context, state) => const ImportExportScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.widgetAnalytics,
+                builder: (context, state) => const WidgetAnalyticsScreen(),
               ),
               GoRoute(
                 path: AppRoutes.importPreview,

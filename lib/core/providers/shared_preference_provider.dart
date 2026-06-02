@@ -123,13 +123,39 @@ class SharedPrefsUtil {
     return date != null ? DateTime.tryParse(date) : null;
   }
 
+  /// Keys safe to export in backups.
+  static const _exportAllowlist = {
+    'onboarding_complete',
+    'user_language',
+    'account_display_style',
+    'app_mode',
+    'detection_mode',
+    'high_contrast_mode',
+    'auto_backup_frequency',
+    'daily_reminder_time_key',
+    'streak_reminder_time_key',
+    'streak_reminder_enabled',
+    'sms_import_enabled',
+    'low_balance_threshold',
+    'sms_banner_dismissed',
+    'has_seen_help_guide',
+  };
+
+  /// Keys that must NEVER be overwritten from backup import.
+  static const _importBlocklist = {
+    'sms_import_enabled',
+    'onboarding_complete',
+    'onboarding_completed_at',
+  };
+
   Future<Map<String, dynamic>> exportAll() async {
-    final keys = _prefs.getKeys();
     final data = <String, dynamic>{};
 
-    for (var key in keys) {
+    for (var key in _exportAllowlist) {
       final value = _prefs.get(key);
-      data[key] = value;
+      if (value != null) {
+        data[key] = value;
+      }
     }
 
     return data;
@@ -139,6 +165,11 @@ class SharedPrefsUtil {
     for (var entry in data.entries) {
       final key = entry.key;
       final value = entry.value;
+
+      // Skip security-critical keys
+      if (_importBlocklist.contains(key)) continue;
+      // Only import known safe keys
+      if (!_exportAllowlist.contains(key)) continue;
 
       if (value is int) {
         await _prefs.setInt(key, value);

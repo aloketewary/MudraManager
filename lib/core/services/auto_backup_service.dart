@@ -14,7 +14,11 @@ class AutoBackupService {
   static const int maxBackupAgeDays = 7;
   static const String _autoBackupPrefix = 'mudra_auto_';
   static final _log = AppLog(getLogger(), 'AutoBackup');
-  static const _storage = FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage(
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.first_unlock_this_device,
+    ),
+  );
 
   static Future<void> setBackupPassword(String password) async {
     await _storage.write(key: _backupPasswordKey, value: password);

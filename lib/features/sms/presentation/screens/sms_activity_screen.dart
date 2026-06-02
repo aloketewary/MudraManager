@@ -13,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -805,8 +806,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
         .isActiveEqualTo(true)
         .findAll();
     final match = accounts.where((a) {
-      final dbAccNo = a.accountNumber?.trim();
-      return dbAccNo != null && dbAccNo.endsWith(acc.trim());
+      return a.matchesSuffix(acc.trim());
     }).firstOrNull;
     if (mounted) setState(() => _hasMatchingAccount = match != null);
   }
@@ -1212,21 +1212,18 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
 
                               final thisAcc = accounts
                                   .where(
-                                    (a) =>
-                                        a.accountNumber != null &&
-                                        a.accountNumber!.endsWith(
-                                          widget.activity.account ?? '',
-                                        ),
+                                    (a) => a.matchesSuffix(
+                                      widget.activity.account ?? '',
+                                    ),
                                   )
                                   .firstOrNull;
                               final pairAcc = pair == null
                                   ? null
                                   : accounts
                                       .where(
-                                        (a) =>
-                                            a.accountNumber != null &&
-                                            a.accountNumber!
-                                                .endsWith(pair.account ?? ''),
+                                        (a) => a.matchesSuffix(
+                                          pair.account ?? '',
+                                        ),
                                       )
                                       .firstOrNull;
 

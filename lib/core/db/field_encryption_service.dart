@@ -36,10 +36,35 @@ class FieldEncryptionService {
   static bool get isReady => _cachedKey != null;
 
   /// Encrypt a plaintext string. Returns prefixed ciphertext.
-  /// Returns original value if encryption is unavailable.
+  /// Throws [StateError] if encryption service is not ready.
+  /// Returns original if already encrypted.
   static String encrypt(String plaintext) {
-    if (!isReady || plaintext.isEmpty) return plaintext;
+    if (plaintext.isEmpty) return plaintext;
     if (plaintext.startsWith(_prefix)) return plaintext; // already encrypted
+    if (!isReady) {
+      _log.e('Encryption key not available — data will NOT be stored');
+      throw StateError('FieldEncryptionService not initialized');
+    }
+    try {
+      final iv = enc.IV.fromSecureRandom(16);
+      final encrypter = enc.Encrypter(enc.AES(_cachedKey!));
+      final encrypted = encrypter.encrypt(plaintext, iv: iv);
+      return '$_prefix${iv.base64}:${encrypted.base64}';
+    } catch (e) {
+      _log.e('Encrypt failed', e);
+      throw StateError('Encryption failed: $e');
+    }
+  }
+
+  /// Encrypt with graceful fallback — only use for non-critical fields
+  /// where losing data would be worse than storing unencrypted.
+  static String encryptOrFallback(String plaintext) {
+    if (plaintext.isEmpty) return plaintext;
+    if (plaintext.startsWith(_prefix)) return plaintext;
+    if (!isReady) {
+      _log.w('Encryption unavailable, storing plaintext');
+      return plaintext;
+    }
     try {
       final iv = enc.IV.fromSecureRandom(16);
       final encrypter = enc.Encrypter(enc.AES(_cachedKey!));
@@ -68,10 +93,16 @@ class FieldEncryptionService {
     }
   }
 
-  /// Encrypt a nullable string.
+  /// Encrypt a nullable string. Throws if service not ready.
   static String? encryptNullable(String? value) {
     if (value == null) return null;
     return encrypt(value);
+  }
+
+  /// Encrypt nullable with graceful fallback.
+  static String? encryptNullableOrFallback(String? value) {
+    if (value == null) return null;
+    return encryptOrFallback(value);
   }
 
   /// Decrypt a nullable string.

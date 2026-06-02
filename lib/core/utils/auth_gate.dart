@@ -182,8 +182,17 @@ class _AuthGateState extends ConsumerState<AuthGate>
       },
       child: Stack(
         children: [
-          // Always keep child mounted to preserve navigation state
-          widget.child,
+          // Hide from accessibility when locked
+          ExcludeSemantics(
+            excluding: !unlocked,
+            child: Visibility(
+              visible: unlocked,
+              maintainState: true,
+              maintainAnimation: true,
+              maintainSize: true,
+              child: widget.child,
+            ),
+          ),
           // Show lock screen on top when not unlocked
           if (!unlocked)
             Positioned.fill(

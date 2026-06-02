@@ -272,6 +272,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 if (kDebugMode) ...[
                   _buildSectionHeader('🛠 Debug', color, textTheme),
                   const SizedBox(height: 10),
+                  _buildGroupedCard(
+                    color,
+                    textTheme,
+                    spacing,
+                    items: [
+                      _SettingItem(
+                        LucideIcons.chartBar,
+                        'Widget Analytics',
+                        'Impressions, clicks, CTR',
+                        () => context.push(AppRoutes.widgetAnalytics),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   _buildDebugEntitlementCard(color, textTheme, spacing),
                   const SizedBox(height: 24),
                 ],

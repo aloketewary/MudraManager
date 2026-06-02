@@ -16,6 +16,7 @@ import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_registry.dart';
 import 'package:mudra_manager/core/db/models/dashboard_widget_preference.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
+import 'package:mudra_manager/features/dashboard/data/widget_analytics_provider.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 
 class DashboardCustomizeScreen extends ConsumerStatefulWidget {
@@ -63,6 +64,9 @@ class _DashboardCustomizeScreenState
     HapticFeedback.mediumImpact();
     final service = ref.read(widgetPreferencesServiceProvider);
     await service.toggleVisibility(entry.plugin.id);
+    if (entry.visible) {
+      ref.read(widgetAnalyticsServiceProvider).recordHide(entry.plugin.id);
+    }
     setState(() => entry.visible = !entry.visible);
   }
 

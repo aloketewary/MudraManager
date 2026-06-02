@@ -7,6 +7,8 @@ import 'package:mudra_manager/core/db/models/dashboard_widget_preference.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/investment_holding.dart';
 import 'package:mudra_manager/core/db/models/balance_snapshot.dart';
+import 'package:mudra_manager/features/memory/data/financial_snapshot.dart';
+import 'package:mudra_manager/features/memory/data/insight_exposure.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
@@ -14,6 +16,7 @@ import 'package:mudra_manager/core/db/models/category_rule.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/pending_notifications.dart';
+import 'package:mudra_manager/core/db/models/widget_metrics.dart';
 import 'package:mudra_manager/core/db/models/reconciliation_status.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
@@ -83,9 +86,12 @@ class IsarService {
           ReconciliationStatusSchema,
           InvestmentHoldingSchema,
           DashboardWidgetPreferenceSchema,
+          WidgetMetricsSchema,
           ExchangeRateSchema,
           ArchivedTransactionSchema,
           PendingNotificationsSchema,
+          FinancialSnapshotSchema,
+          InsightExposureSchema,
         ],
         directory: dir.path,
       ).timeout(const Duration(seconds: 5));

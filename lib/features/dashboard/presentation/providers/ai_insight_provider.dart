@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/features/dashboard/data/spending_drift_detector.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 
 class AiInsight {
@@ -375,6 +376,12 @@ List<AiInsight> _generateInsights(DashboardData data) {
       }
     }
   }
+
+  // ────────────────────────────────────────────
+  // SPENDING DRIFT — category trend detection
+  // ────────────────────────────────────────────
+
+  candidates.addAll(detectSpendingDrift(data.transactions));
 
   // ────────────────────────────────────────────
   // ONBOARDING — only when nothing else matters

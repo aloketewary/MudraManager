@@ -11333,6 +11333,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bill Day'**
   String get plugins_billDayLabel;
+
+  /// No description provided for @streak_savedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak Saved!'**
+  String get streak_savedTitle;
+
+  /// No description provided for @streak_savedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You kept your {days}-day streak alive! 🔥'**
+  String streak_savedBody(int days);
+
+  /// No description provided for @streak_keepGoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s Keep Going'**
+  String get streak_keepGoing;
 }
 
 class _AppLocalizationsDelegate

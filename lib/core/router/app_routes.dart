@@ -92,4 +92,7 @@ abstract class AppRoutes {
   // Import/Export
   static const importExport = '/import-export';
   static const importPreview = '/import-preview';
+
+  // Developer
+  static const widgetAnalytics = '/widget-analytics';
 }

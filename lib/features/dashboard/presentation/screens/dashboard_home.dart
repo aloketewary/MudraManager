@@ -16,6 +16,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/background_task_manager.dart';
 import 'package:mudra_manager/core/services/card_interaction_tracker.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/features/dashboard/data/widget_analytics_provider.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/reconciliation_service.dart';
@@ -150,10 +151,14 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
 
       if (widget.id == 'hero_moment') return child;
 
+      // Record impression
+      ref.read(widgetAnalyticsServiceProvider).recordImpression(widget.id);
+
       return GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
           CardInteractionTracker.recordTap(widget.id);
+          ref.read(widgetAnalyticsServiceProvider).recordClick(widget.id);
           widget.onTap(context, ref);
         },
         child: AbsorbPointer(

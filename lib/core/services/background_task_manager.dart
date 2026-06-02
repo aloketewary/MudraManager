@@ -9,6 +9,7 @@ import 'package:mudra_manager/features/budget/data/bill_service.dart';
 import 'package:mudra_manager/features/dashboard/data/summary_scheduler.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
+import 'package:mudra_manager/features/memory/data/snapshot_generator.dart';
 import 'package:mudra_manager/features/sms/data/sms_cleanup_service.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,7 +34,9 @@ class BackgroundTaskManager {
   /// Call after UI is visible — only notifications and cleanup, no heavy processing.
   static Future<void> runDeferredTasks() async {
     try {
+      final isar = await IsarService().getInstance();
       await BalanceHistoryService(IsarService()).recordDailySnapshots();
+      await SnapshotGenerator(isar).backfillIfNeeded();
       await SummaryScheduler.checkAndShowSummaries();
       await SmartNotificationService.instance.runSmartChecks();
       await SmsHashCleanupService.cleanupOldHashes();
@@ -113,6 +116,7 @@ class BackgroundTaskManager {
       await SmartNotificationService.instance.runSmartChecks();
       await SmsHashCleanupService.cleanupOldHashes();
       await CategoryRuleService(isar).cleanupOldRules();
+      await SnapshotGenerator(isar).refreshCurrentMonth();
 
       await _recordSuccess();
       _log.i('All background tasks completed');

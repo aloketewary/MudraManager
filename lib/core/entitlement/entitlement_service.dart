@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/constants/env.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
@@ -38,6 +39,7 @@ class EntitlementService {
   // ── Query ──────────────────────────────────────────────
 
   Future<bool> isPro() async {
+    await _ensureDeviceSalt();
     final isar = await _isarService.getInstance();
     final record = await _getConfig(isar, _Keys.isPro);
     if (record?.boolValue != true) return false;
@@ -124,6 +126,7 @@ class EntitlementService {
   }) async {
     final isar = await _isarService.getInstance();
     final now = DateTime.now();
+    await _ensureDeviceSalt();
     final sig = _sign('$purchaseToken:${now.millisecondsSinceEpoch}');
 
     await isar.writeTxn(() async {
@@ -187,8 +190,28 @@ class EntitlementService {
 
   // ── Helpers ────────────────────────────────────────────
 
+  static const _storage = FlutterSecureStorage();
+  static const _deviceSaltKey = 'entitlement_device_salt';
+  String? _deviceSalt;
+
+  /// Initialize device-specific signing salt.
+  Future<void> _ensureDeviceSalt() async {
+    if (_deviceSalt != null) return;
+    _deviceSalt = await _storage.read(key: _deviceSaltKey);
+    if (_deviceSalt == null) {
+      _deviceSalt = sha256
+          .convert(utf8.encode(DateTime.now().toIso8601String()))
+          .toString()
+          .substring(0, 16);
+      await _storage.write(key: _deviceSaltKey, value: _deviceSalt);
+    }
+  }
+
+  /// Sign with both the static key AND a per-device salt.
+  /// Attacker must have both APK + physical device access to forge.
   String _sign(String payload) {
-    final key = utf8.encode(Env.encryptKey);
+    final deviceComponent = _deviceSalt ?? '';
+    final key = utf8.encode('${Env.encryptKey}:$deviceComponent');
     final bytes = utf8.encode(payload);
     return Hmac(sha256, key).convert(bytes).toString().substring(0, 32);
   }

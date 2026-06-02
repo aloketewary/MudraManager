@@ -23,6 +23,11 @@ class Account {
 
   String? accountNumber;
 
+  /// SHA-256 hash of last 4 digits of accountNumber.
+  /// Used for SMS matching without storing plaintext account numbers.
+  @Index()
+  String? accountSuffixHash;
+
   /// Currency code for this account (e.g. "USD"). Null = base currency.
   String? currencyCode;
 

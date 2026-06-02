@@ -120,9 +120,7 @@ class SmsActivityService {
             : rawManualDuplicates.where((txn) {
                 final txnAccount = txn.account.value;
                 if (txnAccount == null) return false;
-                final acNum = txnAccount.accountNumber ?? '';
-                if (acNum.isEmpty) return false;
-                return acNum.endsWith(activity.account!);
+                return txnAccount.matchesSuffix(activity.account!);
               }).toList();
 
     // Also check if any existing transaction was already created from this SMS

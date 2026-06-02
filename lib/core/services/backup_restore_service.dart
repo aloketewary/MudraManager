@@ -1,6 +1,7 @@
 import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
@@ -76,16 +77,24 @@ class BackupService {
         'timestamp': DateTime.now().toIso8601String(),
       });
 
-      final key = deriveKey(password);
+      final (key, salt) = deriveKeyWithSalt(password);
       final iv = encrypt.IV.fromSecureRandom(16);
       final encrypter = encrypt.Encrypter(encrypt.AES(key));
       final encrypted = encrypter.encrypt(content, iv: iv);
 
-      final hash = sha256.convert(utf8.encode(content)).toString();
+      // Encrypt-then-MAC: HMAC over ciphertext to detect tampering
+      final macKey = Hmac(sha256, key.bytes).convert(utf8.encode('mac')).bytes;
+      final hmacPayload = '${iv.base64}:${encrypted.base64}';
+      final mac = Hmac(sha256, macKey).convert(utf8.encode(hmacPayload)).toString();
+
       final finalData = jsonEncode({
         'data': encrypted.base64,
         'iv': iv.base64,
-        'hash': hash,
+        'salt': base64Encode(salt),
+        'mac': mac,
+        'kdf': 'pbkdf2',
+        'iterations': 100000,
+        'version': 2,
       });
 
       final dateTime = DateTime.now();
@@ -142,20 +151,51 @@ class BackupService {
       }
 
       final selectedFile = File(result.files.first.path!);
+
+      // Reject excessively large files to prevent OOM
+      final fileSize = selectedFile.lengthSync();
+      if (fileSize > 100 * 1024 * 1024) {
+        SnackbarService.error('Backup file too large (max 100MB)');
+        return null;
+      }
+
       final fileContent = await selectedFile.readAsString();
       final backupData = jsonDecode(fileContent);
 
-      final key = deriveKey(password);
+      // Support both new PBKDF2 and legacy SHA-256 backups
+      final encrypt.Key key;
+      if (backupData['kdf'] == 'pbkdf2' && backupData['salt'] != null) {
+        final salt = base64Decode(backupData['salt'] as String);
+        final (derivedKey, _) = deriveKeyWithSalt(password, Uint8List.fromList(salt));
+        key = derivedKey;
+      } else {
+        // ignore: deprecated_member_use_from_same_package
+        key = deriveKeyLegacy(password);
+      }
       final iv = encrypt.IV.fromBase64(backupData['iv']);
-      final encrypter = encrypt.Encrypter(encrypt.AES(key));
 
+      // Verify MAC before decryption (Encrypt-then-MAC)
+      if (backupData['version'] == 2 && backupData['mac'] != null) {
+        final macKey = Hmac(sha256, key.bytes).convert(utf8.encode('mac')).bytes;
+        final hmacPayload = '${backupData['iv']}:${backupData['data']}';
+        final expectedMac = Hmac(sha256, macKey).convert(utf8.encode(hmacPayload)).toString();
+        if (expectedMac != backupData['mac']) {
+          SnackbarService.error(BuddyMessages.corruptBackup);
+          return null;
+        }
+      }
+
+      final encrypter = encrypt.Encrypter(encrypt.AES(key));
       final decrypted = encrypter.decrypt64(backupData['data'], iv: iv);
       final data = jsonDecode(decrypted);
 
-      final hash = sha256.convert(utf8.encode(decrypted)).toString();
-      if (hash != backupData['hash']) {
-        SnackbarService.error(BuddyMessages.corruptBackup);
-        return null;
+      // Legacy plaintext hash check for v1 backups
+      if (backupData['hash'] != null) {
+        final hash = sha256.convert(utf8.encode(decrypted)).toString();
+        if (hash != backupData['hash']) {
+          SnackbarService.error(BuddyMessages.corruptBackup);
+          return null;
+        }
       }
 
       if (data['db'] != null) {
@@ -176,7 +216,57 @@ class BackupService {
     }
   }
 
-  static encrypt.Key deriveKey(String password) {
+  /// Derive a 256-bit key using PBKDF2-HMAC-SHA256.
+  /// [salt] must be 16 bytes. If null, generates a random salt.
+  /// Returns (key, salt) tuple for storage alongside ciphertext.
+  static (encrypt.Key, Uint8List) deriveKeyWithSalt(
+    String password, [
+    Uint8List? salt,
+  ]) {
+    // Use secure random salt when generating fresh
+    final secureSalt = salt ?? _generateSecureSalt();
+    final key = _pbkdf2(password, secureSalt);
+    return (encrypt.Key(Uint8List.fromList(key)), secureSalt);
+  }
+
+  static Uint8List _generateSecureSalt() {
+    final random = List<int>.generate(16, (_) => Random.secure().nextInt(256));
+    return Uint8List.fromList(random);
+  }
+
+  static List<int> _pbkdf2(String password, Uint8List salt) {
+    const iterations = 100000;
+    const keyLength = 32;
+    final hmacSha256 = Hmac(sha256, utf8.encode(password));
+
+    final blocks = <int>[];
+    for (var blockNum = 1; blocks.length < keyLength; blockNum++) {
+      final blockBytes = [...salt, ..._int32BigEndian(blockNum)];
+      var u = hmacSha256.convert(blockBytes).bytes;
+      var result = List<int>.from(u);
+      for (var i = 1; i < iterations; i++) {
+        u = hmacSha256.convert(u).bytes;
+        for (var j = 0; j < result.length; j++) {
+          result[j] ^= u[j];
+        }
+      }
+      blocks.addAll(result);
+    }
+    return blocks.sublist(0, keyLength);
+  }
+
+  static List<int> _int32BigEndian(int value) {
+    return [
+      (value >> 24) & 0xff,
+      (value >> 16) & 0xff,
+      (value >> 8) & 0xff,
+      value & 0xff,
+    ];
+  }
+
+  /// Legacy key derivation — only used for restoring old backups.
+  @Deprecated('Use deriveKeyWithSalt for new backups')
+  static encrypt.Key deriveKeyLegacy(String password) {
     final bytes = utf8.encode(password);
     final hash = sha256.convert(bytes);
     return encrypt.Key(Uint8List.fromList(hash.bytes));

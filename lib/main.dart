@@ -16,6 +16,9 @@ import 'package:home_widget/home_widget.dart';
 import 'package:mudra_manager/core/db/category_seeder.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/db/encryption_migration.dart';
+import 'package:mudra_manager/core/db/account_encryption_migration.dart';
+import 'package:mudra_manager/core/db/account_suffix_hash_migration.dart';
+import 'package:mudra_manager/core/db/pin_migration.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/l10n_provider.dart';
@@ -162,6 +165,9 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
       await safeExecute(() => _migrateTransactionFields(isar));
       await safeExecute(() => _migrateCategoryAndParticipantFields(isar));
       await safeExecute(() => EncryptionMigration.run(isar));
+      await safeExecute(() => AccountEncryptionMigration.run(isar));
+      await safeExecute(() => AccountSuffixHashMigration.run(isar));
+      await safeExecute(() => PinMigration.run());
 
       // Run recurring/bill/notification tasks
       await BackgroundTaskManager.runDeferredTasks();

@@ -144,7 +144,9 @@ class GoogleDriveService {
       final tempDir = await Directory.systemTemp.createTemp('mudra_restore_');
       final tempFile = File('${tempDir.path}/restore.mudra');
       final sink = tempFile.openWrite();
-      media.stream.forEach(sink.add);
+      await for (final chunk in media.stream) {
+        sink.add(chunk);
+      }
       await sink.close();
 
       _log.i('Downloaded: ${tempFile.path}');

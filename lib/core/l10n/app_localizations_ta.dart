@@ -6247,4 +6247,15 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get plugins_billDayLabel => 'Bill Day';
+
+  @override
+  String get streak_savedTitle => 'Streak Saved!';
+
+  @override
+  String streak_savedBody(int days) {
+    return 'You kept your $days-day streak alive! 🔥';
+  }
+
+  @override
+  String get streak_keepGoing => 'Let\'s Keep Going';
 }

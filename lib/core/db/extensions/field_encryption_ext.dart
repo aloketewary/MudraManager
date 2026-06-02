@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/archived_transaction.dart';
@@ -22,7 +24,9 @@ extension SmsActivityEncryption on SmsActivity {
   void encryptFields() {
     if (!FieldEncryptionService.isReady) return;
     body = FieldEncryptionService.encrypt(body);
+    sender = FieldEncryptionService.encrypt(sender);
     merchant = FieldEncryptionService.encryptNullable(merchant);
+    account = FieldEncryptionService.encryptNullable(account);
     toAccount = FieldEncryptionService.encryptNullable(toAccount);
     transactionRef = FieldEncryptionService.encryptNullable(transactionRef);
     reviewNotes = FieldEncryptionService.encryptNullable(reviewNotes);
@@ -31,7 +35,9 @@ extension SmsActivityEncryption on SmsActivity {
   void decryptFields() {
     if (!FieldEncryptionService.isReady) return;
     body = FieldEncryptionService.decrypt(body);
+    sender = FieldEncryptionService.decrypt(sender);
     merchant = FieldEncryptionService.decryptNullable(merchant);
+    account = FieldEncryptionService.decryptNullable(account);
     toAccount = FieldEncryptionService.decryptNullable(toAccount);
     transactionRef = FieldEncryptionService.decryptNullable(transactionRef);
     reviewNotes = FieldEncryptionService.decryptNullable(reviewNotes);
@@ -169,11 +175,41 @@ extension RecurringTransactionEncryption on RecurringTransaction {
 }
 
 extension AccountEncryption on Account {
-  // Account.accountNumber is NOT encrypted because it's used for
-  // real-time SMS last-4-digit matching in the auto-approval pipeline.
-  // Encrypting it would break: acNum.endsWith(activity.account!)
-  void encryptFields() {}
-  void decryptFields() {}
+  // Account number is encrypted at rest. A separate `accountSuffixHash`
+  // field (full SHA-256 of last 4 digits) is used for SMS matching.
+  void encryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    if (accountNumber == null || accountNumber!.isEmpty) return;
+    // If already encrypted, skip to prevent double-encryption corruption
+    if (FieldEncryptionService.isEncrypted(accountNumber)) return;
+
+    final plainNum = accountNumber!;
+    final last4 = plainNum.length >= 4
+        ? plainNum.substring(plainNum.length - 4)
+        : plainNum;
+    // Use full SHA-256 hash to prevent birthday-attack collisions
+    accountSuffixHash = sha256.convert(utf8.encode(last4)).toString();
+    accountNumber = FieldEncryptionService.encryptOrFallback(plainNum);
+  }
+
+  void decryptFields() {
+    if (!FieldEncryptionService.isReady) return;
+    if (accountNumber != null) {
+      accountNumber = FieldEncryptionService.decrypt(accountNumber!);
+    }
+  }
+
+  /// Check if this account matches an SMS last-4 suffix.
+  bool matchesSuffix(String last4FromSms) {
+    if (last4FromSms.isEmpty) return false;
+    if (accountSuffixHash == null) return false;
+    final hash = sha256.convert(utf8.encode(last4FromSms)).toString();
+    // Support both legacy 16-char and new full-length hashes
+    if (accountSuffixHash!.length <= 16) {
+      return hash.substring(0, 16) == accountSuffixHash;
+    }
+    return hash == accountSuffixHash;
+  }
 }
 
 extension NotificationRecordEncryption on NotificationRecord {
@@ -503,5 +539,26 @@ extension CategoryRuleListDecryption on Future<List<CategoryRule>> {
       item.decryptFields();
     }
     return list;
+  }
+}
+
+extension AccountListDecryption on Future<List<Account>> {
+  Future<List<Account>> withDecryption() async {
+    final list = await this;
+    for (final item in list) {
+      item.decryptFields();
+    }
+    return list;
+  }
+}
+
+extension AccountStreamDecryption on Stream<List<Account>> {
+  Stream<List<Account>> withDecryption() {
+    return map((list) {
+      for (final item in list) {
+        item.decryptFields();
+      }
+      return list;
+    });
   }
 }

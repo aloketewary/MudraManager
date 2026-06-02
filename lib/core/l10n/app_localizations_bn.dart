@@ -6226,4 +6226,15 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get plugins_billDayLabel => 'Bill Day';
+
+  @override
+  String get streak_savedTitle => 'Streak রক্ষা হল!';
+
+  @override
+  String streak_savedBody(int days) {
+    return 'আপনি আপনার $days দিনের streak বাঁচিয়ে রাখলেন! 🔥';
+  }
+
+  @override
+  String get streak_keepGoing => 'চলতে থাকুন!';
 }

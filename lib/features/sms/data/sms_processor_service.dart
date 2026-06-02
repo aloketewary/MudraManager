@@ -70,7 +70,7 @@ class SmsProcessorService {
       );
 
       PluginService().emitSms(sms.sender, sms.body);
-      _log.i('[$corrId] Processed sender: ${sms.sender}, amount: $amount');
+      _log.i('[$corrId] Processed sender: ${sms.sender.length > 4 ? '${sms.sender.substring(0, 4)}***' : sms.sender}, hasAmount: ${amount != null}');
       return activity;
     } catch (e) {
       _log.e('[$corrId] Failed to process SMS transaction', e);
@@ -167,7 +167,7 @@ class SmsProcessorService {
       );
 
       PluginService().emitSms(sender, '');
-      _log.i('[$corrId] Plugin-parsed, sender: $sender, amount: ${parsedSms.amount}');
+      _log.i('[$corrId] Plugin-parsed, sender: ${sender.length > 4 ? '${sender.substring(0, 4)}***' : sender}, amount: ${parsedSms.amount != null ? '***' : 'null'}');
       return activity;
     } catch (e) {
       _log.e('[$corrId] Failed to process plugin-parsed SMS', e);
