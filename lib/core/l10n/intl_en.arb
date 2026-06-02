@@ -3505,5 +3505,15 @@
   "plugins_editCreditCard": "Edit Credit Card",
   "plugins_cardName": "Card Name",
   "plugins_cardNameHint": "e.g., HDFC Regalia",
-  "plugins_billDayLabel": "Bill Day"
+  "plugins_billDayLabel": "Bill Day",
+  "streak_savedTitle": "Streak Saved!",
+  "streak_savedBody": "You kept your {days}-day streak alive! 🔥",
+  "@streak_savedBody": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "streak_keepGoing": "Let's Keep Going"
 }

@@ -1,6 +1,7 @@
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -65,7 +66,7 @@ class _StreakSavedCelebrationSheetState
               ),
               SizedBox(height: spacing.sectionGap),
               Container(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(spacing.sectionGap),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -85,7 +86,7 @@ class _StreakSavedCelebrationSheetState
               ),
               SizedBox(height: spacing.sectionGap),
               Text(
-                'Streak Saved!',
+                AppLocalizations.of(context)!.streak_savedTitle,
                 style: textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w900,
                   color: color.onSurface,
@@ -95,7 +96,7 @@ class _StreakSavedCelebrationSheetState
               ),
               SizedBox(height: spacing.elementGap),
               Text(
-                'You kept your ${widget.streakCount}-day streak alive. Industry standard tracking at its best! 🔥',
+                AppLocalizations.of(context)!.streak_savedBody(widget.streakCount),
                 style: textTheme.bodyLarge?.copyWith(
                   color: color.onSurfaceVariant,
                   height: 1.4,
@@ -116,9 +117,9 @@ class _StreakSavedCelebrationSheetState
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Let\'s Keep Going',
-                    style: TextStyle(
+                  child: Text(
+                    AppLocalizations.of(context)!.streak_keepGoing,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                       letterSpacing: 0.2,
