@@ -53,6 +53,7 @@ class SmartNotificationService {
       ..type = type
       ..priority = priority
       ..category = category
+      ..source = NotificationSource.smart
       ..primaryAction = primaryAction
       ..secondaryAction = secondaryAction
       ..actionData = actionData

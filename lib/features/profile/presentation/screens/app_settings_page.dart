@@ -10,6 +10,8 @@ import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/guest_mode_toggle.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class AppSettingsPage extends ConsumerStatefulWidget {
   const AppSettingsPage({super.key});
@@ -35,14 +37,13 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
     final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: AdaptiveText(
-          ctxt.app_settings_appbar_title,
-          style: textTheme.titleLarge,
-          maxLines: 1,
-        ),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.app_settings_appbar_title,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

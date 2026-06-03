@@ -14,6 +14,8 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 final investmentPortfolioServiceProvider = Provider<InvestmentPortfolioService>((ref) {
   return InvestmentPortfolioService(ref.watch(isarServiceProvider));
@@ -58,9 +60,19 @@ class _InvestmentPortfolioScreenState
     final textTheme = Theme.of(context).textTheme;
     final isGuestMode = ref.watch(guestModeProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('${widget.account.name} - Portfolio'),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: '${widget.account.name} - Portfolio',
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        fab: ScreenAction(
+          id: 'add_holding',
+          label: 'Add',
+          icon: LucideIcons.plus,
+          onTap: _showAddHoldingBottomSheet,
+        ),
       ),
       body: FutureBuilder<Map<String, double>>(
         future: _metricsFuture,
@@ -253,10 +265,6 @@ class _InvestmentPortfolioScreenState
             ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddHoldingBottomSheet,
-        child: const Icon(LucideIcons.plus),
       ),
     );
   }

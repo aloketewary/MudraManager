@@ -1,6 +1,5 @@
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/accounts_widget_plugin.dart';
-import 'package:mudra_manager/features/dashboard/plugin/ai_insight_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/budget_overview_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/cash_flow_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/daily_briefing_widget_plugin.dart';
@@ -22,22 +21,21 @@ import 'package:mudra_manager/features/dashboard/plugin/recurring_expenses_widge
 /// 8. Recent Transactions (7) - Latest activity
 class DashboardWidgetRegistry {
   static final List<DashboardWidgetPlugin> _widgets = [
-    // Unified Briefing — the primary experience (Briefing OR Hero, one slot)
+    // Unified Briefing — the primary experience
     DailyBriefingWidgetPlugin(),
 
-    // Essential widgets (always visible by default)
-    AiInsightWidgetPlugin(), // Order 0 - Smart insights at top
-    AccountsWidgetPlugin(), // Order 1 - Account balances
-    QuickActionsWidgetPlugin(), // Order 2 - Quick access buttons
-    CashFlowWidgetPlugin(), // Order 3 - Income/Expense overview
+    // Essential widgets
+    AccountsWidgetPlugin(),
+    QuickActionsWidgetPlugin(),
+    CashFlowWidgetPlugin(),
 
     // Finance tracking widgets
-    BudgetOverviewWidgetPlugin(), // Order 4 - Budget status
-    GoalsWidgetPlugin(), // Order 5 - Savings goals
-    RecurringExpensesWidgetPlugin(), // Order 6 - Bill reminders
+    BudgetOverviewWidgetPlugin(),
+    GoalsWidgetPlugin(),
+    RecurringExpensesWidgetPlugin(),
 
     // Activity widgets
-    RecentTransactionsWidgetPlugin(), // Order 7 - Latest transactions
+    RecentTransactionsWidgetPlugin(),
   ];
 
   /// Get all registered widgets

@@ -13,6 +13,8 @@ import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class EditUserProfileScreen extends ConsumerStatefulWidget {
   const EditUserProfileScreen({super.key});
@@ -55,12 +57,13 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
     final spacing = ref.watch(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(ctxt.profile_editUserProfileAppTitle,
-            style: textTheme.titleLarge,),
-        elevation: 0,
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.profile_editUserProfileAppTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: profileAsync.when(
         data: (profile) {
           if (!_didInit) _loadProfile(profile);

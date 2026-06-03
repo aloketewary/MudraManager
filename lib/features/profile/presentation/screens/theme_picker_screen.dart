@@ -11,6 +11,8 @@ import 'package:mudra_manager/core/theme/theme_preview_screen.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/shared/widgets/responsive_helper.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class ThemePickerScreen extends ConsumerStatefulWidget {
   const ThemePickerScreen({super.key});
@@ -47,8 +49,20 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
     final freeThemes = AppColorTheme.values.where((t) => !t.isPro).toList();
     final proThemes = AppColorTheme.values.where((t) => t.isPro).toList();
 
-    return Scaffold(
-      appBar: AppBar(title: Text(ctxt.theme_chooseThemeTitle)),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.theme_chooseThemeTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        fab: ScreenAction(
+          id: 'apply_theme',
+          label: ctxt.theme_applyThemeLabel,
+          icon: LucideIcons.circleCheck,
+          onTap: _applyTheme,
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -79,11 +93,6 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
           ),
           const SizedBox(height: 80), // FAB clearance
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _applyTheme,
-        icon: const Icon(LucideIcons.circleCheck),
-        label: Text(ctxt.theme_applyThemeLabel),
       ),
     );
   }

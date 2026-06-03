@@ -8,7 +8,6 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_registry.dart';
-import 'package:mudra_manager/features/dashboard/presentation/providers/smart_order_provider.dart';
 
 /// Service for managing widget preferences
 class WidgetPreferencesService {
@@ -154,20 +153,9 @@ final widgetPreferencesProvider =
   }
 });
 
-/// Cached provider for ordered widgets - prevents unnecessary rebuilds
-final smartOrderEnabledProvider = Provider<bool>((ref) {
-  final prefs = SharedPrefsUtil.instance;
-  final hasAccess = ref.watch(hasFullAccessProvider).value ?? false;
-  if (!hasAccess) return false;
-  return prefs.getString('smart_order_enabled') == 'true';
-});
-
 final orderedDashboardWidgetsProvider =
     Provider<List<DashboardWidgetPlugin>>((ref) {
   final preferencesAsync = ref.watch(widgetPreferencesProvider);
-  final smartEnabled = ref.watch(smartOrderEnabledProvider);
-  final smartScores =
-      smartEnabled ? ref.watch(smartWidgetScoresProvider) : <String, double>{};
   final isSimple = ref.watch(isSimpleModeProvider);
 
   return preferencesAsync.when(
@@ -185,22 +173,13 @@ final orderedDashboardWidgetsProvider =
         final prefA = prefMap[a.id];
         final prefB = prefMap[b.id];
 
-        // Pinned widgets ALWAYS first (user intent > AI)
+        // Pinned widgets first
         final pinnedA = prefA?.pinned ?? false;
         final pinnedB = prefB?.pinned ?? false;
         if (pinnedA && !pinnedB) return -1;
         if (!pinnedA && pinnedB) return 1;
 
-        // Smart order: use scores
-        if (smartEnabled && smartScores.isNotEmpty) {
-          final scoreA = smartScores[a.id] ?? 0;
-          final scoreB = smartScores[b.id] ?? 0;
-          // Higher score = higher position
-          final cmp = scoreB.compareTo(scoreA);
-          if (cmp != 0) return cmp;
-        }
-
-        // Fallback: manual order
+        // Manual order
         final orderA = prefA?.order ?? a.defaultOrder;
         final orderB = prefB?.order ?? b.defaultOrder;
         return orderA.compareTo(orderB);

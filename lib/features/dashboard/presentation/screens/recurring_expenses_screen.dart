@@ -8,6 +8,8 @@ import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class RecurringExpensesScreen extends ConsumerWidget {
   const RecurringExpensesScreen({super.key});
@@ -32,10 +34,13 @@ class RecurringExpensesScreen extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fixed Expenses'),
+    return ScreenShell(
+      config: const ScreenShellConfig(
+        title: 'Fixed Expenses',
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: dashboardAsync.when(
         data: (data) {
           final expenses = data.recurringExpenses;

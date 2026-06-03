@@ -62,7 +62,10 @@ class GoalService {
       goal = await isar.goals.get(goalId).withDecryption();
       if (goal != null) {
         goal!.currentAmount += amount;
-        goal!.contributions.add(GoalContribution.create(amount));
+        goal!.contributions = [
+          ...goal!.contributions,
+          GoalContribution.create(amount),
+        ];
         goal!.encryptFields();
         await isar.goals.put(goal!);
       }

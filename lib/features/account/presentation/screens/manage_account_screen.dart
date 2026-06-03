@@ -22,6 +22,9 @@ import 'package:mudra_manager/features/account/presentation/screens/investment_p
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
+import 'package:mudra_manager/shared/widgets/safe_text.dart';
 
 class ManageAccountScreen extends ConsumerStatefulWidget {
   const ManageAccountScreen({super.key});
@@ -47,25 +50,28 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     final balanceMap = balanceMapAsync.value ?? {};
     final baseBalanceMap = baseBalanceMapAsync.value ?? {};
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: Text(
-          ctxt.accounts_manageAccountsTitle,
-          style: textTheme.titleLarge,
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.plus),
-            onPressed: () {
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.accounts_manageAccountsTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'add_account',
+            label: ctxt.accounts_addAccountLabel,
+            icon: LucideIcons.plus,
+            onTap: () {
               HapticFeedback.mediumImpact();
               context.push('/manage-accounts/add');
             },
-            tooltip: ctxt.accounts_addAccountLabel,
           ),
-          IconButton(
-            icon: const Icon(LucideIcons.info),
-            onPressed: () {
+          ScreenAction(
+            id: 'info_accounts',
+            label: 'Info',
+            icon: LucideIcons.info,
+            onTap: () {
               HapticFeedback.mediumImpact();
               _showInfoBottomSheet(context, color, textTheme, spacing);
             },
@@ -433,7 +439,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                                     children: [
                                       if (account.accountNumber != null)
                                         Text(
-                                          '•••• ${account.accountNumber}',
+                                          '•••• ${account.accountNumber}'.safe(),
                                           style: textTheme.labelSmall?.copyWith(
                                             color: color.onSurfaceVariant.withValues(alpha: 0.5),
                                             letterSpacing: 1.2,

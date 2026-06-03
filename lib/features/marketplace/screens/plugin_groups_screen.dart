@@ -20,6 +20,8 @@ import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 final pluginGroupsProvider = FutureProvider((ref) async {
   final service = ref.watch(marketplaceServiceProvider);
@@ -108,8 +110,13 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
     final spacing = ref.watch(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(ctxt.title_plugins)),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.title_plugins,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.empty,
       body: groupedAsync.when(
         loading: () => ListView.builder(
           padding: EdgeInsets.all(spacing.cardHorizontal),

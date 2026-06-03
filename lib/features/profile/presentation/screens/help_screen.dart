@@ -10,6 +10,8 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/features/profile/data/help_item.dart';
 import 'package:mudra_manager/features/profile/data/help_service.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class HelpScreen extends ConsumerStatefulWidget {
   const HelpScreen({super.key});
@@ -71,27 +73,21 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                onChanged: _search,
-                autofocus: true,
-                style: textTheme.bodyLarge,
-                decoration: InputDecoration(
-                  hintText: ctxt.help_searchHint,
-                  hintStyle: textTheme.bodyLarge?.copyWith(
-                    color: color.onSurfaceVariant,
-                  ),
-                  border: InputBorder.none,
-                ),
-              )
-            : Text(ctxt.help_title),
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? LucideIcons.x : LucideIcons.search),
-            onPressed: () {
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: _isSearching ? null : ctxt.help_title,
+        appBarMode: _isSearching ? AppBarMode.search : AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      onSearch: _isSearching ? _search : null,
+      searchHint: ctxt.help_searchHint,
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'toggle_search',
+            label: _isSearching ? 'Close' : 'Search',
+            icon: _isSearching ? LucideIcons.x : LucideIcons.search,
+            onTap: () {
               setState(() {
                 _isSearching = !_isSearching;
                 if (!_isSearching) {

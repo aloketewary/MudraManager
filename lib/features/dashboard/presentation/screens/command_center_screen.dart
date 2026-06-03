@@ -14,6 +14,8 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class CommandCenterScreen extends ConsumerWidget {
   const CommandCenterScreen({super.key});
@@ -24,7 +26,12 @@ class CommandCenterScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
 
-    return Scaffold(
+    return ScreenShell(
+      config: const ScreenShellConfig(
+        appBarMode: AppBarMode.none,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.empty,
       body: accountsAsync.when(
         data: (accounts) {
           final totalBalance = accounts.fold<double>(

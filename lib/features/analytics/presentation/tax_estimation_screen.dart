@@ -10,6 +10,8 @@ import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class TaxEstimationScreen extends ConsumerWidget {
   const TaxEstimationScreen({super.key});
@@ -20,11 +22,13 @@ class TaxEstimationScreen extends ConsumerWidget {
     final ctxt = AppLocalizations.of(context)!;
     final spacing = ref.watch(spacingProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(ctxt.tax_title),
-        elevation: 0,
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.tax_title,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: taxAsync.when(
         data: (tax) => _TaxContent(tax: tax, ctxt: ctxt, spacing: spacing),
         loading: () => const Center(child: DashboardCardSkeleton()),

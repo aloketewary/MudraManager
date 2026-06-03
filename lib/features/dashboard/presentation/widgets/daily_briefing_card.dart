@@ -14,7 +14,6 @@ import 'package:mudra_manager/features/dashboard/data/financial_regime_provider.
 import 'package:mudra_manager/features/dashboard/data/spending_drift_detector.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/ai_insight_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/hero_moment_card.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 
@@ -405,9 +404,8 @@ class DailyBriefingCard extends ConsumerWidget {
 // UNIFIED CARD — One slot. Briefing or Hero. Never both.
 // ─────────────────────────────────────────────────────────────
 
-/// Renders DailyBriefingCard when a signal fires,
-/// HeroMomentCard when the system is silent.
-/// One plugin, one slot, adapts to state.
+/// Renders DailyBriefingCard when a signal fires.
+/// Silence = SizedBox (no motivational fallback).
 class UnifiedBriefingCard extends ConsumerWidget {
   const UnifiedBriefingCard({super.key});
 
@@ -419,7 +417,6 @@ class UnifiedBriefingCard extends ConsumerWidget {
       return const DailyBriefingCard();
     }
 
-    // No signal — show Hero moment (positive reinforcement on quiet days)
-    return const HeroMomentCard();
+    return const SizedBox.shrink();
   }
 }

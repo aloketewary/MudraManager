@@ -1,5 +1,6 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
@@ -20,14 +21,85 @@ import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'dart:math' as math;
+
+// ─────────────────────────────────────────────────────────────
+// OUTER SHELL — declares chrome + actions. No UI logic.
+// ─────────────────────────────────────────────────────────────
 
 class BudgetDetailsScreen extends ConsumerWidget {
   final BudgetWithProgress data;
 
   const BudgetDetailsScreen({super.key, required this.data});
 
-  // ── Emotional headline ──
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ctxt = AppLocalizations.of(context)!;
+    final b = data.budget;
+
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: b.name,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'edit_budget',
+            label: 'Edit',
+            icon: LucideIcons.pencil,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              context.push(AppRoutes.addBudget, extra: {'budget': b});
+            },
+          ),
+        ],
+        overflow: [
+          ScreenAction(
+            id: 'delete_budget',
+            label: ctxt.budget_delete,
+            icon: LucideIcons.trash2,
+            onTap: () async {
+              HapticFeedback.mediumImpact();
+              final confirmed = await DialogUtils.showDeleteConfirmation(
+                context,
+                title: '${ctxt.budget_delete} \'${b.name}\'',
+              );
+              if (confirmed == true && context.mounted) {
+                await _deleteBudget(context, ref);
+              }
+            },
+          ),
+        ],
+      ),
+      body: _BudgetDetailsBody(data: data),
+    );
+  }
+
+  Future<void> _deleteBudget(BuildContext context, WidgetRef ref) async {
+    final router = GoRouter.of(context);
+    try {
+      await ref.read(budgetServiceProvider).deleteBudget(data.budget.id);
+      SnackbarService.success(BuddyMessages.budgetDeleted);
+      router.pop();
+    } catch (e) {
+      if (context.mounted) SnackbarService.error(BuddyMessages.genericError);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// INNER BODY — pure rendering. No Scaffold. No AppBar. No actions.
+// All code below is UNCHANGED from the original build() body.
+// ─────────────────────────────────────────────────────────────
+
+class _BudgetDetailsBody extends ConsumerWidget {
+  final BudgetWithProgress data;
+
+  const _BudgetDetailsBody({required this.data});
+
   String _emotionLine(double pct, bool isOver, AppLocalizations ctxt) {
     if (isOver) return ctxt.budget_emotionExceeded;
     if (pct > 0.8) return ctxt.budget_emotionAlmostThere;
@@ -72,143 +144,80 @@ class BudgetDetailsScreen extends ConsumerWidget {
         return bPct.compareTo(aPct);
       });
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        title: Text(b.name),
-        elevation: 0,
-        actions: [
-          IconButton(
-            tooltip: 'Edit',
-            icon: const Icon(LucideIcons.pencil, size: 20),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              context.push(AppRoutes.addBudget, extra: {'budget': b});
-            },
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(LucideIcons.ellipsisVertical),
-            onSelected: (value) async {
-              if (value == 'delete') {
-                HapticFeedback.mediumImpact();
-                final confirmed = await DialogUtils.showDeleteConfirmation(
-                  context,
-                  title: '${ctxt.budget_delete} \'${b.name}\'',
-                );
-                if (confirmed == true && context.mounted) {
-                  await _deleteBudget(context, ref);
-                }
-              }
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(LucideIcons.trash2, size: 18, color: color.error),
-                    SizedBox(width: spacing.elementGap),
-                    Text(
-                      ctxt.budget_delete,
-                      style: TextStyle(color: color.error),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+    return ListView(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
       ),
-      body: ListView(
-        padding: EdgeInsets.symmetric(
-          horizontal: spacing.cardHorizontal,
-          vertical: spacing.cardVertical,
+      children: [
+        if (data.hasInvalidCategories)
+          _buildWarningBanner(color, textTheme, spacing, ctxt),
+        _buildHero(
+          remaining, total, spent, pct, isOver, accent,
+          color, textTheme, spacing, isDark, ctxt,
         ),
-        children: [
-          // ── INVALID CATEGORIES WARNING ──
-          if (data.hasInvalidCategories)
-            _buildWarningBanner(color, textTheme, spacing, ctxt),
-
-          // ── 1. HERO ──
-          _buildHero(
-            remaining, total, spent, pct, isOver, accent,
-            color, textTheme, spacing, isDark, ctxt,
-          ),
-          SizedBox(height: spacing.sectionGap),
-
-          // ── 2. BUDGET PERIOD ──
-          _buildPeriodCard(b, daysLeft, color, textTheme, spacing, ctxt),
-          SizedBox(height: spacing.elementGap),
-
-          // ── 3. STATS ROW ──
-          Row(
-            children: [
-              Expanded(
-                child: _buildMiniStat(
-                  '${formatCurrency(safePerDay, code: BaseCurrency.code)}/day',
-                  ctxt.budget_safeToSpend,
-                  LucideIcons.shieldCheck,
-                  accent,
-                  color,
-                  textTheme,
-                  spacing,
-                ),
-              ),
-              SizedBox(width: spacing.elementGap),
-              Expanded(
-                child: _buildMiniStat(
-                  ctxt.budget_daysRemaining(daysLeft),
-                  ctxt.budget_remaining,
-                  LucideIcons.calendar,
-                  color.primary,
-                  color,
-                  textTheme,
-                  spacing,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: spacing.elementGap * 1.5),
-
-          // ── 4. SPENDING PACE ──
-          _buildSpendingPace(
-            actualDailySpend, allowedDaily,
-            color, textTheme, spacing, brightness, ctxt,
-          ),
-          SizedBox(height: spacing.elementGap * 1.5),
-
-          // ── 5. SMART INSIGHT ──
-          _buildInsight(
-            pct, isOver, remaining, safePerDay, daysLeft, accent,
-            color, textTheme, spacing, brightness,
-          ),
-          SizedBox(height: spacing.sectionGap),
-
-          // ── 6. CATEGORY BREAKDOWN ──
-          if (sortedCategories.isNotEmpty) ...[
-            Text(
-              ctxt.budget_breakdown,
-              style: textTheme.labelSmall?.copyWith(
-                color: color.onSurfaceVariant.withValues(alpha: 0.5),
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.5,
+        SizedBox(height: spacing.sectionGap),
+        _buildPeriodCard(b, daysLeft, color, textTheme, spacing, ctxt),
+        SizedBox(height: spacing.elementGap),
+        Row(
+          children: [
+            Expanded(
+              child: _buildMiniStat(
+                '${formatCurrency(safePerDay, code: BaseCurrency.code)}/day',
+                ctxt.budget_safeToSpend,
+                LucideIcons.shieldCheck,
+                accent,
+                color,
+                textTheme,
+                spacing,
               ),
             ),
-            SizedBox(height: spacing.elementGap),
-            ...sortedCategories.map(
-              (cat) => _buildCategoryTile(
-                cat, isGuestMode, color, textTheme, spacing, brightness, ctxt,
+            SizedBox(width: spacing.elementGap),
+            Expanded(
+              child: _buildMiniStat(
+                ctxt.budget_daysRemaining(daysLeft),
+                ctxt.budget_remaining,
+                LucideIcons.calendar,
+                color.primary,
+                color,
+                textTheme,
+                spacing,
               ),
             ),
           ],
-
+        ),
+        SizedBox(height: spacing.elementGap * 1.5),
+        _buildSpendingPace(
+          actualDailySpend, allowedDaily,
+          color, textTheme, spacing, brightness, ctxt,
+        ),
+        SizedBox(height: spacing.elementGap * 1.5),
+        _buildInsight(
+          pct, isOver, remaining, safePerDay, daysLeft, accent,
+          color, textTheme, spacing, brightness,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        if (sortedCategories.isNotEmpty) ...[
+          Text(
+            ctxt.budget_breakdown,
+            style: textTheme.labelSmall?.copyWith(
+              color: color.onSurfaceVariant.withValues(alpha: 0.5),
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.5,
+            ),
+          ),
           SizedBox(height: spacing.elementGap),
-          const AmbientBrandSection(),
+          ...sortedCategories.map(
+            (cat) => _buildCategoryTile(
+              cat, isGuestMode, color, textTheme, spacing, brightness, ctxt,
+            ),
+          ),
         ],
-      ),
+        SizedBox(height: spacing.elementGap),
+        const AmbientBrandSection(),
+      ],
     );
   }
-
-  // ── WARNING BANNER ──
 
   Widget _buildWarningBanner(
     ColorScheme color, TextTheme textTheme, AppSpacing spacing,
@@ -247,8 +256,6 @@ class BudgetDetailsScreen extends ConsumerWidget {
     );
   }
 
-  // ── HERO ──
-
   Widget _buildHero(
     double remaining, double total, double spent, double pct, bool isOver,
     Color accent, ColorScheme color, TextTheme textTheme,
@@ -274,7 +281,6 @@ class BudgetDetailsScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Emotional headline
                 Text(
                   _emotionLine(pct, isOver, ctxt),
                   style: textTheme.bodyMedium?.copyWith(
@@ -283,7 +289,6 @@ class BudgetDetailsScreen extends ConsumerWidget {
                   ),
                 ),
                 SizedBox(height: spacing.elementGap),
-                // Spent amount (hero number)
                 CurrencyText(
                   amount: spent,
                   fixedLength: 0,
@@ -305,7 +310,6 @@ class BudgetDetailsScreen extends ConsumerWidget {
                   ),
                 ),
                 SizedBox(height: spacing.elementGap),
-                // Status badge
                 Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: spacing.elementGap,
@@ -327,7 +331,6 @@ class BudgetDetailsScreen extends ConsumerWidget {
             ),
           ),
           SizedBox(width: spacing.elementGap),
-          // Progress ring
           SizedBox(
             width: 88,
             height: 88,
@@ -373,8 +376,6 @@ class BudgetDetailsScreen extends ConsumerWidget {
       ),
     );
   }
-
-  // ── BUDGET PERIOD ──
 
   Widget _buildPeriodCard(
     dynamic b, int daysLeft, ColorScheme color, TextTheme textTheme,
@@ -427,8 +428,6 @@ class BudgetDetailsScreen extends ConsumerWidget {
     );
   }
 
-  // ── SPENDING PACE ──
-
   Widget _buildSpendingPace(
     double actualDaily, double allowedDaily,
     ColorScheme color, TextTheme textTheme, AppSpacing spacing,
@@ -465,7 +464,6 @@ class BudgetDetailsScreen extends ConsumerWidget {
             ],
           ),
           SizedBox(height: spacing.elementGap),
-          // Pace comparison bar
           Row(
             children: [
               Expanded(
@@ -513,8 +511,6 @@ class BudgetDetailsScreen extends ConsumerWidget {
     );
   }
 
-  // ── MINI STAT ──
-
   Widget _buildMiniStat(
     String value, String label, IconData icon, Color accent,
     ColorScheme color, TextTheme textTheme, AppSpacing spacing,
@@ -545,8 +541,6 @@ class BudgetDetailsScreen extends ConsumerWidget {
       ),
     );
   }
-
-  // ── INSIGHT ──
 
   Widget _buildInsight(
     double pct, bool isOver, double remaining, double safePerDay,
@@ -602,8 +596,6 @@ class BudgetDetailsScreen extends ConsumerWidget {
       ),
     );
   }
-
-  // ── CATEGORY TILE ──
 
   Widget _buildCategoryTile(
     CategorySpending cat, bool isGuestMode, ColorScheme color,
@@ -712,20 +704,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
       ),
     );
   }
-
-  Future<void> _deleteBudget(BuildContext context, WidgetRef ref) async {
-    final router = GoRouter.of(context);
-    try {
-      await ref.read(budgetServiceProvider).deleteBudget(data.budget.id);
-      SnackbarService.success(BuddyMessages.budgetDeleted);
-      router.pop();
-    } catch (e) {
-      if (context.mounted) SnackbarService.error(BuddyMessages.genericError);
-    }
-  }
 }
-
-// ── Ring painter ──
 
 class _RingPainter extends CustomPainter {
   final double progress;

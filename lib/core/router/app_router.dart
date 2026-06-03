@@ -30,7 +30,7 @@ import 'package:mudra_manager/features/goal/presentation/screens/goal_screen.dar
 import 'package:mudra_manager/features/onboarding/presentation/screens/account_setup_screen.dart';
 import 'package:mudra_manager/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/about_app.dart';
-import 'package:mudra_manager/features/profile/presentation/screens/add_edit_category_screen.dart';
+import 'package:mudra_manager/features/category/presentation/screens/add_edit_category_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/app_settings_page.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/appearance_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/backup_restore_screen.dart';
@@ -40,15 +40,15 @@ import 'package:mudra_manager/features/profile/presentation/screens/exchange_rat
 import 'package:mudra_manager/features/profile/presentation/screens/archived_transactions_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/edit_user_profile_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/help_screen.dart';
-import 'package:mudra_manager/features/profile/presentation/screens/manage_account_screen.dart';
-import 'package:mudra_manager/features/profile/presentation/screens/manage_categories_screen.dart';
+import 'package:mudra_manager/features/account/presentation/screens/manage_account_screen.dart';
+import 'package:mudra_manager/features/category/presentation/screens/manage_categories_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/notification_settings_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/setting_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/sms_import_setting_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/theme_picker_screen.dart';
 import 'package:mudra_manager/features/skin/presentation/screens/skin_picker_screen.dart';
 import 'package:mudra_manager/features/skin/presentation/screens/skin_editor_screen.dart';
-import 'package:mudra_manager/features/profile/presentation/widgets/account_form.dart';
+import 'package:mudra_manager/features/account/presentation/screens/add_edit_account_screen.dart';
 import 'package:mudra_manager/features/recap/presentation/screens/monthly_recap_screen.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';

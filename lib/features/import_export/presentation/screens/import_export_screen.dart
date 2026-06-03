@@ -14,6 +14,8 @@ import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/file_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/import_export/data/excel_export_service.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class ImportExportScreen extends ConsumerStatefulWidget {
   const ImportExportScreen({super.key});
@@ -34,13 +36,13 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          ctxt.importExport_title,
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.importExport_title,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: ListView(
         padding: EdgeInsets.symmetric(
           horizontal: spacing.cardHorizontal,

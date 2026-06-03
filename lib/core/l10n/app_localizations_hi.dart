@@ -4946,6 +4946,17 @@ class AppLocalizationsHi extends AppLocalizations {
   String get goal_needsAttention => 'ध्यान दें ⚠️';
 
   @override
+  String goal_needAttention(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count पर ध्यान दें',
+      one: '1 पर ध्यान दें',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get goal_aheadOfSchedule => 'समय से आगे 🎯';
 
   @override
@@ -4978,6 +4989,37 @@ class AppLocalizationsHi extends AppLocalizations {
   String goal_daysAgo(Object count) {
     return '$count दिन पहले';
   }
+
+  @override
+  String goal_onPaceFor(Object date) {
+    return '$date तक पहुँचने की pace पर';
+  }
+
+  @override
+  String get goal_aheadOfPace => 'Target pace से आगे';
+
+  @override
+  String goal_behindByAmount(Object amount) {
+    return '$amount पीछे';
+  }
+
+  @override
+  String get goal_neededPerMonth => 'ज़रूरत / month';
+
+  @override
+  String get goal_currentAvgMonth => 'आपका avg / month';
+
+  @override
+  String get goal_forecastLabel => 'Forecast';
+
+  @override
+  String get goal_basedOnRecent => 'recent contributions के basis पर';
+
+  @override
+  String get goal_timeLeft => 'बाकी समय';
+
+  @override
+  String get goal_paceStatus => 'Pace';
 
   @override
   String get common_today => 'आज';

@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,12 +14,27 @@ import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/shared/widgets/currency_picker.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class CurrencySettingsScreen extends ConsumerWidget {
   const CurrencySettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final ctxt = AppLocalizations.of(context)!;
+
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.currency_title,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.empty,
+      body: _buildBody(context, ref),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
@@ -26,333 +42,330 @@ class CurrencySettingsScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(ctxt.currency_title)),
-      body: baseCurrencyAsync.when(
-        data: (baseCurrency) {
-          final meta = kCurrencies[baseCurrency];
-          return ListView(
-            padding: EdgeInsets.only(
-              left: spacing.cardHorizontal,
-              right: spacing.cardHorizontal,
-              top: spacing.cardVertical,
-              bottom: MediaQuery.of(context).padding.bottom +
-                  kBottomNavigationBarHeight +
-                  spacing.sectionGap,
+    return baseCurrencyAsync.when(
+      data: (baseCurrency) {
+        final meta = kCurrencies[baseCurrency];
+        return ListView(
+          padding: EdgeInsets.only(
+            left: spacing.cardHorizontal,
+            right: spacing.cardHorizontal,
+            top: spacing.cardVertical,
+            bottom: MediaQuery.of(context).padding.bottom +
+                kBottomNavigationBarHeight +
+                spacing.sectionGap,
+          ),
+          children: [
+            // Hero card
+            Container(
+              padding: EdgeInsets.all(spacing.cardInner),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    color.primary.withValues(alpha: isDark ? 0.2 : 0.12),
+                    color.primary.withValues(alpha: isDark ? 0.08 : 0.04),
+                  ],
+                ),
+                border: Border.all(
+                  color: color.primary.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(spacing.cardInner),
+                    decoration: BoxDecoration(
+                      color: color.primary.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      meta?.symbol ?? baseCurrency,
+                      style: textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: color.primary,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: spacing.sectionGap),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ctxt.currency_baseCurrency,
+                          style: textTheme.labelMedium?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          '$baseCurrency — ${meta?.name ?? ''}',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: spacing.elementGapMin),
+                        Text(
+                          ctxt.currency_baseDescription,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            children: [
-              // Hero card
-              Container(
-                padding: EdgeInsets.all(spacing.cardInner),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      color.primary.withValues(alpha: isDark ? 0.2 : 0.12),
-                      color.primary.withValues(alpha: isDark ? 0.08 : 0.04),
+            SizedBox(height: spacing.sectionGap),
+
+            // Change button
+            Card(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              color: color.surfaceContainerLow,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                side: BorderSide(
+                  color: color.outlineVariant.withValues(alpha: 0.5),
+                ),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                onTap: () => _showChangeDialog(
+                  context,
+                  ref,
+                  baseCurrency,
+                  color,
+                  textTheme,
+                  spacing,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardInner,
+                    vertical: spacing.elementGap * 1.5,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(spacing.elementGap),
+                        decoration: BoxDecoration(
+                          color: color.error.withValues(alpha: 0.12),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
+                        ),
+                        child: Icon(
+                          LucideIcons.arrowLeftRight,
+                          color: color.error,
+                          size: 20,
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGap * 1.5),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              BuddyMessages.currencyChangeTitle,
+                              style: textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              BuddyMessages.currencyChangeWarning,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.error,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        color: color.onSurfaceVariant,
+                        size: 20,
+                      ),
                     ],
                   ),
-                  border: Border.all(
-                    color: color.primary.withValues(alpha: 0.3),
+                ),
+              ),
+            ),
+            SizedBox(height: spacing.elementGap),
+
+            // Manage exchange rates
+            Card(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              color: color.surfaceContainerLow,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                side: BorderSide(
+                  color: color.outlineVariant.withValues(alpha: 0.5),
+                ),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                onTap: () => context.push(AppRoutes.exchangeRates),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardInner,
+                    vertical: spacing.elementGap * 1.5,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(spacing.elementGap),
+                        decoration: BoxDecoration(
+                          color: color.tertiary.withValues(alpha: 0.12),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
+                        ),
+                        child: Icon(
+                          LucideIcons.arrowLeftRight,
+                          color: color.tertiary,
+                          size: 20,
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGap * 1.5),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ctxt.currency_exchangeRates,
+                              style: textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              ctxt.currency_exchangeRatesDesc,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        color: color.onSurfaceVariant,
+                        size: 20,
+                      ),
+                    ],
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(spacing.cardInner),
-                      decoration: BoxDecoration(
-                        color: color.primary.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        meta?.symbol ?? baseCurrency,
-                        style: textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
+              ),
+            ),
+            SizedBox(height: spacing.elementGap),
+
+            // View archived
+            Card(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              color: color.surfaceContainerLow,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                side: BorderSide(
+                  color: color.outlineVariant.withValues(alpha: 0.5),
+                ),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                onTap: () => context.push(AppRoutes.archivedTransactions),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardInner,
+                    vertical: spacing.elementGap * 1.5,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(spacing.elementGap),
+                        decoration: BoxDecoration(
+                          color: color.primary.withValues(alpha: 0.12),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
+                        ),
+                        child: Icon(
+                          LucideIcons.archive,
                           color: color.primary,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: spacing.sectionGap),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            ctxt.currency_baseCurrency,
-                            style: textTheme.labelMedium?.copyWith(
-                              color: color.onSurfaceVariant,
-                            ),
-                          ),
-                          Text(
-                            '$baseCurrency — ${meta?.name ?? ''}',
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          SizedBox(height: spacing.elementGapMin),
-                          Text(
-                            ctxt.currency_baseDescription,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: spacing.sectionGap),
-
-              // Change button
-              Card(
-                elevation: 0,
-                margin: EdgeInsets.zero,
-                color: color.surfaceContainerLow,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  side: BorderSide(
-                    color: color.outlineVariant.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  onTap: () => _showChangeDialog(
-                    context,
-                    ref,
-                    baseCurrency,
-                    color,
-                    textTheme,
-                    spacing,
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.cardInner,
-                      vertical: spacing.elementGap * 1.5,
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(spacing.elementGap),
-                          decoration: BoxDecoration(
-                            color: color.error.withValues(alpha: 0.12),
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusMedium),
-                          ),
-                          child: Icon(
-                            LucideIcons.arrowLeftRight,
-                            color: color.error,
-                            size: 20,
-                          ),
-                        ),
-                        SizedBox(width: spacing.elementGap * 1.5),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                BuddyMessages.currencyChangeTitle,
-                                style: textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                BuddyMessages.currencyChangeWarning,
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.error,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          color: color.onSurfaceVariant,
                           size: 20,
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: spacing.elementGap),
-
-              // Manage exchange rates
-              Card(
-                elevation: 0,
-                margin: EdgeInsets.zero,
-                color: color.surfaceContainerLow,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  side: BorderSide(
-                    color: color.outlineVariant.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  onTap: () => context.push(AppRoutes.exchangeRates),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.cardInner,
-                      vertical: spacing.elementGap * 1.5,
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(spacing.elementGap),
-                          decoration: BoxDecoration(
-                            color: color.tertiary.withValues(alpha: 0.12),
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusMedium),
-                          ),
-                          child: Icon(
-                            LucideIcons.arrowLeftRight,
-                            color: color.tertiary,
-                            size: 20,
-                          ),
-                        ),
-                        SizedBox(width: spacing.elementGap * 1.5),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                ctxt.currency_exchangeRates,
-                                style: textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
+                      ),
+                      SizedBox(width: spacing.elementGap * 1.5),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              BuddyMessages.archivedTransactionsTitle,
+                              style: textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w500,
                               ),
-                              Text(
-                                ctxt.currency_exchangeRatesDesc,
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                ),
+                            ),
+                            Text(
+                              ctxt.currency_archivedDesc,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
                               ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          color: color.onSurfaceVariant,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: spacing.elementGap),
-
-              // View archived
-              Card(
-                elevation: 0,
-                margin: EdgeInsets.zero,
-                color: color.surfaceContainerLow,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  side: BorderSide(
-                    color: color.outlineVariant.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  onTap: () => context.push(AppRoutes.archivedTransactions),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.cardInner,
-                      vertical: spacing.elementGap * 1.5,
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(spacing.elementGap),
-                          decoration: BoxDecoration(
-                            color: color.primary.withValues(alpha: 0.12),
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusMedium),
-                          ),
-                          child: Icon(
-                            LucideIcons.archive,
-                            color: color.primary,
-                            size: 20,
-                          ),
-                        ),
-                        SizedBox(width: spacing.elementGap * 1.5),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                BuddyMessages.archivedTransactionsTitle,
-                                style: textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                ctxt.currency_archivedDesc,
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          color: color.onSurfaceVariant,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: spacing.sectionGap),
-
-              // Warning info
-              Container(
-                padding: EdgeInsets.all(spacing.cardInner),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  color: color.error.withValues(alpha: 0.06),
-                  border: Border.all(
-                    color: color.error.withValues(alpha: 0.15),
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      LucideIcons.triangleAlert,
-                      color: color.error,
-                      size: 18,
-                    ),
-                    SizedBox(width: spacing.elementGap),
-                    Expanded(
-                      child: Text(
-                        BuddyMessages.currencyChangeWarning,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                          height: 1.4,
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                      Icon(
+                        LucideIcons.chevronRight,
+                        color: color.onSurfaceVariant,
+                        size: 20,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
-          );
-        },
-        loading: () => Padding(
-          padding: EdgeInsets.all(spacing.cardInner),
-          child: const DashboardCardSkeleton(),
-        ),
-        error: (e, _) => Center(child: Text(ctxt.common_errorLoading)),
+            ),
+            SizedBox(height: spacing.sectionGap),
+
+            // Warning info
+            Container(
+              padding: EdgeInsets.all(spacing.cardInner),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                color: color.error.withValues(alpha: 0.06),
+                border: Border.all(
+                  color: color.error.withValues(alpha: 0.15),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    LucideIcons.triangleAlert,
+                    color: color.error,
+                    size: 18,
+                  ),
+                  SizedBox(width: spacing.elementGap),
+                  Expanded(
+                    child: Text(
+                      BuddyMessages.currencyChangeWarning,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: const DashboardCardSkeleton(),
       ),
+      error: (e, _) => Center(child: Text(ctxt.common_errorLoading)),
     );
   }
 
@@ -407,7 +420,6 @@ class CurrencySettingsScreen extends ConsumerWidget {
               ),
             ),
             SizedBox(height: spacing.sectionGap),
-            // From → To visual
             Container(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardInner,
@@ -447,7 +459,6 @@ class CurrencySettingsScreen extends ConsumerWidget {
               ),
             ),
             SizedBox(height: spacing.sectionGap),
-            // Warning bullets
             Container(
               width: double.infinity,
               padding: EdgeInsets.all(spacing.cardInner),
@@ -523,7 +534,6 @@ class CurrencySettingsScreen extends ConsumerWidget {
 
     if (confirmed != true || !context.mounted) return;
 
-    // Show blocking loading overlay
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -565,14 +575,14 @@ class CurrencySettingsScreen extends ConsumerWidget {
       invalidateAfterCurrencyChange(ref);
 
       if (context.mounted) {
-        Navigator.of(context).pop(); // dismiss loading
+        Navigator.of(context).pop();
         SnackbarService.success(
           BuddyMessages.currencyArchivedCount(archivedCount, newCurrency),
         );
       }
     } catch (e) {
       if (context.mounted) {
-        Navigator.of(context).pop(); // dismiss loading
+        Navigator.of(context).pop();
         SnackbarService.error(BuddyMessages.genericError);
       }
     }

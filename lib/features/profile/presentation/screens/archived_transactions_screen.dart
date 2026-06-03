@@ -12,6 +12,8 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 final _archivedTxnProvider =
     FutureProvider<List<ArchivedTransaction>>((ref) async {
@@ -34,8 +36,13 @@ class ArchivedTransactionsScreen extends ConsumerWidget {
     final asyncTxns = ref.watch(_archivedTxnProvider);
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(BuddyMessages.archivedTransactionsTitle)),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: BuddyMessages.archivedTransactionsTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.empty,
       body: asyncTxns.when(
         data: (txns) {
           if (txns.isEmpty) {

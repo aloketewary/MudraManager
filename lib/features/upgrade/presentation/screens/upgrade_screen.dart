@@ -14,6 +14,8 @@ import 'package:mudra_manager/core/entitlement/entitlement_products.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class UpgradeScreen extends ConsumerStatefulWidget {
   const UpgradeScreen({super.key});
@@ -150,16 +152,18 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
     final isProAsync = ref.watch(isProProvider);
     final billing = ref.watch(billingServiceProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(LucideIcons.x),
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            context.pop();
-          },
-        ),
+    return ScreenShell(
+      config: const ScreenShellConfig(
+        appBarMode: AppBarMode.minimal,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.empty,
+      leading: IconButton(
+        icon: const Icon(LucideIcons.x),
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          context.pop();
+        },
       ),
       body: Stack(
         children: [

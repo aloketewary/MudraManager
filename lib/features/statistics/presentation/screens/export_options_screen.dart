@@ -9,6 +9,8 @@ import 'package:mudra_manager/core/providers/singleton_providers.dart';
 import 'package:mudra_manager/plugins/export_plugin.dart';
 import 'package:mudra_manager/core/utils/file_utils.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 final exportFormatsProvider = FutureProvider.autoDispose<List<String>>((ref) async {
   return ref.read(exportPluginManagerProvider).getSupportedFormats();
@@ -29,17 +31,21 @@ class ExportOptionsScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final formatsAsync = ref.watch(exportFormatsProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.title_exportOptions),
-        backgroundColor: color.surfaceContainer,
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.refreshCw),
-            onPressed: () {
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: AppLocalizations.of(context)!.title_exportOptions,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'refresh_exports',
+            label: 'Refresh',
+            icon: LucideIcons.refreshCw,
+            onTap: () {
               ref.invalidate(exportFormatsProvider);
             },
-            tooltip: 'Refresh',
           ),
         ],
       ),

@@ -189,6 +189,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
 
+
     // Gate: show a single cohesive loading state until core data is ready
     if (!dashboardAsync.hasValue) {
       return Scaffold(

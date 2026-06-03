@@ -19,6 +19,8 @@ import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'dart:math' as math;
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class AdaptiveBudgetDashboard extends ConsumerStatefulWidget {
   const AdaptiveBudgetDashboard({super.key});
@@ -40,18 +42,22 @@ class _AdaptiveBudgetDashboardState
     final isDark = brightness == Brightness.dark;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        title: Text(ctxt.budget_dashboardPageTitle),
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () {
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.budget_dashboardPageTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'add_budget',
+            label: 'Add',
+            icon: LucideIcons.plus,
+            onTap: () {
               HapticFeedback.mediumImpact();
               context.push(AppRoutes.addBudget);
             },
-            icon: const Icon(LucideIcons.plus),
           ),
         ],
       ),

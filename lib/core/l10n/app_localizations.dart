@@ -9084,6 +9084,12 @@ abstract class AppLocalizations {
   /// **'Needs attention ⚠️'**
   String get goal_needsAttention;
 
+  /// No description provided for @goal_needAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 needs attention} other{{count} need attention}}'**
+  String goal_needAttention(num count);
+
   /// No description provided for @goal_aheadOfSchedule.
   ///
   /// In en, this message translates to:
@@ -9143,6 +9149,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} days ago'**
   String goal_daysAgo(Object count);
+
+  /// No description provided for @goal_onPaceFor.
+  ///
+  /// In en, this message translates to:
+  /// **'On pace for {date}'**
+  String goal_onPaceFor(Object date);
+
+  /// No description provided for @goal_aheadOfPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Ahead of target pace'**
+  String get goal_aheadOfPace;
+
+  /// No description provided for @goal_behindByAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Behind by {amount}'**
+  String goal_behindByAmount(Object amount);
+
+  /// No description provided for @goal_neededPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed / month'**
+  String get goal_neededPerMonth;
+
+  /// No description provided for @goal_currentAvgMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Your avg / month'**
+  String get goal_currentAvgMonth;
+
+  /// No description provided for @goal_forecastLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Forecast'**
+  String get goal_forecastLabel;
+
+  /// No description provided for @goal_basedOnRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'based on recent contributions'**
+  String get goal_basedOnRecent;
+
+  /// No description provided for @goal_timeLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Time left'**
+  String get goal_timeLeft;
+
+  /// No description provided for @goal_paceStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Pace'**
+  String get goal_paceStatus;
 
   /// No description provided for @common_today.
   ///

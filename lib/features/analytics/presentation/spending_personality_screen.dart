@@ -13,6 +13,8 @@ import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/analytics/data/spending_analyzer.dart';
 import 'package:mudra_manager/features/analytics/data/personality_archetype.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/spending_personality_card.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class SpendingPersonalityScreen extends ConsumerWidget {
   const SpendingPersonalityScreen({super.key});
@@ -26,12 +28,13 @@ class SpendingPersonalityScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.title_spendingPersonality),
-        elevation: 0,
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: AppLocalizations.of(context)!.title_spendingPersonality,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: personality.when(
         data: (data) {
           if (data == null) {

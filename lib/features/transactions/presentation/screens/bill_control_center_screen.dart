@@ -27,6 +27,8 @@ import 'package:mudra_manager/shared/widgets/widgets.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/subscription_list_card.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class BillControlCenterScreen extends ConsumerStatefulWidget {
   const BillControlCenterScreen({super.key});
@@ -111,16 +113,19 @@ class _BillControlCenterScreenState
     final recurringAsync = ref.watch(recurringTransactionsProvider);
     final accountsAsync = ref.watch(accountsProvider);
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.title_billControlCenter),
-        elevation: 0,
-        actions: [
-          IconButton(
-            tooltip: 'Add',
-            icon: const Icon(LucideIcons.plus),
-            onPressed: () {
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: AppLocalizations.of(context)!.title_billControlCenter,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'add_recurring',
+            label: 'Add',
+            icon: LucideIcons.plus,
+            onTap: () {
               HapticFeedback.mediumImpact();
               context.push(AppRoutes.addRecurring);
             },

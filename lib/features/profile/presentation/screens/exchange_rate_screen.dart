@@ -12,6 +12,8 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 final _ratesProvider = FutureProvider<List<ExchangeRate>>((ref) async {
   final service = await ref.watch(currencyServiceProvider.future);
@@ -37,11 +39,13 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
     final base = BaseCurrency.code;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(ctxt.title_exchangeRates),
-        elevation: 0,
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.title_exchangeRates,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: ratesAsync.when(
         data: (rates) {
           final entries = rates.where((r) {

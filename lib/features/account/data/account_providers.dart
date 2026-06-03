@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -14,7 +15,11 @@ final accountsProvider = FutureProvider.autoDispose((ref) async {
   ref.watch(accountChangeProvider);
   ref.watch(transactionChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
-  return await isar.accounts.filter().isActiveEqualTo(true).findAll();
+  final accounts = await isar.accounts.filter().isActiveEqualTo(true).findAll();
+  for (final a in accounts) {
+    a.decryptFields();
+  }
+  return accounts;
 });
 
 final accountServiceProvider = Provider((ref) {
@@ -28,7 +33,11 @@ final allAccountsProvider = FutureProvider.autoDispose((ref) async {
   ref.watch(transactionChangeProvider);
   final isarService = ref.watch(isarServiceProvider);
   final isar = await isarService.getInstance();
-  return await isar.accounts.where().findAll();
+  final accounts = await isar.accounts.where().findAll();
+  for (final a in accounts) {
+    a.decryptFields();
+  }
+  return accounts;
 });
 
 final accountBalanceMapProvider = FutureProvider.autoDispose<Map<int, double>>((ref) async {

@@ -12,6 +12,8 @@ import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/inline_error.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class SpendingTrendsScreen extends ConsumerWidget {
   const SpendingTrendsScreen({super.key});
@@ -27,11 +29,13 @@ class SpendingTrendsScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(ctxt.analytics_spendingTrendsTitle),
-        elevation: 0,
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.analytics_spendingTrendsTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: trendsAsync.when(
         data: (trends) {
           if (trends.isEmpty) {

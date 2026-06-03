@@ -21,6 +21,8 @@ import 'package:mudra_manager/features/category/data/category_merge_service.dart
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class ManageCategoriesScreen extends ConsumerWidget {
   const ManageCategoriesScreen({super.key});
@@ -34,20 +36,22 @@ class ManageCategoriesScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          ctxt.categories_manageCategoriesTitle,
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.plus),
-            onPressed: () {
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.categories_manageCategoriesTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'add_category',
+            label: ctxt.categories_addCategoryLabel,
+            icon: LucideIcons.plus,
+            onTap: () {
               HapticFeedback.mediumImpact();
               context.push(AppRoutes.addCategory);
             },
-            tooltip: ctxt.categories_addCategoryLabel,
           ),
         ],
       ),

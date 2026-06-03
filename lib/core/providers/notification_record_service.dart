@@ -29,7 +29,8 @@ class NotificationRecordService {
       ..isRead = false
       ..type = type
       ..priority = NotificationPriority.normal
-      ..category = NotificationCategory.financial;
+      ..category = NotificationCategory.financial
+      ..source = NotificationSource.event;
     record.encryptFields(); // Sentinel: Protect sensitive financial alerts in the database
     final isar = await isarService.getInstance();
     await isar.writeTxn(() => isar.notificationRecords.put(record));

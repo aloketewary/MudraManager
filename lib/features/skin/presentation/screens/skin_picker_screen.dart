@@ -12,6 +12,8 @@ import 'package:mudra_manager/core/skin/provider/skin_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/skin/presentation/widgets/skin_preview_card.dart';
 import 'package:mudra_manager/shared/widgets/responsive_helper.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class SkinPickerScreen extends ConsumerStatefulWidget {
   const SkinPickerScreen({super.key});
@@ -47,27 +49,32 @@ class _SkinPickerScreenState extends ConsumerState<SkinPickerScreen> {
     final isPro = ref.watch(hasFullAccessProvider).value ?? false;
     final catalog = ref.watch(skinCatalogProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(ctxt.theme_chooseThemeTitle),
-        actions: [
-          // Customize button for active skin
-          IconButton(
-            onPressed: () => context.push(AppRoutes.skinEditor),
-            icon: const Icon(LucideIcons.slidersHorizontal),
-            tooltip: 'Customize',
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.theme_chooseThemeTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'customize_skin',
+            label: 'Customize',
+            icon: LucideIcons.slidersHorizontal,
+            onTap: () => context.push(AppRoutes.skinEditor),
           ),
         ],
+        fab: ScreenAction(
+          id: 'apply_skin',
+          label: ctxt.theme_applyThemeLabel,
+          icon: LucideIcons.circleCheck,
+          onTap: _applySkin,
+        ),
       ),
       body: catalog.when(
         data: (skins) => _buildBody(skins, isPro, color, textTheme),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _applySkin,
-        icon: const Icon(LucideIcons.circleCheck),
-        label: Text(ctxt.theme_applyThemeLabel),
       ),
     );
   }

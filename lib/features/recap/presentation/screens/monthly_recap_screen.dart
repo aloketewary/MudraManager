@@ -16,6 +16,8 @@ import 'package:mudra_manager/core/utils/file_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/recap/data/monthly_recap_service.dart';
 import 'package:mudra_manager/features/recap/data/monthly_recap_pdf.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class MonthlyRecapScreen extends ConsumerStatefulWidget {
   final DateTime? month;
@@ -77,10 +79,13 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final monthName = safeDateFormat('MMMM yyyy', AppLocalizations.of(context)!.localeName).format(_selectedMonth);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('${AppLocalizations.of(context)!.recap_recapTitle} — $monthName'),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: '${AppLocalizations.of(context)!.recap_recapTitle} — $monthName',
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: FutureBuilder<MonthlyRecapData>(
         future: _loadData(),
         builder: (context, snapshot) {

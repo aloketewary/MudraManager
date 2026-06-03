@@ -4,6 +4,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/widget_metrics.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/widget_analytics_provider.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class WidgetAnalyticsScreen extends ConsumerWidget {
   const WidgetAnalyticsScreen({super.key});
@@ -15,13 +17,19 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
     final spacing = ref.watch(spacingProvider);
     final metricsAsync = ref.watch(widgetMetricsProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Widget Analytics'),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.trash2),
-            onPressed: () async {
+    return ScreenShell(
+      config: const ScreenShellConfig(
+        title: 'Widget Analytics',
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'reset_analytics',
+            label: 'Reset',
+            icon: LucideIcons.trash2,
+            onTap: () async {
               await ref.read(widgetAnalyticsServiceProvider).resetAll();
               ref.invalidate(widgetMetricsProvider);
             },

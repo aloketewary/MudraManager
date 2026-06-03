@@ -46,7 +46,8 @@ class NotificationRecordBackup implements BackupAdapter<NotificationRecord> {
       ..body = json['body']
       ..timestamp = DateTime.parse(json['timestamp'])
       ..type = json['type'] as String?
-      ..isRead = json['isRead'] as bool;
+      ..isRead = json['isRead'] as bool
+      ..source = NotificationSource.smart;
 
     return record;
   }

@@ -11,6 +11,8 @@ import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'dart:math' as math;
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class FinancialHealthScreen extends ConsumerWidget {
   const FinancialHealthScreen({super.key});
@@ -26,12 +28,13 @@ class FinancialHealthScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.title_financialHealth),
-        elevation: 0,
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: AppLocalizations.of(context)!.title_financialHealth,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: healthAsync.when(
         data: (health) {
           final scoreColor = _scoreColor(health.score, color);

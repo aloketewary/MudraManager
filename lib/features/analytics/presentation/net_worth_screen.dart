@@ -17,6 +17,8 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/shared/widgets/widgets.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class NetWorthScreen extends ConsumerWidget {
   const NetWorthScreen({super.key});
@@ -32,13 +34,13 @@ class NetWorthScreen extends ConsumerWidget {
     final isDark = brightness == Brightness.dark;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.title_netWorth),
-        backgroundColor: color.surface,
-        elevation: 0,
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: AppLocalizations.of(context)!.title_netWorth,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: netWorthAsync.when(
         data: (data) {
           if (data.assets.isEmpty && data.liabilities.isEmpty) {

@@ -23,6 +23,8 @@ import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 final _backupHistoryProvider = FutureProvider.autoDispose((ref) {
   return BackupService.getBackupHistory();
@@ -44,8 +46,13 @@ class BackupRestoreScreen extends ConsumerWidget {
         ? historyAsync.value!.first
         : null;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(ctxt.backup_backupRestoreTitle)),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.backup_backupRestoreTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.empty,
       body: ListView(
         padding: EdgeInsets.symmetric(
           horizontal: spacing.cardHorizontal,

@@ -57,6 +57,7 @@ class SmartNotificationEmitter {
       ..type = type
       ..priority = priority
       ..category = category
+      ..source = NotificationSource.smart
       ..primaryAction = primaryAction
       ..actionData = actionData;
 

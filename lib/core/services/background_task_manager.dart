@@ -1,6 +1,7 @@
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/services/auto_backup_service.dart';
 import 'package:mudra_manager/core/services/category_rule_service.dart';
 import 'package:mudra_manager/core/utils/error_tracker.dart';
@@ -82,6 +83,10 @@ class BackgroundTaskManager {
   /// Run auto backup task — used by workmanager callback.
   static Future<void> _runAutoBackup() async {
     try {
+      // Initialize SharedPrefsUtil in this isolate (Workmanager runs separately)
+      final prefs = await SharedPreferences.getInstance();
+      SharedPrefsUtil.init(prefs);
+
       final password = await AutoBackupService.getBackupPassword();
       if (password == null || password.isEmpty) {
         _log.w('No backup password set, skipping auto backup');

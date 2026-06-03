@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -7,20 +6,110 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/features/goal/domain/goal_health.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/shared/widgets/safe_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
-import 'package:mudra_manager/shared/widgets/widgets.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class GoalScreen extends ConsumerWidget {
   const GoalScreen({super.key});
+
+  /// Recent pace: contributions in last 90 days / 3 months.
+  /// Fallback to lifetime average if < 90 days of history.
+  double _recentPace(Goal goal) {
+    final contributions = goal.contributions;
+    if (contributions.isEmpty) return 0;
+
+    final now = DateTime.now();
+    final cutoff = now.subtract(const Duration(days: 90));
+    final recent = contributions.where((c) => c.date.isAfter(cutoff)).toList();
+
+    if (recent.isNotEmpty) {
+      final total = recent.fold(0.0, (sum, c) => sum + c.amount);
+      return total / 3; // 3 months
+    }
+
+    // Fallback: lifetime average
+    final total = contributions.fold(0.0, (sum, c) => sum + c.amount);
+    final first =
+        contributions.reduce((a, b) => a.date.isBefore(b.date) ? a : b).date;
+    final months = now.difference(first).inDays / 30;
+    if (months < 1) return total;
+    return total / months;
+  }
+
+  /// Needed per month to reach goal by target date.
+  double _neededPerMonth(Goal goal) {
+    if (goal.targetDate == null) return 0;
+    final daysLeft = goal.targetDate!.difference(DateTime.now()).inDays;
+    if (daysLeft <= 0) return goal.remainingAmount;
+    final monthsLeft = daysLeft / 30;
+    return goal.remainingAmount / monthsLeft;
+  }
+
+  /// Gap = recentPace - neededPerMonth. Positive = ahead, negative = behind.
+  double _paceGap(Goal goal) {
+    final needed = _neededPerMonth(goal);
+    if (needed <= 0) return 0;
+    return _recentPace(goal) - needed;
+  }
+
+  /// Whether a goal needs attention (raw failure conditions).
+  bool _needsAttention(Goal goal) {
+    if (goal.progressPercent >= 1.0) return false;
+    final gap = _paceGap(goal);
+    if (gap < 0) return true;
+    final daysLeft =
+        goal.targetDate?.difference(DateTime.now()).inDays ?? 9999;
+    if (daysLeft < 90 && daysLeft > 0) return true;
+    final health = GoalHealth.compute(goal);
+    if (health.predictedDate != null &&
+        goal.targetDate != null &&
+        health.predictedDate!.isAfter(goal.targetDate!)) {
+      return true;
+    }
+    return false;
+  }
+
+  /// Suggested one-tap deposit: last contribution, or neededPerMonth rounded.
+  double _suggestedDeposit(Goal goal) {
+    if (goal.contributions.isNotEmpty) {
+      final sorted = goal.contributions.toList()
+        ..sort((a, b) => b.date.compareTo(a.date));
+      return sorted.first.amount;
+    }
+    final needed = _neededPerMonth(goal);
+    if (needed > 0) return (needed / 500).ceil() * 500;
+    return 1000;
+  }
+
+  /// Priority sort score (lower = higher priority).
+  int _sortPriority(Goal goal) {
+    if (goal.progressPercent >= 1.0) return 100;
+    final gap = _paceGap(goal);
+    final daysLeft =
+        goal.targetDate?.difference(DateTime.now()).inDays ?? 9999;
+
+    // Behind schedule
+    if (gap < 0) return 0;
+    // Near deadline (< 90 days)
+    if (daysLeft < 90 && daysLeft > 0) return 1;
+    // On track with deadline
+    if (goal.targetDate != null) return 2;
+    // No deadline
+    return 3;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,28 +119,36 @@ class GoalScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: color.surface,
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.title_goals,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: true,
+      ),
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'add_goal',
+            label: 'Add',
+            icon: LucideIcons.plus,
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              context.push(AppRoutes.addGoal);
+            },
+          ),
+        ],
+      ),
+      onRefresh: () => RefreshHelper.withMinDuration(
+        () async {
+          ref.invalidate(goalsProvider);
+        },
+      ),
       body: goalsAsync.when(
         data: (goals) {
           if (goals.isEmpty) {
-            return Scaffold(
-              appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.title_goals),
-                actions: [
-                  IconButton(
-                    icon: const Icon(LucideIcons.plus),
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
-                      context.push(AppRoutes.addGoal);
-                    },
-                  ),
-                ],
-              ),
-              body: NoDataFound(
-                message: BuddyMessages.noGoals,
-                iconData: LucideIcons.goal,
-              ),
+            return NoDataFound(
+              message: BuddyMessages.noGoals,
+              iconData: LucideIcons.goal,
             );
           }
 
@@ -60,206 +157,128 @@ class GoalScreen extends ConsumerWidget {
               .toList();
           final completedGoals =
               goals.where((g) => g.progressPercent >= 1.0).toList();
-          final allActive = goals.where((g) => g.isActive).toList();
-          final totalTarget =
-              allActive.fold(0.0, (sum, g) => sum + g.targetAmount);
           final totalSaved =
-              allActive.fold(0.0, (sum, g) => sum + g.currentAmount);
-          final overallProgress =
-              totalTarget > 0 ? totalSaved / totalTarget : 0.0;
+              activeGoals.fold(0.0, (sum, g) => sum + g.currentAmount);
+          final attentionCount =
+              activeGoals.where(_needsAttention).length;
 
-          // Highlight = closest to completion (not done)
-          Goal? highlightGoal;
-          List<Goal> remainingGoals = activeGoals;
-          if (activeGoals.length > 1) {
-            final sorted = List<Goal>.from(activeGoals)
-              ..sort((a, b) => b.progressPercent.compareTo(a.progressPercent));
-            highlightGoal = sorted.first;
-            remainingGoals = sorted.sublist(1);
-          } else if (activeGoals.length == 1) {
-            highlightGoal = activeGoals.first;
-            remainingGoals = [];
-          }
+          // Priority sort
+          activeGoals.sort(
+            (a, b) => _sortPriority(a).compareTo(_sortPriority(b)),
+          );
 
-          return RefreshIndicator(
-            onRefresh: () => RefreshHelper.withMinDuration(() async {
-              ref.invalidate(goalsProvider);
-            }),
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverAppBar(
-                  pinned: true,
-                  elevation: 0,
-                  title: Text(
-                    ctxt.title_goals,
-                    style: textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
+          return CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // ── Portfolio Status Strip ──
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    spacing.cardHorizontal,
+                    spacing.elementGap,
+                    spacing.cardHorizontal,
+                    spacing.sectionGap,
                   ),
-                  actions: [
-                    IconButton(
-                      icon: const Icon(LucideIcons.plus),
-                      onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        context.push(AppRoutes.addGoal);
-                      },
-                    ),
-                    SizedBox(width: spacing.cardHorizontal),
-                  ],
-                ),
-
-                // ── Hero Summary ──
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      spacing.cardHorizontal,
-                      spacing.elementGap,
-                      spacing.cardHorizontal,
-                      spacing.cardVertical,
-                    ),
-                    child: _buildHeroSummary(
-                      allActive,
-                      totalSaved,
-                      totalTarget,
-                      overallProgress,
-                      color,
-                      textTheme,
-                      spacing,
-                      ctxt,
-                    ),
+                  child: _buildStatusStrip(
+                    activeGoals.length,
+                    totalSaved,
+                    attentionCount,
+                    color,
+                    textTheme,
+                    spacing,
+                    ctxt,
                   ),
                 ),
+              ),
 
-                // ── Highlight Goal ──
-                if (highlightGoal != null)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: spacing.cardHorizontal,
-                        vertical: spacing.cardVertical,
-                      ),
-                      child: _buildHighlightGoal(
-                        highlightGoal,
+              // ── Active Goals ──
+              SliverPadding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.cardHorizontal,
+                ),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => Padding(
+                      padding: EdgeInsets.only(bottom: spacing.elementGap),
+                      child: _buildGoalCard(
+                        activeGoals[index],
                         color,
                         textTheme,
                         spacing,
                         context,
+                        ref,
+                        ctxt,
                       ),
                     ),
+                    childCount: activeGoals.length,
                   ),
+                ),
+              ),
 
-                // ── In Progress ──
-                if (remainingGoals.isNotEmpty) ...[
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        spacing.cardHorizontal,
-                        spacing.sectionGap,
-                        spacing.cardHorizontal,
-                        spacing.elementGap,
-                      ),
-                      child: _sectionHeader(
-                        ctxt.goal_goalsInProgress(remainingGoals.length),
-                        LucideIcons.flame,
-                        color,
-                        textTheme,
-                      ),
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.cardHorizontal,
-                      vertical: spacing.cardVertical,
-                    ),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => Padding(
-                          padding: EdgeInsets.only(bottom: spacing.elementGap),
-                          child: _buildGoalCard(
-                            remainingGoals[index],
-                            color,
-                            textTheme,
-                            spacing,
-                            context,
-                            ref,
-                          ),
-                        ),
-                        childCount: remainingGoals.length,
-                      ),
-                    ),
-                  ),
-                ],
-
-                // ── Completed ──
-                if (completedGoals.isNotEmpty) ...[
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        spacing.cardHorizontal,
-                        spacing.sectionGap,
-                        spacing.cardHorizontal,
-                        spacing.elementGap,
-                      ),
-                      child: _sectionHeader(
-                        ctxt.goal_completedSection,
-                        LucideIcons.trophy,
-                        color,
-                        textTheme,
-                      ),
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.cardHorizontal,
-                      vertical: spacing.cardVertical,
-                    ),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => Padding(
-                          padding: EdgeInsets.only(bottom: spacing.elementGap),
-                          child: _buildCompletedCard(
-                            completedGoals[index],
-                            color,
-                            textTheme,
-                            spacing,
-                            context,
-                          ),
-                        ),
-                        childCount: completedGoals.length,
-                      ),
-                    ),
-                  ),
-                ],
-
+              // ── Completed (collapsed section) ──
+              if (completedGoals.isNotEmpty) ...[
                 SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: MediaQuery.of(context).padding.bottom +
-                        kBottomNavigationBarHeight +
-                        16,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      spacing.cardHorizontal,
+                      spacing.sectionGap,
+                      spacing.cardHorizontal,
+                      spacing.elementGap,
+                    ),
+                    child: Text(
+                      '${ctxt.goal_completedSection} (${completedGoals.length})',
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                  ),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => Padding(
+                        padding: EdgeInsets.only(bottom: spacing.elementGapMin),
+                        child: _buildCompletedCard(
+                          completedGoals[index],
+                          color,
+                          textTheme,
+                          spacing,
+                          context,
+                          ctxt,
+                        ),
+                      ),
+                      childCount: completedGoals.length,
+                    ),
                   ),
                 ),
               ],
-            ),
+
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).padding.bottom +
+                      kBottomNavigationBarHeight +
+                      16,
+                ),
+              ),
+            ],
           );
         },
         loading: () => Padding(
           padding: EdgeInsets.all(spacing.sectionGap),
           child: Column(
             children: [
-              SizedBox(height: spacing.sectionGap * 3),
-              SkeletonLoader(
-                width: double.infinity,
-                height: 200,
-                borderRadius: BorderRadius.circular(spacing.radiusLarge),
-              ),
               SizedBox(height: spacing.sectionGap),
               ...List.generate(
-                4,
+                5,
                 (i) => Padding(
                   padding: EdgeInsets.only(bottom: spacing.elementGap),
                   child: SkeletonLoader(
                     width: double.infinity,
-                    height: 80,
+                    height: 140,
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
                 ),
@@ -272,350 +291,87 @@ class GoalScreen extends ConsumerWidget {
     );
   }
 
-  // ── Section Header ──
-  Widget _sectionHeader(
-    String title,
-    IconData icon,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: color.primary),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.w700, color: color.primary),
-        ),
-      ],
-    );
-  }
-
-  // ── Hero Summary (untouched) ──
-  Widget _buildHeroSummary(
-    List<Goal> activeGoals,
+  // ── Portfolio Status Strip ──
+  Widget _buildStatusStrip(
+    int goalCount,
     double totalSaved,
-    double totalTarget,
-    double overallProgress,
+    int attentionCount,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
     AppLocalizations ctxt,
   ) {
-    final goalCount = activeGoals.length;
-
-    final sections = activeGoals.map((g) {
-      final goalColor =
-          g.colorValue != null ? Color(g.colorValue!) : color.primary;
-      return PieChartSectionData(
-        value: g.currentAmount > 0 ? g.currentAmount : 0.01,
-        color: goalColor,
-        radius: 18,
-        showTitle: false,
-      );
-    }).toList();
-
-    final totalRemaining = totalTarget - totalSaved;
-    if (totalRemaining > 0) {
-      sections.add(
-        PieChartSectionData(
-          value: totalRemaining,
-          color: color.onPrimaryContainer.withValues(alpha: 0.08),
-          radius: 18,
-          showTitle: false,
-        ),
-      );
-    }
-
-    // Emotional headline based on progress
-    final emotionLine = overallProgress >= 0.75
-        ? ctxt.goal_emotionAlmost
-        : overallProgress >= 0.5
-            ? ctxt.goal_emotionHalfway
-            : overallProgress >= 0.25
-                ? ctxt.goal_emotionProgress
-                : ctxt.goal_emotionEvery;
-
     return Container(
-      padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardInner,
+        vertical: spacing.elementGap,
+      ),
       decoration: BoxDecoration(
-        color: color.primaryContainer,
+        color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
-          SizedBox(
-            width: 104,
-            height: 104,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                PieChart(
-                  PieChartData(
-                    sectionsSpace: 2,
-                    centerSpaceRadius: 32,
-                    startDegreeOffset: -90,
-                    sections: sections,
-                  ),
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${(overallProgress * 100).toStringAsFixed(0)}%',
-                      style: textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: color.onPrimaryContainer,
-                        height: 1,
-                      ),
-                    ),
-                    Text(
-                      ctxt.goal_suffixSaved,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: color.onPrimaryContainer.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          _stripItem(
+            ctxt.goal_goalsInProgress(goalCount),
+            null,
+            textTheme,
+            color,
           ),
-          SizedBox(width: spacing.sectionGap),
+          _stripDot(color),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  emotionLine,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: color.onPrimaryContainer,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: spacing.elementGapMin),
-                CurrencyText(
-                  amount: totalSaved,
-                  fixedLength: 0,
-                  compact: false,
-                  style: textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: color.onPrimaryContainer,
-                  ),
-                ),
-                SizedBox(height: spacing.elementGapMin),
-                Row(
-                  children: [
-                    Text(
-                      'of ',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onPrimaryContainer.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    CurrencyText(
-                      amount: totalTarget,
-                      fixedLength: 0,
-                      compact: false,
-                      style: textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: color.onPrimaryContainer,
-                      ),
-                    ),
-                    Text(
-                      ' ${ctxt.goal_acrossGoals(goalCount)}',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onPrimaryContainer.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: spacing.elementGap),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.elementGap,
-                    vertical: spacing.elementGapMin,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.onPrimaryContainer.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                  ),
-                  child: CurrencyText(
-                    amount: totalTarget - totalSaved,
-                    fixedLength: 0,
-                    compact: false,
-                    suffixText: ctxt.goal_suffixToGo,
-                    style: textTheme.labelMedium?.copyWith(
-                      color: color.onPrimaryContainer,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+            child: CurrencyText(
+              amount: totalSaved,
+              fixedLength: 0,
+              compact: true,
+              suffixText: ctxt.goal_suffixSaved,
+              style: textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
+          if (attentionCount > 0) ...[
+            _stripDot(color),
+            Text(
+              ctxt.goal_needAttention(attentionCount),
+              style: textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: FinanceColors.statusWarning,
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  // ── Highlight Goal — HERO card ──
-  Widget _buildHighlightGoal(
-    Goal goal,
-    ColorScheme color,
+  Widget _stripItem(
+    String text,
+    Color? textColor,
     TextTheme textTheme,
-    AppSpacing spacing,
-    BuildContext context,
+    ColorScheme color,
   ) {
-    final goalColor =
-        goal.colorValue != null ? Color(goal.colorValue!) : color.primary;
-    final health = GoalHealth.compute(goal);
-    final statusColor = health.statusColor(color);
-    final progress = goal.progressPercent;
-    final remaining = goal.targetAmount - goal.currentAmount;
-    final ctxt = AppLocalizations.of(context)!;
-
-    // Emotional label based on progress
-    final emotionLabel = progress >= 0.9
-        ? ctxt.goal_emotionAlmost
-        : progress >= 0.75
-            ? ctxt.goal_emotionAlmost
-            : progress >= 0.5
-                ? ctxt.goal_emotionHalfwayDone
-                : progress >= 0.25
-                    ? ctxt.goal_emotionKeepPushing
-                    : ctxt.goal_emotionJustStarted;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: goalColor.withValues(alpha: 0.3), width: 1.5),
-      ),
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          context.push(AppRoutes.goalDetails, extra: {'goal': goal});
-        },
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        child: Padding(
-          padding: EdgeInsets.all(spacing.cardInner + spacing.elementGapMin),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left — info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Emotional context line
-                    Text(
-                      ctxt.goal_closestToCompletion,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: color.onSurfaceVariant,
-                      ),
-                    ),
-                    SizedBox(height: spacing.elementGapMin),
-                    // Goal name
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(spacing.elementGap * 0.75),
-                          decoration: BoxDecoration(
-                            color: goalColor.withValues(alpha: 0.12),
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusSmall),
-                          ),
-                          child: Icon(
-                            IconHelper.getIconData(goal.iconName),
-                            color: goalColor,
-                            size: 20,
-                          ),
-                        ),
-                        SizedBox(width: spacing.elementGap),
-                        Expanded(
-                          child: Text(
-                            goal.name,
-                            style: textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: spacing.elementGap * 1.2),
-                    // Human-readable amounts
-                    CurrencyText(
-                      amount: goal.currentAmount,
-                      fixedLength: 0,
-                      compact: false,
-                      suffixText: ctxt.goal_suffixSaved,
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: goalColor,
-                      ),
-                    ),
-                    SizedBox(height: spacing.elementGapUltraMin),
-                    CurrencyText(
-                      amount: remaining,
-                      fixedLength: 0,
-                      compact: false,
-                      suffixText: ctxt.goal_suffixLeft,
-                      style: textTheme.bodySmall
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                    if (health.daysLeft > 0) ...[
-                      SizedBox(height: spacing.elementGapUltraMin),
-                      Text(
-                        _formatDaysLeft(health.daysLeft, ctxt),
-                        style: textTheme.bodySmall
-                            ?.copyWith(color: color.onSurfaceVariant),
-                      ),
-                    ],
-                    SizedBox(height: spacing.elementGap),
-                    // Emotion + insight
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: spacing.elementGap,
-                        vertical: spacing.elementGapMin,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.08),
-                        borderRadius:
-                            BorderRadius.circular(spacing.radiusSmall),
-                      ),
-                      child: Text(
-                        emotionLabel,
-                        style: textTheme.labelSmall?.copyWith(
-                          color: statusColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: spacing.elementGap),
-              // Right — progress ring
-              _buildProgressRing(
-                progress,
-                goalColor,
-                color,
-                textTheme,
-                80,
-                45,
-                8,
-                showLabel: true,
-                doneLabel: ctxt.goal_suffixDone,
-              ),
-            ],
-          ),
-        ),
+    return Text(
+      text,
+      style: textTheme.labelMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: textColor ?? color.onSurface,
       ),
     );
   }
 
-  // ── Goal Card — compact, human-readable ──
+  Widget _stripDot(ColorScheme color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Text(
+        '·',
+        style: TextStyle(color: color.onSurfaceVariant),
+      ),
+    );
+  }
+
+  // ── Goal Card (decision-first) ──
   Widget _buildGoalCard(
     Goal goal,
     ColorScheme color,
@@ -623,14 +379,18 @@ class GoalScreen extends ConsumerWidget {
     AppSpacing spacing,
     BuildContext context,
     WidgetRef ref,
+    AppLocalizations ctxt,
   ) {
     final goalColor =
         goal.colorValue != null ? Color(goal.colorValue!) : color.primary;
+    final remaining = goal.remainingAmount;
     final progress = goal.progressPercent;
-    final health = GoalHealth.compute(goal);
-    final statusColor = health.statusColor(color);
-    final remaining = goal.targetAmount - goal.currentAmount;
-    final ctxt = AppLocalizations.of(context)!;
+    final pace = _recentPace(goal);
+    final needed = _neededPerMonth(goal);
+    final gap = needed > 0 ? pace - needed : 0.0;
+    final hasDeadline = goal.targetDate != null;
+    final deposit = _suggestedDeposit(goal);
+    final gapColor = gap >= 0 ? goalColor : FinanceColors.statusWarning;
 
     return Container(
       decoration: BoxDecoration(
@@ -646,113 +406,191 @@ class GoalScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         child: Padding(
           padding: EdgeInsets.all(spacing.cardInner),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left — icon
-              Container(
-                padding: EdgeInsets.all(spacing.elementGap * 0.75),
-                decoration: BoxDecoration(
-                  color: goalColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                ),
-                child: Icon(
-                  IconHelper.getIconData(goal.iconName),
-                  color: goalColor,
-                  size: 20,
-                ),
-              ),
-              SizedBox(width: spacing.elementGap),
-              // Middle — info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      goal.name,
+              // Name
+              Row(
+                children: [
+                  Icon(
+                    IconHelper.getIconData(goal.iconName),
+                    color: goalColor,
+                    size: 18,
+                  ),
+                  SizedBox(width: spacing.elementGapMin),
+                  Expanded(
+                    child: Text(
+                      goal.name.safe(),
                       style: textTheme.bodyLarge
                           ?.copyWith(fontWeight: FontWeight.w600),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: spacing.elementGapUltraMin),
-                    // Human-readable: saved + left
-                    Row(
-                      children: [
-                        CurrencyText(
-                          amount: goal.currentAmount,
-                          fixedLength: 0,
-                          compact: true,
-                          suffixText: ctxt.goal_suffixSaved,
-                          style: textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: goalColor,
-                          ),
-                        ),
-                        Text(
-                          '  •  ',
-                          style: textTheme.labelSmall
-                              ?.copyWith(color: color.outlineVariant),
-                        ),
-                        CurrencyText(
-                          amount: remaining,
-                          fixedLength: 0,
-                          compact: true,
-                          suffixText: ctxt.goal_suffixLeft,
-                          style: textTheme.labelSmall
-                              ?.copyWith(color: color.onSurfaceVariant),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: spacing.elementGapUltraMin),
-                    // Insight line
+                  ),
+                ],
+              ),
+
+              SizedBox(height: spacing.elementGap),
+
+              // Remaining (hero metric on card)
+              CurrencyText(
+                currencyCode: goal.currencyCode,
+                amount: remaining,
+                fixedLength: 0,
+                compact: false,
+                suffixText: ctxt.goal_suffixLeft,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+
+              SizedBox(height: spacing.elementGap),
+
+              // Gap signal (neutral: +/-)
+              if (needed > 0) ...[
+                Row(
+                  children: [
                     Text(
-                      _shortInsight(
-                        health,
-                        goal,
-                        ctxt,
+                      gap >= 0 ? '+' : '',
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: gapColor,
                       ),
-                      style: textTheme.labelSmall?.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.w500,
+                    ),
+                    CurrencyText(
+                      currencyCode: goal.currencyCode,
+                      amount: gap,
+                      fixedLength: 0,
+                      compact: true,
+                      suffixText: '/mo',
+                      showSign: gap < 0,
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: gapColor,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ),
-              SizedBox(width: spacing.elementGap),
-              // Right — mini ring + quick deposit
-              Column(
+                SizedBox(height: spacing.elementGapMin),
+                // Evidence: pace vs needed
+                Row(
+                  children: [
+                    Text(
+                      ctxt.goal_currentAvgMonth,
+                      style: textTheme.labelSmall
+                          ?.copyWith(color: color.onSurfaceVariant),
+                    ),
+                    const SizedBox(width: 4),
+                    CurrencyText(
+                      currencyCode: goal.currencyCode,
+                      amount: pace,
+                      fixedLength: 0,
+                      compact: true,
+                      style: textTheme.labelSmall
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      '  ·  ',
+                      style: textTheme.labelSmall
+                          ?.copyWith(color: color.outlineVariant),
+                    ),
+                    Text(
+                      ctxt.goal_neededPerMonth,
+                      style: textTheme.labelSmall
+                          ?.copyWith(color: color.onSurfaceVariant),
+                    ),
+                    const SizedBox(width: 4),
+                    CurrencyText(
+                      currencyCode: goal.currencyCode,
+                      amount: needed,
+                      fixedLength: 0,
+                      compact: true,
+                      style: textTheme.labelSmall
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                SizedBox(height: spacing.elementGap),
+              ],
+
+              // Target date
+              if (hasDeadline)
+                Text(
+                  safeDateFormat('MMM yyyy', ctxt.localeName)
+                      .format(goal.targetDate!),
+                  style: textTheme.labelSmall
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+
+              SizedBox(height: spacing.elementGap),
+
+              // Progress bar + % (subordinate)
+              Row(
                 children: [
-                  _buildProgressRing(
-                    progress,
-                    goalColor,
-                    color,
-                    textTheme,
-                    50,
-                    24,
-                    5,
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: LinearProgressIndicator(
+                        value: progress.clamp(0.0, 1.0),
+                        backgroundColor: goalColor.withValues(alpha: 0.1),
+                        valueColor: AlwaysStoppedAnimation(goalColor),
+                        minHeight: 4,
+                      ),
+                    ),
                   ),
-                  SizedBox(height: spacing.elementGapMin),
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.mediumImpact();
-                      _showQuickDeposit(context, ref, goal);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: spacing.elementGap,
-                        vertical: spacing.elementGapMin,
-                      ),
-                      decoration: BoxDecoration(
-                        color: goalColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                      ),
-                      child: Icon(LucideIcons.plus, size: 14, color: goalColor),
+                  SizedBox(width: spacing.elementGap),
+                  Text(
+                    '${(progress * 100).toStringAsFixed(0)}%',
+                    style: textTheme.labelSmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
+              ),
+
+              SizedBox(height: spacing.elementGap),
+
+              // One-tap contribution
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    _quickDeposit(context, ref, goal, deposit);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: goalColor,
+                    side: BorderSide(
+                      color: goalColor.withValues(alpha: 0.3),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(spacing.radiusSmall),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      vertical: spacing.elementGapMin,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(LucideIcons.plus, size: 14, color: goalColor),
+                      const SizedBox(width: 4),
+                      CurrencyText(
+                        currencyCode: goal.currencyCode,
+                        amount: deposit,
+                        fixedLength: 0,
+                        compact: true,
+                        style: textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: goalColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -761,16 +599,15 @@ class GoalScreen extends ConsumerWidget {
     );
   }
 
-  // ── Completed Goal Card ──
+  // ── Completed Card (minimal) ──
   Widget _buildCompletedCard(
     Goal goal,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
     BuildContext context,
+    AppLocalizations ctxt,
   ) {
-    final ctxt = AppLocalizations.of(context)!;
-
     return Container(
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
@@ -787,48 +624,30 @@ class GoalScreen extends ConsumerWidget {
           padding: EdgeInsets.all(spacing.cardInner),
           child: Row(
             children: [
-              Container(
-                padding: EdgeInsets.all(spacing.elementGap * 0.75),
-                decoration: BoxDecoration(
-                  color: FinanceColors.statusGood.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                ),
-                child: const Icon(
-                  LucideIcons.check,
-                  color: FinanceColors.statusGood,
-                  size: 20,
-                ),
+              const Icon(
+                LucideIcons.check,
+                color: FinanceColors.statusGood,
+                size: 18,
               ),
               SizedBox(width: spacing.elementGap),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      goal.name,
-                      style: textTheme.bodyLarge
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: spacing.elementGapUltraMin),
-                    CurrencyText(
-                      amount: goal.targetAmount,
-                      fixedLength: 0,
-                      compact: true,
-                      suffixText: ctxt.goal_suffixAchieved,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: FinanceColors.statusGood,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  goal.name.safe(),
+                  style: textTheme.bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.w500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Icon(
-                LucideIcons.trophy,
-                size: 20,
-                color: Colors.amber.withValues(alpha: 0.6),
+              CurrencyText(
+                currencyCode: goal.currencyCode,
+                amount: goal.targetAmount,
+                fixedLength: 0,
+                compact: true,
+                style: textTheme.labelMedium?.copyWith(
+                  color: FinanceColors.statusGood,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -837,206 +656,24 @@ class GoalScreen extends ConsumerWidget {
     );
   }
 
-  // ── Progress Ring (shared) ──
-  Widget _buildProgressRing(
-    double progress,
-    Color goalColor,
-    ColorScheme color,
-    TextTheme textTheme,
-    double size,
-    double radius,
-    double ringWidth, {
-    bool showLabel = false,
-    String doneLabel = 'done',
-  }) {
-    final clamped = progress.clamp(0.0, 1.0);
-    final filled = clamped > 0 ? clamped : 0.001;
-    final remaining = 1.0 - clamped;
-    final pctText = '${(clamped * 100).toStringAsFixed(0)}%';
-
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          PieChart(
-            PieChartData(
-              sectionsSpace: 0,
-              centerSpaceRadius: radius - ringWidth,
-              startDegreeOffset: -90,
-              sections: [
-                PieChartSectionData(
-                  value: filled,
-                  color: goalColor,
-                  radius: ringWidth,
-                  showTitle: false,
-                ),
-                if (remaining > 0)
-                  PieChartSectionData(
-                    value: remaining,
-                    color: goalColor.withValues(alpha: 0.08),
-                    radius: ringWidth,
-                    showTitle: false,
-                  ),
-              ],
-            ),
-          ),
-          showLabel
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      pctText,
-                      style: textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: goalColor,
-                        height: 1,
-                      ),
-                    ),
-                    Text(
-                      doneLabel,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: goalColor.withValues(alpha: 0.6),
-                        fontSize: 9,
-                      ),
-                    ),
-                  ],
-                )
-              : Text(
-                  pctText,
-                  style: textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: goalColor.withValues(alpha: 0.7),
-                  ),
-                ),
-        ],
-      ),
-    );
-  }
-
-  // ── Short insight for list cards ──
-  String _shortInsight(
-    GoalHealth health,
+  // ── Quick Deposit (one-tap) ──
+  void _quickDeposit(
+    BuildContext context,
+    WidgetRef ref,
     Goal goal,
-    AppLocalizations ctxt,
-  ) {
-    if (health.daysLeft > 0) {
-      final pct = goal.progressPercent;
-      if (pct >= 0.75) return ctxt.goal_emotionAlmost;
-      if (pct >= 0.5) return ctxt.goal_emotionProgress;
-      if (health.status == GoalStatus.behind) return ctxt.goal_needsAttention;
-      if (health.status == GoalStatus.ahead) return ctxt.goal_aheadOfSchedule;
-      return _formatDaysLeft(health.daysLeft, ctxt);
-    }
-    if (health.status == GoalStatus.noDeadline) {
-      return ctxt.goal_flexibleTimeline;
-    }
-    return health.insightMessage(goal);
-  }
-
-  String _formatDaysLeft(int days, AppLocalizations ctxt) {
-    if (days > 60) return ctxt.goal_monthsLeft((days / 30).round());
-    return ctxt.goal_daysLeft(days);
-  }
-
-  void _showQuickDeposit(BuildContext context, WidgetRef ref, Goal goal) {
-    final controller = TextEditingController();
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final spacing = ref.read(spacingProvider);
-    final goalColor =
-        goal.colorValue != null ? Color(goal.colorValue!) : color.primary;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
-      ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          left: spacing.cardHorizontalMax,
-          right: spacing.cardHorizontalMax,
-          top: spacing.cardHorizontalMax,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + spacing.cardHorizontalMax,
+    double amount,
+  ) async {
+    await ref.read(goalServiceProvider).addContribution(goal.id, amount);
+    ref.invalidate(goalsProvider);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${formatCurrency(amount, code: goal.currencyCode, decimals: 0)} → ${goal.name.safe()}',
+          ),
+          behavior: SnackBarBehavior.floating,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Icon(IconHelper.getIconData(goal.iconName),
-                    color: goalColor, size: 20),
-                SizedBox(width: spacing.elementGap),
-                Expanded(
-                  child: Text(
-                    goal.name,
-                    style: textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: spacing.sectionGap),
-            TextField(
-              controller: controller,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              autofocus: true,
-              textAlign: TextAlign.center,
-              style: textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: goalColor,
-              ),
-              decoration: InputDecoration(
-                hintText: '0',
-                hintStyle: textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: goalColor.withValues(alpha: 0.2),
-                ),
-                border: InputBorder.none,
-                filled: true,
-                fillColor: goalColor.withValues(alpha: 0.06),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            SizedBox(height: spacing.sectionGap),
-            FilledButton(
-              onPressed: () async {
-                final amount = double.tryParse(
-                    controller.text.replaceAll(',', ''));
-                if (amount == null || amount <= 0) return;
-                await ref
-                    .read(goalServiceProvider)
-                    .addContribution(goal.id, amount);
-                ref.invalidate(goalsProvider);
-                if (ctx.mounted) Navigator.pop(ctx);
-              },
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(double.infinity, 52),
-                backgroundColor: goalColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                ),
-              ),
-              child: Text(
-                AppLocalizations.of(context)!.goal_addToGoal,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+      );
+    }
   }
 }

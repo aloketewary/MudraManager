@@ -1,5 +1,6 @@
 {
     "saropaLints.enabled": true,
     "saropaLints.runAnalysisAfterConfigChange": false,
-    "saropaLints.runAnalysisAfterDependencyChange": false
+    "saropaLints.runAnalysisAfterDependencyChange": false,
+    "java.configuration.updateBuildConfiguration": "disabled"
 }

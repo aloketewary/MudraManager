@@ -13,6 +13,8 @@ import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class CreditCardBillsScreen extends ConsumerWidget {
   const CreditCardBillsScreen({super.key});
@@ -26,12 +28,13 @@ class CreditCardBillsScreen extends ConsumerWidget {
     final summariesAsync = ref.watch(creditCardSummariesProvider);
     final isGuest = ref.watch(guestModeProvider);
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        title: Text(ctxt.cc_title),
-        elevation: 0,
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.cc_title,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: summariesAsync.when(
         data: (summaries) {
           if (summaries.isEmpty) {

@@ -6,6 +6,8 @@ import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/l10n_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class ChooseLanguageScreen extends ConsumerStatefulWidget {
   const ChooseLanguageScreen({super.key});
@@ -32,13 +34,13 @@ class _ChooseLanguageScreenState extends ConsumerState<ChooseLanguageScreen> {
     final spacing = ref.watch(spacingProvider);
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          ctxt.language_settings_appbar_title,
-          style: textTheme.titleLarge,
-        ),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.language_settings_appbar_title,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: ListView(
         padding: EdgeInsets.symmetric(vertical: spacing.cardVertical),
         children: [

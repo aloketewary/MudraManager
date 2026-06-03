@@ -13,6 +13,8 @@ import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/features/account/presentation/widgets/balance_history_chart.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class BalanceHistoryScreen extends ConsumerWidget {
   final Account account;
@@ -29,11 +31,13 @@ class BalanceHistoryScreen extends ConsumerWidget {
     final ctxt = AppLocalizations.of(context)!;
     final accountColor = Color(account.colorValue ?? Colors.blue.toARGB32());
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(account.name, style: textTheme.titleLarge),
-        elevation: 0,
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: account.name,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: balanceHistory.when(
         data: (snapshots) {
           if (snapshots.isEmpty) {

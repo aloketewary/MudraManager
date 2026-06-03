@@ -749,7 +749,8 @@ class NotificationService {
       ..isRead = false
       ..type = type
       ..priority = NotificationPriority.normal
-      ..category = NotificationCategory.system;
+      ..category = NotificationCategory.system
+      ..source = NotificationSource.scheduled;
     record.encryptFields(); // Sentinel: Encrypt summaries which may contain spending data
     await isar.writeTxn(() => isar.notificationRecords.put(record));
   }

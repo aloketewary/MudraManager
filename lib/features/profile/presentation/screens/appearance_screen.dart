@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,6 +16,7 @@ import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/account_display_style_provider.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 
 final _guestModePluginProvider = FutureProvider.autoDispose((ref) async {
@@ -42,8 +44,13 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
     final isGuestMode = ref.watch(guestModeProvider);
     final activeTone = ref.watch(tonePackProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.appearance_title)),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: AppLocalizations.of(context)!.appearance_title,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.empty,
       body: ListView(
         padding: EdgeInsets.symmetric(
           horizontal: spacing.cardHorizontal,

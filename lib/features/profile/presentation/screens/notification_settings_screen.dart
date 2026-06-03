@@ -10,7 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
@@ -256,8 +258,13 @@ class _NotificationSettingsScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(ctxt.title_notifications)),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.title_notifications,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.empty,
       body: !_loaded
           ? Padding(padding: EdgeInsets.all(spacing.cardHorizontal), child: Column(children: [const DashboardCardSkeleton(), SizedBox(height: spacing.elementGap), const DashboardCardSkeleton()]))
           : ListView(

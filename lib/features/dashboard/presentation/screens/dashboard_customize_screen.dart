@@ -262,16 +262,8 @@ class _DashboardCustomizeScreenState
                         ],
                         const Spacer(),
                         Switch(
-                          value: isPro && ref.watch(smartOrderEnabledProvider),
-                          onChanged: isPro
-                              ? (v) {
-                                  SharedPrefsUtil.instance.setString(
-                                    'smart_order_enabled',
-                                    v.toString(),
-                                  );
-                                  ref.invalidate(smartOrderEnabledProvider);
-                                }
-                              : (_) => context.push(AppRoutes.upgrade),
+                          value: false,
+                          onChanged: null,
                         ),
                       ],
                     );
