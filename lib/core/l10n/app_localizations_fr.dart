@@ -6432,4 +6432,41 @@ class AppLocalizationsFr extends AppLocalizations {
   String briefing_greetingWithName(String greeting, String name) {
     return '$greeting, $name';
   }
+
+  @override
+  String hero_spendingLess(String percent) {
+    return 'You\'re spending $percent% less than last month — that\'s real progress 💪';
+  }
+
+  @override
+  String hero_weekSaved(String amount) {
+    return '$amount saved this week — not bad at all!';
+  }
+
+  @override
+  String hero_savingsRate(String percent) {
+    return '$percent% of your income is staying with you this month 🙌';
+  }
+
+  @override
+  String hero_goalsAlmostDone(int count) {
+    return 'So close! $count goal(s) almost at the finish line 🏁';
+  }
+
+  @override
+  String get hero_zeroSpend => 'Zero spent today — your wallet thanks you ✨';
+
+  @override
+  String hero_todayUnderAvg(String today, String avg) {
+    return '$today today — under your $avg daily average 👍';
+  }
+
+  @override
+  String hero_todayVsAvg(String today, String avg) {
+    return '$today today vs $avg daily average';
+  }
+
+  @override
+  String get hero_offlinePrivacy =>
+      'Your data never leaves this device — 100% offline, 100% yours';
 }

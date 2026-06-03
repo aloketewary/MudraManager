@@ -11429,6 +11429,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{greeting}, {name}'**
   String briefing_greetingWithName(String greeting, String name);
+
+  /// No description provided for @hero_spendingLess.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re spending {percent}% less than last month — that\'s real progress 💪'**
+  String hero_spendingLess(String percent);
+
+  /// No description provided for @hero_weekSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} saved this week — not bad at all!'**
+  String hero_weekSaved(String amount);
+
+  /// No description provided for @hero_savingsRate.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of your income is staying with you this month 🙌'**
+  String hero_savingsRate(String percent);
+
+  /// No description provided for @hero_goalsAlmostDone.
+  ///
+  /// In en, this message translates to:
+  /// **'So close! {count} goal(s) almost at the finish line 🏁'**
+  String hero_goalsAlmostDone(int count);
+
+  /// No description provided for @hero_zeroSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'Zero spent today — your wallet thanks you ✨'**
+  String get hero_zeroSpend;
+
+  /// No description provided for @hero_todayUnderAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'{today} today — under your {avg} daily average 👍'**
+  String hero_todayUnderAvg(String today, String avg);
+
+  /// No description provided for @hero_todayVsAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'{today} today vs {avg} daily average'**
+  String hero_todayVsAvg(String today, String avg);
+
+  /// No description provided for @hero_offlinePrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data never leaves this device — 100% offline, 100% yours'**
+  String get hero_offlinePrivacy;
 }
 
 class _AppLocalizationsDelegate

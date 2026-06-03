@@ -5,6 +5,10 @@ import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/daily_briefing_card.dart';
 
+/// Unified "position zero" card.
+/// Briefing fires → shows warning/action narrative.
+/// No signal → shows Hero moment (positive reinforcement).
+/// One slot, adapts to state.
 class DailyBriefingWidgetPlugin extends DashboardWidgetPlugin {
   @override
   String get id => 'daily_briefing';
@@ -28,11 +32,11 @@ class DailyBriefingWidgetPlugin extends DashboardWidgetPlugin {
   bool get canBeDisabled => true;
 
   @override
-  String get description => 'Your daily financial briefing — what changed, what needs attention, what to do';
+  String get description => 'Your daily financial briefing — alerts when needed, encouragement when not';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const DailyBriefingCard();
+    return const UnifiedBriefingCard();
   }
 
   @override

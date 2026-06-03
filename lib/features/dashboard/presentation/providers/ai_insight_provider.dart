@@ -4,6 +4,7 @@ import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/spending_drift_detector.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
+import 'package:mudra_manager/features/dashboard/presentation/widgets/daily_briefing_card.dart';
 
 class AiInsight {
   final String title;
@@ -41,16 +42,36 @@ enum IconType {
 
 final aiInsightProvider = Provider<List<AiInsight>>((ref) {
   final dashboardData = ref.watch(dashboardDataProvider);
+  final briefing = ref.watch(dailyBriefingProvider);
 
   return dashboardData.maybeWhen(
-    data: (data) => _generateInsights(data),
+    data: (data) => _generateInsights(data, briefing),
     orElse: () => [],
   );
 });
 
-List<AiInsight> _generateInsights(DashboardData data) {
+List<AiInsight> _generateInsights(DashboardData data, Briefing? briefing) {
   final candidates = <AiInsight>[];
   final now = DateTime.now();
+
+  // Determine which signal categories the Briefing already covers
+  // Philosophy principle #3: "Signals must compete, not coexist."
+  final briefingCovers = <String>{};
+  if (briefing != null) {
+    switch (briefing.signalType) {
+      case BriefingSignalType.billDueToday:
+      case BriefingSignalType.billDueSoon:
+        briefingCovers.add('bills');
+      case BriefingSignalType.budgetExceeded:
+        briefingCovers.add('budget');
+      case BriefingSignalType.spendingDrift:
+        briefingCovers.add('drift');
+      case BriefingSignalType.overspending:
+        briefingCovers.add('overspending');
+      case BriefingSignalType.improvement:
+        briefingCovers.add('improvement');
+    }
+  }
 
   // ────────────────────────────────────────────
   // ACTIONABLE — things user must act on NOW
@@ -59,7 +80,7 @@ List<AiInsight> _generateInsights(DashboardData data) {
   // (SMS pending is handled by _AutoImportBanner on dashboard — no duplicate insight needed)
 
   // Bills due — urgency by proximity
-  if (data.recurringExpenses.isNotEmpty) {
+  if (data.recurringExpenses.isNotEmpty && !briefingCovers.contains('bills')) {
     final dueTomorrow = data.recurringExpenses
         .where(
           (r) =>
@@ -105,7 +126,7 @@ List<AiInsight> _generateInsights(DashboardData data) {
   // ────────────────────────────────────────────
 
   // Budget exceeded
-  if (data.budgets.isNotEmpty) {
+  if (data.budgets.isNotEmpty && !briefingCovers.contains('budget')) {
     final overBudget = data.budgets.where((b) => b.spent > b.budget.amount);
     final nearLimit = data.budgets.where((b) {
       final pct = b.spent / b.budget.amount;
@@ -145,7 +166,7 @@ List<AiInsight> _generateInsights(DashboardData data) {
   }
 
   // Overspending this month
-  if (data.totalExpense > data.totalIncome && data.totalIncome > 0) {
+  if (data.totalExpense > data.totalIncome && data.totalIncome > 0 && !briefingCovers.contains('overspending')) {
     final deficit = data.totalExpense - data.totalIncome;
     final ratio = deficit / data.totalIncome;
     // Scale: 10% over = 60, 50%+ over = 80

@@ -75,6 +75,18 @@ class WidgetPreferencesService {
       final isar = await isarService.getInstance();
       final existing = await getAll();
       final existingIds = existing.map((e) => e.widgetId).toSet();
+      final registryIds = DashboardWidgetRegistry.widgets.map((w) => w.id).toSet();
+
+      // Clean up orphaned preferences for removed widgets
+      final orphanedPrefs = existing
+          .where((p) => !registryIds.contains(p.widgetId))
+          .toList();
+      if (orphanedPrefs.isNotEmpty) {
+        await isar.writeTxn(() async {
+          await isar.dashboardWidgetPreferences
+              .deleteAll(orphanedPrefs.map((p) => p.id).toList());
+        });
+      }
 
       final newPreferences = <DashboardWidgetPreference>[];
 

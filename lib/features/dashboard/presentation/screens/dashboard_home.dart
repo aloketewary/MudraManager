@@ -149,8 +149,6 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     try {
       final child = widget.build(context, ref);
 
-      if (widget.id == 'hero_moment') return child;
-
       // Record impression
       ref.read(widgetAnalyticsServiceProvider).recordImpression(widget.id);
 
@@ -248,9 +246,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             await widget.refresh(ref);
           }
           if (mounted) {
-            SnackbarService.success(
-              AppLocalizations.of(context)!.tone_friendly_dashboardAllCaughtUp.split('|').first,
-            );
+            SnackbarService.success('✓');
           }
         }),
         child: CustomScrollView(

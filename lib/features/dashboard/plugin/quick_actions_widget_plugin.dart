@@ -27,9 +27,6 @@ class QuickActionsWidgetPlugin extends DashboardWidgetPlugin {
   String get description => 'Quick access to add expenses and transfers';
 
   @override
-  bool get canBeDisabled => false;
-
-  @override
   Widget build(BuildContext context, WidgetRef ref) {
     return const QuickActionButton();
   }

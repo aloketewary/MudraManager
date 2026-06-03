@@ -3,20 +3,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 
+enum HeroMomentType {
+  spendingLess,
+  weekSaved,
+  savingsRate,
+  goalsAlmostDone,
+  zeroSpend,
+  todayUnderAvg,
+  todayVsAvg,
+  offlinePrivacy,
+  allCaughtUp,
+}
+
 class HeroMoment {
   final IconData icon;
-  final String message;
+  final HeroMomentType type;
+  final Map<String, dynamic> params;
   final Color? accentColor;
 
   const HeroMoment({
     required this.icon,
-    required this.message,
+    required this.type,
+    this.params = const {},
     this.accentColor,
   });
 }
@@ -84,8 +99,8 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
       if (improvement >= 5) {
         return HeroMoment(
           icon: LucideIcons.trendingDown,
-          message:
-              'You\'re spending ${improvement.toStringAsFixed(0)}% less than last month — that\'s real progress 💪',
+          type: HeroMomentType.spendingLess,
+          params: {'percent': improvement.toStringAsFixed(0)},
           accentColor: const Color(0xFF4CAF50),
         );
       }
@@ -119,8 +134,8 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
   if (weekSavings > 0 && weekIncome > 0) {
     return HeroMoment(
       icon: LucideIcons.piggyBank,
-      message:
-          '${formatCurrency(applyGM(weekSavings), decimals: 0)} saved this week — not bad at all!',
+      type: HeroMomentType.weekSaved,
+      params: {'amount': formatCurrency(applyGM(weekSavings), decimals: 0)},
       accentColor: const Color(0xFF4CAF50),
     );
   }
@@ -129,8 +144,8 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
   if (monthlySavings > 0 && savingsRate >= 10) {
     return HeroMoment(
       icon: LucideIcons.target,
-      message:
-          '${savingsRate.toStringAsFixed(0)}% of your income is staying with you this month 🙌',
+      type: HeroMomentType.savingsRate,
+      params: {'percent': savingsRate.toStringAsFixed(0)},
       accentColor: const Color(0xFF4CAF50),
     );
   }
@@ -142,8 +157,8 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
     if (nearDone > 0) {
       return HeroMoment(
         icon: LucideIcons.target,
-        message:
-            'So close! $nearDone goal${nearDone > 1 ? 's' : ''} almost at the finish line 🏁',
+        type: HeroMomentType.goalsAlmostDone,
+        params: {'count': nearDone},
         accentColor: const Color(0xFF4CAF50),
       );
     }
@@ -153,7 +168,7 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
   if (todayExpense == 0 && data.transactions.isNotEmpty) {
     return const HeroMoment(
       icon: LucideIcons.sparkles,
-      message: 'Zero spent today — your wallet thanks you ✨',
+      type: HeroMomentType.zeroSpend,
       accentColor: Color(0xFF2196F3),
     );
   }
@@ -164,9 +179,11 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
     final isUnder = todayExpense <= avgDaily;
     return HeroMoment(
       icon: isUnder ? LucideIcons.circleCheck : LucideIcons.receiptText,
-      message: isUnder
-          ? '${formatCurrency(applyGM(todayExpense), decimals: 0)} today — under your ${formatCurrency(applyGM(avgDaily), decimals: 0)} daily average 👍'
-          : '${formatCurrency(applyGM(todayExpense), decimals: 0)} today vs ${formatCurrency(applyGM(avgDaily), decimals: 0)} daily average',
+      type: isUnder ? HeroMomentType.todayUnderAvg : HeroMomentType.todayVsAvg,
+      params: {
+        'today': formatCurrency(applyGM(todayExpense), decimals: 0),
+        'avg': formatCurrency(applyGM(avgDaily), decimals: 0),
+      },
       accentColor: isUnder ? const Color(0xFF4CAF50) : null,
     );
   }
@@ -174,17 +191,17 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
   if (DateTime.now().day % 3 == 0) {
     return const HeroMoment(
       icon: LucideIcons.shieldCheck,
-      message: 'Your data never leaves this device — 100% offline, 100% yours',
+      type: HeroMomentType.offlinePrivacy,
       accentColor: Color(0xFF009688),
     );
   }
 
   // All caught up — nothing needs attention
   if (data.transactions.isNotEmpty) {
-    return HeroMoment(
+    return const HeroMoment(
       icon: LucideIcons.circleCheck,
-      message: BuddyMessages.dashboardAllCaughtUp,
-      accentColor: const Color(0xFF4CAF50),
+      type: HeroMomentType.allCaughtUp,
+      accentColor: Color(0xFF4CAF50),
     );
   }
 
@@ -242,6 +259,7 @@ class _HeroMomentCardState extends ConsumerState<HeroMomentCard>
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final accent = hero.accentColor ?? color.primary;
+    final message = _formatMessage(AppLocalizations.of(context)!, hero);
 
     return SizeTransition(
       sizeFactor: _sizeFactor,
@@ -288,7 +306,7 @@ class _HeroMomentCardState extends ConsumerState<HeroMomentCard>
                     SizedBox(width: spacing.sectionGap),
                     Expanded(
                       child: Text(
-                        hero.message,
+                        message,
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: color.onSurface,
@@ -311,5 +329,25 @@ class _HeroMomentCardState extends ConsumerState<HeroMomentCard>
         ),
       ),
     );
+  }
+
+  String _formatMessage(AppLocalizations l10n, HeroMoment hero) {
+    return switch (hero.type) {
+      HeroMomentType.spendingLess => l10n.hero_spendingLess(
+          hero.params['percent'] as String,),
+      HeroMomentType.weekSaved => l10n.hero_weekSaved(
+          hero.params['amount'] as String,),
+      HeroMomentType.savingsRate => l10n.hero_savingsRate(
+          hero.params['percent'] as String,),
+      HeroMomentType.goalsAlmostDone => l10n.hero_goalsAlmostDone(
+          hero.params['count'] as int,),
+      HeroMomentType.zeroSpend => l10n.hero_zeroSpend,
+      HeroMomentType.todayUnderAvg => l10n.hero_todayUnderAvg(
+          hero.params['today'] as String, hero.params['avg'] as String,),
+      HeroMomentType.todayVsAvg => l10n.hero_todayVsAvg(
+          hero.params['today'] as String, hero.params['avg'] as String,),
+      HeroMomentType.offlinePrivacy => l10n.hero_offlinePrivacy,
+      HeroMomentType.allCaughtUp => BuddyMessages.dashboardAllCaughtUp,
+    };
   }
 }

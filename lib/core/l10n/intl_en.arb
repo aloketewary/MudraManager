@@ -3599,5 +3599,61 @@
         "type": "String"
       }
     }
-  }
+  },
+  "hero_spendingLess": "You're spending {percent}% less than last month — that's real progress 💪",
+  "@hero_spendingLess": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "hero_weekSaved": "{amount} saved this week — not bad at all!",
+  "@hero_weekSaved": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "hero_savingsRate": "{percent}% of your income is staying with you this month 🙌",
+  "@hero_savingsRate": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "hero_goalsAlmostDone": "So close! {count} goal(s) almost at the finish line 🏁",
+  "@hero_goalsAlmostDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hero_zeroSpend": "Zero spent today — your wallet thanks you ✨",
+  "hero_todayUnderAvg": "{today} today — under your {avg} daily average 👍",
+  "@hero_todayUnderAvg": {
+    "placeholders": {
+      "today": {
+        "type": "String"
+      },
+      "avg": {
+        "type": "String"
+      }
+    }
+  },
+  "hero_todayVsAvg": "{today} today vs {avg} daily average",
+  "@hero_todayVsAvg": {
+    "placeholders": {
+      "today": {
+        "type": "String"
+      },
+      "avg": {
+        "type": "String"
+      }
+    }
+  },
+  "hero_offlinePrivacy": "Your data never leaves this device — 100% offline, 100% yours"
 }
