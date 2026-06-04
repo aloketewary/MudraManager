@@ -3377,6 +3377,123 @@ class AppLocalizationsSd extends AppLocalizations {
   }
 
   @override
+  String get budget_spent => 'Spent';
+
+  @override
+  String get budget_currentPace => 'Current pace';
+
+  @override
+  String get budget_allowedPace => 'Allowed pace';
+
+  @override
+  String get budget_exceedingBy => 'Exceeding by';
+
+  @override
+  String get budget_underBy => 'Under by';
+
+  @override
+  String budget_forecastBreach(int days) {
+    return 'At current pace: limit reached in $days days';
+  }
+
+  @override
+  String get budget_remainingAllowance => 'remaining allowance';
+
+  @override
+  String get budget_insufficientData => 'Insufficient activity data';
+
+  @override
+  String get budget_addExpense => 'Add Expense';
+
+  @override
+  String get budget_viewTransactions => 'View Transactions';
+
+  @override
+  String get budget_reduceBy => 'Reduce by';
+
+  @override
+  String get budget_spendAtMost => 'Spend ≤';
+
+  @override
+  String get budget_reviewSpending => 'Review Spending';
+
+  @override
+  String get budget_viewDetails => 'View Details';
+
+  @override
+  String get budget_fixData => 'Fix Data';
+
+  @override
+  String get budget_alreadyBreached => 'At current pace: already breached';
+
+  @override
+  String get budget_paceBelowLimit => 'Current pace below limit';
+
+  @override
+  String get budget_createBudget => 'Create Budget';
+
+  @override
+  String get budget_limit => 'Limit';
+
+  @override
+  String get budget_basedOnHistory => 'Based on your spending';
+
+  @override
+  String get budget_lastMonth => 'Last month';
+
+  @override
+  String get budget_threeMonthAvg => '3-month average';
+
+  @override
+  String get budget_bufferAbove => 'buffer vs last month';
+
+  @override
+  String get budget_bufferBelow => 'below last month';
+
+  @override
+  String get budget_templateRecommended => 'Recommended';
+
+  @override
+  String get budget_templateConservative => 'Conservative';
+
+  @override
+  String get budget_templateFlexible => 'Flexible';
+
+  @override
+  String get budget_periodThisWeek => 'This Week';
+
+  @override
+  String get budget_periodThisMonth => 'This Month';
+
+  @override
+  String get budget_periodThisYear => 'This Year';
+
+  @override
+  String get budget_periodCustom => 'Custom';
+
+  @override
+  String get budget_perDay => 'day';
+
+  @override
+  String get budget_days => 'days';
+
+  @override
+  String get budget_advanced => 'Advanced';
+
+  @override
+  String get budget_adjustLimit => 'Adjust Limit';
+
+  @override
+  String get budget_dangerZone => 'Danger Zone';
+
+  @override
+  String get budget_archive => 'Archive';
+
+  @override
+  String get budget_archiveConfirm =>
+      'Archive this budget? It will move to your past budgets.';
+
+  @override
   String get category_categoryName => 'Category Name';
 
   @override
@@ -6392,4 +6509,72 @@ class AppLocalizationsSd extends AppLocalizations {
   @override
   String get hero_offlinePrivacy =>
       'Your data never leaves this device — 100% offline, 100% yours';
+
+  @override
+  String get goal_whyOptional => 'Why? (optional)';
+
+  @override
+  String get goal_whyHint =>
+      'e.g. Bangalore down payment before child starts school';
+
+  @override
+  String get goal_currentSavings => 'Current Savings';
+
+  @override
+  String get goal_currentExceedsTarget =>
+      'Current savings cannot exceed target amount';
+
+  @override
+  String get goal_targetBelowSaved =>
+      'New target is below current savings. Mark goal as completed instead.';
+
+  @override
+  String get goal_typeHouse => 'House';
+
+  @override
+  String get goal_typeVehicle => 'Vehicle';
+
+  @override
+  String get goal_typeTravel => 'Travel';
+
+  @override
+  String get goal_typeEducation => 'Education';
+
+  @override
+  String get goal_typeWedding => 'Wedding';
+
+  @override
+  String get goal_typeCustom => 'Custom';
+
+  @override
+  String get goal_sectionIdentity => 'Goal Identity';
+
+  @override
+  String get goal_sectionCurrentState => 'Current State';
+
+  @override
+  String get goal_sectionProjection => 'Projection';
+
+  @override
+  String get goal_currentTarget => 'Current Target';
+
+  @override
+  String get goal_adjustTarget => 'Adjust Target';
+
+  @override
+  String get goal_lastContribution => 'Last contribution';
+
+  @override
+  String get goal_viewHistory => 'View History →';
+
+  @override
+  String get goal_archive => 'Archive Goal';
+
+  @override
+  String get goal_markComplete => 'Mark Complete';
+
+  @override
+  String goal_basedOnAvg(Object amount) {
+    return 'Based on $amount/month average';
+  }
 }

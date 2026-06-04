@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
@@ -17,14 +18,18 @@ import 'package:mudra_manager/features/analytics/presentation/net_worth_screen.d
 import 'package:mudra_manager/features/analytics/presentation/tax_estimation_screen.dart';
 import 'package:mudra_manager/features/analytics/presentation/cash_flow_forecast_screen.dart';
 import 'package:mudra_manager/features/analytics/presentation/spending_trends_screen.dart';
+import 'package:mudra_manager/core/db/models/budget.dart';
+import 'package:mudra_manager/core/domain/budget_constraint_snapshot.dart';
+import 'package:mudra_manager/features/budget/presentation/screens/create_budget_screen.dart';
+import 'package:mudra_manager/features/budget/presentation/screens/manage_budget_screen.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
-import 'package:mudra_manager/features/budget/presentation/screens/add_budget_screen.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/adaptive_budget_dashboard.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/budget_details_screen.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/dashboard_customize_screen.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/command_center_screen.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/recurring_expenses_screen.dart';
-import 'package:mudra_manager/features/goal/presentation/screens/add_edit_goal_screen.dart';
+import 'package:mudra_manager/features/goal/presentation/screens/create_goal_screen.dart';
+import 'package:mudra_manager/features/goal/presentation/screens/edit_goal_screen.dart';
 import 'package:mudra_manager/features/goal/presentation/screens/goal_details_screen.dart';
 import 'package:mudra_manager/features/goal/presentation/screens/goal_screen.dart';
 import 'package:mudra_manager/features/onboarding/presentation/screens/account_setup_screen.dart';
@@ -324,14 +329,26 @@ class AppRouter {
                 path: AppRoutes.addBudget,
                 builder: (context, state) {
                   final extra = state.extra as Map<String, dynamic>?;
-                  return AddBudgetScreen(existing: extra?['budget']);
+                  final budget = extra?['budget'] as Budget?;
+                  final budgetId = extra?['budgetId'] as int?;
+                  if (budget != null) {
+                    return ManageBudgetScreen(budget: budget);
+                  }
+                  if (budgetId != null) {
+                    return _ManageBudgetLoader(budgetId: budgetId);
+                  }
+                  return const CreateBudgetScreen();
                 },
               ),
               GoRoute(
                 path: AppRoutes.addGoal,
+                builder: (context, state) => const CreateGoalScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.editGoal,
                 builder: (context, state) {
-                  final extra = state.extra as Map<String, dynamic>?;
-                  return AddEditGoalScreen(goal: extra?['goal']);
+                  final extra = state.extra as Map<String, dynamic>;
+                  return EditGoalScreen(goal: extra['goal']);
                 },
               ),
               GoRoute(
@@ -364,10 +381,10 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.budgetDetails,
                 pageBuilder: (context, state) {
-                  final data = state.extra as BudgetWithProgress;
+                  final data = state.extra as BudgetConstraintSnapshot;
                   return CustomTransitionPage(
                     key: state.pageKey,
-                    child: BudgetDetailsScreen(data: data),
+                    child: BudgetDetailsScreen(snapshot: data),
                     transitionsBuilder: (context, animation, secondaryAnimation, child) {
                       return SharedAxisTransition(
                         animation: animation,
@@ -643,4 +660,49 @@ class AppRouter {
           ),
         ],
       );
+}
+
+/// Loads a budget by ID and navigates to ManageBudgetScreen.
+class _ManageBudgetLoader extends StatelessWidget {
+  final int budgetId;
+  const _ManageBudgetLoader({required this.budgetId});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Budget?>(
+      future: _loadBudget(context),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final budget = snapshot.data;
+        if (budget == null) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Budget not found'),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () => context.pop(),
+                    child: const Text('Go back'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return ManageBudgetScreen(budget: budget);
+      },
+    );
+  }
+
+  Future<Budget?> _loadBudget(BuildContext context) async {
+    final container = ProviderScope.containerOf(context);
+    final service = container.read(budgetServiceProvider);
+    return service.getBudget(budgetId);
+  }
 }

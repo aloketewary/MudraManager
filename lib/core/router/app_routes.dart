@@ -22,6 +22,7 @@ abstract class AppRoutes {
   // Goals
   static const goalScreen = '/goal-screen';
   static const addGoal = '/add-goal';
+  static const editGoal = '/edit-goal';
   static const goalDetails = '/goal-details';
 
   // Recurring

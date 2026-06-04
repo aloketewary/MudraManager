@@ -6120,6 +6120,234 @@ abstract class AppLocalizations {
   /// **'{count} past {count, plural, =1{budget} other{budgets}}'**
   String budget_pastBudgets(int count);
 
+  /// No description provided for @budget_spent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get budget_spent;
+
+  /// No description provided for @budget_currentPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Current pace'**
+  String get budget_currentPace;
+
+  /// No description provided for @budget_allowedPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed pace'**
+  String get budget_allowedPace;
+
+  /// No description provided for @budget_exceedingBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Exceeding by'**
+  String get budget_exceedingBy;
+
+  /// No description provided for @budget_underBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Under by'**
+  String get budget_underBy;
+
+  /// No description provided for @budget_forecastBreach.
+  ///
+  /// In en, this message translates to:
+  /// **'At current pace: limit reached in {days} days'**
+  String budget_forecastBreach(int days);
+
+  /// No description provided for @budget_remainingAllowance.
+  ///
+  /// In en, this message translates to:
+  /// **'remaining allowance'**
+  String get budget_remainingAllowance;
+
+  /// No description provided for @budget_insufficientData.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient activity data'**
+  String get budget_insufficientData;
+
+  /// No description provided for @budget_addExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get budget_addExpense;
+
+  /// No description provided for @budget_viewTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'View Transactions'**
+  String get budget_viewTransactions;
+
+  /// No description provided for @budget_reduceBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce by'**
+  String get budget_reduceBy;
+
+  /// No description provided for @budget_spendAtMost.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend ≤'**
+  String get budget_spendAtMost;
+
+  /// No description provided for @budget_reviewSpending.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Spending'**
+  String get budget_reviewSpending;
+
+  /// No description provided for @budget_viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get budget_viewDetails;
+
+  /// No description provided for @budget_fixData.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix Data'**
+  String get budget_fixData;
+
+  /// No description provided for @budget_alreadyBreached.
+  ///
+  /// In en, this message translates to:
+  /// **'At current pace: already breached'**
+  String get budget_alreadyBreached;
+
+  /// No description provided for @budget_paceBelowLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Current pace below limit'**
+  String get budget_paceBelowLimit;
+
+  /// No description provided for @budget_createBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Budget'**
+  String get budget_createBudget;
+
+  /// No description provided for @budget_limit.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit'**
+  String get budget_limit;
+
+  /// No description provided for @budget_basedOnHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your spending'**
+  String get budget_basedOnHistory;
+
+  /// No description provided for @budget_lastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Last month'**
+  String get budget_lastMonth;
+
+  /// No description provided for @budget_threeMonthAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'3-month average'**
+  String get budget_threeMonthAvg;
+
+  /// No description provided for @budget_bufferAbove.
+  ///
+  /// In en, this message translates to:
+  /// **'buffer vs last month'**
+  String get budget_bufferAbove;
+
+  /// No description provided for @budget_bufferBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'below last month'**
+  String get budget_bufferBelow;
+
+  /// No description provided for @budget_templateRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get budget_templateRecommended;
+
+  /// No description provided for @budget_templateConservative.
+  ///
+  /// In en, this message translates to:
+  /// **'Conservative'**
+  String get budget_templateConservative;
+
+  /// No description provided for @budget_templateFlexible.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible'**
+  String get budget_templateFlexible;
+
+  /// No description provided for @budget_periodThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get budget_periodThisWeek;
+
+  /// No description provided for @budget_periodThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get budget_periodThisMonth;
+
+  /// No description provided for @budget_periodThisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This Year'**
+  String get budget_periodThisYear;
+
+  /// No description provided for @budget_periodCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get budget_periodCustom;
+
+  /// No description provided for @budget_perDay.
+  ///
+  /// In en, this message translates to:
+  /// **'day'**
+  String get budget_perDay;
+
+  /// No description provided for @budget_days.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get budget_days;
+
+  /// No description provided for @budget_advanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get budget_advanced;
+
+  /// No description provided for @budget_adjustLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust Limit'**
+  String get budget_adjustLimit;
+
+  /// No description provided for @budget_dangerZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger Zone'**
+  String get budget_dangerZone;
+
+  /// No description provided for @budget_archive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get budget_archive;
+
+  /// No description provided for @budget_archiveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive this budget? It will move to your past budgets.'**
+  String get budget_archiveConfirm;
+
   /// No description provided for @category_categoryName.
   ///
   /// In en, this message translates to:
@@ -11537,6 +11765,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your data never leaves this device — 100% offline, 100% yours'**
   String get hero_offlinePrivacy;
+
+  /// No description provided for @goal_whyOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Why? (optional)'**
+  String get goal_whyOptional;
+
+  /// No description provided for @goal_whyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Bangalore down payment before child starts school'**
+  String get goal_whyHint;
+
+  /// No description provided for @goal_currentSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Savings'**
+  String get goal_currentSavings;
+
+  /// No description provided for @goal_currentExceedsTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Current savings cannot exceed target amount'**
+  String get goal_currentExceedsTarget;
+
+  /// No description provided for @goal_targetBelowSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'New target is below current savings. Mark goal as completed instead.'**
+  String get goal_targetBelowSaved;
+
+  /// No description provided for @goal_typeHouse.
+  ///
+  /// In en, this message translates to:
+  /// **'House'**
+  String get goal_typeHouse;
+
+  /// No description provided for @goal_typeVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get goal_typeVehicle;
+
+  /// No description provided for @goal_typeTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get goal_typeTravel;
+
+  /// No description provided for @goal_typeEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get goal_typeEducation;
+
+  /// No description provided for @goal_typeWedding.
+  ///
+  /// In en, this message translates to:
+  /// **'Wedding'**
+  String get goal_typeWedding;
+
+  /// No description provided for @goal_typeCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get goal_typeCustom;
+
+  /// No description provided for @goal_sectionIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Identity'**
+  String get goal_sectionIdentity;
+
+  /// No description provided for @goal_sectionCurrentState.
+  ///
+  /// In en, this message translates to:
+  /// **'Current State'**
+  String get goal_sectionCurrentState;
+
+  /// No description provided for @goal_sectionProjection.
+  ///
+  /// In en, this message translates to:
+  /// **'Projection'**
+  String get goal_sectionProjection;
+
+  /// No description provided for @goal_currentTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Target'**
+  String get goal_currentTarget;
+
+  /// No description provided for @goal_adjustTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust Target'**
+  String get goal_adjustTarget;
+
+  /// No description provided for @goal_lastContribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Last contribution'**
+  String get goal_lastContribution;
+
+  /// No description provided for @goal_viewHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'View History →'**
+  String get goal_viewHistory;
+
+  /// No description provided for @goal_archive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive Goal'**
+  String get goal_archive;
+
+  /// No description provided for @goal_markComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Complete'**
+  String get goal_markComplete;
+
+  /// No description provided for @goal_basedOnAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on {amount}/month average'**
+  String goal_basedOnAvg(Object amount);
 }
 
 class _AppLocalizationsDelegate

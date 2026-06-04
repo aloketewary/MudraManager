@@ -18,7 +18,7 @@ final goalServiceProvider = Provider<GoalService>((ref) {
 });
 
 final goalsProvider = StreamProvider.autoDispose<List<Goal>>((ref) {
-  final service = ref.watch(goalServiceProvider);
+  final service = ref.read(goalServiceProvider);
   return service.watchAll();
 });
 

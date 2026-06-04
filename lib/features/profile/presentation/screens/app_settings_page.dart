@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
-import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/guest_mode_toggle.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';

@@ -365,3 +365,124 @@ UI widgets (pure rendering)
 ```
 
 One path. One truth. No branches.
+
+---
+
+## ROADMAP PRIORITY
+
+### Tier 1 — Product-Critical (ship first)
+
+These directly affect whether users understand and trust the app.
+
+| # | Work | Status |
+|---|------|--------|
+| 1 | Dashboard V2 engine cutover | ✅ Done |
+| 2 | Goal list redesign | In progress |
+| 3 | Create Goal screen | Pending |
+| 4 | Edit Goal screen | Pending |
+| 5 | ScreenShell migration (remaining high-traffic) | Wave 3–6 |
+| 6 | Briefing system (replaces priority alerts) | Phase 6 cleanup |
+| 7 | Provider graph cleanup | Phase 8 |
+| 8 | Remove old dashboard engine | Phase 6 partial |
+
+### Tier 2 — Architecture Debt (fix before it spreads)
+
+No immediate user value, but prevents future pain.
+
+| # | Work | Status |
+|---|------|--------|
+| 1 | **TonePack ↔ SkinPack split** | Not started |
+| 2 | Dashboard engine isolation (Phase 8) | Not started |
+| 3 | AppScreenState authority enforcement | Enforced in new screens |
+| 4 | Remove duplicate state computation (old providers) | Phase 6 partial |
+| 5 | Feature flag cleanup after cutover | Not started |
+| 6 | Tone simplification (3 tones: Professional, Calm, Minimal) | After split |
+
+### Tier 3 — Optimization / Polish (last)
+
+| Work |
+|------|
+| New tone variants / message rewrites |
+| Additional skins |
+| Animation system improvements |
+| Advanced customization |
+| Micro-interactions |
+
+---
+
+## ARCHITECTURE LAYERING RULE
+
+```
+Truth Layer (DashboardEngine, GoalEngine, etc.)
+    ↓ computes facts
+Presentation Layer (Templates, ScreenShell)
+    ↓ renders structure
+Tone Layer (TonePack)
+    ↓ chooses words
+Skin Layer (SkinPack)
+    ↓ chooses appearance
+```
+
+None of these layers should know about the others.
+
+If a layer owns two kinds of decisions → split it.
+
+---
+
+## TONE/SKIN SPLIT (Tier 2 — #1)
+
+### Problem
+
+TonePack currently owns both wording AND visual styling:
+
+```dart
+abstract class TonePack {
+  // Wording (correct)
+  String get txnAdded;
+  String get budgetCreated;
+
+  // Visual styling (WRONG — belongs in SkinPack)
+  double get borderRadius;
+  double get cardElevation;
+  double get buttonRadius;
+  double get inputRadius;
+  double get borderOpacity;
+  double get borderWidth;
+  bool get useTransparentCards;
+  String get dividerStyle;
+  String? get numberFont;
+  String? get pdfFont;
+}
+```
+
+A user cannot independently choose:
+- Tone: Professional + Skin: Glass
+- Tone: Minimal + Skin: Material
+
+### Solution
+
+**Phase 1**: Extract visual properties into `SkinPack`. Make `UserSettings` expose `tone` and `skin` independently.
+
+**Phase 2**: Reduce to 3 tones (Professional, Calm, Minimal). Deprecate Friendly/Motivational with migration map.
+
+**Phase 3**: Rewrite Calm to be truly neutral (no philosophy, no metaphors). Add true Minimal (information compression).
+
+### Tone Boundary Rule
+
+Tone applies ONLY to:
+- Success messages
+- Empty states
+- Confirmation text
+- Helper copy
+
+Tone NEVER applies to:
+- Bill due alerts
+- Budget exceeded warnings
+- Goal behind pace
+- Payment overdue
+
+Critical information stays identical across all tones:
+```
+HDFC ₹2,500 due today.
+```
+Same for Professional, Calm, and Minimal. No softening. No personality.

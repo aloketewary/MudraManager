@@ -471,87 +471,10 @@ class GoalScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: spacing.elementGapMin),
-                // Evidence: pace vs needed
-                Row(
-                  children: [
-                    Text(
-                      ctxt.goal_currentAvgMonth,
-                      style: textTheme.labelSmall
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                    const SizedBox(width: 4),
-                    CurrencyText(
-                      currencyCode: goal.currencyCode,
-                      amount: pace,
-                      fixedLength: 0,
-                      compact: true,
-                      style: textTheme.labelSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      '  ·  ',
-                      style: textTheme.labelSmall
-                          ?.copyWith(color: color.outlineVariant),
-                    ),
-                    Text(
-                      ctxt.goal_neededPerMonth,
-                      style: textTheme.labelSmall
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                    const SizedBox(width: 4),
-                    CurrencyText(
-                      currencyCode: goal.currencyCode,
-                      amount: needed,
-                      fixedLength: 0,
-                      compact: true,
-                      style: textTheme.labelSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
                 SizedBox(height: spacing.elementGap),
               ],
 
-              // Target date
-              if (hasDeadline)
-                Text(
-                  safeDateFormat('MMM yyyy', ctxt.localeName)
-                      .format(goal.targetDate!),
-                  style: textTheme.labelSmall
-                      ?.copyWith(color: color.onSurfaceVariant),
-                ),
-
-              SizedBox(height: spacing.elementGap),
-
-              // Progress bar + % (subordinate)
-              Row(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(3),
-                      child: LinearProgressIndicator(
-                        value: progress.clamp(0.0, 1.0),
-                        backgroundColor: goalColor.withValues(alpha: 0.1),
-                        valueColor: AlwaysStoppedAnimation(goalColor),
-                        minHeight: 4,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: spacing.elementGap),
-                  Text(
-                    '${(progress * 100).toStringAsFixed(0)}%',
-                    style: textTheme.labelSmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: spacing.elementGap),
-
-              // One-tap contribution
+              // One-tap contribution (visible within 2nd glance)
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
@@ -591,6 +514,86 @@ class GoalScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
+              ),
+
+              SizedBox(height: spacing.elementGap),
+
+              // Evidence: pace vs needed (supporting detail)
+              if (needed > 0) ...[
+                Row(
+                  children: [
+                    Text(
+                      ctxt.goal_currentAvgMonth,
+                      style: textTheme.labelSmall
+                          ?.copyWith(color: color.onSurfaceVariant),
+                    ),
+                    const SizedBox(width: 4),
+                    CurrencyText(
+                      currencyCode: goal.currencyCode,
+                      amount: pace,
+                      fixedLength: 0,
+                      compact: true,
+                      style: textTheme.labelSmall
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      '  ·  ',
+                      style: textTheme.labelSmall
+                          ?.copyWith(color: color.outlineVariant),
+                    ),
+                    Text(
+                      ctxt.goal_neededPerMonth,
+                      style: textTheme.labelSmall
+                          ?.copyWith(color: color.onSurfaceVariant),
+                    ),
+                    const SizedBox(width: 4),
+                    CurrencyText(
+                      currencyCode: goal.currencyCode,
+                      amount: needed,
+                      fixedLength: 0,
+                      compact: true,
+                      style: textTheme.labelSmall
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                SizedBox(height: spacing.elementGapMin),
+              ],
+
+              // Target date
+              if (hasDeadline)
+                Text(
+                  safeDateFormat('MMM yyyy', ctxt.localeName)
+                      .format(goal.targetDate!),
+                  style: textTheme.labelSmall
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+
+              SizedBox(height: spacing.elementGapMin),
+
+              // Progress bar + % (subordinate, last glance)
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: LinearProgressIndicator(
+                        value: progress.clamp(0.0, 1.0),
+                        backgroundColor: goalColor.withValues(alpha: 0.1),
+                        valueColor: AlwaysStoppedAnimation(goalColor),
+                        minHeight: 4,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: spacing.elementGap),
+                  Text(
+                    '${(progress * 100).toStringAsFixed(0)}%',
+                    style: textTheme.labelSmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

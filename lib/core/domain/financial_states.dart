@@ -6,6 +6,17 @@ enum DataValidityLevel { insufficient, partial, valid }
 
 enum BudgetState { unset, ok, warn, breach }
 
+/// Urgency-ranked budget constraint states for sort order.
+/// Order matches design spec: breached > imminent > approaching > near > unknown > within.
+enum BudgetConstraintUrgency {
+  breached,        // Over limit
+  imminentBreach,  // Forecast breach <= 7 days
+  approachingBreach, // Forecast breach > 7 days
+  nearLimit,       // >80% used, no forecast breach
+  unknown,         // Insufficient data to assess
+  withinLimit,     // Healthy, no action needed
+}
+
 enum BillState { unknown, clear, upcoming, dueSoon, dueToday, overdue }
 
 enum CashflowState { positive, neutral, negative }

@@ -1,5 +1,6 @@
 import 'package:isar_community/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:mudra_manager/features/goal/domain/goal_enums.dart';
 import 'account.dart'; // Import for optional linking
 
 part 'goal.g.dart';
@@ -57,6 +58,12 @@ class Goal {
   String? iconName;
   int? colorValue;
   String? description;
+
+  @enumerated
+  GoalType goalType = GoalType.custom;
+
+  @enumerated
+  GoalPriority priority = GoalPriority.important;
 
   List<GoalContribution> contributions = [];
 

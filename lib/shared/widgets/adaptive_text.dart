@@ -27,10 +27,10 @@ class AdaptiveText extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveMaxFontSize = maxFontSize ?? (style?.fontSize ?? 14);
     final effectiveMinFontSize = minFontSize ?? 12;
-    
+
     // For numeric content, use clip instead of ellipsis to preserve precision
     final effectiveOverflow = isNumeric ? TextOverflow.clip : (overflow ?? TextOverflow.ellipsis);
-    
+
     return AutoSizeText(
       text,
       style: style,

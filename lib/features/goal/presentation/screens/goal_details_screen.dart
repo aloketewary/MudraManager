@@ -143,7 +143,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
             icon: const Icon(LucideIcons.ellipsisVertical),
             onSelected: (value) {
               if (value == 'edit') {
-                context.push(AppRoutes.addGoal, extra: {'goal': widget.goal});
+                context.push(AppRoutes.editGoal, extra: {'goal': widget.goal});
               } else if (value == 'delete') {
                 _deleteGoal();
               }
