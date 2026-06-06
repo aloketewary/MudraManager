@@ -1,5 +1,5 @@
 import 'package:mudra_manager/core/domain/financial_states.dart';
-import 'package:mudra_manager/core/logic/briefing_selector.dart';
+import 'package:mudra_manager/core/domain/insight.dart';
 
 /// Record of a previously fired briefing trigger.
 class SuppressionRecord {
@@ -16,21 +16,19 @@ class SuppressionRecord {
   });
 }
 
-/// Determines whether a briefing candidate should be suppressed.
+/// Determines whether an insight should be suppressed.
 ///
 /// Rules:
 /// - Same trigger suppressed if fired within 24h AND magnitude change < 5%
-/// - After 7 consecutive days of same trigger, shift narrative framing
 /// - Never suppress newlyViolated transitions
 abstract final class SuppressionEngine {
   static bool shouldSuppress({
-    required BriefingSelection candidate,
+    required Insight insight,
     required List<SuppressionRecord> history,
     required DateTime now,
-    double? currentMagnitude,
   }) {
     final matching = history.where(
-      (r) => r.trigger == candidate.trigger,
+      (r) => r.trigger == insight.trigger,
     );
     if (matching.isEmpty) return false;
 
@@ -41,9 +39,9 @@ abstract final class SuppressionEngine {
     if (hoursSince >= 24) return false;
 
     // Never suppress if magnitude changed ≥5%
-    if (currentMagnitude != null && last.magnitude != null) {
-      final change = (currentMagnitude - last.magnitude!).abs();
-      final pct = last.magnitude! > 0 ? change / last.magnitude! : 1.0;
+    if (last.magnitude != null && last.magnitude! > 0) {
+      final change = (insight.magnitude - last.magnitude!).abs();
+      final pct = change / last.magnitude!;
       if (pct >= 0.05) return false;
     }
 
@@ -51,12 +49,11 @@ abstract final class SuppressionEngine {
     return true;
   }
 
-  /// Updates history after a briefing fires. Returns updated list.
+  /// Updates history after an insight fires. Returns updated list.
   static List<SuppressionRecord> recordFiring({
     required List<SuppressionRecord> history,
-    required BriefingSelection fired,
+    required Insight fired,
     required DateTime now,
-    double? magnitude,
   }) {
     final updated = List<SuppressionRecord>.from(history);
 
@@ -70,7 +67,7 @@ abstract final class SuppressionEngine {
       updated[existingIdx] = SuppressionRecord(
         trigger: fired.trigger,
         firedAt: now,
-        magnitude: magnitude,
+        magnitude: fired.magnitude,
         consecutiveDays: hoursSince < 36
             ? existing.consecutiveDays + 1
             : 1,
@@ -79,7 +76,7 @@ abstract final class SuppressionEngine {
       updated.add(SuppressionRecord(
         trigger: fired.trigger,
         firedAt: now,
-        magnitude: magnitude,
+        magnitude: fired.magnitude,
       ),);
     }
 

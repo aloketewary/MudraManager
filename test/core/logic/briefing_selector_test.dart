@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/domain/financial_states.dart';
+import 'package:mudra_manager/core/domain/insight.dart';
 import 'package:mudra_manager/core/logic/briefing_selector.dart';
 
 void main() {
@@ -9,54 +10,77 @@ void main() {
     });
 
     test('returns the single candidate', () {
-      final candidate = BriefingSelection(
+      final insight = Insight(
         trigger: BriefingTrigger.budgetBreach,
-        params: {'name': 'Food', 'over': 500.0},
+        source: 'budget',
+        magnitude: 500,
+        confidence: 1.0,
+        context: {'name': 'Food', 'over': 500.0},
       );
-      expect(BriefingSelector.select([candidate]), candidate);
+      final result = BriefingSelector.select([insight]);
+      expect(result, isNotNull);
+      expect(result!.insight.trigger, BriefingTrigger.budgetBreach);
     });
 
     test('picks highest priority trigger', () {
       final candidates = [
-        const BriefingSelection(
+        const Insight(
           trigger: BriefingTrigger.netNegative, // priority 50
-          params: {'deficit': 2000.0},
+          source: 'cashflow',
+          magnitude: 2000,
+          confidence: 1.0,
+          context: {'deficit': 2000.0},
         ),
-        const BriefingSelection(
+        const Insight(
           trigger: BriefingTrigger.billDueToday, // priority 90
-          params: {'name': 'Rent', 'amount': 15000.0},
+          source: 'bill',
+          magnitude: 15000,
+          confidence: 1.0,
+          context: {'name': 'Rent', 'amount': 15000.0},
         ),
-        const BriefingSelection(
+        const Insight(
           trigger: BriefingTrigger.budgetBreach, // priority 80
-          params: {'name': 'Food', 'over': 500.0},
+          source: 'budget',
+          magnitude: 500,
+          confidence: 1.0,
+          context: {'name': 'Food', 'over': 500.0},
         ),
       ];
 
       final result = BriefingSelector.select(candidates);
-      expect(result?.trigger, BriefingTrigger.billDueToday);
+      expect(result?.insight.trigger, BriefingTrigger.billDueToday);
     });
 
     test('billOverdue beats billDueToday', () {
       final candidates = [
-        const BriefingSelection(
+        const Insight(
           trigger: BriefingTrigger.billDueToday,
-          params: {'name': 'Rent', 'amount': 15000.0},
+          source: 'bill',
+          magnitude: 15000,
+          confidence: 1.0,
+          context: {'name': 'Rent', 'amount': 15000.0},
         ),
-        const BriefingSelection(
+        const Insight(
           trigger: BriefingTrigger.billOverdue,
-          params: {'name': 'Insurance', 'amount': 5000.0},
+          source: 'bill',
+          magnitude: 5000,
+          confidence: 1.0,
+          context: {'name': 'Insurance', 'amount': 5000.0},
         ),
       ];
 
       final result = BriefingSelector.select(candidates);
-      expect(result?.trigger, BriefingTrigger.billOverdue);
+      expect(result?.insight.trigger, BriefingTrigger.billOverdue);
     });
 
     test('preserves params and actionRoute of winner', () {
       final candidates = [
-        const BriefingSelection(
+        const Insight(
           trigger: BriefingTrigger.billOverdue,
-          params: {'name': 'Insurance', 'amount': 5000.0},
+          source: 'bill',
+          magnitude: 5000,
+          confidence: 1.0,
+          context: {'name': 'Insurance', 'amount': 5000.0},
           actionRoute: '/bills',
         ),
       ];

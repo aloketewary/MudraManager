@@ -5,6 +5,8 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/analytics/data/tax_estimation_service.dart';
+import 'package:mudra_manager/features/analytics/data/tax_opportunity_service.dart';
+import 'package:mudra_manager/features/analytics/data/tax_deduction_provider.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 
 final analyticsServiceProvider =
@@ -120,4 +122,14 @@ final taxEstimationProvider =
   ref.watch(transactionChangeProvider);
   final service = ref.watch(taxEstimationServiceProvider);
   return await service.estimateForFY(TaxEstimationService.currentFYStartYear());
+});
+
+final taxOpportunitiesProvider =
+    FutureProvider.autoDispose<List<TaxOpportunity>>((ref) async {
+  final estimate = await ref.watch(taxEstimationProvider.future);
+  final profile = ref.watch(taxDeductionProfileProvider).value;
+  const service = TaxOpportunityService();
+  return service.detect(
+    TaxOpportunityContext(estimate: estimate, profile: profile),
+  );
 });

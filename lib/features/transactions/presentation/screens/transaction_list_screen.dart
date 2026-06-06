@@ -549,7 +549,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             GestureDetector(
               onTap: () {
                 HapticFeedback.mediumImpact();
-                context.push(AppRoutes.budgetDetails, extra: matchingBudget);
+                context.push(AppRoutes.budgetDetails, extra: matchingBudget!.budget.id);
               },
               child: Row(
                 children: [

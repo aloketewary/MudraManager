@@ -4533,6 +4533,47 @@ class AppLocalizationsHi extends AppLocalizations {
   String get billCenter_createNewEntry => 'नई Entry बनाएं';
 
   @override
+  String get billCenter_lowBuffer => 'Low buffer';
+
+  @override
+  String get billCenter_safe => 'Covered';
+
+  @override
+  String billCenter_unfundedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bills may not be covered',
+      one: '1 bill may not be covered',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get billCenter_thisWeekRequired => 'Required this week';
+
+  @override
+  String billCenter_activeBills(int count) {
+    return '$count active bills';
+  }
+
+  @override
+  String get billCenter_largestBill => 'Largest';
+
+  @override
+  String billCenter_upcomingIn(int days) {
+    return 'Upcoming in $days days';
+  }
+
+  @override
+  String get billCenter_cannotPayFuture => 'Cannot mark future bills as paid';
+
+  @override
+  String billCenter_markedPaid(String name) {
+    return '$name marked as paid';
+  }
+
+  @override
   String get comparison_steady => 'स्थिर चल रहा है';
 
   @override
@@ -5986,6 +6027,107 @@ class AppLocalizationsHi extends AppLocalizations {
       'Old Regime estimate सिर्फ standard deduction पर है। HRA, 80C, 80D deductions से बचत और ज़्यादा हो सकती है।';
 
   @override
+  String get tax_assumptions => 'Assumptions';
+
+  @override
+  String get tax_assumeProjected =>
+      'Income को पूरे साल के लिए project किया गया है';
+
+  @override
+  String get tax_assumeNoDeductions =>
+      '80C, 80D, HRA या अन्य deductions शामिल नहीं';
+
+  @override
+  String get tax_assumeNoTds => 'पहले से कटा TDS शामिल नहीं है';
+
+  @override
+  String get tax_assumeAllTaxable =>
+      'सभी income categories पूरी तरह taxable मानी गई हैं';
+
+  @override
+  String get tax_assumeOldNoDeductions =>
+      'Old regime estimate में section-specific deductions नहीं हैं';
+
+  @override
+  String get tax_warnInsufficientData =>
+      'बहुत कम income transactions record हैं';
+
+  @override
+  String get tax_warnHighVariance => 'Income हर महीने काफ़ी अलग-अलग है';
+
+  @override
+  String get tax_warnSingleSource => 'सिर्फ़ एक income source detect हुआ';
+
+  @override
+  String get tax_opportunities => 'Tax बचत के Options';
+
+  @override
+  String get tax_oppSaveUpTo => 'बचत हो सकती है';
+
+  @override
+  String get tax_oppRegime => 'Tax Regime';
+
+  @override
+  String get tax_oppRegimeDesc => 'Old vs New Regime compare करें';
+
+  @override
+  String get tax_oppNps => 'NPS Contribution';
+
+  @override
+  String get tax_oppNpsDesc =>
+      'Evaluate नहीं हुआ — additional deduction मिल सकती है';
+
+  @override
+  String get tax_opp80c => 'Section 80C Investments';
+
+  @override
+  String get tax_opp80cDesc =>
+      'Evaluate नहीं हुआ — ₹1.5L तक deduction हो सकती है';
+
+  @override
+  String get tax_oppHra => 'HRA Exemption';
+
+  @override
+  String get tax_oppHraDesc =>
+      'Evaluate नहीं हुआ — किराये पर benefit मिल सकता है';
+
+  @override
+  String get tax_oppHomeLoan => 'Home Loan Interest';
+
+  @override
+  String get tax_oppHomeLoanDesc =>
+      'Evaluate नहीं हुआ — Section 24 deduction हो सकती है';
+
+  @override
+  String get tax_oppMedical => 'Medical Insurance';
+
+  @override
+  String get tax_oppMedicalDesc =>
+      'Evaluate नहीं हुआ — Section 80D deduction हो सकती है';
+
+  @override
+  String get tax_editDeductions => 'Edit Deductions';
+
+  @override
+  String get tax_deductionProfile => 'Deduction Profile';
+
+  @override
+  String get tax_deductionInfo =>
+      'Leave fields empty if unknown. Enter 0 if you explicitly have no investment in that category.';
+
+  @override
+  String get tax_deductionHintAnnual => 'Annual amount';
+
+  @override
+  String get tax_deductionHintMonthly => 'Monthly amount';
+
+  @override
+  String get tax_deductionEmployerNps => 'Employer NPS';
+
+  @override
+  String get tax_deductionRent => 'Rent Paid (Monthly)';
+
+  @override
   String get category_merge => 'Category मर्ज करें';
 
   @override
@@ -6326,6 +6468,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cc_minimumDue => 'Min. Due';
 
   @override
+  String get cc_minimumDueProvenance => 'Estimated from outstanding balance';
+
+  @override
+  String get cc_availableCredit => 'Available';
+
+  @override
   String get cc_cycleSpend => 'Cycle खर्च';
 
   @override
@@ -6345,6 +6493,45 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get cc_utilitySubtitle => 'Due dates, बकाया और limits';
+
+  @override
+  String get cc_totalMinimumDue => 'Minimum Due This Cycle';
+
+  @override
+  String cc_overdueCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count overdue',
+      one: '1 overdue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cc_dueSoonCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count due soon',
+      one: '1 due soon',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cc_highUtilCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count above 80%',
+      one: '1 above 80%',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cc_allPaymentsCurrent => 'All payments current';
 
   @override
   String get plugins_remindMeBefore => 'Remind me before';

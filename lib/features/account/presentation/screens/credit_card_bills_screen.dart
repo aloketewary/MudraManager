@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
@@ -25,7 +24,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
-    final summariesAsync = ref.watch(creditCardSummariesProvider);
+    final billsAsync = ref.watch(creditCardBillsProvider);
     final isGuest = ref.watch(guestModeProvider);
 
     return ScreenShell(
@@ -35,14 +34,11 @@ class CreditCardBillsScreen extends ConsumerWidget {
         enableRefresh: false,
       ),
       actions: ScreenActions.empty,
-      body: summariesAsync.when(
-        data: (summaries) {
-          if (summaries.isEmpty) {
+      body: billsAsync.when(
+        data: (data) {
+          if (data.cards.isEmpty) {
             return _buildEmpty(color, textTheme, spacing, ctxt);
           }
-
-          final totalOutstanding =
-              summaries.fold<double>(0, (s, c) => s + c.outstanding);
 
           return ListView(
             padding: EdgeInsets.symmetric(
@@ -51,15 +47,33 @@ class CreditCardBillsScreen extends ConsumerWidget {
             ),
             children: [
               _buildTotalHero(
-                totalOutstanding, summaries.length, isGuest,
-                color, textTheme, spacing, ctxt,
+                data.summary,
+                isGuest,
+                color,
+                textTheme,
+                spacing,
+                ctxt,
+              ),
+              SizedBox(height: spacing.elementGap),
+              _buildWarningsStrip(
+                data.summary,
+                color,
+                textTheme,
+                spacing,
+                ctxt,
               ),
               SizedBox(height: spacing.sectionGap),
-              ...summaries.map(
+              ...data.cards.map(
                 (s) => Padding(
                   padding: EdgeInsets.only(bottom: spacing.sectionGap),
                   child: _buildCardTile(
-                    s, isGuest, color, textTheme, spacing, ctxt, context,
+                    s,
+                    isGuest,
+                    color,
+                    textTheme,
+                    spacing,
+                    ctxt,
+                    context,
                   ),
                 ),
               ),
@@ -76,34 +90,48 @@ class CreditCardBillsScreen extends ConsumerWidget {
   }
 
   Widget _buildEmpty(
-    ColorScheme color, TextTheme textTheme, AppSpacing spacing,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
     AppLocalizations ctxt,
   ) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(LucideIcons.creditCard, size: 64,
-              color: color.onSurfaceVariant.withValues(alpha: 0.3),),
+          Icon(
+            LucideIcons.creditCard,
+            size: 64,
+            color: color.onSurfaceVariant.withValues(alpha: 0.3),
+          ),
           SizedBox(height: spacing.sectionGap),
-          Text(ctxt.cc_noCards, style: textTheme.titleMedium?.copyWith(
-            color: color.onSurfaceVariant,
-          ),),
+          Text(
+            ctxt.cc_noCards,
+            style: textTheme.titleMedium?.copyWith(
+              color: color.onSurfaceVariant,
+            ),
+          ),
           SizedBox(height: spacing.elementGap),
-          Text(ctxt.cc_noCardsHint, style: textTheme.bodySmall?.copyWith(
-            color: color.onSurfaceVariant.withValues(alpha: 0.6),
-          ),),
+          Text(
+            ctxt.cc_noCardsHint,
+            style: textTheme.bodySmall?.copyWith(
+              color: color.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildTotalHero(
-    double total, int cardCount, bool isGuest,
-    ColorScheme color, TextTheme textTheme, AppSpacing spacing,
+    CreditCardBillsSummary summary,
+    bool isGuest,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
     AppLocalizations ctxt,
   ) {
-    final isZero = total == 0;
+    final isZero = summary.totalOutstanding == 0;
     final heroColor = isZero ? color.primary : color.error;
 
     return Container(
@@ -137,7 +165,10 @@ class CreditCardBillsScreen extends ConsumerWidget {
           ),
           SizedBox(height: spacing.elementGap),
           CurrencyText(
-            amount: GuestModeUtil.applyGuestMode(total, isGuest),
+            amount: GuestModeUtil.applyGuestMode(
+              summary.totalOutstanding,
+              isGuest,
+            ),
             compact: false,
             fixedLength: 0,
             style: textTheme.headlineMedium?.copyWith(
@@ -145,9 +176,33 @@ class CreditCardBillsScreen extends ConsumerWidget {
               color: heroColor,
             ),
           ),
+          SizedBox(height: spacing.elementGap),
+          // Aggregate minimum due
+          Row(
+            children: [
+              Text(
+                ctxt.cc_totalMinimumDue,
+                style: textTheme.labelMedium?.copyWith(
+                  color: color.onSurfaceVariant,
+                ),
+              ),
+              SizedBox(width: spacing.elementGapMin),
+              CurrencyText(
+                amount: GuestModeUtil.applyGuestMode(
+                  summary.totalMinimumDue,
+                  isGuest,
+                ),
+                compact: true,
+                style: textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: color.tertiary,
+                ),
+              ),
+            ],
+          ),
           SizedBox(height: spacing.elementGapMin),
           Text(
-            ctxt.cc_acrossCards(cardCount),
+            ctxt.cc_acrossCards(summary.cardCount),
             style: textTheme.bodySmall?.copyWith(
               color: color.onSurfaceVariant.withValues(alpha: 0.6),
             ),
@@ -157,10 +212,103 @@ class CreditCardBillsScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildWarningsStrip(
+    CreditCardBillsSummary summary,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final warnings = <_WarningItem>[];
+
+    if (summary.overdueCount > 0) {
+      warnings.add(
+        _WarningItem(
+          text: ctxt.cc_overdueCount(summary.overdueCount),
+          color: color.error,
+        ),
+      );
+    }
+    if (summary.dueSoonCount > 0) {
+      warnings.add(
+        _WarningItem(
+          text: ctxt.cc_dueSoonCount(summary.dueSoonCount),
+          color: color.tertiary,
+        ),
+      );
+    }
+    if (summary.highUtilizationCount > 0) {
+      warnings.add(
+        _WarningItem(
+          text: ctxt.cc_highUtilCount(summary.highUtilizationCount),
+          color: color.tertiary,
+        ),
+      );
+    }
+
+    if (warnings.isEmpty) {
+      return Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardInner,
+          vertical: spacing.elementGap,
+        ),
+        decoration: BoxDecoration(
+          color: color.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+          border:
+              Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            Icon(LucideIcons.checkCircle2, size: 16, color: color.primary),
+            SizedBox(width: spacing.elementGap),
+            Text(
+              ctxt.cc_allPaymentsCurrent,
+              style: textTheme.labelMedium?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardInner,
+        vertical: spacing.elementGap,
+      ),
+      decoration: BoxDecoration(
+        color: color.errorContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+        border: Border.all(color: color.error.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(LucideIcons.alertTriangle, size: 16, color: color.error),
+          SizedBox(width: spacing.elementGap),
+          Expanded(
+            child: Text(
+              warnings.map((w) => w.text).join(' · '),
+              style: textTheme.labelMedium?.copyWith(
+                color: color.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCardTile(
-    CreditCardSummary summary, bool isGuest,
-    ColorScheme color, TextTheme textTheme, AppSpacing spacing,
-    AppLocalizations ctxt, BuildContext context,
+    CreditCardSummary summary,
+    bool isGuest,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+    BuildContext context,
   ) {
     final card = summary.account;
     final cardColor = Color(card.colorValue ?? Colors.blue.toARGB32());
@@ -191,19 +339,26 @@ class CreditCardBillsScreen extends ConsumerWidget {
                     color: cardColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
-                  child: Icon(LucideIcons.creditCard, size: 20,
-                      color: cardColor,),
+                  child: Icon(
+                    LucideIcons.creditCard,
+                    size: 20,
+                    color: cardColor,
+                  ),
                 ),
                 SizedBox(width: spacing.elementGap),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(card.name, style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),),
+                      Text(
+                        card.name,
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       if (card.accountNumber != null)
-                        Text('•••• ${card.accountNumber}',
+                        Text(
+                          '•••• ${card.accountNumber}',
                           style: textTheme.labelSmall?.copyWith(
                             color: color.onSurfaceVariant,
                             letterSpacing: 1.2,
@@ -222,49 +377,113 @@ class CreditCardBillsScreen extends ConsumerWidget {
                       color: dueColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     ),
-                    child: Text(dueStatus, style: textTheme.labelSmall?.copyWith(
-                      color: dueColor,
-                      fontWeight: FontWeight.w600,
-                    ),),
+                    child: Text(
+                      dueStatus,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: dueColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
               ],
             ),
           ),
 
-          Divider(height: 1, color: color.outlineVariant.withValues(alpha: 0.3)),
+          Divider(
+              height: 1, color: color.outlineVariant.withValues(alpha: 0.3)),
 
-          // Outstanding + Minimum Due
+          // Metrics: Outstanding + Est. Minimum Due + Available Credit
           Padding(
             padding: EdgeInsets.all(spacing.cardInner),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _metricColumn(
-                    ctxt.account_outstanding,
-                    GuestModeUtil.applyGuestMode(summary.outstanding, isGuest),
-                    summary.outstanding > 0 ? color.error : color.primary,
-                    textTheme, spacing,
-                    currencyCode: card.currencyCode,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _metricColumn(
+                        ctxt.account_outstanding,
+                        GuestModeUtil.applyGuestMode(
+                            summary.outstanding, isGuest),
+                        summary.outstanding > 0 ? color.error : color.primary,
+                        textTheme,
+                        spacing,
+                        currencyCode: card.currencyCode,
+                      ),
+                    ),
+                    Expanded(
+                      child: _metricColumn(
+                        ctxt.cc_minimumDue,
+                        GuestModeUtil.applyGuestMode(
+                            summary.minimumDue, isGuest),
+                        color.tertiary,
+                        textTheme,
+                        spacing,
+                        currencyCode: card.currencyCode,
+                      ),
+                    ),
+                    if (hasLimit)
+                      Expanded(
+                        child: _metricColumn(
+                          ctxt.cc_availableCredit,
+                          GuestModeUtil.applyGuestMode(
+                            summary.availableCredit,
+                            isGuest,
+                          ),
+                          color.primary,
+                          textTheme,
+                          spacing,
+                          currencyCode: card.currencyCode,
+                        ),
+                      ),
+                  ],
                 ),
-                Expanded(
-                  child: _metricColumn(
-                    ctxt.cc_minimumDue,
-                    GuestModeUtil.applyGuestMode(summary.minimumDue, isGuest),
-                    color.tertiary,
-                    textTheme, spacing,
-                    currencyCode: card.currencyCode,
+                // Provenance line for minimum due
+                if (summary.minimumDue > 0)
+                  Padding(
+                    padding: EdgeInsets.only(top: spacing.elementGapMin),
+                    child: Text(
+                      ctxt.cc_minimumDueProvenance,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.onSurfaceVariant.withValues(alpha: 0.5),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
                   ),
-                ),
+                // Secondary: billing cycle spend
                 if (summary.billingCycleSpend > 0)
-                  Expanded(
-                    child: _metricColumn(
-                      ctxt.cc_cycleSpend,
-                      GuestModeUtil.applyGuestMode(
-                          summary.billingCycleSpend, isGuest,),
-                      color.secondary,
-                      textTheme, spacing,
-                      currencyCode: card.currencyCode,
+                  Padding(
+                    padding: EdgeInsets.only(top: spacing.elementGapMin),
+                    child: Row(
+                      children: [
+                        Icon(
+                          LucideIcons.arrowUpRight,
+                          size: 12,
+                          color: color.onSurfaceVariant.withValues(alpha: 0.5),
+                        ),
+                        SizedBox(width: spacing.elementGapMin),
+                        Text(
+                          ctxt.cc_cycleSpend,
+                          style: textTheme.labelSmall?.copyWith(
+                            color:
+                                color.onSurfaceVariant.withValues(alpha: 0.6),
+                          ),
+                        ),
+                        SizedBox(width: spacing.elementGapMin),
+                        CurrencyText(
+                          amount: GuestModeUtil.applyGuestMode(
+                            summary.billingCycleSpend,
+                            isGuest,
+                          ),
+                          currencyCode: card.currencyCode,
+                          compact: true,
+                          style: textTheme.labelSmall?.copyWith(
+                            color:
+                                color.onSurfaceVariant.withValues(alpha: 0.6),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
               ],
@@ -273,21 +492,32 @@ class CreditCardBillsScreen extends ConsumerWidget {
 
           // Utilization bar
           if (hasLimit) ...[
-            Divider(height: 1,
-                color: color.outlineVariant.withValues(alpha: 0.3),),
+            Divider(
+              height: 1,
+              color: color.outlineVariant.withValues(alpha: 0.3),
+            ),
             Padding(
               padding: EdgeInsets.all(spacing.cardInner),
               child: _buildUtilization(
-                utilPct, card.creditLimit!, summary.outstanding, isGuest,
-                cardColor, color, textTheme, spacing, ctxt,
+                utilPct,
+                card.creditLimit!,
+                summary.outstanding,
+                isGuest,
+                cardColor,
+                color,
+                textTheme,
+                spacing,
+                ctxt,
               ),
             ),
           ],
 
           // Dates row
           if (card.statementDay != null || card.dueDay != null) ...[
-            Divider(height: 1,
-                color: color.outlineVariant.withValues(alpha: 0.3),),
+            Divider(
+              height: 1,
+              color: color.outlineVariant.withValues(alpha: 0.3),
+            ),
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardInner,
@@ -302,7 +532,9 @@ class CreditCardBillsScreen extends ConsumerWidget {
                         ctxt.cc_nextStatement,
                         DateFormat('d MMM', safeDateLocale)
                             .format(summary.nextStatementDate!),
-                        cardColor, textTheme, spacing,
+                        cardColor,
+                        textTheme,
+                        spacing,
                       ),
                     ),
                   if (summary.nextDueDate != null)
@@ -312,7 +544,9 @@ class CreditCardBillsScreen extends ConsumerWidget {
                         ctxt.cc_nextDue,
                         DateFormat('d MMM', safeDateLocale)
                             .format(summary.nextDueDate!),
-                        dueColor, textTheme, spacing,
+                        dueColor,
+                        textTheme,
+                        spacing,
                       ),
                     ),
                 ],
@@ -320,31 +554,60 @@ class CreditCardBillsScreen extends ConsumerWidget {
             ),
           ],
 
-          // Pay action
+          // Pay action — Pay Full promoted, Pay Minimum demoted
           if (summary.outstanding > 0) ...[
-            Divider(height: 1,
-                color: color.outlineVariant.withValues(alpha: 0.3),),
+            Divider(
+              height: 1,
+              color: color.outlineVariant.withValues(alpha: 0.3),
+            ),
             Padding(
               padding: EdgeInsets.all(spacing.cardInner),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: _payButton(
-                      ctxt.cc_payMinimum,
-                      summary.minimumDue,
-                      color.tertiary,
-                      card,
-                      color, textTheme, spacing, context,
+                  // Primary: Pay Full (filled button)
+                  FilledButton(
+                    onPressed: () => _navigateToPayment(context),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: color.primary,
+                      foregroundColor: color.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
+                      ),
+                      padding:
+                          EdgeInsets.symmetric(vertical: spacing.elementGap),
+                    ),
+                    child: Text(
+                      ctxt.cc_payFull,
+                      style: textTheme.labelMedium?.copyWith(
+                        color: color.onPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                  SizedBox(width: spacing.elementGap),
-                  Expanded(
-                    child: _payButton(
-                      ctxt.cc_payFull,
-                      summary.outstanding,
-                      color.primary,
-                      card,
-                      color, textTheme, spacing, context,
+                  SizedBox(height: spacing.elementGapMin),
+                  // Secondary: Pay Minimum (text link, demoted)
+                  Center(
+                    child: TextButton(
+                      onPressed: () => _navigateToPayment(context),
+                      style: TextButton.styleFrom(
+                        foregroundColor: color.onSurfaceVariant,
+                        padding: EdgeInsets.symmetric(
+                          vertical: spacing.elementGapMin,
+                        ),
+                      ),
+                      child: CurrencyText(
+                        amount: GuestModeUtil.applyGuestMode(
+                          summary.minimumDue,
+                          isGuest,
+                        ),
+                        compact: true,
+                        prefixText: '${ctxt.cc_payMinimum}: ',
+                        style: textTheme.labelSmall?.copyWith(
+                          color: color.onSurfaceVariant.withValues(alpha: 0.7),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -357,15 +620,22 @@ class CreditCardBillsScreen extends ConsumerWidget {
   }
 
   Widget _metricColumn(
-    String label, double amount, Color accentColor,
-    TextTheme textTheme, AppSpacing spacing, {String? currencyCode,}
-  ) {
+    String label,
+    double amount,
+    Color accentColor,
+    TextTheme textTheme,
+    AppSpacing spacing, {
+    String? currencyCode,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: textTheme.labelSmall?.copyWith(
-          color: accentColor.withValues(alpha: 0.7),
-        ),),
+        Text(
+          label,
+          style: textTheme.labelSmall?.copyWith(
+            color: accentColor.withValues(alpha: 0.7),
+          ),
+        ),
         SizedBox(height: spacing.elementGapUltraMin),
         CurrencyText(
           amount: amount,
@@ -381,9 +651,15 @@ class CreditCardBillsScreen extends ConsumerWidget {
   }
 
   Widget _buildUtilization(
-    double utilPct, double limit, double outstanding, bool isGuest,
-    Color cardColor, ColorScheme color, TextTheme textTheme,
-    AppSpacing spacing, AppLocalizations ctxt,
+    double utilPct,
+    double limit,
+    double outstanding,
+    bool isGuest,
+    Color cardColor,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final barColor = utilPct > 75
         ? color.error
@@ -398,9 +674,12 @@ class CreditCardBillsScreen extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(ctxt.cc_utilization, style: textTheme.labelSmall?.copyWith(
-              color: color.onSurfaceVariant,
-            ),),
+            Text(
+              ctxt.cc_utilization,
+              style: textTheme.labelSmall?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
+            ),
             Text(
               '${utilPct.toStringAsFixed(0)}%',
               style: textTheme.labelSmall?.copyWith(
@@ -447,47 +726,40 @@ class CreditCardBillsScreen extends ConsumerWidget {
   }
 
   Widget _dateChip(
-    IconData icon, String label, String value,
-    Color accentColor, TextTheme textTheme, AppSpacing spacing,
+    IconData icon,
+    String label,
+    String value,
+    Color accentColor,
+    TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     return Row(
       children: [
         Icon(icon, size: 14, color: accentColor),
         SizedBox(width: spacing.elementGapMin),
-        Text('$label ', style: textTheme.labelSmall?.copyWith(
-          color: accentColor.withValues(alpha: 0.7),
-        ),),
-        Text(value, style: textTheme.labelSmall?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),),
+        Text(
+          '$label ',
+          style: textTheme.labelSmall?.copyWith(
+            color: accentColor.withValues(alpha: 0.7),
+          ),
+        ),
+        Text(
+          value,
+          style: textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _payButton(
-    String label, double amount, Color accent, Account card,
-    ColorScheme color, TextTheme textTheme, AppSpacing spacing,
-    BuildContext context,
-  ) {
-    return OutlinedButton(
-      onPressed: () {
-        HapticFeedback.lightImpact();
-        context.push(AppRoutes.addTransaction, extra: {
-          'isIncome': false,
-        },);
+  void _navigateToPayment(BuildContext context) {
+    HapticFeedback.lightImpact();
+    context.push(
+      AppRoutes.addTransaction,
+      extra: {
+        'isIncome': false,
       },
-      style: OutlinedButton.styleFrom(
-        foregroundColor: accent,
-        side: BorderSide(color: accent.withValues(alpha: 0.3)),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(spacing.radiusSmall),
-        ),
-        padding: EdgeInsets.symmetric(vertical: spacing.elementGap),
-      ),
-      child: Text(label, style: textTheme.labelSmall?.copyWith(
-        color: accent,
-        fontWeight: FontWeight.w600,
-      ),),
     );
   }
 
@@ -504,4 +776,11 @@ class CreditCardBillsScreen extends ConsumerWidget {
     if (daysUntilDue <= 3) return color.tertiary;
     return color.primary;
   }
+}
+
+class _WarningItem {
+  final String text;
+  final Color color;
+
+  const _WarningItem({required this.text, required this.color});
 }

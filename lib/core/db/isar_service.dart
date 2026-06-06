@@ -22,6 +22,7 @@ import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
+import 'package:mudra_manager/core/db/models/tax_deduction_profile.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
@@ -92,6 +93,7 @@ class IsarService {
           PendingNotificationsSchema,
           FinancialSnapshotSchema,
           InsightExposureSchema,
+          TaxDeductionProfileSchema,
         ],
         directory: dir.path,
       ).timeout(const Duration(seconds: 5));

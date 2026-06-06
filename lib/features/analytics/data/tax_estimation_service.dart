@@ -1,7 +1,61 @@
+import 'dart:math' as math;
+
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/extensions/transaction_links.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+
+// ─── Confidence & Assumptions ───────────────────────────────────────────────
+
+/// Modeling decisions that affect the estimate.
+enum TaxAssumption {
+  projectedIncome,
+  noDeductionsConsidered,
+  noTdsConsidered,
+  allIncomeTaxable,
+  oldRegimeNoDeductions,
+}
+
+/// Data quality issues that affect reliability.
+enum TaxWarning {
+  insufficientData,
+  highIncomeVariance,
+  singleIncomeSource,
+}
+
+enum ConfidenceTier { low, medium, high }
+
+class ConfidenceFactors {
+  final double coveragePercent;
+  final double incomeVariance;
+  final int sourceCount;
+  final int transactionVolume;
+
+  const ConfidenceFactors({
+    required this.coveragePercent,
+    required this.incomeVariance,
+    required this.sourceCount,
+    required this.transactionVolume,
+  });
+
+  ConfidenceTier get tier {
+    // Variance-weighted confidence: high variance degrades confidence
+    // even with good coverage
+    if (coveragePercent < 0.25 || transactionVolume < 5) {
+      return ConfidenceTier.low;
+    }
+    if (incomeVariance > 0.5) {
+      // CV > 50% = highly irregular income
+      return coveragePercent > 0.75
+          ? ConfidenceTier.medium
+          : ConfidenceTier.low;
+    }
+    if (coveragePercent >= 0.75) return ConfidenceTier.high;
+    return ConfidenceTier.medium;
+  }
+}
+
+// ─── Service ────────────────────────────────────────────────────────────────
 
 /// Indian Income Tax estimation based on transaction data.
 /// Uses New Tax Regime (default from FY 2024-25) slabs.
@@ -31,6 +85,7 @@ class TaxEstimationService {
     double totalExpense = 0;
     final incomeByCategory = <String, double>{};
     final expenseByCategory = <String, double>{};
+    final monthlyIncome = <int, double>{}; // month index → income
 
     for (final txn in txns) {
       final catName = txn.category.value?.name ?? 'Other';
@@ -42,6 +97,12 @@ class TaxEstimationService {
         totalIncome += txn.baseAmount;
         incomeByCategory[catName] =
             (incomeByCategory[catName] ?? 0) + txn.baseAmount;
+        // Track monthly income for variance
+        final monthIdx = (txn.date.year - fyStart.year) * 12 +
+            txn.date.month -
+            fyStart.month;
+        monthlyIncome[monthIdx] =
+            (monthlyIncome[monthIdx] ?? 0) + txn.baseAmount;
       }
     }
 
@@ -50,8 +111,7 @@ class TaxEstimationService {
         ? now.difference(fyStart).inDays + 1
         : fyEnd.difference(fyStart).inDays + 1;
     final totalDays = fyEnd.difference(fyStart).inDays + 1;
-    final projectionFactor =
-        daysElapsed > 0 ? totalDays / daysElapsed : 1.0;
+    final projectionFactor = daysElapsed > 0 ? totalDays / daysElapsed : 1.0;
 
     final projectedIncome = totalIncome * projectionFactor;
     final isProjected = now.isBefore(fyEnd);
@@ -66,7 +126,6 @@ class TaxEstimationService {
     final baseTax = slabBreakdown.fold<double>(0, (s, e) => s + e.tax);
 
     // Rebate u/s 87A: No tax if taxable income <= 12,00,000
-    // (effective: income up to 12,75,000 with standard deduction)
     final rebate = taxableIncome <= 1200000 ? baseTax : 0.0;
     final taxAfterRebate = baseTax - rebate;
 
@@ -80,6 +139,19 @@ class TaxEstimationService {
     // Effective tax rate
     final effectiveRate =
         projectedIncome > 0 ? totalTax / projectedIncome * 100 : 0.0;
+
+    // Compute confidence factors
+    final confidence = _computeConfidence(
+      daysElapsed: daysElapsed,
+      totalDays: totalDays,
+      monthlyIncome: monthlyIncome,
+      incomeByCategory: incomeByCategory,
+      incomeTxnCount: txns.where((t) => !t.isExpense).length,
+    );
+
+    // Derive assumptions & warnings
+    final assumptions = _deriveAssumptions(isProjected: isProjected);
+    final warnings = _deriveWarnings(confidence);
 
     return TaxEstimate(
       financialYear: 'FY $startYear-${(startYear + 1) % 100}',
@@ -101,11 +173,61 @@ class TaxEstimationService {
       daysElapsed: daysElapsed,
       totalDays: totalDays,
       oldRegimeEstimate: _estimateOldRegime(projectedIncome),
+      confidence: confidence,
+      assumptions: assumptions,
+      warnings: warnings,
     );
   }
 
+  ConfidenceFactors _computeConfidence({
+    required int daysElapsed,
+    required int totalDays,
+    required Map<int, double> monthlyIncome,
+    required Map<String, double> incomeByCategory,
+    required int incomeTxnCount,
+  }) {
+    final coverage = daysElapsed / totalDays;
+
+    // Coefficient of variation for monthly income
+    double variance = 0;
+    if (monthlyIncome.length >= 2) {
+      final values = monthlyIncome.values.toList();
+      final mean = values.reduce((a, b) => a + b) / values.length;
+      if (mean > 0) {
+        final sumSquaredDiff =
+            values.fold<double>(0, (s, v) => s + math.pow(v - mean, 2));
+        final stdDev = math.sqrt(sumSquaredDiff / values.length);
+        variance = stdDev / mean; // CV
+      }
+    }
+
+    return ConfidenceFactors(
+      coveragePercent: coverage,
+      incomeVariance: variance,
+      sourceCount: incomeByCategory.length,
+      transactionVolume: incomeTxnCount,
+    );
+  }
+
+  List<TaxAssumption> _deriveAssumptions({required bool isProjected}) {
+    return [
+      if (isProjected) TaxAssumption.projectedIncome,
+      TaxAssumption.noDeductionsConsidered,
+      TaxAssumption.noTdsConsidered,
+      TaxAssumption.allIncomeTaxable,
+      TaxAssumption.oldRegimeNoDeductions,
+    ];
+  }
+
+  List<TaxWarning> _deriveWarnings(ConfidenceFactors confidence) {
+    return [
+      if (confidence.transactionVolume < 5) TaxWarning.insufficientData,
+      if (confidence.incomeVariance > 0.5) TaxWarning.highIncomeVariance,
+      if (confidence.sourceCount <= 1) TaxWarning.singleIncomeSource,
+    ];
+  }
+
   /// Old Tax Regime estimation (simplified — no HRA/80C/80D input yet).
-  /// Uses standard deduction of ₹50,000 and basic exemption of ₹2.5L.
   OldRegimeEstimate _estimateOldRegime(double grossIncome) {
     const oldStdDeduction = 50000.0;
     final taxableIncome =
@@ -114,7 +236,6 @@ class TaxEstimationService {
     final slabs = _calculateOldRegimeTax(taxableIncome.toDouble());
     final baseTax = slabs.fold<double>(0, (s, e) => s + e.tax);
 
-    // Rebate u/s 87A: No tax if taxable income <= 5,00,000
     final rebate = taxableIncome <= 500000 ? baseTax : 0.0;
     final taxAfterRebate = baseTax - rebate;
     final cess = taxAfterRebate * 0.04;
@@ -152,7 +273,7 @@ class TaxEstimationService {
         rate: bracket.rate * 100,
         taxableAmount: taxable.toDouble(),
         tax: tax,
-      ),);
+      ));
       remaining -= taxable;
     }
 
@@ -183,7 +304,7 @@ class TaxEstimationService {
         rate: bracket.rate * 100,
         taxableAmount: taxable.toDouble(),
         tax: tax,
-      ),);
+      ));
       remaining -= taxable;
     }
 
@@ -196,6 +317,8 @@ class TaxEstimationService {
     return now.month >= 4 ? now.year : now.year - 1;
   }
 }
+
+// ─── Models ─────────────────────────────────────────────────────────────────
 
 class TaxEstimate {
   final String financialYear;
@@ -217,6 +340,9 @@ class TaxEstimate {
   final int daysElapsed;
   final int totalDays;
   final OldRegimeEstimate? oldRegimeEstimate;
+  final ConfidenceFactors confidence;
+  final List<TaxAssumption> assumptions;
+  final List<TaxWarning> warnings;
 
   TaxEstimate({
     required this.financialYear,
@@ -238,13 +364,17 @@ class TaxEstimate {
     required this.daysElapsed,
     required this.totalDays,
     this.oldRegimeEstimate,
+    required this.confidence,
+    required this.assumptions,
+    required this.warnings,
   });
 
   bool get isZeroTax => totalTax <= 0;
   double get projectedSavings => projectedAnnualIncome - totalExpense;
   double get progressPercent => daysElapsed / totalDays;
 
-  /// Which regime saves more tax?
+  ConfidenceTier get confidenceTier => confidence.tier;
+
   bool get oldRegimeBetter =>
       oldRegimeEstimate != null && oldRegimeEstimate!.totalTax < totalTax;
   double get regimeSavings => oldRegimeEstimate != null

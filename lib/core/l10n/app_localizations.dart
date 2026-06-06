@@ -8364,6 +8364,60 @@ abstract class AppLocalizations {
   /// **'Create New Entry'**
   String get billCenter_createNewEntry;
 
+  /// No description provided for @billCenter_lowBuffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Low buffer'**
+  String get billCenter_lowBuffer;
+
+  /// No description provided for @billCenter_safe.
+  ///
+  /// In en, this message translates to:
+  /// **'Covered'**
+  String get billCenter_safe;
+
+  /// No description provided for @billCenter_unfundedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 bill may not be covered} other{{count} bills may not be covered}}'**
+  String billCenter_unfundedCount(int count);
+
+  /// No description provided for @billCenter_thisWeekRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required this week'**
+  String get billCenter_thisWeekRequired;
+
+  /// No description provided for @billCenter_activeBills.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active bills'**
+  String billCenter_activeBills(int count);
+
+  /// No description provided for @billCenter_largestBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Largest'**
+  String get billCenter_largestBill;
+
+  /// No description provided for @billCenter_upcomingIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming in {days} days'**
+  String billCenter_upcomingIn(int days);
+
+  /// No description provided for @billCenter_cannotPayFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot mark future bills as paid'**
+  String get billCenter_cannotPayFuture;
+
+  /// No description provided for @billCenter_markedPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} marked as paid'**
+  String billCenter_markedPaid(String name);
+
   /// No description provided for @comparison_steady.
   ///
   /// In en, this message translates to:
@@ -10938,6 +10992,186 @@ abstract class AppLocalizations {
   /// **'Old Regime estimate uses standard deduction only. With HRA, 80C, 80D deductions, savings could be higher.'**
   String get tax_oldRegimeDisclaimer;
 
+  /// No description provided for @tax_assumptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Assumptions'**
+  String get tax_assumptions;
+
+  /// No description provided for @tax_assumeProjected.
+  ///
+  /// In en, this message translates to:
+  /// **'Income projected from current trend to full year'**
+  String get tax_assumeProjected;
+
+  /// No description provided for @tax_assumeNoDeductions.
+  ///
+  /// In en, this message translates to:
+  /// **'No 80C, 80D, HRA or other deductions considered'**
+  String get tax_assumeNoDeductions;
+
+  /// No description provided for @tax_assumeNoTds.
+  ///
+  /// In en, this message translates to:
+  /// **'TDS already deducted is not accounted for'**
+  String get tax_assumeNoTds;
+
+  /// No description provided for @tax_assumeAllTaxable.
+  ///
+  /// In en, this message translates to:
+  /// **'All income categories treated as fully taxable'**
+  String get tax_assumeAllTaxable;
+
+  /// No description provided for @tax_assumeOldNoDeductions.
+  ///
+  /// In en, this message translates to:
+  /// **'Old regime estimate excludes section-specific deductions'**
+  String get tax_assumeOldNoDeductions;
+
+  /// No description provided for @tax_warnInsufficientData.
+  ///
+  /// In en, this message translates to:
+  /// **'Very few income transactions recorded'**
+  String get tax_warnInsufficientData;
+
+  /// No description provided for @tax_warnHighVariance.
+  ///
+  /// In en, this message translates to:
+  /// **'Income varies significantly month-to-month'**
+  String get tax_warnHighVariance;
+
+  /// No description provided for @tax_warnSingleSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Only one income source detected'**
+  String get tax_warnSingleSource;
+
+  /// No description provided for @tax_opportunities.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Optimization Opportunities'**
+  String get tax_opportunities;
+
+  /// No description provided for @tax_oppSaveUpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Save up to'**
+  String get tax_oppSaveUpTo;
+
+  /// No description provided for @tax_oppRegime.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Regime'**
+  String get tax_oppRegime;
+
+  /// No description provided for @tax_oppRegimeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare old vs new regime for potential savings'**
+  String get tax_oppRegimeDesc;
+
+  /// No description provided for @tax_oppNps.
+  ///
+  /// In en, this message translates to:
+  /// **'NPS Contribution'**
+  String get tax_oppNps;
+
+  /// No description provided for @tax_oppNpsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Not evaluated — additional deduction may be available'**
+  String get tax_oppNpsDesc;
+
+  /// No description provided for @tax_opp80c.
+  ///
+  /// In en, this message translates to:
+  /// **'Section 80C Investments'**
+  String get tax_opp80c;
+
+  /// No description provided for @tax_opp80cDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Not evaluated — deductions up to ₹1.5L may apply'**
+  String get tax_opp80cDesc;
+
+  /// No description provided for @tax_oppHra.
+  ///
+  /// In en, this message translates to:
+  /// **'HRA Exemption'**
+  String get tax_oppHra;
+
+  /// No description provided for @tax_oppHraDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Not evaluated — potential benefit if renting'**
+  String get tax_oppHraDesc;
+
+  /// No description provided for @tax_oppHomeLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Loan Interest'**
+  String get tax_oppHomeLoan;
+
+  /// No description provided for @tax_oppHomeLoanDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Not evaluated — Section 24 deduction may apply'**
+  String get tax_oppHomeLoanDesc;
+
+  /// No description provided for @tax_oppMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical Insurance'**
+  String get tax_oppMedical;
+
+  /// No description provided for @tax_oppMedicalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Not evaluated — Section 80D deduction may apply'**
+  String get tax_oppMedicalDesc;
+
+  /// No description provided for @tax_editDeductions.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Deductions'**
+  String get tax_editDeductions;
+
+  /// No description provided for @tax_deductionProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction Profile'**
+  String get tax_deductionProfile;
+
+  /// No description provided for @tax_deductionInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave fields empty if unknown. Enter 0 if you explicitly have no investment in that category.'**
+  String get tax_deductionInfo;
+
+  /// No description provided for @tax_deductionHintAnnual.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual amount'**
+  String get tax_deductionHintAnnual;
+
+  /// No description provided for @tax_deductionHintMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly amount'**
+  String get tax_deductionHintMonthly;
+
+  /// No description provided for @tax_deductionEmployerNps.
+  ///
+  /// In en, this message translates to:
+  /// **'Employer NPS'**
+  String get tax_deductionEmployerNps;
+
+  /// No description provided for @tax_deductionRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent Paid (Monthly)'**
+  String get tax_deductionRent;
+
   /// No description provided for @category_merge.
   ///
   /// In en, this message translates to:
@@ -11529,13 +11763,25 @@ abstract class AppLocalizations {
   /// No description provided for @cc_minimumDue.
   ///
   /// In en, this message translates to:
-  /// **'Min. Due'**
+  /// **'Est. Min. Due'**
   String get cc_minimumDue;
+
+  /// No description provided for @cc_minimumDueProvenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated from outstanding balance'**
+  String get cc_minimumDueProvenance;
+
+  /// No description provided for @cc_availableCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get cc_availableCredit;
 
   /// No description provided for @cc_cycleSpend.
   ///
   /// In en, this message translates to:
-  /// **'Cycle Spend'**
+  /// **'Spent this cycle'**
   String get cc_cycleSpend;
 
   /// No description provided for @cc_utilization.
@@ -11573,6 +11819,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Due dates, outstanding & limits'**
   String get cc_utilitySubtitle;
+
+  /// No description provided for @cc_totalMinimumDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum Due This Cycle'**
+  String get cc_totalMinimumDue;
+
+  /// No description provided for @cc_overdueCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 overdue} other{{count} overdue}}'**
+  String cc_overdueCount(int count);
+
+  /// No description provided for @cc_dueSoonCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 due soon} other{{count} due soon}}'**
+  String cc_dueSoonCount(int count);
+
+  /// No description provided for @cc_highUtilCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 above 80%} other{{count} above 80%}}'**
+  String cc_highUtilCount(int count);
+
+  /// No description provided for @cc_allPaymentsCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'All payments current'**
+  String get cc_allPaymentsCurrent;
 
   /// No description provided for @plugins_remindMeBefore.
   ///

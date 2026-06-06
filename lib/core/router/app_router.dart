@@ -19,7 +19,6 @@ import 'package:mudra_manager/features/analytics/presentation/tax_estimation_scr
 import 'package:mudra_manager/features/analytics/presentation/cash_flow_forecast_screen.dart';
 import 'package:mudra_manager/features/analytics/presentation/spending_trends_screen.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
-import 'package:mudra_manager/core/domain/budget_constraint_snapshot.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/create_budget_screen.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/manage_budget_screen.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
@@ -381,10 +380,10 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.budgetDetails,
                 pageBuilder: (context, state) {
-                  final data = state.extra as BudgetConstraintSnapshot;
+                  final budgetId = state.extra as int;
                   return CustomTransitionPage(
                     key: state.pageKey,
-                    child: BudgetDetailsScreen(snapshot: data),
+                    child: BudgetDetailsScreen(budgetId: budgetId),
                     transitionsBuilder: (context, animation, secondaryAnimation, child) {
                       return SharedAxisTransition(
                         animation: animation,

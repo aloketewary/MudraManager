@@ -1,19 +1,25 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/domain/financial_states.dart';
-import 'package:mudra_manager/core/logic/briefing_selector.dart';
+import 'package:mudra_manager/core/domain/insight.dart';
 import 'package:mudra_manager/core/logic/suppression_engine.dart';
 
 void main() {
   final now = DateTime(2025, 6, 15, 10, 0);
 
+  Insight _makeInsight(BriefingTrigger trigger, {double magnitude = 0}) {
+    return Insight(
+      trigger: trigger,
+      source: 'test',
+      magnitude: magnitude,
+      confidence: 1.0,
+    );
+  }
+
   group('SuppressionEngine.shouldSuppress', () {
     test('does not suppress when history is empty', () {
       expect(
         SuppressionEngine.shouldSuppress(
-          candidate: const BriefingSelection(
-            trigger: BriefingTrigger.budgetBreach,
-            params: {},
-          ),
+          insight: _makeInsight(BriefingTrigger.budgetBreach),
           history: [],
           now: now,
         ),
@@ -31,13 +37,9 @@ void main() {
       ];
       expect(
         SuppressionEngine.shouldSuppress(
-          candidate: const BriefingSelection(
-            trigger: BriefingTrigger.budgetBreach,
-            params: {},
-          ),
+          insight: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1000),
           history: history,
           now: now,
-          currentMagnitude: 1000,
         ),
         false,
       );
@@ -53,13 +55,9 @@ void main() {
       ];
       expect(
         SuppressionEngine.shouldSuppress(
-          candidate: const BriefingSelection(
-            trigger: BriefingTrigger.budgetBreach,
-            params: {},
-          ),
+          insight: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1020),
           history: history,
           now: now,
-          currentMagnitude: 1020, // 2% change
         ),
         true,
       );
@@ -75,13 +73,9 @@ void main() {
       ];
       expect(
         SuppressionEngine.shouldSuppress(
-          candidate: const BriefingSelection(
-            trigger: BriefingTrigger.budgetBreach,
-            params: {},
-          ),
+          insight: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1100),
           history: history,
           now: now,
-          currentMagnitude: 1100, // 10% change
         ),
         false,
       );
@@ -97,13 +91,9 @@ void main() {
       ];
       expect(
         SuppressionEngine.shouldSuppress(
-          candidate: const BriefingSelection(
-            trigger: BriefingTrigger.billDueToday,
-            params: {},
-          ),
+          insight: _makeInsight(BriefingTrigger.billDueToday, magnitude: 1000),
           history: history,
           now: now,
-          currentMagnitude: 1000,
         ),
         false,
       );
@@ -114,12 +104,8 @@ void main() {
     test('adds new record to empty history', () {
       final result = SuppressionEngine.recordFiring(
         history: [],
-        fired: const BriefingSelection(
-          trigger: BriefingTrigger.budgetBreach,
-          params: {},
-        ),
+        fired: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1500),
         now: now,
-        magnitude: 1500,
       );
 
       expect(result.length, 1);
@@ -140,12 +126,8 @@ void main() {
 
       final result = SuppressionEngine.recordFiring(
         history: history,
-        fired: const BriefingSelection(
-          trigger: BriefingTrigger.budgetBreach,
-          params: {},
-        ),
+        fired: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1100),
         now: now,
-        magnitude: 1100,
       );
 
       expect(result.first.consecutiveDays, 4);
@@ -163,12 +145,8 @@ void main() {
 
       final result = SuppressionEngine.recordFiring(
         history: history,
-        fired: const BriefingSelection(
-          trigger: BriefingTrigger.budgetBreach,
-          params: {},
-        ),
+        fired: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1100),
         now: now,
-        magnitude: 1100,
       );
 
       expect(result.first.consecutiveDays, 1);
@@ -190,12 +168,8 @@ void main() {
 
       final result = SuppressionEngine.recordFiring(
         history: history,
-        fired: const BriefingSelection(
-          trigger: BriefingTrigger.budgetBreach,
-          params: {},
-        ),
+        fired: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1000),
         now: now,
-        magnitude: 1000,
       );
 
       // netNegative (45 days old) should be pruned

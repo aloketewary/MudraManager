@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -42,6 +43,12 @@ final tripChangeProvider = StreamProvider<void>((ref) async* {
 final tagChangeProvider = StreamProvider<void>((ref) async* {
   final isar = await ref.watch(isarServiceProvider).getInstance();
   yield* isar.tags.watchLazy(fireImmediately: true);
+});
+
+/// Emits a tick whenever the budgets collection changes.
+final budgetChangeProvider = StreamProvider<void>((ref) async* {
+  final isar = await ref.watch(isarServiceProvider).getInstance();
+  yield* isar.budgets.watchLazy(fireImmediately: true);
 });
 
 /// Emits a tick whenever the pending transactions collection changes.

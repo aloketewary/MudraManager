@@ -15,6 +15,7 @@ final budgetConstraintsProvider =
     FutureProvider.autoDispose<List<BudgetConstraintSnapshot>>((ref) async {
   ref.watch(dateChangeProvider);
   ref.watch(transactionChangeProvider);
+  ref.watch(budgetChangeProvider);
 
   final isarService = ref.watch(isarServiceProvider);
   final isar = await isarService.getInstance();
@@ -104,6 +105,17 @@ final budgetPortfolioProvider =
       paceRiskCount: paceRiskCount,
     );
   });
+});
+
+/// Derived selector — picks a single snapshot from the computed list.
+/// Detail screen watches this instead of holding a frozen snapshot.
+final budgetConstraintByIdProvider =
+    Provider.autoDispose.family<AsyncValue<BudgetConstraintSnapshot?>, int>(
+        (ref, budgetId) {
+  return ref.watch(budgetConstraintsProvider).whenData(
+        (snapshots) =>
+            snapshots.where((s) => s.budgetId == budgetId).firstOrNull,
+      );
 });
 
 class BudgetPortfolio {

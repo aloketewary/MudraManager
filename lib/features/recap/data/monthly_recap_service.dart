@@ -8,6 +8,8 @@ import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
 
+// ── Data Models ──
+
 class MonthlyRecapData {
   final String currency;
   final DateTime month;
@@ -17,35 +19,31 @@ class MonthlyRecapData {
   final double savingsRate;
   final double avgDailySpend;
   final int transactionCount;
-  final List<CategorySpend> topCategories;
-  final List<CategorySpend> incomeCategories;
-  final List<TransactionSummary> topTransactions;
-  final List<TransactionSummary> topIncomeTransactions;
-  final int budgetsKept;
-  final int budgetsTotal;
-  final List<BudgetUtilization> budgetDetails;
-  final int achievementsUnlocked;
-  final int currentStreak;
-  final int longestStreak;
   final String? userName;
 
-  // New analytics fields
-  final Map<int, double> dailySpending; // day (1-31) → amount
-  final double weekdayAvg;
-  final double weekendAvg;
+  // Financial Score
+  final int financialScore;
+  final int financialScoreDelta;
+
+  // AI Insight
+  final RecapInsight insight;
+
+  // Achievement/Warning
+  final List<RecapAchievement> achievements;
+
+  // Category Change Leaders
+  final List<CategoryChange> categoryChanges;
+
+  // Budget Utilization (only >70% or breached)
+  final List<BudgetUtilization> budgetDetails;
+
+  // Biggest Expenses (top 5)
+  final List<TransactionSummary> topTransactions;
+
+  // Previous month (for computations)
   final double prevMonthIncome;
   final double prevMonthExpense;
-  final double firstHalfSpend;
-  final double secondHalfSpend;
-  final double recurringExpense;
-  final double oneTimeExpense;
-  final List<AccountSpend> accountBreakdown;
-  final List<CategoryFrequency> categoryByFrequency;
-
-  // Year-over-year comparison
-  final double? yoyIncome;
-  final double? yoyExpense;
-  final int? yoyTransactionCount;
+  final double prevSavingsRate;
 
   MonthlyRecapData({
     String? currency,
@@ -56,54 +54,51 @@ class MonthlyRecapData {
     required this.savingsRate,
     required this.avgDailySpend,
     required this.transactionCount,
-    required this.topCategories,
-    required this.incomeCategories,
-    required this.topTransactions,
-    required this.topIncomeTransactions,
-    required this.budgetsKept,
-    required this.budgetsTotal,
-    required this.budgetDetails,
-    required this.achievementsUnlocked,
-    required this.currentStreak,
-    required this.longestStreak,
     this.userName,
-    required this.dailySpending,
-    required this.weekdayAvg,
-    required this.weekendAvg,
+    required this.financialScore,
+    required this.financialScoreDelta,
+    required this.insight,
+    required this.achievements,
+    required this.categoryChanges,
+    required this.budgetDetails,
+    required this.topTransactions,
     required this.prevMonthIncome,
     required this.prevMonthExpense,
-    required this.firstHalfSpend,
-    required this.secondHalfSpend,
-    required this.recurringExpense,
-    required this.oneTimeExpense,
-    required this.accountBreakdown,
-    required this.categoryByFrequency,
-    this.yoyIncome,
-    this.yoyExpense,
-    this.yoyTransactionCount,
+    required this.prevSavingsRate,
   }) : currency = currency ?? BaseCurrency.symbol;
-
-  double get prevMonthSavings => prevMonthIncome - prevMonthExpense;
-  double get incomeChange => prevMonthIncome > 0
-      ? (totalIncome - prevMonthIncome) / prevMonthIncome * 100
-      : 0;
-  double get expenseChange => prevMonthExpense > 0
-      ? (totalExpense - prevMonthExpense) / prevMonthExpense * 100
-      : 0;
-  bool get hasYoyData => yoyIncome != null || yoyExpense != null;
-  double get yoyIncomeChange => (yoyIncome != null && yoyIncome! > 0)
-      ? (totalIncome - yoyIncome!) / yoyIncome! * 100
-      : 0;
-  double get yoyExpenseChange => (yoyExpense != null && yoyExpense! > 0)
-      ? (totalExpense - yoyExpense!) / yoyExpense! * 100
-      : 0;
 }
 
-class CategorySpend {
+class RecapInsight {
+  final List<String> lines;
+  final String? suggestedFocus;
+
+  RecapInsight({required this.lines, this.suggestedFocus});
+
+  bool get isEmpty => lines.isEmpty;
+}
+
+class RecapAchievement {
+  final String text;
+  final bool isWarning;
+
+  RecapAchievement({required this.text, this.isWarning = false});
+}
+
+class CategoryChange {
   final String name;
-  final double amount;
-  final double percentage;
-  CategorySpend(this.name, this.amount, this.percentage);
+  final double currentAmount;
+  final double previousAmount;
+
+  CategoryChange({
+    required this.name,
+    required this.currentAmount,
+    required this.previousAmount,
+  });
+
+  double get delta => currentAmount - previousAmount;
+  double get deltaPercent =>
+      previousAmount > 0 ? delta / previousAmount * 100 : 0;
+  bool get increased => delta > 0;
 }
 
 class TransactionSummary {
@@ -123,6 +118,14 @@ class BudgetUtilization {
   BudgetUtilization(this.name, this.allocated, this.spent);
 }
 
+// Keep these for PDF compatibility
+class CategorySpend {
+  final String name;
+  final double amount;
+  final double percentage;
+  CategorySpend(this.name, this.amount, this.percentage);
+}
+
 class AccountSpend {
   final String name;
   final double amount;
@@ -137,6 +140,8 @@ class CategoryFrequency {
   CategoryFrequency(this.name, this.count, this.totalAmount);
 }
 
+// ── Service ──
+
 class MonthlyRecapService {
   final IsarService _isarService;
   MonthlyRecapService(this._isarService);
@@ -149,180 +154,84 @@ class MonthlyRecapService {
     final start = DateTime(month.year, month.month, 1);
     final end = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
     final daysInMonth = end.day;
-    final midDay = (daysInMonth / 2).ceil();
 
-    final _isar = await _isarService.getInstance();
+    final isar = await _isarService.getInstance();
 
     // ── Current month transactions ──
-    final txns =
-        await _isar.transactions.where().dateBetween(start, end).findAll().withLinks();
+    final txns = await isar.transactions
+        .where()
+        .dateBetween(start, end)
+        .findAll()
+        .withLinks();
+
     double income = 0, expense = 0;
     final Map<String, double> catTotals = {};
-    final Map<String, int> catCounts = {};
-    final Map<String, double> incomeCatTotals = {};
-    final Map<String, double> accountTotals = {};
-    final Map<int, double> dailySpend = {};
     final expenseTxns = <Transaction>[];
-    final incomeTxns = <Transaction>[];
-    double weekdayTotal = 0, weekendTotal = 0;
-    double firstHalf = 0, secondHalf = 0;
-    double recurringExp = 0, oneTimeExp = 0;
-
-    // Track which days are weekday/weekend for averaging
-    final Set<int> weekdayDaysSeen = {}, weekendDaysSeen = {};
 
     for (final txn in txns) {
       if (txn.isTransfer) continue;
-
       if (txn.isExpense) {
         expense += txn.baseAmount;
         final catName = txn.category.value?.name ?? 'Uncategorized';
         catTotals[catName] = (catTotals[catName] ?? 0) + txn.baseAmount;
-        catCounts[catName] = (catCounts[catName] ?? 0) + 1;
         expenseTxns.add(txn);
-
-        // Daily spending
-        dailySpend[txn.date.day] = (dailySpend[txn.date.day] ?? 0) + txn.baseAmount;
-
-        // Weekday vs weekend
-        final wd = txn.date.weekday;
-        if (wd >= 6) {
-          weekendTotal += txn.baseAmount;
-          weekendDaysSeen.add(txn.date.day);
-        } else {
-          weekdayTotal += txn.baseAmount;
-          weekdayDaysSeen.add(txn.date.day);
-        }
-
-        // First half vs second half
-        if (txn.date.day <= midDay) {
-          firstHalf += txn.baseAmount;
-        } else {
-          secondHalf += txn.baseAmount;
-        }
-
-        // Recurring vs one-time
-        await txn.recurringTransactionSource.load();
-        if (txn.recurringTransactionSource.value != null) {
-          recurringExp += txn.baseAmount;
-        } else {
-          oneTimeExp += txn.baseAmount;
-        }
-
-        // Account breakdown
-        final accName = txn.account.value?.name ?? 'Unknown';
-        accountTotals[accName] = (accountTotals[accName] ?? 0) + txn.baseAmount;
       } else {
         income += txn.baseAmount;
-        final catName = txn.category.value?.name ?? 'Other Income';
-        incomeCatTotals[catName] = (incomeCatTotals[catName] ?? 0) + txn.baseAmount;
-        incomeTxns.add(txn);
       }
     }
 
-    // ── Previous month for comparison ──
+    // ── Previous month ──
     final prevStart = DateTime(month.year, month.month - 1, 1);
     final prevEnd = DateTime(month.year, month.month, 0, 23, 59, 59);
-    final prevTxns = await _isar.transactions
+    final prevTxns = await isar.transactions
         .where()
         .dateBetween(prevStart, prevEnd)
-        .findAll();
+        .findAll()
+        .withLinks();
+
     double prevIncome = 0, prevExpense = 0;
+    final Map<String, double> prevCatTotals = {};
+
     for (final txn in prevTxns) {
       if (txn.isTransfer) continue;
       if (txn.isExpense) {
         prevExpense += txn.baseAmount;
+        final catName = txn.category.value?.name ?? 'Uncategorized';
+        prevCatTotals[catName] = (prevCatTotals[catName] ?? 0) + txn.baseAmount;
       } else {
         prevIncome += txn.baseAmount;
       }
     }
 
-    // ── Top expense categories ──
-    final sortedCats = catTotals.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final topCategories = sortedCats
-        .take(8)
-        .map(
-          (e) => CategorySpend(
-            e.key,
-            e.value,
-            expense > 0 ? e.value / expense * 100 : 0,
-          ),
-        )
-        .toList();
+    final net = income - expense;
+    final savingsRate = income > 0 ? net / income * 100 : 0.0;
+    final prevNet = prevIncome - prevExpense;
+    final prevSavingsRate = prevIncome > 0 ? prevNet / prevIncome * 100 : 0.0;
 
-    // ── Income categories ──
-    final sortedIncomeCats = incomeCatTotals.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final incomeCategories = sortedIncomeCats
-        .take(5)
-        .map(
-          (e) => CategorySpend(
-            e.key,
-            e.value,
-            income > 0 ? e.value / income * 100 : 0,
-          ),
-        )
-        .toList();
-
-    // ── Top 5 biggest expenses ──
-    expenseTxns.sort((a, b) => b.amount.compareTo(a.amount));
-    final topTxns = <TransactionSummary>[];
-    for (final txn in expenseTxns.take(5)) {
-      topTxns.add(
-        TransactionSummary(
-          txn.description ?? 'No description',
-          txn.category.value?.name ?? 'Uncategorized',
-          txn.baseAmount,
-          txn.date,
-        ),
-      );
+    // ── Category Change Leaders ──
+    final allCats = {...catTotals.keys, ...prevCatTotals.keys};
+    final categoryChanges = <CategoryChange>[];
+    for (final cat in allCats) {
+      final current = catTotals[cat] ?? 0;
+      final prev = prevCatTotals[cat] ?? 0;
+      if ((current - prev).abs() > 0) {
+        categoryChanges.add(CategoryChange(
+          name: cat,
+          currentAmount: current,
+          previousAmount: prev,
+        ));
+      }
     }
+    categoryChanges.sort((a, b) => b.delta.abs().compareTo(a.delta.abs()));
+    final topCategoryChanges = categoryChanges.take(5).toList();
 
-    // ── Top 5 income transactions ──
-    incomeTxns.sort((a, b) => b.amount.compareTo(a.amount));
-    final topIncomeTxns = <TransactionSummary>[];
-    for (final txn in incomeTxns.take(5)) {
-      topIncomeTxns.add(
-        TransactionSummary(
-          txn.description ?? 'No description',
-          txn.category.value?.name ?? 'Other Income',
-          txn.baseAmount,
-          txn.date,
-        ),
-      );
-    }
-
-    // ── Account breakdown ──
-    final sortedAccounts = accountTotals.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final accountBreakdown = sortedAccounts
-        .map(
-          (e) => AccountSpend(
-            e.key,
-            e.value,
-            expense > 0 ? e.value / expense * 100 : 0,
-          ),
-        )
-        .toList();
-
-    // ── Category by frequency ──
-    final sortedByFreq = catCounts.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final categoryByFrequency = sortedByFreq
-        .take(8)
-        .map((e) => CategoryFrequency(e.key, e.value, catTotals[e.key] ?? 0))
-        .toList();
-
-    // ── Budgets ──
-    final budgets = await _isar.budgets.where().findAll();
+    // ── Budgets (only >70% or breached) ──
+    final budgets = await isar.budgets.where().findAll();
     final monthBudgets = budgets
         .where((b) => b.startDate.isBefore(end) && b.endDate.isAfter(start))
         .toList();
 
-    // Budget utilization details
     final budgetDetails = <BudgetUtilization>[];
-    int kept = 0;
     for (final b in monthBudgets) {
       await b.categories.load();
       final catIds = b.categories.map((c) => c.id).toSet();
@@ -332,60 +241,62 @@ class MonthlyRecapService {
           spent += txn.baseAmount;
         }
       }
-      if (spent <= b.amount) kept++;
-      budgetDetails.add(BudgetUtilization(b.name, b.amount, spent));
-    }
-
-    // ── Achievements & Streaks ──
-    final achievements = await _isar.achievements.where().findAll();
-    final unlockedCount = achievements
-        .where(
-          (a) =>
-              a.unlockedAt != null &&
-              a.unlockedAt!.isAfter(start) &&
-              a.unlockedAt!.isBefore(end),
-        )
-        .length;
-
-    final streaks = await _isar.streaks.where().findAll();
-    final daily = streaks.where((s) => s.type == 'daily_checkin').firstOrNull;
-
-    // ── Year-over-year comparison ──
-    final yoyStart = DateTime(month.year - 1, month.month, 1);
-    final yoyEnd = DateTime(month.year - 1, month.month + 1, 0, 23, 59, 59);
-    final yoyTxns = await _isar.transactions
-        .where()
-        .dateBetween(yoyStart, yoyEnd)
-        .findAll();
-    double? yoyIncome, yoyExpense;
-    int? yoyTxnCount;
-    if (yoyTxns.isNotEmpty) {
-      double yi = 0, ye = 0;
-      int count = 0;
-      for (final txn in yoyTxns) {
-        if (txn.isTransfer) continue;
-        count++;
-        if (txn.isExpense) {
-          ye += txn.baseAmount;
-        } else {
-          yi += txn.baseAmount;
-        }
+      final pct = b.amount > 0 ? spent / b.amount * 100 : 0;
+      if (pct >= 70) {
+        budgetDetails.add(BudgetUtilization(b.name, b.amount, spent));
       }
-      yoyIncome = yi;
-      yoyExpense = ye;
-      yoyTxnCount = count;
     }
+    budgetDetails.sort((a, b) => b.percentage.compareTo(a.percentage));
+
+    // ── Top 5 biggest expenses ──
+    expenseTxns.sort((a, b) => b.amount.compareTo(a.amount));
+    final topTxns = expenseTxns.take(5).map((txn) => TransactionSummary(
+          txn.description ?? '',
+          txn.category.value?.name ?? 'Uncategorized',
+          txn.baseAmount,
+          txn.date,
+        )).toList();
+
+    // ── Financial Score ──
+    final score = _computeFinancialScore(
+      savingsRate: savingsRate,
+      budgetDetails: budgetDetails,
+      expense: expense,
+      prevExpense: prevExpense,
+    );
+    final prevScore = _computeFinancialScore(
+      savingsRate: prevSavingsRate,
+      budgetDetails: [], // approximate
+      expense: prevExpense,
+      prevExpense: 0,
+    );
+
+    // ── AI Insight ──
+    final insight = _buildInsight(
+      income: income,
+      expense: expense,
+      prevIncome: prevIncome,
+      prevExpense: prevExpense,
+      savingsRate: savingsRate,
+      prevSavingsRate: prevSavingsRate,
+      categoryChanges: topCategoryChanges,
+      budgetDetails: budgetDetails,
+      topTxns: topTxns,
+      currency: effectiveCurrency,
+    );
+
+    // ── Achievements/Warnings ──
+    final achievementsList = await _buildAchievements(
+      isar,
+      month: start,
+      savingsRate: savingsRate,
+      net: net,
+      budgetDetails: budgetDetails,
+    );
 
     // ── User ──
-    final profile = await _isar.userProfiles.where().findFirst().withDecryption();
-
-    final net = income - expense;
-    final wdAvg = weekdayDaysSeen.isNotEmpty
-        ? weekdayTotal / weekdayDaysSeen.length
-        : 0.0;
-    final weAvg = weekendDaysSeen.isNotEmpty
-        ? weekendTotal / weekendDaysSeen.length
-        : 0.0;
+    final profile =
+        await isar.userProfiles.where().findFirst().withDecryption();
 
     return MonthlyRecapData(
       currency: effectiveCurrency,
@@ -393,34 +304,193 @@ class MonthlyRecapService {
       totalIncome: income,
       totalExpense: expense,
       netSavings: net,
-      savingsRate: income > 0 ? net / income * 100 : 0,
+      savingsRate: savingsRate,
       avgDailySpend: daysInMonth > 0 ? expense / daysInMonth : 0,
       transactionCount: txns.where((t) => !t.isTransfer).length,
-      topCategories: topCategories,
-      incomeCategories: incomeCategories,
-      topTransactions: topTxns,
-      topIncomeTransactions: topIncomeTxns,
-      budgetsKept: kept,
-      budgetsTotal: monthBudgets.length,
-      budgetDetails: budgetDetails,
-      achievementsUnlocked: unlockedCount,
-      currentStreak: daily?.currentCount ?? 0,
-      longestStreak: daily?.longestCount ?? 0,
       userName: profile?.name,
-      dailySpending: dailySpend,
-      weekdayAvg: wdAvg,
-      weekendAvg: weAvg,
+      financialScore: score,
+      financialScoreDelta: score - prevScore,
+      insight: insight,
+      achievements: achievementsList,
+      categoryChanges: topCategoryChanges,
+      budgetDetails: budgetDetails,
+      topTransactions: topTxns,
       prevMonthIncome: prevIncome,
       prevMonthExpense: prevExpense,
-      firstHalfSpend: firstHalf,
-      secondHalfSpend: secondHalf,
-      recurringExpense: recurringExp,
-      oneTimeExpense: oneTimeExp,
-      accountBreakdown: accountBreakdown,
-      categoryByFrequency: categoryByFrequency,
-      yoyIncome: yoyIncome,
-      yoyExpense: yoyExpense,
-      yoyTransactionCount: yoyTxnCount,
+      prevSavingsRate: prevSavingsRate,
     );
+  }
+
+  // ── Financial Score (0-100) ──
+  int _computeFinancialScore({
+    required double savingsRate,
+    required List<BudgetUtilization> budgetDetails,
+    required double expense,
+    required double prevExpense,
+  }) {
+    // Savings component (0-40 points)
+    final savingsScore = (savingsRate.clamp(0, 40)).round();
+
+    // Budget adherence (0-30 points)
+    int budgetScore = 30;
+    for (final b in budgetDetails) {
+      if (b.overBudget) budgetScore -= 10;
+      else if (b.percentage > 90) budgetScore -= 5;
+    }
+    budgetScore = budgetScore.clamp(0, 30);
+
+    // Spending control (0-30 points) — less than or equal to prev month = full marks
+    int spendScore = 30;
+    if (prevExpense > 0 && expense > prevExpense) {
+      final increase = (expense - prevExpense) / prevExpense * 100;
+      spendScore = (30 - increase).round().clamp(0, 30);
+    }
+
+    return (savingsScore + budgetScore + spendScore).clamp(0, 100);
+  }
+
+  // ── AI Insight Builder ──
+  RecapInsight _buildInsight({
+    required double income,
+    required double expense,
+    required double prevIncome,
+    required double prevExpense,
+    required double savingsRate,
+    required double prevSavingsRate,
+    required List<CategoryChange> categoryChanges,
+    required List<BudgetUtilization> budgetDetails,
+    required List<TransactionSummary> topTxns,
+    required String currency,
+  }) {
+    final lines = <String>[];
+
+    // Spending change
+    if (prevExpense > 0) {
+      final delta = expense - prevExpense;
+      final pct = (delta / prevExpense * 100).abs().round();
+      if (delta > 0) {
+        lines.add(
+            'Spending increased by $currency${delta.round().abs()} (+$pct%) from last month.');
+      } else if (delta < 0) {
+        lines.add(
+            'Spending decreased by $currency${delta.round().abs()} (-$pct%) from last month.');
+      }
+    }
+
+    // Top category contributor to change
+    if (categoryChanges.isNotEmpty) {
+      final top = categoryChanges.first;
+      if (top.increased) {
+        lines.add(
+            '${top.name} contributed $currency${top.delta.round()} of the increase.');
+      } else {
+        lines.add(
+            '${top.name} spending fell by $currency${top.delta.round().abs()}.');
+      }
+    }
+
+    // Savings rate change
+    if (prevSavingsRate > 0) {
+      if ((savingsRate - prevSavingsRate).abs() > 2) {
+        lines.add(
+            'Savings rate ${savingsRate > prevSavingsRate ? "improved" : "dropped"} from ${prevSavingsRate.round()}% to ${savingsRate.round()}%.');
+      }
+    }
+
+    // Budget breaches
+    final breached = budgetDetails.where((b) => b.overBudget).toList();
+    for (final b in breached.take(2)) {
+      final over = b.spent - b.allocated;
+      lines.add(
+          'Exceeded ${b.name} budget by $currency${over.round()}.');
+    }
+
+    // Largest expense
+    if (topTxns.isNotEmpty) {
+      final biggest = topTxns.first;
+      final desc = biggest.description.isNotEmpty
+          ? biggest.description
+          : biggest.category;
+      lines.add(
+          'Largest expense: $currency${biggest.amount.round()} ($desc).');
+    }
+
+    // Suggested focus
+    String? focus;
+    if (categoryChanges.isNotEmpty && categoryChanges.first.increased) {
+      final top = categoryChanges.first;
+      final reductionNeeded = ((savingsRate - prevSavingsRate).abs() > 2 &&
+              savingsRate < prevSavingsRate)
+          ? ' to recover your savings rate'
+          : '';
+      focus =
+          'Reduce ${top.name} spending by 20%$reductionNeeded.';
+    }
+
+    return RecapInsight(lines: lines, suggestedFocus: focus);
+  }
+
+  // ── Achievements/Warnings ──
+  Future<List<RecapAchievement>> _buildAchievements(
+    Isar isar, {
+    required DateTime month,
+    required double savingsRate,
+    required double net,
+    required List<BudgetUtilization> budgetDetails,
+  }) async {
+    final results = <RecapAchievement>[];
+
+    // Check if best savings month in last 12 months
+    final yearAgo = DateTime(month.year - 1, month.month, 1);
+    final prevMonths = await isar.transactions
+        .where()
+        .dateBetween(yearAgo, month)
+        .findAll();
+
+    // Group by month and compute savings
+    final Map<String, double> monthlySavings = {};
+    for (final txn in prevMonths) {
+      if (txn.isTransfer) continue;
+      final key = '${txn.date.year}-${txn.date.month}';
+      monthlySavings[key] = (monthlySavings[key] ?? 0) +
+          (txn.isExpense ? -txn.baseAmount : txn.baseAmount);
+    }
+
+    final currentKey = '${month.year}-${month.month}';
+    final otherMonths = monthlySavings.entries
+        .where((e) => e.key != currentKey)
+        .map((e) => e.value)
+        .toList();
+
+    if (otherMonths.isNotEmpty && net > 0) {
+      final maxPrev = otherMonths.reduce((a, b) => a > b ? a : b);
+      if (net > maxPrev) {
+        results.add(RecapAchievement(text: 'Best savings month in 12 months 🎉'));
+      }
+    }
+
+    // High savings rate
+    if (savingsRate >= 30) {
+      results.add(RecapAchievement(text: 'Saved ${savingsRate.round()}% of income 💪'));
+    }
+
+    // Budget breaches as warnings
+    final breachedCount = budgetDetails.where((b) => b.overBudget).length;
+    if (breachedCount >= 2) {
+      results.add(RecapAchievement(
+        text: '$breachedCount budgets exceeded this month',
+        isWarning: true,
+      ));
+    }
+
+    // Streaks
+    final streaks = await isar.streaks.where().findAll();
+    final daily = streaks.where((s) => s.type == 'daily_checkin').firstOrNull;
+    if (daily != null && daily.currentCount >= 30) {
+      results.add(RecapAchievement(
+          text: '${daily.currentCount}-day tracking streak 🔥'));
+    }
+
+    return results;
   }
 }

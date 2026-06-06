@@ -4558,6 +4558,47 @@ class AppLocalizationsBo extends AppLocalizations {
   String get billCenter_createNewEntry => 'Create New Entry';
 
   @override
+  String get billCenter_lowBuffer => 'Low buffer';
+
+  @override
+  String get billCenter_safe => 'Covered';
+
+  @override
+  String billCenter_unfundedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bills may not be covered',
+      one: '1 bill may not be covered',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get billCenter_thisWeekRequired => 'Required this week';
+
+  @override
+  String billCenter_activeBills(int count) {
+    return '$count active bills';
+  }
+
+  @override
+  String get billCenter_largestBill => 'Largest';
+
+  @override
+  String billCenter_upcomingIn(int days) {
+    return 'Upcoming in $days days';
+  }
+
+  @override
+  String get billCenter_cannotPayFuture => 'Cannot mark future bills as paid';
+
+  @override
+  String billCenter_markedPaid(String name) {
+    return '$name marked as paid';
+  }
+
+  @override
   String get comparison_steady => 'Steady as she goes';
 
   @override
@@ -6014,6 +6055,108 @@ class AppLocalizationsBo extends AppLocalizations {
       'Old Regime estimate uses standard deduction only. With HRA, 80C, 80D deductions, savings could be higher.';
 
   @override
+  String get tax_assumptions => 'Assumptions';
+
+  @override
+  String get tax_assumeProjected =>
+      'Income projected from current trend to full year';
+
+  @override
+  String get tax_assumeNoDeductions =>
+      'No 80C, 80D, HRA or other deductions considered';
+
+  @override
+  String get tax_assumeNoTds => 'TDS already deducted is not accounted for';
+
+  @override
+  String get tax_assumeAllTaxable =>
+      'All income categories treated as fully taxable';
+
+  @override
+  String get tax_assumeOldNoDeductions =>
+      'Old regime estimate excludes section-specific deductions';
+
+  @override
+  String get tax_warnInsufficientData =>
+      'Very few income transactions recorded';
+
+  @override
+  String get tax_warnHighVariance =>
+      'Income varies significantly month-to-month';
+
+  @override
+  String get tax_warnSingleSource => 'Only one income source detected';
+
+  @override
+  String get tax_opportunities => 'Tax Optimization Opportunities';
+
+  @override
+  String get tax_oppSaveUpTo => 'Save up to';
+
+  @override
+  String get tax_oppRegime => 'Tax Regime';
+
+  @override
+  String get tax_oppRegimeDesc =>
+      'Compare old vs new regime for potential savings';
+
+  @override
+  String get tax_oppNps => 'NPS Contribution';
+
+  @override
+  String get tax_oppNpsDesc =>
+      'Not evaluated — additional deduction may be available';
+
+  @override
+  String get tax_opp80c => 'Section 80C Investments';
+
+  @override
+  String get tax_opp80cDesc =>
+      'Not evaluated — deductions up to ₹1.5L may apply';
+
+  @override
+  String get tax_oppHra => 'HRA Exemption';
+
+  @override
+  String get tax_oppHraDesc => 'Not evaluated — potential benefit if renting';
+
+  @override
+  String get tax_oppHomeLoan => 'Home Loan Interest';
+
+  @override
+  String get tax_oppHomeLoanDesc =>
+      'Not evaluated — Section 24 deduction may apply';
+
+  @override
+  String get tax_oppMedical => 'Medical Insurance';
+
+  @override
+  String get tax_oppMedicalDesc =>
+      'Not evaluated — Section 80D deduction may apply';
+
+  @override
+  String get tax_editDeductions => 'Edit Deductions';
+
+  @override
+  String get tax_deductionProfile => 'Deduction Profile';
+
+  @override
+  String get tax_deductionInfo =>
+      'Leave fields empty if unknown. Enter 0 if you explicitly have no investment in that category.';
+
+  @override
+  String get tax_deductionHintAnnual => 'Annual amount';
+
+  @override
+  String get tax_deductionHintMonthly => 'Monthly amount';
+
+  @override
+  String get tax_deductionEmployerNps => 'Employer NPS';
+
+  @override
+  String get tax_deductionRent => 'Rent Paid (Monthly)';
+
+  @override
   String get category_merge => 'Merge Category';
 
   @override
@@ -6350,10 +6493,16 @@ class AppLocalizationsBo extends AppLocalizations {
   String get cc_noCardsHint => 'Add a credit card account to track bills here';
 
   @override
-  String get cc_minimumDue => 'Min. Due';
+  String get cc_minimumDue => 'Est. Min. Due';
 
   @override
-  String get cc_cycleSpend => 'Cycle Spend';
+  String get cc_minimumDueProvenance => 'Estimated from outstanding balance';
+
+  @override
+  String get cc_availableCredit => 'Available';
+
+  @override
+  String get cc_cycleSpend => 'Spent this cycle';
 
   @override
   String get cc_utilization => 'Credit Utilization';
@@ -6372,6 +6521,45 @@ class AppLocalizationsBo extends AppLocalizations {
 
   @override
   String get cc_utilitySubtitle => 'Due dates, outstanding & limits';
+
+  @override
+  String get cc_totalMinimumDue => 'Minimum Due This Cycle';
+
+  @override
+  String cc_overdueCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count overdue',
+      one: '1 overdue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cc_dueSoonCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count due soon',
+      one: '1 due soon',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cc_highUtilCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count above 80%',
+      one: '1 above 80%',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cc_allPaymentsCurrent => 'All payments current';
 
   @override
   String get plugins_remindMeBefore => 'Remind me before';

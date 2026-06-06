@@ -18,11 +18,38 @@ import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
-class AdaptiveBudgetDashboard extends ConsumerWidget {
+class AdaptiveBudgetDashboard extends ConsumerStatefulWidget {
   const AdaptiveBudgetDashboard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdaptiveBudgetDashboard> createState() =>
+      _AdaptiveBudgetDashboardState();
+}
+
+class _AdaptiveBudgetDashboardState
+    extends ConsumerState<AdaptiveBudgetDashboard>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(budgetConstraintsProvider);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final ctxt = AppLocalizations.of(context)!;
 
     return ScreenShell(
@@ -204,7 +231,7 @@ class _BudgetConstraintCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         onTap: () {
           HapticFeedback.lightImpact();
-          context.push(AppRoutes.budgetDetails, extra: snapshot);
+          context.push(AppRoutes.budgetDetails, extra: snapshot.budgetId);
         },
         child: Padding(
           padding: EdgeInsets.all(spacing.cardInner),
@@ -431,7 +458,7 @@ class _BudgetConstraintCard extends ConsumerWidget {
       BudgetConstraintUrgency.approachingBreach => (
         ctxt.budget_reviewSpending,
         LucideIcons.search,
-        () => context.push(AppRoutes.budgetDetails, extra: snapshot),
+        () => context.push(AppRoutes.budgetDetails, extra: snapshot.budgetId),
       ),
       BudgetConstraintUrgency.unknown => (
         ctxt.budget_fixData,
@@ -441,7 +468,7 @@ class _BudgetConstraintCard extends ConsumerWidget {
       _ => (
         ctxt.budget_viewDetails,
         LucideIcons.arrowRight,
-        () => context.push(AppRoutes.budgetDetails, extra: snapshot),
+        () => context.push(AppRoutes.budgetDetails, extra: snapshot.budgetId),
       ),
     };
 

@@ -34,6 +34,7 @@ final budgetWithProgressProvider =
         (ref) async {
   ref.watch(dateChangeProvider);
   ref.watch(transactionChangeProvider);
+  ref.watch(budgetChangeProvider);
   final budgetService = ref.watch(budgetServiceProvider);
   final isar = await ref.read(isarServiceProvider).getInstance();
 
@@ -68,6 +69,7 @@ final budgetsWithProgressProvider =
     FutureProvider.autoDispose<List<BudgetWithProgress>>((ref) async {
   ref.watch(dateChangeProvider);
   ref.watch(transactionChangeProvider);
+  ref.watch(budgetChangeProvider);
   return ref.watch(budgetServiceProvider).getBudgetsWithProgress();
 });
 

@@ -1,9 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/domain/financial_states.dart';
 import 'package:mudra_manager/core/engine/dashboard_engine.dart';
+import 'package:mudra_manager/core/logic/generators/bill_insight_generator.dart';
+import 'package:mudra_manager/core/logic/generators/budget_insight_generator.dart';
+import 'package:mudra_manager/core/logic/generators/cashflow_insight_generator.dart';
+import 'package:mudra_manager/core/logic/insight_generator.dart';
 
 void main() {
   final today = DateTime(2025, 6, 15, 10, 0);
+  final List<InsightGenerator> generators = [
+    BudgetInsightGenerator(),
+    BillInsightGenerator(),
+    CashflowInsightGenerator(),
+  ];
 
   group('DashboardEngine.compute', () {
     test('cold start — no data → insufficient gate', () {
@@ -105,12 +114,12 @@ void main() {
         recurringScanDone: true,
       );
 
-      final state = DashboardEngine.compute(input, now: today);
+      final state = DashboardEngine.compute(input, now: today, generators: generators);
 
       expect(state.budgetState, BudgetState.breach);
       expect(state.convergenceCount, 1);
       expect(state.briefing, isNotNull);
-      expect(state.briefing!.trigger, BriefingTrigger.budgetBreach);
+      expect(state.briefing!.insight.trigger, BriefingTrigger.budgetBreach);
       expect(state.briefing!.params['name'], 'Food');
     });
 
@@ -138,10 +147,10 @@ void main() {
         recurringScanDone: true,
       );
 
-      final state = DashboardEngine.compute(input, now: today);
+      final state = DashboardEngine.compute(input, now: today, generators: generators);
 
       expect(state.convergenceCount, 3); // breach + overdue + negative
-      expect(state.briefing!.trigger, BriefingTrigger.billOverdue);
+      expect(state.briefing!.insight.trigger, BriefingTrigger.billOverdue);
       expect(state.briefing!.params['name'], 'Insurance');
     });
 

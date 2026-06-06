@@ -27,6 +27,8 @@ enum BriefingTrigger {
   billOverdue(100),
   billDueToday(90),
   budgetBreach(80),
+  spendingThresholdBreach(70),
+  spendingAcceleration(70),
   spendingDrift(70),
   billDueSoon(60),
   netNegative(50),

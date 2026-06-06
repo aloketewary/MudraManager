@@ -1,5 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/engine/dashboard_engine.dart';
+import 'package:mudra_manager/core/logic/generators/bill_insight_generator.dart';
+import 'package:mudra_manager/core/logic/generators/budget_insight_generator.dart';
+import 'package:mudra_manager/core/logic/generators/cashflow_insight_generator.dart';
+import 'package:mudra_manager/core/logic/generators/comparison_insight_generator.dart';
+import 'package:mudra_manager/core/logic/suppression_engine.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/state/dashboard_state.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
@@ -7,6 +12,9 @@ import 'package:mudra_manager/features/dashboard/presentation/providers/dashboar
 
 /// Module-level storage for previous state (persists across provider rebuilds).
 DashboardState? _previousState;
+
+/// Module-level suppression history (persists across provider rebuilds).
+List<SuppressionRecord> _suppressionHistory = [];
 
 /// V2 Dashboard State Provider.
 /// Reads from existing dashboardDataProvider (raw data), runs new engine.
@@ -21,10 +29,10 @@ final dashboardStateV2Provider = Provider.autoDispose<DashboardState?>((ref) {
   // ── Map DashboardData → EngineInput ──
   final input = EngineInput(
     accounts: data.accounts
-        .map((a) => EngineAccount(id: a.id),)
+        .map((a) => EngineAccount(id: a.id))
         .toList(),
     transactions: data.transactions
-        .map((t) => EngineTransaction(date: t.date),)
+        .map((t) => EngineTransaction(date: t.date))
         .toList(),
     budgets: data.budgets
         .map((b) => EngineBudget(
@@ -48,15 +56,36 @@ final dashboardStateV2Provider = Provider.autoDispose<DashboardState?>((ref) {
         prefs.getString('budget_setup_skipped') == 'true',
     recurringScanDone:
         prefs.getString('recurring_scan_completed') == 'true',
+    // categoryComparison: null for now — will be wired when
+    // comparison fact extraction is added to dashboardDataProvider
   );
+
+  // ── Generators ──
+  final generators = [
+    const BillInsightGenerator(billActionRoute: AppRoutes.recurringTransactions),
+    const BudgetInsightGenerator(budgetActionRoute: AppRoutes.budgetDashboard),
+    const CashflowInsightGenerator(actionRoute: AppRoutes.budgetDashboard),
+    const ComparisonInsightGenerator(actionRoute: AppRoutes.statistics),
+  ];
 
   final state = DashboardEngine.compute(
     input,
     previous: _previousState,
     now: now,
+    generators: generators,
+    suppressionHistory: _suppressionHistory,
     billActionRoute: AppRoutes.recurringTransactions,
     budgetActionRoute: AppRoutes.budgetDashboard,
   );
+
+  // Record suppression if briefing fired
+  if (state.briefing != null) {
+    _suppressionHistory = SuppressionEngine.recordFiring(
+      history: _suppressionHistory,
+      fired: state.briefing!.insight,
+      now: now,
+    );
+  }
 
   // Store for next transition detection cycle
   _previousState = state;

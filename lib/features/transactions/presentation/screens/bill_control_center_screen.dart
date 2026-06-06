@@ -18,8 +18,8 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/utils.dart';
+import 'package:mudra_manager/features/transactions/data/bill_control_center_provider.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_provider.dart';
-import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
@@ -40,69 +40,11 @@ class BillControlCenterScreen extends ConsumerStatefulWidget {
 
 class _BillControlCenterScreenState
     extends ConsumerState<BillControlCenterScreen> {
-
   @override
   void initState() {
     super.initState();
     BackgroundTaskManager.processRecurringNow();
   }
-
-  // ── Helpers ──
-  static const _dueSoonDays = 7;
-
-  List<RecurringTransaction> _overdue(List<RecurringTransaction> active) {
-    final now = DateTime.now();
-    return active.where((b) => b.nextDueDate.isBefore(now)).toList()
-      ..sort((a, b) => a.nextDueDate.compareTo(b.nextDueDate));
-  }
-
-  List<RecurringTransaction> _dueSoon(List<RecurringTransaction> active) {
-    final now = DateTime.now();
-    return active
-        .where(
-          (b) =>
-              !b.nextDueDate.isBefore(now) &&
-              b.nextDueDate.difference(now).inDays <= _dueSoonDays,
-        )
-        .toList()
-      ..sort((a, b) => a.nextDueDate.compareTo(b.nextDueDate));
-  }
-
-  List<RecurringTransaction> _thisMonth(List<RecurringTransaction> active) {
-    final now = DateTime.now();
-    return active
-        .where(
-          (b) =>
-              b.nextDueDate.difference(now).inDays > _dueSoonDays &&
-              b.nextDueDate.month == now.month &&
-              b.nextDueDate.year == now.year,
-        )
-        .toList()
-      ..sort((a, b) => a.nextDueDate.compareTo(b.nextDueDate));
-  }
-
-  List<RecurringTransaction> _later(List<RecurringTransaction> active) {
-    final now = DateTime.now();
-    return active
-        .where(
-          (b) =>
-              b.nextDueDate.difference(now).inDays > _dueSoonDays &&
-              (b.nextDueDate.month != now.month ||
-                  b.nextDueDate.year != now.year),
-        )
-        .toList()
-      ..sort((a, b) => a.nextDueDate.compareTo(b.nextDueDate));
-  }
-
-  String _frequencyLabel(Frequency f) => switch (f) {
-        Frequency.daily => 'Daily',
-        Frequency.weekly => 'Weekly',
-        Frequency.monthly => 'Monthly',
-        Frequency.yearly => 'Yearly',
-      };
-
-  int _daysUntil(RecurringTransaction b) =>
-      b.nextDueDate.difference(DateTime.now()).inDays;
 
   @override
   Widget build(BuildContext context) {
@@ -110,12 +52,12 @@ class _BillControlCenterScreenState
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final brightness = Theme.of(context).brightness;
-    final recurringAsync = ref.watch(recurringTransactionsProvider);
-    final accountsAsync = ref.watch(accountsProvider);
+    final ctxt = AppLocalizations.of(context)!;
+    final dataAsync = ref.watch(billControlCenterProvider);
 
     return ScreenShell(
       config: ScreenShellConfig(
-        title: AppLocalizations.of(context)!.title_billControlCenter,
+        title: ctxt.title_billControlCenter,
         appBarMode: AppBarMode.standard,
         enableRefresh: false,
       ),
@@ -132,129 +74,125 @@ class _BillControlCenterScreenState
           ),
         ],
       ),
-      body: recurringAsync.when(
-        data: (bills) {
-          if (bills.isEmpty) {
+      body: dataAsync.when(
+        data: (data) {
+          if (data.activeCount == 0) {
             return NoDataFound(
               message: BuddyMessages.noBills,
               iconData: LucideIcons.receiptText,
             );
           }
 
-          final active = bills.where((b) => b.isActive).toList();
-          final overdue = _overdue(active);
-          final dueSoon = _dueSoon(active);
-          final thisMonth = _thisMonth(active);
-          final later = _later(active);
-
-          final monthlyTotal =
-              active.fold(0.0, (sum, b) => sum + _monthlyEquivalent(b));
-
-          return accountsAsync.when(
-            data: (accounts) {
-              final totalBalance =
-                  accounts.fold(0.0, (sum, a) => sum + a.initialBalance);
-              final upcomingTotal =
-                  [...overdue, ...dueSoon].fold(0.0, (s, b) => s + b.amount);
-              final afterBills = totalBalance - upcomingTotal;
-
-              return ListView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal,
-                  vertical: spacing.cardVertical,
-                ),
-                children: [
-                  // 1. Upcoming hero
-                  if (overdue.isNotEmpty || dueSoon.isNotEmpty)
-                    _buildUpcomingHero(
-                      [...overdue, ...dueSoon],
-                      upcomingTotal,
-                      color,
-                      textTheme,
-                      spacing,
-                      brightness,
-                    ),
-                  if (overdue.isNotEmpty || dueSoon.isNotEmpty)
-                    SizedBox(height: spacing.elementGap),
-
-                  // 2. Balance impact
-                  _buildBalanceImpact(
-                    totalBalance,
-                    afterBills,
-                    color,
-                    textTheme,
-                    spacing,
-                    brightness,
-                  ),
-                  SizedBox(height: spacing.elementGap),
-
-                  // 3. Monthly insight
-                  _buildMonthlyInsight(
-                    monthlyTotal,
-                    active.length,
-                    color,
-                    textTheme,
-                    spacing,
-                  ),
-                  SizedBox(height: spacing.sectionGap),
-
-                  // 3b. Detected subscriptions
-                  const SubscriptionListCard(),
-
-                  // 4. Grouped lists
-                  if (overdue.isNotEmpty)
-                    _buildGroup(
-                      AppLocalizations.of(context)!.billCenter_overdue,
-                      overdue,
-                      FinanceColors.expenseColor(brightness),
-                      LucideIcons.circleAlert,
-                      color,
-                      textTheme,
-                      spacing,
-                      brightness,
-                    ),
-                  if (dueSoon.isNotEmpty)
-                    _buildGroup(
-                      AppLocalizations.of(context)!.billCenter_thisWeek,
-                      dueSoon,
-                      color.tertiary,
-                      LucideIcons.clock,
-                      color,
-                      textTheme,
-                      spacing,
-                      brightness,
-                    ),
-                  if (thisMonth.isNotEmpty)
-                    _buildGroup(
-                      AppLocalizations.of(context)!.billCenter_thisMonth,
-                      thisMonth,
-                      color.primary,
-                      LucideIcons.calendar,
-                      color,
-                      textTheme,
-                      spacing,
-                      brightness,
-                    ),
-                  if (later.isNotEmpty)
-                    _buildGroup(
-                      AppLocalizations.of(context)!.billCenter_later,
-                      later,
-                      color.onSurfaceVariant,
-                      LucideIcons.calendarDays,
-                      color,
-                      textTheme,
-                      spacing,
-                      brightness,
-                    ),
-
-                  const AmbientBrandSection(),
-                ],
-              );
-            },
-            loading: () => ListView(
-              children: List.generate(3, (_) => const BudgetCardSkeleton()),
+          return ListView(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal,
+              vertical: spacing.cardVertical,
             ),
-            error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
+            children: [
+              // 1. Balance Impact (affordability first)
+              _buildBalanceImpact(
+                data.affordability,
+                color,
+                textTheme,
+                spacing,
+                brightness,
+                ctxt,
+              ),
+              SizedBox(height: spacing.elementGap),
+
+              // 2. This week required strip
+              if (data.thisWeekCount > 0)
+                _buildThisWeekStrip(
+                  data.thisWeekTotal,
+                  data.thisWeekCount,
+                  color,
+                  textTheme,
+                  spacing,
+                  ctxt,
+                ),
+              if (data.thisWeekCount > 0) SizedBox(height: spacing.elementGap),
+
+              // 3. Upcoming hero
+              if (data.overdue.isNotEmpty || data.dueSoon.isNotEmpty)
+                _buildUpcomingHero(
+                  [...data.overdue, ...data.dueSoon],
+                  data.affordability.upcomingTotal,
+                  data.paidBillIds,
+                  color,
+                  textTheme,
+                  spacing,
+                  brightness,
+                  ctxt,
+                ),
+              if (data.overdue.isNotEmpty || data.dueSoon.isNotEmpty)
+                SizedBox(height: spacing.elementGap),
+
+              // 4. Monthly insight
+              _buildMonthlyInsight(
+                data.monthlyTotal,
+                data.activeCount,
+                data.largestBill,
+                color,
+                textTheme,
+                spacing,
+              ),
+              SizedBox(height: spacing.sectionGap),
+
+              // 5. Grouped bill lists
+              if (data.overdue.isNotEmpty)
+                _buildGroup(
+                  ctxt.billCenter_overdue,
+                  data.overdue,
+                  data.paidBillIds,
+                  FinanceColors.expenseColor(brightness),
+                  LucideIcons.circleAlert,
+                  color,
+                  textTheme,
+                  spacing,
+                  brightness,
+                ),
+              if (data.dueSoon.isNotEmpty)
+                _buildGroup(
+                  ctxt.billCenter_thisWeek,
+                  data.dueSoon,
+                  data.paidBillIds,
+                  color.tertiary,
+                  LucideIcons.clock,
+                  color,
+                  textTheme,
+                  spacing,
+                  brightness,
+                ),
+              if (data.thisMonth.isNotEmpty)
+                _buildGroup(
+                  ctxt.billCenter_thisMonth,
+                  data.thisMonth,
+                  data.paidBillIds,
+                  color.primary,
+                  LucideIcons.calendar,
+                  color,
+                  textTheme,
+                  spacing,
+                  brightness,
+                ),
+              if (data.later.isNotEmpty)
+                _buildGroup(
+                  ctxt.billCenter_later,
+                  data.later,
+                  data.paidBillIds,
+                  color.onSurfaceVariant,
+                  LucideIcons.calendarDays,
+                  color,
+                  textTheme,
+                  spacing,
+                  brightness,
+                ),
+
+              // 6. Detected subscriptions (last — optional discovery)
+              const SubscriptionListCard(),
+
+              const AmbientBrandSection(),
+            ],
           );
         },
         loading: () => ListView(
@@ -265,21 +203,207 @@ class _BillControlCenterScreenState
     );
   }
 
-  double _monthlyEquivalent(RecurringTransaction b) => switch (b.frequency) {
-        Frequency.daily => b.amount * 30,
-        Frequency.weekly => b.amount * 4.33,
-        Frequency.monthly => b.amount,
-        Frequency.yearly => b.amount / 12,
-      };
+  // ── Balance Impact (affordability hero) ──
 
-  // ── BATCH 2: Upcoming Hero ──
-  Widget _buildUpcomingHero(
-    List<RecurringTransaction> upcoming,
-    double total,
+  Widget _buildBalanceImpact(
+    BillAffordabilitySummary affordability,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
     Brightness brightness,
+    AppLocalizations ctxt,
+  ) {
+    final Color accentColor;
+    final IconData icon;
+    final String? statusLabel;
+
+    switch (affordability.state) {
+      case AffordabilityState.negative:
+        accentColor = FinanceColors.expenseColor(brightness);
+        icon = LucideIcons.triangleAlert;
+        statusLabel = null;
+      case AffordabilityState.low:
+        accentColor = color.tertiary;
+        icon = LucideIcons.triangleAlert;
+        statusLabel = ctxt.billCenter_lowBuffer;
+      case AffordabilityState.safe:
+        accentColor = FinanceColors.incomeColor(brightness);
+        icon = LucideIcons.shieldCheck;
+        statusLabel = ctxt.billCenter_safe;
+    }
+
+    return Card(
+      elevation: 0,
+      color: accentColor.withValues(alpha: 0.08),
+      margin: const EdgeInsets.only(),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: accentColor.withValues(alpha: 0.25)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(spacing.elementGap),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  ),
+                  child: Icon(icon, color: accentColor, size: 24),
+                ),
+                SizedBox(width: spacing.elementGap * 1.5),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ctxt.billCenter_afterUpcoming,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                        ),
+                      ),
+                      SizedBox(height: spacing.elementGapMin),
+                      CurrencyText(
+                        amount: affordability.remainingBalance,
+                        fixedLength: 0,
+                        compact: false,
+                        showSign: true,
+                        showPositiveSign: false,
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: accentColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (statusLabel != null)
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.elementGap,
+                      vertical: spacing.elementGapMin,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                    ),
+                    child: Text(
+                      statusLabel,
+                      style: textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: accentColor,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            // Unfunded warning
+            if (affordability.unfundedCount > 0) ...[
+              SizedBox(height: spacing.elementGap),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.elementGap,
+                  vertical: spacing.elementGapMin,
+                ),
+                decoration: BoxDecoration(
+                  color: FinanceColors.expenseColor(brightness)
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      LucideIcons.alertTriangle,
+                      size: 12,
+                      color: FinanceColors.expenseColor(brightness),
+                    ),
+                    SizedBox(width: spacing.elementGapMin),
+                    Text(
+                      ctxt.billCenter_unfundedCount(
+                        affordability.unfundedCount,
+                      ),
+                      style: textTheme.labelSmall?.copyWith(
+                        color: FinanceColors.expenseColor(brightness),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── This Week Strip ──
+
+  Widget _buildThisWeekStrip(
+    double total,
+    int count,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardInner,
+        vertical: spacing.elementGap,
+      ),
+      decoration: BoxDecoration(
+        color: color.tertiaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+        border: Border.all(color: color.tertiary.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(LucideIcons.clock, size: 16, color: color.tertiary),
+          SizedBox(width: spacing.elementGap),
+          Text(
+            ctxt.billCenter_thisWeekRequired,
+            style: textTheme.labelMedium?.copyWith(
+              color: color.onSurface,
+            ),
+          ),
+          const Spacer(),
+          CurrencyText(
+            amount: total,
+            compact: true,
+            style: textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color.tertiary,
+            ),
+          ),
+          SizedBox(width: spacing.elementGapMin),
+          Text(
+            '· $count',
+            style: textTheme.labelMedium?.copyWith(
+              color: color.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Upcoming Hero ──
+
+  Widget _buildUpcomingHero(
+    List<RecurringTransaction> upcoming,
+    double total,
+    Set<int> paidBillIds,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    Brightness brightness,
+    AppLocalizations ctxt,
   ) {
     return Card(
       elevation: 0,
@@ -298,7 +422,7 @@ class _BillControlCenterScreenState
                 Icon(LucideIcons.bell, size: 18, color: color.primary),
                 SizedBox(width: spacing.elementGap),
                 Text(
-                  'Upcoming in $_dueSoonDays days',
+                  ctxt.billCenter_upcomingIn(7),
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: color.onPrimaryContainer,
@@ -325,7 +449,6 @@ class _BillControlCenterScreenState
               ],
             ),
             SizedBox(height: spacing.elementGap * 1.5),
-            // Bill rows (max 4)
             ...upcoming.take(4).map(
                   (b) => Padding(
                     padding: EdgeInsets.only(bottom: spacing.elementGap),
@@ -335,9 +458,11 @@ class _BillControlCenterScreenState
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: b.nextDueDate.isBefore(DateTime.now())
-                                ? FinanceColors.expenseColor(brightness)
-                                : color.primary,
+                            color: paidBillIds.contains(b.id)
+                                ? FinanceColors.incomeColor(brightness)
+                                : b.nextDueDate.isBefore(DateTime.now())
+                                    ? FinanceColors.expenseColor(brightness)
+                                    : color.primary,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -347,6 +472,9 @@ class _BillControlCenterScreenState
                             b.category.value?.name ?? 'Bill',
                             style: textTheme.bodyMedium?.copyWith(
                               color: color.onPrimaryContainer,
+                              decoration: paidBillIds.contains(b.id)
+                                  ? TextDecoration.lineThrough
+                                  : null,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -387,13 +515,14 @@ class _BillControlCenterScreenState
                 ),
               ),
             Divider(
-                height: spacing.sectionGap,
-                color: color.onPrimaryContainer.withValues(alpha: 0.15),),
+              height: spacing.sectionGap,
+              color: color.onPrimaryContainer.withValues(alpha: 0.15),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.billCenter_totalUpcoming,
+                  ctxt.billCenter_totalUpcoming,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onPrimaryContainer.withValues(alpha: 0.7),
                   ),
@@ -414,108 +543,12 @@ class _BillControlCenterScreenState
     );
   }
 
-  String _dueLabel(RecurringTransaction b) {
-    final days = _daysUntil(b);
-    if (days < 0) return '${days.abs()}d ago';
-    if (days == 0) return 'Today';
-    if (days == 1) return 'Tomorrow';
-    return '$days days';
-  }
+  // ── Monthly Insight ──
 
-  // ── BATCH 3: Balance Impact ──
-  Widget _buildBalanceImpact(
-    double balance,
-    double afterBills,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-    Brightness brightness,
-  ) {
-    final isNegative = afterBills < 0;
-    final accentColor = isNegative
-        ? FinanceColors.expenseColor(brightness)
-        : FinanceColors.incomeColor(brightness);
-
-    return Card(
-      elevation: 0,
-      color: accentColor.withValues(alpha: 0.08),
-      margin: const EdgeInsets.only(),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(color: accentColor.withValues(alpha: 0.25)),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.cardInner),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(spacing.elementGap),
-              decoration: BoxDecoration(
-                color: accentColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              ),
-              child: Icon(
-                isNegative
-                    ? LucideIcons.triangleAlert
-                    : LucideIcons.shieldCheck,
-                color: accentColor,
-                size: 24,
-              ),
-            ),
-            SizedBox(width: spacing.elementGap * 1.5),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.billCenter_afterUpcoming,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                  SizedBox(height: spacing.elementGapMin),
-                  CurrencyText(
-                    amount: afterBills,
-                    fixedLength: 0,
-                    compact: false,
-                    showSign: true,
-                    showPositiveSign: false,
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: accentColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isNegative)
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.elementGap,
-                  vertical: spacing.elementGapMin,
-                ),
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                ),
-                child: Text(
-                  'LOW',
-                  style: textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: accentColor,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── BATCH 4: Monthly Insight ──
   Widget _buildMonthlyInsight(
     double monthlyTotal,
     int count,
+    RecurringTransaction? largest,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
@@ -541,7 +574,7 @@ class _BillControlCenterScreenState
               TextSpan(
                 children: [
                   TextSpan(
-                    text: '$count active bills',
+                    text: '$count active',
                     style: textTheme.bodySmall?.copyWith(
                       color: color.onSurfaceVariant,
                     ),
@@ -559,6 +592,21 @@ class _BillControlCenterScreenState
                       color: color.onSurface,
                     ),
                   ),
+                  if (largest != null) ...[
+                    TextSpan(
+                      text: '  \u2022  ',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    TextSpan(
+                      text:
+                          '${largest.category.value?.name ?? "Bill"} ${formatCurrency(largest.amount, decimals: 0)}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -568,10 +616,12 @@ class _BillControlCenterScreenState
     );
   }
 
-  // ── BATCH 5: Group Section ──
+  // ── Group Section ──
+
   Widget _buildGroup(
     String title,
     List<RecurringTransaction> bills,
+    Set<int> paidBillIds,
     Color accent,
     IconData icon,
     ColorScheme color,
@@ -586,7 +636,6 @@ class _BillControlCenterScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Group header
           Row(
             children: [
               Icon(icon, size: 16, color: accent),
@@ -628,11 +677,17 @@ class _BillControlCenterScreenState
             ],
           ),
           SizedBox(height: spacing.elementGap),
-          // Bill cards
           ...bills.map(
             (b) => Padding(
               padding: EdgeInsets.only(bottom: spacing.elementGap),
-              child: _buildBillCard(b, color, textTheme, spacing, brightness),
+              child: _buildBillCard(
+                b,
+                paidBillIds.contains(b.id),
+                color,
+                textTheme,
+                spacing,
+                brightness,
+              ),
             ),
           ),
         ],
@@ -640,32 +695,38 @@ class _BillControlCenterScreenState
     );
   }
 
-  // ── BATCH 6: Bill Card ──
+  // ── Bill Card ──
+
   Widget _buildBillCard(
     RecurringTransaction bill,
+    bool isPaid,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
     Brightness brightness,
   ) {
-    final days = _daysUntil(bill);
-    final isOverdue = days < 0;
-    final isDueSoon = days >= 0 && days <= _dueSoonDays;
+    final days = bill.nextDueDate.difference(DateTime.now()).inDays;
+    final isOverdue = bill.nextDueDate.isBefore(DateTime.now());
+    final isDueSoon = !isOverdue && days <= 7;
 
     final Color statusColor;
     final String statusText;
     final IconData statusIcon;
 
-    if (isOverdue) {
+    if (isPaid) {
+      statusColor = FinanceColors.incomeColor(brightness);
+      statusText = AppLocalizations.of(context)!.billCenter_paid;
+      statusIcon = LucideIcons.circleCheck;
+    } else if (isOverdue) {
       statusColor = FinanceColors.expenseColor(brightness);
       statusText = '${days.abs()}d overdue';
       statusIcon = LucideIcons.circleAlert;
     } else if (isDueSoon) {
       statusColor = color.tertiary;
       statusText = days == 0
-          ? 'Due today'
+          ? AppLocalizations.of(context)!.billCenter_dueToday
           : days == 1
-              ? 'Tomorrow'
+              ? AppLocalizations.of(context)!.billCenter_tomorrow
               : 'In $days days';
       statusIcon = LucideIcons.clock;
     } else {
@@ -674,199 +735,189 @@ class _BillControlCenterScreenState
       statusIcon = LucideIcons.calendar;
     }
 
-    return FutureBuilder<bool>(
-      future: _isAlreadyPaid(bill),
-      builder: (context, snap) {
-        final isPaid = snap.data ?? false;
-        final effectiveColor =
-            isPaid ? FinanceColors.incomeColor(brightness) : statusColor;
-        final effectiveText = isPaid ? 'Paid' : statusText;
-        final effectiveIcon = isPaid ? LucideIcons.circleCheck : statusIcon;
-
-        return Card(
-          elevation: 0,
-          color: color.surfaceContainerLow,
-          margin: const EdgeInsets.only(),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            side: BorderSide(
-              color: isOverdue && !isPaid
-                  ? effectiveColor.withValues(alpha: 0.5)
-                  : color.outlineVariant.withValues(alpha: 0.3),
-            ),
-          ),
-          child: InkWell(
-            onTap: () => context.push(
-              AppRoutes.addRecurring,
-              extra: {'recurring': bill},
-            ),
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            child: Padding(
-              padding: EdgeInsets.all(spacing.cardInner),
-              child: Row(
-                children: [
-                  // Icon
-                  Container(
-                    padding: EdgeInsets.all(spacing.elementGap),
-                    decoration: BoxDecoration(
-                      color: effectiveColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    ),
-                    child: Icon(
-                      IconHelper.iconFromName(
-                        bill.category.value?.iconName ?? 'category',
-                      ),
-                      color: effectiveColor,
-                      size: 22,
-                    ),
+    return Card(
+      elevation: 0,
+      color: color.surfaceContainerLow,
+      margin: const EdgeInsets.only(),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: isOverdue && !isPaid
+              ? statusColor.withValues(alpha: 0.5)
+              : color.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
+      child: InkWell(
+        onTap: () => context.push(
+          AppRoutes.addRecurring,
+          extra: {'recurring': bill},
+        ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        child: Padding(
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(spacing.elementGap),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                ),
+                child: Icon(
+                  IconHelper.iconFromName(
+                    bill.category.value?.iconName ?? 'category',
                   ),
-                  SizedBox(width: spacing.elementGap * 1.5),
-                  // Name + status
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  color: statusColor,
+                  size: 22,
+                ),
+              ),
+              SizedBox(width: spacing.elementGap * 1.5),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      bill.category.value?.name ?? 'Bill',
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: spacing.elementGapUltraMin),
+                    Row(
                       children: [
+                        Icon(statusIcon, size: 12, color: statusColor),
+                        SizedBox(width: spacing.elementGapMin),
                         Text(
-                          bill.category.value?.name ?? 'Bill',
-                          style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
+                          statusText,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: statusColor,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        SizedBox(height: spacing.elementGapUltraMin),
-                        Row(
-                          children: [
-                            Icon(effectiveIcon,
-                                size: 12, color: effectiveColor,),
-                            SizedBox(width: spacing.elementGapMin),
-                            Text(
-                              effectiveText,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: effectiveColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              ' \u2022 ${_frequencyLabel(bill.frequency)}',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: color.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          ' \u2022 ${_frequencyLabel(bill.frequency)}',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  CurrencyText(
+                    amount: bill.amount,
+                    currencyCode: bill.account.value?.currencyCode,
+                    compact: false,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isPaid
+                          ? statusColor
+                          : FinanceColors.expenseColor(brightness),
+                    ),
                   ),
-                  // Amount + action
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      CurrencyText(
-                        amount: bill.amount,
-                        currencyCode: bill.account.value?.currencyCode,
-                        compact: false,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isPaid
-                              ? effectiveColor
-                              : FinanceColors.expenseColor(brightness),
-                        ),
-                      ),
-                      if (!isPaid && (isOverdue || isDueSoon))
-                        Padding(
-                          padding: EdgeInsets.only(top: spacing.elementGapMin),
-                          child: InkWell(
-                            onTap: () {
-                              HapticFeedback.mediumImpact();
-                              _markAsPaid(bill);
-                            },
+                  if (!isPaid && (isOverdue || isDueSoon))
+                    Padding(
+                      padding: EdgeInsets.only(top: spacing.elementGapMin),
+                      child: InkWell(
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          _markAsPaid(bill);
+                        },
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: spacing.elementGap,
+                            vertical: spacing.elementGapMin,
+                          ),
+                          decoration: BoxDecoration(
+                            color: color.primary.withValues(alpha: 0.12),
                             borderRadius:
                                 BorderRadius.circular(spacing.radiusSmall),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: spacing.elementGap,
-                                vertical: spacing.elementGapMin,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                LucideIcons.check,
+                                size: 12,
+                                color: color.primary,
                               ),
-                              decoration: BoxDecoration(
-                                color: color.primary.withValues(alpha: 0.12),
-                                borderRadius:
-                                    BorderRadius.circular(spacing.radiusSmall),
+                              SizedBox(width: spacing.elementGapMin),
+                              Text(
+                                AppLocalizations.of(context)!.billCenter_pay,
+                                style: textTheme.labelSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: color.primary,
+                                ),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(LucideIcons.check,
-                                      size: 12, color: color.primary,),
-                                  SizedBox(width: spacing.elementGapMin),
-                                  Text(
-                                    'Pay',
-                                    style: textTheme.labelSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: color.primary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            ],
                           ),
                         ),
-                      if (isPaid)
-                        Padding(
-                          padding: EdgeInsets.only(top: spacing.elementGapMin),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: spacing.elementGap * 0.75,
-                              vertical: spacing.elementGapUltraMin,
-                            ),
-                            decoration: BoxDecoration(
-                              color: effectiveColor.withValues(alpha: 0.12),
-                              borderRadius:
-                                  BorderRadius.circular(spacing.radiusSmall),
-                            ),
-                            child: Text(
-                              'PAID',
-                              style: textTheme.labelSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: effectiveColor,
-                              ),
-                            ),
+                      ),
+                    ),
+                  if (isPaid)
+                    Padding(
+                      padding: EdgeInsets.only(top: spacing.elementGapMin),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: spacing.elementGap * 0.75,
+                          vertical: spacing.elementGapUltraMin,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.12),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
+                        ),
+                        child: Text(
+                          'PAID',
+                          style: textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: statusColor,
                           ),
                         ),
-                    ],
-                  ),
-                  SizedBox(width: spacing.elementGapMin),
-                  Icon(
-                    LucideIcons.chevronRight,
-                    size: 16,
-                    color: color.onSurfaceVariant.withValues(alpha: 0.4),
-                  ),
+                      ),
+                    ),
                 ],
               ),
-            ),
+              SizedBox(width: spacing.elementGapMin),
+              Icon(
+                LucideIcons.chevronRight,
+                size: 16,
+                color: color.onSurfaceVariant.withValues(alpha: 0.4),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  // ── BATCH 7: Mark Paid + helpers ──
-  Future<bool> _isAlreadyPaid(RecurringTransaction bill) async {
-    final isar = await ref.read(isarServiceProvider).getInstance();
-    final dueDate = bill.nextDueDate;
-    final searchStart = DateTime(dueDate.year, dueDate.month, dueDate.day)
-        .subtract(const Duration(days: 1));
-    final searchEnd =
-        DateTime(dueDate.year, dueDate.month, dueDate.day, 23, 59, 59)
-            .add(const Duration(days: 1));
+  // ── Helpers ──
 
-    final count = await isar.transactions
-        .filter()
-        .dateBetween(searchStart, searchEnd)
-        .recurringTransactionSource((q) => q.idEqualTo(bill.id))
-        .count();
-    return count > 0;
+  String _dueLabel(RecurringTransaction b) {
+    final days = b.nextDueDate.difference(DateTime.now()).inDays;
+    if (days < 0) return '${days.abs()}d ago';
+    if (days == 0) return 'Today';
+    if (days == 1) return 'Tomorrow';
+    return '$days days';
   }
 
+  String _frequencyLabel(Frequency f) => switch (f) {
+        Frequency.daily => 'Daily',
+        Frequency.weekly => 'Weekly',
+        Frequency.monthly => 'Monthly',
+        Frequency.yearly => 'Yearly',
+      };
+
+  // ── Mark As Paid (preserved from original) ──
+
   void _markAsPaid(RecurringTransaction bill) async {
+    final ctxt = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final dueDate = DateTime(
@@ -877,7 +928,7 @@ class _BillControlCenterScreenState
 
     if (dueDate.isAfter(today)) {
       SnackbarService.error(
-        'Cannot mark future bills as paid. Due on ${DateFormat('MMM d').format(bill.nextDueDate)}',
+        '${ctxt.billCenter_cannotPayFuture}. Due on ${DateFormat('MMM d').format(bill.nextDueDate)}',
       );
       return;
     }
@@ -930,9 +981,12 @@ class _BillControlCenterScreenState
     await _advanceDueDate(isar, bill);
     ref.invalidate(transactionProvider);
     ref.invalidate(recurringTransactionsProvider);
+    ref.invalidate(billControlCenterProvider);
     if (context.mounted) {
       HapticFeedback.mediumImpact();
-      SnackbarService.success('${bill.category.value?.name} marked as paid');
+      SnackbarService.success(
+        ctxt.billCenter_markedPaid(bill.category.value?.name ?? 'Bill'),
+      );
     }
   }
 
@@ -943,11 +997,14 @@ class _BillControlCenterScreenState
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final sp = ref.read(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
 
     return showModalBottomSheet<_PaidAction>(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(Tone.current.borderRadius * 2),
+        ),
       ),
       builder: (ctx) => SafeArea(
         child: Padding(
@@ -967,7 +1024,7 @@ class _BillControlCenterScreenState
               Icon(LucideIcons.search, size: 36, color: cs.primary),
               SizedBox(height: sp.elementGap),
               Text(
-                'Existing Transaction Found',
+                ctxt.billCenter_existingTxnFound,
                 style: tt.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               SizedBox(height: sp.elementGap),
@@ -1015,7 +1072,7 @@ class _BillControlCenterScreenState
                 child: FilledButton.icon(
                   onPressed: () => Navigator.pop(ctx, _PaidAction.link),
                   icon: const Icon(LucideIcons.link, size: 16),
-                  label: const Text('Link This Transaction'),
+                  label: Text(ctxt.billCenter_linkTransaction),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -1030,7 +1087,7 @@ class _BillControlCenterScreenState
                 child: OutlinedButton.icon(
                   onPressed: () => Navigator.pop(ctx, _PaidAction.create),
                   icon: const Icon(LucideIcons.plus, size: 16),
-                  label: const Text('Create New Entry'),
+                  label: Text(ctxt.billCenter_createNewEntry),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(

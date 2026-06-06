@@ -135,7 +135,6 @@ class BackupService {
     try {
       await FilePicker.clearTemporaryFiles();
       final result = await FilePicker.pickFiles(
-        allowMultiple: false,
         type: FileType.any,
         dialogTitle: 'Select Backup File',
       );

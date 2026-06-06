@@ -155,7 +155,7 @@ class _DashboardCustomizeScreenState
                     );
                   },
                   itemCount: _entries.length,
-                  onReorder: _onReorder,
+                  onReorderItem: _onReorder,
                   itemBuilder: (context, index) {
                     final entry = _entries[index];
                     return _buildWidgetTile(
@@ -257,7 +257,7 @@ class _DashboardCustomizeScreenState
                           const ProBadge(),
                         ],
                         const Spacer(),
-                        Switch(
+                        const Switch(
                           value: false,
                           onChanged: null,
                         ),

@@ -1,12 +1,13 @@
 import 'package:mudra_manager/core/domain/financial_states.dart';
-import 'package:mudra_manager/core/domain/metrics.dart';
 import 'package:mudra_manager/core/logic/bill_state_machine.dart';
 import 'package:mudra_manager/core/logic/briefing_selector.dart';
 import 'package:mudra_manager/core/logic/budget_state_machine.dart';
 import 'package:mudra_manager/core/logic/cashflow_engine.dart';
 import 'package:mudra_manager/core/logic/convergence_counter.dart';
 import 'package:mudra_manager/core/logic/data_validity_gate.dart';
+import 'package:mudra_manager/core/logic/insight_generator.dart';
 import 'package:mudra_manager/core/logic/state_transition_engine.dart';
+import 'package:mudra_manager/core/logic/suppression_engine.dart';
 import 'package:mudra_manager/core/state/dashboard_state.dart';
 
 /// Input contract for the engine. Keeps engine decoupled from Isar models.
@@ -22,6 +23,9 @@ class EngineInput {
   final bool budgetSetupSkipped;
   final bool recurringScanDone;
 
+  /// Optional: per-category comparison facts for ComparisonInsightGenerator.
+  final Map<String, CategoryFact>? categoryComparison;
+
   const EngineInput({
     required this.accounts,
     required this.transactions,
@@ -33,6 +37,7 @@ class EngineInput {
     required this.expenseLast7Days,
     required this.budgetSetupSkipped,
     required this.recurringScanDone,
+    this.categoryComparison,
   });
 }
 
@@ -77,6 +82,8 @@ abstract final class DashboardEngine {
     EngineInput input, {
     DashboardState? previous,
     DateTime? now,
+    List<InsightGenerator> generators = const [],
+    List<SuppressionRecord> suppressionHistory = const [],
     String? billActionRoute,
     String? budgetActionRoute,
   }) {
@@ -141,7 +148,7 @@ abstract final class DashboardEngine {
       }
     }
 
-    // ── Transitions (compare to previous snapshot) ──
+    // ── Transitions ──
     final budgetTransition = StateTransitionEngine.detectBudget(
       previous?.budgetState,
       worstBudget,
@@ -162,52 +169,32 @@ abstract final class DashboardEngine {
       cashflow: cashflow.state,
     );
 
-    // ── Briefing candidates ──
-    final candidates = <BriefingSelection>[];
+    // ── Insight Generation ──
+    final daysInMonth = DateTime(today.year, today.month + 1, 0).day;
+    final facts = Facts(
+      budgets: input.budgets,
+      worstBudgetName: budgetName,
+      worstBudgetSpent: budgetSpent,
+      worstBudgetLimit: budgetLimit,
+      bills: input.bills,
+      recurringScanDone: input.recurringScanDone,
+      totalIncome: input.totalIncome,
+      totalExpense: input.totalExpense,
+      categoryComparison: input.categoryComparison,
+      dayOfMonth: today.day,
+      daysInMonth: daysInMonth,
+      daysRemaining: daysInMonth - today.day,
+      now: today,
+    );
 
-    if (worstBill == BillState.overdue) {
-      candidates.add(BriefingSelection(
-        trigger: BriefingTrigger.billOverdue,
-        params: {'name': nearestName ?? '', 'amount': nearestAmount ?? 0},
-        actionRoute: billActionRoute,
-      ),);
-    }
-    if (worstBill == BillState.dueToday) {
-      candidates.add(BriefingSelection(
-        trigger: BriefingTrigger.billDueToday,
-        params: {'name': nearestName ?? '', 'amount': nearestAmount ?? 0},
-        actionRoute: billActionRoute,
-      ),);
-    }
-    if (worstBudget == BudgetState.breach) {
-      candidates.add(BriefingSelection(
-        trigger: BriefingTrigger.budgetBreach,
-        params: {
-          'name': budgetName ?? '',
-          'over': budgetSpent - budgetLimit,
-        },
-        actionRoute: budgetActionRoute,
-      ),);
-    }
-    if (worstBill == BillState.dueSoon && nearestDate != null) {
-      candidates.add(BriefingSelection(
-        trigger: BriefingTrigger.billDueSoon,
-        params: {
-          'name': nearestName ?? '',
-          'days': Metrics.daysUntilDue(nearestDate, today),
-        },
-        actionRoute: billActionRoute,
-      ),);
-    }
-    if (cashflow.state == CashflowState.negative) {
-      candidates.add(BriefingSelection(
-        trigger: BriefingTrigger.netNegative,
-        params: {'deficit': input.totalExpense - input.totalIncome},
-        actionRoute: budgetActionRoute,
-      ),);
-    }
+    final insights = generators.expand((g) => g.generate(facts)).toList();
 
-    final briefing = BriefingSelector.select(candidates);
+    // ── Briefing Selection (with suppression) ──
+    final briefing = BriefingSelector.select(
+      insights,
+      suppressionHistory: suppressionHistory,
+      now: today,
+    );
 
     return DashboardState(
       gate: validity.level,

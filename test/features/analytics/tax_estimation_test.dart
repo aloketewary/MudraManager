@@ -233,5 +233,13 @@ TaxEstimate _makeTaxEstimate({
     expenseByCategory: {},
     daysElapsed: daysElapsed,
     totalDays: totalDays,
+    confidence: const ConfidenceFactors(
+      coveragePercent: 1.0,
+      incomeVariance: 0,
+      sourceCount: 1,
+      transactionVolume: 10,
+    ),
+    assumptions: const [],
+    warnings: const [],
   );
 }

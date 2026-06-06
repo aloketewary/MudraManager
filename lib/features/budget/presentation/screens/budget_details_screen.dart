@@ -15,15 +15,47 @@ import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/budget/data/budget_constraint_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/permission_provider.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class BudgetDetailsScreen extends ConsumerWidget {
+  final int budgetId;
+
+  const BudgetDetailsScreen({super.key, required this.budgetId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ctxt = AppLocalizations.of(context)!;
+
+    return ref.watch(budgetConstraintByIdProvider(budgetId)).when(
+          data: (snapshot) {
+            if (snapshot == null) {
+              return Scaffold(
+                appBar: AppBar(),
+                body: Center(child: Text(ctxt.budget_dashboardNotFoundText)),
+              );
+            }
+            return _BudgetDetailShell(snapshot: snapshot);
+          },
+          loading: () => Scaffold(
+            appBar: AppBar(title: Text(ctxt.budget_dashboardPageTitle)),
+            body: const Center(child: CircularProgressIndicator()),
+          ),
+          error: (e, _) => Scaffold(
+            appBar: AppBar(),
+            body: Center(child: Text('$e')),
+          ),
+        );
+  }
+}
+
+class _BudgetDetailShell extends ConsumerWidget {
   final BudgetConstraintSnapshot snapshot;
 
-  const BudgetDetailsScreen({super.key, required this.snapshot});
+  const _BudgetDetailShell({required this.snapshot});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,7 +75,10 @@ class BudgetDetailsScreen extends ConsumerWidget {
             icon: LucideIcons.pencil,
             onTap: () {
               HapticFeedback.lightImpact();
-              context.push(AppRoutes.addBudget, extra: {'budgetId': snapshot.budgetId});
+              context.push(
+                AppRoutes.addBudget,
+                extra: {'budgetId': snapshot.budgetId},
+              );
             },
           ),
         ],
@@ -109,7 +144,9 @@ class _BudgetDetailBody extends ConsumerWidget {
         ],
 
         // 4. Remaining daily allowance
-        if (!snapshot.isUnknown && !snapshot.isBreached && snapshot.daysLeft > 0) ...[
+        if (!snapshot.isUnknown &&
+            !snapshot.isBreached &&
+            snapshot.daysLeft > 0) ...[
           _buildAllowance(textTheme, color, spacing, ctxt),
           SizedBox(height: spacing.elementGap),
         ],
@@ -177,7 +214,11 @@ class _BudgetDetailBody extends ConsumerWidget {
     );
   }
 
-  Widget _buildPeriod(TextTheme textTheme, ColorScheme color, AppLocalizations ctxt) {
+  Widget _buildPeriod(
+    TextTheme textTheme,
+    ColorScheme color,
+    AppLocalizations ctxt,
+  ) {
     final now = DateTime.now();
     final start = now.subtract(Duration(days: snapshot.daysPassed));
     final end = start.add(Duration(days: snapshot.totalDays - 1));
@@ -224,7 +265,11 @@ class _BudgetDetailBody extends ConsumerWidget {
     );
   }
 
-  Widget _buildSpentContext(TextTheme textTheme, ColorScheme color, AppLocalizations ctxt) {
+  Widget _buildSpentContext(
+    TextTheme textTheme,
+    ColorScheme color,
+    AppLocalizations ctxt,
+  ) {
     return Row(
       children: [
         Text(
@@ -433,8 +478,6 @@ class _BudgetDetailBody extends ConsumerWidget {
   ) {
     final hasAutoTrack = ref.watch(smsPermissionGrantedProvider).value ?? false;
 
-    // Primary CTA: always View Transactions (budgets are observation tools)
-    // Secondary CTA: Add Expense only when no auto-tracking
     return Column(
       children: [
         SizedBox(
@@ -444,7 +487,7 @@ class _BudgetDetailBody extends ConsumerWidget {
               HapticFeedback.lightImpact();
               context.push(AppRoutes.transactions);
             },
-            icon: Icon(LucideIcons.list, size: 16),
+            icon: const Icon(LucideIcons.list, size: 16),
             label: Text(ctxt.budget_viewTransactions),
           ),
         ),
@@ -455,10 +498,11 @@ class _BudgetDetailBody extends ConsumerWidget {
             onPressed: () {
               HapticFeedback.lightImpact();
               if (hasAutoTrack) {
-                // Auto-tracking active: secondary action is adjust budget
-                context.push(AppRoutes.addBudget, extra: {'budgetId': snapshot.budgetId});
+                context.push(
+                  AppRoutes.addBudget,
+                  extra: {'budgetId': snapshot.budgetId},
+                );
               } else {
-                // Manual entry: secondary action is add expense
                 context.push(AppRoutes.addTransaction);
               }
             },
@@ -467,7 +511,9 @@ class _BudgetDetailBody extends ConsumerWidget {
               size: 16,
             ),
             label: Text(
-              hasAutoTrack ? ctxt.budget_buttonEditText : ctxt.budget_addExpense,
+              hasAutoTrack
+                  ? ctxt.budget_buttonEditText
+                  : ctxt.budget_addExpense,
             ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: color.outlineVariant),

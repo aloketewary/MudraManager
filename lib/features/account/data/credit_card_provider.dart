@@ -12,6 +12,7 @@ class CreditCardSummary {
   final int? daysUntilDue;
   final double? utilization;
   final double minimumDue;
+  final double availableCredit;
   final double billingCycleSpend;
   final DateTime? nextStatementDate;
   final DateTime? nextDueDate;
@@ -22,9 +23,40 @@ class CreditCardSummary {
     this.daysUntilDue,
     this.utilization,
     this.minimumDue = 0,
+    this.availableCredit = 0,
     this.billingCycleSpend = 0,
     this.nextStatementDate,
     this.nextDueDate,
+  });
+}
+
+class CreditCardBillsSummary {
+  final double totalOutstanding;
+  final double totalMinimumDue;
+  final double totalAvailableCredit;
+  final int overdueCount;
+  final int dueSoonCount;
+  final int highUtilizationCount;
+  final int cardCount;
+
+  const CreditCardBillsSummary({
+    required this.totalOutstanding,
+    required this.totalMinimumDue,
+    required this.totalAvailableCredit,
+    required this.overdueCount,
+    required this.dueSoonCount,
+    required this.highUtilizationCount,
+    required this.cardCount,
+  });
+}
+
+class CreditCardBillsData {
+  final CreditCardBillsSummary summary;
+  final List<CreditCardSummary> cards;
+
+  const CreditCardBillsData({
+    required this.summary,
+    required this.cards,
   });
 }
 
@@ -32,7 +64,9 @@ DateTime _nextOccurrence(int dayOfMonth) {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   var date = DateTime(now.year, now.month, dayOfMonth);
-  if (date.month != now.month) date = DateTime(now.year, now.month + 1, 0); // clamp
+  if (date.month != now.month) {
+    date = DateTime(now.year, now.month + 1, 0); // clamp
+  }
   if (!date.isAfter(today)) {
     date = DateTime(now.year, now.month + 1, dayOfMonth);
     if (date.month != now.month + 1 && date.month != 1) {
@@ -42,8 +76,8 @@ DateTime _nextOccurrence(int dayOfMonth) {
   return date;
 }
 
-final creditCardSummariesProvider =
-    FutureProvider.autoDispose<List<CreditCardSummary>>((ref) async {
+final creditCardBillsProvider =
+    FutureProvider.autoDispose<CreditCardBillsData>((ref) async {
   ref.watch(transactionChangeProvider);
   ref.watch(accountChangeProvider);
 
@@ -80,10 +114,14 @@ final creditCardSummariesProvider =
         ? (outstanding / card.creditLimit!) * 100
         : null;
 
-    // Minimum due: ~5% of outstanding or ₹200, whichever is higher (Indian CC norm)
-    final minimumDue = outstanding > 0
-        ? (outstanding * 0.05).clamp(200.0, outstanding)
+    // Available credit
+    final availableCredit = card.creditLimit != null && card.creditLimit! > 0
+        ? (card.creditLimit! - outstanding).clamp(0.0, card.creditLimit!)
         : 0.0;
+
+    // Minimum due: ~5% of outstanding or ₹200, whichever is higher (Indian CC norm)
+    final minimumDue =
+        outstanding > 0 ? (outstanding * 0.05).clamp(200.0, outstanding) : 0.0;
 
     // Billing cycle spend: expenses since last statement date
     double billingCycleSpend = 0;
@@ -101,19 +139,45 @@ final creditCardSummariesProvider =
           .sum();
     }
 
-    summaries.add(CreditCardSummary(
-      account: card,
-      outstanding: outstanding,
-      daysUntilDue: daysUntilDue,
-      utilization: utilization,
-      minimumDue: minimumDue,
-      billingCycleSpend: billingCycleSpend,
-      nextStatementDate: nextStatementDate,
-      nextDueDate: nextDueDate,
-    ));
+    summaries.add(
+      CreditCardSummary(
+        account: card,
+        outstanding: outstanding,
+        daysUntilDue: daysUntilDue,
+        utilization: utilization,
+        minimumDue: minimumDue,
+        availableCredit: availableCredit,
+        billingCycleSpend: billingCycleSpend,
+        nextStatementDate: nextStatementDate,
+        nextDueDate: nextDueDate,
+      ),
+    );
   }
 
-  // Sort: cards with nearest due date first
-  summaries.sort((a, b) => (a.daysUntilDue ?? 999).compareTo(b.daysUntilDue ?? 999));
-  return summaries;
+  // Sort: overdue first, then nearest due date
+  summaries
+      .sort((a, b) => (a.daysUntilDue ?? 999).compareTo(b.daysUntilDue ?? 999));
+
+  // Compute aggregate summary
+  final summary = CreditCardBillsSummary(
+    totalOutstanding: summaries.fold(0, (s, c) => s + c.outstanding),
+    totalMinimumDue: summaries.fold(0, (s, c) => s + c.minimumDue),
+    totalAvailableCredit: summaries.fold(0, (s, c) => s + c.availableCredit),
+    overdueCount: summaries.where((c) => (c.daysUntilDue ?? 999) < 0).length,
+    dueSoonCount: summaries
+        .where((c) => (c.daysUntilDue ?? 999) > 0 && c.daysUntilDue! <= 3)
+        .length,
+    highUtilizationCount:
+        summaries.where((c) => (c.utilization ?? 0) > 80).length,
+    cardCount: summaries.length,
+  );
+
+  return CreditCardBillsData(summary: summary, cards: summaries);
+});
+
+/// Backward-compatible provider for existing consumers
+final creditCardSummariesProvider =
+    FutureProvider.autoDispose<List<CreditCardSummary>>((ref) async {
+  final data = await ref.watch(creditCardBillsProvider.future);
+  return data.cards;
 });
