@@ -34,6 +34,9 @@ class TransactionService {
 
     txn.encryptFields();
 
+    // Denormalize categoryId for efficient queries
+    txn.categoryId = txn.category.value?.id;
+
     try {
       await isar.writeTxn(() async {
         await isar.transactions.put(txn);

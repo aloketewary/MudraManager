@@ -130,7 +130,7 @@ class SpendingAnalyzer {
 
     // ── Top category ──
     final topCat = categorySpending.entries.isEmpty
-        ? MapEntry('Other', 0.0)
+        ? const MapEntry('Other', 0.0)
         : categorySpending.entries.reduce((a, b) => a.value > b.value ? a : b);
 
     // ── Essential vs discretionary ratio ──

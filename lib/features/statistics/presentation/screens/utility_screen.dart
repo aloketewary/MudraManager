@@ -618,9 +618,9 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (item.description.isNotEmpty)
+                  if (item.message.isNotEmpty)
                     Text(
-                      item.description,
+                      item.message,
                       style: textTheme.bodySmall?.copyWith(
                         color: color.onSurfaceVariant,
                       ),
@@ -630,7 +630,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                 ],
               ),
             ),
-            if (item.canDismiss)
+            if (item.type != AttentionType.critical)
               IconButton(
                 onPressed: () => _dismissAttentionItem(item.id),
                 icon: Icon(

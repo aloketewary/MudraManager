@@ -37,6 +37,9 @@ class RecurringTransaction {
   // Flag to indicate if this recurrence is still active
   bool isActive = true;
 
+  /// Date when this bill was last executed/paid
+  DateTime? lastExecutedDate;
+
   // Isar requires a default constructor
   RecurringTransaction();
 

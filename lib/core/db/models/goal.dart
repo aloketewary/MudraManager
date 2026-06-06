@@ -44,6 +44,9 @@ class Goal {
 
   DateTime? targetDate; // Optional deadline for the goal
 
+  /// Last contribution date — updated on each deposit for efficient querying
+  DateTime? lastContributionDate;
+
   DateTime creationDate = DateTime.now(); // When the goal was set up
 
   @Index() // Index for filtering active/completed goals

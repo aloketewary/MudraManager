@@ -86,6 +86,10 @@ class Transaction {
   @Index() // Indexing the link helps find transactions for a specific category
   final category = IsarLink<Category>();
 
+  /// Denormalized category ID for efficient filter queries without loading link
+  @Index()
+  int? categoryId;
+
   // Link to the Account this transaction affects
   @Index() // Indexing the link helps find transactions for a specific account
   final account = IsarLink<Account>();

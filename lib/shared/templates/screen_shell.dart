@@ -25,10 +25,14 @@ class ScreenShellConfig {
   final AppBarMode appBarMode;
   final bool enableRefresh;
 
+  /// Optional bottom widget for AppBar (e.g., TabBar).
+  final PreferredSizeWidget? bottom;
+
   const ScreenShellConfig({
     this.title,
     this.appBarMode = AppBarMode.standard,
     this.enableRefresh = true,
+    this.bottom,
   });
 }
 
@@ -158,6 +162,7 @@ class ScreenShell extends ConsumerWidget {
                 )
               : null,
           actions: actionWidgets,
+          bottom: config.bottom,
         ),
     };
   }

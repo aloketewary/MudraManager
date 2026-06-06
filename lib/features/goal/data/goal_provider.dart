@@ -62,6 +62,7 @@ class GoalService {
       goal = await isar.goals.get(goalId).withDecryption();
       if (goal != null) {
         goal!.currentAmount += amount;
+        goal!.lastContributionDate = DateTime.now();
         goal!.contributions = [
           ...goal!.contributions,
           GoalContribution.create(amount),

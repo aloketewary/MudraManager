@@ -323,7 +323,7 @@ class _TaxContent extends ConsumerWidget {
           Row(
             children: [
               Icon(LucideIcons.layers,
-                  color: color.primary, size: spacing.iconLG),
+                  color: color.primary, size: spacing.iconLG,),
               SizedBox(width: spacing.elementGap),
               Text(
                 ctxt.tax_slabBreakdown,
@@ -367,7 +367,7 @@ class _TaxContent extends ConsumerWidget {
                     ),
                   ],
                 ),
-              )),
+              ),),
           Divider(color: color.outlineVariant.withValues(alpha: 0.5)),
           SizedBox(height: spacing.elementGapMin),
           Row(
@@ -413,7 +413,7 @@ class _TaxContent extends ConsumerWidget {
           Row(
             children: [
               Icon(LucideIcons.calculator,
-                  color: color.primary, size: spacing.iconLG),
+                  color: color.primary, size: spacing.iconLG,),
               SizedBox(width: spacing.elementGap),
               Text(
                 ctxt.tax_computation,
@@ -551,7 +551,7 @@ class _TaxContent extends ConsumerWidget {
               style:
                   textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
             ),
-          ]),
+          ],),
           SizedBox(height: spacing.sectionGap),
           Row(children: [
             Expanded(
@@ -563,7 +563,7 @@ class _TaxContent extends ConsumerWidget {
               textTheme,
               isGuestMode,
               betterColor,
-            )),
+            ),),
             SizedBox(width: spacing.elementGap),
             Expanded(
                 child: _regimeColumn(
@@ -574,8 +574,8 @@ class _TaxContent extends ConsumerWidget {
               textTheme,
               isGuestMode,
               betterColor,
-            )),
-          ]),
+            ),),
+          ],),
           SizedBox(height: spacing.sectionGap),
           Container(
             width: double.infinity,
@@ -650,12 +650,12 @@ class _TaxContent extends ConsumerWidget {
           Text(label,
               style: textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-              )),
+              ),),
           if (isBetter) ...[
             SizedBox(width: spacing.elementGapMin),
             Icon(LucideIcons.circleCheck, size: 14, color: betterColor),
           ],
-        ]),
+        ],),
         SizedBox(height: spacing.elementGapMin),
         CurrencyText(
           amount: GuestModeUtil.applyGuestMode(totalTax, isGuestMode),
@@ -665,7 +665,7 @@ class _TaxContent extends ConsumerWidget {
             color: isBetter ? betterColor : color.onSurface,
           ),
         ),
-      ]),
+      ],),
     );
   }
 
