@@ -61,20 +61,30 @@ class BudgetSpentCalculator {
     List<Transaction> txns,
   ) async {
     await budget.categories.load();
-    final categoryIds = budget.categories.map((c) => c.id).toList();
+    final categoryIds = budget.categories.map((c) => c.id).toSet();
 
     if (categoryIds.isEmpty) {
       return txns.fold<double>(0.0, (sum, t) => sum + t.baseAmount);
     }
 
+    double spent = 0;
     for (final t in txns) {
       await t.category.load();
+      final cat = t.category.value;
+      if (cat == null) continue;
+
+      if (categoryIds.contains(cat.id)) {
+        spent += t.baseAmount;
+        continue;
+      }
+
+      await cat.parentCategory.load();
+      final parentId = cat.parentCategory.value?.id;
+      if (parentId != null && categoryIds.contains(parentId)) {
+        spent += t.baseAmount;
+      }
     }
-    return txns
-        .where((t) =>
-            t.category.value != null &&
-            categoryIds.contains(t.category.value!.id),)
-        .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
+    return spent;
   }
 
   static Future<double> _calculateCategoryWise(
@@ -82,16 +92,28 @@ class BudgetSpentCalculator {
     List<Transaction> txns,
   ) async {
     await budget.categories.load();
-    final categoryIds = budget.categories.map((c) => c.id).toList();
+    final categoryIds = budget.categories.map((c) => c.id).toSet();
     if (categoryIds.isEmpty) return 0;
 
+    double spent = 0;
     for (final t in txns) {
       await t.category.load();
+      final cat = t.category.value;
+      if (cat == null) continue;
+
+      // Direct match
+      if (categoryIds.contains(cat.id)) {
+        spent += t.baseAmount;
+        continue;
+      }
+
+      // Parent match: if transaction's category is a child of a budgeted category
+      await cat.parentCategory.load();
+      final parentId = cat.parentCategory.value?.id;
+      if (parentId != null && categoryIds.contains(parentId)) {
+        spent += t.baseAmount;
+      }
     }
-    return txns
-        .where((t) =>
-            t.category.value != null &&
-            categoryIds.contains(t.category.value!.id),)
-        .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
+    return spent;
   }
 }

@@ -15,6 +15,7 @@ import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/dashboard/data/priority_alert_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mudra_manager/features/statistics/data/adaptive_utility_provider.dart';
 
 class UtilityScreen extends ConsumerStatefulWidget {
   final bool isTabActive;
@@ -27,9 +28,11 @@ class UtilityScreen extends ConsumerStatefulWidget {
 class UtilityScreenState extends ConsumerState<UtilityScreen>
     with TickerProviderStateMixin {
   List<String> _hiddenUtilities = [];
+  List<String> _dismissedAttentionItems = [];
   bool _isLoading = true;
   late final AnimationController _bgIconController;
   Key _animKey = UniqueKey();
+  bool _showingAdvisoryExpanded = false;
 
   // Grouped utility definitions
   static const _activeMoney = [
@@ -139,9 +142,11 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final hidden = prefs.getStringList('hidden_utilities') ?? [];
+    final dismissed = prefs.getStringList('dismissed_attention_items') ?? [];
     if (mounted) {
       setState(() {
         _hiddenUtilities = hidden;
+        _dismissedAttentionItems = dismissed;
         _isLoading = false;
       });
     }
@@ -150,6 +155,14 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
   Future<void> _savePreferences() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('hidden_utilities', _hiddenUtilities);
+    await prefs.setStringList('dismissed_attention_items', _dismissedAttentionItems);
+  }
+
+  void _dismissAttentionItem(String itemId) {
+    setState(() {
+      _dismissedAttentionItems.add(itemId);
+    });
+    _savePreferences();
   }
 
   bool _isVisible(String id) => !_hiddenUtilities.contains(id);
@@ -317,7 +330,10 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
           vertical: spacing.cardVertical,
         ),
         children: [
-          // Priority alert
+          // Financial Advisory Layer (Phase 5)
+          _buildAdvisoryLayer(color, textTheme, spacing, l10n),
+
+          // Legacy Priority Alerts
           _buildPriorityAlert(color, textTheme, spacing),
 
           // 1. Active Money
@@ -432,6 +448,237 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
         ],
       ),
     );
+  }
+
+  /// Phase 5: Advisory UI Layer - Non-authoritative attention items
+  Widget _buildAdvisoryLayer(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations l10n,
+  ) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final adaptiveStateAsync = ref.watch(adaptiveUtilityProvider);
+
+        return adaptiveStateAsync.when(
+          data: (adaptiveState) {
+            final attentionItems = adaptiveState.attentionItems
+                .where((item) => !_dismissedAttentionItems.contains(item.id))
+                .toList();
+
+            if (attentionItems.isEmpty) return const SizedBox.shrink();
+
+            final shouldShowAdvisory = adaptiveState.shouldShowAdvisory;
+            if (!shouldShowAdvisory) return const SizedBox.shrink();
+
+            return Padding(
+              padding: EdgeInsets.only(bottom: spacing.sectionGap),
+              child: Card(
+                elevation: 0,
+                margin: EdgeInsets.zero,
+                color: color.surfaceContainerHigh,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  side: BorderSide(
+                    color: color.primary.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // Advisory Header
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _showingAdvisoryExpanded = !_showingAdvisoryExpanded;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      child: Padding(
+                        padding: EdgeInsets.all(spacing.cardInner),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(spacing.elementGap),
+                              decoration: BoxDecoration(
+                                color: color.primary.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                LucideIcons.lightbulb,
+                                color: color.primary,
+                                size: 18,
+                              ),
+                            ),
+                            SizedBox(width: spacing.elementGap * 1.5),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Financial Advisory (Beta)',
+                                    style: textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: color.primary,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${attentionItems.length} ${attentionItems.length == 1 ? 'item' : 'items'} may need attention',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: color.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              _showingAdvisoryExpanded 
+                                  ? LucideIcons.chevronUp 
+                                  : LucideIcons.chevronDown,
+                              size: 16,
+                              color: color.onSurfaceVariant,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Expandable Advisory Items
+                    if (_showingAdvisoryExpanded) ...[
+                      Divider(
+                        height: 1,
+                        color: color.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                      ...attentionItems.take(3).map(
+                        (item) => _buildAdvisoryItem(item, color, textTheme, spacing),
+                      ),
+                      if (attentionItems.length > 3)
+                        Padding(
+                          padding: EdgeInsets.all(spacing.cardInner),
+                          child: Text(
+                            '${attentionItems.length - 3} more items...',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: color.onSurfaceVariant,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (error, stack) => const SizedBox.shrink(),
+        );
+      },
+    );
+  }
+
+  Widget _buildAdvisoryItem(
+    AttentionItem item,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final itemColor = _getAttentionColor(item.type, color);
+
+    return InkWell(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        context.push(item.actionRoute);
+      },
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(spacing.elementGap * 0.75),
+              decoration: BoxDecoration(
+                color: itemColor.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _getAttentionIcon(item.type),
+                color: itemColor,
+                size: 14,
+              ),
+            ),
+            SizedBox(width: spacing.elementGap),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (item.description.isNotEmpty)
+                    Text(
+                      item.description,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+            if (item.canDismiss)
+              IconButton(
+                onPressed: () => _dismissAttentionItem(item.id),
+                icon: Icon(
+                  LucideIcons.x,
+                  size: 16,
+                  color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
+                padding: EdgeInsets.all(spacing.elementGap * 0.5),
+                constraints: const BoxConstraints(
+                  minWidth: 24,
+                  minHeight: 24,
+                ),
+              ),
+            Icon(
+              LucideIcons.chevronRight,
+              size: 14,
+              color: color.onSurfaceVariant.withValues(alpha: 0.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getAttentionColor(AttentionType type, ColorScheme color) {
+    switch (type) {
+      case AttentionType.critical:
+        return color.error;
+      case AttentionType.warning:
+        return color.tertiary;
+      case AttentionType.info:
+        return color.primary;
+      case AttentionType.insight:
+        return color.secondary;
+    }
+  }
+
+  IconData _getAttentionIcon(AttentionType type) {
+    switch (type) {
+      case AttentionType.critical:
+        return LucideIcons.alertTriangle;
+      case AttentionType.warning:
+        return LucideIcons.alertCircle;
+      case AttentionType.info:
+        return LucideIcons.info;
+      case AttentionType.insight:
+        return LucideIcons.trendingUp;
+    }
   }
 
   Widget _sectionHeader(
@@ -583,6 +830,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
+          // Track usage for adaptive learning
+          ref.read(utilityTrackerProvider).trackUtilityOpen(item.id);
           context.push(item.route);
         },
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -677,6 +926,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
+          // Track usage for adaptive learning
+          ref.read(utilityTrackerProvider).trackUtilityOpen(item.id);
           context.push(item.route);
         },
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
