@@ -21,6 +21,7 @@ import 'package:mudra_manager/core/services/widget_service.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_query_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
@@ -143,7 +144,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
 
     try {
       HapticFeedback.heavyImpact();
-      final amount = double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
+      final amount =
+          double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
       if (amount <= 0) {
         setState(() => _saving = false);
         return;
@@ -155,7 +157,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
       double creditAmount = amount;
       if (_isCrossCurrency) {
         final service = await ref.read(currencyServiceProvider.future);
-        final result = await service.convert(amount, fromCur ?? BaseCurrency.code, toCur ?? BaseCurrency.code);
+        final result = await service.convert(
+            amount, fromCur ?? BaseCurrency.code, toCur ?? BaseCurrency.code);
         if (result != null) {
           creditAmount = result.converted;
         }
@@ -186,9 +189,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
       if (context.mounted) {
         ref.invalidate(transactionProvider);
         ref.invalidate(accountServiceProvider);
-        ref.invalidate(allSectionedTransactionsProvider);
-        ref.invalidate(sectionedTransactionsProvider);
-        ref.invalidate(sectionedTransactionsByDateRangeProvider);
+        ref.invalidate(transactionQueryProvider);
 
         SnackbarService.success(
           _isEditing ? 'Transfer updated' : 'Transfer completed',
@@ -229,7 +230,9 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         data: (accounts) {
           if (accounts.isEmpty) {
             return Center(
-              child: NoDataFound(message: BuddyMessages.noAccounts, iconData: LucideIcons.wallet),
+              child: NoDataFound(
+                  message: BuddyMessages.noAccounts,
+                  iconData: LucideIcons.wallet),
             );
           }
 
@@ -315,7 +318,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                                       children: chips.map((amt) {
                                         return ActionChip(
                                           label: Text(
-                                            formatCurrency(amt.toDouble(), decimals: 0),
+                                            formatCurrency(amt.toDouble(),
+                                                decimals: 0),
                                             style:
                                                 textTheme.labelSmall?.copyWith(
                                               fontWeight: FontWeight.w600,
@@ -435,8 +439,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                     if (_isCrossCurrency)
                       _buildCrossCurrencyPreview(color, textTheme, spacing),
 
-                    if (_isCrossCurrency)
-                      SizedBox(height: spacing.elementGap),
+                    if (_isCrossCurrency) SizedBox(height: spacing.elementGap),
 
                     // ── NOTE ──
                     TextField(
@@ -532,7 +535,9 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
             ],
           );
         },
-        loading: () =>  Padding(padding: EdgeInsets.all(spacing.cardInner), child: const AccountCardSkeleton()),
+        loading: () => Padding(
+            padding: EdgeInsets.all(spacing.cardInner),
+            child: const AccountCardSkeleton()),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
@@ -547,8 +552,6 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
     final amount = double.tryParse(_amountController.text) ?? 0;
     final fromCur = _fromAccount?.currencyCode ?? BaseCurrency.code;
     final toCur = _toAccount?.currencyCode ?? BaseCurrency.code;
-    
-    
 
     return FutureBuilder<({double converted, double rate})?>(
       future: () async {
@@ -586,7 +589,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                       Text(
                         'Rate: 1 $fromCur = ${result.rate.toStringAsFixed(4)} $toCur',
                         style: textTheme.bodySmall?.copyWith(
-                          color: color.onTertiaryContainer.withValues(alpha: 0.7),
+                          color:
+                              color.onTertiaryContainer.withValues(alpha: 0.7),
                         ),
                       ),
                   ],
@@ -773,7 +777,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                   padding: EdgeInsets.all(spacing.elementGap),
                   decoration: BoxDecoration(
                     color: acColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius:
+                        BorderRadius.circular(Tone.current.borderRadius),
                   ),
                   child: Icon(
                     account.accountType.icon,

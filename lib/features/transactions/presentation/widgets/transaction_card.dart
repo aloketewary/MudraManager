@@ -21,6 +21,7 @@ import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/safe_text.dart';
 import 'package:mudra_manager/shared/widgets/swipe_action_wrapper.dart';
+import 'package:mudra_manager/features/transactions/presentation/widgets/card_variants/card_variants.dart';
 
 class TransactionCard extends ConsumerStatefulWidget {
   final Category? category;
@@ -121,13 +122,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                widget.isTransfer
-                    ? buildTransferCard()
-                    : widget.isRecurring
-                        ? buildSubscriptionCard()
-                        : widget.tripName != null
-                            ? buildTripCard()
-                            : buildNormalCard(),
+                _buildVariantBody(),
                 if (_hasDetails)
                   AnimatedSize(
                     duration: const Duration(milliseconds: 200),
@@ -172,7 +167,8 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                                     decoration: BoxDecoration(
                                       color: color.surfaceContainerHighest
                                           .withValues(alpha: 0.4),
-                                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                                      borderRadius: BorderRadius.circular(
+                                          spacing.radiusSmall),
                                     ),
                                     child: Row(
                                       crossAxisAlignment:
@@ -254,10 +250,10 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                             ),
                           )
                         : const SizedBox.shrink(),
-                      ),
-                  ],
-                ),
+                  ),
+              ],
             ),
+          ),
         ),
       ),
     );
@@ -268,514 +264,35 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
     return card;
   }
 
-  Widget buildNormalCard() {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final ctxt = AppLocalizations.of(context)!;
-    final spacing = ref.watch(spacingProvider);
-    final categoryColor = Color(widget.category?.colorValue ?? 0xFF000000);
+  TransactionCardData get _cardData => TransactionCardData(
+        category: widget.category,
+        description: widget.description,
+        account: widget.account,
+        displayAmount: displayAmount,
+        date: widget.date,
+        isExpense: widget.isExpense,
+        isTransfer: widget.isTransfer,
+        tags: widget.tags,
+        related: widget.related,
+        tripName: widget.tripName,
+        isRecurring: widget.isRecurring,
+        currencyCode: widget.currencyCode,
+        convertedAmount: widget.convertedAmount,
+        hasDetails: _hasDetails,
+        expanded: _expanded,
+        onUnlinkRecurring: widget.onUnlinkRecurring,
+      );
 
-    return Row(
-      children: <Widget>[
-        Container(
-          width: 48.0,
-          height: 48.0,
-          decoration: BoxDecoration(
-            color: categoryColor.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          ),
-          child: Icon(
-            IconHelper.getIconData(widget.category?.iconName),
-            color: categoryColor,
-            size: 24.0,
-          ),
-        ),
-        const SizedBox(width: 14.0),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              AdaptiveText(
-                widget.category?.name ?? 'Uncategorized',
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-              ),
-              const SizedBox(height: 4),
-              Flexible(
-                child: AdaptiveText(
-                  '${widget.account?.name} • ${widget.account?.accountType.name.toTitleCase()}',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: color.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                ),
-              ),
-              if (_hasDetails)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedRotation(
-                        turns: _expanded ? 0.5 : 0.0,
-                        duration: const Duration(milliseconds: 200),
-                        child: Icon(
-                          LucideIcons.chevronDown,
-                          size: 14,
-                          color: color.onSurfaceVariant.withValues(alpha: 0.4),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            CurrencyText(
-              currencyCode: widget.currencyCode,
-              amount: displayAmount,
-              showSign: true,
-              isExpense: widget.isExpense,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: widget.isExpense
-                    ? FinanceColors.expenseColor(Theme.of(context).brightness)
-                    : FinanceColors.incomeColor(Theme.of(context).brightness),
-              ),
-              maxLines: 1,
-            ),
-            if (widget.currencyCode != null && widget.convertedAmount != null)
-              CurrencyText(
-                amount: widget.convertedAmount!,
-                compact: true,
-                style: textTheme.bodySmall?.copyWith(
-                  color: color.onSurfaceVariant.withValues(alpha: 0.6),
-                  fontSize: 11,
-                ),
-                prefixText: '≈',
-              ),
-            const SizedBox(height: 4),
-            Text(
-              DateFormat('MMM dd', ctxt.localeName).format(widget.date),
-              style: textTheme.bodySmall?.copyWith(
-                color: color.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget buildSubscriptionCard() {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final ctxt = AppLocalizations.of(context)!;
-    final spacing = ref.watch(spacingProvider);
-    final categoryColor = Color(widget.category?.colorValue ?? 0xFF000000);
-    final brightness = Theme.of(context).brightness;
-
-    return Row(
-      children: [
-        // Category icon with recurring badge
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: categoryColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              ),
-              child: Icon(
-                IconHelper.getIconData(widget.category?.iconName),
-                color: categoryColor,
-                size: 24,
-              ),
-            ),
-            Positioned(
-              right: -4,
-              bottom: -4,
-              child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: color.error,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: color.surfaceContainerLow, width: 1.5),
-                ),
-                child: const Icon(LucideIcons.repeat, size: 10, color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AdaptiveText(
-                widget.category?.name ?? 'Uncategorized',
-                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                maxLines: 1,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: widget.onUnlinkRecurring != null
-                        ? () async {
-                            final confirmed = await DialogUtils.showConfirmation(
-                              context,
-                              title: 'Remove Subscription Tag?',
-                              message: 'This will unlink this transaction from the recurring bill.',
-                              icon: LucideIcons.repeat,
-                              confirmText: 'Remove',
-                            );
-                            if (confirmed == true) widget.onUnlinkRecurring?.call();
-                          }
-                        : null,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: color.error.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Subscription',
-                            style: textTheme.labelSmall?.copyWith(
-                              color: color.error,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 10,
-                            ),
-                          ),
-                          if (widget.onUnlinkRecurring != null) ...[
-                            const SizedBox(width: 2),
-                            Icon(LucideIcons.x, size: 10, color: color.error),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: AdaptiveText(
-                      widget.account?.name ?? '',
-                      style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
-                      maxLines: 1,
-                    ),
-                  ),
-                ],
-              ),
-              if (_hasDetails)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: AnimatedRotation(
-                    turns: _expanded ? 0.5 : 0.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(LucideIcons.chevronDown, size: 14, color: color.onSurfaceVariant.withValues(alpha: 0.4)),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CurrencyText(
-              currencyCode: widget.currencyCode,
-              amount: displayAmount,
-              showSign: true,
-              isExpense: widget.isExpense,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: widget.isExpense
-                    ? FinanceColors.expenseColor(brightness)
-                    : FinanceColors.incomeColor(brightness),
-              ),
-              maxLines: 1,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              DateFormat('MMM dd', ctxt.localeName).format(widget.date),
-              style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget buildTripCard() {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final ctxt = AppLocalizations.of(context)!;
-    final spacing = ref.watch(spacingProvider);
-    final categoryColor = Color(widget.category?.colorValue ?? 0xFF000000);
-    final brightness = Theme.of(context).brightness;
-
-    return Row(
-      children: [
-        // Category icon with trip badge
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: categoryColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              ),
-              child: Icon(
-                IconHelper.getIconData(widget.category?.iconName),
-                color: categoryColor,
-                size: 24,
-              ),
-            ),
-            Positioned(
-              right: -4,
-              bottom: -4,
-              child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: color.primary,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: color.surfaceContainerLow, width: 1.5),
-                ),
-                child: const Icon(LucideIcons.planeTakeoff, size: 10, color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AdaptiveText(
-                widget.category?.name ?? 'Uncategorized',
-                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                maxLines: 1,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: color.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(LucideIcons.planeTakeoff, size: 10, color: color.primary),
-                        const SizedBox(width: 3),
-                        Text(
-                          widget.tripName!,
-                          style: textTheme.labelSmall?.copyWith(
-                            color: color.primary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: AdaptiveText(
-                      widget.account?.name ?? '',
-                      style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
-                      maxLines: 1,
-                    ),
-                  ),
-                ],
-              ),
-              if (_hasDetails)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: AnimatedRotation(
-                    turns: _expanded ? 0.5 : 0.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(LucideIcons.chevronDown, size: 14, color: color.onSurfaceVariant.withValues(alpha: 0.4)),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CurrencyText(
-              currencyCode: widget.currencyCode,
-              amount: displayAmount,
-              showSign: true,
-              isExpense: widget.isExpense,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: widget.isExpense
-                    ? FinanceColors.expenseColor(brightness)
-                    : FinanceColors.incomeColor(brightness),
-              ),
-              maxLines: 1,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              DateFormat('MMM dd', ctxt.localeName).format(widget.date),
-              style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget buildTransferCard() {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final related = widget.related;
-    final ctxt = AppLocalizations.of(context)!;
-
-    return Column(
-      children: [
-        Row(
-          children: [
-            // FROM Account
-            Expanded(
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.surfaceContainerHighest,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      related?.account.value?.accountType.icon,
-                      size: 16,
-                      color: FinanceColors.transferColor(
-                        Theme.of(context).brightness,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          ctxt.common_fromLabel,
-                          style: textTheme.labelSmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                            fontSize: 10,
-                          ),
-                        ),
-                        AdaptiveText(
-                          related?.account.value?.name ?? '',
-                          style: textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Transfer Icon
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Icon(
-                LucideIcons.arrowRight,
-                color: color.tertiary,
-                size: 20,
-              ),
-            ),
-
-            // TO Account
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          ctxt.common_toLabel,
-                          style: textTheme.labelSmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                            fontSize: 10,
-                          ),
-                        ),
-                        AdaptiveText(
-                          widget.account?.name ?? '',
-                          style: textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.surfaceContainerHighest,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      widget.account?.accountType.icon,
-                      size: 16,
-                      color: color.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CurrencyText(
-              currencyCode: widget.currencyCode,
-              amount: displayAmount,
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color.primary,
-              ),
-            ),
-          ],
-        ),
-        Text(
-          DateFormat('MMM dd, yyyy', ctxt.localeName).format(widget.date),
-          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
-        ),
-      ],
-    );
+  Widget _buildVariantBody() {
+    if (widget.isTransfer) {
+      return TransferTransactionCardBody(data: _cardData);
+    }
+    if (widget.isRecurring) {
+      return SubscriptionTransactionCardBody(data: _cardData);
+    }
+    if (widget.tripName != null) {
+      return TripTransactionCardBody(data: _cardData);
+    }
+    return NormalTransactionCardBody(data: _cardData);
   }
 }

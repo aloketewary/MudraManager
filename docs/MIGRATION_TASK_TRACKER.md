@@ -129,13 +129,14 @@ Template → layout composition ONLY (no decisions)
 - [x] `core/engine/parity_checker.dart`
 
 ### Still in code (have downstream consumers):
-- [ ] `features/dashboard/data/priority_alert_provider.dart` — used by `utility_screen.dart`
+- [x] `features/dashboard/data/priority_alert_provider.dart` — replaced by `core/logic/attention/dashboard_alert_provider.dart` (utility screen migrated)
 - [ ] `features/dashboard/presentation/providers/ai_insight_provider.dart` — `AiInsight` class used by `spending_drift_detector.dart` + `daily_briefing_card.dart`
 
 ### To fully remove these:
+- ~~Extract `PriorityAlert` to standalone~~ — kept in place, `dashboard_alert_provider` imports it
 - Extract `AiInsight` class to a standalone model file
 - Refactor `spending_drift_detector` to return `BriefingSelection` instead of `AiInsight`
-- Rewrite `utility_screen.dart` priority alert section to use `dashboardStateV2Provider`
+- ~~Rewrite `utility_screen.dart` priority alert section to use `dashboardStateV2Provider`~~ ✅ Done via `dashboardAlertProvider`
 
 ---
 

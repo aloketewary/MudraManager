@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
@@ -28,16 +29,37 @@ final adaptiveUtilityProvider =
 
   // Get recent data
   final last30Days = DateTime.now().subtract(const Duration(days: 30));
-  final transactions =
-      await isar.transactions.filter().dateGreaterThan(last30Days).findAll();
+  final transactions = await isar.transactions
+      .filter()
+      .dateGreaterThan(last30Days)
+      .findAll();
+  for (final t in transactions) {
+    t.decryptFields();
+  }
 
-  final budgets =
-      await isar.budgets.filter().isArchivedEqualTo(false).findAll();
+  final budgets = await isar.budgets
+      .filter()
+      .isArchivedEqualTo(false)
+      .findAll();
+  for (final b in budgets) {
+    b.decryptFields();
+  }
 
-  final goals = await isar.goals.filter().isActiveEqualTo(true).findAll();
+  final goals = await isar.goals
+      .filter()
+      .isActiveEqualTo(true)
+      .findAll();
+  for (final g in goals) {
+    g.decryptFields();
+  }
 
-  final bills =
-      await isar.recurringTransactions.filter().isActiveEqualTo(true).findAll();
+  final bills = await isar.recurringTransactions
+      .filter()
+      .isActiveEqualTo(true)
+      .findAll();
+  for (final bill in bills) {
+    bill.decryptFields();
+  }
 
   // Phase 2: Generate signals
   final signals = FinancialSignalGenerator().generateSignals(

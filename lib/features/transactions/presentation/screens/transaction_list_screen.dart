@@ -14,15 +14,19 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
-import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/features/transactions/data/filter_state_provider.dart';
 import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_query_provider.dart';
+import 'package:mudra_manager/features/transactions/data/view_mode_provider.dart';
+import 'package:mudra_manager/features/transactions/domain/filter_state.dart';
+import 'package:mudra_manager/features/transactions/domain/transaction_view_mode.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_card.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
@@ -57,14 +61,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   @override
   bool get wantKeepAlive => true;
 
-  String _filter = 'all';
-  DateTime _selectedDate = DateTime.now();
-  String _searchQuery = '';
-  int? _selectedCategoryId;
-  int? _selectedTagId;
-  String? _selectedTagName;
-  DateTime? _filterStartDate;
-  DateTime? _filterEndDate;
+  // Interaction state (local to this screen)
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   bool _showCalendar = false;
@@ -74,9 +71,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   late final ScrollController _scrollController;
   int _displayLimit = 50;
   bool _isLoadingMore = false;
-  bool _useInfiniteScroll = true;
-  List<TxListEntry>? _cachedFiltered;
-  String _lastFilterKey = '';
   double _lastScrollOffset = 0;
   Timer? _searchDebounce;
   final Map<int, Timer> _pendingDeletes = {};
@@ -91,6 +85,119 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   AnimationController? _fabController;
   final _speedDialKey = GlobalKey<ExpandableFabState>();
 
+  // ── Bridge getters: derive old-style values from providers ──
+  // These allow remaining UI methods (calendar, month picker, date controls,
+  // filter sheet) to compile unchanged. The real state lives in providers.
+
+  bool get _useInfiniteScroll => ref.read(viewModeProvider) is InfiniteView;
+
+  DateTime get _selectedDate {
+    final mode = ref.read(viewModeProvider);
+    if (mode is MonthView) return DateTime(mode.year, mode.month);
+    return DateTime.now();
+  }
+
+  int? get _selectedCategoryId => ref.read(filterStateProvider).categoryId;
+  int? get _selectedTagId => ref.read(filterStateProvider).tagId;
+  String? get _selectedTagName => null; // Derived from tag provider if needed
+  String get _searchQuery => ref.read(filterStateProvider).searchQuery;
+  String get _filter {
+    final type = ref.read(filterStateProvider).type;
+    switch (type) {
+      case TransactionTypeFilter.all:
+        return 'all';
+      case TransactionTypeFilter.income:
+        return 'income';
+      case TransactionTypeFilter.expense:
+        return 'expense';
+    }
+  }
+
+  DateTime? get _filterStartDate {
+    final mode = ref.read(viewModeProvider);
+    if (mode is DateRangeView) return mode.start;
+    return null;
+  }
+
+  DateTime? get _filterEndDate {
+    final mode = ref.read(viewModeProvider);
+    if (mode is DateRangeView) return mode.end;
+    return null;
+  }
+
+  // ── Bridge setters: forward mutations to providers ──
+
+  void _clearCache() {
+    _clearTripCache();
+  }
+
+  set _selectedDateValue(DateTime date) {
+    ref.read(viewModeProvider.notifier).setMonth(date.year, date.month);
+  }
+
+  // ignore: use_setters_to_change_properties
+  set _selectedDate(DateTime date) {
+    ref.read(viewModeProvider.notifier).setMonth(date.year, date.month);
+  }
+
+  // ignore: use_setters_to_change_properties
+  set _useInfiniteScroll(bool value) {
+    if (value) {
+      ref.read(viewModeProvider.notifier).setInfinite();
+    } else {
+      final now = DateTime.now();
+      ref.read(viewModeProvider.notifier).setMonth(now.year, now.month);
+    }
+  }
+
+  // ignore: use_setters_to_change_properties
+  set _selectedCategoryId(int? value) {
+    ref.read(filterStateProvider.notifier).setCategory(value);
+  }
+
+  // ignore: use_setters_to_change_properties
+  set _selectedTagId(int? value) {
+    ref.read(filterStateProvider.notifier).setTag(value);
+  }
+
+  // ignore: use_setters_to_change_properties
+  set _selectedTagName(String? _) {} // Display state derived from tag provider
+
+  // ignore: use_setters_to_change_properties
+  set _filter(String value) {
+    final type = switch (value) {
+      'income' => TransactionTypeFilter.income,
+      'expense' => TransactionTypeFilter.expense,
+      _ => TransactionTypeFilter.all,
+    };
+    ref.read(filterStateProvider.notifier).setType(type);
+  }
+
+  // ignore: use_setters_to_change_properties
+  set _filterStartDate(DateTime? value) {
+    if (value != null && _filterEndDate != null) {
+      ref.read(viewModeProvider.notifier).setDateRange(value, _filterEndDate!);
+    } else if (value == null) {
+      // Clearing date range — go back to month view
+      final now = DateTime.now();
+      ref.read(viewModeProvider.notifier).setMonth(now.year, now.month);
+    }
+  }
+
+  // ignore: use_setters_to_change_properties
+  set _filterEndDate(DateTime? value) {
+    if (value != null && _filterStartDate != null) {
+      ref
+          .read(viewModeProvider.notifier)
+          .setDateRange(_filterStartDate!, value);
+    }
+  }
+
+  // ignore: use_setters_to_change_properties
+  set _searchQuery(String value) {
+    ref.read(filterStateProvider.notifier).setSearch(value);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -103,14 +210,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         value: 1.0,
       );
     }
-    // Clear in-memory cache whenever transactions collection changes
-    // (covers FAB add, SMS auto-import, background writes)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.listenManual(transactionChangeProvider, (_, __) {
-        _clearCache();
-      });
-    });
   }
 
   @override
@@ -124,9 +223,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     super.dispose();
   }
 
-  void _clearCache() {
-    _cachedFiltered = null;
-    _lastFilterKey = '';
+  void _clearTripCache() {
     _lastTxIds = null;
     _tripNamesFuture = null;
   }
@@ -162,9 +259,11 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final yesterdayOnly =
         DateTime(yesterday.year, yesterday.month, yesterday.day);
 
-    final isViewingCurrentMonth = _useInfiniteScroll ||
-        (_selectedDate.year == today.year &&
-            _selectedDate.month == today.month);
+    final mode = ref.read(viewModeProvider);
+    final isViewingCurrentMonth = mode is InfiniteView ||
+        (mode is MonthView &&
+            mode.year == today.year &&
+            mode.month == today.month);
 
     if (isViewingCurrentMonth) {
       if (dateOnly == todayOnly) {
@@ -184,15 +283,21 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   void toggleSearch() {
     setState(() {
       _showSearch = !_showSearch;
-      if (!_showSearch) _searchQuery = '';
+      if (!_showSearch) {
+        ref.read(filterStateProvider.notifier).clearSearch();
+      }
     });
   }
 
   String _getDateRangeText() {
-    if (_filterStartDate != null && _filterEndDate != null) {
-      return '${DateFormat.MMMd().format(_filterStartDate!)} - ${DateFormat.MMMd().format(_filterEndDate!)}';
+    final mode = ref.read(viewModeProvider);
+    if (mode is DateRangeView) {
+      return '${DateFormat.MMMd().format(mode.start)} - ${DateFormat.MMMd().format(mode.end)}';
     }
-    return DateFormat.yMMMM().format(_selectedDate);
+    if (mode is MonthView) {
+      return DateFormat.yMMMM().format(DateTime(mode.year, mode.month));
+    }
+    return '';
   }
 
   @override
@@ -221,55 +326,56 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                       if (_selectedTxnIds.length == 2)
                         TextButton.icon(
                           onPressed: () => _mergeAsTransfer(ctxt),
-                          icon: const Icon(LucideIcons.arrowLeftRight, size: 18),
+                          icon:
+                              const Icon(LucideIcons.arrowLeftRight, size: 18),
                           label: Text(ctxt.txnList_convertToTransfer),
                         ),
                     ],
                   )
                 : AppBar(
-              title: Text(ctxt.transaction_list_cash_flow_screen_title),
-              actions: [
-                IconButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    toggleSearch();
-                  },
-                  icon: Icon(
-                    _showSearch ? LucideIcons.x : LucideIcons.search,
+                    title: Text(ctxt.transaction_list_cash_flow_screen_title),
+                    actions: [
+                      IconButton(
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          toggleSearch();
+                        },
+                        icon: Icon(
+                          _showSearch ? LucideIcons.x : LucideIcons.search,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          _showTagFilterSheet(context);
+                        },
+                        icon: Icon(
+                          LucideIcons.tag,
+                          color: _selectedTagId != null
+                              ? Theme.of(context).colorScheme.tertiary
+                              : null,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          showFilterBottomSheet(context, spacing);
+                        },
+                        icon: const Icon(LucideIcons.listFilter),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          setState(() {
+                            _selectMode = true;
+                            _selectedTxnIds.clear();
+                          });
+                        },
+                        icon: const Icon(LucideIcons.combine),
+                        tooltip: ctxt.txnList_convertToTransfer,
+                      ),
+                    ],
                   ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    _showTagFilterSheet(context);
-                  },
-                  icon: Icon(
-                    LucideIcons.tag,
-                    color: _selectedTagId != null
-                        ? Theme.of(context).colorScheme.tertiary
-                        : null,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    showFilterBottomSheet(context, spacing);
-                  },
-                  icon: const Icon(LucideIcons.listFilter),
-                ),
-                IconButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    setState(() {
-                      _selectMode = true;
-                      _selectedTxnIds.clear();
-                    });
-                  },
-                  icon: const Icon(LucideIcons.combine),
-                  tooltip: ctxt.txnList_convertToTransfer,
-                ),
-              ],
-            ),
             body: Stack(
               children: [
                 _buildMainComponent(),
@@ -296,28 +402,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
     final spacing = ref.watch(spacingProvider);
+    final filters = ref.watch(filterStateProvider);
+    final mode = ref.watch(viewModeProvider);
 
-    final sectionedAsync =
-        _useInfiniteScroll && _filterStartDate == null && _filterEndDate == null
-            ? ref.watch(allSectionedTransactionsProvider(_filter))
-            : _filterStartDate != null && _filterEndDate != null
-                ? ref.watch(
-                    sectionedTransactionsByDateRangeProvider(
-                      (
-                        start: _filterStartDate!,
-                        end: _filterEndDate!,
-                        type: _filter,
-                      ),
-                    ),
-                  )
-                : ref.watch(
-                    sectionedTransactionsProvider(
-                      (
-                        month: _selectedDate,
-                        type: _filter,
-                      ),
-                    ),
-                  );
+    final sectionedAsync = ref.watch(transactionQueryProvider);
 
     return Column(
       children: [
@@ -337,7 +425,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         ),
 
         // ── Sticky filter bar (always visible when filters active) ──
-        if (_selectedCategoryId != null || _filterStartDate != null || _selectedTagId != null)
+        if (filters.categoryId != null ||
+            mode is DateRangeView ||
+            filters.tagId != null)
           _buildStickyFilterBar(
             color,
             textTheme,
@@ -380,11 +470,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   void _invalidateTransactionProviders() {
-    _clearCache();
+    _clearTripCache();
+    ref.invalidate(transactionQueryProvider);
     ref.invalidate(accountServiceProvider);
-    ref.invalidate(allSectionedTransactionsProvider);
-    ref.invalidate(sectionedTransactionsProvider);
-    ref.invalidate(sectionedTransactionsByDateRangeProvider);
   }
 
   // ── SEARCH BAR ──
@@ -408,10 +496,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             _searchDebounce?.cancel();
             _searchDebounce = Timer(const Duration(milliseconds: 300), () {
               if (mounted) {
-                setState(() {
-                  _searchQuery = value.toLowerCase();
-                  _clearCache();
-                });
+                ref
+                    .read(filterStateProvider.notifier)
+                    .setSearch(value.toLowerCase());
               }
             });
           },
@@ -425,15 +512,12 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               color: color.primary,
               size: 22,
             ),
-            suffixIcon: _searchQuery.isNotEmpty
+            suffixIcon: ref.watch(filterStateProvider).searchQuery.isNotEmpty
                 ? IconButton(
                     icon: const Icon(LucideIcons.x, size: 20),
                     onPressed: () {
                       HapticFeedback.mediumImpact();
-                      setState(() {
-                        _searchQuery = '';
-                        _clearCache();
-                      });
+                      ref.read(filterStateProvider.notifier).clearSearch();
                     },
                   )
                 : null,
@@ -460,19 +544,21 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     AppSpacing spacing,
   ) {
     final ctxt = AppLocalizations.of(context)!;
+    final filters = ref.watch(filterStateProvider);
+    final mode = ref.watch(viewModeProvider);
     final parts = <String>[];
-    if (_selectedCategoryId != null) parts.add(ctxt.txnList_category);
-    if (_filterStartDate != null) parts.add(ctxt.txnList_dateRange);
-    if (_selectedTagId != null) parts.add(_selectedTagName ?? ctxt.txnList_tag);
+    if (filters.categoryId != null) parts.add(ctxt.txnList_category);
+    if (mode is DateRangeView) parts.add(ctxt.txnList_dateRange);
+    if (filters.tagId != null) parts.add(ctxt.txnList_tag);
 
     // Check if a budget exists for the selected category
     BudgetWithProgress? matchingBudget;
-    if (_selectedCategoryId != null) {
+    if (filters.categoryId != null) {
       final budgetsAsync = ref.watch(budgetsWithProgressProvider);
       budgetsAsync.whenData((budgets) {
         for (final bwp in budgets) {
           final catIds = bwp.budget.categories.map((c) => c.id).toSet();
-          if (catIds.contains(_selectedCategoryId)) {
+          if (catIds.contains(filters.categoryId)) {
             matchingBudget = bwp;
             break;
           }
@@ -515,14 +601,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               GestureDetector(
                 onTap: () {
                   HapticFeedback.mediumImpact();
-                  setState(() {
-                    _selectedCategoryId = null;
-                    _filterStartDate = null;
-                    _filterEndDate = null;
-                    _selectedTagId = null;
-                    _selectedTagName = null;
-                    _clearCache();
-                  });
+                  ref.read(filterStateProvider.notifier).clearAll();
+                  ref.read(viewModeProvider.notifier).setInfinite();
+                  setState(() {});
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(
@@ -549,7 +630,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             GestureDetector(
               onTap: () {
                 HapticFeedback.mediumImpact();
-                context.push(AppRoutes.budgetDetails, extra: matchingBudget!.budget.id);
+                context.push(AppRoutes.budgetDetails,
+                    extra: matchingBudget!.budget.id);
               },
               child: Row(
                 children: [
@@ -598,12 +680,13 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             child: InkWell(
               onTap: () {
                 HapticFeedback.mediumImpact();
-                if (_useInfiniteScroll && _filterStartDate == null) {
-                  setState(() {
-                    _useInfiniteScroll = false;
-                    _displayLimit = 50;
-                    _clearCache();
-                  });
+                final mode = ref.read(viewModeProvider);
+                if (mode is InfiniteView) {
+                  final now = DateTime.now();
+                  ref
+                      .read(viewModeProvider.notifier)
+                      .setMonth(now.year, now.month);
+                  setState(() => _displayLimit = 50);
                 } else {
                   setState(() {
                     _showCalendar = !_showCalendar;
@@ -622,7 +705,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: color.primaryContainer,
-                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                            borderRadius: BorderRadius.circular(
+                                Tone.current.borderRadius),
                           ),
                           child: Icon(
                             LucideIcons.calendar,
@@ -636,8 +720,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _useInfiniteScroll && _filterStartDate == null
-                                    ? AppLocalizations.of(context)!.txnList_allTransactions
+                                ref.watch(viewModeProvider) is InfiniteView
+                                    ? AppLocalizations.of(context)!
+                                        .txnList_allTransactions
                                     : _getDateRangeText(),
                                 style: textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -647,14 +732,16 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                               if (_rangeSelectionMode ==
                                   RangeSelectionMode.toggledOn)
                                 Text(
-                                  AppLocalizations.of(context)!.txnList_tapStartEnd,
+                                  AppLocalizations.of(context)!
+                                      .txnList_tapStartEnd,
                                   style: textTheme.bodySmall
                                       ?.copyWith(color: color.primary),
                                 )
-                              else if (_useInfiniteScroll &&
-                                  _filterStartDate == null)
+                              else if (ref.watch(viewModeProvider)
+                                  is InfiniteView)
                                 Text(
-                                  AppLocalizations.of(context)!.txnList_scrollToLoad,
+                                  AppLocalizations.of(context)!
+                                      .txnList_scrollToLoad,
                                   style: textTheme.bodySmall?.copyWith(
                                     color: color.onSurfaceVariant,
                                   ),
@@ -667,7 +754,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           spacing,
                         ),
                         SizedBox(width: spacing.elementGap),
-                        if (!_useInfiniteScroll || _filterStartDate != null)
+                        if (ref.watch(viewModeProvider) is! InfiniteView)
                           Icon(
                             _showCalendar || _showMonthPicker
                                 ? LucideIcons.chevronUp
@@ -683,7 +770,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           segments: [
                             ButtonSegment(
                               value: RangeSelectionMode.toggledOff,
-                              label: Text(AppLocalizations.of(context)!.txnList_month),
+                              label: Text(
+                                  AppLocalizations.of(context)!.txnList_month),
                               icon: const Icon(
                                 LucideIcons.calendarDays,
                                 size: 16,
@@ -691,8 +779,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             ),
                             ButtonSegment(
                               value: RangeSelectionMode.toggledOn,
-                              label: Text(AppLocalizations.of(context)!.txnList_dateRange),
-                              icon: const Icon(LucideIcons.calendarRange, size: 16),
+                              label: Text(AppLocalizations.of(context)!
+                                  .txnList_dateRange),
+                              icon: const Icon(LucideIcons.calendarRange,
+                                  size: 16),
                             ),
                           ],
                           selected: {_rangeSelectionMode},
@@ -702,8 +792,11 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                               _rangeSelectionMode = newSelection.first;
                               if (_rangeSelectionMode ==
                                   RangeSelectionMode.toggledOff) {
-                                _filterStartDate = null;
-                                _filterEndDate = null;
+                                // Switch back to month view
+                                final now = DateTime.now();
+                                ref
+                                    .read(viewModeProvider.notifier)
+                                    .setMonth(now.year, now.month);
                               }
                             });
                           },
@@ -761,7 +854,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               IconButton(
                 icon:
                     Icon(LucideIcons.refreshCw, size: 20, color: color.primary),
-                tooltip: AppLocalizations.of(context)!.txnList_resetToCurrentMonth,
+                tooltip:
+                    AppLocalizations.of(context)!.txnList_resetToCurrentMonth,
                 onPressed: () {
                   HapticFeedback.mediumImpact();
                   setState(() {
@@ -810,7 +904,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               size: 20,
               color: color.primary,
             ),
-            tooltip: _useInfiniteScroll ? AppLocalizations.of(context)!.txnList_monthView : AppLocalizations.of(context)!.txnList_allTransactions,
+            tooltip: _useInfiniteScroll
+                ? AppLocalizations.of(context)!.txnList_monthView
+                : AppLocalizations.of(context)!.txnList_allTransactions,
             onPressed: () {
               HapticFeedback.mediumImpact();
               setState(() {
@@ -1097,7 +1193,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     AppLocalizations ctxt,
     AppSpacing spacing,
   ) {
-    final filtered = _filterTransactions(sectioned);
+    final filtered = sectioned;
 
     if (filtered.isEmpty) {
       return ListView(
@@ -1195,28 +1291,29 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 displayItems.indexWhere((e) => e is TxItem);
 
             return _selectMode
-                ? _buildSelectableCard(transaction, tags, isRecurring, tripName, ctxt, color, spacing)
+                ? _buildSelectableCard(transaction, tags, isRecurring, tripName,
+                    ctxt, color, spacing)
                 : TransactionCard(
-              category: transaction.category.value,
-              description: transaction.description,
-              account: transaction.account.value,
-              amount: transaction.amount.toStringAsFixed(2),
-              currencyCode: transaction.currencyCode,
-              convertedAmount: transaction.convertedAmount,
-              date: transaction.date,
-              isExpense: transaction.isExpense,
-              isTransfer: transaction.isTransfer,
-              tags: tags,
-              related: transaction.related.value,
-              tripName: tripName,
-              isRecurring: isRecurring,
-              onEdit: () => _onEditTransaction(transaction),
-              onRemove: () => _onRemoveTransaction(transaction, ctxt),
-              onUnlinkRecurring: isRecurring
-                  ? () => _onUnlinkRecurring(transaction)
-                  : null,
-              enablePeek: index == firstTxIndex && widget.isTabActive,
-            );
+                    category: transaction.category.value,
+                    description: transaction.description,
+                    account: transaction.account.value,
+                    amount: transaction.amount.toStringAsFixed(2),
+                    currencyCode: transaction.currencyCode,
+                    convertedAmount: transaction.convertedAmount,
+                    date: transaction.date,
+                    isExpense: transaction.isExpense,
+                    isTransfer: transaction.isTransfer,
+                    tags: tags,
+                    related: transaction.related.value,
+                    tripName: tripName,
+                    isRecurring: isRecurring,
+                    onEdit: () => _onEditTransaction(transaction),
+                    onRemove: () => _onRemoveTransaction(transaction, ctxt),
+                    onUnlinkRecurring: isRecurring
+                        ? () => _onUnlinkRecurring(transaction)
+                        : null,
+                    enablePeek: index == firstTxIndex && widget.isTabActive,
+                  );
           },
         );
       },
@@ -1224,13 +1321,16 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   // ── SELECT MODE HINT BAR ──
-  Widget _buildSelectModeHint(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+  Widget _buildSelectModeHint(
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     final hint = _selectedTxnIds.length == 1
         ? 'Select the matching transaction'
         : 'Tap merge in the app bar';
 
     return Positioned(
-      bottom: MediaQuery.of(context).padding.bottom + kBottomNavigationBarHeight + 8,
+      bottom: MediaQuery.of(context).padding.bottom +
+          kBottomNavigationBarHeight +
+          8,
       left: spacing.cardHorizontal,
       right: spacing.cardHorizontal,
       child: Container(
@@ -1280,8 +1380,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     AppSpacing spacing,
   ) {
     final isSelected = _selectedTxnIds.contains(transaction.id);
-    final canSelect = !transaction.isTransfer &&
-        (_selectedTxnIds.length < 2 || isSelected);
+    final canSelect =
+        !transaction.isTransfer && (_selectedTxnIds.length < 2 || isSelected);
 
     return GestureDetector(
       onTap: () {
@@ -1328,7 +1428,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                   color: color.primary,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(LucideIcons.check, size: 16, color: color.onPrimary),
+                child:
+                    Icon(LucideIcons.check, size: 16, color: color.onPrimary),
               ),
             ),
         ],
@@ -1398,7 +1499,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
     if (result == true) {
       // Delete both original transactions atomically
-      await ref.read(transactionProvider).deleteTransactionPair(expense.id, income.id);
+      await ref
+          .read(transactionProvider)
+          .deleteTransactionPair(expense.id, income.id);
       _invalidateTransactionProviders();
 
       setState(() {
@@ -1463,7 +1566,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     _invalidateTransactionProviders();
     setState(() => _clearCache());
     if (!context.mounted) return;
-    SnackbarService.success(AppLocalizations.of(context)!.txnList_subscriptionTagRemoved);
+    SnackbarService.success(
+        AppLocalizations.of(context)!.txnList_subscriptionTagRemoved);
   }
 
   Future<void> _onRemoveTransaction(transaction, AppLocalizations ctxt) async {
@@ -1490,9 +1594,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       _pendingDeletes.remove(txnId);
       if (!mounted) return;
 
-      await ref
-          .read(tripServiceProvider)
-          .removeTransactionFromTrip(txnId);
+      await ref.read(tripServiceProvider).removeTransactionFromTrip(txnId);
 
       final service = ref.read(transactionProvider);
       if (transaction.isTransfer) {
@@ -1522,65 +1624,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     }
   }
 
-  // ── FILTER LOGIC ──
-  List<TxListEntry> _filterTransactions(List<TxListEntry> sectioned) {
-    final filterKey = '$_searchQuery|$_selectedCategoryId|$_selectedTagId';
-    if (_cachedFiltered != null && _lastFilterKey == filterKey) {
-      return _cachedFiltered!;
-    }
-
-    if (_searchQuery.isEmpty && _selectedCategoryId == null && _selectedTagId == null) {
-      _cachedFiltered = sectioned;
-      _lastFilterKey = filterKey;
-      return sectioned;
-    }
-
-    final filtered = <TxListEntry>[];
-    DateTime? currentDate;
-
-    for (var entry in sectioned) {
-      if (entry is TxHeader) {
-        currentDate = entry.group;
-        continue;
-      }
-
-      final txItem = entry as TxItem;
-      final tx = txItem.txn;
-
-      bool matches = true;
-
-      if (_searchQuery.isNotEmpty) {
-        final desc = tx.description?.toLowerCase() ?? '';
-        matches = desc.contains(_searchQuery);
-      }
-
-      if (matches && _selectedCategoryId != null) {
-        matches = tx.category.value?.id == _selectedCategoryId;
-      }
-
-      if (matches && _selectedTagId != null) {
-        matches = tx.tags.any((t) => t.id == _selectedTagId);
-      }
-
-      if (matches && currentDate != null) {
-        // Only add header if it's a new date group
-        final lastHeader =
-            filtered.isEmpty ? null : filtered.whereType<TxHeader>().lastOrNull;
-        if (lastHeader == null ||
-            lastHeader.group.year != currentDate.year ||
-            lastHeader.group.month != currentDate.month ||
-            lastHeader.group.day != currentDate.day) {
-          filtered.add(TxHeader(currentDate));
-        }
-        filtered.add(txItem);
-      }
-    }
-
-    _cachedFiltered = filtered;
-    _lastFilterKey = filterKey;
-    return filtered;
-  }
-
   // ── LIST EQUALITY CHECK ──
   bool _listEquals(List<int> a, List<int> b) {
     if (a.length != b.length) return false;
@@ -1598,83 +1641,87 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) {
         return Consumer(
           builder: (context, ref, _) {
             final tagsAsync = ref.watch(tagListProvider);
             return switch (tagsAsync) {
-          AsyncData(:final value) => Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.txnList_filterByTag,
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (value.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 24),
-                      child: Center(
-                        child: Text(
-                          AppLocalizations.of(context)!.txnList_noTagsYet,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: color.onSurfaceVariant,
-                          ),
+              AsyncData(:final value) => Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.txnList_filterByTag,
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    )
-                  else
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        if (_selectedTagId != null)
-                          ActionChip(
-                            label: Text(AppLocalizations.of(context)!.txnList_clear),
-                            avatar: const Icon(LucideIcons.x, size: 16),
-                            onPressed: () {
-                              setState(() {
-                                _selectedTagId = null;
-                                _selectedTagName = null;
-                                _clearCache();
-                              });
-                              Navigator.pop(ctx);
-                            },
+                      const SizedBox(height: 16),
+                      if (value.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Center(
+                            child: Text(
+                              AppLocalizations.of(context)!.txnList_noTagsYet,
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
                           ),
-                        ...value.map((tag) {
-                          final isSelected = _selectedTagId == tag.id;
-                          return FilterChip(
-                            label: Text(tag.name),
-                            selected: isSelected,
-                            onSelected: (_) {
-                              HapticFeedback.selectionClick();
-                              setState(() {
-                                _selectedTagId = tag.id;
-                                _selectedTagName = tag.name;
-                                _clearCache();
-                              });
-                              Navigator.pop(ctx);
-                            },
-                            showCheckmark: true,
-                          );
-                        }),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-          _ => Padding(
-              padding: const EdgeInsets.all(48),
-              child: Column(children: List.generate(5, (_) => const TransactionCardSkeleton())),
-            ),
-        };
+                        )
+                      else
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            if (_selectedTagId != null)
+                              ActionChip(
+                                label: Text(AppLocalizations.of(context)!
+                                    .txnList_clear),
+                                avatar: const Icon(LucideIcons.x, size: 16),
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedTagId = null;
+                                    _selectedTagName = null;
+                                    _clearCache();
+                                  });
+                                  Navigator.pop(ctx);
+                                },
+                              ),
+                            ...value.map((tag) {
+                              final isSelected = _selectedTagId == tag.id;
+                              return FilterChip(
+                                label: Text(tag.name),
+                                selected: isSelected,
+                                onSelected: (_) {
+                                  HapticFeedback.selectionClick();
+                                  setState(() {
+                                    _selectedTagId = tag.id;
+                                    _selectedTagName = tag.name;
+                                    _clearCache();
+                                  });
+                                  Navigator.pop(ctx);
+                                },
+                                showCheckmark: true,
+                              );
+                            }),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              _ => Padding(
+                  padding: const EdgeInsets.all(48),
+                  child: Column(
+                      children: List.generate(
+                          5, (_) => const TransactionCardSkeleton())),
+                ),
+            };
           },
         );
       },
@@ -1733,7 +1780,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             vertical: spacing.cardVertical,
                           ),
                           child: Text(
-                            AppLocalizations.of(context)!.txnList_transactionType,
+                            AppLocalizations.of(context)!
+                                .txnList_transactionType,
                             style: textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -1791,15 +1839,19 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             children: [
                               RadioListTile<int?>(
                                 value: null,
-                                title: Text(AppLocalizations.of(context)!.txnList_allCategories),
+                                title: Text(AppLocalizations.of(context)!
+                                    .txnList_allCategories),
                               ),
                               ...parentCategories.map((parent) {
                                 final subcategories = allCategories
                                     .where(
-                                      (c) => c.parentCategory.value?.id == parent.id,
+                                      (c) =>
+                                          c.parentCategory.value?.id ==
+                                          parent.id,
                                     )
                                     .toList();
-                                final hasSubcategories = subcategories.isNotEmpty;
+                                final hasSubcategories =
+                                    subcategories.isNotEmpty;
 
                                 return Column(
                                   children: [
@@ -1808,7 +1860,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                       title: Row(
                                         children: [
                                           Icon(
-                                            IconHelper.getIconData(parent.iconName),
+                                            IconHelper.getIconData(
+                                                parent.iconName),
                                             size: 20,
                                             color: Color(
                                               parent.colorValue ?? 0xFF9E9E9E,
@@ -1828,7 +1881,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                     if (hasSubcategories)
                                       ...subcategories.map(
                                         (sub) => Padding(
-                                          padding: const EdgeInsets.only(left: 32),
+                                          padding:
+                                              const EdgeInsets.only(left: 32),
                                           child: RadioListTile<int?>(
                                             value: sub.id,
                                             title: Row(
@@ -1839,10 +1893,12 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                                   ),
                                                   size: 18,
                                                   color: Color(
-                                                    sub.colorValue ?? 0xFF9E9E9E,
+                                                    sub.colorValue ??
+                                                        0xFF9E9E9E,
                                                   ),
                                                 ),
-                                                SizedBox(width: spacing.elementGap),
+                                                SizedBox(
+                                                    width: spacing.elementGap),
                                                 Text(
                                                   sub.name,
                                                   style: textTheme.bodyMedium,
@@ -1872,11 +1928,13 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           ),
                         ),
                         ListTile(
-                          leading: Icon(LucideIcons.calendarRange, color: color.primary),
+                          leading: Icon(LucideIcons.calendarRange,
+                              color: color.primary),
                           title: Text(
                             _filterStartDate != null && _filterEndDate != null
                                 ? '${DateFormat.yMMMd().format(_filterStartDate!)} - ${DateFormat.yMMMd().format(_filterEndDate!)}'
-                                : AppLocalizations.of(context)!.txnList_selectDateRange,
+                                : AppLocalizations.of(context)!
+                                    .txnList_selectDateRange,
                           ),
                           trailing: const Icon(LucideIcons.chevronRight),
                           onTap: () async {
@@ -1906,7 +1964,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                         if (_filterStartDate != null)
                           Padding(
                             padding: EdgeInsets.symmetric(
-                                horizontal: spacing.cardHorizontal,),
+                              horizontal: spacing.cardHorizontal,
+                            ),
                             child: TextButton.icon(
                               onPressed: () {
                                 HapticFeedback.mediumImpact();
@@ -1918,7 +1977,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                 setModalState(() {});
                               },
                               icon: const Icon(LucideIcons.x),
-                              label: Text(AppLocalizations.of(context)!.txnList_clearDateRange),
+                              label: Text(AppLocalizations.of(context)!
+                                  .txnList_clearDateRange),
                             ),
                           ),
                       ],

@@ -35,13 +35,15 @@ void main() {
       final timerSection = listScreen.substring(
         listScreen.indexOf('Timer(const Duration(seconds: 6)'),
       );
-      final callbackEnd = timerSection.indexOf('_pendingDeletes[txnId] = timer');
+      final callbackEnd =
+          timerSection.indexOf('_pendingDeletes[txnId] = timer');
       final callback = timerSection.substring(0, callbackEnd);
       expect(callback, contains('if (!mounted) return'));
     });
 
     test('1.3: deleteTransferAtomic exists in TransactionService', () {
-      expect(txnService, contains('Future<void> deleteTransferAtomic(int txnId)'));
+      expect(
+          txnService, contains('Future<void> deleteTransferAtomic(int txnId)'));
     });
 
     test('1.3: deleteTransferAtomic uses single writeTxn', () {
@@ -92,11 +94,13 @@ void main() {
     });
 
     test('4c: deleteTransactionPair exists in TransactionService', () {
-      expect(txnService, contains('Future<void> deleteTransactionPair(int id1, int id2)'));
+      expect(txnService,
+          contains('Future<void> deleteTransactionPair(int id1, int id2)'));
     });
 
     test('4c: merge uses deleteTransactionPair', () {
-      expect(listScreen, contains('deleteTransactionPair(expense.id, income.id)'));
+      expect(
+          listScreen, contains('deleteTransactionPair(expense.id, income.id)'));
     });
   });
 
@@ -113,31 +117,30 @@ void main() {
   });
 
   group('Bug 8 — Cache Cleared on FAB Return', () {
-    test('listenManual on transactionChangeProvider in initState', () {
-      final initMethod = listScreen.substring(
-        listScreen.indexOf('void initState()'),
-        listScreen.indexOf('void dispose()'),
-      );
-      expect(initMethod, contains('ref.listenManual(transactionChangeProvider'));
-      expect(initMethod, contains('_clearCache()'));
+    test(
+        'transactionQueryProvider watches transactionChangeProvider for reactivity',
+        () {
+      final queryProvider = File(
+        'lib/features/transactions/data/transaction_query_provider.dart',
+      ).readAsStringSync();
+      expect(queryProvider, contains('ref.watch(transactionChangeProvider)'));
     });
   });
 
   group('Bug 9 — Full Provider Invalidation', () {
-    test('9a: _invalidateTransactionProviders invalidates all 3 sectioned providers', () {
+    test(
+        '9a: _invalidateTransactionProviders invalidates transactionQueryProvider',
+        () {
       final method = listScreen.substring(
         listScreen.indexOf('void _invalidateTransactionProviders()'),
         listScreen.indexOf('Widget _buildSearchBar'),
       );
-      expect(method, contains('ref.invalidate(allSectionedTransactionsProvider)'));
-      expect(method, contains('ref.invalidate(sectionedTransactionsProvider)'));
-      expect(method, contains('ref.invalidate(sectionedTransactionsByDateRangeProvider)'));
+      expect(method, contains('ref.invalidate(transactionQueryProvider)'));
     });
 
-    test('9b: transfer screen invalidates all 3 sectioned providers', () {
-      expect(transferScreen, contains('ref.invalidate(allSectionedTransactionsProvider)'));
-      expect(transferScreen, contains('ref.invalidate(sectionedTransactionsProvider)'));
-      expect(transferScreen, contains('ref.invalidate(sectionedTransactionsByDateRangeProvider)'));
+    test('9b: transfer screen invalidates transactionQueryProvider', () {
+      expect(
+          transferScreen, contains('ref.invalidate(transactionQueryProvider)'));
     });
   });
 }

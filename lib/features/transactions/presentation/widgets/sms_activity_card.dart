@@ -16,6 +16,7 @@ import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/features/sms/data/category_matcher_service.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_query_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
@@ -72,7 +73,8 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
       final autoApprove = await DialogUtils.showConfirmation(
         context,
         title: 'Auto-approve pending?',
-        message: 'Do you want to automatically approve pending transactions for "${widget.activity.account}"?',
+        message:
+            'Do you want to automatically approve pending transactions for "${widget.activity.account}"?',
         icon: LucideIcons.circleCheck,
         confirmText: 'Yes',
         cancelText: 'No',
@@ -86,7 +88,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
       ref.invalidate(accountsProvider);
       ref.invalidate(accountServiceProvider);
       ref.invalidate(transactionProvider);
-      ref.invalidate(allSectionedTransactionsProvider);
+      ref.invalidate(transactionQueryProvider);
 
       // Wait a bit for providers to refresh
       await Future.delayed(const Duration(milliseconds: 100));
@@ -163,14 +165,14 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
 
     if (result == true) {
       ref.invalidate(transactionProvider);
-      ref.invalidate(allSectionedTransactionsProvider);
+      ref.invalidate(transactionQueryProvider);
     }
   }
 
   Future<void> _reject() async {
     await SmsActivityService.instance.rejectActivity(widget.activity, null);
     ref.invalidate(transactionProvider);
-    ref.invalidate(allSectionedTransactionsProvider);
+    ref.invalidate(transactionQueryProvider);
   }
 
   @override
@@ -181,18 +183,19 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
 
     // Check if account exists in database (only if account was detected in SMS)
     final accountsAsync = ref.watch(accountsProvider);
-    final hasUnknownAccount = widget.activity.account != null && accountsAsync.when(
-      data: (accounts) {
-        // Check if any account number matches (last 4 digits)
-        return !accounts.any(
-          (a) =>
-              a.accountNumber != null &&
-              widget.activity.account!.contains(a.accountNumber!),
+    final hasUnknownAccount = widget.activity.account != null &&
+        accountsAsync.when(
+          data: (accounts) {
+            // Check if any account number matches (last 4 digits)
+            return !accounts.any(
+              (a) =>
+                  a.accountNumber != null &&
+                  widget.activity.account!.contains(a.accountNumber!),
+            );
+          },
+          loading: () => false,
+          error: (_, __) => false,
         );
-      },
-      loading: () => false,
-      error: (_, __) => false,
-    );
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
@@ -218,7 +221,8 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                         height: 48.0,
                         decoration: BoxDecoration(
                           color: statusColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius:
+                              BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: Icon(
                           widget.activity.isIncome == true
@@ -370,21 +374,27 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: FinanceColors.statusWarning.withValues(alpha: 0.1),
+                        color:
+                            FinanceColors.statusWarning.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: FinanceColors.statusWarning.withValues(alpha: 0.3),),
+                          color: FinanceColors.statusWarning
+                              .withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(LucideIcons.info,
-                              color: FinanceColors.statusWarning, size: 20,),
+                          const Icon(
+                            LucideIcons.info,
+                            color: FinanceColors.statusWarning,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'Account "${widget.activity.account}" not found. Add it first.',
-                              style: textTheme.bodySmall
-                                  ?.copyWith(color: FinanceColors.statusWarning),
+                              style: textTheme.bodySmall?.copyWith(
+                                  color: FinanceColors.statusWarning),
                             ),
                           ),
                         ],
@@ -410,11 +420,14 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                         child: FilledButton.icon(
                           onPressed: hasUnknownAccount ? _addAccount : _approve,
                           icon: Icon(
-                            hasUnknownAccount ? LucideIcons.plus : LucideIcons.check,
+                            hasUnknownAccount
+                                ? LucideIcons.plus
+                                : LucideIcons.check,
                             size: 18,
                           ),
                           label: Text(
-                              hasUnknownAccount ? 'ADD ACCOUNT' : 'APPROVE',),
+                            hasUnknownAccount ? 'ADD ACCOUNT' : 'APPROVE',
+                          ),
                         ),
                       ),
                     ],
