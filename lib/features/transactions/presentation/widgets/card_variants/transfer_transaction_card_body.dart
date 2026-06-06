@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/card_variants/transaction_card_data.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';

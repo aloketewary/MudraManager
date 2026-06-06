@@ -99,7 +99,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
   int? get _selectedCategoryId => ref.read(filterStateProvider).categoryId;
   int? get _selectedTagId => ref.read(filterStateProvider).tagId;
-  String? get _selectedTagName => null; // Derived from tag provider if needed
+// Derived from tag provider if needed
   String get _searchQuery => ref.read(filterStateProvider).searchQuery;
   String get _filter {
     final type = ref.read(filterStateProvider).type;
@@ -131,9 +131,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     _clearTripCache();
   }
 
-  set _selectedDateValue(DateTime date) {
-    ref.read(viewModeProvider.notifier).setMonth(date.year, date.month);
-  }
 
   // ignore: use_setters_to_change_properties
   set _selectedDate(DateTime date) {
@@ -194,9 +191,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   // ignore: use_setters_to_change_properties
-  set _searchQuery(String value) {
-    ref.read(filterStateProvider.notifier).setSearch(value);
-  }
 
   @override
   void initState() {
