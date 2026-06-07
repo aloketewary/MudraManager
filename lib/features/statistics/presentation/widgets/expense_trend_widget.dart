@@ -73,7 +73,9 @@ class _ExpenseTrendWidgetState extends State<ExpenseTrendWidget> {
             ),
             const SizedBox(width: 12),
             IconButton.filled(
-              icon: Icon(showLineChart ? Icons.bar_chart : LucideIcons.chartLine),
+              icon: Icon(
+                showLineChart ? Icons.bar_chart : LucideIcons.chartLine,
+              ),
               onPressed: () => setState(() => showLineChart = !showLineChart),
               iconSize: 40,
             ),

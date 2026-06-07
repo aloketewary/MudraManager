@@ -3,7 +3,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart' show PeriodType;
+import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart'
+    show PeriodType;
 
 class PeriodSelector extends StatelessWidget {
   final DateTime selectedDate;

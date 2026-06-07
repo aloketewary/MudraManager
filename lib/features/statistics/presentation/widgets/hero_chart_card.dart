@@ -120,8 +120,11 @@ class HeroChartCard extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, _) => Text(
-                          formatCurrency(value,
-                              code: BaseCurrency.code, decimals: 0,),
+                          formatCurrency(
+                            value,
+                            code: BaseCurrency.code,
+                            decimals: 0,
+                          ),
                           style: textTheme.bodySmall?.copyWith(fontSize: 9),
                         ),
                         reservedSize: 35,

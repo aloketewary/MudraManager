@@ -22,16 +22,20 @@ enum AppBarMode {
 /// Chrome-only configuration. Rendering hints. No logic. No actions.
 class ScreenShellConfig {
   final String? title;
+  final Widget? titleWidget;
   final AppBarMode appBarMode;
   final bool enableRefresh;
+  final double? toolbarHeight;
 
   /// Optional bottom widget for AppBar (e.g., TabBar).
   final PreferredSizeWidget? bottom;
 
   const ScreenShellConfig({
     this.title,
+    this.titleWidget,
     this.appBarMode = AppBarMode.standard,
     this.enableRefresh = true,
+    this.toolbarHeight,
     this.bottom,
   });
 }
@@ -153,14 +157,16 @@ class ScreenShell extends ConsumerWidget {
         ),
       AppBarMode.standard => AppBar(
           leading: leading,
-          title: config.title != null
-              ? Text(
-                  config.title!,
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              : null,
+          toolbarHeight: config.toolbarHeight,
+          title: config.titleWidget ??
+              (config.title != null
+                  ? Text(
+                      config.title!,
+                      style: textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : null),
           actions: actionWidgets,
           bottom: config.bottom,
         ),
