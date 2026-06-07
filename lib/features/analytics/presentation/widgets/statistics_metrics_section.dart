@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/analytics/data/net_worth_service.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
@@ -12,9 +13,12 @@ import 'package:mudra_manager/shared/widgets/inline_error.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class StatisticsMetricsSection extends ConsumerWidget {
-  final StatsData data;
+  final String periodKey;
 
-  const StatisticsMetricsSection({super.key, required this.data});
+  const StatisticsMetricsSection({
+    super.key,
+    required this.periodKey,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,49 +28,56 @@ class StatisticsMetricsSection extends ConsumerWidget {
     final isGuestMode = ref.watch(guestModeProvider);
     final l10n = AppLocalizations.of(context)!;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.stats_overview,
-          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: spacing.sectionGap),
-        Row(
-          children: [
-            Expanded(
-              child: _PulseCard(
-                label: l10n.stats_income,
-                value: data.income,
-                cardColor: color.primary,
-                icon: LucideIcons.arrowUp,
-                sparkline: data.incomeSpots,
-                isGuestMode: isGuestMode,
-                spacing: spacing,
+    final metricsAsync = ref.watch(analyticsMetricsProvider(periodKey));
+
+    return metricsAsync.when(
+      data: (data) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.stats_overview,
+            style:
+                textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: spacing.sectionGap),
+          Row(
+            children: [
+              Expanded(
+                child: _PulseCard(
+                  label: l10n.stats_income,
+                  value: data.totalIncome,
+                  cardColor: color.primary,
+                  icon: LucideIcons.arrowUp,
+                  sparkline: data.incomeSpots,
+                  isGuestMode: isGuestMode,
+                  spacing: spacing,
+                ),
               ),
-            ),
-            SizedBox(width: spacing.elementGap),
-            Expanded(
-              child: _PulseCard(
-                label: l10n.stats_expense,
-                value: data.expense,
-                cardColor: color.error,
-                icon: LucideIcons.arrowDown,
-                sparkline: data.expenseSpots,
-                isGuestMode: isGuestMode,
-                spacing: spacing,
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: _PulseCard(
+                  label: l10n.stats_expense,
+                  value: data.totalExpense,
+                  cardColor: color.error,
+                  icon: LucideIcons.arrowDown,
+                  sparkline: data.expenseSpots,
+                  isGuestMode: isGuestMode,
+                  spacing: spacing,
+                ),
               ),
-            ),
-          ],
-        ),
-        SizedBox(height: spacing.elementGap),
-        _NetWorthCard(
-          isGuestMode: isGuestMode,
-          savingsRate: data.savingsRate,
-          savingsSpots: data.savingsSpots,
-          spacing: spacing,
-        ),
-      ],
+            ],
+          ),
+          SizedBox(height: spacing.elementGap),
+          _NetWorthCard(
+            isGuestMode: isGuestMode,
+            savingsRate: data.savingsRate,
+            savingsSpots: data.savingsSpots,
+            spacing: spacing,
+          ),
+        ],
+      ),
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const InlineError(),
     );
   }
 }
@@ -169,7 +180,9 @@ class _PulseCard extends StatelessWidget {
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
@@ -222,26 +235,21 @@ class _PulseCard extends StatelessWidget {
                 SizedBox(height: spacing.elementGap),
                 Text(
                   label,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: color.onSurfaceVariant,
-                  ),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
                 SizedBox(height: spacing.elementGapMin),
                 isPercentage
                     ? Text(
                         '${value.toStringAsFixed(1)}%',
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       )
                     : CurrencyText(
-                        amount: GuestModeUtil.applyGuestMode(
-                          value,
-                          isGuestMode,
-                        ),
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        amount:
+                            GuestModeUtil.applyGuestMode(value, isGuestMode),
+                        style: textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                 if (sparkline.isNotEmpty) const SizedBox(height: 50),
               ],

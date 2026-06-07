@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
-import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
+import 'package:mudra_manager/features/analytics/domain/narrative_fact.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/inline_error.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class StatisticsInsightsSection extends ConsumerWidget {
-  final StatsData data;
+  final String periodKey;
 
-  const StatisticsInsightsSection({super.key, required this.data});
+  const StatisticsInsightsSection({
+    super.key,
+    required this.periodKey,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,6 +23,10 @@ class StatisticsInsightsSection extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
+    final brightness = Theme.of(context).brightness;
+
+    final narrativeFactsAsync =
+        ref.watch(analyticsNarrativeFactsProvider(periodKey));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,7 +36,8 @@ class StatisticsInsightsSection extends ConsumerWidget {
           style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         SizedBox(height: spacing.sectionGap),
-        // Spending Prediction Banner
+
+        // 1. Prediction Banner (Remains high-level)
         Consumer(
           builder: (context, ref, child) {
             final predictionAsync = ref.watch(predictedSpendingProvider);
@@ -70,9 +76,8 @@ class StatisticsInsightsSection extends ConsumerWidget {
                             SizedBox(height: spacing.elementGap),
                             CurrencyText(
                               amount: predicted,
-                              style: textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                               compact: false,
                               fixedLength: 0,
                             ),
@@ -89,44 +94,56 @@ class StatisticsInsightsSection extends ConsumerWidget {
           },
         ),
 
-        // Insights Nudges
-        if (data.categoryData.isNotEmpty) ...[
-          Row(
-            children: [
-              Expanded(
-                child: _buildInsightCard(
-                  l10n.stats_topSpending,
-                  (data.categoryData.entries.toList()
-                        ..sort((a, b) => b.value.compareTo(a.value)))
-                      .first
-                      .key,
-                  LucideIcons.trendingUp,
-                  color,
-                  textTheme,
-                  spacing,
-                ),
+        // 2. Narrative Facts via Mapper
+        narrativeFactsAsync.when(
+          data: (facts) {
+            if (facts.isEmpty) return const SizedBox.shrink();
+            return Padding(
+              padding: EdgeInsets.only(top: spacing.elementGap),
+              child: Column(
+                children: facts.map((fact) {
+                  final presentation =
+                      NarrativeMapper.map(fact, l10n, brightness, color);
+                  return Card(
+                    elevation: 0,
+                    margin: EdgeInsets.only(bottom: spacing.elementGap),
+                    color: color.surfaceContainerLow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      side: BorderSide(
+                        color: color.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(spacing.cardInner),
+                      child: Row(
+                        children: [
+                          Icon(
+                            presentation.icon,
+                            color: presentation.color,
+                            size: 24,
+                          ),
+                          SizedBox(width: spacing.elementGap),
+                          Expanded(
+                            child: Text(
+                              presentation.text,
+                              style: textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
-              SizedBox(width: spacing.elementGap),
-              Expanded(
-                child: _buildInsightCard(
-                  l10n.statistics_dailyAverage,
-                  formatCurrency(
-                    data.avgDailySpend,
-                    code: BaseCurrency.code,
-                    decimals: 0,
-                  ),
-                  LucideIcons.calendar,
-                  color,
-                  textTheme,
-                  spacing,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: spacing.elementGap),
-        ],
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const InlineError(),
+        ),
 
-        // Category Trends (Top 5)
+        // 3. Category Trends
         Consumer(
           builder: (context, ref, child) {
             final categoryTrendsAsync = ref.watch(categoryTrendsProvider);
@@ -153,9 +170,8 @@ class StatisticsInsightsSection extends ConsumerWidget {
                       children: [
                         Text(
                           l10n.stats_categoryTrends,
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 20),
                         ...sortedTrends.take(5).map(
@@ -194,13 +210,11 @@ class StatisticsInsightsSection extends ConsumerWidget {
                                                   vertical: 4,
                                                 ),
                                                 decoration: BoxDecoration(
-                                                  color:
-                                                      (trend.changePercent > 0
-                                                              ? color.error
-                                                              : color.primary)
-                                                          .withValues(
-                                                    alpha: 0.1,
-                                                  ),
+                                                  color: (trend.changePercent >
+                                                              0
+                                                          ? color.error
+                                                          : color.primary)
+                                                      .withValues(alpha: 0.1),
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                     spacing.radiusMedium,
@@ -265,50 +279,6 @@ class StatisticsInsightsSection extends ConsumerWidget {
           },
         ),
       ],
-    );
-  }
-
-  Widget _buildInsightCard(
-    String label,
-    String value,
-    IconData icon,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-  ) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.only(top: spacing.elementGap),
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.cardInner),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color.primary, size: 24),
-            SizedBox(height: spacing.elementGap),
-            Text(
-              label,
-              style: textTheme.bodySmall?.copyWith(
-                color: color.onSurfaceVariant,
-              ),
-            ),
-            SizedBox(height: spacing.elementGap),
-            Text(
-              value,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/features/analytics/domain/narrative_fact.dart';
 
 // ── Output DTOs ──
 
@@ -87,6 +88,9 @@ class ComparisonAnalysis {
   final double currentAvgTxn;
   final double compareAvgTxn;
 
+  // ── Narrative ──
+  final List<NarrativeFact> facts;
+
   const ComparisonAnalysis({
     required this.currentIncome,
     required this.compareIncome,
@@ -105,6 +109,7 @@ class ComparisonAnalysis {
     required this.compareTxnCount,
     required this.currentAvgTxn,
     required this.compareAvgTxn,
+    required this.facts,
   });
 
   bool get isExpenseDown => expenseVariance < 0;
@@ -249,6 +254,80 @@ class MonthlyComparisonService {
     final curAvg = curExpCount > 0 ? curExp / curExpCount : 0.0;
     final cmpAvg = cmpExpCount > 0 ? cmpExp / cmpExpCount : 0.0;
 
+    // ── Facts ──
+    final facts = <NarrativeFact>[];
+    const materialityThreshold = 50.0;
+
+    if (netExpVariance.abs() < materialityThreshold) {
+      facts.add(const InsufficientHistoryFact()); // Reuse as "Steady"
+    } else if (cmpExp > 0) {
+      if (netExpVariance < 0) {
+        facts.add(
+          SpendingDecelerationFact(
+            category: 'Total Spending',
+            percentage: (netExpVariance.abs() / cmpExp * 100).clamp(0, 100),
+          ),
+        );
+      } else {
+        facts.add(
+          SpendingAccelerationFact(
+            category: 'Total Spending',
+            percentage: (netExpVariance / cmpExp * 100),
+            amount: netExpVariance,
+          ),
+        );
+      }
+    } else {
+      // First time spending
+      facts.add(
+        SpendingAccelerationFact(
+          category: 'Total Spending',
+          percentage: 100,
+          amount: netExpVariance,
+        ),
+      );
+    }
+
+    if (topIncrease != null && topIncrease.delta > materialityThreshold) {
+      facts.add(
+        TopCategoryFact(
+          category: topIncrease.name,
+          percentage: topIncrease.contributionPct,
+        ),
+      );
+    }
+
+    // New/Stopped categories
+    for (final contrib in contributions) {
+      if (contrib.currentSpend > materialityThreshold &&
+          contrib.compareSpend == 0) {
+        facts.add(
+          NewSpendingCategoryFact(
+            category: contrib.name,
+            amount: contrib.currentSpend,
+          ),
+        );
+      } else if (contrib.currentSpend == 0 &&
+          contrib.compareSpend > materialityThreshold) {
+        facts.add(
+          CategoryStoppedFact(
+            category: contrib.name,
+            previousAmount: contrib.compareSpend,
+          ),
+        );
+      }
+    }
+
+    if (forecastEligible) {
+      facts.add(
+        SpendingForecastFact(
+          projectedAmount: projected,
+          variance: projected - cmpExp,
+          comparisonPeriod: 'baseline',
+        ),
+      );
+    }
+
     return ComparisonAnalysis(
       currentIncome: curInc,
       compareIncome: cmpInc,
@@ -267,6 +346,7 @@ class MonthlyComparisonService {
       compareTxnCount: cmpExpCount,
       currentAvgTxn: curAvg,
       compareAvgTxn: cmpAvg,
+      facts: facts,
     );
   }
 

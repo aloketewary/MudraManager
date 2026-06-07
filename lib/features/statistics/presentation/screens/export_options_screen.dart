@@ -12,11 +12,13 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
-final exportFormatsProvider = FutureProvider.autoDispose<List<String>>((ref) async {
+final exportFormatsProvider =
+    FutureProvider.autoDispose<List<String>>((ref) async {
   return ref.read(exportPluginManagerProvider).getSupportedFormats();
 });
 
-final exportTemplatesProvider = FutureProvider.autoDispose.family<List<String>, String>((ref, format) async {
+final exportTemplatesProvider = FutureProvider.autoDispose
+    .family<List<String>, String>((ref, format) async {
   return ref.read(exportPluginManagerProvider).getTemplatesForFormat(format);
 });
 
@@ -50,15 +52,18 @@ class ExportOptionsScreen extends ConsumerWidget {
         ],
       ),
       body: formatsAsync.when(
-        loading: () => const Padding(padding: EdgeInsets.all(16), child: DashboardCardSkeleton()),
-        error: (err, stack) => Center(child: Text(BuddyMessages.errorWith('$err'))),
+        loading: () => const Padding(
+            padding: EdgeInsets.all(16), child: DashboardCardSkeleton(),),
+        error: (err, stack) =>
+            Center(child: Text(BuddyMessages.errorWith('$err'))),
         data: (formats) {
           if (formats.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(LucideIcons.fileX, size: 64, color: color.onSurfaceVariant),
+                  Icon(LucideIcons.fileX,
+                      size: 64, color: color.onSurfaceVariant,),
                   const SizedBox(height: 16),
                   Text(
                     'No export templates enabled',
@@ -102,15 +107,18 @@ class ExportOptionsScreen extends ConsumerWidget {
                   return Card(
                     margin: const EdgeInsets.only(bottom: 16),
                     child: ExpansionTile(
-                      leading: Icon(_getFormatIcon(format), color: color.primary),
+                      leading:
+                          Icon(_getFormatIcon(format), color: color.primary),
                       title: Text(format, style: textTheme.titleMedium),
-                      subtitle: Text('${templates.length} template${templates.length > 1 ? 's' : ''} available'),
+                      subtitle: Text(
+                          '${templates.length} template${templates.length > 1 ? 's' : ''} available',),
                       children: templates
                           .map(
                             (template) => ListTile(
                               title: Text(template),
                               trailing: const Icon(LucideIcons.download),
-                              onTap: () => _exportWithTemplate(context, format, template),
+                              onTap: () => _exportWithTemplate(
+                                  context, format, template,),
                             ),
                           )
                           .toList(),
@@ -137,8 +145,12 @@ class ExportOptionsScreen extends ConsumerWidget {
   }
 
   Future<void> _exportWithTemplate(
-      BuildContext context, String format, String template,) async {
-    final plugin = await ExportPluginManager.instance.getPlugin(format, template);
+    BuildContext context,
+    String format,
+    String template,
+  ) async {
+    final plugin =
+        await ExportPluginManager.instance.getPlugin(format, template);
     if (plugin == null) return;
 
     try {

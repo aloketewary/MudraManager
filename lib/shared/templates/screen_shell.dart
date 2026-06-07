@@ -41,16 +41,6 @@ class ScreenShellConfig {
 }
 
 /// ScreenShell — dumb chrome renderer.
-///
-/// Reads pre-grouped action slots from [actions]. No filtering. No selection.
-/// Renders:
-///   - actions.appBar → AppBar icon buttons
-///   - actions.overflow → PopupMenuButton
-///   - actions.fab → FloatingActionButton
-///   - actions.contextual → NOT rendered here (template's job)
-///
-/// If this widget ever needs a `.where` or `.firstOrNull`, the architecture
-/// is violated. Fix the state provider, not the shell.
 class ScreenShell extends ConsumerWidget {
   final ScreenShellConfig config;
   final Widget body;

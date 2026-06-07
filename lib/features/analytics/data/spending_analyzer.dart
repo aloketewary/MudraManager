@@ -1,8 +1,5 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
-import 'package:mudra_manager/core/db/models/budget.dart';
-import 'package:mudra_manager/core/db/models/goal.dart';
-import 'package:mudra_manager/core/db/models/transaction.dart';
 
 class SpendingPersonality {
   final String topCategory;
@@ -146,7 +143,8 @@ class SpendingAnalyzer {
 
     // ── Spending trend ──
     final trendDiff = firstHalfExpense > 0
-        ? ((secondHalfExpense - firstHalfExpense) / firstHalfExpense * 100).abs()
+        ? ((secondHalfExpense - firstHalfExpense) / firstHalfExpense * 100)
+            .abs()
         : 0.0;
     final trend = trendDiff < 10
         ? 'Steady spender'

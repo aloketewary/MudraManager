@@ -325,8 +325,8 @@ features/category/presentation/screens/
 - [ ] SplitDetailScreen (2279 lines) → ScreenShell + body split
 
 ### Wave 4 — Analytics
-- [ ] Statistics → ScreenShell
-- [ ] Monthly comparison → ScreenShell
+- [x] Statistics → Template E + ScreenShell
+- [x] Monthly comparison → ScreenShell + NarrativeFact
 - [ ] Export options → ScreenShell
 
 ### Wave 5 — Core User Screens (CRITICAL)

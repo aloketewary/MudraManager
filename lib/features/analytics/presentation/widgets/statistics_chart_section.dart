@@ -11,13 +11,15 @@ import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
+import 'package:mudra_manager/features/analytics/domain/narrative_fact.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class StatisticsChartSection extends ConsumerStatefulWidget {
-  const StatisticsChartSection({super.key});
+  final String periodKey;
+  const StatisticsChartSection({super.key, required this.periodKey});
 
   @override
   ConsumerState<StatisticsChartSection> createState() =>
@@ -129,10 +131,12 @@ class _StatisticsChartSectionState
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    final trendsAsync = ref.watch(monthlyExpenseTrendsProvider);
+    final chartAsync = ref.watch(analyticsChartProvider(widget.periodKey));
     final l10n = AppLocalizations.of(context)!;
-    return trendsAsync.when(
-      data: (categoryData) {
+
+    return chartAsync.when(
+      data: (aggregates) {
+        final categoryData = aggregates.monthlyExpenseTrends;
         if (categoryData.isEmpty) {
           return SizedBox(
             height: 200,
@@ -149,41 +153,21 @@ class _StatisticsChartSectionState
                 .compareTo(a.value.reduce((a, b) => a + b)),
           );
 
-        // Compute insight
-        final topCat = sortedCategories.first;
-        final topTotal = topCat.value.reduce((a, b) => a + b);
-        final thisMonth = topCat.value.last;
-        final lastMonth = topCat.value.length >= 2
-            ? topCat.value[topCat.value.length - 2]
-            : 0.0;
-        final allTotals = sortedCategories.map(
-          (e) => e.value.reduce((a, b) => a + b),
-        );
-        final grandTotal = allTotals.fold(0.0, (a, b) => a + b);
-        final topPercent = grandTotal > 0
-            ? (topTotal / grandTotal * 100).toStringAsFixed(0)
-            : '0';
+        // Derive narrative using facts from aggregates
+        final facts = ref
+                .watch(analyticsNarrativeFactsProvider(widget.periodKey))
+                .value ??
+            [];
+        final trendFact = facts.whereType<TopCategoryFact>().firstOrNull;
 
-        String insight;
-        IconData insightIcon;
-        Color insightColor;
-        if (thisMonth > lastMonth * 1.3 && lastMonth > 0) {
-          insight = l10n.stats_trendUp(topCat.key, topPercent);
-          insightIcon = LucideIcons.trendingUp;
-          insightColor = FinanceColors.expenseColor(
-            Theme.of(context).brightness,
-          );
-        } else if (thisMonth < lastMonth * 0.7 && lastMonth > 0) {
-          insight = l10n.stats_trendDown(topCat.key);
-          insightIcon = LucideIcons.trendingDown;
-          insightColor = FinanceColors.incomeColor(
-            Theme.of(context).brightness,
-          );
-        } else {
-          insight = l10n.stats_topCategory(topCat.key, topPercent);
-          insightIcon = LucideIcons.sparkles;
-          insightColor = color.primary;
-        }
+        final insight = trendFact != null
+            ? NarrativeMapper.map(
+                trendFact,
+                l10n,
+                Theme.of(context).brightness,
+                color,
+              )
+            : null;
 
         final chartColors = ChartPalette.colors;
         final topCats = sortedCategories.take(3).toList();
@@ -242,7 +226,9 @@ class _StatisticsChartSectionState
                         .toList(),
                     maxCategories: 4,
                   ),
-                  child: _MonthlyTrendChart(sortedCategories: sortedCategories),
+                  child: _MonthlyTrendChart(
+                    sortedCategories: sortedCategories,
+                  ),
                 ),
               ),
             ),
@@ -290,15 +276,17 @@ class _StatisticsChartSectionState
                 ),
               ),
             ),
-            SizedBox(height: spacing.elementGap),
-            _chartInsight(
-              insight,
-              insightIcon,
-              insightColor,
-              color,
-              textTheme,
-              spacing,
-            ),
+            if (insight != null) ...[
+              SizedBox(height: spacing.elementGap),
+              _chartInsight(
+                insight.text,
+                insight.icon,
+                insight.color,
+                color,
+                textTheme,
+                spacing,
+              ),
+            ],
           ],
         );
       },
@@ -324,11 +312,16 @@ class _StatisticsChartSectionState
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    final spendingByDayAsync = ref.watch(spendingByDayProvider);
+    final chartAsync = ref.watch(analyticsChartProvider(widget.periodKey));
     final l10n = AppLocalizations.of(context)!;
-    return spendingByDayAsync.when(
-      data: (byDay) {
-        final maxSpending = byDay.values.reduce((a, b) => a > b ? a : b);
+
+    return chartAsync.when(
+      data: (aggregates) {
+        final byDay = aggregates.spendingByDayOfWeek;
+        final maxSpending = byDay.values.isNotEmpty
+            ? byDay.values.reduce((a, b) => a > b ? a : b)
+            : 0.0;
+
         if (maxSpending == 0) {
           return SizedBox(
             height: 200,
@@ -339,46 +332,23 @@ class _StatisticsChartSectionState
           );
         }
 
-        // Compute insight
-        final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        final peakDay = days.reduce(
-          (a, b) => (byDay[a] ?? 0) > (byDay[b] ?? 0) ? a : b,
-        );
-        final quietDay = days.reduce(
-          (a, b) => (byDay[a] ?? 0) < (byDay[b] ?? 0) ? a : b,
-        );
-        final weekdayTotal = [
-          'Mon',
-          'Tue',
-          'Wed',
-          'Thu',
-          'Fri',
-        ].fold(0.0, (s, d) => s + (byDay[d] ?? 0));
-        final weekendTotal = [
-          'Sat',
-          'Sun',
-        ].fold(0.0, (s, d) => s + (byDay[d] ?? 0));
-        final weekendAvg = weekendTotal / 2;
-        final weekdayAvg = weekdayTotal / 5;
+        // Derive pattern narrative
+        final facts = ref
+                .watch(analyticsNarrativeFactsProvider(widget.periodKey))
+                .value ??
+            [];
+        final patternFact = facts
+            .where((f) => f is WeekendPeakFact || f is WeekdayPeakFact)
+            .firstOrNull;
 
-        String insight;
-        IconData insightIcon;
-        Color insightColor;
-        if (weekendAvg > weekdayAvg * 1.5) {
-          insight = l10n.stats_weekendPeak(peakDay);
-          insightIcon = LucideIcons.calendarRange;
-          insightColor = FinanceColors.expenseColor(
-            Theme.of(context).brightness,
-          );
-        } else if (weekdayAvg > weekendAvg * 1.5) {
-          insight = l10n.stats_weekdayPeak(peakDay);
-          insightIcon = LucideIcons.briefcase;
-          insightColor = FinanceColors.statusWarning;
-        } else {
-          insight = l10n.stats_peakAndQuiet(peakDay, quietDay);
-          insightIcon = LucideIcons.chartBar;
-          insightColor = color.primary;
-        }
+        final insight = patternFact != null
+            ? NarrativeMapper.map(
+                patternFact,
+                l10n,
+                Theme.of(context).brightness,
+                color,
+              )
+            : null;
 
         return Column(
           children: [
@@ -388,7 +358,7 @@ class _StatisticsChartSectionState
                 BarChartData(
                   alignment: BarChartAlignment.spaceAround,
                   maxY: maxSpending * 1.2,
-                  barTouchData: BarTouchData(enabled: false),
+                  barTouchData: const BarTouchData(enabled: false),
                   titlesData: FlTitlesData(
                     show: true,
                     bottomTitles: AxisTitles(
@@ -407,9 +377,8 @@ class _StatisticsChartSectionState
                           return Text(
                             days[value.toInt()],
                             style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant.withValues(
-                                alpha: 0.6,
-                              ),
+                              color:
+                                  color.onSurfaceVariant.withValues(alpha: 0.6),
                             ),
                           );
                         },
@@ -443,7 +412,7 @@ class _StatisticsChartSectionState
                 BarChartData(
                   alignment: BarChartAlignment.spaceAround,
                   maxY: maxSpending * 1.2,
-                  barTouchData: BarTouchData(enabled: false),
+                  barTouchData: const BarTouchData(enabled: false),
                   titlesData: FlTitlesData(
                     show: true,
                     bottomTitles: AxisTitles(
@@ -462,9 +431,8 @@ class _StatisticsChartSectionState
                           return Text(
                             days[value.toInt()],
                             style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant.withValues(
-                                alpha: 0.6,
-                              ),
+                              color:
+                                  color.onSurfaceVariant.withValues(alpha: 0.6),
                             ),
                           );
                         },
@@ -485,37 +453,37 @@ class _StatisticsChartSectionState
                   barGroups: [
                     _buildBarGroup(
                       0,
-                      byDay['Mon']!,
+                      byDay['Mon'] ?? 0,
                       color.primary.withValues(alpha: 0.9),
                     ),
                     _buildBarGroup(
                       1,
-                      byDay['Tue']!,
+                      byDay['Tue'] ?? 0,
                       color.primary.withValues(alpha: 0.9),
                     ),
                     _buildBarGroup(
                       2,
-                      byDay['Wed']!,
+                      byDay['Wed'] ?? 0,
                       color.primary.withValues(alpha: 0.9),
                     ),
                     _buildBarGroup(
                       3,
-                      byDay['Thu']!,
+                      byDay['Thu'] ?? 0,
                       color.primary.withValues(alpha: 0.9),
                     ),
                     _buildBarGroup(
                       4,
-                      byDay['Fri']!,
+                      byDay['Fri'] ?? 0,
                       color.primary.withValues(alpha: 0.9),
                     ),
                     _buildBarGroup(
                       5,
-                      byDay['Sat']!,
+                      byDay['Sat'] ?? 0,
                       color.primary.withValues(alpha: 0.9),
                     ),
                     _buildBarGroup(
                       6,
-                      byDay['Sun']!,
+                      byDay['Sun'] ?? 0,
                       color.primary.withValues(alpha: 0.9),
                     ),
                   ],
@@ -524,15 +492,17 @@ class _StatisticsChartSectionState
                 curve: Curves.easeOutCubic,
               ),
             ),
-            SizedBox(height: spacing.elementGap),
-            _chartInsight(
-              insight,
-              insightIcon,
-              insightColor,
-              color,
-              textTheme,
-              spacing,
-            ),
+            if (insight != null) ...[
+              SizedBox(height: spacing.elementGap),
+              _chartInsight(
+                insight.text,
+                insight.icon,
+                insight.color,
+                color,
+                textTheme,
+                spacing,
+              ),
+            ],
           ],
         );
       },
@@ -752,14 +722,16 @@ class _MonthlyTrendChartState extends State<_MonthlyTrendChart>
                 return LineChartBarData(
                   spots: List.generate(
                     12,
-                    (j) => FlSpot(j.toDouble(), entry.value.value[j] * t),
+                    (j) => FlSpot(
+                      j.toDouble(),
+                      entry.value.value[j] * t,
+                    ),
                   ),
                   isCurved: true,
                   curveSmoothness: 0.4,
                   preventCurveOverShooting: true,
-                  color: colors[entry.key % colors.length].withValues(
-                    alpha: 0.9,
-                  ),
+                  color:
+                      colors[entry.key % colors.length].withValues(alpha: 0.9),
                   barWidth: 3,
                   dotData: const FlDotData(show: false),
                   belowBarData: BarAreaData(
@@ -768,12 +740,10 @@ class _MonthlyTrendChartState extends State<_MonthlyTrendChart>
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        colors[entry.key % colors.length].withValues(
-                          alpha: 0.15 * t,
-                        ),
-                        colors[entry.key % colors.length].withValues(
-                          alpha: 0.05 * t,
-                        ),
+                        colors[entry.key % colors.length]
+                            .withValues(alpha: 0.15 * t),
+                        colors[entry.key % colors.length]
+                            .withValues(alpha: 0.05 * t),
                       ],
                     ),
                   ),
@@ -982,10 +952,8 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
               showTitles: true,
               getTitlesWidget: (value, meta) {
                 final now = DateTime.now();
-                final month = DateTime(
-                  now.year,
-                  now.month - (11 - value.toInt()),
-                );
+                final month =
+                    DateTime(now.year, now.month - (11 - value.toInt()));
                 return Text(
                   safeDateFormat(
                     'MMM',
@@ -1020,8 +988,11 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
             barWidth: 3,
             dotData: FlDotData(
               show: true,
-              getDotPainter: (spot, _, __, ___) =>
-                  FlDotCirclePainter(radius: 3, color: c, strokeWidth: 0),
+              getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+                radius: 3,
+                color: c,
+                strokeWidth: 0,
+              ),
             ),
             belowBarData: BarAreaData(
               show: true,
@@ -1103,9 +1074,8 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
           return Center(
             child: Text(
               BuddyMessages.noTransactions,
-              style: textTheme.bodyMedium?.copyWith(
-                color: color.onSurfaceVariant,
-              ),
+              style:
+                  textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
             ),
           );
         }
@@ -1129,7 +1099,7 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
                     );
                   }
                   return BarTooltipItem(
-                    'Day ${group.x + 1}\n${segments.join('\n')}',
+                    'Day ${group.x + 1}\n${segments.join("\n")}',
                     textTheme.labelSmall!.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -1218,9 +1188,7 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
 
   String _monthLabel(DateTime now, int index) {
     final month = DateTime(now.year, now.month - (11 - index));
-    return safeDateFormat(
-      'MMMM yyyy',
-      AppLocalizations.of(context)!.localeName,
-    ).format(month);
+    return safeDateFormat('MMMM yyyy', AppLocalizations.of(context)!.localeName)
+        .format(month);
   }
 }

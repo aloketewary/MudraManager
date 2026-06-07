@@ -96,7 +96,9 @@ final netWorthHistoryProvider = FutureProvider.autoDispose((ref) async {
 
     final balances = await Future.wait(
       accounts.map(
-        (a) => ref.read(balanceHistoryServiceProvider).getBalanceOnDate(a.id, date),
+        (a) => ref
+            .read(balanceHistoryServiceProvider)
+            .getBalanceOnDate(a.id, date),
       ),
     );
 

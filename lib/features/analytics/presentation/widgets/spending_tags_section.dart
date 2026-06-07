@@ -8,9 +8,12 @@ import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/inline_error.dart';
 
 class SpendingTagsSection extends ConsumerWidget {
-  final String period;
+  final String periodKey;
 
-  const SpendingTagsSection({super.key, required this.period});
+  const SpendingTagsSection({
+    super.key,
+    required this.periodKey,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,7 +22,10 @@ class SpendingTagsSection extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
 
+    // Translate UI period to internal period string
+    final period = periodKey.contains('_') ? 'Month' : periodKey;
     final tagSpendingAsync = ref.watch(tagSpendingProvider(period));
+
     return tagSpendingAsync.when(
       data: (tagSpendings) {
         if (tagSpendings.isEmpty) return const SizedBox.shrink();

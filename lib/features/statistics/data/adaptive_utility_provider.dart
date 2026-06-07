@@ -1,9 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/models/budget.dart';
-import 'package:mudra_manager/core/db/models/goal.dart';
-import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
-import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/statistics/data/contextual_scorer.dart';
 import 'package:mudra_manager/features/statistics/data/financial_attention_layer.dart';
@@ -28,25 +23,16 @@ final adaptiveUtilityProvider =
 
   // Get recent data
   final last30Days = DateTime.now().subtract(const Duration(days: 30));
-  final transactions = await isar.transactions
-      .filter()
-      .dateGreaterThan(last30Days)
-      .findAll();
+  final transactions =
+      await isar.transactions.filter().dateGreaterThan(last30Days).findAll();
 
-  final budgets = await isar.budgets
-      .filter()
-      .isArchivedEqualTo(false)
-      .findAll();
+  final budgets =
+      await isar.budgets.filter().isArchivedEqualTo(false).findAll();
 
-  final goals = await isar.goals
-      .filter()
-      .isActiveEqualTo(true)
-      .findAll();
+  final goals = await isar.goals.filter().isActiveEqualTo(true).findAll();
 
-  final bills = await isar.recurringTransactions
-      .filter()
-      .isActiveEqualTo(true)
-      .findAll();
+  final bills =
+      await isar.recurringTransactions.filter().isActiveEqualTo(true).findAll();
 
   // Phase 2: Generate signals
   final signals = FinancialSignalGenerator().generateSignals(
@@ -73,7 +59,8 @@ final adaptiveUtilityProvider =
 });
 
 /// Track utility usage for adaptive learning
-final utilityTrackerProvider = Provider<UtilityTracker>((ref) => UtilityTracker());
+final utilityTrackerProvider =
+    Provider<UtilityTracker>((ref) => UtilityTracker());
 
 // ─── Usage tracking ──────────────────────────────────────────────────────────
 
@@ -91,7 +78,8 @@ class UtilityTracker {
   Future<void> trackTaskCompletion(String attentionItemId) async {
     final prefs = await SharedPreferences.getInstance();
     final completions = prefs.getStringList('completed_tasks') ?? [];
-    completions.add('${attentionItemId}_${DateTime.now().millisecondsSinceEpoch}');
+    completions
+        .add('${attentionItemId}_${DateTime.now().millisecondsSinceEpoch}');
     if (completions.length > 50) completions.removeAt(0);
     await prefs.setStringList('completed_tasks', completions);
   }

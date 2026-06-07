@@ -14,6 +14,7 @@ import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
+import 'package:mudra_manager/features/analytics/domain/narrative_fact.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/features/statistics/data/comparison_provider.dart';
 import 'package:mudra_manager/features/statistics/data/monthly_comparison_service.dart';
@@ -383,7 +384,7 @@ class _InsightCard extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final brightness = Theme.of(context).brightness;
-    final code = BaseCurrency.code;
+    final l10n = AppLocalizations.of(context)!;
 
     final isDown = data.isExpenseDown;
     final isFlat = data.isExpenseFlat;
@@ -392,39 +393,6 @@ class _InsightCard extends ConsumerWidget {
         : isDown
             ? FinanceColors.incomeColor(brightness)
             : FinanceColors.expenseColor(brightness);
-
-    // Build narrative lines
-    final lines = <String>[];
-
-    if (isFlat) {
-      lines.add('Spending is steady compared to $cmpName.');
-    } else {
-      final dir = isDown ? 'decreased' : 'increased';
-      final amt = formatCurrencyCompact(data.expenseVariance.abs(), code: code);
-      final pct = data.expenseVariancePct.abs().toStringAsFixed(0);
-      lines.add('Spending $dir $pct% ($amt).');
-    }
-
-    if (data.topIncrease != null && !isFlat) {
-      final pct = data.topIncrease!.contributionPct.abs().toStringAsFixed(0);
-      lines.add('${data.topIncrease!.name} contributed +$pct% of the change.');
-    }
-    if (data.topDecrease != null && !isFlat) {
-      final pct = data.topDecrease!.contributionPct.abs().toStringAsFixed(0);
-      lines.add('${data.topDecrease!.name} offset −$pct%.');
-    }
-
-    if (data.forecastEligible && !isFlat) {
-      if (data.projectedMonthEndSpend > data.compareExpense) {
-        final over = formatCurrencyCompact(
-          data.projectedMonthEndSpend - data.compareExpense,
-          code: code,
-        );
-        lines.add('At current pace, $over above $cmpName.');
-      } else {
-        lines.add('On track to finish below $cmpName.');
-      }
-    }
 
     final IconData icon;
     if (isFlat) {
@@ -455,12 +423,38 @@ class _InsightCard extends ConsumerWidget {
           ),
           SizedBox(width: spacing.elementGap),
           Expanded(
-            child: Text(
-              lines.join('\n'),
-              style: text.bodySmall?.copyWith(
-                color: color.onSurfaceVariant,
-                height: 1.5,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: data.facts.map((fact) {
+                final presentation =
+                    NarrativeMapper.map(fact, l10n, brightness, color);
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Icon(
+                          presentation.icon,
+                          size: 12,
+                          color: presentation.color,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          presentation.text,
+                          style: text.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ],
@@ -1020,8 +1014,10 @@ class _MetricRow extends StatelessWidget {
           style: text.bodySmall?.copyWith(color: color.onSurfaceVariant),
         ),
         const Spacer(),
-        Text(value,
-            style: text.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+        Text(
+          value,
+          style: text.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+        ),
         const SizedBox(width: 8),
         if (delta.abs() > 0.5)
           Text(

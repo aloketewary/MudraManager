@@ -48,7 +48,7 @@ class FinancialSignalGenerator {
             'limit': limit,
             'overspendPercent': ((spent / limit) - 1.0) * 100,
           },
-        ));
+        ),);
       }
 
       final daysPassed = DateTime.now().difference(budget.startDate).inDays;
@@ -72,7 +72,7 @@ class FinancialSignalGenerator {
               'projectedTotal': projected,
               'daysRemaining': daysRemaining,
             },
-          ));
+          ),);
         }
       }
     }
@@ -86,7 +86,7 @@ class FinancialSignalGenerator {
             t.isExpense &&
             !t.isTransfer &&
             t.date.isAfter(budget.startDate) &&
-            t.date.isBefore(budget.endDate))
+            t.date.isBefore(budget.endDate),)
         .fold<double>(0.0, (sum, t) => sum + t.amount);
   }
 
@@ -96,10 +96,12 @@ class FinancialSignalGenerator {
     for (final goal in goals) {
       if (goal.targetDate == null || goal.currentAmount <= 0) continue;
 
-      final monthsRemaining = goal.targetDate!.difference(DateTime.now()).inDays / 30.0;
+      final monthsRemaining =
+          goal.targetDate!.difference(DateTime.now()).inDays / 30.0;
       if (monthsRemaining <= 0) continue;
 
-      final totalMonths = goal.targetDate!.difference(goal.creationDate).inDays / 30.0;
+      final totalMonths =
+          goal.targetDate!.difference(goal.creationDate).inDays / 30.0;
       if (totalMonths <= 0) continue;
 
       final expectedProgress = 1.0 - (monthsRemaining / totalMonths);
@@ -113,7 +115,8 @@ class FinancialSignalGenerator {
         signals.add(FinancialSignal(
           type: SignalType.goalDelay,
           absoluteValue: neededPerMonth,
-          relativeToBaseline: expectedProgress / actualProgress.clamp(0.01, 1.0),
+          relativeToBaseline:
+              expectedProgress / actualProgress.clamp(0.01, 1.0),
           timestamp: DateTime.now(),
           metadata: {
             'goalId': goal.id,
@@ -122,7 +125,7 @@ class FinancialSignalGenerator {
             'expectedProgress': expectedProgress,
             'daysDelayed': ((expectedProgress - actualProgress) * 30).round(),
           },
-        ));
+        ),);
       }
     }
 
@@ -147,7 +150,7 @@ class FinancialSignalGenerator {
             'amount': bill.amount.abs(),
             'daysOverdue': daysUntilDue.abs(),
           },
-        ));
+        ),);
       } else if (daysUntilDue <= 2) {
         signals.add(FinancialSignal(
           type: SignalType.billDueSoon,
@@ -159,7 +162,7 @@ class FinancialSignalGenerator {
             'amount': bill.amount.abs(),
             'daysTillDue': daysUntilDue,
           },
-        ));
+        ),);
       }
     }
 

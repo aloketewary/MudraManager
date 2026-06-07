@@ -46,7 +46,15 @@ class FinancialHealthScreen extends ConsumerWidget {
             ),
             children: [
               // 1. Hero — Score + Verdict
-              _buildHero(health, scoreColor, color, textTheme, spacing, isDark, ctxt),
+              _buildHero(
+                health,
+                scoreColor,
+                color,
+                textTheme,
+                spacing,
+                isDark,
+                ctxt,
+              ),
               SizedBox(height: spacing.sectionGap),
 
               // 2. Key Insight (top 1)
@@ -81,8 +89,13 @@ class FinancialHealthScreen extends ConsumerWidget {
 
               // 5. Category Health
               categoryTrendsAsync.maybeWhen(
-                data: (trends) =>
-                    _buildCategoryHealth(trends, color, textTheme, spacing, ctxt),
+                data: (trends) => _buildCategoryHealth(
+                  trends,
+                  color,
+                  textTheme,
+                  spacing,
+                  ctxt,
+                ),
                 orElse: () => const SizedBox.shrink(),
               ),
               SizedBox(height: spacing.sectionGap),
@@ -103,8 +116,7 @@ class FinancialHealthScreen extends ConsumerWidget {
         loading: () => ListView(
           children: List.generate(3, (_) => const DashboardCardSkeleton()),
         ),
-        error: (_, __) =>
-            Center(child: Text(ctxt.health_errorLoading)),
+        error: (_, __) => Center(child: Text(ctxt.health_errorLoading)),
       ),
     );
   }
@@ -225,9 +237,19 @@ class FinancialHealthScreen extends ConsumerWidget {
 
     final components = [
       _Component(ctxt.health_savings, savingsPoints, 30, LucideIcons.piggyBank),
-      _Component(ctxt.health_spending, budgetPoints, 30, LucideIcons.shieldCheck),
+      _Component(
+        ctxt.health_spending,
+        budgetPoints,
+        30,
+        LucideIcons.shieldCheck,
+      ),
       _Component(ctxt.health_debt, debtPoints, 20, LucideIcons.landmark),
-      _Component(ctxt.health_emergency, emergencyPoints, 20, LucideIcons.heartPulse),
+      _Component(
+        ctxt.health_emergency,
+        emergencyPoints,
+        20,
+        LucideIcons.heartPulse,
+      ),
     ];
 
     return Card(

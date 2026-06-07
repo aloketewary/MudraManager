@@ -46,7 +46,9 @@ class InsightGridCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +119,9 @@ class InsightGridCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +129,11 @@ class InsightGridCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(LucideIcons.calendar, size: 16, color: color.primary),
+              Icon(
+                LucideIcons.calendar,
+                size: 16,
+                color: color.primary,
+              ),
               SizedBox(width: spacing.elementGap / 2),
               Text(
                 ctxt.statistics_dailyAverage,

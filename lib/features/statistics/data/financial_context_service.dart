@@ -36,7 +36,8 @@ class UserFinancialContext {
 
   bool get isStable => stabilityScore >= 0.7;
 
-  int get daysSinceLastSalary => DateTime.now().difference(lastSalaryCredit).inDays;
+  int get daysSinceLastSalary =>
+      DateTime.now().difference(lastSalaryCredit).inDays;
 
   bool get isContextFresh => DateTime.now().difference(lastUpdated).inDays < 7;
 
@@ -62,10 +63,8 @@ class FinancialContextService {
     final now = DateTime.now();
     final last90Days = now.subtract(const Duration(days: 90));
 
-    final transactions = await _isar.transactions
-        .filter()
-        .dateGreaterThan(last90Days)
-        .findAll();
+    final transactions =
+        await _isar.transactions.filter().dateGreaterThan(last90Days).findAll();
 
     final accounts = await _isar.accounts.where().findAll();
     final bills = await _isar.recurringTransactions
@@ -93,7 +92,8 @@ class FinancialContextService {
     if (income.isEmpty) return 0.0;
 
     final total = income.fold<double>(0.0, (s, t) => s + t.amount);
-    final days = DateTime.now().difference(income.last.date).inDays.clamp(1, 999);
+    final days =
+        DateTime.now().difference(income.last.date).inDays.clamp(1, 999);
     return (total / days) * 30;
   }
 
@@ -102,13 +102,16 @@ class FinancialContextService {
     if (expenses.isEmpty) return 0.0;
 
     final total = expenses.fold<double>(0.0, (s, t) => s + t.amount);
-    final days = DateTime.now().difference(expenses.last.date).inDays.clamp(1, 999);
+    final days =
+        DateTime.now().difference(expenses.last.date).inDays.clamp(1, 999);
     return (total / days) * 30;
   }
 
   double _liquidityBuffer(List<Account> accounts, double monthlyExpenses) {
     final liquid = accounts
-        .where((a) => a.accountType == AccountType.bank || a.accountType == AccountType.cash)
+        .where((a) =>
+            a.accountType == AccountType.bank ||
+            a.accountType == AccountType.cash,)
         .fold<double>(0.0, (s, a) => s + a.initialBalance);
 
     return monthlyExpenses > 0 ? (liquid / monthlyExpenses) * 30 : 0.0;
@@ -122,7 +125,11 @@ class FinancialContextService {
       final start = now.subtract(Duration(days: (w + 1) * 7));
       final end = now.subtract(Duration(days: w * 7));
       final total = txns
-          .where((t) => t.isExpense && !t.isTransfer && t.date.isAfter(start) && t.date.isBefore(end))
+          .where((t) =>
+              t.isExpense &&
+              !t.isTransfer &&
+              t.date.isAfter(start) &&
+              t.date.isBefore(end),)
           .fold<double>(0.0, (s, t) => s + t.amount);
       weekly.add(total);
     }
@@ -131,7 +138,9 @@ class FinancialContextService {
     final mean = weekly.reduce((a, b) => a + b) / weekly.length;
     if (mean == 0) return 0.0;
 
-    final variance = weekly.map((x) => (x - mean) * (x - mean)).reduce((a, b) => a + b) / weekly.length;
+    final variance =
+        weekly.map((x) => (x - mean) * (x - mean)).reduce((a, b) => a + b) /
+            weekly.length;
     // Simplified stddev approximation via sqrt(variance) ≈ variance^0.5
     // For coefficient of variation we just use variance/mean as a proxy
     return (variance / (mean * mean)).clamp(0.0, 1.0);
@@ -145,9 +154,12 @@ class FinancialContextService {
     return monthlyIncome > 0 ? (debt / monthlyIncome).clamp(0.0, 5.0) : 0.0;
   }
 
-  double _autopayCoverage(List<RecurringTransaction> bills, double monthlyExpenses) {
+  double _autopayCoverage(
+      List<RecurringTransaction> bills, double monthlyExpenses,) {
     final total = bills.fold<double>(0.0, (s, b) => s + b.amount.abs());
-    return monthlyExpenses > 0 ? (total / monthlyExpenses).clamp(0.0, 1.0) : 0.0;
+    return monthlyExpenses > 0
+        ? (total / monthlyExpenses).clamp(0.0, 1.0)
+        : 0.0;
   }
 
   DateTime _lastSalary(List<Transaction> txns) {
@@ -164,6 +176,8 @@ class FinancialContextService {
   bool _isSalaryLike(Transaction t) {
     final desc = t.description?.toLowerCase() ?? '';
     const keywords = ['salary', 'sal', 'wage', 'payroll', 'neft', 'imps'];
-    return keywords.any(desc.contains) && t.amount >= 15000 && t.amount <= 500000;
+    return keywords.any(desc.contains) &&
+        t.amount >= 15000 &&
+        t.amount <= 500000;
   }
 }

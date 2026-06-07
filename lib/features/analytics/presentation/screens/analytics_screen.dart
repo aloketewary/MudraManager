@@ -241,85 +241,162 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
             const SizedBox(height: 16),
 
-
             // Cash Flow Forecast
             forecastAsync.when(
               data: (forecast) => GestureDetector(
                 onTap: () => context.push(AppRoutes.cashFlowForecast),
                 child: Card(
-                elevation: 0,
-                color: color.surfaceContainerLow,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
-                  side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(children: [
-                        Icon(LucideIcons.trendingUp, color: color.primary, size: 24),
-                        const SizedBox(width: 10),
-                        Text(AppLocalizations.of(context)!.analytics_cashFlowForecast, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                      ],),
-                      const SizedBox(height: 16),
-                      // Current month projection
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: forecast.projectedNet >= 0 ? FinanceColors.incomeColor(Theme.of(context).brightness).withValues(alpha: 0.08) : FinanceColors.expenseColor(Theme.of(context).brightness).withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
-                        ),
-                        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          Text(AppLocalizations.of(context)!.analytics_thisMonthProjected, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
-                          CurrencyText(
-                            amount: GuestModeUtil.applyGuestMode(forecast.projectedNet, isGuestMode),
-                            style: textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: forecast.projectedNet >= 0 ? FinanceColors.incomeColor(Theme.of(context).brightness) : FinanceColors.expenseColor(Theme.of(context).brightness),
-                            ),
-                          ),
-                        ],),
-                      ),
-                      const SizedBox(height: 12),
-                      // Next 3 months
-                      ...forecast.forecastMonths.map((m) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          Text(DateFormat('MMM yyyy').format(m.month), style: textTheme.bodyMedium),
-                          Row(children: [
-                            CurrencyText(
-                              amount: GuestModeUtil.applyGuestMode(m.net, isGuestMode),
-                              style: textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: m.isPositive ? FinanceColors.incomeColor(Theme.of(context).brightness) : FinanceColors.expenseColor(Theme.of(context).brightness),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
+                  elevation: 0,
+                  color: color.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(Tone.current.borderRadius),
+                    side: BorderSide(
+                      color: color.outlineVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
                             Icon(
-                              m.isPositive ? LucideIcons.trendingUp : LucideIcons.trendingDown,
-                              size: 16,
-                              color: m.isPositive ? FinanceColors.incomeColor(Theme.of(context).brightness) : FinanceColors.expenseColor(Theme.of(context).brightness),
+                              LucideIcons.trendingUp,
+                              color: color.primary,
+                              size: 24,
                             ),
-                          ],),
-                        ],),
-                      ),),
-                      const SizedBox(height: 12),
-                      // Summary
-                      Center(
-                        child: Text(
-                          forecast.isPositive ? AppLocalizations.of(context)!.analytics_savingOnAverage : AppLocalizations.of(context)!.analytics_spendingExceedsIncome,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: forecast.isPositive ? FinanceColors.incomeColor(Theme.of(context).brightness) : FinanceColors.expenseColor(Theme.of(context).brightness),
-                            fontStyle: FontStyle.italic,
+                            const SizedBox(width: 10),
+                            Text(
+                              AppLocalizations.of(context)!
+                                  .analytics_cashFlowForecast,
+                              style: textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Current month projection
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: forecast.projectedNet >= 0
+                                ? FinanceColors.incomeColor(
+                                    Theme.of(context).brightness,
+                                  ).withValues(alpha: 0.08)
+                                : FinanceColors.expenseColor(
+                                    Theme.of(context).brightness,
+                                  ).withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(
+                              Tone.current.borderRadius,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context)!
+                                    .analytics_thisMonthProjected,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurfaceVariant,
+                                ),
+                              ),
+                              CurrencyText(
+                                amount: GuestModeUtil.applyGuestMode(
+                                  forecast.projectedNet,
+                                  isGuestMode,
+                                ),
+                                style: textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: forecast.projectedNet >= 0
+                                      ? FinanceColors.incomeColor(
+                                          Theme.of(context).brightness,
+                                        )
+                                      : FinanceColors.expenseColor(
+                                          Theme.of(context).brightness,
+                                        ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        // Next 3 months
+                        ...forecast.forecastMonths.map(
+                          (m) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  DateFormat('MMM yyyy').format(m.month),
+                                  style: textTheme.bodyMedium,
+                                ),
+                                Row(
+                                  children: [
+                                    CurrencyText(
+                                      amount: GuestModeUtil.applyGuestMode(
+                                        m.net,
+                                        isGuestMode,
+                                      ),
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: m.isPositive
+                                            ? FinanceColors.incomeColor(
+                                                Theme.of(context).brightness,
+                                              )
+                                            : FinanceColors.expenseColor(
+                                                Theme.of(context).brightness,
+                                              ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      m.isPositive
+                                          ? LucideIcons.trendingUp
+                                          : LucideIcons.trendingDown,
+                                      size: 16,
+                                      color: m.isPositive
+                                          ? FinanceColors.incomeColor(
+                                              Theme.of(context).brightness,
+                                            )
+                                          : FinanceColors.expenseColor(
+                                              Theme.of(context).brightness,
+                                            ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Summary
+                        Center(
+                          child: Text(
+                            forecast.isPositive
+                                ? AppLocalizations.of(context)!
+                                    .analytics_savingOnAverage
+                                : AppLocalizations.of(context)!
+                                    .analytics_spendingExceedsIncome,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: forecast.isPositive
+                                  ? FinanceColors.incomeColor(
+                                      Theme.of(context).brightness,
+                                    )
+                                  : FinanceColors.expenseColor(
+                                      Theme.of(context).brightness,
+                                    ),
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),),
+              ),
               loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const InlineError(),
             ),
@@ -328,7 +405,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
             // Tax Estimation
             taxAsync.when(
-              data: (tax) => _buildTaxCard(tax, color, textTheme, isGuestMode, context),
+              data: (tax) =>
+                  _buildTaxCard(tax, color, textTheme, isGuestMode, context),
               loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const InlineError(),
             ),
@@ -344,104 +422,110 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 return GestureDetector(
                   onTap: () => context.push(AppRoutes.spendingTrends),
                   child: Card(
-                  elevation: 0,
-                  color: color.surfaceContainerLow,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              LucideIcons.layoutGrid,
-                              color: color.primary,
-                              size: 28,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              AppLocalizations.of(context)!
-                                  .analytics_categoryTrends,
-                              style: textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
+                    elevation: 0,
+                    color: color.surfaceContainerLow,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                LucideIcons.layoutGrid,
+                                color: color.primary,
+                                size: 28,
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        ...sortedTrends.take(5).map(
-                              (trend) => Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
+                              const SizedBox(width: 12),
+                              Text(
+                                AppLocalizations.of(context)!
+                                    .analytics_categoryTrends,
+                                style: textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          trend.categoryName,
-                                          style: textTheme.titleSmall?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            CurrencyText(
-                                              amount:
-                                                  GuestModeUtil.applyGuestMode(
-                                                trend.thisMonth,
-                                                isGuestMode,
-                                              ),
-                                              style: textTheme.titleSmall,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          ...sortedTrends.take(5).map(
+                                (trend) => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            trend.categoryName,
+                                            style:
+                                                textTheme.titleSmall?.copyWith(
+                                              fontWeight: FontWeight.bold,
                                             ),
-                                            if (trend.changePercent != 0) ...[
-                                              const SizedBox(width: 8),
-                                              Icon(
-                                                trend.changePercent > 0
-                                                    ? LucideIcons.arrowUp
-                                                    : LucideIcons.arrowDown,
-                                                size: 16,
-                                                color: trend.changePercent > 0
-                                                    ? FinanceColors.statusDanger
-                                                    : FinanceColors.statusGood,
+                                          ),
+                                          Row(
+                                            children: [
+                                              CurrencyText(
+                                                amount: GuestModeUtil
+                                                    .applyGuestMode(
+                                                  trend.thisMonth,
+                                                  isGuestMode,
+                                                ),
+                                                style: textTheme.titleSmall,
                                               ),
-                                              Text(
-                                                '${trend.changePercent.abs().toStringAsFixed(0)}%',
-                                                style: textTheme.bodySmall
-                                                    ?.copyWith(
+                                              if (trend.changePercent != 0) ...[
+                                                const SizedBox(width: 8),
+                                                Icon(
+                                                  trend.changePercent > 0
+                                                      ? LucideIcons.arrowUp
+                                                      : LucideIcons.arrowDown,
+                                                  size: 16,
                                                   color: trend.changePercent > 0
                                                       ? FinanceColors
                                                           .statusDanger
                                                       : FinanceColors
                                                           .statusGood,
                                                 ),
-                                              ),
+                                                Text(
+                                                  '${trend.changePercent.abs().toStringAsFixed(0)}%',
+                                                  style: textTheme.bodySmall
+                                                      ?.copyWith(
+                                                    color:
+                                                        trend.changePercent > 0
+                                                            ? FinanceColors
+                                                                .statusDanger
+                                                            : FinanceColors
+                                                                .statusGood,
+                                                  ),
+                                                ),
+                                              ],
                                             ],
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    LinearProgressIndicator(
-                                      semanticsLabel: 'Progress',
-                                      value: (trend.thisMonth /
-                                              sortedTrends.first.thisMonth)
-                                          .clamp(0.0, 1.0),
-                                      backgroundColor:
-                                          color.surfaceContainerHighest,
-                                      color: color.primary,
-                                    ),
-                                  ],
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      LinearProgressIndicator(
+                                        semanticsLabel: 'Progress',
+                                        value: (trend.thisMonth /
+                                                sortedTrends.first.thisMonth)
+                                            .clamp(0.0, 1.0),
+                                        backgroundColor:
+                                            color.surfaceContainerHighest,
+                                        color: color.primary,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),);
+                );
               },
               loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const InlineError(),
@@ -604,9 +688,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   ) {
     final brightness = Theme.of(context).brightness;
     final ctxt = AppLocalizations.of(context)!;
-    final taxColor = tax.isZeroTax
-        ? FinanceColors.goodColor(brightness)
-        : color.onSurface;
+    final taxColor =
+        tax.isZeroTax ? FinanceColors.goodColor(brightness) : color.onSurface;
 
     return GestureDetector(
       onTap: () => context.push(AppRoutes.taxEstimation),

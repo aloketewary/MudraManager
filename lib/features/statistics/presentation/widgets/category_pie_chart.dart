@@ -29,7 +29,11 @@ class CategoryPieChart extends StatelessWidget {
     }).toList();
 
     return PieChart(
-      PieChartData(sections: sections, sectionsSpace: 2, centerSpaceRadius: 40),
+      PieChartData(
+        sections: sections,
+        sectionsSpace: 2,
+        centerSpaceRadius: 40,
+      ),
     );
   }
 }

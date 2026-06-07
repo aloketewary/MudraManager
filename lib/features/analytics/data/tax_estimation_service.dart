@@ -1,9 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/extensions/transaction_links.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
-import 'package:mudra_manager/core/db/models/transaction.dart';
 
 // ─── Confidence & Assumptions ───────────────────────────────────────────────
 
@@ -268,12 +265,14 @@ class TaxEstimationService {
       if (remaining <= 0) break;
       final taxable = remaining.clamp(0, bracket.limit);
       final tax = taxable * bracket.rate;
-      slabs.add(TaxSlab(
-        label: bracket.label,
-        rate: bracket.rate * 100,
-        taxableAmount: taxable.toDouble(),
-        tax: tax,
-      ));
+      slabs.add(
+        TaxSlab(
+          label: bracket.label,
+          rate: bracket.rate * 100,
+          taxableAmount: taxable.toDouble(),
+          tax: tax,
+        ),
+      );
       remaining -= taxable;
     }
 
@@ -299,12 +298,14 @@ class TaxEstimationService {
       if (remaining <= 0) break;
       final taxable = remaining.clamp(0, bracket.limit);
       final tax = taxable * bracket.rate;
-      slabs.add(TaxSlab(
-        label: bracket.label,
-        rate: bracket.rate * 100,
-        taxableAmount: taxable.toDouble(),
-        tax: tax,
-      ));
+      slabs.add(
+        TaxSlab(
+          label: bracket.label,
+          rate: bracket.rate * 100,
+          taxableAmount: taxable.toDouble(),
+          tax: tax,
+        ),
+      );
       remaining -= taxable;
     }
 

@@ -30,11 +30,15 @@ class FinancialBehaviorSection extends ConsumerWidget {
         SizedBox(height: spacing.elementGap),
 
         // FINANCIAL HEALTH
-        const FinancialHealthCard(globalPadding: 0),
+        const FinancialHealthCard(
+          globalPadding: 0,
+        ),
         SizedBox(height: spacing.elementGap),
 
         // SPENDING PERSONALITY
-        const SpendingPersonalityCard(globalPadding: 0),
+        const SpendingPersonalityCard(
+          globalPadding: 0,
+        ),
       ],
     );
   }
@@ -72,15 +76,13 @@ class FinancialBehaviorSection extends ConsumerWidget {
                   children: [
                     Text(
                       l10n.analytics_spendingTrendsTitle,
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     Text(
                       l10n.utility_spendingTrendsSubtitle,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onSurfaceVariant,
-                      ),
+                      style: textTheme.bodySmall
+                          ?.copyWith(color: color.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -130,15 +132,13 @@ class FinancialBehaviorSection extends ConsumerWidget {
                   children: [
                     Text(
                       l10n.analytics_cashFlowForecast,
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     Text(
                       l10n.utility_cashFlowSubtitle,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onSurfaceVariant,
-                      ),
+                      style: textTheme.bodySmall
+                          ?.copyWith(color: color.onSurfaceVariant),
                     ),
                   ],
                 ),
