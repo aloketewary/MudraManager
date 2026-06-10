@@ -393,11 +393,13 @@ No immediate user value, but prevents future pain.
 | # | Work | Status |
 |---|------|--------|
 | 1 | **TonePack ↔ SkinPack split** | Not started |
-| 2 | Dashboard engine isolation (Phase 8) | Not started |
-| 3 | AppScreenState authority enforcement | Enforced in new screens |
-| 4 | Remove duplicate state computation (old providers) | Phase 6 partial |
-| 5 | Feature flag cleanup after cutover | Not started |
-| 6 | Tone simplification (3 tones: Professional, Calm, Minimal) | After split |
+| 2 | **Analytics Insight Engine extraction** | Not started |
+| 3 | Dashboard engine isolation (Phase 8) | Not started |
+| 4 | AppScreenState authority enforcement | Enforced in new screens |
+| 5 | Remove duplicate state computation (old providers) | Phase 6 partial |
+| 6 | Feature flag cleanup after cutover | Not started |
+| 7 | Tone simplification (3 tones: Professional, Calm, Minimal) | After split |
+| 8 | **Sealed AnalyticsPeriod** (after #2) | Not started |
 
 ### Tier 3 — Optimization / Polish (last)
 
@@ -408,6 +410,121 @@ No immediate user value, but prevents future pain.
 | Animation system improvements |
 | Advanced customization |
 | Micro-interactions |
+
+---
+
+## ANALYTICS INSIGHT ENGINE — Extraction Task
+
+### Goal
+
+Extract analytics insight generation from providers into a testable domain/application layer with rule-based extensibility.
+
+### Success Criteria
+
+- [ ] Providers contain orchestration only (no business logic in provider bodies)
+- [ ] Analytics insight generation lives in `AnalyticsInsightEngine`
+- [ ] New insights can be added by: creating an `InsightRule`, registering it, adding mapper text
+- [ ] No Riverpod imports in domain layer
+- [ ] No Flutter imports in domain/application layers
+- [ ] Existing UI behavior unchanged
+- [ ] Existing analytics tests continue to pass
+- [ ] New unit tests cover engine and rules directly
+- [ ] Characterization test proves behavior parity before/after
+
+### Scope
+
+#### Included
+
+- `InsightRule` abstract class
+- `InsightRuleId` enum (for future suppression/dismissal/telemetry)
+- `AnalyticsInsightEngine` (takes rules, evaluates aggregates, returns facts)
+- Concrete rules: `TopCategoryRule`, `NewCategoryRule`, `CategoryStoppedRule`, `SpendingPatternRule`, `SpendingForecastRule`
+- Migration of logic from `analyticsNarrativeFactsProvider` into rules
+- Unit tests for engine + each rule
+- Characterization test (same aggregates → same facts before/after)
+
+#### Excluded (separate tasks)
+
+- `AnalyticsPeriod` sealed class (do after engine extraction)
+- DTO nesting (`AnalyticsAggregates` split into sub-models)
+- `.select()` optimization (profile first)
+- Confidence scoring (premature until signals are better understood)
+- NarrativeMapper changes (presentation layer, unaffected)
+
+### Implementation Order
+
+1. Create characterization test against current provider output
+2. Create `analytics/domain/insight_rule.dart` — `InsightRule` + `InsightRuleId`
+3. Create concrete rules (one class per existing if-block in provider)
+4. Create `analytics/application/analytics_insight_engine.dart`
+5. Replace `analyticsNarrativeFactsProvider` body with `engine.generate(aggregates)`
+6. Verify characterization test still passes
+7. Add unit tests per rule
+
+### Target File Structure
+
+```
+features/analytics/
+├── domain/
+│   ├── narrative_fact.dart          (exists)
+│   ├── insight_rule.dart            (NEW — InsightRule + InsightRuleId)
+│   └── analytics_aggregates.dart    (move from data/)
+│
+├── application/
+│   └── analytics_insight_engine.dart (NEW)
+│
+├── data/
+│   ├── analytics_provider.dart      (simplified — orchestration only)
+│   ├── analytics_aggregation_service.dart (unchanged)
+│   └── ...
+│
+└── presentation/
+    └── widgets/                     (unchanged)
+```
+
+### Rule Abstraction
+
+```dart
+enum InsightRuleId {
+  topCategory,
+  newCategory,
+  categoryStopped,
+  weekendPeak,
+  weekdayPeak,
+  spendingForecast,
+}
+
+abstract class InsightRule {
+  InsightRuleId get id;
+  NarrativeFact? evaluate(AnalyticsAggregates aggregates, {String? periodKey});
+}
+```
+
+### Engine Design
+
+```dart
+class AnalyticsInsightEngine {
+  const AnalyticsInsightEngine(this._rules);
+  final List<InsightRule> _rules;
+
+  List<NarrativeFact> generate(AnalyticsAggregates aggregates, {String? periodKey}) {
+    return _rules
+        .map((r) => r.evaluate(aggregates, periodKey: periodKey))
+        .whereType<NarrativeFact>()
+        .toList();
+  }
+}
+```
+
+### Gating Philosophy
+
+Rules return `null` when data is insufficient — no pseudo-confidence scores. Ternary: no data → null, enough data → fact, strong signal → fact. Same pattern as budget forecast gating (`daysPassed >= 7 && totalSpent >= 20%`).
+
+### Connection to Existing Systems
+
+- `InsightRuleId` maps to `BriefingTrigger` when insights surface on dashboard
+- Suppression engine already suppresses by ID + time + magnitude — facts with rule IDs slot in naturally
+- `NarrativeMapper` (presentation) is unaffected — it maps facts to UI regardless of where facts originated
 
 ---
 
