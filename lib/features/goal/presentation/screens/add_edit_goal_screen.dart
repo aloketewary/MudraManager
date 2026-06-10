@@ -132,10 +132,12 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
     final router = GoRouter.of(context);
     final goal = widget.goal ?? Goal();
     goal.name = _nameController.text.trim();
-    goal.targetAmount = double.tryParse(_amountController.text.trim().replaceAll(',', '')) ?? 0;
+    goal.targetAmount =
+        double.tryParse(_amountController.text.trim().replaceAll(',', '')) ?? 0;
     goal.currentAmount = double.tryParse(
-      _currentAmountController.text.trim().replaceAll(',', ''),
-    ) ?? 0;
+          _currentAmountController.text.trim().replaceAll(',', ''),
+        ) ??
+        0;
     goal.targetDate = _targetDate;
     goal.iconName = _selectedIcon;
     goal.colorValue = _selectedColor.toARGB32();
@@ -174,9 +176,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
       backgroundColor: color.surface,
       appBar: AppBar(
         title: Text(
-          _isEditing
-              ? ctxt.goal_editGoalTitle
-              : ctxt.goal_newGoalTitle,
+          _isEditing ? ctxt.goal_editGoalTitle : ctxt.goal_newGoalTitle,
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
@@ -193,9 +193,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                     ),
                   )
                 : Text(
-                    _isEditing
-                        ? ctxt.goal_updateGoal
-                        : ctxt.goal_createGoal,
+                    _isEditing ? ctxt.goal_updateGoal : ctxt.goal_createGoal,
                     style: textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -607,7 +605,9 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                     ),
                   ),
             style: textTheme.bodySmall?.copyWith(
-              color: reachedGoal ? FinanceColors.statusGood : color.onSurfaceVariant,
+              color: reachedGoal
+                  ? FinanceColors.statusGood
+                  : color.onSurfaceVariant,
               fontWeight: reachedGoal ? FontWeight.w600 : FontWeight.normal,
             ),
           ),

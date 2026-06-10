@@ -161,9 +161,7 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
                 ),
               ),
               validator: (v) =>
-                  v == null || v.trim().isEmpty
-                      ? ctxt.goal_giveGoalName
-                      : null,
+                  v == null || v.trim().isEmpty ? ctxt.goal_giveGoalName : null,
             ),
             SizedBox(height: spacing.sectionGap),
 
@@ -206,8 +204,9 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
               ),
               validator: (v) {
                 final val = double.tryParse(
-                  v?.trim().replaceAll(',', '') ?? '',
-                ) ?? 0;
+                      v?.trim().replaceAll(',', '') ?? '',
+                    ) ??
+                    0;
                 return val <= 0 ? ctxt.goal_enterValidTarget : null;
               },
             ),
@@ -240,8 +239,9 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
               ),
               validator: (v) {
                 final current = double.tryParse(
-                  v?.trim().replaceAll(',', '') ?? '',
-                ) ?? 0;
+                      v?.trim().replaceAll(',', '') ?? '',
+                    ) ??
+                    0;
                 if (current > 0 && _target > 0 && current > _target) {
                   return ctxt.goal_currentExceedsTarget;
                 }
@@ -311,8 +311,7 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
                   style: textTheme.bodySmall?.copyWith(
                     fontWeight:
                         isSelected ? FontWeight.w600 : FontWeight.normal,
-                    color:
-                        isSelected ? color.primary : color.onSurfaceVariant,
+                    color: isSelected ? color.primary : color.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -354,9 +353,8 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
             Icon(
               LucideIcons.calendar,
               size: spacing.iconSM,
-              color: _targetDate != null
-                  ? color.primary
-                  : color.onSurfaceVariant,
+              color:
+                  _targetDate != null ? color.primary : color.onSurfaceVariant,
             ),
             SizedBox(width: spacing.elementGap),
             Expanded(
@@ -466,8 +464,18 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
 
   String _monthName(int month) {
     const names = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return names[month - 1];
   }

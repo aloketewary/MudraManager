@@ -70,8 +70,7 @@ class GoalScreen extends ConsumerWidget {
     if (goal.progressPercent >= 1.0) return false;
     final gap = _paceGap(goal);
     if (gap < 0) return true;
-    final daysLeft =
-        goal.targetDate?.difference(DateTime.now()).inDays ?? 9999;
+    final daysLeft = goal.targetDate?.difference(DateTime.now()).inDays ?? 9999;
     if (daysLeft < 90 && daysLeft > 0) return true;
     final health = GoalHealth.compute(goal);
     if (health.predictedDate != null &&
@@ -98,8 +97,7 @@ class GoalScreen extends ConsumerWidget {
   int _sortPriority(Goal goal) {
     if (goal.progressPercent >= 1.0) return 100;
     final gap = _paceGap(goal);
-    final daysLeft =
-        goal.targetDate?.difference(DateTime.now()).inDays ?? 9999;
+    final daysLeft = goal.targetDate?.difference(DateTime.now()).inDays ?? 9999;
 
     // Behind schedule
     if (gap < 0) return 0;
@@ -159,8 +157,7 @@ class GoalScreen extends ConsumerWidget {
               goals.where((g) => g.progressPercent >= 1.0).toList();
           final totalSaved =
               activeGoals.fold(0.0, (sum, g) => sum + g.currentAmount);
-          final attentionCount =
-              activeGoals.where(_needsAttention).length;
+          final attentionCount = activeGoals.where(_needsAttention).length;
 
           // Priority sort
           activeGoals.sort(
@@ -488,8 +485,7 @@ class GoalScreen extends ConsumerWidget {
                       color: goalColor.withValues(alpha: 0.3),
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(spacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     ),
                     padding: EdgeInsets.symmetric(
                       vertical: spacing.elementGapMin,

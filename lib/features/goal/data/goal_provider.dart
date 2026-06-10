@@ -94,7 +94,8 @@ class GoalService {
       (a, b) => a.progressPercent > b.progressPercent ? a : b,
     );
     final pct = (topGoal.progressPercent * 100).toStringAsFixed(0);
-    final summary = Tone.appL10n?.notif_goalStatusBody(goals.length, topGoal.name, pct) ??
+    final summary = Tone.appL10n
+            ?.notif_goalStatusBody(goals.length, topGoal.name, pct) ??
         'You have ${goals.length} active goals. ${topGoal.name} is $pct% complete!';
 
     await NotificationService.scheduleMonthlyGoalReminder(summary);

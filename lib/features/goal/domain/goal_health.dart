@@ -47,7 +47,8 @@ class GoalHealth {
     }
 
     final dailyNeeded = remaining / daysLeft;
-    final monthlyNeeded = remaining / (daysLeft / 30).clamp(0.1, double.infinity);
+    final monthlyNeeded =
+        remaining / (daysLeft / 30).clamp(0.1, double.infinity);
 
     // Calculate expected progress based on elapsed time
     final totalDays = goal.targetDate!.difference(goal.creationDate).inDays;
@@ -151,6 +152,18 @@ class GoalHealth {
     return null;
   }
 
+  /// Average monthly contribution from actual deposit history.
+  static double avgMonthlyContribution(Goal goal) {
+    final contributions = goal.contributions;
+    if (contributions.isEmpty) return 0;
+    final total = contributions.fold(0.0, (sum, c) => sum + c.amount);
+    final first =
+        contributions.reduce((a, b) => a.date.isBefore(b.date) ? a : b).date;
+    final months = DateTime.now().difference(first).inDays / 30;
+    if (months < 1) return total;
+    return total / months;
+  }
+
   /// Contribution this month from the goal's history.
   static double contributionThisMonth(Goal goal) {
     final now = DateTime.now();
@@ -159,8 +172,9 @@ class GoalHealth {
         .fold(0.0, (sum, c) => sum + c.amount);
   }
 
-  String get predictedDateFormatted =>
-      predictedDate != null ? DateFormat('dd MMM yyyy').format(predictedDate!) : '';
+  String get predictedDateFormatted => predictedDate != null
+      ? DateFormat('dd MMM yyyy').format(predictedDate!)
+      : '';
 
   String get milestoneMessage {
     return ''; // Handled by tone system

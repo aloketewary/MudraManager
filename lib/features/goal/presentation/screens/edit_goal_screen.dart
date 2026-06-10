@@ -45,7 +45,8 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     _goalType = widget.goal.goalType;
     _targetDate = widget.goal.targetDate;
     _targetAmount = widget.goal.targetAmount;
-    _targetController = TextEditingController(text: _targetAmount.toStringAsFixed(0));
+    _targetController =
+        TextEditingController(text: _targetAmount.toStringAsFixed(0));
   }
 
   @override
@@ -521,8 +522,8 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
                 amount: widget.goal.currentAmount,
                 fixedLength: 0,
                 compact: false,
-                style:
-                    textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                style: textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),
@@ -566,8 +567,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
                 },
                 child: Text(
                   ctxt.goal_viewHistory,
-                  style: textTheme.labelSmall
-                      ?.copyWith(color: color.primary),
+                  style: textTheme.labelSmall?.copyWith(color: color.primary),
                 ),
               ),
             ),
@@ -642,7 +642,8 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
                     ),
                     Text(
                       ctxt.goal_basedOnAvg(
-                        formatCurrency(pace, code: widget.goal.currencyCode, decimals: 0),
+                        formatCurrency(pace,
+                            code: widget.goal.currencyCode, decimals: 0),
                       ),
                       style: textTheme.labelSmall?.copyWith(
                         color: color.onSurfaceVariant.withValues(alpha: 0.7),
