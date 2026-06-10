@@ -1,4 +1,5 @@
 import 'package:mudra_manager/features/analytics/data/analytics_aggregation_service.dart';
+import 'package:mudra_manager/features/analytics/domain/analytics_period.dart';
 import 'package:mudra_manager/features/analytics/domain/narrative_fact.dart';
 
 /// Identifies each rule for suppression, dismissal, and telemetry.
@@ -19,9 +20,8 @@ abstract class InsightRule {
   InsightRuleId get id;
 
   /// Evaluate aggregates and optionally produce a fact.
-  /// [periodKey] provides context for period-gated rules.
   NarrativeFact? evaluate(
     AnalyticsAggregates aggregates, {
-    String? periodKey,
+    AnalyticsPeriod? period,
   });
 }

@@ -9,6 +9,7 @@ import 'package:mudra_manager/features/analytics/data/tax_opportunity_service.da
 import 'package:mudra_manager/features/analytics/data/tax_deduction_provider.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_aggregation_service.dart';
+import 'package:mudra_manager/features/analytics/domain/analytics_period.dart';
 import 'package:mudra_manager/features/analytics/domain/narrative_fact.dart';
 import 'package:mudra_manager/features/analytics/application/analytics_insight_engine.dart';
 
@@ -30,6 +31,7 @@ final analyticsTransactionsProvider =
 });
 
 /// Primary computation root for analytics.
+/// Family key is [AnalyticsPeriod.key] string — typed period resolves dates.
 final analyticsAggregatesProvider =
     FutureProvider.autoDispose.family<AnalyticsAggregates, String>((
   ref,
@@ -37,40 +39,14 @@ final analyticsAggregatesProvider =
 ) async {
   final transactions = await ref.watch(analyticsTransactionsProvider.future);
   final service = ref.watch(analyticsAggregationServiceProvider);
-
-  final now = DateTime.now();
-  DateTime start;
-  DateTime end = now;
-
-  if (periodKey.contains('_')) {
-    final parts = periodKey.split('_');
-    start = DateTime.fromMillisecondsSinceEpoch(int.parse(parts[0]));
-    final endDate = DateTime.fromMillisecondsSinceEpoch(int.parse(parts[1]));
-    end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
-  } else {
-    switch (periodKey) {
-      case 'Today':
-        start = DateTime(now.year, now.month, now.day);
-        break;
-      case 'Week':
-        start = now.subtract(const Duration(days: 6));
-        break;
-      case 'Month':
-        start = DateTime(now.year, now.month, 1);
-        break;
-      case 'Year':
-        start = DateTime(now.year, 1, 1);
-        break;
-      default:
-        start = DateTime(2000);
-    }
-  }
+  final period = AnalyticsPeriodParser.fromKey(periodKey);
+  final (:start, :end) = period.resolve();
 
   return service.compute(
     transactions: transactions,
     start: start,
     end: end,
-    periodType: periodKey.contains('_') ? 'Custom' : periodKey,
+    periodType: period.periodType,
   );
 });
 
@@ -100,9 +76,10 @@ final analyticsNarrativeFactsProvider =
 ) async {
   final aggregates =
       await ref.watch(analyticsAggregatesProvider(periodKey).future);
+  final period = AnalyticsPeriodParser.fromKey(periodKey);
   return AnalyticsInsightEngine.standard.generate(
     aggregates,
-    periodKey: periodKey,
+    period: period,
   );
 });
 

@@ -1,4 +1,5 @@
 import 'package:mudra_manager/features/analytics/data/analytics_aggregation_service.dart';
+import 'package:mudra_manager/features/analytics/domain/analytics_period.dart';
 import 'package:mudra_manager/features/analytics/domain/insight_rule.dart';
 import 'package:mudra_manager/features/analytics/domain/narrative_fact.dart';
 
@@ -14,7 +15,7 @@ class TopCategoryRule implements InsightRule {
   @override
   NarrativeFact? evaluate(
     AnalyticsAggregates aggregates, {
-    String? periodKey,
+    AnalyticsPeriod? period,
   }) {
     if (aggregates.categoryBreakdown.isEmpty) return null;
     if (aggregates.totalExpense <= 0) return null;
@@ -44,9 +45,9 @@ class NewCategoryRule implements InsightRule {
   @override
   NarrativeFact? evaluate(
     AnalyticsAggregates aggregates, {
-    String? periodKey,
+    AnalyticsPeriod? period,
   }) {
-    if (periodKey != 'Month') return null;
+    if (period?.isMonthly != true) return null;
 
     final trends = aggregates.monthlyExpenseTrends;
     for (final entry in trends.entries) {
@@ -78,9 +79,9 @@ class CategoryStoppedRule implements InsightRule {
   @override
   NarrativeFact? evaluate(
     AnalyticsAggregates aggregates, {
-    String? periodKey,
+    AnalyticsPeriod? period,
   }) {
-    if (periodKey != 'Month') return null;
+    if (period?.isMonthly != true) return null;
 
     final trends = aggregates.monthlyExpenseTrends;
     for (final entry in trends.entries) {
@@ -112,7 +113,7 @@ class SpendingPatternRule implements InsightRule {
   @override
   NarrativeFact? evaluate(
     AnalyticsAggregates aggregates, {
-    String? periodKey,
+    AnalyticsPeriod? period,
   }) {
     final byDay = aggregates.spendingByDayOfWeek;
     if (!byDay.values.any((v) => v > minDailySpend)) return null;
@@ -149,9 +150,9 @@ class SpendingForecastRule implements InsightRule {
   @override
   NarrativeFact? evaluate(
     AnalyticsAggregates aggregates, {
-    String? periodKey,
+    AnalyticsPeriod? period,
   }) {
-    if (periodKey != 'Month') return null;
+    if (period?.isMonthly != true) return null;
 
     final now = DateTime.now();
     if (now.day < 7) return null;

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/features/analytics/application/analytics_insight_engine.dart';
 import 'package:mudra_manager/features/analytics/application/insight_rules.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_aggregation_service.dart';
+import 'package:mudra_manager/features/analytics/domain/analytics_period.dart';
 import 'package:mudra_manager/features/analytics/domain/narrative_fact.dart';
 
 AnalyticsAggregates _makeAggregates({
@@ -75,7 +76,7 @@ void main() {
           'Gym': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500],
         },
       );
-      final fact = rule.evaluate(aggregates, periodKey: 'Month');
+      final fact = rule.evaluate(aggregates, period: const MonthPeriod());
 
       expect(fact, isA<NewSpendingCategoryFact>());
       final f = fact! as NewSpendingCategoryFact;
@@ -89,7 +90,7 @@ void main() {
           'Gym': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500],
         },
       );
-      expect(rule.evaluate(aggregates, periodKey: 'Week'), isNull);
+      expect(rule.evaluate(aggregates, period: const WeekPeriod()), isNull);
     });
 
     test('returns null when amount below threshold', () {
@@ -98,7 +99,7 @@ void main() {
           'Gym': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50],
         },
       );
-      expect(rule.evaluate(aggregates, periodKey: 'Month'), isNull);
+      expect(rule.evaluate(aggregates, period: const MonthPeriod()), isNull);
     });
   });
 
@@ -111,7 +112,7 @@ void main() {
           'Gym': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500, 0],
         },
       );
-      final fact = rule.evaluate(aggregates, periodKey: 'Month');
+      final fact = rule.evaluate(aggregates, period: const MonthPeriod());
 
       expect(fact, isA<CategoryStoppedFact>());
       final f = fact! as CategoryStoppedFact;
@@ -125,7 +126,7 @@ void main() {
           'Gym': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0],
         },
       );
-      expect(rule.evaluate(aggregates, periodKey: 'Month'), isNull);
+      expect(rule.evaluate(aggregates, period: const MonthPeriod()), isNull);
     });
   });
 
@@ -204,7 +205,7 @@ void main() {
         avgDailySpend: 1500,
         previousFullExpense: 30000,
       );
-      final fact = rule.evaluate(aggregates, periodKey: 'Month');
+      final fact = rule.evaluate(aggregates, period: const MonthPeriod());
 
       // This test is date-dependent (requires day >= 7)
       final now = DateTime.now();
@@ -220,12 +221,12 @@ void main() {
         avgDailySpend: 1500,
         previousFullExpense: 30000,
       );
-      expect(rule.evaluate(aggregates, periodKey: 'Week'), isNull);
+      expect(rule.evaluate(aggregates, period: const WeekPeriod()), isNull);
     });
 
     test('returns null when no previous data', () {
       final aggregates = _makeAggregates(avgDailySpend: 1500);
-      expect(rule.evaluate(aggregates, periodKey: 'Month'), isNull);
+      expect(rule.evaluate(aggregates, period: const MonthPeriod()), isNull);
     });
 
     test('returns null when variance is within 5%', () {
@@ -234,7 +235,7 @@ void main() {
         avgDailySpend: 1000,
         previousFullExpense: 29500,
       );
-      final fact = rule.evaluate(aggregates, periodKey: 'Month');
+      final fact = rule.evaluate(aggregates, period: const MonthPeriod());
       // Within 5% threshold
       final now = DateTime.now();
       final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
@@ -262,7 +263,7 @@ void main() {
 
       final facts = AnalyticsInsightEngine.standard.generate(
         aggregates,
-        periodKey: 'Month',
+        period: const MonthPeriod(),
       );
 
       // Should have at least TopCategoryFact + WeekendPeakFact
@@ -303,7 +304,7 @@ void main() {
         },
       );
 
-      final facts = engine.generate(aggregates, periodKey: 'Month');
+      final facts = engine.generate(aggregates, period: const MonthPeriod());
 
       // Only TopCategoryRule — no pattern facts
       expect(facts.whereType<TopCategoryFact>(), hasLength(1));

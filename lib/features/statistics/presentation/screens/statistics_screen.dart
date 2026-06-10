@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
+import 'package:mudra_manager/features/analytics/domain/analytics_period.dart';
 import 'package:mudra_manager/features/analytics/presentation/widgets/widgets.dart';
 import 'package:mudra_manager/shared/templates/analytics_view_template.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
@@ -22,18 +23,18 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   DateTime? _customStart;
   DateTime? _customEnd;
 
-  String get _periodKey {
+  AnalyticsPeriod get _period {
     if (_selectedPeriod == PeriodType.custom &&
         _customStart != null &&
         _customEnd != null) {
-      return '${_customStart!.millisecondsSinceEpoch}_${_customEnd!.millisecondsSinceEpoch}';
+      return CustomPeriod(start: _customStart!, end: _customEnd!);
     }
     return switch (_selectedPeriod) {
-      PeriodType.day => 'Today',
-      PeriodType.week => 'Week',
-      PeriodType.month => 'Month',
-      PeriodType.year => 'Year',
-      _ => 'Month',
+      PeriodType.day => const TodayPeriod(),
+      PeriodType.week => const WeekPeriod(),
+      PeriodType.month => const MonthPeriod(),
+      PeriodType.year => const YearPeriod(),
+      _ => const MonthPeriod(),
     };
   }
 
@@ -62,15 +63,15 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         appBarMode: AppBarMode.standard,
         toolbarHeight: 80,
       ),
-      body: ref.watch(analyticsAggregatesProvider(_periodKey)).when(
+      body: ref.watch(analyticsAggregatesProvider(_period.key)).when(
             data: (aggregates) {
               return AnalyticsViewTemplate(
                 timeSelector: const SizedBox.shrink(),
-                chart: StatisticsChartSection(periodKey: _periodKey),
-                metricSummary: StatisticsMetricsSection(periodKey: _periodKey),
+                chart: StatisticsChartSection(periodKey: _period.key),
+                metricSummary: StatisticsMetricsSection(periodKey: _period.key),
                 content: [
-                  StatisticsInsightsSection(periodKey: _periodKey),
-                  SpendingTagsSection(periodKey: _periodKey),
+                  StatisticsInsightsSection(periodKey: _period.key),
+                  SpendingTagsSection(periodKey: _period.key),
                   const FinancialBehaviorSection(),
                   const AmbientBrandSection(),
                 ],
