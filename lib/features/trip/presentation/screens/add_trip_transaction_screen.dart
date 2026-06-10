@@ -84,7 +84,8 @@ class _AddTripTransactionScreenState
           appBar: AppBar(
             title: Text(
               'Add Split Expense',
-              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              style:
+                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           body: Column(
@@ -119,9 +120,12 @@ class _AddTripTransactionScreenState
                       onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
                         prefix: Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: CurrencyBadge(code: tripCurrency ?? BaseCurrency.code, size: 24, color: color.primary.withValues(alpha: 0.6)),
-                      ),
+                          padding: const EdgeInsets.only(right: 8),
+                          child: CurrencyBadge(
+                              code: tripCurrency ?? BaseCurrency.code,
+                              size: 24,
+                              color: color.primary.withValues(alpha: 0.6)),
+                        ),
                         hintText: '0',
                         hintStyle: textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w900,
@@ -149,22 +153,23 @@ class _AddTripTransactionScreenState
                       controller: _descController,
                       decoration: InputDecoration(
                         hintText: 'What was this for?',
-                        prefixIcon: Icon(LucideIcons.fileText,
-                            size: 18, color: color.onSurfaceVariant,),
+                        prefixIcon: Icon(
+                          LucideIcons.fileText,
+                          size: 18,
+                          color: color.onSurfaceVariant,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius:
                               BorderRadius.circular(spacing.radiusMedium),
                           borderSide: BorderSide(
-                            color:
-                                color.outlineVariant.withValues(alpha: 0.3),
+                            color: color.outlineVariant.withValues(alpha: 0.3),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius:
                               BorderRadius.circular(spacing.radiusMedium),
                           borderSide: BorderSide(
-                            color:
-                                color.outlineVariant.withValues(alpha: 0.3),
+                            color: color.outlineVariant.withValues(alpha: 0.3),
                           ),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
@@ -274,7 +279,8 @@ class _AddTripTransactionScreenState
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius:
+                            BorderRadius.circular(Tone.current.borderRadius),
                         border: Border.all(
                           color: color.outlineVariant.withValues(alpha: 0.5),
                         ),
@@ -283,7 +289,8 @@ class _AddTripTransactionScreenState
                         style: ButtonStyle(
                           shape: WidgetStateProperty.all(
                             RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                              borderRadius: BorderRadius.circular(
+                                  Tone.current.borderRadius),
                             ),
                           ),
                           padding: WidgetStateProperty.all(
@@ -335,8 +342,8 @@ class _AddTripTransactionScreenState
                               double sum = 0;
                               for (var id in _selectedParticipants) {
                                 sum += double.tryParse(
-                                        _customAmountControllers[id]?.text ??
-                                            '0',) ??
+                                      _customAmountControllers[id]?.text ?? '0',
+                                    ) ??
                                     0;
                               }
                               final isPercent =
@@ -368,8 +375,7 @@ class _AddTripTransactionScreenState
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (context, index) {
                         final p = participants[index];
-                        final isChecked =
-                            _selectedParticipants.contains(p.id);
+                        final isChecked = _selectedParticipants.contains(p.id);
                         return InkWell(
                           onTap: () {
                             HapticFeedback.lightImpact();
@@ -387,7 +393,8 @@ class _AddTripTransactionScreenState
                               }
                             });
                           },
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius:
+                              BorderRadius.circular(Tone.current.borderRadius),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -398,7 +405,8 @@ class _AddTripTransactionScreenState
                                   ? color.primaryContainer
                                       .withValues(alpha: 0.2)
                                   : color.surface,
-                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                              borderRadius: BorderRadius.circular(
+                                  Tone.current.borderRadius),
                               border: Border.all(
                                 color: isChecked
                                     ? color.primary.withValues(alpha: 0.5)
@@ -427,7 +435,11 @@ class _AddTripTransactionScreenState
                                   child: (_splitType != SplitType.equal &&
                                           isChecked)
                                       ? _buildCustomSplitRow(
-                                          p, amount, color, textTheme,)
+                                          p,
+                                          amount,
+                                          color,
+                                          textTheme,
+                                        )
                                       : Text(
                                           p.name,
                                           style:
@@ -438,13 +450,16 @@ class _AddTripTransactionScreenState
                                           ),
                                         ),
                                 ),
-                                if (isChecked &&
-                                    _splitType == SplitType.equal)
-                                  Icon(LucideIcons.circleCheck,
-                                      color: color.primary,)
+                                if (isChecked && _splitType == SplitType.equal)
+                                  Icon(
+                                    LucideIcons.circleCheck,
+                                    color: color.primary,
+                                  )
                                 else if (!isChecked)
-                                  Icon(LucideIcons.circle,
-                                      color: color.outline,),
+                                  Icon(
+                                    LucideIcons.circle,
+                                    color: color.outline,
+                                  ),
                               ],
                             ),
                           ),
@@ -469,8 +484,7 @@ class _AddTripTransactionScreenState
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(spacing.radiusMedium),
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
                     minimumSize: const Size(double.infinity, 52),
                   ),
@@ -485,8 +499,7 @@ class _AddTripTransactionScreenState
                         )
                       : Text(
                           trip.isTrip ? 'Add to Trip' : 'Add to Group',
-                          style:
-                              const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                 ),
               ),
@@ -495,7 +508,8 @@ class _AddTripTransactionScreenState
         );
       },
       loading: () => Scaffold(
-        body: ListView(children: List.generate(3, (_) => const DashboardCardSkeleton())),
+        body: ListView(
+            children: List.generate(3, (_) => const DashboardCardSkeleton())),
       ),
       error: (e, _) => Scaffold(
         body: Center(child: Text(BuddyMessages.errorWith('$e'))),
@@ -532,13 +546,14 @@ class _AddTripTransactionScreenState
               p.id,
               () => TextEditingController(text: '0'),
             ),
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
-              prefix: isPercent ? null : Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: CurrencyBadge(code: BaseCurrency.code, size: 12),
-                ),
+              prefix: isPercent
+                  ? null
+                  : Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: CurrencyBadge(code: BaseCurrency.code, size: 12),
+                    ),
               suffixText: isPercent ? '%' : null,
               isDense: true,
               contentPadding:
@@ -546,8 +561,11 @@ class _AddTripTransactionScreenState
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               suffixIcon: IconButton(
-                icon: Icon(LucideIcons.wand,
-                    size: 18, color: color.primary,),
+                icon: Icon(
+                  LucideIcons.wand,
+                  size: 18,
+                  color: color.primary,
+                ),
                 tooltip: 'Auto-fill remaining',
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -556,7 +574,8 @@ class _AddTripTransactionScreenState
                   for (var id in _selectedParticipants) {
                     if (id == p.id) continue;
                     othersSum += double.tryParse(
-                            _customAmountControllers[id]?.text ?? '0',) ??
+                          _customAmountControllers[id]?.text ?? '0',
+                        ) ??
                         0;
                   }
                   final target = isPercent ? 100.0 : amount;
@@ -635,8 +654,7 @@ class _AddTripTransactionScreenState
       // Snapshot currency conversion
       if (trip.currencyCode != null) {
         expense.currencyCode = trip.currencyCode;
-        final currencyService =
-            await ref.read(currencyServiceProvider.future);
+        final currencyService = await ref.read(currencyServiceProvider.future);
         final result =
             await currencyService.convertToBase(amount, trip.currencyCode!);
         if (result != null) {
@@ -679,7 +697,8 @@ class _AddTripTransactionScreenState
       final amounts = <double>[];
       for (var id in _selectedParticipants) {
         final val = double.tryParse(
-                _customAmountControllers[id]?.text ?? '0',) ??
+              _customAmountControllers[id]?.text ?? '0',
+            ) ??
             0.0;
         amounts.add(val);
         sum += val;
@@ -699,14 +718,16 @@ class _AddTripTransactionScreenState
       final amounts = <double>[];
       for (var id in _selectedParticipants) {
         final pct = double.tryParse(
-                _customAmountControllers[id]?.text ?? '0',) ??
+              _customAmountControllers[id]?.text ?? '0',
+            ) ??
             0.0;
         amounts.add(amount * (pct / 100));
         sum += pct;
       }
       if ((sum - 100).abs() > 0.1) {
         SnackbarService.error(
-            'Total percentage (${sum.toStringAsFixed(1)}%) must equal 100%',);
+          'Total percentage (${sum.toStringAsFixed(1)}%) must equal 100%',
+        );
         setState(() => _saving = false);
         return null;
       }

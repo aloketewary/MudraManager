@@ -78,22 +78,21 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
 
         return Scaffold(
           appBar: _buildAppBar(state, color, textTheme, spacing),
-          floatingActionButton:
-              state.allowedActions.contains(GroupAction.addExpense) &&
-                      !header.isTrip
-                  ? FloatingActionButton.extended(
-                      onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        context.push(
-                          AppRoutes.addTripTransaction,
-                          extra: widget.tripId,
-                        );
-                      },
-                      icon: const Icon(LucideIcons.plus),
-                      label:
-                          Text(AppLocalizations.of(context)!.trip_splitExpense),
-                    )
-                  : null,
+          floatingActionButton: state.allowedActions
+                      .contains(GroupAction.addExpense) &&
+                  !header.isTrip
+              ? FloatingActionButton.extended(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    context.push(
+                      AppRoutes.addTripTransaction,
+                      extra: widget.tripId,
+                    );
+                  },
+                  icon: const Icon(LucideIcons.plus),
+                  label: Text(AppLocalizations.of(context)!.trip_splitExpense),
+                )
+              : null,
           body: Column(
             children: [
               _buildSummaryCard(state, isGuestMode, color, textTheme, spacing),
@@ -353,11 +352,13 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
           if (header.isTrip)
             Row(
               children: [
-                Icon(LucideIcons.calendar, size: 14, color: color.onSurfaceVariant),
+                Icon(LucideIcons.calendar,
+                    size: 14, color: color.onSurfaceVariant),
                 SizedBox(width: spacing.elementGapMin),
                 Text(
                   '${DateFormat.MMMd().format(header.startDate)} - ${DateFormat.MMMd().format(header.endDate)} \u2022 ${header.durationDays} ${header.durationDays == 1 ? 'day' : 'days'}',
-                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
                 const Spacer(),
                 if (header.isActive)
@@ -412,12 +413,15 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                     children: [
                       Text(
                         AppLocalizations.of(context)!.trip_totalSpent,
-                        style: textTheme.labelMedium?.copyWith(color: color.onSurfaceVariant),
+                        style: textTheme.labelMedium
+                            ?.copyWith(color: color.onSurfaceVariant),
                       ),
                       SizedBox(height: spacing.elementGapMin),
                       Text(
-                        formatCurrency(timeline.totalSpent, code: header.currencyCode, decimals: 0),
-                        style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                        formatCurrency(timeline.totalSpent,
+                            code: header.currencyCode, decimals: 0),
+                        style: textTheme.headlineMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -431,8 +435,11 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                         vertical: spacing.elementGap,
                       ),
                       decoration: BoxDecoration(
-                        color: budgetUsed > 0.9 ? color.errorContainer : color.tertiaryContainer,
-                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        color: budgetUsed > 0.9
+                            ? color.errorContainer
+                            : color.tertiaryContainer,
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -440,14 +447,18 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                           Text(
                             '${(budgetUsed * 100).toStringAsFixed(0)}%',
                             style: textTheme.titleMedium?.copyWith(
-                              color: budgetUsed > 0.9 ? color.onErrorContainer : color.onTertiaryContainer,
+                              color: budgetUsed > 0.9
+                                  ? color.onErrorContainer
+                                  : color.onTertiaryContainer,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
                             'of budget',
                             style: textTheme.labelSmall?.copyWith(
-                              color: budgetUsed > 0.9 ? color.onErrorContainer : color.onTertiaryContainer,
+                              color: budgetUsed > 0.9
+                                  ? color.onErrorContainer
+                                  : color.onTertiaryContainer,
                             ),
                           ),
                         ],
@@ -459,17 +470,22 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
           else
             Row(
               children: [
-                Icon(LucideIcons.users, size: 14, color: color.onSurfaceVariant),
+                Icon(LucideIcons.users,
+                    size: 14, color: color.onSurfaceVariant),
                 SizedBox(width: spacing.elementGapMin),
                 Text(
                   '${header.memberCount} people',
-                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
                 if (timeline.totalSpent > 0) ...[
-                  Text(' \u2022 ', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                  Text(' \u2022 ',
+                      style: textTheme.bodySmall
+                          ?.copyWith(color: color.onSurfaceVariant)),
                   Text(
                     '${formatCurrency(timeline.totalSpent, code: header.currencyCode, decimals: 0)} total',
-                    style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                    style: textTheme.bodySmall
+                        ?.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ],
               ],
@@ -514,23 +530,27 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
               const SizedBox(height: 24),
               Text(
                 emptyMsg.first,
-                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               if (emptyMsg.length > 1) ...[
                 const SizedBox(height: 8),
                 Text(
                   emptyMsg.sublist(1).join('\n'),
-                  style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: color.onSurfaceVariant),
                   textAlign: TextAlign.center,
                 ),
               ],
-              if (!header.isTrip && state.allowedActions.contains(GroupAction.addExpense)) ...[
+              if (!header.isTrip &&
+                  state.allowedActions.contains(GroupAction.addExpense)) ...[
                 const SizedBox(height: 24),
                 FilledButton.icon(
                   onPressed: () {
                     HapticFeedback.mediumImpact();
-                    context.push(AppRoutes.addTripTransaction, extra: widget.tripId);
+                    context.push(AppRoutes.addTripTransaction,
+                        extra: widget.tripId);
                   },
                   icon: const Icon(LucideIcons.plus, size: 18),
                   label: Text(AppLocalizations.of(context)!.trip_splitExpense),
@@ -682,14 +702,17 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
               if (header.isTrip)
                 Text(
                   'Paid by ${expense.paidByName} \u2022 Split among ${expense.shares.length}',
-                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 )
               else
                 Text(
                   _buildSplitContextLabel(expense),
-                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
-              if (expense.description != null && expense.description!.isNotEmpty)
+              if (expense.description != null &&
+                  expense.description!.isNotEmpty)
                 Text(
                   expense.description!,
                   maxLines: 1,
@@ -735,7 +758,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
   ) {
     final settlements = state.settlements;
     final header = state.header;
-    final canMarkPaid = state.allowedActions.contains(GroupAction.markSettlementPaid);
+    final canMarkPaid =
+        state.allowedActions.contains(GroupAction.markSettlementPaid);
 
     if (settlements.pending.isEmpty) {
       return ListView(
@@ -754,17 +778,20 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                     color: color.primaryContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(LucideIcons.circleCheck, size: 48, color: color.primary),
+                  child: Icon(LucideIcons.circleCheck,
+                      size: 48, color: color.primary),
                 ),
                 SizedBox(height: spacing.sectionGap),
                 Text(
                   'All settled up!',
-                  style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: spacing.elementGap),
                 Text(
                   'Everyone is square \u2014 no one owes anything',
-                  style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
               ],
             ),
@@ -795,7 +822,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                 Expanded(
                   child: Text(
                     'Archive to settle up',
-                    style: textTheme.bodySmall?.copyWith(color: color.onTertiaryContainer),
+                    style: textTheme.bodySmall
+                        ?.copyWith(color: color.onTertiaryContainer),
                   ),
                 ),
               ],
@@ -810,7 +838,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
             decoration: BoxDecoration(
               color: color.surfaceContainerLow,
               borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+              border: Border.all(
+                  color: color.outlineVariant.withValues(alpha: 0.5)),
             ),
             child: Row(
               children: [
@@ -905,7 +934,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                 Expanded(
                   child: Text(
                     '${record.fromName} paid ${record.toName}',
-                    style: textTheme.bodySmall?.copyWith(color: color.onSurface),
+                    style:
+                        textTheme.bodySmall?.copyWith(color: color.onSurface),
                   ),
                 ),
                 Text(
@@ -918,7 +948,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                 SizedBox(width: spacing.elementGap),
                 Text(
                   DateFormat('d MMM').format(record.date),
-                  style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.labelSmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
               ],
             ),
@@ -962,12 +993,14 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
               const SizedBox(height: 24),
               Text(
                 BuddyMessages.noData,
-                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'Add expenses to see insights',
-                style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+                style: textTheme.bodyMedium
+                    ?.copyWith(color: color.onSurfaceVariant),
               ),
             ],
           ),
@@ -982,13 +1015,16 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
       ),
       children: [
         // Summary stats
-        _buildInsightsSummary(insights, header, isGuestMode, spacing, color, textTheme),
+        _buildInsightsSummary(
+            insights, header, isGuestMode, spacing, color, textTheme),
         SizedBox(height: spacing.sectionGap),
         // Per-person breakdown
-        _buildPerPersonSection(insights, header, isGuestMode, spacing, color, textTheme),
+        _buildPerPersonSection(
+            insights, header, isGuestMode, spacing, color, textTheme),
         SizedBox(height: spacing.sectionGap),
         // Category breakdown
-        _buildCategorySection(insights, header, isGuestMode, spacing, color, textTheme),
+        _buildCategorySection(
+            insights, header, isGuestMode, spacing, color, textTheme),
       ],
     );
   }
@@ -1022,7 +1058,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
             ),
             SizedBox(height: spacing.elementGap),
             CurrencyText(
-              amount: GuestModeUtil.applyGuestMode(insights.totalCost, isGuestMode),
+              amount:
+                  GuestModeUtil.applyGuestMode(insights.totalCost, isGuestMode),
               currencyCode: header.currencyCode,
               compact: false,
               showPositiveSign: false,
@@ -1048,7 +1085,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                   LucideIcons.users,
                   'Per Person',
                   formatCurrency(
-                    GuestModeUtil.applyGuestMode(insights.perPersonAverage, isGuestMode),
+                    GuestModeUtil.applyGuestMode(
+                        insights.perPersonAverage, isGuestMode),
                     code: header.currencyCode,
                     decimals: 0,
                   ),
@@ -1061,7 +1099,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                   LucideIcons.trendingUp,
                   'Avg/Txn',
                   formatCurrency(
-                    GuestModeUtil.applyGuestMode(insights.averagePerTransaction, isGuestMode),
+                    GuestModeUtil.applyGuestMode(
+                        insights.averagePerTransaction, isGuestMode),
                     code: header.currencyCode,
                     decimals: 0,
                   ),
@@ -1097,7 +1136,9 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
         ),
         child: Column(
           children: [
-            Icon(icon, size: 16, color: color.onPrimaryContainer.withValues(alpha: 0.6)),
+            Icon(icon,
+                size: 16,
+                color: color.onPrimaryContainer.withValues(alpha: 0.6)),
             SizedBox(height: spacing.elementGap),
             Text(
               value,
@@ -1156,7 +1197,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                 SizedBox(width: spacing.sectionGap),
                 Text(
                   'Per Person Summary',
-                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -1202,17 +1244,20 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                               Flexible(
                                 child: Text(
                                   p.name,
-                                  style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                                  style: textTheme.bodyLarge
+                                      ?.copyWith(fontWeight: FontWeight.w600),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               if (isTop) ...[
                                 const SizedBox(width: 6),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: color.tertiaryContainer,
-                                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                                    borderRadius: BorderRadius.circular(
+                                        spacing.radiusSmall),
                                   ),
                                   child: Text(
                                     '👑 Top',
@@ -1243,7 +1288,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         CurrencyText(
-                          amount: GuestModeUtil.applyGuestMode(p.amountPaid, isGuestMode),
+                          amount: GuestModeUtil.applyGuestMode(
+                              p.amountPaid, isGuestMode),
                           currencyCode: header.currencyCode,
                           compact: false,
                           style: textTheme.titleMedium?.copyWith(
@@ -1255,7 +1301,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                         ),
                         Text(
                           '${p.percentage.toStringAsFixed(1)}%',
-                          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                          style: textTheme.bodySmall
+                              ?.copyWith(color: color.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -1305,7 +1352,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                 SizedBox(width: spacing.elementGap),
                 Text(
                   'Category Breakdown',
-                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -1331,11 +1379,13 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                     Expanded(
                       child: Text(
                         cat.name,
-                        style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                        style: textTheme.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                     ),
                     CurrencyText(
-                      amount: GuestModeUtil.applyGuestMode(cat.amount, isGuestMode),
+                      amount:
+                          GuestModeUtil.applyGuestMode(cat.amount, isGuestMode),
                       currencyCode: header.currencyCode,
                       compact: false,
                       style: textTheme.bodyMedium?.copyWith(
@@ -1351,7 +1401,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                       child: Text(
                         '${cat.percentage.toStringAsFixed(1)}%',
                         textAlign: TextAlign.end,
-                        style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                        style: textTheme.bodySmall
+                            ?.copyWith(color: color.onSurfaceVariant),
                       ),
                     ),
                   ],

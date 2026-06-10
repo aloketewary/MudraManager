@@ -59,10 +59,15 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
             controller: _tabController,
             tabs: tripsAsync.maybeWhen(
               data: (all) => [
-                Tab(text: '${l10n.title_trips} (${all.where((t) => t.isTrip).length})'),
-                Tab(text: '${l10n.title_shared} (${all.where((t) => !t.isTrip).length})'),
+                Tab(
+                    text:
+                        '${l10n.title_trips} (${all.where((t) => t.isTrip).length})'),
+                Tab(
+                    text:
+                        '${l10n.title_shared} (${all.where((t) => !t.isTrip).length})'),
               ],
-              orElse: () => [Tab(text: l10n.title_trips), Tab(text: l10n.title_shared)],
+              orElse: () =>
+                  [Tab(text: l10n.title_trips), Tab(text: l10n.title_shared)],
             ),
           );
         },
@@ -95,12 +100,15 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
           return TabBarView(
             controller: _tabController,
             children: [
-              _buildListView(context, ref, trips, spacing, color, textTheme, isTrip: true),
-              _buildListView(context, ref, splits, spacing, color, textTheme, isTrip: false),
+              _buildListView(context, ref, trips, spacing, color, textTheme,
+                  isTrip: true),
+              _buildListView(context, ref, splits, spacing, color, textTheme,
+                  isTrip: false),
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator.adaptive()),
+        loading: () =>
+            const Center(child: CircularProgressIndicator.adaptive()),
         error: (e, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -111,17 +119,20 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
                   color: color.errorContainer,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(LucideIcons.circleAlert, size: 64, color: color.error),
+                child:
+                    Icon(LucideIcons.circleAlert, size: 64, color: color.error),
               ),
               const SizedBox(height: 24),
               Text(
                 'Error loading trips',
-                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 '$e',
-                style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                style: textTheme.bodySmall
+                    ?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -162,14 +173,16 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
               const SizedBox(height: 24),
               Text(
                 isTrip ? 'No trips yet' : 'No split groups yet',
-                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 isTrip
                     ? 'Create a trip to track travel expenses'
                     : 'Split bills with friends without a trip',
-                style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+                style: textTheme.bodyMedium
+                    ?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -194,7 +207,9 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
         children: [
           if (active.isNotEmpty) ...[
             _buildTypeHeader(
-              isTrip ? 'ACTIVE' : AppLocalizations.of(context)!.section_ongoing.toUpperCase(),
+              isTrip
+                  ? 'ACTIVE'
+                  : AppLocalizations.of(context)!.section_ongoing.toUpperCase(),
               isTrip ? LucideIcons.plane : LucideIcons.split,
               color.primary,
               textTheme,
@@ -203,7 +218,9 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
             ...active.map(
               (t) => Padding(
                 padding: EdgeInsets.only(bottom: spacing.cardVertical),
-                child: _buildTripCard(context, ref, t, color, textTheme, spacing, isActive: true),
+                child: _buildTripCard(
+                    context, ref, t, color, textTheme, spacing,
+                    isActive: true),
               ),
             ),
             SizedBox(height: spacing.sectionGap),
@@ -219,7 +236,8 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
             ...archived.map(
               (t) => Padding(
                 padding: EdgeInsets.only(bottom: spacing.cardVertical),
-                child: _buildTripCard(context, ref, t, color, textTheme, spacing),
+                child:
+                    _buildTripCard(context, ref, t, color, textTheme, spacing),
               ),
             ),
           ],
@@ -311,7 +329,8 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
                       children: [
                         Text(
                           trip.name,
-                          style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                          style: textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -319,7 +338,8 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
                         if (!isSplit)
                           Text(
                             '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)} \u2022 $duration days',
-                            style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                            style: textTheme.bodySmall
+                                ?.copyWith(color: color.onSurfaceVariant),
                           ),
                       ],
                     ),
@@ -332,7 +352,8 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
                       ),
                       decoration: BoxDecoration(
                         color: color.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
                       ),
                       child: Text(
                         isSplit
@@ -366,8 +387,10 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
                   return Padding(
                     padding: EdgeInsets.only(top: spacing.elementGap),
                     child: isSplit
-                        ? _buildSplitSummary(context, s, trip.currencyCode, color, textTheme, spacing)
-                        : _buildTripSummary(s, trip.currencyCode, color, textTheme, spacing),
+                        ? _buildSplitSummary(context, s, trip.currencyCode,
+                            color, textTheme, spacing)
+                        : _buildTripSummary(
+                            s, trip.currencyCode, color, textTheme, spacing),
                   );
                 },
                 orElse: () => const SizedBox.shrink(),
@@ -393,16 +416,19 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
             children: [
               Text(
                 formatCurrency(s.totalSpent, code: currencyCode, decimals: 0),
-                style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                style:
+                    textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
               ),
               Text(
                 ' spent',
-                style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                style: textTheme.bodySmall
+                    ?.copyWith(color: color.onSurfaceVariant),
               ),
               if (s.ownerShare > 0) ...[
                 Text(
                   ' \u2022 ',
-                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
                 Text(
                   formatCurrency(s.ownerShare, code: currencyCode, decimals: 0),
@@ -413,7 +439,8 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
                 ),
                 Text(
                   ' your share',
-                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
               ],
             ],
@@ -459,7 +486,8 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
         Container(
           width: 6,
           height: 6,
-          decoration: BoxDecoration(color: balanceColor, shape: BoxShape.circle),
+          decoration:
+              BoxDecoration(color: balanceColor, shape: BoxShape.circle),
         ),
         SizedBox(width: spacing.elementGap),
         Expanded(
@@ -491,7 +519,8 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
       context: context,
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => SafeArea(
         child: Padding(
@@ -510,7 +539,8 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
               SizedBox(height: spacing.sectionGap),
               Text(
                 'Create Group',
-                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               SizedBox(height: spacing.sectionGap),
               ListTile(
@@ -520,17 +550,21 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
                     color: color.primaryContainer,
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
-                  child: Icon(LucideIcons.plane, color: color.primary, size: 24),
+                  child:
+                      Icon(LucideIcons.plane, color: color.primary, size: 24),
                 ),
                 title: Text(
                   l10n.trip_createTrip,
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  style: textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(
                   l10n.trip_trackTravel,
-                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
-                trailing: Icon(LucideIcons.chevronRight, size: 18, color: color.onSurfaceVariant),
+                trailing: Icon(LucideIcons.chevronRight,
+                    size: 18, color: color.onSurfaceVariant),
                 onTap: () {
                   HapticFeedback.mediumImpact();
                   ctx.pop();
@@ -545,17 +579,21 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
                     color: color.secondaryContainer,
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
-                  child: Icon(LucideIcons.users, color: color.secondary, size: 24),
+                  child:
+                      Icon(LucideIcons.users, color: color.secondary, size: 24),
                 ),
                 title: Text(
                   l10n.trip_createGroup,
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  style: textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(
                   l10n.trip_splitBills,
-                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
-                trailing: Icon(LucideIcons.chevronRight, size: 18, color: color.onSurfaceVariant),
+                trailing: Icon(LucideIcons.chevronRight,
+                    size: 18, color: color.onSurfaceVariant),
                 onTap: () {
                   HapticFeedback.mediumImpact();
                   ctx.pop();

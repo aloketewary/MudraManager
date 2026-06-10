@@ -94,10 +94,13 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildExpensesTab(state, isGuestMode, spacing, color, textTheme),
-                    _buildSettlementsTab(state, isGuestMode, spacing, color, textTheme),
+                    _buildExpensesTab(
+                        state, isGuestMode, spacing, color, textTheme),
+                    _buildSettlementsTab(
+                        state, isGuestMode, spacing, color, textTheme),
                     if (!header.isActive)
-                      _buildInsightsTab(state, isGuestMode, spacing, color, textTheme),
+                      _buildInsightsTab(
+                          state, isGuestMode, spacing, color, textTheme),
                   ],
                 ),
               ),
@@ -106,7 +109,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         );
       },
       loading: () => Scaffold(
-        appBar: AppBar(title: Text(AppLocalizations.of(context)!.common_loading)),
+        appBar:
+            AppBar(title: Text(AppLocalizations.of(context)!.common_loading)),
         body: ListView.builder(
           itemCount: 5,
           itemBuilder: (context, index) => const Padding(
@@ -201,7 +205,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 );
                 if (confirm == true) {
                   final router = GoRouter.of(context);
-                  await ref.read(tripServiceProvider).archiveTrip(widget.tripId);
+                  await ref
+                      .read(tripServiceProvider)
+                      .archiveTrip(widget.tripId);
                   ref.invalidate(allTripsProvider);
                   ref.invalidate(activeTripsProvider);
                   ref.invalidate(groupDetailProvider(widget.tripId));
@@ -249,7 +255,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   ) {
     final header = state.header;
     final timeline = state.timeline;
-    final budget = header.budget ?? (timeline.totalSpent > 0 ? timeline.totalSpent * 1.2 : 10000);
+    final budget = header.budget ??
+        (timeline.totalSpent > 0 ? timeline.totalSpent * 1.2 : 10000);
     final budgetUsed = timeline.totalSpent / budget;
 
     return Container(
@@ -271,11 +278,13 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         children: [
           Row(
             children: [
-              Icon(LucideIcons.calendar, size: 14, color: color.onSurfaceVariant),
+              Icon(LucideIcons.calendar,
+                  size: 14, color: color.onSurfaceVariant),
               SizedBox(width: spacing.elementGapMin),
               Text(
                 '${DateFormat.MMMd().format(header.startDate)} - ${DateFormat.MMMd().format(header.endDate)} \u2022 ${header.durationDays} ${header.durationDays == 1 ? 'day' : 'days'}',
-                style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                style: textTheme.bodySmall
+                    ?.copyWith(color: color.onSurfaceVariant),
               ),
               const Spacer(),
               if (header.isActive)
@@ -308,12 +317,15 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   children: [
                     Text(
                       AppLocalizations.of(context)!.trip_totalSpent,
-                      style: textTheme.labelMedium?.copyWith(color: color.onSurfaceVariant),
+                      style: textTheme.labelMedium
+                          ?.copyWith(color: color.onSurfaceVariant),
                     ),
                     SizedBox(height: spacing.elementGapMin),
                     Text(
-                      formatCurrency(timeline.totalSpent, code: header.currencyCode, decimals: 0),
-                      style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                      formatCurrency(timeline.totalSpent,
+                          code: header.currencyCode, decimals: 0),
+                      style: textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -324,7 +336,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   vertical: spacing.elementGap,
                 ),
                 decoration: BoxDecoration(
-                  color: budgetUsed > 0.9 ? color.errorContainer : color.tertiaryContainer,
+                  color: budgetUsed > 0.9
+                      ? color.errorContainer
+                      : color.tertiaryContainer,
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 ),
                 child: Column(
@@ -333,14 +347,18 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     Text(
                       '${(budgetUsed * 100).toStringAsFixed(0)}%',
                       style: textTheme.titleMedium?.copyWith(
-                        color: budgetUsed > 0.9 ? color.onErrorContainer : color.onTertiaryContainer,
+                        color: budgetUsed > 0.9
+                            ? color.onErrorContainer
+                            : color.onTertiaryContainer,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       'of budget',
                       style: textTheme.labelSmall?.copyWith(
-                        color: budgetUsed > 0.9 ? color.onErrorContainer : color.onTertiaryContainer,
+                        color: budgetUsed > 0.9
+                            ? color.onErrorContainer
+                            : color.onTertiaryContainer,
                       ),
                     ),
                   ],
@@ -388,14 +406,16 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               const SizedBox(height: 24),
               Text(
                 emptyMsg.first,
-                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               if (emptyMsg.length > 1) ...[
                 const SizedBox(height: 8),
                 Text(
                   emptyMsg.sublist(1).join('\n'),
-                  style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: color.onSurfaceVariant),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -434,14 +454,16 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   const Spacer(),
                   Text(
                     '${day.expenseCount} expense${day.expenseCount == 1 ? '' : 's'} \u2022 ${formatCurrency(day.totalSpent, code: header.currencyCode, decimals: 0)}',
-                    style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+                    style: textTheme.labelSmall
+                        ?.copyWith(color: color.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
             // Expense cards
             ...day.expenses.map(
-              (expense) => _buildExpenseCard(expense, state, isGuestMode, spacing, color, textTheme),
+              (expense) => _buildExpenseCard(
+                  expense, state, isGuestMode, spacing, color, textTheme),
             ),
           ],
         );
@@ -529,9 +551,11 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               const SizedBox(height: 4),
               Text(
                 'Paid by ${expense.paidByName} \u2022 Split among ${expense.shares.length}',
-                style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                style: textTheme.bodySmall
+                    ?.copyWith(color: color.onSurfaceVariant),
               ),
-              if (expense.description != null && expense.description!.isNotEmpty)
+              if (expense.description != null &&
+                  expense.description!.isNotEmpty)
                 Text(
                   expense.description!,
                   maxLines: 1,
@@ -569,7 +593,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   ) {
     final settlements = state.settlements;
     final header = state.header;
-    final canMarkPaid = state.allowedActions.contains(GroupAction.markSettlementPaid);
+    final canMarkPaid =
+        state.allowedActions.contains(GroupAction.markSettlementPaid);
 
     if (settlements.pending.isEmpty) {
       return ListView(
@@ -588,17 +613,20 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     color: color.primaryContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(LucideIcons.circleCheck, size: 48, color: color.primary),
+                  child: Icon(LucideIcons.circleCheck,
+                      size: 48, color: color.primary),
                 ),
                 SizedBox(height: spacing.sectionGap),
                 Text(
                   AppLocalizations.of(context)!.trip_allSettled,
-                  style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: spacing.elementGap),
                 Text(
                   'No pending settlements for this trip',
-                  style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: color.onSurfaceVariant),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -629,7 +657,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 Expanded(
                   child: Text(
                     'Archive the trip to settle up',
-                    style: textTheme.bodySmall?.copyWith(color: color.onTertiaryContainer),
+                    style: textTheme.bodySmall
+                        ?.copyWith(color: color.onTertiaryContainer),
                   ),
                 ),
               ],
@@ -711,7 +740,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 Expanded(
                   child: Text(
                     '${record.fromName} paid ${record.toName}',
-                    style: textTheme.bodySmall?.copyWith(color: color.onSurface),
+                    style:
+                        textTheme.bodySmall?.copyWith(color: color.onSurface),
                   ),
                 ),
                 Text(
@@ -724,7 +754,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 SizedBox(width: spacing.elementGap),
                 Text(
                   DateFormat('d MMM').format(record.date),
-                  style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.labelSmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
               ],
             ),
@@ -768,12 +799,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               const SizedBox(height: 24),
               Text(
                 BuddyMessages.noData,
-                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'Add expenses to see report',
-                style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+                style: textTheme.bodyMedium
+                    ?.copyWith(color: color.onSurfaceVariant),
               ),
             ],
           ),
@@ -787,11 +820,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         vertical: spacing.cardVertical,
       ),
       children: [
-        _buildInsightsSummary(insights, header, isGuestMode, spacing, color, textTheme),
+        _buildInsightsSummary(
+            insights, header, isGuestMode, spacing, color, textTheme),
         SizedBox(height: spacing.sectionGap),
-        _buildPerPersonSection(insights, header, isGuestMode, spacing, color, textTheme),
+        _buildPerPersonSection(
+            insights, header, isGuestMode, spacing, color, textTheme),
         SizedBox(height: spacing.sectionGap),
-        _buildCategorySection(insights, header, isGuestMode, spacing, color, textTheme),
+        _buildCategorySection(
+            insights, header, isGuestMode, spacing, color, textTheme),
       ],
     );
   }
@@ -825,7 +861,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             ),
             SizedBox(height: spacing.elementGap),
             CurrencyText(
-              amount: GuestModeUtil.applyGuestMode(insights.totalCost, isGuestMode),
+              amount:
+                  GuestModeUtil.applyGuestMode(insights.totalCost, isGuestMode),
               currencyCode: header.currencyCode,
               compact: false,
               showPositiveSign: false,
@@ -838,12 +875,17 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             SizedBox(height: spacing.sectionGap),
             Row(
               children: [
-                _buildStatPill(LucideIcons.receiptText, 'Transactions', '${insights.transactionCount}', color, textTheme, spacing),
+                _buildStatPill(LucideIcons.receiptText, 'Transactions',
+                    '${insights.transactionCount}', color, textTheme, spacing),
                 SizedBox(width: spacing.elementGap),
                 _buildStatPill(
                   LucideIcons.users,
                   'Per Person',
-                  formatCurrency(GuestModeUtil.applyGuestMode(insights.perPersonAverage, isGuestMode), code: header.currencyCode, decimals: 0),
+                  formatCurrency(
+                      GuestModeUtil.applyGuestMode(
+                          insights.perPersonAverage, isGuestMode),
+                      code: header.currencyCode,
+                      decimals: 0),
                   color,
                   textTheme,
                   spacing,
@@ -852,7 +894,11 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 _buildStatPill(
                   LucideIcons.trendingUp,
                   'Avg/Txn',
-                  formatCurrency(GuestModeUtil.applyGuestMode(insights.averagePerTransaction, isGuestMode), code: header.currencyCode, decimals: 0),
+                  formatCurrency(
+                      GuestModeUtil.applyGuestMode(
+                          insights.averagePerTransaction, isGuestMode),
+                      code: header.currencyCode,
+                      decimals: 0),
                   color,
                   textTheme,
                   spacing,
@@ -885,7 +931,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         ),
         child: Column(
           children: [
-            Icon(icon, size: 16, color: color.onPrimaryContainer.withValues(alpha: 0.6)),
+            Icon(icon,
+                size: 16,
+                color: color.onPrimaryContainer.withValues(alpha: 0.6)),
             SizedBox(height: spacing.elementGap),
             Text(
               value,
@@ -916,7 +964,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     ColorScheme color,
     TextTheme textTheme,
   ) {
-    final chartColors = [color.primary, color.tertiary, color.secondary, color.error, color.primaryContainer, color.tertiaryContainer];
+    final chartColors = [
+      color.primary,
+      color.tertiary,
+      color.secondary,
+      color.error,
+      color.primaryContainer,
+      color.tertiaryContainer
+    ];
 
     return Card(
       elevation: 0,
@@ -935,7 +990,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               children: [
                 Icon(LucideIcons.users, color: color.secondary, size: 20),
                 SizedBox(width: spacing.sectionGap),
-                Text('Per Person Summary', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Text('Per Person Summary',
+                    style: textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold)),
               ],
             ),
             SizedBox(height: spacing.sectionGap),
@@ -960,7 +1017,12 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       child: ClipOval(
                         child: BoringAvatar(
                           name: p.name,
-                          palette: BoringAvatarPalette([color.primary, color.tertiary, color.primaryContainer, color.tertiaryContainer]),
+                          palette: BoringAvatarPalette([
+                            color.primary,
+                            color.tertiary,
+                            color.primaryContainer,
+                            color.tertiaryContainer
+                          ]),
                           type: BoringAvatarType.beam,
                         ),
                       ),
@@ -973,14 +1035,24 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                           Row(
                             children: [
                               Flexible(
-                                child: Text(p.name, style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
+                                child: Text(p.name,
+                                    style: textTheme.bodyLarge
+                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                    overflow: TextOverflow.ellipsis),
                               ),
                               if (isTop) ...[
                                 const SizedBox(width: 6),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(color: color.tertiaryContainer, borderRadius: BorderRadius.circular(spacing.radiusSmall)),
-                                  child: Text('👑 Top', style: textTheme.labelSmall?.copyWith(color: color.onTertiaryContainer, fontWeight: FontWeight.bold)),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                      color: color.tertiaryContainer,
+                                      borderRadius: BorderRadius.circular(
+                                          spacing.radiusSmall)),
+                                  child: Text('👑 Top',
+                                      style: textTheme.labelSmall?.copyWith(
+                                          color: color.onTertiaryContainer,
+                                          fontWeight: FontWeight.bold)),
                                 ),
                               ],
                             ],
@@ -1003,14 +1075,18 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         CurrencyText(
-                          amount: GuestModeUtil.applyGuestMode(p.amountPaid, isGuestMode),
+                          amount: GuestModeUtil.applyGuestMode(
+                              p.amountPaid, isGuestMode),
                           currencyCode: header.currencyCode,
                           compact: false,
-                          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: barColor),
+                          style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold, color: barColor),
                           showPositiveSign: false,
                           showSign: true,
                         ),
-                        Text('${p.percentage.toStringAsFixed(1)}%', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                        Text('${p.percentage.toStringAsFixed(1)}%',
+                            style: textTheme.bodySmall
+                                ?.copyWith(color: color.onSurfaceVariant)),
                       ],
                     ),
                   ],
@@ -1031,7 +1107,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     ColorScheme color,
     TextTheme textTheme,
   ) {
-    final chartColors = [color.primary, color.tertiary, color.secondary, color.error, color.primaryContainer, color.tertiaryContainer];
+    final chartColors = [
+      color.primary,
+      color.tertiary,
+      color.secondary,
+      color.error,
+      color.primaryContainer,
+      color.tertiaryContainer
+    ];
 
     return Card(
       elevation: 0,
@@ -1050,7 +1133,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               children: [
                 Icon(LucideIcons.chartPie, color: color.primary, size: 20),
                 SizedBox(width: spacing.elementGap),
-                Text('Category Breakdown', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Text('Category Breakdown',
+                    style: textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold)),
               ],
             ),
             SizedBox(height: spacing.sectionGap),
@@ -1063,21 +1148,34 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 padding: EdgeInsets.only(bottom: spacing.elementGap),
                 child: Row(
                   children: [
-                    Container(width: 12, height: 12, decoration: BoxDecoration(color: catColor, borderRadius: BorderRadius.circular(3))),
+                    Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                            color: catColor,
+                            borderRadius: BorderRadius.circular(3))),
                     SizedBox(width: spacing.sectionGap),
-                    Expanded(child: Text(cat.name, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600))),
+                    Expanded(
+                        child: Text(cat.name,
+                            style: textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w600))),
                     CurrencyText(
-                      amount: GuestModeUtil.applyGuestMode(cat.amount, isGuestMode),
+                      amount:
+                          GuestModeUtil.applyGuestMode(cat.amount, isGuestMode),
                       currencyCode: header.currencyCode,
                       compact: false,
-                      style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: catColor),
+                      style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold, color: catColor),
                       showPositiveSign: false,
                       showSign: true,
                     ),
                     SizedBox(width: spacing.sectionGap),
                     SizedBox(
                       width: 45,
-                      child: Text('${cat.percentage.toStringAsFixed(1)}%', textAlign: TextAlign.end, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                      child: Text('${cat.percentage.toStringAsFixed(1)}%',
+                          textAlign: TextAlign.end,
+                          style: textTheme.bodySmall
+                              ?.copyWith(color: color.onSurfaceVariant)),
                     ),
                   ],
                 ),

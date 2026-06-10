@@ -39,7 +39,8 @@ class ActiveTripMiniCard extends ConsumerWidget {
                 elevation: 0,
                 color: color.errorContainer,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius:
+                      BorderRadius.circular(Tone.current.borderRadius),
                   side: BorderSide(color: color.error, width: 2),
                 ),
                 child: InkWell(
@@ -47,7 +48,8 @@ class ActiveTripMiniCard extends ConsumerWidget {
                     HapticFeedback.mediumImpact();
                     context.push(AppRoutes.tripDetail, extra: trip.id);
                   },
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius:
+                      BorderRadius.circular(Tone.current.borderRadius),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(

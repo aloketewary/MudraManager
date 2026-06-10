@@ -36,14 +36,18 @@ class TripParticipantCard extends StatelessWidget {
         ),
         title: Text(name, style: textTheme.titleMedium),
         subtitle: Text(
-          balance >= 0 ? 'Gets back ${formatCurrency(balance.abs(), decimals: 2)}' : 'Owes ${formatCurrency(balance.abs(), decimals: 2)}',
+          balance >= 0
+              ? 'Gets back ${formatCurrency(balance.abs(), decimals: 2)}'
+              : 'Owes ${formatCurrency(balance.abs(), decimals: 2)}',
           style: TextStyle(
-            color: balance >= 0 ? FinanceColors.statusGood : FinanceColors.statusDanger,
+            color: balance >= 0
+                ? FinanceColors.statusGood
+                : FinanceColors.statusDanger,
           ),
         ),
         trailing: onDelete != null
             ? IconButton(
-              tooltip: 'Delete',
+                tooltip: 'Delete',
                 icon: const Icon(LucideIcons.trash2),
                 onPressed: onDelete,
               )

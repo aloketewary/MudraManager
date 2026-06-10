@@ -19,7 +19,8 @@ class SplitAmountCalculator extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final equalSplit = participantCount > 0 ? totalAmount / participantCount : 0;
+    final equalSplit =
+        participantCount > 0 ? totalAmount / participantCount : 0;
 
     return Card(
       child: Padding(
@@ -32,10 +33,12 @@ class SplitAmountCalculator extends StatelessWidget {
               children: [
                 Text(
                   'Split Amount',
-                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Chip(
-                  label: Text('${formatCurrency(equalSplit.toDouble(), decimals: equalSplit.truncateToDouble() == equalSplit ? 0 : 2)} each'),
+                  label: Text(
+                      '${formatCurrency(equalSplit.toDouble(), decimals: equalSplit.truncateToDouble() == equalSplit ? 0 : 2)} each'),
                   backgroundColor: color.primaryContainer,
                 ),
               ],
@@ -47,7 +50,8 @@ class SplitAmountCalculator extends StatelessWidget {
             ),
             Text(
               '$participantCount participants',
-              style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+              style:
+                  textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
             ),
           ],
         ),

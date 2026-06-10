@@ -1,12 +1,8 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
-import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,11 +11,14 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/extension/case_extention.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
+import 'package:mudra_manager/features/trip/presentation/widgets/edit_split_sheet.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class ExpenseDetailScreen extends ConsumerStatefulWidget {
@@ -67,13 +66,14 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     final isGuestMode = ref.watch(guestModeProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return tripAsync.when(
       data: (trip) {
         if (trip == null) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Trip Not Found')),
-            body: const Center(child: Text('Trip not found')),
+          return ScreenShell(
+            config: ScreenShellConfig(title: BuddyMessages.genericError),
+            body: Center(child: Text(BuddyMessages.genericError)),
           );
         }
         final tripTxn = trip.transactions
@@ -81,9 +81,9 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
             .firstOrNull;
         final resolvedAmount = tripTxn?.resolvedAmount;
         if (tripTxn == null || resolvedAmount == null) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Not Found')),
-            body: const Center(child: Text('Expense not found')),
+          return ScreenShell(
+            config: ScreenShellConfig(title: BuddyMessages.genericError),
+            body: Center(child: Text(BuddyMessages.genericError)),
           );
         }
 
@@ -92,43 +92,27 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
         final amount =
             GuestModeUtil.applyGuestMode(resolvedAmount, isGuestMode);
         final paidBy = tripTxn.paidBy.value;
-        final category = tripTxn.transaction.value?.category.value?.name
-            ?? tripTxn.splitExpense.value?.description
-            ?? 'Uncategorized';
+        final category = tripTxn.transaction.value?.category.value?.name ??
+            tripTxn.splitExpense.value?.description ??
+            'Uncategorized';
         final expenseDate = tripTxn.resolvedDate ?? DateTime.now();
         final expenseDescription = tripTxn.resolvedDescription;
         final perPerson = _selectedParticipants.isNotEmpty
             ? amount / _selectedParticipants.length
             : 0.0;
 
-        return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(LucideIcons.arrowLeft),
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                context.pop();
-              },
-            ),
-            title: Text(AppLocalizations.of(context)!.expense_details),
-            actions: [
-              PopupMenuButton(
-                icon: const Icon(LucideIcons.ellipsisVertical),
-                itemBuilder: (ctx) => [
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(LucideIcons.trash2, color: color.error, size: 18),
-                        const SizedBox(width: 8),
-                        Text('Delete', style: TextStyle(color: color.error)),
-                      ],
-                    ),
-                  ),
-                ],
-                onSelected: (val) {
-                  if (val == 'delete') _deleteExpense();
-                },
+        return ScreenShell(
+          config: ScreenShellConfig(
+            title: ctxt.expense_details,
+            appBarMode: AppBarMode.standard,
+          ),
+          actions: ScreenActions.build(
+            overflow: [
+              ScreenAction(
+                id: 'delete_expense',
+                label: ctxt.common_delete,
+                icon: LucideIcons.trash2,
+                onTap: _deleteExpense,
               ),
             ],
           ),
@@ -138,7 +122,6 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
               vertical: spacing.cardVertical,
             ),
             children: [
-              // Amount hero
               _buildAmountHero(
                 amount,
                 category,
@@ -148,7 +131,6 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                 textTheme,
               ),
               SizedBox(height: spacing.sectionGap),
-              // Info card
               _buildInfoCard(
                 paidBy: paidBy,
                 description: expenseDescription,
@@ -159,8 +141,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                 color: color,
                 textTheme: textTheme,
               ),
-              const SizedBox(height: 16),
-              // Split breakdown
+              SizedBox(height: spacing.sectionGap),
               _buildSplitBreakdown(
                 tripTxn: tripTxn,
                 trip: trip,
@@ -174,11 +155,14 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
           ),
         );
       },
-      loading: () => Scaffold(
-        body: ListView(children: List.generate(3, (_) => const DashboardCardSkeleton())),
+      loading: () => ScreenShell(
+        config: ScreenShellConfig(title: ctxt.expense_details),
+        body: ListView(
+          children: List.generate(3, (_) => const DashboardCardSkeleton()),
+        ),
       ),
-      error: (e, _) => Scaffold(
-        appBar: AppBar(title: Text(BuddyMessages.genericError)),
+      error: (e, _) => ScreenShell(
+        config: ScreenShellConfig(title: BuddyMessages.genericError),
         body: Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
@@ -195,14 +179,8 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.primaryContainer,
-            color.secondaryContainer,
-          ],
-        ),
+        color: color.surfaceContainerLow,
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Padding(
         padding: EdgeInsets.all(spacing.cardInner),
@@ -258,7 +236,6 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     required ColorScheme color,
     required TextTheme textTheme,
   }) {
-    // Find owner's share
     final owner = trip.participants.where((p) => p.isOwner).firstOrNull;
     final ownerId = owner?.id;
     double? ownerShare;
@@ -301,7 +278,11 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
               _infoRow(
                 icon: LucideIcons.receiptText,
                 label: 'Your share',
-                value: formatCurrency(ownerShare, code: trip.currencyCode, decimals: 0),
+                value: formatCurrency(
+                  ownerShare,
+                  code: trip.currencyCode,
+                  decimals: 0,
+                ),
                 color: color,
                 textTheme: textTheme,
                 spacing: spacing,
@@ -417,7 +398,15 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                 ),
                 if (trip.isActive)
                   TextButton.icon(
-                    onPressed: () => _editSplit(trip, tripTxn),
+                    onPressed: () => showEditSplitSheet(
+                      context: context,
+                      trip: trip,
+                      tripTxn: tripTxn,
+                      selectedParticipants: _selectedParticipants,
+                      splitType: _splitType,
+                      splitAmounts: _splitAmounts,
+                      onChanged: () => setState(() {}),
+                    ),
                     icon: const Icon(LucideIcons.pencil, size: 14),
                     label: const Text('Edit'),
                     style: TextButton.styleFrom(
@@ -530,317 +519,6 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
             }),
           ],
         ),
-      ),
-    );
-  }
-
-  // ─── SPLIT EDIT + ACTIONS ───
-
-  void _editSplit(Trip trip, TripTransaction tripTxn) {
-    final amount = tripTxn.resolvedAmount ?? 0.0;
-    final controllers = <int, TextEditingController>{};
-    for (var p in _selectedParticipants) {
-      controllers[p.id] = TextEditingController(
-        text: (_splitAmounts[p.id] ?? 0).toString(),
-      );
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
-      ),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) {
-          final color = Theme.of(context).colorScheme;
-          final textTheme = Theme.of(context).textTheme;
-
-          double currentSum = 0;
-          for (var id in _selectedParticipants.map((p) => p.id)) {
-            currentSum += _splitAmounts[id] ?? 0;
-          }
-          final isPercentage = _splitType == SplitType.percentage;
-          final target = isPercentage ? 100.0 : amount;
-          final remaining = target - currentSum;
-
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-              left: 24,
-              right: 24,
-              top: 24,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.expense_editSplit,
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Split Type', style: textTheme.titleSmall),
-                    if ((_splitType == SplitType.custom ||
-                            _splitType == SplitType.percentage) &&
-                        amount > 0)
-                      Text(
-                        isPercentage
-                            ? 'Remaining: ${remaining.toStringAsFixed(1)}%'
-                            : 'Remaining: ${formatCurrency(remaining, decimals: 2)}',
-                        style: textTheme.labelLarge?.copyWith(
-                          color: remaining.abs() < 0.1
-                              ? color.primary
-                              : (remaining < 0 ? color.error : color.tertiary),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                SegmentedButton<SplitType>(
-                  segments: const [
-                    ButtonSegment(
-                      value: SplitType.equal,
-                      label: Text('Equal'),
-                      icon: Icon(LucideIcons.chartPie, size: 16),
-                    ),
-                    ButtonSegment(
-                      value: SplitType.percentage,
-                      label: Text('%'),
-                      icon: Icon(LucideIcons.percent, size: 16),
-                    ),
-                    ButtonSegment(
-                      value: SplitType.custom,
-                      label: Text('Custom'),
-                      icon: Icon(LucideIcons.calculator, size: 16),
-                    ),
-                  ],
-                  selected: {_splitType},
-                  onSelectionChanged: (Set<SplitType> selected) {
-                    setState(() => _splitType = selected.first);
-                    setModalState(() {});
-                  },
-                ),
-                const SizedBox(height: 16),
-                Text('Participants', style: textTheme.titleSmall),
-                const SizedBox(height: 12),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 300),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: trip.participants.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final p = trip.participants.toList()[index];
-                      final isSelected =
-                          _selectedParticipants.any((sp) => sp.id == p.id);
-
-                      return InkWell(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          setState(() {
-                            if (isSelected) {
-                              _selectedParticipants
-                                  .removeWhere((sp) => sp.id == p.id);
-                              _splitAmounts.remove(p.id);
-                            } else {
-                              _selectedParticipants.add(p);
-                              if (_splitType != SplitType.equal) {
-                                _splitAmounts[p.id] = 0.0;
-                                controllers[p.id] =
-                                    TextEditingController(text: '0');
-                              }
-                            }
-                          });
-                          setModalState(() {});
-                        },
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? color.primaryContainer.withValues(alpha: 0.2)
-                                : color.surface,
-                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
-                            border: Border.all(
-                              color: isSelected
-                                  ? color.primary.withValues(alpha: 0.5)
-                                  : color.outlineVariant.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: isSelected
-                                    ? color.primary
-                                    : color.surfaceContainerHighest,
-                                child: Text(
-                                  p.name[0].toUpperCase(),
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? color.onPrimary
-                                        : color.onSurfaceVariant,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: (_splitType == SplitType.custom ||
-                                            _splitType ==
-                                                SplitType.percentage) &&
-                                        isSelected
-                                    ? Row(
-                                        children: [
-                                          Text(
-                                            p.name,
-                                            style:
-                                                textTheme.titleMedium?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const Spacer(),
-                                          if (_splitType ==
-                                                  SplitType.percentage &&
-                                              amount > 0)
-                                            Text(
-                                              '${formatCurrency((amount * (_splitAmounts[p.id] ?? 0) / 100), decimals: 0)}  ',
-                                              style:
-                                                  textTheme.bodySmall?.copyWith(
-                                                color: color.primary,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          SizedBox(
-                                            width: 120,
-                                            child: TextField(
-                                              controller: controllers[p.id],
-                                              keyboardType: const TextInputType
-                                                  .numberWithOptions(
-                                                decimal: true,
-                                              ),
-                                              decoration: InputDecoration(
-                                                prefixText: _splitType ==
-                                                        SplitType.percentage
-                                                    ? ''
-                                                    : null,
-                                                prefix: _splitType != SplitType.percentage ? Padding(
-                                                  padding: const EdgeInsets.only(right: 4),
-                                                  child: CurrencyBadge(code: BaseCurrency.code, size: 12),
-                                                ) : null,
-                                                suffixText: _splitType ==
-                                                        SplitType.percentage
-                                                    ? '%'
-                                                    : null,
-                                                isDense: true,
-                                                contentPadding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 8,
-                                                  vertical: 8,
-                                                ),
-                                                border: OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                suffixIcon: IconButton(
-                                                  icon: Icon(
-                                                    LucideIcons.wand,
-                                                    size: 18,
-                                                    color: color.primary,
-                                                  ),
-                                                  tooltip:
-                                                      'Auto-fill remaining',
-                                                  padding: EdgeInsets.zero,
-                                                  constraints:
-                                                      const BoxConstraints(),
-                                                  onPressed: () {
-                                                    double othersSum = 0;
-                                                    for (var sp
-                                                        in _selectedParticipants) {
-                                                      if (sp.id == p.id) {
-                                                        continue;
-                                                      }
-                                                      othersSum +=
-                                                          _splitAmounts[
-                                                                  sp.id] ??
-                                                              0;
-                                                    }
-                                                    final rem =
-                                                        target - othersSum;
-                                                    setState(
-                                                      () =>
-                                                          _splitAmounts[p.id] =
-                                                              rem,
-                                                    );
-                                                    controllers[p.id]!.text =
-                                                        rem.toStringAsFixed(
-                                                      isPercentage ? 1 : 2,
-                                                    );
-                                                    setModalState(() {});
-                                                  },
-                                                ),
-                                              ),
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _splitAmounts[p.id] =
-                                                      double.tryParse(value) ??
-                                                          0.0;
-                                                });
-                                                setModalState(() {});
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : Text(
-                                        p.name,
-                                        style: textTheme.titleMedium?.copyWith(
-                                          fontWeight: isSelected
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                        ),
-                                      ),
-                              ),
-                              if (isSelected && _splitType == SplitType.equal)
-                                Icon(
-                                  LucideIcons.circleCheck,
-                                  color: color.primary,
-                                )
-                              else if (!isSelected)
-                                Icon(
-                                  LucideIcons.circle,
-                                  color: color.outline,
-                                ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: () {
-                    for (var c in controllers.values) {
-                      c.dispose();
-                    }
-                    ctx.pop();
-                  },
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
-                  child: Text(AppLocalizations.of(context)!.common_done),
-                ),
-              ],
-            ),
-          );
-        },
       ),
     );
   }
