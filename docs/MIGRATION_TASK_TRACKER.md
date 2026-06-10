@@ -319,16 +319,16 @@ features/category/presentation/screens/
 | GoalScreen | appBar: add, onRefresh | ScreenShell (SliverAppBar flattened) |
 | TransactionListScreen | N/A | Template X (custom — mode-switching AppBar, ExpandableFab, multi-select) |
 
-### Wave 3 — Detail Screens (large, full rewrite)
-- [ ] GoalDetailsScreen (1063 lines) → ScreenShell + body split
-- [ ] TripDetailScreen (2188 lines) → ScreenShell + body split
-- [ ] ExpenseDetailScreen (869 lines) → ScreenShell + body split
-- [ ] SplitDetailScreen (2279 lines) → ScreenShell + body split
+### Wave 3 — Detail Screens ✅
+- [x] GoalDetailsScreen (1063→500) → ScreenShell + QuickDepositSheet + ContributionHistorySheet
+- [x] TripDetailScreen (2188→718) → ScreenShell + TripInsightsTab
+- [x] ExpenseDetailScreen (869→450) → ScreenShell + EditSplitSheet
+- [x] SplitDetailScreen (2279→889) → ScreenShell + reused TripInsightsTab
 
-### Wave 4 — Analytics
+### Wave 4 — Analytics ✅
 - [x] Statistics → Template E + ScreenShell
 - [x] Monthly comparison → ScreenShell + NarrativeFact
-- [ ] Export options → ScreenShell
+- [x] Export options → ScreenShell
 
 ### Wave 5 — Dashboard (Plugin Architecture Consolidation)
 - [x] Banner extraction (PrioritizedBanner, HelpBanner, AutoImportBanner, BackgroundHealthBanner)
@@ -402,13 +402,13 @@ No immediate user value, but prevents future pain.
 | # | Work | Status |
 |---|------|--------|
 | 1 | **TonePack ↔ SkinPack split** | Not started |
-| 2 | **Analytics Insight Engine extraction** | Not started |
+| 2 | **Analytics Insight Engine extraction** | ✅ Done |
 | 3 | Dashboard engine isolation (Phase 8) | Not started |
 | 4 | AppScreenState authority enforcement | Enforced in new screens |
 | 5 | Remove duplicate state computation (old providers) | Phase 6 partial |
 | 6 | Feature flag cleanup after cutover | Not started |
 | 7 | Tone simplification (3 tones: Professional, Calm, Minimal) | After split |
-| 8 | **Sealed AnalyticsPeriod** (after #2) | Not started |
+| 8 | **Sealed AnalyticsPeriod** (after #2) | ✅ Done |
 
 ### Tier 3 — Optimization / Polish (last)
 
