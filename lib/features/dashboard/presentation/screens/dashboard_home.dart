@@ -1,42 +1,34 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
-import 'package:mudra_manager/core/utils/buddy_messages.dart';
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'dart:io' show Platform;
-
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/core/logging/app_log.dart';
-import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/engine/dashboard_state_provider.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/logic/attention/dashboard_attention_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/services/background_task_manager.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/services/card_interaction_tracker.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
-import 'package:mudra_manager/features/dashboard/data/widget_analytics_provider.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/core/state/dashboard_state.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
-import 'package:mudra_manager/features/account/data/reconciliation_service.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
-import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
-import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
-import 'package:mudra_manager/features/dashboard/data/background_health_provider.dart';
-import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
-import 'package:mudra_manager/features/dashboard/presentation/providers/permission_provider.dart';
+import 'package:mudra_manager/features/account/data/reconciliation_service.dart';
+import 'package:mudra_manager/features/dashboard/data/widget_analytics_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
-import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
-import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
-import 'package:mudra_manager/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart';
-import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
-import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
-import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/sms_success_celebration_sheet.dart';
+import 'package:mudra_manager/features/dashboard/presentation/widgets/staggered_widget_list.dart';
 import 'package:mudra_manager/features/gamification/presentation/widgets/streak_saved_celebration_sheet.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:mudra_manager/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart';
+import 'package:mudra_manager/shared/templates/templates.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class DashboardHome extends ConsumerStatefulWidget {
   const DashboardHome({super.key});
@@ -46,15 +38,11 @@ class DashboardHome extends ConsumerStatefulWidget {
 }
 
 class _DashboardHomeState extends ConsumerState<DashboardHome> {
-  final AppLog log = AppLog(getLogger(), 'DashBoardHome');
   static bool _hasAnimatedOnce = false;
-  int _revealedCount = 0;
-  bool _allRevealed = _hasAnimatedOnce;
 
   @override
   void initState() {
     super.initState();
-    // Deferred — gamification check-in and reconciliation don't affect first frame
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
       _performDailyCheckIn();
@@ -65,16 +53,12 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
 
   Future<void> _performDailyCheckIn() async {
     if (!mounted) return;
-
-    // Always cancel streak reminder when user opens the app
     await NotificationService.cancelStreakReminder();
-
     final prefs = SharedPrefsUtil.instance;
     final lastCheckIn = prefs.getLastDailyCheckIn();
     final now = DateTime.now();
-
-    final isDelayed = lastCheckIn != null &&
-        now.difference(lastCheckIn).inHours >= 24;
+    final isDelayed =
+        lastCheckIn != null && now.difference(lastCheckIn).inHours >= 24;
 
     if (lastCheckIn == null ||
         !(lastCheckIn.year == now.year &&
@@ -95,9 +79,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
-              builder: (_) => StreakSavedCelebrationSheet(
-                streakCount: streakCount,
-              ),
+              builder: (_) =>
+                  StreakSavedCelebrationSheet(streakCount: streakCount),
             );
           } else {
             SnackbarService.success(
@@ -107,51 +90,190 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
         } else {
           SnackbarService.success('🔥 $result');
         }
-        log.i('✅ Daily check-in completed');
       }
     }
   }
 
   void _checkSmsFirstImportCelebration() {
     final prefs = SharedPrefsUtil.instance;
-    if (!prefs.getSmsFirstImportReady() || prefs.getSmsFirstImportCelebrated()) {
+    if (!prefs.getSmsFirstImportReady() ||
+        prefs.getSmsFirstImportCelebrated()) {
       return;
     }
     prefs.setSmsFirstImportCelebrated();
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => const SmsSuccessCelebrationSheet(),
     );
   }
 
-  void _revealNext(int total) {
-    if (_allRevealed || !mounted) return;
-    Future.delayed(const Duration(milliseconds: 60), () {
-      if (!mounted) return;
-      setState(() {
-        _revealedCount++;
-        if (_revealedCount >= total) {
-          _allRevealed = true;
-          _hasAnimatedOnce = true;
-        }
-      });
-    });
+  @override
+  Widget build(BuildContext context) {
+    final dashboardState = ref.watch(dashboardStateV2Provider);
+    final widgets = ref.watch(orderedDashboardWidgetsProvider);
+    final attention = ref.watch(dashboardAttentionProvider);
+    ref.watch(spacingProvider);
+    final l10n = AppLocalizations.of(context)!;
+
+    if (dashboardState == null) {
+      return const _DashboardSkeleton();
+    }
+
+    final screenState = AppScreenState<DashboardState>(
+      gate: dashboardState.gate,
+      data: dashboardState,
+      alert: attention,
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'customize',
+            label: l10n.dashboard_customizeDashboard,
+            icon: LucideIcons.settings2,
+            onTap: () => context.push(AppRoutes.dashboardCustomize),
+          ),
+          ScreenAction(
+            id: 'refresh',
+            label: 'Refresh',
+            icon: LucideIcons.refreshCw,
+            onTap: () => _handleRefresh(ref, widgets),
+          ),
+        ],
+        fab: ScreenAction(
+          id: 'quick_add',
+          label: l10n.common_addLabel,
+          icon: LucideIcons.plus,
+          onTap: () => showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => const QuickAddTransactionSheet(compact: true),
+          ),
+        ),
+      ),
+    );
+
+    // Build content sections
+    final List<Widget> content = [];
+
+    // Zero-state check for transactions
+    final hasTransactions = dashboardState.balance != 0 ||
+        dashboardState.cashflow.incomeTotal != 0 ||
+        dashboardState.cashflow.expenseTotal != 0;
+    // We can use a more precise check if needed, but balance/cashflow is a good proxy.
+    // Re-check original logic: dashboardAsync.value?.transactions.where((t) => !t.isTransfer).toList() ?? [];
+
+    final nudgeDismissed = SharedPrefsUtil.instance.getFirstTxnNudgeDismissed();
+    final onboardedAt = SharedPrefsUtil.instance.getOnboardingCompletedAt();
+    final isNewUser = onboardedAt != null &&
+        DateTime.now().difference(onboardedAt).inHours < 24;
+
+    if (!hasTransactions && !nudgeDismissed) {
+      content.add(
+        _FirstTransactionNudge(
+          isNewUser: isNewUser,
+          onDismiss: () {
+            SharedPrefsUtil.instance.setFirstTxnNudgeDismissed();
+            ref.invalidate(dashboardStateV2Provider);
+          },
+        ),
+      );
+    }
+
+    if (widgets.isEmpty) {
+      content.add(_EmptyWidgetsState(l10n: l10n));
+    } else {
+      final List<Widget> widgetList =
+          widgets.map((w) => _TrackedWidget(widget: w)).toList();
+      widgetList.add(const AmbientBrandSection(showSignature: false));
+
+      content.add(
+        StaggeredWidgetList(
+          animate: !_hasAnimatedOnce,
+          onComplete: () => _hasAnimatedOnce = true,
+          children: widgetList,
+        ),
+      );
+    }
+
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: 'Mudra',
+        appBarMode: AppBarMode.standard,
+        enableRefresh: true,
+      ),
+      onRefresh: () => _handleRefresh(ref, widgets),
+      actions: screenState.actions,
+      body: CoreOverviewTemplate(
+        gate: screenState.gate,
+        alert: screenState.alert,
+        primaryMetric: _PrimaryMetric(
+          balance: dashboardState.balance,
+          label: l10n.accounts_totalBalance,
+        ),
+        content: content,
+      ),
+    );
   }
 
-  Widget _buildTrackedWidget(
-    BuildContext context,
+  Future<void> _handleRefresh(
     WidgetRef ref,
-    DashboardWidgetPlugin widget,
-  ) {
+    List<DashboardWidgetPlugin> widgets,
+  ) async {
+    await RefreshHelper.withMinDuration(() async {
+      ref.invalidate(dashboardStateV2Provider);
+      for (final widget in widgets) {
+        await widget.refresh(ref);
+      }
+      if (mounted) {
+        SnackbarService.success('✓');
+        _hasAnimatedOnce = true;
+      }
+    });
+  }
+}
+
+class _PrimaryMetric extends StatelessWidget {
+  final double balance;
+  final String label;
+
+  const _PrimaryMetric({required this.balance, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: textTheme.labelLarge?.copyWith(color: color.onSurfaceVariant),
+        ),
+        const SizedBox(height: 4),
+        CurrencyText(
+          amount: balance,
+          style: textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -1,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TrackedWidget extends ConsumerWidget {
+  final DashboardWidgetPlugin widget;
+
+  const _TrackedWidget({required this.widget});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     try {
-      final child = widget.build(context, ref);
-
-      // Record impression
       ref.read(widgetAnalyticsServiceProvider).recordImpression(widget.id);
-
       return GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
@@ -159,745 +281,104 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           ref.read(widgetAnalyticsServiceProvider).recordClick(widget.id);
           widget.onTap(context, ref);
         },
-        child: AbsorbPointer(
-          absorbing: false,
-          child: child,
-        ),
+        child: widget.build(context, ref),
       );
-    } catch (e, stack) {
-      log.e('Dashboard widget "${widget.id}" crashed', e, stack);
-      return Card(
-        color: Theme.of(context).colorScheme.errorContainer,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            'Widget failed to load',
-            style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
-          ),
-        ),
-      );
+    } catch (e) {
+      return _WidgetErrorCard(id: widget.id);
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final dashboardAsync = ref.watch(dashboardDataProvider);
-    final widgets = ref.watch(orderedDashboardWidgetsProvider);
-    final alerts = ref.watch(budgetAlertsProvider);
-    final hasSeenHelp = ref.watch(hasSeenHelpGuideProvider);
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final spacing = ref.watch(spacingProvider);
-
-
-    // Gate: show a single cohesive loading state until core data is ready
-    if (!dashboardAsync.hasValue) {
-      return Scaffold(
-        body: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  SizedBox(height: spacing.elementGap),
-                  const AccountCardSkeleton(),
-                  const QuickActionsSkeleton(),
-                  const CashFlowSkeleton(),
-                  const BudgetCardSkeleton(),
-                  const DashboardCardSkeleton(),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Data is ready — check for zero-state (new user, no transactions)
-    final data = dashboardAsync.value;
-    final txns = data?.transactions.where((t) => !t.isTransfer).toList() ?? [];
-    final hasTransactions = txns.isNotEmpty;
-    final nudgeDismissed = SharedPrefsUtil.instance.getFirstTxnNudgeDismissed();
-    final onboardedAt = SharedPrefsUtil.instance.getOnboardingCompletedAt();
-    final isNewUser = onboardedAt != null &&
-        DateTime.now().difference(onboardedAt).inHours < 24;
-
-    // Data is ready — stagger only once
-    if (!_allRevealed && _revealedCount == 0 && widgets.isNotEmpty) {
-      _revealNext(widgets.length);
-    }
-
-    final visibleCount = _allRevealed ? widgets.length : _revealedCount;
-
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          HapticFeedback.mediumImpact();
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => const QuickAddTransactionSheet(compact: true),
-          );
-        },
-        child: const Icon(LucideIcons.plus),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () => RefreshHelper.withMinDuration(() async {
-          ref.invalidate(dashboardDataProvider);
-          for (final widget in widgets) {
-            await widget.refresh(ref);
-          }
-          if (mounted) {
-            SnackbarService.success('✓');
-          }
-        }),
-        child: CustomScrollView(
-          key: const PageStorageKey('dashboard_scroll'),
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            // Priority-ranked: only ONE banner shows at a time
-            SliverToBoxAdapter(
-              child: RepaintBoundary(
-                child: _PrioritizedBanner(
-                  hasSeenHelp: hasSeenHelp,
-                  alerts: alerts,
-                ),
-              ),
-            ),
-            // Zero-state: first-transaction nudge for new users
-            if (!hasTransactions && !nudgeDismissed)
-              SliverToBoxAdapter(
-                child: RepaintBoundary(
-                  child: _FirstTransactionNudge(
-                    isNewUser: isNewUser,
-                    onDismiss: () {
-                      SharedPrefsUtil.instance.setFirstTxnNudgeDismissed();
-                      ref.invalidate(dashboardDataProvider);
-                    },
-                  ),
-                ),
-              ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final widget = widgets[index];
-                  if (index < visibleCount) {
-                    if (index == visibleCount - 1 && !_allRevealed) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        _revealNext(widgets.length);
-                      });
-                    }
-                    final child = _WidgetErrorBoundary(
-                      id: widget.id,
-                      child: _buildTrackedWidget(context, ref, widget),
-                    );
-                    // Skip fade-in animation after first launch
-                    if (_hasAnimatedOnce) return child;
-                    return child
-                        .animate()
-                        .fadeIn(duration: 300.ms, curve: Curves.easeOut)
-                        .slideY(
-                          begin: 0.1,
-                          end: 0,
-                          duration: 400.ms,
-                          curve: Curves.easeOutBack,
-                        );
-                  }
-                  return const SizedBox.shrink();
-                },
-                childCount: widgets.length,
-              ),
-            ),
-            if (widgets.isEmpty)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          LucideIcons.layoutDashboard,
-                          size: 64,
-                          color: color.onSurfaceVariant,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          BuddyMessages.noData,
-                          style: textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          AppLocalizations.of(context)!.dashboard_enableCardsDesc,
-                          style: textTheme.bodyMedium
-                              ?.copyWith(color: color.onSurfaceVariant),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        FilledButton.icon(
-                          onPressed: () =>
-                              context.push(AppRoutes.dashboardCustomize),
-                          icon: const Icon(LucideIcons.plus),
-                          label: Text(AppLocalizations.of(context)!.dashboard_enableCards),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            if (widgets.isNotEmpty) ...[
-              SliverToBoxAdapter(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: TextButton.icon(
-                      onPressed: () =>
-                          context.push(AppRoutes.dashboardCustomize),
-                      icon: Icon(
-                        LucideIcons.settings2,
-                        size: 16,
-                        color: color.onSurfaceVariant,
-                      ),
-                      label: Text(
-                        AppLocalizations.of(context)!.dashboard_customizeDashboard,
-                        style: textTheme.labelMedium
-                            ?.copyWith(color: color.onSurfaceVariant),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(
-                child: AmbientBrandSection(showSignature: false),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
   }
 }
 
-/// Shows only the highest-priority banner. One slot, one message.
-/// Priority: BackgroundHealth > BudgetAlert > AutoImport > Help
-class _PrioritizedBanner extends ConsumerWidget {
-  final bool hasSeenHelp;
-  final List<BudgetAlert> alerts;
-
-  const _PrioritizedBanner({
-    required this.hasSeenHelp,
-    required this.alerts,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // P0: Background health issue (system broken)
-    final unhealthy = ref.watch(backgroundTaskUnhealthyProvider).value ?? false;
-    if (unhealthy) return _BackgroundHealthBanner();
-
-    // P1: Budget alerts (money at risk)
-    if (alerts.isNotEmpty) {
-      return Column(
-        children: [
-          BudgetAlertBanner(
-            alerts: alerts,
-            onDismiss: () {
-              ref.read(budgetAlertsProvider.notifier).dismissAlert(alerts.first);
-            },
-          ),
-          const SizedBox(height: 16),
-        ],
-      );
-    }
-
-    // P2: Auto-import setup/pending
-    if (Platform.isAndroid) {
-      final granted = ref.watch(smsPermissionGrantedProvider);
-      if (!granted.isLoading) {
-        final isGranted = granted.value == true;
-        final autoImportOn = SharedPrefsUtil.instance.getSmsImportEnabled();
-        if (isGranted && autoImportOn) {
-          final pending = ref.watch(pendingCountProvider).value ?? 0;
-          if (pending > 0) return _AutoImportBanner();
-        } else if (isGranted && !autoImportOn) {
-          return _AutoImportBanner();
-        } else if (!SharedPrefsUtil.instance.getSmsbannerDismiss()) {
-          return _AutoImportBanner();
-        }
-      }
-    }
-
-    // P3: Help guide for new users
-    if (!hasSeenHelp) return _HelpBanner();
-
-    return const SizedBox.shrink();
-  }
-}
-
-class _HelpBanner extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final spacing = ref.watch(spacingProvider);
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = color.primary;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              accent.withValues(alpha: isDark ? 0.2 : 0.12),
-              accent.withValues(alpha: isDark ? 0.08 : 0.04),
-            ],
-          ),
-          border: Border.all(color: accent.withValues(alpha: 0.3)),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          onTap: () {
-            HapticFeedback.mediumImpact();
-            context.push(AppRoutes.help);
-          },
-          child: Padding(
-            padding: EdgeInsets.all(spacing.cardInner),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(spacing.elementGap),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  ),
-                  child: Icon(
-                    LucideIcons.badgeQuestionMark,
-                    color: accent,
-                    size: 20,
-                  ),
-                ),
-                SizedBox(width: spacing.elementGap),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.dashboard_newToApp,
-                        style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: color.onSurface,
-                        ),
-                      ),
-                      SizedBox(height: spacing.elementGapUltraMin),
-                      Text(
-                        AppLocalizations.of(context)!.dashboard_tapToExploreHelp,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  LucideIcons.chevronRight,
-                  size: 18,
-                  color: color.onSurfaceVariant,
-                ),
-                SizedBox(width: spacing.elementGap),
-                GestureDetector(
-                  onTap: () async {
-                    await SharedPrefsUtil.instance.setHasSeenHelpGuide(true);
-                    ref.read(hasSeenHelpGuideProvider.notifier).set(true);
-                  },
-                  child: Icon(
-                    LucideIcons.x,
-                    size: 18,
-                    color: color.onSurfaceVariant.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AutoImportBanner extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (!Platform.isAndroid) return const SizedBox.shrink();
-
-    final granted = ref.watch(smsPermissionGrantedProvider);
-    if (granted.isLoading) return const SizedBox.shrink();
-
-    final isGranted = granted.value == true;
-    final autoImportOn = SharedPrefsUtil.instance.getSmsImportEnabled();
-    final spacing = ref.watch(spacingProvider);
-
-    if (isGranted && autoImportOn) {
-      final pending = ref.watch(pendingCountProvider).value ?? 0;
-      if (pending > 0) {
-        return _buildActiveCard(context, ref, spacing, pending);
-      }
-      return const SizedBox.shrink();
-    }
-
-    if (isGranted && !autoImportOn) {
-      return _buildPausedPill(context, ref, spacing);
-    }
-
-    final dismissed = SharedPrefsUtil.instance.getSmsbannerDismiss();
-    if (dismissed) return const SizedBox.shrink();
-
-    return _buildSetupBanner(context, ref, spacing);
-  }
-
-  Widget _buildActiveCard(
-    BuildContext context,
-    WidgetRef ref,
-    AppSpacing spacing,
-    int pending,
-  ) {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = color.tertiary;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
-      ),
-      child: GestureDetector(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          context
-              .push(pending > 0 ? AppRoutes.smsActivity : AppRoutes.smsImport);
-        },
-        child: Container(
-          padding: EdgeInsets.all(spacing.cardInner),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            color:
-                color.tertiaryContainer.withValues(alpha: isDark ? 0.4 : 0.3),
-            border: Border.all(color: accent.withValues(alpha: 0.2)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                ),
-                child: Icon(LucideIcons.bellRing, color: accent, size: 18),
-              ),
-              SizedBox(width: spacing.elementGap + 4),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$pending pending review',
-                      style: textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: color.onTertiaryContainer,
-                      ),
-                    ),
-                    Text(
-                      AppLocalizations.of(context)!.dashboard_tapToReviewTxn,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                ),
-                child: Text(
-                  '$pending',
-                  style: textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: color.onTertiaryContainer,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPausedPill(
-    BuildContext context,
-    WidgetRef ref,
-    AppSpacing spacing,
-  ) {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = color.tertiary;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
-      ),
-      child: GestureDetector(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          context.push(AppRoutes.smsImport);
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: spacing.cardInner,
-            vertical: spacing.elementGap + 2,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            color:
-                color.tertiaryContainer.withValues(alpha: isDark ? 0.4 : 0.3),
-            border: Border.all(color: accent.withValues(alpha: 0.25)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: accent,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              SizedBox(width: spacing.elementGap + 2),
-              Text(
-                AppLocalizations.of(context)!.dashboard_autoImportPaused,
-                style: textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: color.onTertiaryContainer,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                AppLocalizations.of(context)!.dashboard_enable,
-                style: textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: color.onSurfaceVariant,
-                ),
-              ),
-              SizedBox(width: spacing.cardVerticalMin),
-              Icon(
-                LucideIcons.chevronRight,
-                size: 14,
-                color: color.onSurfaceVariant.withValues(alpha: 0.5),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSetupBanner(
-    BuildContext context,
-    WidgetRef ref,
-    AppSpacing spacing,
-  ) {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = color.tertiary;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color.tertiaryContainer.withValues(alpha: isDark ? 0.5 : 0.4),
-              color.tertiaryContainer.withValues(alpha: isDark ? 0.2 : 0.1),
-            ],
-          ),
-          border: Border.all(color: accent.withValues(alpha: 0.3)),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          onTap: () {
-            HapticFeedback.mediumImpact();
-            context.push(AppRoutes.smsImport);
-          },
-          child: Padding(
-            padding: EdgeInsets.all(spacing.cardInner),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(spacing.elementGap + 2),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  ),
-                  child: Icon(LucideIcons.bellRing, color: accent, size: 20),
-                ),
-                SizedBox(width: spacing.cardInner),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.dashboard_enableAutoImport,
-                        style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: color.onSurface,
-                        ),
-                      ),
-                      SizedBox(height: spacing.cardVerticalMin / 2),
-                      Text(
-                        AppLocalizations.of(context)!.dashboard_autoTrackDesc,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  LucideIcons.chevronRight,
-                  size: 18,
-                  color: color.onSurfaceVariant,
-                ),
-                SizedBox(width: spacing.cardVerticalMin),
-                GestureDetector(
-                  onTap: () {
-                    SharedPrefsUtil.instance.setSmsBannerDismiss();
-                    ref.invalidate(smsPermissionGrantedProvider);
-                  },
-                  child: Icon(
-                    LucideIcons.x,
-                    size: 18,
-                    color: color.onSurfaceVariant.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
-
-
-class _BackgroundHealthBanner extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final unhealthy = ref.watch(backgroundTaskUnhealthyProvider).value ?? false;
-    if (!unhealthy) return const SizedBox.shrink();
-
-    final spacing = ref.watch(spacingProvider);
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
-      ),
-      child: Container(
-        padding: EdgeInsets.all(spacing.cardInner),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          color: color.errorContainer.withValues(alpha: 0.3),
-          border: Border.all(color: color.error.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          children: [
-            Icon(LucideIcons.triangleAlert, size: 20, color: color.error),
-            SizedBox(width: spacing.elementGap),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.dashboard_bgSyncIssueTitle,
-                    style: textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: color.onErrorContainer,
-                    ),
-                  ),
-                  Text(
-                    AppLocalizations.of(context)!.dashboard_bgSyncIssueDesc,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: color.onErrorContainer.withValues(alpha: 0.7),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            GestureDetector(
-              onTap: () async {
-                await BackgroundTaskManager.dismissFailureBanner();
-                ref.invalidate(backgroundTaskUnhealthyProvider);
-              },
-              child: Icon(
-                LucideIcons.x,
-                size: 18,
-                color: color.onErrorContainer.withValues(alpha: 0.6),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _WidgetErrorBoundary extends StatefulWidget {
+class _WidgetErrorCard extends StatelessWidget {
   final String id;
-  final Widget child;
-
-  const _WidgetErrorBoundary({required this.id, required this.child});
-
-  @override
-  State<_WidgetErrorBoundary> createState() => _WidgetErrorBoundaryState();
-}
-
-class _WidgetErrorBoundaryState extends State<_WidgetErrorBoundary> {
-  bool _hasError = false;
+  const _WidgetErrorCard({required this.id});
 
   @override
   Widget build(BuildContext context) {
-    if (_hasError) return const SizedBox.shrink();
-    return widget.child;
+    final color = Theme.of(context).colorScheme;
+    return Card(
+      color: color.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          'Widget "$id" failed to load',
+          style: TextStyle(color: color.onErrorContainer),
+        ),
+      ),
+    );
   }
+}
+
+class _EmptyWidgetsState extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _EmptyWidgetsState({required this.l10n});
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _hasError = false;
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              LucideIcons.layoutDashboard,
+              size: 64,
+              color: color.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              BuddyMessages.noData,
+              style:
+                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.dashboard_enableCardsDesc,
+              style:
+                  textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () => context.push(AppRoutes.dashboardCustomize),
+              icon: const Icon(LucideIcons.plus),
+              label: Text(l10n.dashboard_enableCards),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardSkeleton extends ConsumerWidget {
+  const _DashboardSkeleton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                SizedBox(height: spacing.elementGap),
+                const AccountCardSkeleton(),
+                const QuickActionsSkeleton(),
+                const CashFlowSkeleton(),
+                const BudgetCardSkeleton(),
+                const DashboardCardSkeleton(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -916,7 +397,7 @@ class _FirstTransactionNudge extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ctxt = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     final accent = color.primary;
 
     return Padding(
@@ -926,7 +407,6 @@ class _FirstTransactionNudge extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          // Main nudge card
           GestureDetector(
             onTap: () {
               HapticFeedback.mediumImpact();
@@ -966,7 +446,7 @@ class _FirstTransactionNudge extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          ctxt.dashboard_addFirstExpense,
+                          l10n.dashboard_addFirstExpense,
                           style: textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: color.onSurface,
@@ -974,7 +454,7 @@ class _FirstTransactionNudge extends ConsumerWidget {
                         ),
                         SizedBox(height: spacing.elementGapUltraMin),
                         Text(
-                          ctxt.dashboard_addFirstExpenseDesc,
+                          l10n.dashboard_addFirstExpenseDesc,
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
@@ -1000,7 +480,6 @@ class _FirstTransactionNudge extends ConsumerWidget {
               ),
             ),
           ),
-          // Quick actions grid for new users
           if (isNewUser) ...[
             SizedBox(height: spacing.elementGap),
             Container(
@@ -1016,7 +495,7 @@ class _FirstTransactionNudge extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    ctxt.dashboard_meanwhile,
+                    l10n.dashboard_meanwhile,
                     style: textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: color.onSurfaceVariant,
@@ -1027,7 +506,7 @@ class _FirstTransactionNudge extends ConsumerWidget {
                     children: [
                       _QuickActionChip(
                         icon: LucideIcons.plus,
-                        label: ctxt.dashboard_addExpense,
+                        label: l10n.dashboard_addExpense,
                         onTap: () => showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -1037,7 +516,7 @@ class _FirstTransactionNudge extends ConsumerWidget {
                       SizedBox(width: spacing.elementGap),
                       _QuickActionChip(
                         icon: LucideIcons.target,
-                        label: ctxt.dashboard_setBudget,
+                        label: l10n.dashboard_setBudget,
                         onTap: () => context.push(AppRoutes.addBudget),
                       ),
                     ],
@@ -1047,20 +526,20 @@ class _FirstTransactionNudge extends ConsumerWidget {
                     children: [
                       _QuickActionChip(
                         icon: LucideIcons.piggyBank,
-                        label: ctxt.dashboard_createGoal,
+                        label: l10n.dashboard_createGoal,
                         onTap: () => context.push(AppRoutes.addGoal),
                       ),
                       SizedBox(width: spacing.elementGap),
                       _QuickActionChip(
                         icon: LucideIcons.landmark,
-                        label: ctxt.dashboard_addAccount,
+                        label: l10n.dashboard_addAccount,
                         onTap: () => context.push(AppRoutes.addAccount),
                       ),
                     ],
                   ),
                   SizedBox(height: spacing.elementGap),
                   Text(
-                    ctxt.dashboard_testTip,
+                    l10n.dashboard_testTip,
                     style: textTheme.bodySmall?.copyWith(
                       color: color.onSurfaceVariant.withValues(alpha: 0.7),
                     ),
@@ -1097,11 +576,11 @@ class _QuickActionChip extends StatelessWidget {
           HapticFeedback.mediumImpact();
           onTap();
         },
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.625),
+        borderRadius: BorderRadius.circular(10),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.625),
+            borderRadius: BorderRadius.circular(10),
             color: color.surfaceContainerHighest.withValues(alpha: 0.5),
           ),
           child: Row(

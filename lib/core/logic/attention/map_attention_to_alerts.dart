@@ -66,6 +66,47 @@ List<PriorityAlert> mapAttentionItemsToAlerts(
           route: AppRoutes.goalScreen,
           type: AlertType.info,
         ));
+
+      case BackgroundUnhealthy():
+        alerts.add(PriorityAlert(
+          title: l10n?.dashboard_bgSyncIssueTitle ?? 'Sync Issue',
+          message: l10n?.dashboard_bgSyncIssueDesc ??
+              'Background tasks are not running',
+          route: '', // Handled by dismiss in UI for now or just info
+          type: AlertType.urgent,
+        ));
+
+      case SmsImportPending(:final count):
+        alerts.add(PriorityAlert(
+          title: 'Action Needed', // TODO: Add to l10n if missing
+          message: '$count pending review',
+          route: AppRoutes.smsActivity,
+          type: AlertType.warning,
+        ));
+
+      case SmsImportPaused():
+        alerts.add(PriorityAlert(
+          title: l10n?.dashboard_autoImportPaused ?? 'Import Paused',
+          message: l10n?.dashboard_enable ?? 'Tap to enable',
+          route: AppRoutes.smsImport,
+          type: AlertType.info,
+        ));
+
+      case SmsImportSetup():
+        alerts.add(PriorityAlert(
+          title: l10n?.dashboard_enableAutoImport ?? 'Enable Auto Import',
+          message: l10n?.dashboard_autoTrackDesc ?? 'Track expenses from SMS',
+          route: AppRoutes.smsImport,
+          type: AlertType.info,
+        ));
+
+      case HelpNeeded():
+        alerts.add(PriorityAlert(
+          title: l10n?.dashboard_newToApp ?? 'New to Mudra?',
+          message: l10n?.dashboard_tapToExploreHelp ?? 'Explore the help guide',
+          route: AppRoutes.help,
+          type: AlertType.info,
+        ));
     }
   }
 
