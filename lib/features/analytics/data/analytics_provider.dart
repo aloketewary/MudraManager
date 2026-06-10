@@ -10,6 +10,7 @@ import 'package:mudra_manager/features/analytics/data/tax_deduction_provider.dar
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_aggregation_service.dart';
 import 'package:mudra_manager/features/analytics/domain/narrative_fact.dart';
+import 'package:mudra_manager/features/analytics/application/analytics_insight_engine.dart';
 
 final analyticsServiceProvider =
     Provider.autoDispose<AdvancedAnalyticsService>((ref) {
@@ -91,7 +92,7 @@ final analyticsChartProvider =
   return ref.watch(analyticsAggregatesProvider(periodKey).future);
 });
 
-/// Derived narrative facts from aggregates.
+/// Derived narrative facts from aggregates via InsightEngine.
 final analyticsNarrativeFactsProvider =
     FutureProvider.autoDispose.family<List<NarrativeFact>, String>((
   ref,
@@ -99,91 +100,10 @@ final analyticsNarrativeFactsProvider =
 ) async {
   final aggregates =
       await ref.watch(analyticsAggregatesProvider(periodKey).future);
-  final facts = <NarrativeFact>[];
-
-  // 1. Threshold for significance (Materiality)
-  const minSpendThreshold = 100.0;
-
-  // 2. Identify top spending category
-  if (aggregates.categoryBreakdown.isNotEmpty) {
-    final sorted = aggregates.categoryBreakdown.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final top = sorted.first;
-    if (top.value > minSpendThreshold) {
-      facts.add(
-        TopCategoryFact(
-          category: top.key,
-          percentage: (top.value / aggregates.totalExpense) * 100,
-        ),
-      );
-    }
-  }
-
-  // 3. New / Disappeared Categories (Requires comparison month)
-  if (periodKey == 'Month') {
-    final trends = aggregates.monthlyExpenseTrends;
-    for (final entry in trends.entries) {
-      final history = entry.value;
-      if (history.length >= 2) {
-        final current = history.last;
-        final previous = history[history.length - 2];
-
-        if (current > minSpendThreshold && previous == 0) {
-          facts.add(
-            NewSpendingCategoryFact(category: entry.key, amount: current),
-          );
-        } else if (current == 0 && previous > minSpendThreshold) {
-          facts.add(
-            CategoryStoppedFact(category: entry.key, previousAmount: previous),
-          );
-        }
-      }
-    }
-  }
-
-  // 4. Identify spending patterns (days)
-  final byDay = aggregates.spendingByDayOfWeek;
-  const minDailySpend = 50.0;
-  if (byDay.values.any((v) => v > minDailySpend)) {
-    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final peakDay =
-        days.reduce((a, b) => (byDay[a] ?? 0) > (byDay[b] ?? 0) ? a : b);
-
-    final weekdayTotal = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
-        .fold(0.0, (s, d) => s + (byDay[d] ?? 0));
-    final weekendTotal =
-        ['Sat', 'Sun'].fold(0.0, (s, d) => s + (byDay[d] ?? 0));
-
-    if (weekendTotal / 2 > (weekdayTotal / 5) * 1.5) {
-      facts.add(WeekendPeakFact(peakDay: peakDay));
-    } else if (weekdayTotal / 5 > (weekendTotal / 2) * 1.5) {
-      facts.add(WeekdayPeakFact(peakDay: peakDay));
-    }
-  }
-
-  // 5. Forecast (Gate: min 7 days elapsed)
-  final now = DateTime.now();
-  if (periodKey == 'Month' && now.day >= 7) {
-    final projected =
-        aggregates.avgDailySpend * DateTime(now.year, now.month + 1, 0).day;
-    final previousTotal = aggregates.previousFullExpense;
-
-    if (previousTotal != null && previousTotal > 0) {
-      final variance = projected - previousTotal;
-      if (variance.abs() > (previousTotal * 0.05)) {
-        // Only if > 5% change
-        facts.add(
-          SpendingForecastFact(
-            projectedAmount: projected,
-            variance: variance,
-            comparisonPeriod: 'last month',
-          ),
-        );
-      }
-    }
-  }
-
-  return facts;
+  return AnalyticsInsightEngine.standard.generate(
+    aggregates,
+    periodKey: periodKey,
+  );
 });
 
 final predictedSpendingProvider =
