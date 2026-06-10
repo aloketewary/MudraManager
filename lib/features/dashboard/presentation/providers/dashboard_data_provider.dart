@@ -242,8 +242,7 @@ final dashboardAccountsProvider = Provider<List<Account>>((ref) {
 final dashboardAccountBalancesProvider = Provider<Map<int, double>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) =>
-          asyncValue.value?.accountBalances ?? <int, double>{},
+      (asyncValue) => asyncValue.value?.accountBalances ?? <int, double>{},
     ),
   );
 });

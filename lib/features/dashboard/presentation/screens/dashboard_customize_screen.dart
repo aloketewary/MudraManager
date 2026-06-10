@@ -108,7 +108,8 @@ class _DashboardCustomizeScreenState
         ],
       ),
       body: prefsAsync.when(
-        loading: () => ListView(children: List.generate(4, (_) => const DashboardCardSkeleton())),
+        loading: () => ListView(
+            children: List.generate(4, (_) => const DashboardCardSkeleton())),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
         data: (prefs) {
           if (!_initialized) {
@@ -241,7 +242,8 @@ class _DashboardCustomizeScreenState
                 SizedBox(height: spacing.elementGap),
                 Consumer(
                   builder: (context, ref, _) {
-                    final isPro = ref.watch(hasFullAccessProvider).value ?? false;
+                    final isPro =
+                        ref.watch(hasFullAccessProvider).value ?? false;
                     return Row(
                       children: [
                         Icon(LucideIcons.sparkles, size: 14, color: accent),
@@ -297,7 +299,8 @@ class _DashboardCustomizeScreenState
       ),
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: spacing.cardInner, vertical: spacing.elementGap),
+        padding: EdgeInsets.symmetric(
+            horizontal: spacing.cardInner, vertical: spacing.elementGap),
         child: Row(
           children: [
             // Icon

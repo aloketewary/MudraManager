@@ -95,36 +95,42 @@ final dailyBriefingProvider = Provider<Briefing?>((ref) {
     final billName = rawName.isEmpty
         ? (bill.category.value?.name ?? 'Bill')
         : FieldEncryptionService.safeDisplay(
-            rawName, bill.category.value?.name ?? 'Bill',);
+            rawName,
+            bill.category.value?.name ?? 'Bill',
+          );
     final amount = formatCurrencyCompact(
       GuestModeUtil.applyGuestMode(bill.amount, isGuest),
     );
-    signals.add(_Signal(
-      urgency: 100,
-      type: BriefingSignalType.billDueToday,
-      params: {'name': billName, 'amount': amount},
-      actionRoute: AppRoutes.recurringTransactions,
-    ),);
+    signals.add(
+      _Signal(
+        urgency: 100,
+        type: BriefingSignalType.billDueToday,
+        params: {'name': billName, 'amount': amount},
+        actionRoute: AppRoutes.recurringTransactions,
+      ),
+    );
   }
 
   // Signal: Budget exceeded (urgency 80)
   if (data.budgets.isNotEmpty) {
-    final worst = data.budgets
-        .where((b) => b.spent > b.budget.amount)
-        .toList()
-      ..sort((a, b) =>
-          (b.spent - b.budget.amount).compareTo(a.spent - a.budget.amount),);
+    final worst = data.budgets.where((b) => b.spent > b.budget.amount).toList()
+      ..sort(
+        (a, b) =>
+            (b.spent - b.budget.amount).compareTo(a.spent - a.budget.amount),
+      );
     if (worst.isNotEmpty) {
       final b = worst.first;
       final over = formatCurrencyCompact(
         GuestModeUtil.applyGuestMode(b.spent - b.budget.amount, isGuest),
       );
-      signals.add(_Signal(
-        urgency: 80,
-        type: BriefingSignalType.budgetExceeded,
-        params: {'name': b.budget.name, 'amount': over},
-        actionRoute: AppRoutes.budgetDashboard,
-      ),);
+      signals.add(
+        _Signal(
+          urgency: 80,
+          type: BriefingSignalType.budgetExceeded,
+          params: {'name': b.budget.name, 'amount': over},
+          actionRoute: AppRoutes.budgetDashboard,
+        ),
+      );
     }
   }
 
@@ -136,35 +142,39 @@ final dailyBriefingProvider = Provider<Briefing?>((ref) {
     final drift = drifts.first;
     final cat = drift.title.split(' ').first;
     final pct = drift.title.split(' ').last;
-    signals.add(_Signal(
-      urgency: 70,
-      type: BriefingSignalType.spendingDrift,
-      params: {'category': cat, 'percent': pct},
-      actionRoute: drift.actionRoute,
-    ),);
+    signals.add(
+      _Signal(
+        urgency: 70,
+        type: BriefingSignalType.spendingDrift,
+        params: {'category': cat, 'percent': pct},
+        actionRoute: drift.actionRoute,
+      ),
+    );
   }
 
   // Signal: Bills due soon, not today (urgency 60)
-  final billsSoon = data.recurringExpenses
-      .where((r) {
-        final d = r.nextDueDate.difference(now).inDays;
-        return d > 0 && d <= 3;
-      })
-      .toList();
+  final billsSoon = data.recurringExpenses.where((r) {
+    final d = r.nextDueDate.difference(now).inDays;
+    return d > 0 && d <= 3;
+  }).toList();
   if (billsSoon.isNotEmpty && billsToday.isEmpty) {
     final bill = billsSoon.first;
     final rawSoonName = bill.description ?? '';
     final billName = rawSoonName.isEmpty
         ? (bill.category.value?.name ?? 'Bill')
         : FieldEncryptionService.safeDisplay(
-            rawSoonName, bill.category.value?.name ?? 'Bill',);
+            rawSoonName,
+            bill.category.value?.name ?? 'Bill',
+          );
     final days = bill.nextDueDate.difference(now).inDays;
-    signals.add(_Signal(
-      urgency: 60,
-      type: BriefingSignalType.billDueSoon,
-      params: {'name': billName, 'days': days},
-      actionRoute: AppRoutes.recurringTransactions,
-    ),);
+    signals.add(
+      _Signal(
+        urgency: 60,
+        type: BriefingSignalType.billDueSoon,
+        params: {'name': billName, 'days': days},
+        actionRoute: AppRoutes.recurringTransactions,
+      ),
+    );
   }
 
   // Signal: Overspending vs income (urgency 50) — requires regular income
@@ -175,12 +185,14 @@ final dailyBriefingProvider = Provider<Briefing?>((ref) {
     final overFmt = formatCurrencyCompact(
       GuestModeUtil.applyGuestMode(over, isGuest),
     );
-    signals.add(_Signal(
-      urgency: 50,
-      type: BriefingSignalType.overspending,
-      params: {'amount': overFmt},
-      actionRoute: AppRoutes.budgetDashboard,
-    ),);
+    signals.add(
+      _Signal(
+        urgency: 50,
+        type: BriefingSignalType.overspending,
+        params: {'amount': overFmt},
+        actionRoute: AppRoutes.budgetDashboard,
+      ),
+    );
   }
 
   // Signal: Positive — month-over-month improvement (urgency 20) — requires depth ≥ 2
@@ -190,31 +202,37 @@ final dailyBriefingProvider = Provider<Briefing?>((ref) {
     final lastMonthSameDay = DateTime(now.year, now.month - 1, now.day);
 
     final lastExp = txns
-        .where((t) =>
-            t.isExpense &&
-            t.date.isAfter(
-              lastMonthStart.subtract(const Duration(days: 1)),
-            ) &&
-            t.date.isBefore(
-              lastMonthSameDay.add(const Duration(days: 1)),
-            ),)
+        .where(
+          (t) =>
+              t.isExpense &&
+              t.date.isAfter(
+                lastMonthStart.subtract(const Duration(days: 1)),
+              ) &&
+              t.date.isBefore(
+                lastMonthSameDay.add(const Duration(days: 1)),
+              ),
+        )
         .fold<double>(0, (s, t) => s + t.baseAmount);
 
     final thisExp = txns
-        .where((t) =>
-            t.isExpense &&
-            t.date.isAfter(
-              thisMonthStart.subtract(const Duration(days: 1)),
-            ),)
+        .where(
+          (t) =>
+              t.isExpense &&
+              t.date.isAfter(
+                thisMonthStart.subtract(const Duration(days: 1)),
+              ),
+        )
         .fold<double>(0, (s, t) => s + t.baseAmount);
 
     if (lastExp > 0 && thisExp < lastExp * 0.9) {
       final pct = ((lastExp - thisExp) / lastExp * 100).round();
-      signals.add(_Signal(
-        urgency: 20,
-        type: BriefingSignalType.improvement,
-        params: {'percent': pct},
-      ),);
+      signals.add(
+        _Signal(
+          urgency: 20,
+          type: BriefingSignalType.improvement,
+          params: {'percent': pct},
+        ),
+      );
     }
   }
 
@@ -374,17 +392,27 @@ class DailyBriefingCard extends ConsumerWidget {
   String _formatNarrative(AppLocalizations l10n, Briefing b) {
     return switch (b.signalType) {
       BriefingSignalType.billDueToday => l10n.briefing_billDueToday(
-          b.params['name'] as String, b.params['amount'] as String,),
+          b.params['name'] as String,
+          b.params['amount'] as String,
+        ),
       BriefingSignalType.budgetExceeded => l10n.briefing_budgetExceeded(
-          b.params['name'] as String, b.params['amount'] as String,),
+          b.params['name'] as String,
+          b.params['amount'] as String,
+        ),
       BriefingSignalType.spendingDrift => l10n.briefing_spendingDrift(
-          b.params['category'] as String, b.params['percent'] as String,),
+          b.params['category'] as String,
+          b.params['percent'] as String,
+        ),
       BriefingSignalType.billDueSoon => l10n.briefing_billDueSoon(
-          b.params['name'] as String, b.params['days'] as int,),
+          b.params['name'] as String,
+          b.params['days'] as int,
+        ),
       BriefingSignalType.overspending => l10n.briefing_overspending(
-          b.params['amount'] as String,),
+          b.params['amount'] as String,
+        ),
       BriefingSignalType.improvement => l10n.briefing_improvement(
-          b.params['percent'] as int,),
+          b.params['percent'] as int,
+        ),
     };
   }
 

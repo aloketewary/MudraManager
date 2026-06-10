@@ -70,7 +70,8 @@ class RecurringExpensesScreen extends ConsumerWidget {
                       color: color.errorContainer,
                       borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
-                    child: Icon(LucideIcons.repeat, color: color.error, size: 24),
+                    child:
+                        Icon(LucideIcons.repeat, color: color.error, size: 24),
                   ),
                   title: Text(
                     category?.name ?? 'Uncategorized',

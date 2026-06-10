@@ -48,8 +48,7 @@ class QuickActionButton extends ConsumerWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isNarrow = constraints.maxWidth < 350;
-          final isLargeText =
-              MediaQuery.textScalerOf(context).scale(14) > 18;
+          final isLargeText = MediaQuery.textScalerOf(context).scale(14) > 18;
 
           if (isLargeText || isNarrow) {
             return Column(

@@ -18,4 +18,3 @@ class AccountCard {
     required this.accountType,
   });
 }
-

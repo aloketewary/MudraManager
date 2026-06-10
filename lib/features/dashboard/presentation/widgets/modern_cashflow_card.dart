@@ -179,8 +179,12 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
             color: accent.withValues(alpha: 0.12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.horizontal(
-                left: isExpense ? Radius.zero : Radius.circular(spacing.radiusMedium),
-                right: isExpense ? Radius.circular(spacing.radiusMedium) : Radius.zero,
+                left: isExpense
+                    ? Radius.zero
+                    : Radius.circular(spacing.radiusMedium),
+                right: isExpense
+                    ? Radius.circular(spacing.radiusMedium)
+                    : Radius.zero,
               ),
             ),
             child: Padding(
@@ -249,6 +253,4 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
       ),
     );
   }
-
-
 }

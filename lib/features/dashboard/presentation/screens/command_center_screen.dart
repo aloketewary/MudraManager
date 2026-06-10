@@ -80,7 +80,8 @@ class CommandCenterScreen extends ConsumerWidget {
                           children: [
                             IconButton(
                               tooltip: 'Search',
-                              icon: Icon(LucideIcons.search, color: color.onSurface),
+                              icon: Icon(LucideIcons.search,
+                                  color: color.onSurface),
                               onPressed: () {
                                 HapticFeedback.mediumImpact();
                                 // Navigate to search
@@ -88,8 +89,10 @@ class CommandCenterScreen extends ConsumerWidget {
                             ),
                             IconButton(
                               tooltip: 'Notifications',
-                              icon: Icon(LucideIcons.bell,
-                                  color: color.onSurface,),
+                              icon: Icon(
+                                LucideIcons.bell,
+                                color: color.onSurface,
+                              ),
                               onPressed: () {
                                 HapticFeedback.mediumImpact();
                                 context.push(AppRoutes.notifications);
@@ -128,11 +131,14 @@ class CommandCenterScreen extends ConsumerWidget {
                           if (pendingAmount > 0)
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 10,),
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
                               decoration: BoxDecoration(
                                 color:
                                     color.errorContainer.withValues(alpha: 0.3),
-                                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                                borderRadius: BorderRadius.circular(
+                                    Tone.current.borderRadius),
                                 border: Border.all(
                                   color: color.error.withValues(alpha: 0.3),
                                   width: 1,
@@ -141,8 +147,11 @@ class CommandCenterScreen extends ConsumerWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(LucideIcons.lock,
-                                      size: 16, color: color.error,),
+                                  Icon(
+                                    LucideIcons.lock,
+                                    size: 16,
+                                    color: color.error,
+                                  ),
                                   const SizedBox(width: 8),
                                   Text(
                                     'Money hold: ${formatCurrency(pendingAmount, code: BaseCurrency.code, decimals: 2)}',
@@ -183,7 +192,8 @@ class CommandCenterScreen extends ConsumerWidget {
                                   color.primary.withValues(alpha: 0.7),
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                              borderRadius: BorderRadius.circular(
+                                  Tone.current.borderRadius),
                               boxShadow: [
                                 BoxShadow(
                                   color: color.primary.withValues(alpha: 0.3),
@@ -293,7 +303,8 @@ class CommandCenterScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Padding(padding: EdgeInsets.all(16), child: AccountCardSkeleton()),
+        loading: () => const Padding(
+            padding: EdgeInsets.all(16), child: AccountCardSkeleton()),
         error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
       ),
     );

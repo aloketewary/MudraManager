@@ -241,7 +241,8 @@ class _AnimatedSwipeableAccountCardsState
               Expanded(
                 child: AnimatedBalance(
                   value: displayBalance,
-                  currencyCode: isTotal ? null : accounts[balanceViewIndex].currencyCode,
+                  currencyCode:
+                      isTotal ? null : accounts[balanceViewIndex].currencyCode,
                   style: textTheme.displayMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: color.onSurface,
@@ -335,7 +336,9 @@ class _AnimatedSwipeableAccountCardsState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      _accountsExpanded ? ctxt.dashboard_hideAccounts : ctxt.dashboard_showAccounts,
+                      _accountsExpanded
+                          ? ctxt.dashboard_hideAccounts
+                          : ctxt.dashboard_showAccounts,
                       style: textTheme.labelSmall?.copyWith(
                         color: color.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
@@ -535,7 +538,10 @@ class _AnimatedSwipeableAccountCardsState
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                     ),
-                                                    SizedBox(height: spacing.elementGap / 4),
+                                                    SizedBox(
+                                                        height:
+                                                            spacing.elementGap /
+                                                                4),
                                                     Text(
                                                       account.accountType.label,
                                                       style: textTheme
@@ -543,14 +549,16 @@ class _AnimatedSwipeableAccountCardsState
                                                           ?.copyWith(
                                                         color: Colors.white
                                                             .withValues(
-                                                                alpha: 0.7,),
+                                                          alpha: 0.7,
+                                                        ),
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
                                               AnimatedBalance(
-                                                currencyCode: account.currencyCode,
+                                                currencyCode:
+                                                    account.currencyCode,
                                                 value: balance,
                                                 compact: false,
                                                 fixedStringLength: 0,
@@ -558,7 +566,8 @@ class _AnimatedSwipeableAccountCardsState
                                                     ?.copyWith(
                                                   color: Colors.white,
                                                   fontWeight: FontWeight.w700,
-                                                  fontFamily: AppTheme.monoFontFamily,
+                                                  fontFamily:
+                                                      AppTheme.monoFontFamily,
                                                 ),
                                               ),
                                             ],
@@ -579,7 +588,9 @@ class _AnimatedSwipeableAccountCardsState
                             padding: EdgeInsets.only(top: spacing.cardVertical),
                             child: Center(
                               child: Text(
-                                AppLocalizations.of(context)!.dashboard_accountsTapExpand(accounts.length),
+                                AppLocalizations.of(context)!
+                                    .dashboard_accountsTapExpand(
+                                        accounts.length),
                                 style: textTheme.labelSmall?.copyWith(
                                   color: color.onSurfaceVariant,
                                 ),

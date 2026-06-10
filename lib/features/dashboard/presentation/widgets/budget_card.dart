@@ -28,12 +28,16 @@ class BudgetCard extends ConsumerWidget {
       data: (budgets) {
         if (budgets.isEmpty) return const SizedBox.shrink();
 
-        final totalBudget = budgets.fold(0.0, (sum, b) => sum + b.budget.amount);
+        final totalBudget =
+            budgets.fold(0.0, (sum, b) => sum + b.budget.amount);
         final totalSpent = budgets.fold(0.0, (sum, b) => sum + b.spent);
         final remaining = totalBudget - totalSpent;
-        final percent = totalBudget > 0 ? (totalSpent / totalBudget * 100).clamp(0.0, 100.0) : 0.0;
-        
-        final daysInMonth = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
+        final percent = totalBudget > 0
+            ? (totalSpent / totalBudget * 100).clamp(0.0, 100.0)
+            : 0.0;
+
+        final daysInMonth =
+            DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
         final daysLeft = daysInMonth - DateTime.now().day + 1;
         final dailySafe = daysLeft > 0 ? remaining / daysLeft : 0;
 
@@ -100,7 +104,8 @@ class BudgetCard extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                AppLocalizations.of(context)!.dashboard_mini_budget_text,
+                                AppLocalizations.of(context)!
+                                    .dashboard_mini_budget_text,
                                 style: textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -111,14 +116,18 @@ class BudgetCard extends ConsumerWidget {
                                 height: 10,
                                 decoration: BoxDecoration(
                                   color: color.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                                  borderRadius: BorderRadius.circular(
+                                      spacing.radiusSmall),
                                 ),
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                                  borderRadius: BorderRadius.circular(
+                                      spacing.radiusSmall),
                                   child: TweenAnimationBuilder<double>(
-                                    duration: const Duration(milliseconds: 1500),
+                                    duration:
+                                        const Duration(milliseconds: 1500),
                                     curve: Curves.easeOutCubic,
-                                    tween: Tween(begin: 0.0, end: percent / 100),
+                                    tween:
+                                        Tween(begin: 0.0, end: percent / 100),
                                     builder: (context, value, child) {
                                       return FractionallySizedBox(
                                         widthFactor: value,
@@ -126,7 +135,11 @@ class BudgetCard extends ConsumerWidget {
                                         child: Container(
                                           decoration: BoxDecoration(
                                             gradient: LinearGradient(
-                                              colors: [progressColor, progressColor.withValues(alpha: 0.7)],
+                                              colors: [
+                                                progressColor,
+                                                progressColor.withValues(
+                                                    alpha: 0.7)
+                                              ],
                                             ),
                                           ),
                                         ),
@@ -140,7 +153,8 @@ class BudgetCard extends ConsumerWidget {
                                 children: [
                                   Expanded(
                                     child: _buildMetricItem(
-                                      AppLocalizations.of(context)!.budget_remaining,
+                                      AppLocalizations.of(context)!
+                                          .budget_remaining,
                                       formatCurrency(remaining, decimals: 0),
                                       LucideIcons.wallet,
                                       progressColor,
@@ -151,8 +165,10 @@ class BudgetCard extends ConsumerWidget {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: _buildMetricItem(
-                                      AppLocalizations.of(context)!.budget_safeToSpend,
-                                      formatCurrency(dailySafe.toDouble(), decimals: 0),
+                                      AppLocalizations.of(context)!
+                                          .budget_safeToSpend,
+                                      formatCurrency(dailySafe.toDouble(),
+                                          decimals: 0),
                                       LucideIcons.calendar,
                                       color.primary,
                                       color,
@@ -265,6 +281,6 @@ class _CompactRingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CompactRingPainter oldDelegate) => 
-    oldDelegate.progress != progress || oldDelegate.color != color;
+  bool shouldRepaint(_CompactRingPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.color != color;
 }

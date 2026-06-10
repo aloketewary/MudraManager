@@ -62,7 +62,8 @@ class RecentTransactionsCard extends ConsumerWidget {
                   ),
                   SizedBox(width: spacing.cardVertical),
                   AdaptiveText(
-                    AppLocalizations.of(context)!.statistics_recentTransactionsTitleText,
+                    AppLocalizations.of(context)!
+                        .statistics_recentTransactionsTitleText,
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: color.primary,
@@ -128,7 +129,8 @@ class RecentTransactionsCard extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: Color(category?.colorValue ?? 0xFF6200EE)
                                 .withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusSmall),
                           ),
                           child: Icon(
                             IconHelper.getIconData(category?.iconName),

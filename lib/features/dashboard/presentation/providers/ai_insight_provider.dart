@@ -166,7 +166,9 @@ List<AiInsight> _generateInsights(DashboardData data, Briefing? briefing) {
   }
 
   // Overspending this month
-  if (data.totalExpense > data.totalIncome && data.totalIncome > 0 && !briefingCovers.contains('overspending')) {
+  if (data.totalExpense > data.totalIncome &&
+      data.totalIncome > 0 &&
+      !briefingCovers.contains('overspending')) {
     final deficit = data.totalExpense - data.totalIncome;
     final ratio = deficit / data.totalIncome;
     // Scale: 10% over = 60, 50%+ over = 80
@@ -174,7 +176,8 @@ List<AiInsight> _generateInsights(DashboardData data, Briefing? briefing) {
     candidates.add(
       AiInsight(
         title: BuddyMessages.insightOverspending,
-        message: BuddyMessages.insightOverspendingMessage(deficit.toStringAsFixed(0)),
+        message: BuddyMessages.insightOverspendingMessage(
+            deficit.toStringAsFixed(0)),
         type: 'warning',
         iconType: IconType.warning,
         generatedAt: now,
@@ -378,7 +381,8 @@ List<AiInsight> _generateInsights(DashboardData data, Briefing? briefing) {
         final potentialSaving = (worstAvg - bestAvg);
         candidates.add(
           AiInsight(
-            title: Tone.appL10n?.insight_bestDayTitle(days[worstIdx]) ?? '${days[worstIdx]}s cost you the most',
+            title: Tone.appL10n?.insight_bestDayTitle(days[worstIdx]) ??
+                '${days[worstIdx]}s cost you the most',
             message: BuddyMessages.insightBestDay(
               days[worstIdx],
               worstAvg.toStringAsFixed(0),

@@ -94,10 +94,12 @@ class GoalCard extends ConsumerWidget {
                         height: 10,
                         decoration: BoxDecoration(
                           color: color.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
                           child: TweenAnimationBuilder<double>(
                             duration: const Duration(milliseconds: 1500),
                             curve: Curves.easeOutCubic,
@@ -135,7 +137,8 @@ class GoalCard extends ConsumerWidget {
                           Expanded(
                             child: _buildMetricItem(
                               AppLocalizations.of(context)!.budget_remaining,
-                              formatCurrency((totalTarget - totalSaved), decimals: 0),
+                              formatCurrency((totalTarget - totalSaved),
+                                  decimals: 0),
                               LucideIcons.trendingUp,
                               color.tertiary,
                               color,

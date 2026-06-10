@@ -47,10 +47,10 @@ enum AnimationStyles { defaultStyle, custom, none }
 
 const List<(AnimationStyles, String)> animationStyleSegments =
     <(AnimationStyles, String)>[
-      (AnimationStyles.defaultStyle, 'Default'),
-      (AnimationStyles.custom, 'Custom'),
-      (AnimationStyles.none, 'None'),
-    ];
+  (AnimationStyles.defaultStyle, 'Default'),
+  (AnimationStyles.custom, 'Custom'),
+  (AnimationStyles.none, 'None'),
+];
 
 enum Menu { edit, archive, remove }
 
@@ -171,7 +171,8 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                       Container(
                         decoration: BoxDecoration(
                           color: textColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius:
+                              BorderRadius.circular(Tone.current.borderRadius),
                         ),
                         child: PopupMenuButton<Menu>(
                           popUpAnimationStyle: _animationStyle,
@@ -183,47 +184,47 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                           onSelected: (Menu item) {},
                           itemBuilder: (BuildContext context) =>
                               <PopupMenuEntry<Menu>>[
-                                PopupMenuItem<Menu>(
-                                  value: Menu.edit,
-                                  onTap: widget.onEdit,
-                                  child: const ListTile(
-                                    leading: Icon(LucideIcons.pencil),
-                                    title: Text('Edit'),
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                  ),
+                            PopupMenuItem<Menu>(
+                              value: Menu.edit,
+                              onTap: widget.onEdit,
+                              child: const ListTile(
+                                leading: Icon(LucideIcons.pencil),
+                                title: Text('Edit'),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12,
                                 ),
-                                PopupMenuItem<Menu>(
-                                  value: Menu.archive,
-                                  onTap: widget.onArchive,
-                                  child: const ListTile(
-                                    leading: Icon(LucideIcons.archive),
-                                    title: Text('Archive'),
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                  ),
+                              ),
+                            ),
+                            PopupMenuItem<Menu>(
+                              value: Menu.archive,
+                              onTap: widget.onArchive,
+                              child: const ListTile(
+                                leading: Icon(LucideIcons.archive),
+                                title: Text('Archive'),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12,
                                 ),
-                                const PopupMenuDivider(),
-                                PopupMenuItem<Menu>(
-                                  value: Menu.remove,
-                                  onTap: widget.onRemove,
-                                  child: ListTile(
-                                    leading: Icon(
-                                      LucideIcons.trash2,
-                                      color: color.error,
-                                    ),
-                                    title: Text(
-                                      'Remove',
-                                      style: TextStyle(color: color.error),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                  ),
+                              ),
+                            ),
+                            const PopupMenuDivider(),
+                            PopupMenuItem<Menu>(
+                              value: Menu.remove,
+                              onTap: widget.onRemove,
+                              child: ListTile(
+                                leading: Icon(
+                                  LucideIcons.trash2,
+                                  color: color.error,
                                 ),
-                              ],
+                                title: Text(
+                                  'Remove',
+                                  style: TextStyle(color: color.error),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                   ],

@@ -49,7 +49,8 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
     );
     final color = Theme.of(context).colorScheme;
     final isGuestMode = ref.watch(guestModeProvider);
-    final displayTotalBalance = GuestModeUtil.applyGuestMode(totalBalance, isGuestMode);
+    final displayTotalBalance =
+        GuestModeUtil.applyGuestMode(totalBalance, isGuestMode);
 
     return Padding(
       padding: EdgeInsets.all(widget.globalPadding),
@@ -83,7 +84,8 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: color.secondary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                            borderRadius: BorderRadius.circular(
+                                Tone.current.borderRadius),
                           ),
                           child: Icon(
                             LucideIcons.wallet,
@@ -112,35 +114,49 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                           Positioned.fill(
                             child: Consumer(
                               builder: (context, ref, child) {
-                                final historyAsync = ref.watch(historicalBalanceProvider);
+                                final historyAsync =
+                                    ref.watch(historicalBalanceProvider);
                                 return historyAsync.when(
                                   data: (history) {
-                                    if (history.isEmpty || history.every((v) => v == 0)) {
+                                    if (history.isEmpty ||
+                                        history.every((v) => v == 0)) {
                                       return const SizedBox();
                                     }
-                                    final maxVal = history.reduce((a, b) => a > b ? a : b);
-                                    final minVal = history.reduce((a, b) => a < b ? a : b);
+                                    final maxVal =
+                                        history.reduce((a, b) => a > b ? a : b);
+                                    final minVal =
+                                        history.reduce((a, b) => a < b ? a : b);
                                     final range = maxVal - minVal;
-                                    final spots = history.asMap().entries.map((e) {
-                                      final normalized = range > 0 ? ((e.value - minVal) / range) * 50 + 10 : 30;
-                                      return FlSpot(e.key.toDouble(), normalized.toDouble());
+                                    final spots =
+                                        history.asMap().entries.map((e) {
+                                      final normalized = range > 0
+                                          ? ((e.value - minVal) / range) * 50 +
+                                              10
+                                          : 30;
+                                      return FlSpot(e.key.toDouble(),
+                                          normalized.toDouble());
                                     }).toList();
                                     return LineChart(
                                       LineChartData(
                                         gridData: const FlGridData(show: false),
-                                        titlesData: const FlTitlesData(show: false),
+                                        titlesData:
+                                            const FlTitlesData(show: false),
                                         borderData: FlBorderData(show: false),
-                                        lineTouchData: const LineTouchData(enabled: false),
+                                        lineTouchData:
+                                            const LineTouchData(enabled: false),
                                         lineBarsData: [
                                           LineChartBarData(
                                             spots: spots,
                                             isCurved: true,
-                                            color: color.secondary.withValues(alpha: 0.15),
+                                            color: color.secondary
+                                                .withValues(alpha: 0.15),
                                             barWidth: 3,
-                                            dotData: const FlDotData(show: false),
+                                            dotData:
+                                                const FlDotData(show: false),
                                             belowBarData: BarAreaData(
                                               show: true,
-                                              color: color.secondary.withValues(alpha: 0.05),
+                                              color: color.secondary
+                                                  .withValues(alpha: 0.05),
                                             ),
                                           ),
                                         ],

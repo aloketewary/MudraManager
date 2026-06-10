@@ -16,8 +16,7 @@ class SmsSuccessCelebrationSheet extends ConsumerStatefulWidget {
 
 class _SmsSuccessCelebrationSheetState
     extends ConsumerState<SmsSuccessCelebrationSheet> {
-  final _confetti =
-      ConfettiController(duration: const Duration(seconds: 2));
+  final _confetti = ConfettiController(duration: const Duration(seconds: 2));
 
   @override
   void initState() {
@@ -110,8 +109,7 @@ class _SmsSuccessCelebrationSheetState
                   onPressed: () => Navigator.of(context).pop(),
                   style: FilledButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(spacing.radiusMedium),
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
                   ),
                   child: Text(
