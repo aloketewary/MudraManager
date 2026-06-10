@@ -121,6 +121,30 @@ class ScreenShell extends ConsumerWidget {
               )
               .toList(),
         ),
+      if (actions.trailing != null)
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: actions.trailing!.isLoading
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : TextButton(
+                  onPressed: actions.trailing!.isEnabled
+                      ? () {
+                          HapticFeedback.mediumImpact();
+                          actions.trailing!.onTap!();
+                        }
+                      : null,
+                  child: Text(
+                    actions.trailing!.label,
+                    style: textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+        ),
     ];
 
     return switch (config.appBarMode) {

@@ -64,11 +64,16 @@ class ScreenActions {
   final List<ScreenAction> overflow;
   final List<ScreenAction> contextual;
 
+  /// Text-button action rendered at the trailing edge of AppBar.
+  /// Used for form save/confirm/create actions.
+  final ScreenTextAction? trailing;
+
   const ScreenActions._({
     required this.appBar,
     required this.fab,
     required this.overflow,
     required this.contextual,
+    required this.trailing,
   });
 
   /// Empty state — no actions. Used for loading, insufficient gate, etc.
@@ -77,6 +82,7 @@ class ScreenActions {
     fab: null,
     overflow: [],
     contextual: [],
+    trailing: null,
   );
 
   /// Validated construction. Throws [StateError] on duplicate action IDs.
@@ -86,6 +92,7 @@ class ScreenActions {
     ScreenAction? fab,
     List<ScreenAction> overflow = const [],
     List<ScreenAction> contextual = const [],
+    ScreenTextAction? trailing,
   }) {
     final ids = <String>{};
     void check(ScreenAction a) {
@@ -101,18 +108,29 @@ class ScreenActions {
     if (fab != null) check(fab);
     overflow.forEach(check);
     contextual.forEach(check);
+    if (trailing != null && !ids.add(trailing.id)) {
+      throw StateError(
+        'Duplicate ScreenAction id: "${trailing.id}". '
+        'Each action must be unique across all slots.',
+      );
+    }
 
     return ScreenActions._(
       appBar: appBar,
       fab: fab,
       overflow: overflow,
       contextual: contextual,
+      trailing: trailing,
     );
   }
 
   /// Whether any actions exist at all.
   bool get isEmpty =>
-      appBar.isEmpty && fab == null && overflow.isEmpty && contextual.isEmpty;
+      appBar.isEmpty &&
+      fab == null &&
+      overflow.isEmpty &&
+      contextual.isEmpty &&
+      trailing == null;
 }
 
 /// A single UI action. Slot is determined by WHERE it lives in ScreenActions,
@@ -129,6 +147,25 @@ class ScreenAction {
     required this.icon,
     required this.onTap,
   });
+}
+
+/// A text-button action for AppBar (save/create/confirm).
+/// Supports enabled/disabled state and loading indicator.
+class ScreenTextAction {
+  final String id;
+  final String label;
+  final VoidCallback? onTap;
+  final bool isLoading;
+
+  const ScreenTextAction({
+    required this.id,
+    required this.label,
+    this.onTap,
+    this.isLoading = false,
+  });
+
+  /// Whether the action is currently enabled.
+  bool get isEnabled => onTap != null && !isLoading;
 }
 
 /// A single constraint state for display (budget or bill).
