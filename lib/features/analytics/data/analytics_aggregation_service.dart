@@ -1,40 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/features/analytics/domain/analytics_aggregates.dart';
 
-/// Unified results from AnalyticsAggregationService.
-class AnalyticsAggregates {
-  final double totalIncome;
-  final double totalExpense;
-  final List<FlSpot> incomeSpots;
-  final List<FlSpot> expenseSpots;
-  final List<FlSpot> savingsSpots;
-  final Map<String, double> categoryBreakdown;
-  final Map<String, double> incomeCategoryBreakdown;
-  final Map<String, List<double>> monthlyExpenseTrends; // last 12 months
-  final Map<String, double> spendingByDayOfWeek;
-  final double savingsRate;
-  final double avgDailySpend;
-  final int daysInPeriod;
-  final double? previousPartialExpense; // For fair comparison (same days)
-  final double? previousFullExpense; // For projection comparison
-
-  const AnalyticsAggregates({
-    required this.totalIncome,
-    required this.totalExpense,
-    required this.incomeSpots,
-    required this.expenseSpots,
-    required this.savingsSpots,
-    required this.categoryBreakdown,
-    required this.incomeCategoryBreakdown,
-    required this.monthlyExpenseTrends,
-    required this.spendingByDayOfWeek,
-    required this.savingsRate,
-    required this.avgDailySpend,
-    required this.daysInPeriod,
-    this.previousPartialExpense,
-    this.previousFullExpense,
-  });
-}
+export 'package:mudra_manager/features/analytics/domain/analytics_aggregates.dart';
 
 /// Service that performs single-pass aggregation over transactions
 /// to ensure consistent data across all analytics components.
