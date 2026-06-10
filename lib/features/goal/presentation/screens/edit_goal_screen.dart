@@ -9,12 +9,14 @@ import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/features/goal/domain/goal_enums.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
@@ -160,33 +162,19 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        title: Text(
-          ctxt.goal_editGoalTitle,
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.goal_editGoalTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        trailing: ScreenTextAction(
+          id: 'save_goal',
+          label: ctxt.goal_updateGoal,
+          onTap: !_saving ? _save : null,
+          isLoading: _saving,
         ),
-        actions: [
-          TextButton(
-            onPressed: !_saving ? _save : null,
-            child: _saving
-                ? SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: color.primary,
-                    ),
-                  )
-                : Text(
-                    ctxt.goal_updateGoal,
-                    style: textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-          ),
-          SizedBox(width: spacing.cardHorizontal),
-        ],
       ),
       body: ListView(
         padding: EdgeInsets.symmetric(

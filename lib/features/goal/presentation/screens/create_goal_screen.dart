@@ -8,10 +8,12 @@ import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/features/goal/domain/goal_enums.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
@@ -107,33 +109,19 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        title: Text(
-          ctxt.goal_newGoalTitle,
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: ctxt.goal_newGoalTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        trailing: ScreenTextAction(
+          id: 'create_goal',
+          label: ctxt.goal_createGoal,
+          onTap: (_isFormValid && !_saving) ? _create : null,
+          isLoading: _saving,
         ),
-        actions: [
-          TextButton(
-            onPressed: (_isFormValid && !_saving) ? _create : null,
-            child: _saving
-                ? SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: color.primary,
-                    ),
-                  )
-                : Text(
-                    ctxt.goal_createGoal,
-                    style: textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-          ),
-          SizedBox(width: spacing.cardHorizontal),
-        ],
       ),
       body: Form(
         key: _formKey,
