@@ -58,7 +58,12 @@ class SpendingTrendsScreen extends ConsumerWidget {
                         ctxt.analytics_anomalyCategories,
                         LucideIcons.triangleAlert,
                         FinanceColors.statusDanger,
-                        anomalies, color, textTheme, spacing, isGuestMode, ctxt,
+                        anomalies,
+                        color,
+                        textTheme,
+                        spacing,
+                        isGuestMode,
+                        ctxt,
                       )
                     : const SizedBox.shrink(),
                 orElse: () => const SizedBox.shrink(),
@@ -71,7 +76,12 @@ class SpendingTrendsScreen extends ConsumerWidget {
                         ctxt.analytics_risingCategories,
                         LucideIcons.trendingUp,
                         FinanceColors.statusWarning,
-                        rising, color, textTheme, spacing, isGuestMode, ctxt,
+                        rising,
+                        color,
+                        textTheme,
+                        spacing,
+                        isGuestMode,
+                        ctxt,
                       )
                     : const SizedBox.shrink(),
                 orElse: () => const SizedBox.shrink(),
@@ -79,7 +89,12 @@ class SpendingTrendsScreen extends ConsumerWidget {
 
               // All categories
               _buildAllCategories(
-                sorted, color, textTheme, spacing, isGuestMode, ctxt,
+                sorted,
+                color,
+                textTheme,
+                spacing,
+                isGuestMode,
+                ctxt,
               ),
               SizedBox(height: spacing.sectionGap * 3),
             ],
@@ -117,13 +132,28 @@ class SpendingTrendsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: [
-                Icon(icon, size: 18, color: accent),
-                SizedBox(width: spacing.elementGap),
-                Text(title, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-              ],),
+              Row(
+                children: [
+                  Icon(icon, size: 18, color: accent),
+                  SizedBox(width: spacing.elementGap),
+                  Text(
+                    title,
+                    style: textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
               SizedBox(height: spacing.sectionGap),
-              ...items.map((t) => _buildTrendRow(t, color, textTheme, spacing, isGuestMode, ctxt: ctxt)),
+              ...items.map(
+                (t) => _buildTrendRow(
+                  t,
+                  color,
+                  textTheme,
+                  spacing,
+                  isGuestMode,
+                  ctxt: ctxt,
+                ),
+              ),
             ],
           ),
         ),
@@ -149,80 +179,117 @@ class SpendingTrendsScreen extends ConsumerWidget {
       padding: EdgeInsets.only(bottom: spacing.elementGap * 1.5),
       child: Column(
         children: [
-          Row(children: [
-            Expanded(
-              flex: 3,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(trend.categoryName,
-                      style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),),
-                  if (trend.isAnomaly)
-                    Container(
-                      margin: EdgeInsets.only(top: spacing.elementGapUltraMin),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: FinanceColors.statusDanger.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text('⚠ Anomaly',
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      trend.categoryName,
+                      style: textTheme.bodyMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    if (trend.isAnomaly)
+                      Container(
+                        margin:
+                            EdgeInsets.only(top: spacing.elementGapUltraMin),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              FinanceColors.statusDanger.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '⚠ Anomaly',
                           style: textTheme.labelSmall?.copyWith(
-                            color: FinanceColors.statusDanger, fontSize: 10,
-                          ),),
+                            color: FinanceColors.statusDanger,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              // Sparkline
+              SizedBox(
+                width: 60,
+                height: 24,
+                child: _buildSparkline(trend.monthlyHistory, color),
+              ),
+              SizedBox(width: spacing.elementGap),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  CurrencyText(
+                    amount: GuestModeUtil.applyGuestMode(
+                      trend.thisMonth,
+                      isGuestMode,
+                    ),
+                    fixedLength: 0,
+                    compact: true,
+                    style: textTheme.bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  if (trend.changePercent != 0)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          trend.changePercent > 0
+                              ? LucideIcons.arrowUp
+                              : LucideIcons.arrowDown,
+                          size: 12,
+                          color: changeColor,
+                        ),
+                        Text(
+                          '${trend.changePercent.abs().toStringAsFixed(0)}%',
+                          style: textTheme.labelSmall
+                              ?.copyWith(color: changeColor),
+                        ),
+                      ],
                     ),
                 ],
               ),
-            ),
-            // Sparkline
-            SizedBox(
-              width: 60,
-              height: 24,
-              child: _buildSparkline(trend.monthlyHistory, color),
-            ),
-            SizedBox(width: spacing.elementGap),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                CurrencyText(
-                  amount: GuestModeUtil.applyGuestMode(trend.thisMonth, isGuestMode),
-                  fixedLength: 0, compact: true,
-                  style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                if (trend.changePercent != 0)
-                  Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(
-                      trend.changePercent > 0 ? LucideIcons.arrowUp : LucideIcons.arrowDown,
-                      size: 12, color: changeColor,
-                    ),
-                    Text(
-                      '${trend.changePercent.abs().toStringAsFixed(0)}%',
-                      style: textTheme.labelSmall?.copyWith(color: changeColor),
-                    ),
-                  ],),
-              ],
-            ),
-          ],),
+            ],
+          ),
           // Predicted next month
           if (trend.predictedNextMonth > 0)
             Padding(
               padding: EdgeInsets.only(top: spacing.elementGapMin),
-              child: Row(children: [
-                Icon(LucideIcons.sparkles, size: 12, color: color.primary.withValues(alpha: 0.6)),
-                const SizedBox(width: 4),
-                if (ctxt != null)
-                  Text(
-                    ctxt.analytics_predictedNextMonth,
-                    style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+              child: Row(
+                children: [
+                  Icon(
+                    LucideIcons.sparkles,
+                    size: 12,
+                    color: color.primary.withValues(alpha: 0.6),
                   ),
-                const SizedBox(width: 4),
-                CurrencyText(
-                  amount: GuestModeUtil.applyGuestMode(trend.predictedNextMonth, isGuestMode),
-                  fixedLength: 0, compact: true,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: color.primary, fontWeight: FontWeight.w600,
+                  const SizedBox(width: 4),
+                  if (ctxt != null)
+                    Text(
+                      ctxt.analytics_predictedNextMonth,
+                      style: textTheme.labelSmall
+                          ?.copyWith(color: color.onSurfaceVariant),
+                    ),
+                  const SizedBox(width: 4),
+                  CurrencyText(
+                    amount: GuestModeUtil.applyGuestMode(
+                      trend.predictedNextMonth,
+                      isGuestMode,
+                    ),
+                    fixedLength: 0,
+                    compact: true,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: color.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],),
+                ],
+              ),
             ),
         ],
       ),
@@ -242,28 +309,30 @@ class SpendingTrendsScreen extends ConsumerWidget {
         .map((e) => FlSpot(e.key.toDouble(), e.value))
         .toList();
 
-    return LineChart(LineChartData(
-      maxY: maxVal * 1.1,
-      minY: 0,
-      gridData: const FlGridData(show: false),
-      borderData: FlBorderData(show: false),
-      titlesData: const FlTitlesData(show: false),
-      lineTouchData: const LineTouchData(enabled: false),
-      lineBarsData: [
-        LineChartBarData(
-          spots: spots,
-          isCurved: true,
-          curveSmoothness: 0.3,
-          color: color.primary.withValues(alpha: 0.6),
-          barWidth: 1.5,
-          dotData: const FlDotData(show: false),
-          belowBarData: BarAreaData(
-            show: true,
-            color: color.primary.withValues(alpha: 0.06),
+    return LineChart(
+      LineChartData(
+        maxY: maxVal * 1.1,
+        minY: 0,
+        gridData: const FlGridData(show: false),
+        borderData: FlBorderData(show: false),
+        titlesData: const FlTitlesData(show: false),
+        lineTouchData: const LineTouchData(enabled: false),
+        lineBarsData: [
+          LineChartBarData(
+            spots: spots,
+            isCurved: true,
+            curveSmoothness: 0.3,
+            color: color.primary.withValues(alpha: 0.6),
+            barWidth: 1.5,
+            dotData: const FlDotData(show: false),
+            belowBarData: BarAreaData(
+              show: true,
+              color: color.primary.withValues(alpha: 0.06),
+            ),
           ),
-        ),
-      ],
-    ),);
+        ],
+      ),
+    );
   }
 
   Widget _buildAllCategories(
@@ -287,14 +356,28 @@ class SpendingTrendsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Icon(LucideIcons.layers, size: 18, color: color.primary),
-              SizedBox(width: spacing.elementGap),
-              Text(ctxt.analytics_allCategories,
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),),
-            ],),
+            Row(
+              children: [
+                Icon(LucideIcons.layers, size: 18, color: color.primary),
+                SizedBox(width: spacing.elementGap),
+                Text(
+                  ctxt.analytics_allCategories,
+                  style: textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
             SizedBox(height: spacing.sectionGap),
-            ...sorted.map((t) => _buildTrendRow(t, color, textTheme, spacing, isGuestMode, ctxt: ctxt)),
+            ...sorted.map(
+              (t) => _buildTrendRow(
+                t,
+                color,
+                textTheme,
+                spacing,
+                isGuestMode,
+                ctxt: ctxt,
+              ),
+            ),
           ],
         ),
       ),

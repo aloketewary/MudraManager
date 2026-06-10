@@ -5,7 +5,8 @@ import 'package:mudra_manager/features/statistics/data/financial_signal_generato
 /// Converts financial signals into contextual significance scores
 
 class ContextualScorer {
-  ScoredSignal scoreSignal(FinancialSignal signal, UserFinancialContext context) {
+  ScoredSignal scoreSignal(
+      FinancialSignal signal, UserFinancialContext context,) {
     final anomaly = _anomalyScore(signal);
     final impact = _impactScore(signal, context);
     final risk = _riskScore(signal, context);
@@ -74,7 +75,9 @@ class ContextualScorer {
   double _noveltyScore(FinancialSignal signal) {
     if (signal.metadata['isRecurring'] == true) return 0.1;
     if (signal.metadata['isFirstTime'] == true) return 0.9;
-    if (signal.relativeToBaseline > 1.3 || signal.relativeToBaseline < 0.7) return 0.7;
+    if (signal.relativeToBaseline > 1.3 || signal.relativeToBaseline < 0.7) {
+      return 0.7;
+    }
     return 0.3;
   }
 
@@ -97,7 +100,8 @@ class ContextualScorer {
 
     if (anomaly > 0.6) {
       final pct = ((signal.relativeToBaseline - 1.0) * 100).abs().round();
-      factors.add('$pct% ${signal.relativeToBaseline > 1 ? 'above' : 'below'} normal');
+      factors.add(
+          '$pct% ${signal.relativeToBaseline > 1 ? 'above' : 'below'} normal',);
     }
     if (impact > 0.5 && context.liquidityBufferDays < 15) {
       factors.add('significant given current liquidity');

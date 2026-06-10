@@ -322,8 +322,11 @@ class _TaxContent extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(LucideIcons.layers,
-                  color: color.primary, size: spacing.iconLG,),
+              Icon(
+                LucideIcons.layers,
+                color: color.primary,
+                size: spacing.iconLG,
+              ),
               SizedBox(width: spacing.elementGap),
               Text(
                 ctxt.tax_slabBreakdown,
@@ -334,40 +337,42 @@ class _TaxContent extends ConsumerWidget {
             ],
           ),
           SizedBox(height: spacing.sectionGap),
-          ...activeSlabs.map((slab) => Padding(
-                padding: EdgeInsets.only(bottom: spacing.elementGap),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: Text(slab.label, style: textTheme.bodyMedium),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        '${slab.rate.toStringAsFixed(0)}%',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: color.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
+          ...activeSlabs.map(
+            (slab) => Padding(
+              padding: EdgeInsets.only(bottom: spacing.elementGap),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Text(slab.label, style: textTheme.bodyMedium),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      '${slab.rate.toStringAsFixed(0)}%',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: color.onSurfaceVariant,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    Expanded(
-                      flex: 3,
-                      child: CurrencyText(
-                        amount: GuestModeUtil.applyGuestMode(
-                          slab.tax,
-                          isGuestMode,
-                        ),
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.end,
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: CurrencyText(
+                      amount: GuestModeUtil.applyGuestMode(
+                        slab.tax,
+                        isGuestMode,
                       ),
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.end,
                     ),
-                  ],
-                ),
-              ),),
+                  ),
+                ],
+              ),
+            ),
+          ),
           Divider(color: color.outlineVariant.withValues(alpha: 0.5)),
           SizedBox(height: spacing.elementGapMin),
           Row(
@@ -412,8 +417,11 @@ class _TaxContent extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(LucideIcons.calculator,
-                  color: color.primary, size: spacing.iconLG,),
+              Icon(
+                LucideIcons.calculator,
+                color: color.primary,
+                size: spacing.iconLG,
+              ),
               SizedBox(width: spacing.elementGap),
               Text(
                 ctxt.tax_computation,
@@ -543,39 +551,45 @@ class _TaxContent extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            Icon(LucideIcons.scale, color: betterColor, size: spacing.iconLG),
-            SizedBox(width: spacing.elementGap),
-            Text(
-              ctxt.tax_regimeComparison,
-              style:
-                  textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-            ),
-          ],),
+          Row(
+            children: [
+              Icon(LucideIcons.scale, color: betterColor, size: spacing.iconLG),
+              SizedBox(width: spacing.elementGap),
+              Text(
+                ctxt.tax_regimeComparison,
+                style:
+                    textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
           SizedBox(height: spacing.sectionGap),
-          Row(children: [
-            Expanded(
+          Row(
+            children: [
+              Expanded(
                 child: _regimeColumn(
-              ctxt.tax_newRegime,
-              tax.totalTax,
-              newBetter,
-              color,
-              textTheme,
-              isGuestMode,
-              betterColor,
-            ),),
-            SizedBox(width: spacing.elementGap),
-            Expanded(
+                  ctxt.tax_newRegime,
+                  tax.totalTax,
+                  newBetter,
+                  color,
+                  textTheme,
+                  isGuestMode,
+                  betterColor,
+                ),
+              ),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
                 child: _regimeColumn(
-              ctxt.tax_oldRegime,
-              oldRegime.totalTax,
-              !newBetter,
-              color,
-              textTheme,
-              isGuestMode,
-              betterColor,
-            ),),
-          ],),
+                  ctxt.tax_oldRegime,
+                  oldRegime.totalTax,
+                  !newBetter,
+                  color,
+                  textTheme,
+                  isGuestMode,
+                  betterColor,
+                ),
+              ),
+            ],
+          ),
           SizedBox(height: spacing.sectionGap),
           Container(
             width: double.infinity,
@@ -645,27 +659,34 @@ class _TaxContent extends ConsumerWidget {
               : color.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
-      child: Column(children: [
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text(label,
-              style: textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),),
-          if (isBetter) ...[
-            SizedBox(width: spacing.elementGapMin),
-            Icon(LucideIcons.circleCheck, size: 14, color: betterColor),
-          ],
-        ],),
-        SizedBox(height: spacing.elementGapMin),
-        CurrencyText(
-          amount: GuestModeUtil.applyGuestMode(totalTax, isGuestMode),
-          fixedLength: 0,
-          style: textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: isBetter ? betterColor : color.onSurface,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (isBetter) ...[
+                SizedBox(width: spacing.elementGapMin),
+                Icon(LucideIcons.circleCheck, size: 14, color: betterColor),
+              ],
+            ],
           ),
-        ),
-      ],),
+          SizedBox(height: spacing.elementGapMin),
+          CurrencyText(
+            amount: GuestModeUtil.applyGuestMode(totalTax, isGuestMode),
+            fixedLength: 0,
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: isBetter ? betterColor : color.onSurface,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -798,7 +819,7 @@ class _TaxContent extends ConsumerWidget {
                   ),
                 );
               },
-              icon: Icon(LucideIcons.pencil, size: 16),
+              icon: const Icon(LucideIcons.pencil, size: 16),
               label: Text(ctxt.tax_editDeductions),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: color.outlineVariant),
@@ -845,7 +866,7 @@ class _TaxContent extends ConsumerWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 if (isQuantified && opp.estimatedSavings != null)
                   Row(
                     children: [
@@ -855,7 +876,7 @@ class _TaxContent extends ConsumerWidget {
                           color: color.primary,
                         ),
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       CurrencyText(
                         amount: GuestModeUtil.applyGuestMode(
                           opp.estimatedSavings!,

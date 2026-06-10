@@ -264,7 +264,9 @@ class SpendingPersonalityScreen extends ConsumerWidget {
       _InsightItem(
         LucideIcons.piggyBank,
         '${data.savingsRate.toStringAsFixed(0)}% savings rate',
-        data.savingsRate > 20 ? FinanceColors.statusGood : FinanceColors.statusWarning,
+        data.savingsRate > 20
+            ? FinanceColors.statusGood
+            : FinanceColors.statusWarning,
       ),
       _InsightItem(
         LucideIcons.tag,
@@ -494,8 +496,7 @@ class SpendingPersonalityScreen extends ConsumerWidget {
                         alignment: Alignment.bottomCenter,
                         child: _AnimatedDayBar(
                           ratio: ratio,
-                          barColor:
-                              isWeekend ? color.tertiary : color.primary,
+                          barColor: isWeekend ? color.tertiary : color.primary,
                         ),
                       ),
                     ),
@@ -640,8 +641,7 @@ class _AnimatedBarState extends State<_AnimatedBar>
   Widget build(BuildContext context) {
     return VisibilityDetector(
       key: ValueKey('bar_${widget.progress}_${widget.barColor.toARGB32()}'),
-      onVisibilityChanged: (info) =>
-          _maybeStart(info.visibleFraction > 0.3),
+      onVisibilityChanged: (info) => _maybeStart(info.visibleFraction > 0.3),
       child: AnimatedBuilder(
         animation: _anim,
         builder: (_, __) => ClipRRect(
@@ -706,8 +706,7 @@ class _AnimatedDayBarState extends State<_AnimatedDayBar>
   Widget build(BuildContext context) {
     return VisibilityDetector(
       key: ValueKey('day_${widget.ratio}_${widget.barColor.toARGB32()}'),
-      onVisibilityChanged: (info) =>
-          _maybeStart(info.visibleFraction > 0.3),
+      onVisibilityChanged: (info) => _maybeStart(info.visibleFraction > 0.3),
       child: AnimatedBuilder(
         animation: _anim,
         builder: (_, __) => FractionallySizedBox(

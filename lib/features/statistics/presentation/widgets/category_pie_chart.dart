@@ -16,7 +16,8 @@ class CategoryPieChart extends StatelessWidget {
     final sections = categoryData.entries.map((entry) {
       return PieChartSectionData(
         value: entry.value,
-        title: '${(entry.value / categoryData.values.reduce((a, b) => a + b) * 100).toStringAsFixed(1)}%',
+        title:
+            '${(entry.value / categoryData.values.reduce((a, b) => a + b) * 100).toStringAsFixed(1)}%',
         color: categoryColors[entry.key] ?? Colors.grey,
         radius: 100,
         titleStyle: const TextStyle(

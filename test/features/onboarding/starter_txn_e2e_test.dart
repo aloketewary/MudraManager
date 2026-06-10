@@ -419,7 +419,7 @@ void main() {
 
       expect(isNewUser, true);
       expect(txnCount == 0 && isNewUser, true,
-          reason: 'Should show zero-state dashboard');
+          reason: 'Should show zero-state dashboard',);
     });
 
     test('user with starter transactions: not zero state', () async {
@@ -432,7 +432,7 @@ void main() {
       final txnCount = await isar.transactions.count();
       expect(txnCount, 1);
       expect(txnCount == 0, false,
-          reason: 'Should NOT show zero-state dashboard');
+          reason: 'Should NOT show zero-state dashboard',);
     });
 
     test('nudge dismissed: not shown even with zero transactions', () async {
@@ -445,7 +445,7 @@ void main() {
       expect(txnCount, 0);
       expect(nudgeDismissed, true);
       expect(txnCount == 0 && !nudgeDismissed, false,
-          reason: 'Nudge should not show when dismissed');
+          reason: 'Nudge should not show when dismissed',);
     });
 
     test('old user (>24h) with no transactions: nudge but no quick actions', () async {
@@ -457,7 +457,7 @@ void main() {
           DateTime.now().difference(onboardedAt).inHours < 24;
 
       expect(isNewUser, false,
-          reason: 'Quick action grid should not show for old users');
+          reason: 'Quick action grid should not show for old users',);
     });
   });
 

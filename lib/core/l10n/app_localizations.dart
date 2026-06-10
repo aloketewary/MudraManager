@@ -6852,6 +6852,24 @@ abstract class AppLocalizations {
   /// **'{peak} is your peak spending day, {quiet} is the quietest'**
   String stats_peakAndQuiet(Object peak, Object quiet);
 
+  /// No description provided for @stats_expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get stats_expand;
+
+  /// No description provided for @stats_otherCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get stats_otherCategory;
+
+  /// No description provided for @stats_dayNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String stats_dayNumber(Object day);
+
   /// No description provided for @stats_categoryTrends.
   ///
   /// In en, this message translates to:
@@ -6959,6 +6977,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Generating...'**
   String get stats_generating;
+
+  /// No description provided for @stats_newCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'New spending in {category} detected.'**
+  String stats_newCategory(Object category);
+
+  /// No description provided for @stats_categoryStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'No spending in {category} this period.'**
+  String stats_categoryStopped(Object category);
+
+  /// No description provided for @stats_spendingSteady.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending is steady compared to baseline.'**
+  String get stats_spendingSteady;
+
+  /// No description provided for @stats_forecastHigher.
+  ///
+  /// In en, this message translates to:
+  /// **'At current pace, you may spend more than {period}.'**
+  String stats_forecastHigher(Object period);
+
+  /// No description provided for @stats_forecastLower.
+  ///
+  /// In en, this message translates to:
+  /// **'On track to finish below {period}.'**
+  String stats_forecastLower(Object period);
 
   /// No description provided for @recap_belowAvg.
   ///

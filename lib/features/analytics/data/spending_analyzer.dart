@@ -146,7 +146,8 @@ class SpendingAnalyzer {
 
     // ── Spending trend ──
     final trendDiff = firstHalfExpense > 0
-        ? ((secondHalfExpense - firstHalfExpense) / firstHalfExpense * 100).abs()
+        ? ((secondHalfExpense - firstHalfExpense) / firstHalfExpense * 100)
+            .abs()
         : 0.0;
     final trend = trendDiff < 10
         ? 'Steady spender'

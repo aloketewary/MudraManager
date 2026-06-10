@@ -10,7 +10,7 @@ void main() {
     });
 
     test('returns the single candidate', () {
-      final insight = Insight(
+      final insight = const Insight(
         trigger: BriefingTrigger.budgetBreach,
         source: 'budget',
         magnitude: 500,

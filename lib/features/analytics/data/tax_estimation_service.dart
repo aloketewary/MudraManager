@@ -268,12 +268,14 @@ class TaxEstimationService {
       if (remaining <= 0) break;
       final taxable = remaining.clamp(0, bracket.limit);
       final tax = taxable * bracket.rate;
-      slabs.add(TaxSlab(
-        label: bracket.label,
-        rate: bracket.rate * 100,
-        taxableAmount: taxable.toDouble(),
-        tax: tax,
-      ));
+      slabs.add(
+        TaxSlab(
+          label: bracket.label,
+          rate: bracket.rate * 100,
+          taxableAmount: taxable.toDouble(),
+          tax: tax,
+        ),
+      );
       remaining -= taxable;
     }
 
@@ -299,12 +301,14 @@ class TaxEstimationService {
       if (remaining <= 0) break;
       final taxable = remaining.clamp(0, bracket.limit);
       final tax = taxable * bracket.rate;
-      slabs.add(TaxSlab(
-        label: bracket.label,
-        rate: bracket.rate * 100,
-        taxableAmount: taxable.toDouble(),
-        tax: tax,
-      ));
+      slabs.add(
+        TaxSlab(
+          label: bracket.label,
+          rate: bracket.rate * 100,
+          taxableAmount: taxable.toDouble(),
+          tax: tax,
+        ),
+      );
       remaining -= taxable;
     }
 

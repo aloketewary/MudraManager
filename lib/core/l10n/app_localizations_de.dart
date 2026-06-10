@@ -3819,6 +3819,17 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get stats_expand => 'Expand';
+
+  @override
+  String get stats_otherCategory => 'Other';
+
+  @override
+  String stats_dayNumber(Object day) {
+    return 'Day $day';
+  }
+
+  @override
   String get stats_categoryTrends => 'Kategorie-Trends';
 
   @override
@@ -3876,6 +3887,29 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get stats_generating => 'Wird generiert...';
+
+  @override
+  String stats_newCategory(Object category) {
+    return 'New spending in $category detected.';
+  }
+
+  @override
+  String stats_categoryStopped(Object category) {
+    return 'No spending in $category this period.';
+  }
+
+  @override
+  String get stats_spendingSteady => 'Spending is steady compared to baseline.';
+
+  @override
+  String stats_forecastHigher(Object period) {
+    return 'At current pace, you may spend more than $period.';
+  }
+
+  @override
+  String stats_forecastLower(Object period) {
+    return 'On track to finish below $period.';
+  }
 
   @override
   String get recap_belowAvg => 'Unter Durchschnitt';

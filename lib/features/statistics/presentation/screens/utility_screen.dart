@@ -155,7 +155,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
   Future<void> _savePreferences() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('hidden_utilities', _hiddenUtilities);
-    await prefs.setStringList('dismissed_attention_items', _dismissedAttentionItems);
+    await prefs.setStringList(
+        'dismissed_attention_items', _dismissedAttentionItems,);
   }
 
   void _dismissAttentionItem(String itemId) {
@@ -180,7 +181,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       isScrollControlled: true,
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(Tone.current.borderRadius * 2),),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) => Container(
@@ -222,7 +224,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                             _savePreferences();
                             SnackbarService.info(BuddyMessages.settingsSaved);
                           },
-                          child: Text(AppLocalizations.of(context)!.common_reset),
+                          child:
+                              Text(AppLocalizations.of(context)!.common_reset),
                         ),
                       ],
                     ),
@@ -355,7 +358,10 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                   .entries
                   .map(
                     (e) => SizedBox(
-                      width: (MediaQuery.of(context).size.width - spacing.cardHorizontal * 2 - spacing.elementGap) / 2,
+                      width: (MediaQuery.of(context).size.width -
+                              spacing.cardHorizontal * 2 -
+                              spacing.elementGap) /
+                          2,
                       height: 130,
                       child: _buildCard(
                         e.value,
@@ -532,8 +538,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                               ),
                             ),
                             Icon(
-                              _showingAdvisoryExpanded 
-                                  ? LucideIcons.chevronUp 
+                              _showingAdvisoryExpanded
+                                  ? LucideIcons.chevronUp
                                   : LucideIcons.chevronDown,
                               size: 16,
                               color: color.onSurfaceVariant,
@@ -550,8 +556,9 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                         color: color.outlineVariant.withValues(alpha: 0.5),
                       ),
                       ...attentionItems.take(3).map(
-                        (item) => _buildAdvisoryItem(item, color, textTheme, spacing),
-                      ),
+                            (item) => _buildAdvisoryItem(
+                                item, color, textTheme, spacing,),
+                          ),
                       if (attentionItems.length > 3)
                         Padding(
                           padding: EdgeInsets.all(spacing.cardInner),
@@ -744,7 +751,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                         padding: EdgeInsets.all(spacing.cardInner),
                         decoration: BoxDecoration(
                           color: alertColor.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
                           border: Border.all(
                             color: alertColor.withValues(alpha: 0.25),
                           ),
@@ -790,7 +798,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                             Icon(
                               LucideIcons.chevronRight,
                               size: 16,
-                              color: color.onSurfaceVariant.withValues(alpha: 0.5),
+                              color:
+                                  color.onSurfaceVariant.withValues(alpha: 0.5),
                             ),
                           ],
                         ),
@@ -836,64 +845,64 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
         },
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         child: Stack(
-            children: [
-              // Large background icon — slow float
-              Positioned(
-                right: -8,
-                bottom: -14,
-                child: AnimatedBuilder(
-                  animation: _bgIconController,
-                  builder: (_, __) {
-                    final t = _bgIconController.value;
-                    return Transform.translate(
-                      offset: Offset(t * 6 - 3, -t * 5 + 2.5),
-                      child: Transform.rotate(
-                        angle: (t - 0.5) * 0.12,
-                        child: Icon(
-                          item.icon,
-                          size: 80,
-                          color:
-                              color.primary.withValues(alpha: 0.08 + t * 0.04),
-                        ),
+          children: [
+            // Large background icon — slow float
+            Positioned(
+              right: -8,
+              bottom: -14,
+              child: AnimatedBuilder(
+                animation: _bgIconController,
+                builder: (_, __) {
+                  final t = _bgIconController.value;
+                  return Transform.translate(
+                    offset: Offset(t * 6 - 3, -t * 5 + 2.5),
+                    child: Transform.rotate(
+                      angle: (t - 0.5) * 0.12,
+                      child: Icon(
+                        item.icon,
+                        size: 80,
+                        color: color.primary.withValues(alpha: 0.08 + t * 0.04),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
-              // Content
-              Padding(
-                padding: EdgeInsets.all(spacing.cardInner),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(spacing.elementGap),
-                      decoration: BoxDecoration(
-                        color: color.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
-                      ),
-                      child: Icon(item.icon, size: 20, color: color.primary),
+            ),
+            // Content
+            Padding(
+              padding: EdgeInsets.all(spacing.cardInner),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(spacing.elementGap),
+                    decoration: BoxDecoration(
+                      color: color.primary.withValues(alpha: 0.1),
+                      borderRadius:
+                          BorderRadius.circular(Tone.current.borderRadius),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.translate(item.titleKey),
-                      style: textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: spacing.elementGapUltraMin),
-                    Text(
-                      l10n.translate(item.subtitleKey),
-                      style: textTheme.bodySmall
-                          ?.copyWith(color: color.onSurfaceVariant),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+                    child: Icon(item.icon, size: 20, color: color.primary),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.translate(item.titleKey),
+                    style: textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: spacing.elementGapUltraMin),
+                  Text(
+                    l10n.translate(item.subtitleKey),
+                    style: textTheme.bodySmall
+                        ?.copyWith(color: color.onSurfaceVariant),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
     ).animate().fadeIn(duration: 250.ms, delay: (50 * index).ms).slideY(
           begin: 0.3,
           end: 0,
@@ -960,7 +969,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                     padding: EdgeInsets.all(spacing.elementGap),
                     decoration: BoxDecoration(
                       color: color.secondary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                      borderRadius:
+                          BorderRadius.circular(Tone.current.borderRadius),
                     ),
                     child: Icon(item.icon, size: 18, color: color.secondary),
                   ),

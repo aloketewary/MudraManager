@@ -54,9 +54,11 @@ class AdvancedAnalyticsService {
 
       final monthKey = tx.date.year * 12 + tx.date.month;
       if (tx.isExpense) {
-        expenseTotals[monthKey] = (expenseTotals[monthKey] ?? 0) + tx.effectiveAmount;
+        expenseTotals[monthKey] =
+            (expenseTotals[monthKey] ?? 0) + tx.effectiveAmount;
       } else {
-        incomeTotals[monthKey] = (incomeTotals[monthKey] ?? 0) + tx.effectiveAmount;
+        incomeTotals[monthKey] =
+            (incomeTotals[monthKey] ?? 0) + tx.effectiveAmount;
       }
     }
 
@@ -93,15 +95,19 @@ class AdvancedAnalyticsService {
 
     for (int i = 1; i <= 3; i++) {
       final forecastMonth = DateTime(now.year, now.month + i);
-      forecastMonths.add(MonthForecast(
-        month: forecastMonth,
-        income: incForecast,
-        expense: expForecast,
-        net: incForecast - expForecast,
-      ),);
+      forecastMonths.add(
+        MonthForecast(
+          month: forecastMonth,
+          income: incForecast,
+          expense: expForecast,
+          net: incForecast - expForecast,
+        ),
+      );
     }
 
-    final avgNet = forecastMonths.isEmpty ? 0.0 : forecastMonths.map((f) => f.net).reduce((a, b) => a + b) / 3;
+    final avgNet = forecastMonths.isEmpty
+        ? 0.0
+        : forecastMonths.map((f) => f.net).reduce((a, b) => a + b) / 3;
 
     return CashFlowForecast(
       currentMonthIncome: currentIncome,
@@ -130,13 +136,18 @@ class AdvancedAnalyticsService {
 
   // Calculate financial health score (0-100)
   // OPTIMIZED: O(N) single-pass aggregation
-  FinancialHealthScore calculateHealthScore(List<Transaction> transactions, double totalBalance) {
+  FinancialHealthScore calculateHealthScore(
+    List<Transaction> transactions,
+    double totalBalance,
+  ) {
     final now = DateTime.now();
     double income = 0;
     double expense = 0;
 
     for (final tx in transactions) {
-      if (tx.date.year == now.year && tx.date.month == now.month && tx.affectsStats) {
+      if (tx.date.year == now.year &&
+          tx.date.month == now.month &&
+          tx.affectsStats) {
         if (tx.isExpense) {
           expense += tx.effectiveAmount;
         } else {
@@ -241,7 +252,8 @@ class AdvancedAnalyticsService {
       if (!tx.isExpense || !tx.affectsStats) continue;
 
       // Calculate month index (0 = this month, 1 = last month, ..., 5 = 5 months ago)
-      final monthDiff = (now.year - tx.date.year) * 12 + (now.month - tx.date.month);
+      final monthDiff =
+          (now.year - tx.date.year) * 12 + (now.month - tx.date.month);
 
       if (monthDiff >= 0 && monthDiff < 6) {
         final name = tx.category.value?.name ?? 'Uncategorized';
@@ -252,7 +264,8 @@ class AdvancedAnalyticsService {
 
     final trends = <String, CategoryTrend>{};
     for (final entry in catMonths.entries) {
-      final history = entry.value; // [thisMonth, lastMonth, 2ago, 3ago, 4ago, 5ago]
+      final history =
+          entry.value; // [thisMonth, lastMonth, 2ago, 3ago, 4ago, 5ago]
       final thisMonth = history[0];
       final lastMonth = history[1];
 
@@ -401,7 +414,6 @@ class CategoryTrend {
 }
 
 enum TrendDirection { rising, falling, stable }
-
 
 class CashFlowForecast {
   final double currentMonthIncome;
