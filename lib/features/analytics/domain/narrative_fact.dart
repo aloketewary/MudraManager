@@ -172,8 +172,8 @@ class NarrativeMapper {
         ),
       final SpendingForecastFact f => NarrativePresentation(
           text: f.variance > 0
-              ? l10n.stats_forecastHigher(f.comparisonPeriod ?? "last month")
-              : l10n.stats_forecastLower(f.comparisonPeriod ?? "last month"),
+              ? l10n.stats_forecastHigher(f.comparisonPeriod ?? 'last month')
+              : l10n.stats_forecastLower(f.comparisonPeriod ?? 'last month'),
           icon: LucideIcons.trendingUp,
           color: f.variance > 0
               ? FinanceColors.expenseColor(brightness)

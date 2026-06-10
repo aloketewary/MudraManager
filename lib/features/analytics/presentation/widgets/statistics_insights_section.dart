@@ -47,13 +47,10 @@ class StatisticsInsightsSection extends ConsumerWidget {
                 return Container(
                   padding: EdgeInsets.all(spacing.cardInner),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        color.primaryContainer,
-                        color.secondaryContainer,
-                      ],
-                    ),
+                    color: color.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    border: Border.all(
+                        color: color.outlineVariant.withValues(alpha: 0.5),),
                   ),
                   child: Row(
                     children: [
@@ -173,10 +170,11 @@ class StatisticsInsightsSection extends ConsumerWidget {
                           style: textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: spacing.sectionGap),
                         ...sortedTrends.take(5).map(
                               (trend) => Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
+                                padding:
+                                    EdgeInsets.only(bottom: spacing.elementGap),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -225,8 +223,8 @@ class StatisticsInsightsSection extends ConsumerWidget {
                                                     Icon(
                                                       trend.changePercent > 0
                                                           ? LucideIcons.arrowUp
-                                                          : Icons
-                                                              .arrow_downward,
+                                                          : LucideIcons
+                                                              .arrowDown,
                                                       size: 12,
                                                       color:
                                                           trend.changePercent >

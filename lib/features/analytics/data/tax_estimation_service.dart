@@ -1,6 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/transaction_links.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
 
 // ─── Confidence & Assumptions ───────────────────────────────────────────────
 

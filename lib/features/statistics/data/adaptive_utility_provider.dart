@@ -1,4 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/models/budget.dart';
+import 'package:mudra_manager/core/db/models/goal.dart';
+import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/statistics/data/contextual_scorer.dart';
 import 'package:mudra_manager/features/statistics/data/financial_attention_layer.dart';

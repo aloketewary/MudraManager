@@ -1,5 +1,8 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/models/budget.dart';
+import 'package:mudra_manager/core/db/models/goal.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
 
 class SpendingPersonality {
   final String topCategory;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/analytics/presentation/widgets/widgets.dart';
 import 'package:mudra_manager/shared/templates/analytics_view_template.dart';
@@ -76,7 +77,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               );
             },
             loading: () => _buildLoading(spacing),
-            error: (e, _) => Center(child: Text('Error: $e')),
+            error: (e, _) => Center(child: Text(BuddyMessages.genericError)),
           ),
     );
   }

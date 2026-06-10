@@ -56,7 +56,7 @@ class SpendingTagsSection extends ConsumerWidget {
                 child: Column(
                   children: tagSpendings.take(8).map((ts) {
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
+                      padding: EdgeInsets.only(bottom: spacing.elementGap),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

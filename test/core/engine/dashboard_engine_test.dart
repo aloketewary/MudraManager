@@ -9,14 +9,14 @@ import 'package:mudra_manager/core/logic/insight_generator.dart';
 void main() {
   final today = DateTime(2025, 6, 15, 10, 0);
   final List<InsightGenerator> generators = [
-    BudgetInsightGenerator(),
-    BillInsightGenerator(),
-    CashflowInsightGenerator(),
+    const BudgetInsightGenerator(),
+    const BillInsightGenerator(),
+    const CashflowInsightGenerator(),
   ];
 
   group('DashboardEngine.compute', () {
     test('cold start — no data → insufficient gate', () {
-      final input = EngineInput(
+      final input = const EngineInput(
         accounts: [],
         transactions: [],
         budgets: [],

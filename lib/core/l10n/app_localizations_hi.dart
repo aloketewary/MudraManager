@@ -3741,6 +3741,17 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String get stats_expand => 'बड़ा करें';
+
+  @override
+  String get stats_otherCategory => 'अन्य';
+
+  @override
+  String stats_dayNumber(Object day) {
+    return 'Day $day';
+  }
+
+  @override
   String get stats_categoryTrends => 'Category Trends';
 
   @override
@@ -3797,6 +3808,29 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get stats_generating => 'बन रहा है...';
+
+  @override
+  String stats_newCategory(Object category) {
+    return 'New spending in $category detected.';
+  }
+
+  @override
+  String stats_categoryStopped(Object category) {
+    return 'No spending in $category this period.';
+  }
+
+  @override
+  String get stats_spendingSteady => 'Spending is steady compared to baseline.';
+
+  @override
+  String stats_forecastHigher(Object period) {
+    return 'At current pace, you may spend more than $period.';
+  }
+
+  @override
+  String stats_forecastLower(Object period) {
+    return 'On track to finish below $period.';
+  }
 
   @override
   String get recap_belowAvg => 'औसत से कम';

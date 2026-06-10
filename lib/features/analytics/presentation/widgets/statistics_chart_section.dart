@@ -266,7 +266,7 @@ class _StatisticsChartSectionState
                       ),
                       SizedBox(width: spacing.elementGapMin),
                       Text(
-                        'Expand',
+                        l10n.stats_expand,
                         style: textTheme.labelSmall?.copyWith(
                           color: color.onSurfaceVariant,
                         ),
@@ -365,17 +365,14 @@ class _StatisticsChartSectionState
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
-                          final days = [
-                            'Mon',
-                            'Tue',
-                            'Wed',
-                            'Thu',
-                            'Fri',
-                            'Sat',
-                            'Sun',
-                          ];
+                          // Mon=1 in DateTime, but index 0=Mon here
+                          final date = DateTime(
+                            2024,
+                            1,
+                            value.toInt() + 1,
+                          );
                           return Text(
-                            days[value.toInt()],
+                            safeDateFormat('E', l10n.localeName).format(date),
                             style: textTheme.bodySmall?.copyWith(
                               color:
                                   color.onSurfaceVariant.withValues(alpha: 0.6),
@@ -419,17 +416,13 @@ class _StatisticsChartSectionState
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
-                          final days = [
-                            'Mon',
-                            'Tue',
-                            'Wed',
-                            'Thu',
-                            'Fri',
-                            'Sat',
-                            'Sun',
-                          ];
+                          final date = DateTime(
+                            2024,
+                            1,
+                            value.toInt() + 1,
+                          );
                           return Text(
-                            days[value.toInt()],
+                            safeDateFormat('E', l10n.localeName).format(date),
                             style: textTheme.bodySmall?.copyWith(
                               color:
                                   color.onSurfaceVariant.withValues(alpha: 0.6),
@@ -1087,19 +1080,21 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
             barTouchData: BarTouchData(
               touchTooltipData: BarTouchTooltipData(
                 getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                  final l10n = AppLocalizations.of(context)!;
                   final segments = <String>[];
                   for (var i = rod.rodStackItems.length - 1; i >= 0; i--) {
                     final item = rod.rodStackItems[i];
                     final amount = item.toY - item.fromY;
                     if (amount <= 0) continue;
-                    final name =
-                        i < maxCats ? widget.sortedCategories[i].key : 'Other';
+                    final name = i < maxCats
+                        ? widget.sortedCategories[i].key
+                        : l10n.stats_otherCategory;
                     segments.add(
                       '$name: ${formatCurrency(amount, code: BaseCurrency.code)}',
                     );
                   }
                   return BarTooltipItem(
-                    'Day ${group.x + 1}\n${segments.join("\n")}',
+                    '${l10n.stats_dayNumber((group.x + 1).toString())}\n${segments.join("\n")}',
                     textTheme.labelSmall!.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
