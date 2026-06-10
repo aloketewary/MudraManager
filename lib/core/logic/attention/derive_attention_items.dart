@@ -15,10 +15,21 @@ import 'package:mudra_manager/core/state/dashboard_state.dart';
 List<AttentionItem> deriveAttentionItems({
   required DashboardState state,
   required List<Goal> goals,
+  bool isBackgroundUnhealthy = false,
+  int smsPendingCount = 0,
+  bool isSmsPermissionGranted = true,
+  bool isSmsImportEnabled = true,
+  bool isSmsBannerDismissed = false,
+  bool hasSeenHelpGuide = true,
   DateTime? now,
 }) {
   final items = <AttentionItem>[];
   final currentTime = now ?? DateTime.now();
+
+  // ── System Health ──
+  if (isBackgroundUnhealthy) {
+    items.add(const BackgroundUnhealthy());
+  }
 
   // ── Bill attention ──
   if (state.billState == BillState.dueSoon ||
@@ -63,6 +74,22 @@ List<AttentionItem> deriveAttentionItems({
 
   if (nearComplete > 0) {
     items.add(GoalNearCompletion(count: nearComplete));
+  }
+
+  // ── SMS Import attention ──
+  if (isSmsPermissionGranted && isSmsImportEnabled) {
+    if (smsPendingCount > 0) {
+      items.add(SmsImportPending(count: smsPendingCount));
+    }
+  } else if (isSmsPermissionGranted && !isSmsImportEnabled) {
+    items.add(const SmsImportPaused());
+  } else if (!isSmsPermissionGranted && !isSmsBannerDismissed) {
+    items.add(const SmsImportSetup());
+  }
+
+  // ── Help attention ──
+  if (!hasSeenHelpGuide) {
+    items.add(const HelpNeeded());
   }
 
   return items;

@@ -45,3 +45,24 @@ final class GoalNearCompletion extends AttentionItem {
 
   const GoalNearCompletion({required this.count});
 }
+
+final class BackgroundUnhealthy extends AttentionItem {
+  const BackgroundUnhealthy();
+}
+
+final class SmsImportPending extends AttentionItem {
+  final int count;
+  const SmsImportPending({required this.count});
+}
+
+final class SmsImportPaused extends AttentionItem {
+  const SmsImportPaused();
+}
+
+final class SmsImportSetup extends AttentionItem {
+  const SmsImportSetup();
+}
+
+final class HelpNeeded extends AttentionItem {
+  const HelpNeeded();
+}
