@@ -330,9 +330,18 @@ features/category/presentation/screens/
 - [x] Monthly comparison → ScreenShell + NarrativeFact
 - [ ] Export options → ScreenShell
 
-### Wave 5 — Core User Screens (CRITICAL)
-- [ ] Dashboard → Template A + DashboardState
-- [ ] Home shell → gate from DashboardState
+### Wave 5 — Dashboard (Plugin Architecture Consolidation)
+- [x] Banner extraction (PrioritizedBanner, HelpBanner, AutoImportBanner, BackgroundHealthBanner)
+- [x] First-transaction nudge extraction
+- [ ] Lifecycle side-effect extraction (DashboardLifecycleProvider)
+- [ ] DashboardState gating (render from V2 engine output)
+- ~~Dashboard → Template A~~ — NOT APPLICABLE (Dashboard is a composition engine, not a structured overview)
+
+### Deferred (no trigger fired)
+- DTO nesting for AnalyticsAggregates (trigger: field count > 20 or third analytics feature)
+- `.select()` optimization (trigger: profiling shows rebuild pressure)
+- Fact confidence/priority scoring (trigger: dashboard surfacing or notification selection)
+- Shared Detail Template abstraction (trigger: actual repetition observed across 4+ screens)
 
 ### Wave 6 — Edge + Form Screens
 - [ ] SMS setup → Template C
