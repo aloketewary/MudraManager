@@ -11,6 +11,7 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/features/dashboard/data/today_card_analytics.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/account_display_style_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
@@ -201,6 +202,7 @@ class _AnimatedSwipeableAccountCardsState
             InkWell(
               onTap: () {
                 HapticFeedback.lightImpact();
+                TodayCardAnalytics.recordAccountsOpened();
                 context.push(AppRoutes.netWorth);
               },
               borderRadius: spacing.borderRadiusSmall,

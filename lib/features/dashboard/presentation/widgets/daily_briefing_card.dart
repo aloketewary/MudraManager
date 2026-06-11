@@ -13,15 +13,26 @@ import 'package:mudra_manager/features/dashboard/data/greeting_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/financial_regime_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/spending_drift_detector.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/ai_insight_provider.dart';
+import 'package:mudra_manager/features/dashboard/data/today_card_analytics.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
-import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
+import 'package:mudra_manager/shared/widgets/widgets.dart';
 
 // ─────────────────────────────────────────────────────────────
-// DAILY BRIEFING — One story. One decision.
+// TODAY CARD — System's daily financial assessment
+// Always renders. Never disappears.
 // ─────────────────────────────────────────────────────────────
 
-/// Signal types for structured l10n formatting in the widget.
+/// The card's three possible maturity states.
+enum TodayCardMaturity {
+  /// No recurring bills set up — show balance only
+  stage0,
+
+  /// Has bills — can compute "remaining after upcoming bills"
+  stage1,
+}
+
+/// Signal types for the warning state.
 enum BriefingSignalType {
   billDueToday,
   budgetExceeded,
@@ -31,57 +42,90 @@ enum BriefingSignalType {
   improvement,
 }
 
-/// A single coherent story about one financial signal.
-class Briefing {
-  final String nameForGreeting;
-  final DayPeriod period;
+/// The complete state for rendering the Today Card.
+class TodayCardState {
+  final TodayCardMaturity maturity;
   final double balance;
-  final BriefingSignalType signalType;
-  final Map<String, dynamic> params; // signal-specific params for l10n
+  final double upcomingBillsTotal;
+  final double remainingAfterBills;
+
+  /// Next upcoming bill info (name + days until due)
+  final String? nextBillName;
+  final int? nextBillDays;
+
+  /// Warning signal (null = healthy state)
+  final BriefingSignalType? signalType;
+  final Map<String, dynamic> signalParams;
   final String? actionRoute;
 
-  const Briefing({
-    required this.nameForGreeting,
-    required this.period,
+  const TodayCardState({
+    required this.maturity,
     required this.balance,
-    required this.signalType,
-    required this.params,
+    required this.upcomingBillsTotal,
+    required this.remainingAfterBills,
+    this.nextBillName,
+    this.nextBillDays,
+    this.signalType,
+    this.signalParams = const {},
     this.actionRoute,
   });
+
+  bool get isHealthy => signalType == null;
+  bool get hasUpcomingBills => maturity == TodayCardMaturity.stage1;
 }
 
-/// Each signal is a self-contained story: what changed, why it matters, what to do.
-/// They compete. One wins.
-class _Signal {
-  final int urgency;
-  final BriefingSignalType type;
-  final Map<String, dynamic> params;
-  final String? actionRoute;
+// ─────────────────────────────────────────────────────────────
+// PROVIDER — Computes TodayCardState from dashboard data
+// ─────────────────────────────────────────────────────────────
 
-  const _Signal({
-    required this.urgency,
-    required this.type,
-    required this.params,
-    this.actionRoute,
-  });
-}
-
-final dailyBriefingProvider = Provider<Briefing?>((ref) {
+final todayCardProvider = Provider<TodayCardState?>((ref) {
   final data = ref.watch(dashboardDataProvider).value;
   if (data == null) return null;
 
   final now = DateTime.now();
   final isGuest = ref.watch(guestModeProvider);
-  final name = ref.watch(userProfileProvider).value?.name ?? '';
-  final period = ref.watch(dayPeriodProvider);
+  final regime = ref.watch(financialRegimeProvider);
 
   // ── Balance ──
   final balance = GuestModeUtil.applyGuestMode(data.totalBalance, isGuest);
 
-  // ── Regime: determines which signals are admissible ──
-  final regime = ref.watch(financialRegimeProvider);
+  // ── Upcoming bills (next 30 days, active expenses only) ──
+  final upcomingBills = data.recurringExpenses.where((r) {
+    final daysUntil = r.nextDueDate.difference(now).inDays;
+    return daysUntil >= 0 && daysUntil <= 30;
+  }).toList();
 
-  // ── Collect competing signals (regime-gated) ──
+  final upcomingBillsTotal = GuestModeUtil.applyGuestMode(
+    upcomingBills.fold<double>(0, (sum, r) => sum + r.amount),
+    isGuest,
+  );
+
+  // ── Maturity gate ──
+  final hasAnyActiveBills = data.recurringExpenses.isNotEmpty;
+  final maturity =
+      hasAnyActiveBills ? TodayCardMaturity.stage1 : TodayCardMaturity.stage0;
+
+  final remainingAfterBills = balance - upcomingBillsTotal;
+
+  // ── Next bill context ──
+  String? nextBillName;
+  int? nextBillDays;
+
+  if (upcomingBills.isNotEmpty) {
+    final sorted = List.of(upcomingBills)
+      ..sort((a, b) => a.nextDueDate.compareTo(b.nextDueDate));
+    final next = sorted.first;
+    final rawName = next.description ?? '';
+    nextBillName = rawName.isEmpty
+        ? (next.category.value?.name ?? 'Bill')
+        : FieldEncryptionService.safeDisplay(
+            rawName,
+            next.category.value?.name ?? 'Bill',
+          );
+    nextBillDays = next.nextDueDate.difference(now).inDays;
+  }
+
+  // ── Signal competition (reuses existing logic) ──
   final signals = <_Signal>[];
   final txns = data.transactions.where((t) => !t.isTransfer).toList();
 
@@ -195,7 +239,7 @@ final dailyBriefingProvider = Provider<Briefing?>((ref) {
     );
   }
 
-  // Signal: Positive — month-over-month improvement (urgency 20) — requires depth ≥ 2
+  // Signal: Positive — month-over-month improvement (urgency 20)
   if (regime.spendingDepthMonths >= 2 && now.day >= 10) {
     final thisMonthStart = DateTime(now.year, now.month, 1);
     final lastMonthStart = DateTime(now.year, now.month - 1, 1);
@@ -237,57 +281,139 @@ final dailyBriefingProvider = Provider<Briefing?>((ref) {
   }
 
   // ── Pick the winner ──
-  if (signals.isEmpty) return null;
-
   signals.sort((a, b) => b.urgency.compareTo(a.urgency));
-  final winner = signals.first;
+  final winner = signals.isNotEmpty ? signals.first : null;
+
+  return TodayCardState(
+    maturity: maturity,
+    balance: balance,
+    upcomingBillsTotal: upcomingBillsTotal,
+    remainingAfterBills: remainingAfterBills,
+    nextBillName: nextBillName,
+    nextBillDays: nextBillDays,
+    signalType: winner?.type,
+    signalParams: winner?.params ?? const {},
+    actionRoute: winner?.actionRoute,
+  );
+});
+
+/// Internal signal model for competition.
+class _Signal {
+  final int urgency;
+  final BriefingSignalType type;
+  final Map<String, dynamic> params;
+  final String? actionRoute;
+
+  const _Signal({
+    required this.urgency,
+    required this.type,
+    required this.params,
+    this.actionRoute,
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// LEGACY COMPATIBILITY — Keep old provider alive for
+// ai_insight_provider.dart which depends on it
+// ─────────────────────────────────────────────────────────────
+
+/// Legacy Briefing model (kept for backward compat with ai_insight_provider)
+class Briefing {
+  final String nameForGreeting;
+  final DayPeriod period;
+  final double balance;
+  final BriefingSignalType signalType;
+  final Map<String, dynamic> params;
+  final String? actionRoute;
+
+  const Briefing({
+    required this.nameForGreeting,
+    required this.period,
+    required this.balance,
+    required this.signalType,
+    required this.params,
+    this.actionRoute,
+  });
+}
+
+/// Legacy provider — now derived from todayCardProvider for backward compat.
+final dailyBriefingProvider = Provider<Briefing?>((ref) {
+  final state = ref.watch(todayCardProvider);
+  if (state == null || state.isHealthy) return null;
+
+  final period = ref.watch(dayPeriodProvider);
 
   return Briefing(
-    nameForGreeting: name,
+    nameForGreeting: '',
     period: period,
-    balance: balance,
-    signalType: winner.type,
-    params: winner.params,
-    actionRoute: winner.actionRoute,
+    balance: state.balance,
+    signalType: state.signalType!,
+    params: state.signalParams,
+    actionRoute: state.actionRoute,
   );
 });
 
 // ─────────────────────────────────────────────────────────────
-// UI — The card itself
+// UI — The Today Card (always renders)
 // ─────────────────────────────────────────────────────────────
 
-class DailyBriefingCard extends ConsumerWidget {
-  const DailyBriefingCard({super.key});
+/// Entry point widget registered in the plugin system.
+/// Always renders — never returns SizedBox.shrink.
+class UnifiedBriefingCard extends ConsumerStatefulWidget {
+  const UnifiedBriefingCard({super.key});
+
+  @override
+  ConsumerState<UnifiedBriefingCard> createState() =>
+      _UnifiedBriefingCardState();
+}
+
+class _UnifiedBriefingCardState extends ConsumerState<UnifiedBriefingCard> {
+  bool _hasRecordedImpression = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(todayCardProvider);
+    if (state == null) return const SizedBox.shrink(); // data still loading
+
+    // Record impression once per widget lifecycle
+    if (!_hasRecordedImpression) {
+      _hasRecordedImpression = true;
+      if (state.isHealthy) {
+        TodayCardAnalytics.recordCardShownHealthy();
+        // Detect natural dismissal: previous session had alert, now healthy
+        final lastSignal = TodayCardAnalytics.getLastAlertSignal();
+        if (lastSignal != null &&
+            !TodayCardAnalytics.hasInteractionAfterLastAlert()) {
+          TodayCardAnalytics.recordAlertDismissedNaturally(
+            signalType: lastSignal,
+          );
+        }
+      } else {
+        TodayCardAnalytics.recordCardShownAlert(
+          signalType: state.signalType!,
+          metadata: state.signalParams.map(
+            (k, v) => MapEntry(k, v.toString()),
+          ),
+        );
+      }
+    }
+
+    return TodayCard(state: state);
+  }
+}
+
+/// The permanent Today Card.
+class TodayCard extends ConsumerWidget {
+  final TodayCardState state;
+
+  const TodayCard({super.key, required this.state});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final briefing = ref.watch(dailyBriefingProvider);
-    if (briefing == null) return const SizedBox.shrink();
-
     final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
-
-    // ── Format greeting with l10n ──
-    final greetText = switch (briefing.period) {
-      DayPeriod.morning => l10n.greeting_good_morning_text,
-      DayPeriod.afternoon => l10n.greeting_good_afternoon_text,
-      DayPeriod.evening || DayPeriod.night => l10n.greeting_good_evening_text,
-    };
-    final greeting = briefing.nameForGreeting.isNotEmpty
-        ? l10n.briefing_greetingWithName(greetText, briefing.nameForGreeting)
-        : greetText;
-
-    // ── Format balance line ──
-    final balanceLine = l10n.briefing_available(
-      formatCurrencyCompact(briefing.balance),
-    );
-
-    // ── Format narrative from signal type ──
-    final narrative = _formatNarrative(l10n, briefing);
-    final actionLabel = _formatActionLabel(l10n, briefing);
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -306,67 +432,122 @@ class DailyBriefingCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Greeting + Balance ──
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    greeting,
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: color.onSurface,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.elementGap + 2,
-                    vertical: spacing.elementGapMin,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.primary.withValues(
-                      alpha: isDark ? 0.15 : 0.08,
-                    ),
-                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                  ),
-                  child: Text(
-                    balanceLine,
-                    style: textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: color.primary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: spacing.sectionGap),
-
-            // ── The story ──
+            // ── "TODAY" label ──
             Text(
-              narrative,
-              style: textTheme.bodyLarge?.copyWith(
-                color: color.onSurface,
-                height: 1.5,
+              l10n.today_label,
+              style: textTheme.labelSmall?.copyWith(
+                color: color.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
               ),
             ),
 
-            // ── Action ──
-            if (briefing.actionRoute != null) ...[
-              SizedBox(height: spacing.sectionGap),
+            SizedBox(height: spacing.elementGap),
+
+            // ── Status line ──
+            Text(
+              state.isHealthy
+                  ? l10n.today_noActionRequired
+                  : l10n.today_attentionRequired,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: state.isHealthy ? color.onSurface : color.error,
+              ),
+            ),
+
+            // ── Signal narrative (warning only) ──
+            if (!state.isHealthy) ...[
+              SizedBox(height: spacing.elementGap),
+              Text(
+                _formatNarrative(l10n, state),
+                style: textTheme.bodyMedium?.copyWith(
+                  color: color.onSurface,
+                  height: 1.4,
+                ),
+              ),
+            ],
+
+            SizedBox(height: spacing.sectionGap),
+
+            // ── Hero number ──
+            if (state.hasUpcomingBills) ...[
+              CurrencyText(
+                amount: state.remainingAfterBills,
+                style: textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: color.onSurface,
+                ),
+              ),
+              SizedBox(height: spacing.elementGapMin),
+              Text(
+                l10n.today_remainingAfterBills,
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                ),
+              ),
+              SizedBox(height: spacing.elementGap),
+              // ── Micro breakdown ──
+              Text(
+                l10n.today_breakdown(
+                  formatCurrencyCompact(state.balance),
+                  formatCurrencyCompact(state.upcomingBillsTotal),
+                ),
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+              ),
+            ] else ...[
+              // Stage 0: just balance
+              CurrencyText(
+                amount: state.balance,
+                style: textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: color.onSurface,
+                ),
+              ),
+              SizedBox(height: spacing.elementGapMin),
+              Text(
+                l10n.today_balance,
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                ),
+              ),
+            ],
+
+            SizedBox(height: spacing.sectionGap),
+
+            // ── Context line (next bill or setup prompt) ──
+            if (state.hasUpcomingBills && state.nextBillName != null)
+              _buildNextBillChip(
+                context,
+                spacing,
+                color,
+                textTheme,
+                state.nextBillName!,
+                state.nextBillDays ?? 0,
+              )
+            else if (!state.hasUpcomingBills)
+              _buildSetupPrompt(context, spacing, color, textTheme, l10n),
+
+            // ── CTA (warning state only) ──
+            if (!state.isHealthy && state.actionRoute != null) ...[
+              SizedBox(height: spacing.elementGap),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    context.push(briefing.actionRoute!);
+                    TodayCardAnalytics.recordCtaTapped(
+                      signalType: state.signalType!,
+                      destination: state.actionRoute!,
+                    );
+                    context.push(state.actionRoute!);
                   },
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        actionLabel,
+                        _formatActionLabel(l10n, state),
                         style: textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: color.primary,
@@ -389,35 +570,126 @@ class DailyBriefingCard extends ConsumerWidget {
     );
   }
 
-  String _formatNarrative(AppLocalizations l10n, Briefing b) {
-    return switch (b.signalType) {
+  Widget _buildNextBillChip(
+    BuildContext context,
+    AppSpacing spacing,
+    ColorScheme color,
+    TextTheme textTheme,
+    String billName,
+    int days,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.elementGap + 2,
+        vertical: spacing.elementGapMin,
+      ),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            LucideIcons.clock,
+            size: 14,
+            color: color.onSurfaceVariant,
+          ),
+          SizedBox(width: spacing.elementGapMin),
+          Flexible(
+            child: Text(
+              days == 0
+                  ? l10n.today_billDueToday(billName)
+                  : l10n.today_billContext(billName, days),
+              style: textTheme.labelSmall?.copyWith(
+                color: color.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSetupPrompt(
+    BuildContext context,
+    AppSpacing spacing,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppLocalizations l10n,
+  ) {
+    return InkWell(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        context.push(AppRoutes.recurringTransactions);
+      },
+      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.elementGap + 2,
+          vertical: spacing.elementGapMin + 2,
+        ),
+        decoration: BoxDecoration(
+          color: color.primaryContainer.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+          border: Border.all(
+            color: color.primary.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              LucideIcons.plus,
+              size: 14,
+              color: color.primary,
+            ),
+            SizedBox(width: spacing.elementGapMin),
+            Text(
+              l10n.today_addBillPrompt,
+              style: textTheme.labelSmall?.copyWith(
+                color: color.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatNarrative(AppLocalizations l10n, TodayCardState state) {
+    return switch (state.signalType!) {
       BriefingSignalType.billDueToday => l10n.briefing_billDueToday(
-          b.params['name'] as String,
-          b.params['amount'] as String,
+          state.signalParams['name'] as String,
+          state.signalParams['amount'] as String,
         ),
       BriefingSignalType.budgetExceeded => l10n.briefing_budgetExceeded(
-          b.params['name'] as String,
-          b.params['amount'] as String,
+          state.signalParams['name'] as String,
+          state.signalParams['amount'] as String,
         ),
       BriefingSignalType.spendingDrift => l10n.briefing_spendingDrift(
-          b.params['category'] as String,
-          b.params['percent'] as String,
+          state.signalParams['category'] as String,
+          state.signalParams['percent'] as String,
         ),
       BriefingSignalType.billDueSoon => l10n.briefing_billDueSoon(
-          b.params['name'] as String,
-          b.params['days'] as int,
+          state.signalParams['name'] as String,
+          state.signalParams['days'] as int,
         ),
       BriefingSignalType.overspending => l10n.briefing_overspending(
-          b.params['amount'] as String,
+          state.signalParams['amount'] as String,
         ),
       BriefingSignalType.improvement => l10n.briefing_improvement(
-          b.params['percent'] as int,
+          state.signalParams['percent'] as int,
         ),
     };
   }
 
-  String _formatActionLabel(AppLocalizations l10n, Briefing b) {
-    return switch (b.signalType) {
+  String _formatActionLabel(AppLocalizations l10n, TodayCardState state) {
+    return switch (state.signalType!) {
       BriefingSignalType.billDueToday => l10n.briefing_payNow,
       BriefingSignalType.budgetExceeded => l10n.briefing_review,
       BriefingSignalType.spendingDrift => l10n.briefing_viewPattern,
@@ -429,22 +701,15 @@ class DailyBriefingCard extends ConsumerWidget {
 }
 
 // ─────────────────────────────────────────────────────────────
-// UNIFIED CARD — One slot. Briefing or Hero. Never both.
+// LEGACY — Keep DailyBriefingCard alive for any external refs
 // ─────────────────────────────────────────────────────────────
 
-/// Renders DailyBriefingCard when a signal fires.
-/// Silence = SizedBox (no motivational fallback).
-class UnifiedBriefingCard extends ConsumerWidget {
-  const UnifiedBriefingCard({super.key});
+/// @deprecated Use UnifiedBriefingCard instead.
+class DailyBriefingCard extends ConsumerWidget {
+  const DailyBriefingCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final briefing = ref.watch(dailyBriefingProvider);
-
-    if (briefing != null) {
-      return const DailyBriefingCard();
-    }
-
-    return const SizedBox.shrink();
+    return const UnifiedBriefingCard();
   }
 }

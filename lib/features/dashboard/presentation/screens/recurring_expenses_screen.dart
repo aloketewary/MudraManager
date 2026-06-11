@@ -6,13 +6,27 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/features/dashboard/data/today_card_analytics.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
-class RecurringExpensesScreen extends ConsumerWidget {
+class RecurringExpensesScreen extends ConsumerStatefulWidget {
   const RecurringExpensesScreen({super.key});
+
+  @override
+  ConsumerState<RecurringExpensesScreen> createState() =>
+      _RecurringExpensesScreenState();
+}
+
+class _RecurringExpensesScreenState
+    extends ConsumerState<RecurringExpensesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    TodayCardAnalytics.recordDestinationOpened(destination: 'bills');
+  }
 
   String _formatFrequency(Frequency freq) {
     switch (freq) {
@@ -28,7 +42,7 @@ class RecurringExpensesScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final spacing = ref.watch(spacingProvider);
     final dashboardAsync = ref.watch(dashboardDataProvider);
     final color = Theme.of(context).colorScheme;

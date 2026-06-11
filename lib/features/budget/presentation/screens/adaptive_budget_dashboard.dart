@@ -13,6 +13,7 @@ import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/features/budget/data/budget_constraint_provider.dart';
+import 'package:mudra_manager/features/dashboard/data/today_card_analytics.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
@@ -33,6 +34,7 @@ class _AdaptiveBudgetDashboardState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    TodayCardAnalytics.recordDestinationOpened(destination: 'budget');
   }
 
   @override

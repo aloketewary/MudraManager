@@ -12042,6 +12042,84 @@ abstract class AppLocalizations {
   /// **'{greeting}, {name}'**
   String briefing_greetingWithName(String greeting, String name);
 
+  /// No description provided for @today_label.
+  ///
+  /// In en, this message translates to:
+  /// **'TODAY'**
+  String get today_label;
+
+  /// No description provided for @today_noActionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'No action required'**
+  String get today_noActionRequired;
+
+  /// No description provided for @today_attentionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Attention required'**
+  String get today_attentionRequired;
+
+  /// No description provided for @today_remainingAfterBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining after upcoming bills'**
+  String get today_remainingAfterBills;
+
+  /// No description provided for @today_balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get today_balance;
+
+  /// No description provided for @today_breakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'{balance} balance · {bills} upcoming bills'**
+  String today_breakdown(String balance, String bills);
+
+  /// No description provided for @today_billContext.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} • {days} days'**
+  String today_billContext(String name, int days);
+
+  /// No description provided for @today_billDueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} • due today'**
+  String today_billDueToday(String name);
+
+  /// No description provided for @today_addBillPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Add recurring bills for accurate capacity'**
+  String get today_addBillPrompt;
+
+  /// No description provided for @health_budgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get health_budgets;
+
+  /// No description provided for @health_bills.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills'**
+  String get health_bills;
+
+  /// No description provided for @health_goals.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get health_goals;
+
+  /// No description provided for @health_cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get health_cards;
+
   /// No description provided for @hero_spendingLess.
   ///
   /// In en, this message translates to:

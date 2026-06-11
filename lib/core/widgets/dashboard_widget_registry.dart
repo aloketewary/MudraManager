@@ -4,6 +4,7 @@ import 'package:mudra_manager/features/dashboard/plugin/budget_overview_widget_p
 import 'package:mudra_manager/features/dashboard/plugin/cash_flow_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/daily_briefing_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/goals_widget_plugin.dart';
+import 'package:mudra_manager/features/dashboard/plugin/health_strip_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/quick_actions_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/recent_transactions_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/recurring_expenses_widget_plugin.dart';
@@ -23,6 +24,9 @@ class DashboardWidgetRegistry {
   static final List<DashboardWidgetPlugin> _widgets = [
     // Unified Briefing — the primary experience
     DailyBriefingWidgetPlugin(),
+
+    // Health Strip — attention orientation
+    HealthStripWidgetPlugin(),
 
     // Essential widgets
     AccountsWidgetPlugin(),

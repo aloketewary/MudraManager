@@ -3858,5 +3858,45 @@
       }
     }
   },
-  "streak_keepGoing": "चलते रहें!"
+  "streak_keepGoing": "चलते रहें!",
+  "today_label": "TODAY",
+  "today_noActionRequired": "कोई action ज़रूरी नहीं",
+  "today_attentionRequired": "ध्यान दें",
+  "today_remainingAfterBills": "Upcoming bills के बाद बचा",
+  "today_balance": "Balance",
+  "today_breakdown": "{balance} balance · {bills} upcoming bills",
+  "@today_breakdown": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      },
+      "bills": {
+        "type": "String"
+      }
+    }
+  },
+  "today_billContext": "{name} • {days} दिन",
+  "@today_billContext": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "today_billDueToday": "{name} • आज due है",
+  "@today_billDueToday": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "today_addBillPrompt": "Recurring bills add करें accurate capacity के लिए",
+  "health_budgets": "Budgets",
+  "health_bills": "Bills",
+  "health_goals": "Goals",
+  "health_cards": "Cards"
 }

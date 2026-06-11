@@ -6673,6 +6673,52 @@ class AppLocalizationsBn extends AppLocalizations {
   }
 
   @override
+  String get today_label => 'TODAY';
+
+  @override
+  String get today_noActionRequired => 'কোনো action দরকার নেই';
+
+  @override
+  String get today_attentionRequired => 'মনোযোগ দিন';
+
+  @override
+  String get today_remainingAfterBills => 'Upcoming bills এর পর বাকি';
+
+  @override
+  String get today_balance => 'Balance';
+
+  @override
+  String today_breakdown(String balance, String bills) {
+    return '$balance balance · $bills upcoming bills';
+  }
+
+  @override
+  String today_billContext(String name, int days) {
+    return '$name • $days দিন';
+  }
+
+  @override
+  String today_billDueToday(String name) {
+    return '$name • আজ due';
+  }
+
+  @override
+  String get today_addBillPrompt =>
+      'সঠিক capacity জানতে recurring bills add করুন';
+
+  @override
+  String get health_budgets => 'Budgets';
+
+  @override
+  String get health_bills => 'Bills';
+
+  @override
+  String get health_goals => 'Goals';
+
+  @override
+  String get health_cards => 'Cards';
+
+  @override
   String hero_spendingLess(String percent) {
     return 'You\'re spending $percent% less than last month — that\'s real progress 💪';
   }
