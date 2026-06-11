@@ -17,6 +17,8 @@ import 'package:mudra_manager/core/utils/simple_color_picker.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class AccountForm extends ConsumerStatefulWidget {
@@ -105,44 +107,26 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.x),
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            context.pop();
-          },
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: _isEditing ? ctxt.account_editTitle : ctxt.account_newTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      leading: IconButton(
+        icon: const Icon(LucideIcons.x),
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          context.pop();
+        },
+      ),
+      actions: ScreenActions.build(
+        trailing: ScreenTextAction(
+          id: 'save_account',
+          label: _isEditing ? ctxt.common_update : ctxt.common_create,
+          onTap: _saving ? null : () => _saveAccount(widget.account?.id),
+          isLoading: _saving,
         ),
-        title:
-            Text(_isEditing ? ctxt.account_editTitle : ctxt.account_newTitle),
-        actions: [
-          TextButton(
-            onPressed: _saving
-                ? null
-                : () {
-                    HapticFeedback.mediumImpact();
-                    _saveAccount(widget.account?.id);
-                  },
-            child: _saving
-                ? SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: color.primary,
-                    ),
-                  )
-                : Text(
-                    _isEditing ? ctxt.common_update : ctxt.common_create,
-                    style: textTheme.titleSmall?.copyWith(
-                      color: color.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-          ),
-        ],
       ),
       body: Form(
         key: _formKey,
@@ -453,7 +437,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
-            labelText: isCreditCard ? ctxt.account_outstanding : ctxt.account_initialBalance,
+            labelText: isCreditCard
+                ? ctxt.account_outstanding
+                : ctxt.account_initialBalance,
             helperText: isCreditCard ? ctxt.account_cardPaidOff : null,
             helperStyle: textTheme.labelSmall?.copyWith(
               color: color.onSurfaceVariant.withValues(alpha: 0.6),
@@ -481,7 +467,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
               labelText: ctxt.account_creditLimit,
-              prefixIcon: Icon(LucideIcons.gauge, size: 18, color: _selectedColor),
+              prefixIcon:
+                  Icon(LucideIcons.gauge, size: 18, color: _selectedColor),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
@@ -551,9 +538,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           isDense: true,
           hint: Text('—', style: textTheme.bodyLarge),
           items: [
-            DropdownMenuItem<int?>(value: null, child: Text('—', style: textTheme.bodyLarge)),
+            DropdownMenuItem<int?>(
+                value: null, child: Text('—', style: textTheme.bodyLarge)),
             ...List.generate(31, (i) => i + 1).map(
-              (day) => DropdownMenuItem(value: day, child: Text('$day', style: textTheme.bodyLarge)),
+              (day) => DropdownMenuItem(
+                  value: day, child: Text('$day', style: textTheme.bodyLarge)),
             ),
           ],
           onChanged: onChanged,
@@ -701,7 +690,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 context: context,
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+                  borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(Tone.current.borderRadius * 2)),
                 ),
                 builder: (_) => _CurrencyPickerInline(selected: displayCode),
               );
@@ -845,7 +835,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     return showModalBottomSheet<bool>(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(Tone.current.borderRadius * 2)),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(
@@ -1149,7 +1140,8 @@ class _CurrencyPickerInlineState extends State<_CurrencyPickerInline> {
                 hintText: ctxt.common_searchCurrency,
                 prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius:
+                      BorderRadius.circular(Tone.current.borderRadius),
                   borderSide: BorderSide(color: color.outlineVariant),
                 ),
                 isDense: true,

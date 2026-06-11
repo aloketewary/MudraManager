@@ -15,6 +15,8 @@ import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/icon_picker_bottom_sheet.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class AddEditCategoryScreen extends ConsumerStatefulWidget {
   final Category? existing;
@@ -101,46 +103,26 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.x),
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            context.pop();
-          },
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: _isEditing ? ctxt.category_editTitle : ctxt.category_addTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      leading: IconButton(
+        icon: const Icon(LucideIcons.x),
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          context.pop();
+        },
+      ),
+      actions: ScreenActions.build(
+        trailing: ScreenTextAction(
+          id: 'save_category',
+          label: _isEditing ? ctxt.common_update : ctxt.category_save,
+          onTap: _saving ? null : _save,
+          isLoading: _saving,
         ),
-        title: Text(
-          _isEditing ? ctxt.category_editTitle : ctxt.category_addTitle,
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          TextButton(
-            onPressed: _saving
-                ? null
-                : () {
-                    HapticFeedback.mediumImpact();
-                    _save();
-                  },
-            child: _saving
-                ? SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: color.primary,
-                    ),
-                  )
-                : Text(
-                    _isEditing ? ctxt.common_update : ctxt.category_save,
-                    style: textTheme.titleSmall?.copyWith(
-                      color: color.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-          ),
-        ],
       ),
       body: Form(
         key: _formKey,

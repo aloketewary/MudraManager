@@ -46,6 +46,8 @@ import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/simple_calculator.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/add_transaction_widgets.dart';
 
 class AddEditTransactionScreen extends ConsumerStatefulWidget {
@@ -304,46 +306,30 @@ class _AddEditTransactionScreenState
 
     final accentColor = _isExpense ? color.error : color.primary;
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.x),
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            context.pop();
-          },
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: _isEditing
+            ? ctxt.transaction_editTransactionTitle
+            : (_isExpense
+                ? ctxt.transaction_addExpenseTitle
+                : ctxt.transaction_addIncomeTitle),
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      leading: IconButton(
+        icon: const Icon(LucideIcons.x),
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          context.pop();
+        },
+      ),
+      actions: ScreenActions.build(
+        trailing: ScreenTextAction(
+          id: 'save_transaction',
+          label: _isEditing ? ctxt.common_update : ctxt.common_save,
+          onTap: _saving ? null : _saveTransaction,
+          isLoading: _saving,
         ),
-        title: Text(
-          _isEditing
-              ? ctxt.transaction_editTransactionTitle
-              : (_isExpense ? ctxt.transaction_addExpenseTitle : ctxt.transaction_addIncomeTitle),
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          TextButton(
-            onPressed: _saving ? null : _saveTransaction,
-            child: _saving
-                ? SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: color.primary,
-                    ),
-                  )
-                : Text(
-                    _isEditing
-                        ? ctxt.common_update
-                        : ctxt.common_save,
-                    style: textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-          ),
-          SizedBox(width: spacing.cardHorizontal),
-        ],
       ),
       body: Form(
         key: _formKey,

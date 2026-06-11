@@ -158,7 +158,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
       if (_isCrossCurrency) {
         final service = await ref.read(currencyServiceProvider.future);
         final result = await service.convert(
-            amount, fromCur ?? BaseCurrency.code, toCur ?? BaseCurrency.code);
+            amount, fromCur ?? BaseCurrency.code, toCur ?? BaseCurrency.code,);
         if (result != null) {
           creditAmount = result.converted;
         }
@@ -232,7 +232,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
             return Center(
               child: NoDataFound(
                   message: BuddyMessages.noAccounts,
-                  iconData: LucideIcons.wallet),
+                  iconData: LucideIcons.wallet,),
             );
           }
 
@@ -319,7 +319,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                                         return ActionChip(
                                           label: Text(
                                             formatCurrency(amt.toDouble(),
-                                                decimals: 0),
+                                                decimals: 0,),
                                             style:
                                                 textTheme.labelSmall?.copyWith(
                                               fontWeight: FontWeight.w600,
@@ -537,7 +537,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         },
         loading: () => Padding(
             padding: EdgeInsets.all(spacing.cardInner),
-            child: const AccountCardSkeleton()),
+            child: const AccountCardSkeleton(),),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );

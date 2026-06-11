@@ -153,7 +153,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                       )
                     : const Icon(LucideIcons.download, size: 18),
                 label: Text(
-                    _downloading ? l10n.stats_generating : l10n.stats_downloadPdf),
+                    _downloading ? l10n.stats_generating : l10n.stats_downloadPdf,),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
@@ -236,14 +236,14 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
           Row(
             children: [
               _summaryTile(l10n.recap_income, data.totalIncome, color.primary,
-                  color, textTheme, spacing),
+                  color, textTheme, spacing,),
               SizedBox(width: spacing.elementGap),
               _summaryTile(l10n.recap_expense, data.totalExpense, color.error,
-                  color, textTheme, spacing),
+                  color, textTheme, spacing,),
               SizedBox(width: spacing.elementGap),
               _summaryTile(l10n.recap_saved, data.netSavings,
                   data.netSavings >= 0 ? color.primary : color.error,
-                  color, textTheme, spacing),
+                  color, textTheme, spacing,),
             ],
           ),
           SizedBox(height: spacing.elementGap * 1.5),
@@ -391,7 +391,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     ),
                   ],
                 ),
-              )),
+              ),),
           if (insight.suggestedFocus != null) ...[
             SizedBox(height: spacing.elementGap),
             Container(

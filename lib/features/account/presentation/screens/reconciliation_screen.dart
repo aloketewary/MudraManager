@@ -13,6 +13,8 @@ import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/account/data/reconciliation_service.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class ReconciliationScreen extends ConsumerStatefulWidget {
@@ -102,31 +104,21 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
     final ctxt = AppLocalizations.of(context)!;
     final diff = _difference;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('${ctxt.reconcile_title} ${widget.account.name}'),
-        actions: [
-          TextButton(
-            onPressed: _saving || _enteredBalance == null
-                ? null
-                : () {
-                    HapticFeedback.mediumImpact();
-                    _reconcile();
-                  },
-            child: _saving
-                ? SizedBox(
-                    width: 18, height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: color.primary),
-                  )
-                : Text(
-                    diff != null && diff.abs() < 0.01 ? ctxt.common_confirm : ctxt.reconcile_title,
-                    style: textTheme.titleSmall?.copyWith(
-                      color: _enteredBalance != null ? color.primary : color.onSurfaceVariant,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-          ),
-        ],
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: '${ctxt.reconcile_title} ${widget.account.name}',
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        trailing: ScreenTextAction(
+          id: 'reconcile',
+          label: diff != null && diff.abs() < 0.01
+              ? ctxt.common_confirm
+              : ctxt.reconcile_title,
+          onTap: _saving || _enteredBalance == null ? null : _reconcile,
+          isLoading: _saving,
+        ),
       ),
       body: _calculatedBalance == null
           ? ListView(children: List.generate(3, (_) => const DashboardCardSkeleton()))

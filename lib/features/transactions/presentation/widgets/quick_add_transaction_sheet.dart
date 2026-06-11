@@ -98,7 +98,7 @@ class _QuickAddTransactionSheetState
       decoration: BoxDecoration(
         color: color.surface,
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2)),
+            top: Radius.circular(Tone.current.borderRadius * 2),),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -192,7 +192,7 @@ class _QuickAddTransactionSheetState
                         _buildSelectedLabel(
                           _selectedAccount!.name,
                           Color(_selectedAccount!.colorValue ??
-                              color.primary.toARGB32()),
+                              color.primary.toARGB32(),),
                           textTheme,
                         ),
                       SizedBox(
@@ -207,7 +207,7 @@ class _QuickAddTransactionSheetState
                             final acc = accounts[i];
                             final selected = _selectedAccount?.id == acc.id;
                             final acColor = Color(
-                                acc.colorValue ?? color.primary.toARGB32());
+                                acc.colorValue ?? color.primary.toARGB32(),);
                             final unlockedIds =
                                 ref.watch(unlockedAccountIdsProvider);
                             final isUnlocked =
@@ -237,7 +237,7 @@ class _QuickAddTransactionSheetState
                                           : color.surfaceContainerHighest
                                               .withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(
-                                      spacing.radiusMedium),
+                                      spacing.radiusMedium,),
                                   border: Border.all(
                                     color: selected
                                         ? acColor.withValues(alpha: 0.5)
@@ -250,7 +250,7 @@ class _QuickAddTransactionSheetState
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(LucideIcons.landmark,
-                                        size: 16, color: acColor),
+                                        size: 16, color: acColor,),
                                     SizedBox(width: spacing.elementGap),
                                     Text(
                                       acc.name,
@@ -310,7 +310,7 @@ class _QuickAddTransactionSheetState
                   final expanded = _expandedParent(parents);
                   final hasChildren = expanded != null &&
                       categories.any(
-                          (c) => c.parentCategory.value?.id == expanded.id);
+                          (c) => c.parentCategory.value?.id == expanded.id,);
                   final children = hasChildren
                       ? categories
                           .where(
@@ -328,7 +328,7 @@ class _QuickAddTransactionSheetState
                               ? '${_selectedCategory!.name} · ${_selectedCategory!.parentCategory.value?.name ?? ""}'
                               : _selectedCategory!.name,
                           Color(_selectedCategory!.colorValue ??
-                              color.primary.toARGB32()),
+                              color.primary.toARGB32(),),
                           textTheme,
                         ),
                       // Parent row
@@ -343,7 +343,7 @@ class _QuickAddTransactionSheetState
                           itemBuilder: (_, i) {
                             final cat = parents[i];
                             final catColor = Color(
-                                cat.colorValue ?? color.primary.toARGB32());
+                                cat.colorValue ?? color.primary.toARGB32(),);
                             final isExpanded = expanded?.id == cat.id;
                             final isSelected =
                                 isExpanded || _selectedCategory?.id == cat.id;
@@ -367,7 +367,7 @@ class _QuickAddTransactionSheetState
                                       ? catColor.withValues(alpha: 0.1)
                                       : color.surfaceContainerHighest,
                                   borderRadius: BorderRadius.circular(
-                                      spacing.radiusMedium),
+                                      spacing.radiusMedium,),
                                   border: Border.all(
                                     color: isSelected
                                         ? catColor.withValues(alpha: 0.5)
@@ -381,7 +381,7 @@ class _QuickAddTransactionSheetState
                                   children: [
                                     Icon(
                                       IconHelper.iconFromName(
-                                          cat.iconName ?? 'category'),
+                                          cat.iconName ?? 'category',),
                                       size: 16,
                                       color: catColor,
                                     ),
@@ -557,7 +557,7 @@ class _QuickAddTransactionSheetState
               TextButton.icon(
                 onPressed: () => setState(() => _showFullMode = true),
                 icon: Icon(LucideIcons.chevronDown,
-                    size: 16, color: color.onSurfaceVariant),
+                    size: 16, color: color.onSurfaceVariant,),
                 label: Text(
                   ctxt.quickAdd_moreOptions,
                   style: textTheme.labelMedium?.copyWith(
@@ -763,7 +763,7 @@ class _QuickAddTransactionSheetState
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2)),
+            top: Radius.circular(Tone.current.borderRadius * 2),),
       ),
       builder: (ctx) => SafeArea(
         child: Padding(
@@ -802,7 +802,7 @@ class _QuickAddTransactionSheetState
                   minimumSize: const Size(double.infinity, 52),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
-                        ref.read(spacingProvider).radiusMedium),
+                        ref.read(spacingProvider).radiusMedium,),
                   ),
                 ),
               ),
