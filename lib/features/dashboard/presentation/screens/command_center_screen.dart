@@ -81,7 +81,7 @@ class CommandCenterScreen extends ConsumerWidget {
                             IconButton(
                               tooltip: 'Search',
                               icon: Icon(LucideIcons.search,
-                                  color: color.onSurface),
+                                  color: color.onSurface,),
                               onPressed: () {
                                 HapticFeedback.mediumImpact();
                                 // Navigate to search
@@ -138,7 +138,7 @@ class CommandCenterScreen extends ConsumerWidget {
                                 color:
                                     color.errorContainer.withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(
-                                    Tone.current.borderRadius),
+                                    Tone.current.borderRadius,),
                                 border: Border.all(
                                   color: color.error.withValues(alpha: 0.3),
                                   width: 1,
@@ -193,7 +193,7 @@ class CommandCenterScreen extends ConsumerWidget {
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(
-                                  Tone.current.borderRadius),
+                                  Tone.current.borderRadius,),
                               boxShadow: [
                                 BoxShadow(
                                   color: color.primary.withValues(alpha: 0.3),
@@ -304,7 +304,7 @@ class CommandCenterScreen extends ConsumerWidget {
           );
         },
         loading: () => const Padding(
-            padding: EdgeInsets.all(16), child: AccountCardSkeleton()),
+            padding: EdgeInsets.all(16), child: AccountCardSkeleton(),),
         error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
       ),
     );

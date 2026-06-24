@@ -90,7 +90,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2)),
+            top: Radius.circular(Tone.current.borderRadius * 2),),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
@@ -182,7 +182,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                             BorderRadius.circular(Tone.current.borderRadius),
                       ),
                     ),
-                    child: const Text('Add'),
+                    child: Text(AppLocalizations.of(context)!.editTrip_add),
                   ),
                 ),
               ],
@@ -274,11 +274,11 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
   Future<void> _finalizeTrip(Trip trip) async {
     final confirm = await DialogUtils.showConfirmation(
       context,
-      title: _isTrip ? 'Finalize Trip' : 'Close Group',
+      title: _isTrip ? AppLocalizations.of(context)!.trip_finalizeTrip : AppLocalizations.of(context)!.trip_closeGroup,
       message: _isTrip
-          ? 'This will mark the trip as ended. You can\'t add expenses after this.'
-          : 'This will close the group. You can\'t add expenses after this.',
-      confirmText: _isTrip ? 'Finalize' : 'Close',
+          ? AppLocalizations.of(context)!.trip_finalizeTripMsg
+          : AppLocalizations.of(context)!.trip_closeGroupMsg,
+      confirmText: _isTrip ? AppLocalizations.of(context)!.trip_finalize : AppLocalizations.of(context)!.trip_close,
       icon: LucideIcons.circleCheck,
     );
     if (confirm != true) return;
@@ -328,10 +328,10 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
           if (trip == null) {
             return Scaffold(
               appBar: AppBar(
-                title: Text(_isTrip ? 'Trip Not Found' : 'Group Not Found'),
+                title: Text(_isTrip ? AppLocalizations.of(context)!.trip_tripNotFound : AppLocalizations.of(context)!.trip_groupNotFound),
               ),
               body: Center(
-                child: Text(_isTrip ? 'Trip not found' : 'Group not found'),
+                child: Text(_isTrip ? AppLocalizations.of(context)!.trip_tripNotFound : AppLocalizations.of(context)!.trip_groupNotFound),
               ),
             );
           }
@@ -346,7 +346,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
           return _buildContent(spacing, color, textTheme, trip);
         },
         loading: () => Scaffold(
-          appBar: AppBar(title: Text(_isTrip ? 'Edit Trip' : 'Edit Group')),
+          appBar: AppBar(title: Text(_isTrip ? AppLocalizations.of(context)!.trip_editTrip : AppLocalizations.of(context)!.trip_editGroup)),
           body: ListView(
             children: List.generate(3, (_) => const DashboardCardSkeleton()),
           ),
@@ -373,8 +373,8 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
       appBar: AppBar(
         title: Text(
           isEditMode
-              ? (_isTrip ? 'Edit Trip' : 'Edit Split Group')
-              : (_isTrip ? 'Create Trip' : 'Create Split Group'),
+              ? (_isTrip ? AppLocalizations.of(context)!.trip_editTrip : AppLocalizations.of(context)!.trip_editSplitGroup)
+              : (_isTrip ? AppLocalizations.of(context)!.trip_createTrip : AppLocalizations.of(context)!.trip_createGroup),
         ),
         leading: IconButton(
           icon: const Icon(LucideIcons.x),
@@ -386,7 +386,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
         actions: [
           TextButton.icon(
             icon: const Icon(LucideIcons.save),
-            label: Text(isEditMode ? 'Update' : 'Create'),
+            label: Text(isEditMode ? AppLocalizations.of(context)!.common_update : AppLocalizations.of(context)!.common_create),
             onPressed: () {
               HapticFeedback.mediumImpact();
               _saveTrip(trip);
@@ -426,7 +426,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      _isTrip ? 'Travel Trip' : 'Split Group',
+                      _isTrip ? AppLocalizations.of(context)!.trip_travelTrip : AppLocalizations.of(context)!.trip_splitGroup,
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: _isTrip
@@ -469,10 +469,10 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                 TextField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                    labelText: _isTrip ? 'Trip Name' : 'Group Name',
+                    labelText: _isTrip ? AppLocalizations.of(context)!.trip_tripName : AppLocalizations.of(context)!.trip_groupName,
                     hintText: _isTrip
-                        ? 'e.g., Goa Trip 2024'
-                        : 'e.g., Weekend dinner split',
+                        ? AppLocalizations.of(context)!.trip_tripNameHint
+                        : AppLocalizations.of(context)!.trip_groupNameHint,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
@@ -488,8 +488,8 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     labelText: AppLocalizations.of(context)!
                         .editTrip_descriptionOptional,
                     hintText: _isTrip
-                        ? 'Beach vacation with friends'
-                        : 'Split expenses with friends',
+                        ? AppLocalizations.of(context)!.trip_tripDescHint
+                        : AppLocalizations.of(context)!.trip_groupDescHint,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
@@ -504,7 +504,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     decoration: InputDecoration(
                       labelText:
                           AppLocalizations.of(context)!.editTrip_budgetOptional,
-                      hintText: 'e.g., 50000',
+                      hintText: AppLocalizations.of(context)!.trip_budgetHint,
                       border: OutlineInputBorder(
                         borderRadius:
                             BorderRadius.circular(spacing.radiusMedium),
@@ -524,7 +524,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.vertical(
                             top:
-                                Radius.circular(Tone.current.borderRadius * 2)),
+                                Radius.circular(Tone.current.borderRadius * 2),),
                       ),
                       builder: (_) => _TripCurrencyPicker(
                         selected: _tripCurrency,
@@ -537,7 +537,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   child: InputDecorator(
                     decoration: InputDecoration(
-                      labelText: 'Currency',
+                      labelText: AppLocalizations.of(context)!.trip_currency,
                       border: OutlineInputBorder(
                         borderRadius:
                             BorderRadius.circular(spacing.radiusMedium),

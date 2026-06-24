@@ -625,7 +625,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               onTap: () {
                 HapticFeedback.mediumImpact();
                 context.push(AppRoutes.budgetDetails,
-                    extra: matchingBudget!.budget.id);
+                    extra: matchingBudget!.budget.id,);
               },
               child: Row(
                 children: [
@@ -700,7 +700,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           decoration: BoxDecoration(
                             color: color.primaryContainer,
                             borderRadius: BorderRadius.circular(
-                                Tone.current.borderRadius),
+                                Tone.current.borderRadius,),
                           ),
                           child: Icon(
                             LucideIcons.calendar,
@@ -765,7 +765,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             ButtonSegment(
                               value: RangeSelectionMode.toggledOff,
                               label: Text(
-                                  AppLocalizations.of(context)!.txnList_month),
+                                  AppLocalizations.of(context)!.txnList_month,),
                               icon: const Icon(
                                 LucideIcons.calendarDays,
                                 size: 16,
@@ -774,9 +774,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             ButtonSegment(
                               value: RangeSelectionMode.toggledOn,
                               label: Text(AppLocalizations.of(context)!
-                                  .txnList_dateRange),
+                                  .txnList_dateRange,),
                               icon: const Icon(LucideIcons.calendarRange,
-                                  size: 16),
+                                  size: 16,),
                             ),
                           ],
                           selected: {_rangeSelectionMode},
@@ -1286,7 +1286,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
             return _selectMode
                 ? _buildSelectableCard(transaction, tags, isRecurring, tripName,
-                    ctxt, color, spacing)
+                    ctxt, color, spacing,)
                 : TransactionCard(
                     category: transaction.category.value,
                     description: transaction.description,
@@ -1316,7 +1316,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
   // ── SELECT MODE HINT BAR ──
   Widget _buildSelectModeHint(
-      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
     final hint = _selectedTxnIds.length == 1
         ? 'Select the matching transaction'
         : 'Tap merge in the app bar';
@@ -1561,7 +1561,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     setState(() => _clearCache());
     if (!context.mounted) return;
     SnackbarService.success(
-        AppLocalizations.of(context)!.txnList_subscriptionTagRemoved);
+        AppLocalizations.of(context)!.txnList_subscriptionTagRemoved,);
   }
 
   Future<void> _onRemoveTransaction(transaction, AppLocalizations ctxt) async {
@@ -1636,7 +1636,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2)),
+            top: Radius.circular(Tone.current.borderRadius * 2),),
       ),
       builder: (ctx) {
         return Consumer(
@@ -1676,7 +1676,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             if (_selectedTagId != null)
                               ActionChip(
                                 label: Text(AppLocalizations.of(context)!
-                                    .txnList_clear),
+                                    .txnList_clear,),
                                 avatar: const Icon(LucideIcons.x, size: 16),
                                 onPressed: () {
                                   setState(() {
@@ -1713,7 +1713,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                   padding: const EdgeInsets.all(48),
                   child: Column(
                       children: List.generate(
-                          5, (_) => const TransactionCardSkeleton())),
+                          5, (_) => const TransactionCardSkeleton(),),),
                 ),
             };
           },
@@ -1834,7 +1834,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                               RadioListTile<int?>(
                                 value: null,
                                 title: Text(AppLocalizations.of(context)!
-                                    .txnList_allCategories),
+                                    .txnList_allCategories,),
                               ),
                               ...parentCategories.map((parent) {
                                 final subcategories = allCategories
@@ -1855,7 +1855,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                         children: [
                                           Icon(
                                             IconHelper.getIconData(
-                                                parent.iconName),
+                                                parent.iconName,),
                                             size: 20,
                                             color: Color(
                                               parent.colorValue ?? 0xFF9E9E9E,
@@ -1892,7 +1892,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                                   ),
                                                 ),
                                                 SizedBox(
-                                                    width: spacing.elementGap),
+                                                    width: spacing.elementGap,),
                                                 Text(
                                                   sub.name,
                                                   style: textTheme.bodyMedium,
@@ -1923,7 +1923,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                         ),
                         ListTile(
                           leading: Icon(LucideIcons.calendarRange,
-                              color: color.primary),
+                              color: color.primary,),
                           title: Text(
                             _filterStartDate != null && _filterEndDate != null
                                 ? '${DateFormat.yMMMd().format(_filterStartDate!)} - ${DateFormat.yMMMd().format(_filterEndDate!)}'
@@ -1972,7 +1972,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                               },
                               icon: const Icon(LucideIcons.x),
                               label: Text(AppLocalizations.of(context)!
-                                  .txnList_clearDateRange),
+                                  .txnList_clearDateRange,),
                             ),
                           ),
                       ],

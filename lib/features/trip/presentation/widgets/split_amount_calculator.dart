@@ -38,7 +38,7 @@ class SplitAmountCalculator extends StatelessWidget {
                 ),
                 Chip(
                   label: Text(
-                      '${formatCurrency(equalSplit.toDouble(), decimals: equalSplit.truncateToDouble() == equalSplit ? 0 : 2)} each'),
+                      '${formatCurrency(equalSplit.toDouble(), decimals: equalSplit.truncateToDouble() == equalSplit ? 0 : 2)} each',),
                   backgroundColor: color.primaryContainer,
                 ),
               ],

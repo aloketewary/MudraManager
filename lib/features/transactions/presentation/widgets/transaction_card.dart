@@ -159,7 +159,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                                       color: color.surfaceContainerHighest
                                           .withValues(alpha: 0.4),
                                       borderRadius: BorderRadius.circular(
-                                          spacing.radiusSmall),
+                                          spacing.radiusSmall,),
                                     ),
                                     child: Row(
                                       crossAxisAlignment:

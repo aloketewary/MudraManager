@@ -173,16 +173,16 @@ class AdvancedAnalyticsService {
     // 1. Savings Rate (30 points)
     if (savingsRate >= 30) {
       score += 30;
-      insights.add('Excellent savings rate!');
+      insights.add('Savings rate: ${savingsRate.toStringAsFixed(0)}% of income');
     } else if (savingsRate >= 20) {
       score += 25;
-      insights.add('Good savings habit');
+      insights.add('Savings rate: ${savingsRate.toStringAsFixed(0)}% of income');
     } else if (savingsRate >= 10) {
       score += 15;
-      insights.add('Try to save 20% of income');
+      insights.add('Savings rate: ${savingsRate.toStringAsFixed(0)}% — below 20% target');
     } else {
       score += 5;
-      insights.add('Aim to save at least 10% monthly');
+      insights.add('Savings rate: ${savingsRate.toStringAsFixed(0)}% — below 10%');
     }
 
     // 2. Budget Discipline (30 points) - based on expense ratio
@@ -190,12 +190,12 @@ class AdvancedAnalyticsService {
       score += 30;
     } else if (expenseRatio <= 70) {
       score += 20;
-      insights.add('Keep expenses under 70%');
+      insights.add('Expense ratio: ${expenseRatio.toStringAsFixed(0)}% of income');
     } else if (expenseRatio <= 90) {
       score += 10;
-      insights.add('Expenses are high, review spending');
+      insights.add('Expense ratio: ${expenseRatio.toStringAsFixed(0)}% — high relative to income');
     } else {
-      insights.add('Critical: Expenses exceed income');
+      insights.add('Expenses exceed income this month');
     }
 
     // 3. Debt Factor (20 points) - negative balance indicates debt
@@ -203,24 +203,24 @@ class AdvancedAnalyticsService {
       score += 20;
     } else if (totalBalance >= -income) {
       score += 10;
-      insights.add('Work on clearing debt');
+      insights.add('Net balance is negative');
     } else {
-      insights.add('High debt level detected');
+      insights.add('Debt exceeds monthly income');
     }
 
     // 4. Emergency Fund (20 points) - 3-6 months of expenses
     final monthlyExpense = expense;
     if (totalBalance >= monthlyExpense * 6) {
       score += 20;
-      insights.add('Strong emergency fund!');
+      insights.add('Balance covers 6+ months of expenses');
     } else if (totalBalance >= monthlyExpense * 3) {
       score += 15;
     } else if (totalBalance >= monthlyExpense) {
       score += 10;
-      insights.add('Build 3-6 months emergency fund');
+      insights.add('Balance covers ~1 month of expenses');
     } else if (totalBalance > 0) {
       score += 5;
-      insights.add('Start building emergency fund');
+      insights.add('Balance covers less than 1 month of expenses');
     }
 
     final rating = score >= 80

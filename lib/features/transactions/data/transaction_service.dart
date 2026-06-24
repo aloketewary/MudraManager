@@ -93,7 +93,7 @@ class TransactionService {
 
   Future<List<Transaction>> getAll({int? limit}) async {
     final isar = await isarService.getInstance();
-    var query = isar.transactions.where().sortByDateDesc();
+    final query = isar.transactions.where().sortByDateDesc();
     final allTransactions = limit != null
         ? await query.limit(limit).findAll()
         : await query.findAll();

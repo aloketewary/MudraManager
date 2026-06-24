@@ -17,7 +17,7 @@ class MonthlyRecapPdf {
       await rootBundle.load('assets/fonts/NotoSansBengali-Variable.ttf'),
     );
     final theme = pw.ThemeData.withFont(
-        base: font, fontFallback: [fallbackFont, bengaliFallback]);
+        base: font, fontFallback: [fallbackFont, bengaliFallback],);
 
     final monthName = safeDateFormat('MMMM yyyy').format(data.month);
     final now = DateTime.now();
@@ -266,7 +266,7 @@ class MonthlyRecapPdf {
                   '• $line',
                   style: const pw.TextStyle(fontSize: 10),
                 ),
-              )),
+              ),),
           if (insight.suggestedFocus != null) ...[
             pw.SizedBox(height: 8),
             pw.Text(
@@ -308,14 +308,14 @@ class MonthlyRecapPdf {
                         a.isWarning ? PdfColors.red800 : PdfColors.green800,
                   ),
                 ),
-              ))
+              ),)
           .toList(),
     );
   }
 
   // ── CATEGORY CHANGES ──
   static pw.Widget _categoryChangesSection(
-      List<CategoryChange> changes, String c) {
+      List<CategoryChange> changes, String c,) {
     return pw.TableHelper.fromTextArray(
       headerStyle: pw.TextStyle(
         fontWeight: pw.FontWeight.bold,
@@ -331,7 +331,7 @@ class MonthlyRecapPdf {
                 ch.name,
                 _fmt(ch.currentAmount, c),
                 '${ch.increased ? "+" : "-"}${_fmt(ch.delta.abs(), c)}',
-              ])
+              ],)
           .toList(),
     );
   }

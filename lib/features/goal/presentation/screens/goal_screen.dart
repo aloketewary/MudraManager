@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/logic/goal_state_machine.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -25,88 +26,54 @@ import 'package:mudra_manager/shared/templates/screen_shell.dart';
 class GoalScreen extends ConsumerWidget {
   const GoalScreen({super.key});
 
-  /// Recent pace: contributions in last 90 days / 3 months.
-  /// Fallback to lifetime average if < 90 days of history.
-  double _recentPace(Goal goal) {
-    final contributions = goal.contributions;
-    if (contributions.isEmpty) return 0;
-
-    final now = DateTime.now();
-    final cutoff = now.subtract(const Duration(days: 90));
-    final recent = contributions.where((c) => c.date.isAfter(cutoff)).toList();
-
-    if (recent.isNotEmpty) {
-      final total = recent.fold(0.0, (sum, c) => sum + c.amount);
-      return total / 3; // 3 months
-    }
-
-    // Fallback: lifetime average
-    final total = contributions.fold(0.0, (sum, c) => sum + c.amount);
-    final first =
-        contributions.reduce((a, b) => a.date.isBefore(b.date) ? a : b).date;
-    final months = now.difference(first).inDays / 30;
-    if (months < 1) return total;
-    return total / months;
+  /// Convert goal contributions to state machine input.
+  List<GoalContributionData> _contributions(Goal goal) {
+    return goal.contributions
+        .map((c) => GoalContributionData(amount: c.amount, date: c.date))
+        .toList();
   }
 
-  /// Needed per month to reach goal by target date.
-  double _neededPerMonth(Goal goal) {
-    if (goal.targetDate == null) return 0;
-    final daysLeft = goal.targetDate!.difference(DateTime.now()).inDays;
-    if (daysLeft <= 0) return goal.remainingAmount;
-    final monthsLeft = daysLeft / 30;
-    return goal.remainingAmount / monthsLeft;
-  }
-
-  /// Gap = recentPace - neededPerMonth. Positive = ahead, negative = behind.
-  double _paceGap(Goal goal) {
-    final needed = _neededPerMonth(goal);
-    if (needed <= 0) return 0;
-    return _recentPace(goal) - needed;
-  }
-
-  /// Whether a goal needs attention (raw failure conditions).
+  /// Whether a goal needs attention (delegates to state machine).
   bool _needsAttention(Goal goal) {
     if (goal.progressPercent >= 1.0) return false;
-    final gap = _paceGap(goal);
-    if (gap < 0) return true;
-    final daysLeft = goal.targetDate?.difference(DateTime.now()).inDays ?? 9999;
-    if (daysLeft < 90 && daysLeft > 0) return true;
+    final now = DateTime.now();
+    final contribs = _contributions(goal);
+    final pace = GoalStateMachine.recentPace(contribs, now);
+    final needed = GoalStateMachine.neededPerMonth(
+      goal.remainingAmount,
+      goal.targetDate,
+      now,
+    );
+    final gap = GoalStateMachine.paceGap(pace, needed);
+    final daysLeft = GoalStateMachine.daysRemaining(goal.targetDate, now);
     final health = GoalHealth.compute(goal);
-    if (health.predictedDate != null &&
-        goal.targetDate != null &&
-        health.predictedDate!.isAfter(goal.targetDate!)) {
-      return true;
-    }
-    return false;
+    return GoalStateMachine.needsAttention(
+      progressPercent: goal.progressPercent,
+      gap: gap,
+      daysRemaining: daysLeft,
+      predictedDate: health.predictedDate,
+      targetDate: goal.targetDate,
+    );
   }
 
-  /// Suggested one-tap deposit: last contribution, or neededPerMonth rounded.
-  double _suggestedDeposit(Goal goal) {
-    if (goal.contributions.isNotEmpty) {
-      final sorted = goal.contributions.toList()
-        ..sort((a, b) => b.date.compareTo(a.date));
-      return sorted.first.amount;
-    }
-    final needed = _neededPerMonth(goal);
-    if (needed > 0) return (needed / 500).ceil() * 500;
-    return 1000;
-  }
-
-  /// Priority sort score (lower = higher priority).
+  /// Priority sort score (delegates to state machine).
   int _sortPriority(Goal goal) {
-    if (goal.progressPercent >= 1.0) return 100;
-    final gap = _paceGap(goal);
-    final daysLeft = goal.targetDate?.difference(DateTime.now()).inDays ?? 9999;
-
-    // Behind schedule
-    if (gap < 0) return 0;
-    // Near deadline (< 90 days)
-    if (daysLeft < 90 && daysLeft > 0) return 1;
-    // On track with deadline
-    if (goal.targetDate != null) return 2;
-    // No deadline
-    return 3;
+    final now = DateTime.now();
+    final contribs = _contributions(goal);
+    final pace = GoalStateMachine.recentPace(contribs, now);
+    final needed = GoalStateMachine.neededPerMonth(
+      goal.remainingAmount,
+      goal.targetDate,
+      now,
+    );
+    final gap = GoalStateMachine.paceGap(pace, needed);
+    final daysLeft = GoalStateMachine.daysRemaining(goal.targetDate, now);
+    return GoalStateMachine.sortPriority(
+      progressPercent: goal.progressPercent,
+      gap: gap,
+      daysRemaining: daysLeft,
+      hasDeadline: goal.targetDate != null,
+    );
   }
 
   @override
@@ -382,11 +349,16 @@ class GoalScreen extends ConsumerWidget {
         goal.colorValue != null ? Color(goal.colorValue!) : color.primary;
     final remaining = goal.remainingAmount;
     final progress = goal.progressPercent;
-    final pace = _recentPace(goal);
-    final needed = _neededPerMonth(goal);
-    final gap = needed > 0 ? pace - needed : 0.0;
     final hasDeadline = goal.targetDate != null;
-    final deposit = _suggestedDeposit(goal);
+    final contributions = goal.contributions
+        .map((c) => GoalContributionData(amount: c.amount, date: c.date))
+        .toList();
+    final pace = GoalStateMachine.recentPace(contributions, DateTime.now());
+    final needed = GoalStateMachine.neededPerMonth(
+        goal.remainingAmount, goal.targetDate, DateTime.now(),);
+    final gap = GoalStateMachine.paceGap(pace, needed);
+    final deposit = GoalStateMachine.suggestedDeposit(contributions, needed);
+
     final gapColor = gap >= 0 ? goalColor : FinanceColors.statusWarning;
 
     return Container(

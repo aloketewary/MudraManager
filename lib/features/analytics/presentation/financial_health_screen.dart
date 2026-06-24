@@ -161,6 +161,15 @@ class FinancialHealthScreen extends ConsumerWidget {
             ),
           ),
         ),
+        SizedBox(height: spacing.elementGap),
+        Text(
+          ctxt.health_provenanceLine,
+          style: textTheme.bodySmall?.copyWith(
+            color: color.onSurfaceVariant.withValues(alpha: 0.6),
+            fontSize: 11,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ],
     );
   }

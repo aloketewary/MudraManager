@@ -177,7 +177,7 @@ List<AiInsight> _generateInsights(DashboardData data, Briefing? briefing) {
       AiInsight(
         title: BuddyMessages.insightOverspending,
         message: BuddyMessages.insightOverspendingMessage(
-            deficit.toStringAsFixed(0)),
+            deficit.toStringAsFixed(0),),
         type: 'warning',
         iconType: IconType.warning,
         generatedAt: now,
@@ -317,7 +317,7 @@ List<AiInsight> _generateInsights(DashboardData data, Briefing? briefing) {
       final top = leaks.first;
       candidates.add(
         AiInsight(
-          title: Tone.appL10n?.insight_moneyLeakTitle ?? 'Quiet money leak 💧',
+          title: Tone.appL10n?.insight_moneyLeakTitle ?? 'Frequent small spends',
           message: BuddyMessages.insightMoneyLeak(
             top.key,
             top.value.count,
@@ -382,7 +382,7 @@ List<AiInsight> _generateInsights(DashboardData data, Briefing? briefing) {
         candidates.add(
           AiInsight(
             title: Tone.appL10n?.insight_bestDayTitle(days[worstIdx]) ??
-                '${days[worstIdx]}s cost you the most',
+                '${days[worstIdx]}s: avg ₹${worstAvg.toStringAsFixed(0)}',
             message: BuddyMessages.insightBestDay(
               days[worstIdx],
               worstAvg.toStringAsFixed(0),

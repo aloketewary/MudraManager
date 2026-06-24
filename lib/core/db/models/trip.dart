@@ -107,6 +107,9 @@ class TripTransaction {
   late List<int> participantIds;
   late List<double> splitAmounts;
 
+  /// Whether this transaction is a settlement payment (not a regular expense).
+  bool isSettlement = false;
+
   late DateTime addedAt;
 
   TripTransaction();

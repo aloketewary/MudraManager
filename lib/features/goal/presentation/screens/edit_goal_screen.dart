@@ -631,7 +631,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
                     Text(
                       ctxt.goal_basedOnAvg(
                         formatCurrency(pace,
-                            code: widget.goal.currencyCode, decimals: 0),
+                            code: widget.goal.currencyCode, decimals: 0,),
                       ),
                       style: textTheme.labelSmall?.copyWith(
                         color: color.onSurfaceVariant.withValues(alpha: 0.7),

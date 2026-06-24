@@ -112,7 +112,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
         widget.goal.targetDate?.difference(DateTime.now()).inDays ?? 0;
     final monthsLeft = daysLeft > 0 ? daysLeft / 30 : 0.0;
     final neededPerMonth = monthsLeft > 0 ? remaining / monthsLeft : 0.0;
-    final avgPerMonth = GoalHealth.avgMonthlyContribution(widget.goal);
+    final avgPerMonth = GoalHealth.recentMonthlyPace(widget.goal);
     final isAheadOfPace = avgPerMonth >= neededPerMonth && neededPerMonth > 0;
     final isCompleted = progress >= 1.0;
 

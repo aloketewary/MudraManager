@@ -543,7 +543,7 @@ class _AnimatedSwipeableAccountCardsState
                                                     SizedBox(
                                                         height:
                                                             spacing.elementGap /
-                                                                4),
+                                                                4,),
                                                     Text(
                                                       account.accountType.label,
                                                       style: textTheme
@@ -592,7 +592,7 @@ class _AnimatedSwipeableAccountCardsState
                               child: Text(
                                 AppLocalizations.of(context)!
                                     .dashboard_accountsTapExpand(
-                                        accounts.length),
+                                        accounts.length,),
                                 style: textTheme.labelSmall?.copyWith(
                                   color: color.onSurfaceVariant,
                                 ),

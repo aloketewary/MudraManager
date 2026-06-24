@@ -1,5 +1,5 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,9 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
-
-// In spending_prediction_card.dart
-// Replace the predictedSpendingProvider watch with dashboardDataProvider
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class SpendingPredictionCard extends ConsumerWidget {
   final double globalPadding;
@@ -21,6 +19,7 @@ class SpendingPredictionCard extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     if (data == null) return const SizedBox.shrink();
 
@@ -67,7 +66,7 @@ class SpendingPredictionCard extends ConsumerWidget {
     final icon = isOver ? LucideIcons.trendingUp : LucideIcons.trendingDown;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: EdgeInsets.only(top: spacing.cardVertical),
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: globalPadding),
         child: Card(
@@ -80,38 +79,60 @@ class SpendingPredictionCard extends ConsumerWidget {
             },
             borderRadius: BorderRadius.circular(spacing.radiusLarge),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(spacing.cardInner),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(spacing.elementGap),
                     decoration: BoxDecoration(
                       color: accent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
-                    child: Icon(icon, color: accent, size: 24),
+                    child: Icon(icon, color: accent, size: spacing.iconMD),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: spacing.cardInner),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           isOver
-                              ? '${pct.toStringAsFixed(0)}% ahead of last month'
-                              : '${pct.toStringAsFixed(0)}% under last month',
+                              ? l10n.dashboard_pctAheadOfLastMonth(
+                                  pct.toStringAsFixed(0),
+                                )
+                              : l10n.dashboard_pctUnderLastMonth(
+                                  pct.toStringAsFixed(0),
+                                ),
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'On track for ${formatCurrency(projected, decimals: 0)} by month end',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                        SizedBox(height: spacing.elementGapMin),
+                        Row(
+                          children: [
+                            Text(
+                              l10n.dashboard_onTrackForPrefix,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                            CurrencyText(
+                              amount: projected,
+                              fixedLength: 0,
+                              compact: true,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              l10n.dashboard_byMonthEnd,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -119,7 +140,7 @@ class SpendingPredictionCard extends ConsumerWidget {
                   Icon(
                     LucideIcons.chevronRight,
                     color: color.onSurfaceVariant,
-                    size: 20,
+                    size: spacing.iconSM,
                   ),
                 ],
               ),

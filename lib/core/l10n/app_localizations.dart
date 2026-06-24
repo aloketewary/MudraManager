@@ -1939,18 +1939,6 @@ abstract class AppLocalizations {
   /// **'Archive'**
   String get common_archive;
 
-  /// No description provided for @common_create.
-  ///
-  /// In en, this message translates to:
-  /// **'Create'**
-  String get common_create;
-
-  /// No description provided for @common_update.
-  ///
-  /// In en, this message translates to:
-  /// **'Update'**
-  String get common_update;
-
   /// No description provided for @common_remove.
   ///
   /// In en, this message translates to:
@@ -2533,12 +2521,6 @@ abstract class AppLocalizations {
   /// **'Edit Trip'**
   String get trip_editTrip;
 
-  /// No description provided for @trip_editGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Group'**
-  String get trip_editGroup;
-
   /// No description provided for @trip_archiveTrip.
   ///
   /// In en, this message translates to:
@@ -2550,18 +2532,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Archive Group'**
   String get trip_archiveGroup;
-
-  /// No description provided for @trip_allSettled.
-  ///
-  /// In en, this message translates to:
-  /// **'All settled up!'**
-  String get trip_allSettled;
-
-  /// No description provided for @trip_archiveToSettle.
-  ///
-  /// In en, this message translates to:
-  /// **'Archive to settle up'**
-  String get trip_archiveToSettle;
 
   /// No description provided for @trip_trackTravel.
   ///
@@ -7998,12 +7968,6 @@ abstract class AppLocalizations {
   /// **'Uncategorized'**
   String get trip_uncategorized;
 
-  /// No description provided for @trip_removeExpense.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove Expense'**
-  String get trip_removeExpense;
-
   /// No description provided for @trip_removeFromTrip.
   ///
   /// In en, this message translates to:
@@ -8057,6 +8021,342 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This group will be moved to archive. All data and settlements will be preserved.'**
   String get trip_archiveGroupMsg;
+
+  /// No description provided for @trip_errorLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading trips'**
+  String get trip_errorLoading;
+
+  /// No description provided for @trip_noTripsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips yet'**
+  String get trip_noTripsYet;
+
+  /// No description provided for @trip_noSplitsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No split groups yet'**
+  String get trip_noSplitsYet;
+
+  /// No description provided for @trip_createTripDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a trip to track travel expenses'**
+  String get trip_createTripDesc;
+
+  /// No description provided for @trip_createSplitDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Split bills with friends without a trip'**
+  String get trip_createSplitDesc;
+
+  /// No description provided for @trip_spent.
+  ///
+  /// In en, this message translates to:
+  /// **'spent'**
+  String get trip_spent;
+
+  /// No description provided for @trip_yourShare.
+  ///
+  /// In en, this message translates to:
+  /// **'your share'**
+  String get trip_yourShare;
+
+  /// No description provided for @trip_nPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} people'**
+  String trip_nPeople(int count);
+
+  /// No description provided for @common_new.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get common_new;
+
+  /// No description provided for @trip_archive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get trip_archive;
+
+  /// No description provided for @trip_ofBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'of budget'**
+  String get trip_ofBudget;
+
+  /// No description provided for @trip_nDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{day} other{days}}'**
+  String trip_nDays(int count);
+
+  /// No description provided for @trip_nExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{expense} other{expenses}}'**
+  String trip_nExpenses(int count);
+
+  /// No description provided for @trip_removeExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Expense'**
+  String get trip_removeExpense;
+
+  /// No description provided for @trip_removeExpenseMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this expense from the trip?'**
+  String get trip_removeExpenseMsg;
+
+  /// No description provided for @trip_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get trip_remove;
+
+  /// No description provided for @trip_paidBySplitAmong.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by {name} • Split among {count}'**
+  String trip_paidBySplitAmong(String name, int count);
+
+  /// No description provided for @trip_archiveToSettle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive the trip to settle up'**
+  String get trip_archiveToSettle;
+
+  /// No description provided for @trip_settlementHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Settlement History'**
+  String get trip_settlementHistory;
+
+  /// No description provided for @trip_allSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'All settled up!'**
+  String get trip_allSettled;
+
+  /// No description provided for @trip_removeGroupExpenseMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this expense from the group?'**
+  String get trip_removeGroupExpenseMsg;
+
+  /// No description provided for @trip_nPendingSettlements.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending {count, plural, =1{settlement} other{settlements}}'**
+  String trip_nPendingSettlements(int count);
+
+  /// No description provided for @trip_addSplitExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Split Expense'**
+  String get trip_addSplitExpense;
+
+  /// No description provided for @trip_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get trip_amount;
+
+  /// No description provided for @trip_whatWasThisFor.
+  ///
+  /// In en, this message translates to:
+  /// **'What was this for?'**
+  String get trip_whatWasThisFor;
+
+  /// No description provided for @trip_paidBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid By'**
+  String get trip_paidBy;
+
+  /// No description provided for @trip_splitType.
+  ///
+  /// In en, this message translates to:
+  /// **'Split Type'**
+  String get trip_splitType;
+
+  /// No description provided for @trip_equally.
+  ///
+  /// In en, this message translates to:
+  /// **'Equally'**
+  String get trip_equally;
+
+  /// No description provided for @trip_custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get trip_custom;
+
+  /// No description provided for @trip_splitWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Split With'**
+  String get trip_splitWith;
+
+  /// No description provided for @trip_addToTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Trip'**
+  String get trip_addToTrip;
+
+  /// No description provided for @trip_addToGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Group'**
+  String get trip_addToGroup;
+
+  /// No description provided for @trip_autoFillRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-fill remaining'**
+  String get trip_autoFillRemaining;
+
+  /// No description provided for @trip_finalizeTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalize Trip'**
+  String get trip_finalizeTrip;
+
+  /// No description provided for @trip_closeGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Group'**
+  String get trip_closeGroup;
+
+  /// No description provided for @trip_finalizeTripMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'This will mark the trip as ended. You can\'t add expenses after this.'**
+  String get trip_finalizeTripMsg;
+
+  /// No description provided for @trip_closeGroupMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'This will close the group. You can\'t add expenses after this.'**
+  String get trip_closeGroupMsg;
+
+  /// No description provided for @trip_finalize.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalize'**
+  String get trip_finalize;
+
+  /// No description provided for @trip_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get trip_close;
+
+  /// No description provided for @trip_tripNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip not found'**
+  String get trip_tripNotFound;
+
+  /// No description provided for @trip_groupNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Group not found'**
+  String get trip_groupNotFound;
+
+  /// No description provided for @trip_editGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group'**
+  String get trip_editGroup;
+
+  /// No description provided for @trip_editSplitGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Split Group'**
+  String get trip_editSplitGroup;
+
+  /// No description provided for @trip_travelTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel Trip'**
+  String get trip_travelTrip;
+
+  /// No description provided for @trip_splitGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Split Group'**
+  String get trip_splitGroup;
+
+  /// No description provided for @trip_tripName.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip Name'**
+  String get trip_tripName;
+
+  /// No description provided for @trip_groupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Name'**
+  String get trip_groupName;
+
+  /// No description provided for @trip_tripNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Goa Trip 2024'**
+  String get trip_tripNameHint;
+
+  /// No description provided for @trip_groupNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Weekend dinner split'**
+  String get trip_groupNameHint;
+
+  /// No description provided for @trip_tripDescHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Beach vacation with friends'**
+  String get trip_tripDescHint;
+
+  /// No description provided for @trip_groupDescHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Split expenses with friends'**
+  String get trip_groupDescHint;
+
+  /// No description provided for @trip_budgetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., 50000'**
+  String get trip_budgetHint;
+
+  /// No description provided for @trip_currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get trip_currency;
+
+  /// No description provided for @common_update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get common_update;
+
+  /// No description provided for @common_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get common_create;
+
+  /// No description provided for @editTrip_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get editTrip_add;
 
   /// No description provided for @editTrip_addParticipant.
   ///
@@ -10740,6 +11040,12 @@ abstract class AppLocalizations {
   /// **'needs attention'**
   String get health_verdictPoor;
 
+  /// No description provided for @health_provenanceLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on this month\'s savings, spending, debt & emergency fund'**
+  String get health_provenanceLine;
+
   /// No description provided for @health_of100.
   ///
   /// In en, this message translates to:
@@ -11417,6 +11723,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to quickly log what you spent today'**
   String get dashboard_addFirstExpenseDesc;
+
+  /// No description provided for @dashboard_pctAheadOfLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% ahead of last month'**
+  String dashboard_pctAheadOfLastMonth(String pct);
+
+  /// No description provided for @dashboard_pctUnderLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% under last month'**
+  String dashboard_pctUnderLastMonth(String pct);
+
+  /// No description provided for @dashboard_onTrackForPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'On track for '**
+  String get dashboard_onTrackForPrefix;
+
+  /// No description provided for @dashboard_byMonthEnd.
+  ///
+  /// In en, this message translates to:
+  /// **' by month end'**
+  String get dashboard_byMonthEnd;
 
   /// No description provided for @quickAdd_title.
   ///

@@ -109,7 +109,7 @@ class _DashboardCustomizeScreenState
       ),
       body: prefsAsync.when(
         loading: () => ListView(
-            children: List.generate(4, (_) => const DashboardCardSkeleton())),
+            children: List.generate(4, (_) => const DashboardCardSkeleton()),),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
         data: (prefs) {
           if (!_initialized) {
@@ -300,7 +300,7 @@ class _DashboardCustomizeScreenState
       clipBehavior: Clip.antiAlias,
       child: Padding(
         padding: EdgeInsets.symmetric(
-            horizontal: spacing.cardInner, vertical: spacing.elementGap),
+            horizontal: spacing.cardInner, vertical: spacing.elementGap,),
         child: Row(
           children: [
             // Icon

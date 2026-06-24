@@ -539,10 +539,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           hint: Text('—', style: textTheme.bodyLarge),
           items: [
             DropdownMenuItem<int?>(
-                value: null, child: Text('—', style: textTheme.bodyLarge)),
+                value: null, child: Text('—', style: textTheme.bodyLarge),),
             ...List.generate(31, (i) => i + 1).map(
               (day) => DropdownMenuItem(
-                  value: day, child: Text('$day', style: textTheme.bodyLarge)),
+                  value: day, child: Text('$day', style: textTheme.bodyLarge),),
             ),
           ],
           onChanged: onChanged,
@@ -691,7 +691,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(Tone.current.borderRadius * 2)),
+                      top: Radius.circular(Tone.current.borderRadius * 2),),
                 ),
                 builder: (_) => _CurrencyPickerInline(selected: displayCode),
               );
@@ -836,7 +836,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2)),
+            top: Radius.circular(Tone.current.borderRadius * 2),),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(

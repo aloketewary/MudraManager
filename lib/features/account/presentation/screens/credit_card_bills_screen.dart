@@ -390,7 +390,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
           ),
 
           Divider(
-              height: 1, color: color.outlineVariant.withValues(alpha: 0.3)),
+              height: 1, color: color.outlineVariant.withValues(alpha: 0.3),),
 
           // Metrics: Outstanding + Est. Minimum Due + Available Credit
           Padding(
@@ -404,7 +404,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
                       child: _metricColumn(
                         ctxt.account_outstanding,
                         GuestModeUtil.applyGuestMode(
-                            summary.outstanding, isGuest),
+                            summary.outstanding, isGuest,),
                         summary.outstanding > 0 ? color.error : color.primary,
                         textTheme,
                         spacing,
@@ -415,7 +415,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
                       child: _metricColumn(
                         ctxt.cc_minimumDue,
                         GuestModeUtil.applyGuestMode(
-                            summary.minimumDue, isGuest),
+                            summary.minimumDue, isGuest,),
                         color.tertiary,
                         textTheme,
                         spacing,

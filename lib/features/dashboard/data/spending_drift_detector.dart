@@ -117,7 +117,7 @@ List<AiInsight> detectSpendingDrift(List<Transaction> transactions) {
     AiInsight(
       title: '${top.category} ↑ $pctIncrease%',
       message:
-          'Bringing ${top.category} back to your usual level would recover ₹${top.increase.round()} this month.',
+          '${top.category} is ₹${top.increase.round()} above your usual pace this month.',
       type: 'tip',
       iconType: IconType.spending,
       generatedAt: now,

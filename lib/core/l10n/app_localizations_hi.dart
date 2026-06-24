@@ -956,12 +956,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get common_archive => 'संग्रह करें';
 
   @override
-  String get common_create => 'बनाएं';
-
-  @override
-  String get common_update => 'अपडेट करें';
-
-  @override
   String get common_remove => 'निकालें';
 
   @override
@@ -1253,19 +1247,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get trip_editTrip => 'यात्रा संपादित करें';
 
   @override
-  String get trip_editGroup => 'समूह संपादित करें';
-
-  @override
   String get trip_archiveTrip => 'यात्रा संग्रह करें';
 
   @override
   String get trip_archiveGroup => 'समूह संग्रह करें';
-
-  @override
-  String get trip_allSettled => 'सब निपट गया!';
-
-  @override
-  String get trip_archiveToSettle => 'निपटान के लिए संग्रह करें';
 
   @override
   String get trip_trackTravel =>
@@ -4356,9 +4341,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get trip_uncategorized => 'बिना श्रेणी';
 
   @override
-  String get trip_removeExpense => 'खर्च हटाएं';
-
-  @override
   String get trip_removeFromTrip => 'इस खर्च को trip से हटाएं?';
 
   @override
@@ -4386,6 +4368,205 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get trip_archiveGroupMsg =>
       'यह group archive हो जाएगा। सारा data और settlement सुरक्षित रहेगा।';
+
+  @override
+  String get trip_errorLoading => 'Error loading trips';
+
+  @override
+  String get trip_noTripsYet => 'No trips yet';
+
+  @override
+  String get trip_noSplitsYet => 'No split groups yet';
+
+  @override
+  String get trip_createTripDesc => 'Create a trip to track travel expenses';
+
+  @override
+  String get trip_createSplitDesc => 'Split bills with friends without a trip';
+
+  @override
+  String get trip_spent => 'spent';
+
+  @override
+  String get trip_yourShare => 'your share';
+
+  @override
+  String trip_nPeople(int count) {
+    return '$count people';
+  }
+
+  @override
+  String get common_new => 'New';
+
+  @override
+  String get trip_archive => 'Archive';
+
+  @override
+  String get trip_ofBudget => 'of budget';
+
+  @override
+  String trip_nDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trip_nExpenses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'expenses',
+      one: 'expense',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get trip_removeExpense => 'खर्च हटाएं';
+
+  @override
+  String get trip_removeExpenseMsg => 'Remove this expense from the trip?';
+
+  @override
+  String get trip_remove => 'Remove';
+
+  @override
+  String trip_paidBySplitAmong(String name, int count) {
+    return 'Paid by $name • Split among $count';
+  }
+
+  @override
+  String get trip_archiveToSettle => 'निपटान के लिए संग्रह करें';
+
+  @override
+  String get trip_settlementHistory => 'Settlement History';
+
+  @override
+  String get trip_allSettled => 'सब निपट गया!';
+
+  @override
+  String get trip_removeGroupExpenseMsg =>
+      'Remove this expense from the group?';
+
+  @override
+  String trip_nPendingSettlements(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'settlements',
+      one: 'settlement',
+    );
+    return '$count pending $_temp0';
+  }
+
+  @override
+  String get trip_addSplitExpense => 'Add Split Expense';
+
+  @override
+  String get trip_amount => 'Amount';
+
+  @override
+  String get trip_whatWasThisFor => 'What was this for?';
+
+  @override
+  String get trip_paidBy => 'Paid By';
+
+  @override
+  String get trip_splitType => 'Split Type';
+
+  @override
+  String get trip_equally => 'Equally';
+
+  @override
+  String get trip_custom => 'Custom';
+
+  @override
+  String get trip_splitWith => 'Split With';
+
+  @override
+  String get trip_addToTrip => 'Add to Trip';
+
+  @override
+  String get trip_addToGroup => 'Add to Group';
+
+  @override
+  String get trip_autoFillRemaining => 'Auto-fill remaining';
+
+  @override
+  String get trip_finalizeTrip => 'Finalize Trip';
+
+  @override
+  String get trip_closeGroup => 'Close Group';
+
+  @override
+  String get trip_finalizeTripMsg =>
+      'This will mark the trip as ended. You can\'t add expenses after this.';
+
+  @override
+  String get trip_closeGroupMsg =>
+      'This will close the group. You can\'t add expenses after this.';
+
+  @override
+  String get trip_finalize => 'Finalize';
+
+  @override
+  String get trip_close => 'Close';
+
+  @override
+  String get trip_tripNotFound => 'Trip not found';
+
+  @override
+  String get trip_groupNotFound => 'Group not found';
+
+  @override
+  String get trip_editGroup => 'समूह संपादित करें';
+
+  @override
+  String get trip_editSplitGroup => 'Edit Split Group';
+
+  @override
+  String get trip_travelTrip => 'Travel Trip';
+
+  @override
+  String get trip_splitGroup => 'Split Group';
+
+  @override
+  String get trip_tripName => 'Trip Name';
+
+  @override
+  String get trip_groupName => 'Group Name';
+
+  @override
+  String get trip_tripNameHint => 'e.g., Goa Trip 2024';
+
+  @override
+  String get trip_groupNameHint => 'e.g., Weekend dinner split';
+
+  @override
+  String get trip_tripDescHint => 'Beach vacation with friends';
+
+  @override
+  String get trip_groupDescHint => 'Split expenses with friends';
+
+  @override
+  String get trip_budgetHint => 'e.g., 50000';
+
+  @override
+  String get trip_currency => 'Currency';
+
+  @override
+  String get common_update => 'अपडेट करें';
+
+  @override
+  String get common_create => 'बनाएं';
+
+  @override
+  String get editTrip_add => 'Add';
 
   @override
   String get editTrip_addParticipant => 'प्रतिभागी जोड़ें';
@@ -5899,6 +6080,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get health_verdictPoor => 'ध्यान देने की ज़रूरत है';
 
   @override
+  String get health_provenanceLine =>
+      'Based on this month\'s savings, spending, debt & emergency fund';
+
+  @override
   String get health_of100 => 'में से 100';
 
   @override
@@ -6273,6 +6458,22 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get dashboard_addFirstExpenseDesc =>
       'आज क्या खर्च किया? Tap करके बताएं';
+
+  @override
+  String dashboard_pctAheadOfLastMonth(String pct) {
+    return '$pct% ahead of last month';
+  }
+
+  @override
+  String dashboard_pctUnderLastMonth(String pct) {
+    return '$pct% under last month';
+  }
+
+  @override
+  String get dashboard_onTrackForPrefix => 'On track for ';
+
+  @override
+  String get dashboard_byMonthEnd => ' by month end';
 
   @override
   String get quickAdd_title => 'Quick Add';

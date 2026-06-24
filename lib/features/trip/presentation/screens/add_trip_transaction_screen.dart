@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
@@ -73,7 +74,7 @@ class _AddTripTransactionScreenState
 
     return tripAsync.when(
       data: (trip) {
-        if (trip == null) return const Center(child: Text('Trip not found'));
+        if (trip == null) return const Center(child: Text(''));
 
         final participants = trip.participants.toList();
         final amount = _resolvedAmount ?? 0.0;
@@ -83,7 +84,7 @@ class _AddTripTransactionScreenState
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              'Add Split Expense',
+              AppLocalizations.of(context)!.trip_addSplitExpense,
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
@@ -102,7 +103,7 @@ class _AddTripTransactionScreenState
                     // ── Amount ──
                     _buildSectionHeader(
                       context,
-                      'Amount',
+                      AppLocalizations.of(context)!.trip_amount,
                       currencyIcon(tripCurrency),
                       color.primary,
                     ),
@@ -124,7 +125,7 @@ class _AddTripTransactionScreenState
                           child: CurrencyBadge(
                               code: tripCurrency ?? BaseCurrency.code,
                               size: 24,
-                              color: color.primary.withValues(alpha: 0.6)),
+                              color: color.primary.withValues(alpha: 0.6),),
                         ),
                         hintText: '0',
                         hintStyle: textTheme.headlineMedium?.copyWith(
@@ -152,7 +153,7 @@ class _AddTripTransactionScreenState
                     TextField(
                       controller: _descController,
                       decoration: InputDecoration(
-                        hintText: 'What was this for?',
+                        hintText: AppLocalizations.of(context)!.trip_whatWasThisFor,
                         prefixIcon: Icon(
                           LucideIcons.fileText,
                           size: 18,
@@ -184,7 +185,7 @@ class _AddTripTransactionScreenState
                     // ── Paid By ──
                     _buildSectionHeader(
                       context,
-                      'Paid By',
+                      AppLocalizations.of(context)!.trip_paidBy,
                       LucideIcons.user,
                       color.secondary,
                     ),
@@ -271,7 +272,7 @@ class _AddTripTransactionScreenState
                     // ── Split Type ──
                     _buildSectionHeader(
                       context,
-                      'Split Type',
+                      AppLocalizations.of(context)!.trip_splitType,
                       LucideIcons.split,
                       color.tertiary,
                     ),
@@ -290,7 +291,7 @@ class _AddTripTransactionScreenState
                           shape: WidgetStateProperty.all(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
-                                  Tone.current.borderRadius),
+                                  Tone.current.borderRadius,),
                             ),
                           ),
                           padding: WidgetStateProperty.all(
@@ -298,18 +299,18 @@ class _AddTripTransactionScreenState
                           ),
                           visualDensity: VisualDensity.comfortable,
                         ),
-                        segments: const [
+                        segments: [
                           ButtonSegment(
                             value: SplitType.equal,
-                            label: Text('Equally'),
-                            icon: Icon(LucideIcons.scale),
+                            label: Text(AppLocalizations.of(context)!.trip_equally),
+                            icon: const Icon(LucideIcons.scale),
                           ),
                           ButtonSegment(
                             value: SplitType.custom,
-                            label: Text('Custom'),
-                            icon: Icon(LucideIcons.slidersHorizontal),
+                            label: Text(AppLocalizations.of(context)!.trip_custom),
+                            icon: const Icon(LucideIcons.slidersHorizontal),
                           ),
-                          ButtonSegment(
+                          const ButtonSegment(
                             value: SplitType.percentage,
                             label: Text('%'),
                             icon: Icon(LucideIcons.percent),
@@ -330,7 +331,7 @@ class _AddTripTransactionScreenState
                       children: [
                         _buildSectionHeader(
                           context,
-                          'Split With',
+                          AppLocalizations.of(context)!.trip_splitWith,
                           LucideIcons.users,
                           color.primary,
                         ),
@@ -406,7 +407,7 @@ class _AddTripTransactionScreenState
                                       .withValues(alpha: 0.2)
                                   : color.surface,
                               borderRadius: BorderRadius.circular(
-                                  Tone.current.borderRadius),
+                                  Tone.current.borderRadius,),
                               border: Border.all(
                                 color: isChecked
                                     ? color.primary.withValues(alpha: 0.5)
@@ -498,7 +499,7 @@ class _AddTripTransactionScreenState
                           ),
                         )
                       : Text(
-                          trip.isTrip ? 'Add to Trip' : 'Add to Group',
+                          trip.isTrip ? AppLocalizations.of(context)!.trip_addToTrip : AppLocalizations.of(context)!.trip_addToGroup,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                 ),
@@ -509,7 +510,7 @@ class _AddTripTransactionScreenState
       },
       loading: () => Scaffold(
         body: ListView(
-            children: List.generate(3, (_) => const DashboardCardSkeleton())),
+            children: List.generate(3, (_) => const DashboardCardSkeleton()),),
       ),
       error: (e, _) => Scaffold(
         body: Center(child: Text(BuddyMessages.errorWith('$e'))),
@@ -566,7 +567,7 @@ class _AddTripTransactionScreenState
                   size: 18,
                   color: color.primary,
                 ),
-                tooltip: 'Auto-fill remaining',
+                tooltip: AppLocalizations.of(context)!.trip_autoFillRemaining,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 onPressed: () {

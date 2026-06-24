@@ -43,7 +43,7 @@ void main() {
 
     test('1.3: deleteTransferAtomic exists in TransactionService', () {
       expect(
-          txnService, contains('Future<void> deleteTransferAtomic(int txnId)'));
+          txnService, contains('Future<void> deleteTransferAtomic(int txnId)'),);
     });
 
     test('1.3: deleteTransferAtomic uses single writeTxn', () {
@@ -95,12 +95,12 @@ void main() {
 
     test('4c: deleteTransactionPair exists in TransactionService', () {
       expect(txnService,
-          contains('Future<void> deleteTransactionPair(int id1, int id2)'));
+          contains('Future<void> deleteTransactionPair(int id1, int id2)'),);
     });
 
     test('4c: merge uses deleteTransactionPair', () {
       expect(
-          listScreen, contains('deleteTransactionPair(expense.id, income.id)'));
+          listScreen, contains('deleteTransactionPair(expense.id, income.id)'),);
     });
   });
 
@@ -140,7 +140,7 @@ void main() {
 
     test('9b: transfer screen invalidates transactionQueryProvider', () {
       expect(
-          transferScreen, contains('ref.invalidate(transactionQueryProvider)'));
+          transferScreen, contains('ref.invalidate(transactionQueryProvider)'),);
     });
   });
 }

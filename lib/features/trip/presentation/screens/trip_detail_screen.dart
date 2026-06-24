@@ -185,12 +185,12 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   }
 
   Future<void> _archiveTrip(int tripId) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await DialogUtils.showConfirmation(
       context,
-      title: 'Archive Trip',
-      message:
-          'This trip will be moved to archive. All data and settlements will be preserved.',
-      confirmText: 'Archive',
+      title: l10n.trip_archiveGroupTitle,
+      message: l10n.trip_archiveGroupMsg,
+      confirmText: l10n.trip_archive,
       icon: LucideIcons.archive,
     );
     if (confirm == true) {
@@ -238,10 +238,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           Row(
             children: [
               Icon(LucideIcons.calendar,
-                  size: 14, color: color.onSurfaceVariant),
+                  size: 14, color: color.onSurfaceVariant,),
               SizedBox(width: spacing.elementGapMin),
               Text(
-                '${DateFormat.MMMd().format(header.startDate)} - ${DateFormat.MMMd().format(header.endDate)} \u2022 ${header.durationDays} ${header.durationDays == 1 ? 'day' : 'days'}',
+                '${DateFormat.MMMd().format(header.startDate)} - ${DateFormat.MMMd().format(header.endDate)} \u2022 ${header.durationDays} ${AppLocalizations.of(context)!.trip_nDays(header.durationDays)}',
                 style: textTheme.bodySmall
                     ?.copyWith(color: color.onSurfaceVariant),
               ),
@@ -257,7 +257,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
                   child: Text(
-                    'LIVE',
+                    AppLocalizations.of(context)!.trip_live,
                     style: textTheme.labelSmall?.copyWith(
                       color: color.onPrimary,
                       fontWeight: FontWeight.bold,
@@ -282,7 +282,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     SizedBox(height: spacing.elementGapMin),
                     Text(
                       formatCurrency(timeline.totalSpent,
-                          code: header.currencyCode, decimals: 0),
+                          code: header.currencyCode, decimals: 0,),
                       style: textTheme.headlineMedium
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
@@ -313,7 +313,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       ),
                     ),
                     Text(
-                      'of budget',
+                      AppLocalizations.of(context)!.trip_ofBudget,
                       style: textTheme.labelSmall?.copyWith(
                         color: budgetUsed > 0.9
                             ? color.onErrorContainer
@@ -351,7 +351,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(32),
+                padding: EdgeInsets.all(spacing.sectionGap * 2),
                 decoration: BoxDecoration(
                   color: color.surfaceContainerHighest,
                   shape: BoxShape.circle,
@@ -362,7 +362,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   color: color.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing.sectionGap),
               Text(
                 emptyMsg.first,
                 style:
@@ -370,7 +370,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 textAlign: TextAlign.center,
               ),
               if (emptyMsg.length > 1) ...[
-                const SizedBox(height: 8),
+                SizedBox(height: spacing.elementGap),
                 Text(
                   emptyMsg.sublist(1).join('\n'),
                   style: textTheme.bodyMedium
@@ -404,7 +404,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               child: Row(
                 children: [
                   Text(
-                    DateFormat('EEE, d MMM').format(day.date),
+                    DateFormat('EEE, d MMM', AppLocalizations.of(context)!.localeName).format(day.date),
                     style: textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: color.onSurfaceVariant,
@@ -412,7 +412,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   ),
                   const Spacer(),
                   Text(
-                    '${day.expenseCount} expense${day.expenseCount == 1 ? '' : 's'} \u2022 ${formatCurrency(day.totalSpent, code: header.currencyCode, decimals: 0)}',
+                    '${day.expenseCount} ${AppLocalizations.of(context)!.trip_nExpenses(day.expenseCount)} \u2022 ${formatCurrency(day.totalSpent, code: header.currencyCode, decimals: 0)}',
                     style: textTheme.labelSmall
                         ?.copyWith(color: color.onSurfaceVariant),
                   ),
@@ -422,7 +422,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             // Expense cards
             ...day.expenses.map(
               (expense) => _buildExpenseCard(
-                  expense, state, isGuestMode, spacing, color, textTheme),
+                  expense, state, isGuestMode, spacing, color, textTheme,),
             ),
           ],
         );
@@ -445,7 +445,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           : DismissDirection.none,
       background: Container(
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
+        padding: EdgeInsets.only(right: spacing.cardInner),
         decoration: BoxDecoration(
           color: color.error,
           borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -456,9 +456,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         HapticFeedback.mediumImpact();
         final confirmed = await DialogUtils.showDeleteConfirmation(
           context,
-          title: 'Remove Expense',
-          message: 'Remove this expense from the trip?',
-          deleteText: 'Remove',
+          title: AppLocalizations.of(context)!.trip_removeExpense,
+          message: AppLocalizations.of(context)!.trip_removeExpenseMsg,
+          deleteText: AppLocalizations.of(context)!.trip_remove,
         );
         if (confirmed == true) {
           await ref
@@ -507,9 +507,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 4),
+              SizedBox(height: spacing.elementGapMin),
               Text(
-                'Paid by ${expense.paidByName} \u2022 Split among ${expense.shares.length}',
+                AppLocalizations.of(context)!.trip_paidBySplitAmong(expense.paidByName, expense.shares.length),
                 style: textTheme.bodySmall
                     ?.copyWith(color: color.onSurfaceVariant),
               ),
@@ -567,13 +567,13 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(spacing.sectionGap),
                   decoration: BoxDecoration(
                     color: color.primaryContainer,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(LucideIcons.circleCheck,
-                      size: 48, color: color.primary),
+                      size: 48, color: color.primary,),
                 ),
                 SizedBox(height: spacing.sectionGap),
                 Text(
@@ -583,7 +583,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 ),
                 SizedBox(height: spacing.elementGap),
                 Text(
-                  'No pending settlements for this trip',
+                  AppLocalizations.of(context)!.trip_noPendingSettlements,
                   style: textTheme.bodyMedium
                       ?.copyWith(color: color.onSurfaceVariant),
                   textAlign: TextAlign.center,
@@ -615,7 +615,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 SizedBox(width: spacing.elementGap),
                 Expanded(
                   child: Text(
-                    'Archive the trip to settle up',
+                    AppLocalizations.of(context)!.trip_archiveToSettle,
                     style: textTheme.bodySmall
                         ?.copyWith(color: color.onTertiaryContainer),
                   ),
@@ -673,7 +673,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             Icon(LucideIcons.history, size: 16, color: color.onSurfaceVariant),
             SizedBox(width: spacing.elementGap),
             Text(
-              'Settlement History',
+              AppLocalizations.of(context)!.trip_settlementHistory,
               style: textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color.onSurfaceVariant,
@@ -712,7 +712,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 ),
                 SizedBox(width: spacing.elementGap),
                 Text(
-                  DateFormat('d MMM').format(record.date),
+                  DateFormat('d MMM', AppLocalizations.of(context)!.localeName).format(record.date),
                   style: textTheme.labelSmall
                       ?.copyWith(color: color.onSurfaceVariant),
                 ),

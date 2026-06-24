@@ -83,7 +83,7 @@ void main() {
         AccountType.eWallet,
         AccountType.investment,
         AccountType.other,
-      ]));
+      ]),);
     });
   });
 }

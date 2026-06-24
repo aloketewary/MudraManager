@@ -232,10 +232,9 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
   Future<void> _archiveGroup(int groupId) async {
     final confirm = await DialogUtils.showConfirmation(
       context,
-      title: 'Archive Group',
-      message:
-          'This group will be moved to archive. All data and settlements will be preserved.',
-      confirmText: 'Archive',
+      title: AppLocalizations.of(context)!.trip_archiveGroupTitle,
+      message: AppLocalizations.of(context)!.trip_archiveGroupMsg,
+      confirmText: AppLocalizations.of(context)!.trip_archive,
       icon: LucideIcons.archive,
     );
     if (confirm == true) {
@@ -281,10 +280,10 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
             Row(
               children: [
                 Icon(LucideIcons.calendar,
-                    size: 14, color: color.onSurfaceVariant),
+                    size: 14, color: color.onSurfaceVariant,),
                 SizedBox(width: spacing.elementGapMin),
                 Text(
-                  '${DateFormat.MMMd().format(header.startDate)} - ${DateFormat.MMMd().format(header.endDate)} \u2022 ${header.durationDays} ${header.durationDays == 1 ? 'day' : 'days'}',
+                  '${DateFormat.MMMd().format(header.startDate)} - ${DateFormat.MMMd().format(header.endDate)} \u2022 ${header.durationDays} ${AppLocalizations.of(context)!.trip_nDays(header.durationDays)}',
                   style: textTheme.bodySmall
                       ?.copyWith(color: color.onSurfaceVariant),
                 ),
@@ -300,7 +299,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                       borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     ),
                     child: Text(
-                      'LIVE',
+                      AppLocalizations.of(context)!.trip_live,
                       style: textTheme.labelSmall?.copyWith(
                         color: color.onPrimary,
                         fontWeight: FontWeight.bold,
@@ -322,7 +321,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                   borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Text(
-                  'ACTIVE',
+                  AppLocalizations.of(context)!.section_active.toUpperCase(),
                   style: textTheme.labelSmall?.copyWith(
                     color: color.onPrimary,
                     fontWeight: FontWeight.bold,
@@ -347,7 +346,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                       SizedBox(height: spacing.elementGapMin),
                       Text(
                         formatCurrency(timeline.totalSpent,
-                            code: header.currencyCode, decimals: 0),
+                            code: header.currencyCode, decimals: 0,),
                         style: textTheme.headlineMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
@@ -382,7 +381,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                             ),
                           ),
                           Text(
-                            'of budget',
+                            AppLocalizations.of(context)!.trip_ofBudget,
                             style: textTheme.labelSmall?.copyWith(
                               color: budgetUsed > 0.9
                                   ? color.onErrorContainer
@@ -392,24 +391,24 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                         ],
                       ),
                     );
-                  }),
+                  },),
               ],
             )
           else
             Row(
               children: [
                 Icon(LucideIcons.users,
-                    size: 14, color: color.onSurfaceVariant),
+                    size: 14, color: color.onSurfaceVariant,),
                 SizedBox(width: spacing.elementGapMin),
                 Text(
-                  '${header.memberCount} people',
+                  '${header.memberCount} ${AppLocalizations.of(context)!.trip_nPeople(header.memberCount)}',
                   style: textTheme.bodySmall
                       ?.copyWith(color: color.onSurfaceVariant),
                 ),
                 if (timeline.totalSpent > 0) ...[
                   Text(' \u2022 ',
                       style: textTheme.bodySmall
-                          ?.copyWith(color: color.onSurfaceVariant)),
+                          ?.copyWith(color: color.onSurfaceVariant),),
                   Text(
                     '${formatCurrency(timeline.totalSpent, code: header.currencyCode, decimals: 0)} total',
                     style: textTheme.bodySmall
@@ -444,7 +443,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(32),
+                padding: EdgeInsets.all(spacing.sectionGap * 2),
                 decoration: BoxDecoration(
                   color: color.surfaceContainerHighest,
                   shape: BoxShape.circle,
@@ -455,7 +454,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                   color: color.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing.sectionGap),
               Text(
                 emptyMsg.first,
                 style:
@@ -463,7 +462,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                 textAlign: TextAlign.center,
               ),
               if (emptyMsg.length > 1) ...[
-                const SizedBox(height: 8),
+                SizedBox(height: spacing.elementGap),
                 Text(
                   emptyMsg.sublist(1).join('\n'),
                   style: textTheme.bodyMedium
@@ -473,12 +472,12 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
               ],
               if (!header.isTrip &&
                   state.allowedActions.contains(GroupAction.addExpense)) ...[
-                const SizedBox(height: 24),
+                SizedBox(height: spacing.sectionGap),
                 FilledButton.icon(
                   onPressed: () {
                     HapticFeedback.mediumImpact();
                     context.push(AppRoutes.addTripTransaction,
-                        extra: widget.tripId);
+                        extra: widget.tripId,);
                   },
                   icon: const Icon(LucideIcons.plus, size: 18),
                   label: Text(AppLocalizations.of(context)!.trip_splitExpense),
@@ -519,7 +518,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                     ),
                     const Spacer(),
                     Text(
-                      '${day.expenseCount} expense${day.expenseCount == 1 ? '' : 's'} \u2022 ${formatCurrency(day.totalSpent, code: header.currencyCode, decimals: 0)}',
+                      '${day.expenseCount} ${AppLocalizations.of(context)!.trip_nExpenses(day.expenseCount)} \u2022 ${formatCurrency(day.totalSpent, code: header.currencyCode, decimals: 0)}',
                       style: textTheme.labelSmall?.copyWith(
                         color: color.onSurfaceVariant,
                       ),
@@ -562,7 +561,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
           : DismissDirection.none,
       background: Container(
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
+        padding: EdgeInsets.only(right: spacing.cardInner),
         decoration: BoxDecoration(
           color: color.error,
           borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -573,11 +572,11 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
         HapticFeedback.mediumImpact();
         final confirmed = await DialogUtils.showDeleteConfirmation(
           context,
-          title: 'Remove Expense',
+          title: AppLocalizations.of(context)!.trip_removeExpense,
           message: header.isTrip
-              ? 'Remove this expense from the trip?'
-              : 'Remove this expense from the group?',
-          deleteText: 'Remove',
+              ? AppLocalizations.of(context)!.trip_removeExpenseMsg
+              : AppLocalizations.of(context)!.trip_removeGroupExpenseMsg,
+          deleteText: AppLocalizations.of(context)!.trip_remove,
         );
         if (confirmed == true) {
           await ref
@@ -629,7 +628,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
               const SizedBox(height: 4),
               if (header.isTrip)
                 Text(
-                  'Paid by ${expense.paidByName} \u2022 Split among ${expense.shares.length}',
+                  AppLocalizations.of(context)!.trip_paidBySplitAmong(expense.paidByName, expense.shares.length),
                   style: textTheme.bodySmall
                       ?.copyWith(color: color.onSurfaceVariant),
                 )
@@ -701,23 +700,23 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(spacing.sectionGap),
                   decoration: BoxDecoration(
                     color: color.primaryContainer,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(LucideIcons.circleCheck,
-                      size: 48, color: color.primary),
+                      size: 48, color: color.primary,),
                 ),
                 SizedBox(height: spacing.sectionGap),
                 Text(
-                  'All settled up!',
+                  AppLocalizations.of(context)!.trip_allSettled,
                   style: textTheme.titleLarge
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: spacing.elementGap),
                 Text(
-                  'Everyone is square \u2014 no one owes anything',
+                  AppLocalizations.of(context)!.trip_everyoneSquare,
                   style: textTheme.bodyMedium
                       ?.copyWith(color: color.onSurfaceVariant),
                 ),
@@ -749,7 +748,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                 SizedBox(width: spacing.elementGap),
                 Expanded(
                   child: Text(
-                    'Archive to settle up',
+                    AppLocalizations.of(context)!.trip_archiveToSettle,
                     style: textTheme.bodySmall
                         ?.copyWith(color: color.onTertiaryContainer),
                   ),
@@ -767,7 +766,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
               color: color.surfaceContainerLow,
               borderRadius: BorderRadius.circular(spacing.radiusMedium),
               border: Border.all(
-                  color: color.outlineVariant.withValues(alpha: 0.5)),
+                  color: color.outlineVariant.withValues(alpha: 0.5),),
             ),
             child: Row(
               children: [
@@ -775,7 +774,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                 SizedBox(width: spacing.elementGap * 1.5),
                 Expanded(
                   child: Text(
-                    '${settlements.pendingCount} pending settlement${settlements.pendingCount == 1 ? '' : 's'}',
+                    AppLocalizations.of(context)!.trip_nPendingSettlements(settlements.pendingCount),
                     style: textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: color.onSurface,
@@ -836,7 +835,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
             Icon(LucideIcons.history, size: 16, color: color.onSurfaceVariant),
             SizedBox(width: spacing.elementGap),
             Text(
-              'Settlement History',
+              AppLocalizations.of(context)!.trip_settlementHistory,
               style: textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color.onSurfaceVariant,

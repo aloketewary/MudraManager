@@ -199,7 +199,7 @@ class NetWorthCard extends ConsumerWidget {
                                               : color.onPrimaryContainer
                                                   .withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(
-                                              spacing.radiusMedium),
+                                              spacing.radiusMedium,),
                                         ),
                                         child: Text(
                                           '${savingsRate.toStringAsFixed(0)}% savings',

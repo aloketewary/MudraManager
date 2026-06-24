@@ -112,7 +112,7 @@ List<Transaction> _applySearchFilter(
   final lowerQuery = query.toLowerCase();
   return transactions
       .where(
-          (tx) => tx.description?.toLowerCase().contains(lowerQuery) ?? false)
+          (tx) => tx.description?.toLowerCase().contains(lowerQuery) ?? false,)
       .toList();
 }
 

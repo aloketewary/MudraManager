@@ -117,11 +117,11 @@ class BudgetCard extends ConsumerWidget {
                                 decoration: BoxDecoration(
                                   color: color.surfaceContainerHighest,
                                   borderRadius: BorderRadius.circular(
-                                      spacing.radiusSmall),
+                                      spacing.radiusSmall,),
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(
-                                      spacing.radiusSmall),
+                                      spacing.radiusSmall,),
                                   child: TweenAnimationBuilder<double>(
                                     duration:
                                         const Duration(milliseconds: 1500),
@@ -138,7 +138,7 @@ class BudgetCard extends ConsumerWidget {
                                               colors: [
                                                 progressColor,
                                                 progressColor.withValues(
-                                                    alpha: 0.7)
+                                                    alpha: 0.7,),
                                               ],
                                             ),
                                           ),
@@ -168,7 +168,7 @@ class BudgetCard extends ConsumerWidget {
                                       AppLocalizations.of(context)!
                                           .budget_safeToSpend,
                                       formatCurrency(dailySafe.toDouble(),
-                                          decimals: 0),
+                                          decimals: 0,),
                                       LucideIcons.calendar,
                                       color.primary,
                                       color,

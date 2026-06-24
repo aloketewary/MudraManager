@@ -103,31 +103,31 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
                         flex: 3,
                         child: Text('Widget',
                             style: textTheme.labelMedium
-                                ?.copyWith(fontWeight: FontWeight.w700))),
+                                ?.copyWith(fontWeight: FontWeight.w700),),),
                     Expanded(
                         flex: 2,
                         child: Text('Impr',
                             style: textTheme.labelMedium
                                 ?.copyWith(fontWeight: FontWeight.w700),
-                            textAlign: TextAlign.right)),
+                            textAlign: TextAlign.right,),),
                     Expanded(
                         flex: 2,
                         child: Text('Clicks',
                             style: textTheme.labelMedium
                                 ?.copyWith(fontWeight: FontWeight.w700),
-                            textAlign: TextAlign.right)),
+                            textAlign: TextAlign.right,),),
                     Expanded(
                         flex: 2,
                         child: Text('CTR',
                             style: textTheme.labelMedium
                                 ?.copyWith(fontWeight: FontWeight.w700),
-                            textAlign: TextAlign.right)),
+                            textAlign: TextAlign.right,),),
                     Expanded(
                         flex: 2,
                         child: Text('Hides',
                             style: textTheme.labelMedium
                                 ?.copyWith(fontWeight: FontWeight.w700),
-                            textAlign: TextAlign.right)),
+                            textAlign: TextAlign.right,),),
                   ],
                 ),
               ),
@@ -155,13 +155,13 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
     return Row(
       children: [
         _summaryChip('Impressions', '$totalImpressions', color.primary, color,
-            textTheme),
+            textTheme,),
         SizedBox(width: spacing.elementGap),
         _summaryChip(
-            'Clicks', '$totalClicks', color.tertiary, color, textTheme),
+            'Clicks', '$totalClicks', color.tertiary, color, textTheme,),
         SizedBox(width: spacing.elementGap),
         _summaryChip('Avg CTR', '${avgCtr.toStringAsFixed(1)}%',
-            color.secondary, color, textTheme),
+            color.secondary, color, textTheme,),
         SizedBox(width: spacing.elementGap),
         _summaryChip('Hides', '$totalHides', color.error, color, textTheme),
       ],
@@ -169,7 +169,7 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
   }
 
   Widget _summaryChip(String label, String value, Color accent,
-      ColorScheme color, TextTheme textTheme) {
+      ColorScheme color, TextTheme textTheme,) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
@@ -182,11 +182,11 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
           children: [
             Text(value,
                 style: textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w700, color: accent)),
+                    ?.copyWith(fontWeight: FontWeight.w700, color: accent),),
             const SizedBox(height: 2),
             Text(label,
                 style: textTheme.labelSmall
-                    ?.copyWith(color: color.onSurfaceVariant)),
+                    ?.copyWith(color: color.onSurfaceVariant),),
           ],
         ),
       ),
@@ -194,7 +194,7 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
   }
 
   Widget _buildRow(WidgetMetrics m, ColorScheme color, TextTheme textTheme,
-      AppSpacing spacing) {
+      AppSpacing spacing,) {
     final ctrColor = m.ctr > 15
         ? color.primary
         : m.ctr > 5
@@ -207,7 +207,7 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         border: Border(
             bottom:
-                BorderSide(color: color.outlineVariant.withValues(alpha: 0.3))),
+                BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),),
       ),
       child: Row(
         children: [
@@ -216,15 +216,15 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
               child: Text(m.widgetId,
                   style: textTheme.bodySmall
                       ?.copyWith(fontWeight: FontWeight.w500),
-                  overflow: TextOverflow.ellipsis)),
+                  overflow: TextOverflow.ellipsis,),),
           Expanded(
               flex: 2,
               child: Text('${m.impressions}',
-                  style: textTheme.bodySmall, textAlign: TextAlign.right)),
+                  style: textTheme.bodySmall, textAlign: TextAlign.right,),),
           Expanded(
               flex: 2,
               child: Text('${m.clicks}',
-                  style: textTheme.bodySmall, textAlign: TextAlign.right)),
+                  style: textTheme.bodySmall, textAlign: TextAlign.right,),),
           Expanded(
             flex: 2,
             child: Text(
@@ -239,7 +239,7 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
               child: Text('${m.hides}',
                   style: textTheme.bodySmall
                       ?.copyWith(color: m.hides > 0 ? color.error : null),
-                  textAlign: TextAlign.right)),
+                  textAlign: TextAlign.right,),),
         ],
       ),
     );

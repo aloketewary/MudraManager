@@ -176,7 +176,7 @@ void main() {
 
     test('inactive goals do not produce attention', () {
       final goals = [
-        _makeGoal(progress: 90, isActive: false)
+        _makeGoal(progress: 90, isActive: false),
       ]; // 0.9 but inactive
       final state = _makeState();
       final result = deriveAttentionItems(state: state, goals: goals, now: now);

@@ -219,7 +219,7 @@ class MonthlyRecapService {
           name: cat,
           currentAmount: current,
           previousAmount: prev,
-        ));
+        ),);
       }
     }
     categoryChanges.sort((a, b) => b.delta.abs().compareTo(a.delta.abs()));
@@ -255,7 +255,7 @@ class MonthlyRecapService {
           txn.category.value?.name ?? 'Uncategorized',
           txn.baseAmount,
           txn.date,
-        )).toList();
+        ),).toList();
 
     // ── Financial Score ──
     final score = _computeFinancialScore(
@@ -334,8 +334,11 @@ class MonthlyRecapService {
     // Budget adherence (0-30 points)
     int budgetScore = 30;
     for (final b in budgetDetails) {
-      if (b.overBudget) budgetScore -= 10;
-      else if (b.percentage > 90) budgetScore -= 5;
+      if (b.overBudget) {
+        budgetScore -= 10;
+      } else if (b.percentage > 90) {
+        budgetScore -= 5;
+      }
     }
     budgetScore = budgetScore.clamp(0, 30);
 
@@ -370,10 +373,10 @@ class MonthlyRecapService {
       final pct = (delta / prevExpense * 100).abs().round();
       if (delta > 0) {
         lines.add(
-            'Spending increased by $currency${delta.round().abs()} (+$pct%) from last month.');
+            'Spending increased by $currency${delta.round().abs()} (+$pct%) from last month.',);
       } else if (delta < 0) {
         lines.add(
-            'Spending decreased by $currency${delta.round().abs()} (-$pct%) from last month.');
+            'Spending decreased by $currency${delta.round().abs()} (-$pct%) from last month.',);
       }
     }
 
@@ -382,10 +385,10 @@ class MonthlyRecapService {
       final top = categoryChanges.first;
       if (top.increased) {
         lines.add(
-            '${top.name} contributed $currency${top.delta.round()} of the increase.');
+            '${top.name} contributed $currency${top.delta.round()} of the increase.',);
       } else {
         lines.add(
-            '${top.name} spending fell by $currency${top.delta.round().abs()}.');
+            '${top.name} spending fell by $currency${top.delta.round().abs()}.',);
       }
     }
 
@@ -393,7 +396,7 @@ class MonthlyRecapService {
     if (prevSavingsRate > 0) {
       if ((savingsRate - prevSavingsRate).abs() > 2) {
         lines.add(
-            'Savings rate ${savingsRate > prevSavingsRate ? "improved" : "dropped"} from ${prevSavingsRate.round()}% to ${savingsRate.round()}%.');
+            'Savings rate ${savingsRate > prevSavingsRate ? "improved" : "dropped"} from ${prevSavingsRate.round()}% to ${savingsRate.round()}%.',);
       }
     }
 
@@ -402,7 +405,7 @@ class MonthlyRecapService {
     for (final b in breached.take(2)) {
       final over = b.spent - b.allocated;
       lines.add(
-          'Exceeded ${b.name} budget by $currency${over.round()}.');
+          'Exceeded ${b.name} budget by $currency${over.round()}.',);
     }
 
     // Largest expense
@@ -412,7 +415,7 @@ class MonthlyRecapService {
           ? biggest.description
           : biggest.category;
       lines.add(
-          'Largest expense: $currency${biggest.amount.round()} ($desc).');
+          'Largest expense: $currency${biggest.amount.round()} ($desc).',);
     }
 
     // Suggested focus
@@ -480,7 +483,7 @@ class MonthlyRecapService {
       results.add(RecapAchievement(
         text: '$breachedCount budgets exceeded this month',
         isWarning: true,
-      ));
+      ),);
     }
 
     // Streaks
@@ -488,7 +491,7 @@ class MonthlyRecapService {
     final daily = streaks.where((s) => s.type == 'daily_checkin').firstOrNull;
     if (daily != null && daily.currentCount >= 30) {
       results.add(RecapAchievement(
-          text: '${daily.currentCount}-day tracking streak 🔥'));
+          text: '${daily.currentCount}-day tracking streak 🔥',),);
     }
 
     return results;

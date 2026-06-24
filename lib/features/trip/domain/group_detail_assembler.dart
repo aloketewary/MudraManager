@@ -339,6 +339,8 @@ class GroupDetailAssembler {
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
   bool _isSettlement(TripTransaction txn) {
+    if (txn.isSettlement) return true;
+    // Fallback for pre-migration data
     return txn.splitExpense.value?.description == 'Settlement';
   }
 }

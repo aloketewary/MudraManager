@@ -156,7 +156,7 @@ class HealthStrip extends ConsumerWidget {
         count: state.budgets,
         route: AppRoutes.budgetDashboard,
         icon: LucideIcons.chartPie,
-      ));
+      ),);
     }
     if (state.bills > 0) {
       chips.add(_ChipData(
@@ -164,7 +164,7 @@ class HealthStrip extends ConsumerWidget {
         count: state.bills,
         route: AppRoutes.recurringTransactions,
         icon: LucideIcons.receipt,
-      ));
+      ),);
     }
     if (state.goals > 0) {
       chips.add(_ChipData(
@@ -172,7 +172,7 @@ class HealthStrip extends ConsumerWidget {
         count: state.goals,
         route: AppRoutes.goalScreen,
         icon: LucideIcons.target,
-      ));
+      ),);
     }
     if (state.cards > 0) {
       chips.add(_ChipData(
@@ -180,7 +180,7 @@ class HealthStrip extends ConsumerWidget {
         count: state.cards,
         route: AppRoutes.manageAccounts,
         icon: LucideIcons.creditCard,
-      ));
+      ),);
     }
 
     return Padding(

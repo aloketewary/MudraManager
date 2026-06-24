@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/logic/goal_state_machine.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -58,10 +59,12 @@ class GoalHealth {
 
     // Predict completion date based on current pace
     DateTime? predictedDate;
-    if (actualProgress > 0 && elapsed > 0) {
-      final daysForFull = (elapsed / actualProgress).ceil();
-      predictedDate = goal.creationDate.add(Duration(days: daysForFull));
-    }
+    predictedDate = GoalStateMachine.predictedCompletion(
+      progressPercent: goal.progressPercent,
+      creationDate: goal.creationDate,
+      now: now,
+      contributionCount: goal.contributions.length,
+    );
 
     GoalStatus status;
     int daysAheadOrBehind = 0;
@@ -152,7 +155,17 @@ class GoalHealth {
     return null;
   }
 
+  /// Recent monthly pace (90-day rolling, lifetime fallback).
+  /// Delegates to GoalStateMachine for consistent calculation.
+  static double recentMonthlyPace(Goal goal) {
+    final contributions = goal.contributions
+        .map((c) => GoalContributionData(amount: c.amount, date: c.date))
+        .toList();
+    return GoalStateMachine.recentPace(contributions, DateTime.now());
+  }
+
   /// Average monthly contribution from actual deposit history.
+  /// @deprecated Use [recentMonthlyPace] for 90-day rolling pace.
   static double avgMonthlyContribution(Goal goal) {
     final contributions = goal.contributions;
     if (contributions.isEmpty) return 0;

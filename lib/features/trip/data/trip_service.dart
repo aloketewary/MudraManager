@@ -397,7 +397,7 @@ class TripService {
       splitType: SplitType.equal,
       participantIds: [toId],
       splitAmounts: [amount],
-    );
+    )..isSettlement = true;
 
     expense.encryptFields();
     ledgerTxn.encryptFields();

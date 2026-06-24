@@ -138,7 +138,7 @@ class GoalCard extends ConsumerWidget {
                             child: _buildMetricItem(
                               AppLocalizations.of(context)!.budget_remaining,
                               formatCurrency((totalTarget - totalSaved),
-                                  decimals: 0),
+                                  decimals: 0,),
                               LucideIcons.trendingUp,
                               color.tertiary,
                               color,

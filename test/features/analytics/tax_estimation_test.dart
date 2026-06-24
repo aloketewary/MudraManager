@@ -199,7 +199,7 @@ List<TaxSlab> _calculateSlabs(double taxableIncome) {
       rate: bracket.rate * 100,
       taxableAmount: taxable.toDouble(),
       tax: tax,
-    ));
+    ),);
     remaining -= taxable;
   }
 

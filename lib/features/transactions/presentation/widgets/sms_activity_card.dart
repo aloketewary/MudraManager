@@ -394,7 +394,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                             child: Text(
                               'Account "${widget.activity.account}" not found. Add it first.',
                               style: textTheme.bodySmall?.copyWith(
-                                  color: FinanceColors.statusWarning),
+                                  color: FinanceColors.statusWarning,),
                             ),
                           ),
                         ],

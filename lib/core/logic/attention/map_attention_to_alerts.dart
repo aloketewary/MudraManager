@@ -29,7 +29,7 @@ List<PriorityAlert> mapAttentionItemsToAlerts(
               '$count bill${count > 1 ? 's' : ''} due tomorrow',
           route: AppRoutes.recurringTransactions,
           type: AlertType.urgent,
-        ));
+        ),);
 
       case BillDueSoon(:final count, :final daysUntil):
         alerts.add(PriorityAlert(
@@ -38,7 +38,7 @@ List<PriorityAlert> mapAttentionItemsToAlerts(
               '$count bill${count > 1 ? 's' : ''} due in $daysUntil days',
           route: AppRoutes.recurringTransactions,
           type: AlertType.warning,
-        ));
+        ),);
 
       case BudgetOverLimit(:final overCount):
         alerts.add(PriorityAlert(
@@ -47,7 +47,7 @@ List<PriorityAlert> mapAttentionItemsToAlerts(
               '$overCount budget${overCount > 1 ? 's' : ''} exceeded',
           route: AppRoutes.budgetDashboard,
           type: AlertType.urgent,
-        ));
+        ),);
 
       case BudgetNearLimit(:final nearCount):
         alerts.add(PriorityAlert(
@@ -56,7 +56,7 @@ List<PriorityAlert> mapAttentionItemsToAlerts(
               '$nearCount budget${nearCount > 1 ? 's' : ''} near limit',
           route: AppRoutes.budgetDashboard,
           type: AlertType.warning,
-        ));
+        ),);
 
       case GoalNearCompletion(:final count):
         alerts.add(PriorityAlert(
@@ -65,7 +65,7 @@ List<PriorityAlert> mapAttentionItemsToAlerts(
               '$count goal${count > 1 ? 's' : ''} almost complete!',
           route: AppRoutes.goalScreen,
           type: AlertType.info,
-        ));
+        ),);
     }
   }
 

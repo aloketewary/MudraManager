@@ -620,8 +620,9 @@ class _QuickAddTransactionSheetState
         if (accounts.isNotEmpty && _selectedAccount == null) {
           final primary = accounts.where((a) => a.isPrimary).firstOrNull;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted)
+            if (mounted) {
               setState(() => _selectedAccount = primary ?? accounts.first);
+            }
           });
         }
       });

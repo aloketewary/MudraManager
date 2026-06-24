@@ -31,13 +31,13 @@ List<AttentionItem> deriveAttentionItems({
         items.add(BillDueTomorrow(
           count: state.billCount,
           billName: state.nearestBillName,
-        ));
+        ),);
       } else {
         items.add(BillDueSoon(
           count: state.billCount,
           daysUntil: daysUntil,
           billName: state.nearestBillName,
-        ));
+        ),);
       }
     }
   }
@@ -47,18 +47,18 @@ List<AttentionItem> deriveAttentionItems({
     items.add(BudgetOverLimit(
       budgetName: state.budgetName ?? '',
       overCount: state.convergenceCount,
-    ));
+    ),);
   } else if (state.budgetState == BudgetState.warn) {
     items.add(BudgetNearLimit(
       budgetName: state.budgetName ?? '',
       nearCount: state.convergenceCount,
-    ));
+    ),);
   }
 
   // ── Goal attention ──
   final nearComplete = goals
       .where((g) =>
-          g.isActive && g.progressPercent >= 0.80 && g.progressPercent < 1.0)
+          g.isActive && g.progressPercent >= 0.80 && g.progressPercent < 1.0,)
       .length;
 
   if (nearComplete > 0) {

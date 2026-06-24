@@ -330,7 +330,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                               context.push(AppRoutes.dashboardCustomize),
                           icon: const Icon(LucideIcons.plus),
                           label: Text(AppLocalizations.of(context)!
-                              .dashboard_enableCards),
+                              .dashboard_enableCards,),
                         ),
                       ],
                     ),

@@ -85,7 +85,7 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                           decoration: BoxDecoration(
                             color: color.secondary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(
-                                Tone.current.borderRadius),
+                                Tone.current.borderRadius,),
                           ),
                           child: Icon(
                             LucideIcons.wallet,
@@ -134,7 +134,7 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                                               10
                                           : 30;
                                       return FlSpot(e.key.toDouble(),
-                                          normalized.toDouble());
+                                          normalized.toDouble(),);
                                     }).toList();
                                     return LineChart(
                                       LineChartData(

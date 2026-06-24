@@ -10,6 +10,19 @@ import 'package:mudra_manager/core/utils/budget_spent_calculator.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/achievement_registry.dart';
 
+/// Manages achievements, streaks, XP, and levels.
+///
+/// TECH DEBT: This service directly calls SnackbarService and
+/// NotificationService (10 call sites). These should be extracted to
+/// return GamificationResult objects, letting the presentation layer
+/// decide what UI feedback to show. This blocks proper unit testing
+/// of the service without mocking static methods.
+///
+/// TECH DEBT: This class (1100+ lines) should be decomposed into:
+/// - StreakEngine (5 streak types)
+/// - AchievementEngine (series, progress, unlock)
+/// - XpEngine (add, level-up, formula)
+/// GamificationService becomes a thin facade.
 class GamificationService {
   final Isar isar;
   final AppLog log;
@@ -201,7 +214,8 @@ class GamificationService {
         ]);
         break;
       case GamificationEvent.dailyCheckIn:
-        await _handleDailyStreak();
+        // No-op: daily streak is managed exclusively via updateDailyCheckIn()
+        // to ensure grace period logic is applied consistently.
         break;
       case GamificationEvent.goalCompleted:
         await _incrementAll(['goal_completed']);
@@ -548,54 +562,6 @@ class GamificationService {
   /* =====================================================
      STREAK ENGINE
   ===================================================== */
-
-  Future<void> _handleDailyStreak() async {
-    final streak = await _getOrCreateStreak();
-
-    final now = DateTime.now();
-
-    if (streak.lastChecked != null && _isSameDay(streak.lastChecked!, now)) {
-      return;
-    }
-
-    if (streak.lastChecked != null &&
-        _isConsecutiveDay(streak.lastChecked!, now)) {
-      streak.currentCount++;
-    } else {
-      streak.currentCount = 1;
-    }
-
-    if (streak.currentCount > streak.longestCount) {
-      streak.longestCount = streak.currentCount;
-    }
-
-    streak.lastChecked = now;
-    streak.lastUpdated = now;
-
-    await isar.writeTxn(() => isar.streaks.put(streak));
-
-    await _checkStreaks(streak.currentCount);
-
-    await _addXP(_calculateStreakXP(streak.currentCount), 'Daily Streak: ${streak.currentCount}');
-  }
-
-  Future<Streak> _getOrCreateStreak() async {
-    final existing =
-        await isar.streaks.filter().typeEqualTo('daily_checkin').findFirst();
-
-    if (existing != null) return existing;
-
-    final streak = Streak()
-      ..type = 'daily_checkin'
-      ..currentCount = 0
-      ..longestCount = 0
-      ..lastChecked = null
-      ..lastUpdated = DateTime.now();
-
-    await isar.writeTxn(() => isar.streaks.put(streak));
-
-    return streak;
-  }
 
   Future<void> _checkStreaks(int count) async {
     // Set progress directly to count for streak achievements
