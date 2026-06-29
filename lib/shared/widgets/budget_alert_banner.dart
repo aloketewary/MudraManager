@@ -1,6 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter/material.dart';
@@ -25,89 +23,67 @@ class BudgetAlertBanner extends StatelessWidget {
     final alert = alerts.first;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final ctxt = AppLocalizations.of(context)!;
 
-    final color = alert.threshold == 100
+    final accentColor = alert.threshold == 100
         ? colorScheme.error
-        : alert.threshold == 90
-        ? const Color(0xFFF59E0B)
-        : const Color(0xFFFBBF24);
+        : const Color(0xFFF59E0B);
 
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            color.withValues(alpha: 0.15),
-            color.withValues(alpha: 0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12),
+        color: accentColor.withValues(alpha: 0.08),
+        border: Border.all(color: accentColor.withValues(alpha: 0.3)),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
-          onTap: () {
-            HapticFeedback.mediumImpact();
-            _showDetails(context, alert);
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Icon(
-                  alert.threshold == 100
-                      ? LucideIcons.circleAlert
-                      : LucideIcons.triangleAlert,
-                  color: color,
-                  size: 36,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        alert.threshold == 100
-                            ? ctxt.budget_alert_exceededTitle
-                            : ctxt.budget_alert_warningTitle(alert.threshold.toString()),
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: color,
-                        ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          _showDetails(context, alert);
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Icon(
+                LucideIcons.triangleAlert,
+                color: accentColor,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${alert.budget.name} \u2022 ${alert.percentage.toInt()}%',
+                      style: textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colorScheme.onSurface,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${alert.budget.name}: ${formatCurrency(alert.spent, decimals: 0)} / ${formatCurrency(alert.budget.amount, decimals: 0)}',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                        ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${formatCurrency(alert.spent, decimals: 0)} / ${formatCurrency(alert.budget.amount, decimals: 0)}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  tooltip: ctxt.common_close,
-                  icon: const Icon(LucideIcons.x),
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    onDismiss();
-                  },
-                  color: color,
+              ),
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  onDismiss();
+                },
+                child: Icon(
+                  LucideIcons.x,
+                  size: 18,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -116,6 +92,8 @@ class BudgetAlertBanner extends StatelessWidget {
 
   void _showDetails(BuildContext context, BudgetAlert alert) {
     final ctxt = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -124,19 +102,33 @@ class BudgetAlertBanner extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CurrencyText(amount: alert.budget.amount, prefixText: ctxt.label_budget_with_colon, compact: false, fixedLength: 0),
-            CurrencyText(amount: alert.spent, prefixText: ctxt.label_spent_with_colon, compact: false, fixedLength: 0),
-            Text('${ctxt.label_percentage_with_colon} ${alert.percentage.toStringAsFixed(1)}%'),
+            CurrencyText(
+              amount: alert.budget.amount,
+              prefixText: ctxt.label_budget_with_colon,
+              compact: false,
+              fixedLength: 0,
+            ),
+            CurrencyText(
+              amount: alert.spent,
+              prefixText: ctxt.label_spent_with_colon,
+              compact: false,
+              fixedLength: 0,
+            ),
+            Text(
+              '${ctxt.label_percentage_with_colon} ${alert.percentage.toStringAsFixed(1)}%',
+            ),
             const SizedBox(height: 16),
-            LinearProgressIndicator(
-              semanticsLabel: 'Progress',
-              value: alert.percentage / 100,
-              backgroundColor: Colors.grey[300],
-              color: alert.threshold == 100
-                  ? FinanceColors.statusDanger
-                  : alert.threshold == 90
-                  ? FinanceColors.statusWarning
-                  : Colors.amber,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: LinearProgressIndicator(
+                semanticsLabel: 'Progress',
+                value: (alert.percentage / 100).clamp(0.0, 1.0),
+                minHeight: 6,
+                backgroundColor: colorScheme.surfaceContainerHighest,
+                color: alert.threshold == 100
+                    ? colorScheme.error
+                    : const Color(0xFFF59E0B),
+              ),
             ),
           ],
         ),

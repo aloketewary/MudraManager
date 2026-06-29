@@ -245,8 +245,8 @@ class _AnimatedSwipeableAccountCardsState
                   value: displayBalance,
                   currencyCode:
                       isTotal ? null : accounts[balanceViewIndex].currencyCode,
-                  style: textTheme.displayMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
+                  style: textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
                     color: color.onSurface,
                   ),
                   compact: false,

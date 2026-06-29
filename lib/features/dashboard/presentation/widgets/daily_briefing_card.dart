@@ -423,7 +423,7 @@ class TodayCard extends ConsumerWidget {
       child: Container(
         padding: EdgeInsets.all(spacing.cardInner + 4),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(spacing.radiusLarge),
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
           color: color.surfaceContainerLow,
           border: Border.all(
             color: color.outlineVariant.withValues(alpha: 0.5),
@@ -444,31 +444,6 @@ class TodayCard extends ConsumerWidget {
 
             SizedBox(height: spacing.elementGap),
 
-            // ── Status line ──
-            Text(
-              state.isHealthy
-                  ? l10n.today_noActionRequired
-                  : l10n.today_attentionRequired,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: state.isHealthy ? color.onSurface : color.error,
-              ),
-            ),
-
-            // ── Signal narrative (warning only) ──
-            if (!state.isHealthy) ...[
-              SizedBox(height: spacing.elementGap),
-              Text(
-                _formatNarrative(l10n, state),
-                style: textTheme.bodyMedium?.copyWith(
-                  color: color.onSurface,
-                  height: 1.4,
-                ),
-              ),
-            ],
-
-            SizedBox(height: spacing.sectionGap),
-
             // ── Hero number ──
             if (state.hasUpcomingBills) ...[
               CurrencyText(
@@ -486,7 +461,6 @@ class TodayCard extends ConsumerWidget {
                 ),
               ),
               SizedBox(height: spacing.elementGap),
-              // ── Micro breakdown ──
               Text(
                 l10n.today_breakdown(
                   formatCurrencyCompact(state.balance),
@@ -497,7 +471,6 @@ class TodayCard extends ConsumerWidget {
                 ),
               ),
             ] else ...[
-              // Stage 0: just balance
               CurrencyText(
                 amount: state.balance,
                 style: textTheme.headlineMedium?.copyWith(
@@ -510,6 +483,18 @@ class TodayCard extends ConsumerWidget {
                 l10n.today_balance,
                 style: textTheme.bodySmall?.copyWith(
                   color: color.onSurfaceVariant,
+                ),
+              ),
+            ],
+
+            // ── Signal narrative (warning only) ──
+            if (!state.isHealthy) ...[
+              SizedBox(height: spacing.sectionGap),
+              Text(
+                _formatNarrative(l10n, state),
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.error,
+                  height: 1.4,
                 ),
               ),
             ],
