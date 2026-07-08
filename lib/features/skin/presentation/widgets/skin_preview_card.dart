@@ -1,12 +1,14 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/skin/model/skin.dart';
 import 'package:mudra_manager/core/skin/converter/skin_to_theme.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 
-class SkinPreviewCard extends StatelessWidget {
+class SkinPreviewCard extends ConsumerWidget {
   final Skin skin;
+  
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -18,7 +20,7 @@ class SkinPreviewCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final brightness = Theme.of(context).brightness;
     final mode = brightness == Brightness.light
         ? AppThemeMode.light
@@ -26,13 +28,14 @@ class SkinPreviewCard extends StatelessWidget {
     final colorScheme = SkinToTheme.colorScheme(skin, mode);
     final isHairline = skin.style.dividerStyle == 'hairline';
     final radius = skin.style.cardRadius;
+    final spacing = ref.watch(spacingProvider);
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           border: Border.all(
             color: isSelected ? colorScheme.primary : Colors.transparent,
             width: 3,
@@ -47,10 +50,10 @@ class SkinPreviewCard extends StatelessWidget {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           child: Stack(
             children: [
-              _buildPreview(colorScheme, isHairline, radius),
+              _buildPreview(colorScheme, isHairline, radius, spacing),
               if (isSelected)
                 Positioned(
                   top: 8,
@@ -76,6 +79,7 @@ class SkinPreviewCard extends StatelessWidget {
     ColorScheme colorScheme,
     bool isHairline,
     double radius,
+    AppSpacing spacing,
   ) {
     final borderColor = colorScheme.outline.withValues(
       alpha: skin.style.borderOpacity,
@@ -98,7 +102,7 @@ class SkinPreviewCard extends StatelessWidget {
                 width: 40,
                 decoration: BoxDecoration(
                   color: colorScheme.onSurface,
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.5),
                 ),
               ),
             ],
@@ -111,7 +115,7 @@ class SkinPreviewCard extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             child: isHairline
                 ? _buildHairlinePreview(colorScheme, borderColor, radius)
-                : _buildStandardPreview(colorScheme, radius),
+                : _buildStandardPreview(colorScheme, radius, spacing),
           ),
         ),
       ],
@@ -119,7 +123,7 @@ class SkinPreviewCard extends StatelessWidget {
   }
 
   /// Standard card-based preview (rounded cards with fill).
-  Widget _buildStandardPreview(ColorScheme colorScheme, double radius) {
+  Widget _buildStandardPreview(ColorScheme colorScheme, double radius, AppSpacing spacing) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -147,7 +151,7 @@ class SkinPreviewCard extends StatelessWidget {
                 width: 40,
                 decoration: BoxDecoration(
                   color: colorScheme.onPrimaryContainer,
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.5),
                 ),
               ),
             ],

@@ -112,7 +112,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                 id: 'delete_expense',
                 label: ctxt.common_delete,
                 icon: LucideIcons.trash2,
-                onTap: _deleteExpense,
+                onTap: () => _deleteExpense(spacing),
               ),
             ],
           ),
@@ -406,6 +406,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                       splitType: _splitType,
                       splitAmounts: _splitAmounts,
                       onChanged: () => setState(() {}),
+                      spacing: spacing,
                     ),
                     icon: const Icon(LucideIcons.pencil, size: 14),
                     label: const Text('Edit'),
@@ -523,9 +524,9 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     );
   }
 
-  Future<void> _deleteExpense() async {
+  Future<void> _deleteExpense(AppSpacing spacing,) async {
     final confirm = await DialogUtils.showConfirmation(
-      context,
+      context, spacing,
       title: 'Delete Expense',
       message: 'This will adjust everyone\'s balance. Continue?',
       confirmText: 'Delete',
@@ -541,7 +542,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
         );
     ref.invalidate(tripByIdProvider(widget.tripId));
 
-    SnackbarService.success(BuddyMessages.txnDeleted);
+    SnackbarService.success(BuddyMessages.txnDeleted, spacing,);
     router.pop();
   }
 }

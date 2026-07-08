@@ -235,7 +235,7 @@ class SkinStyle {
   final String? pdfFont; // font for PDF export (e.g. "NotoSans")
 
   const SkinStyle({
-    this.cardRadius = 16,
+    this.cardRadius = 12,
     this.cardElevation = 0,
     this.buttonRadius = 12,
     this.inputRadius = 12,
@@ -248,7 +248,7 @@ class SkinStyle {
 
   factory SkinStyle.fromJson(Map<String, dynamic> json) {
     return SkinStyle(
-      cardRadius: (json['cardRadius'] as num?)?.toDouble() ?? 16,
+      cardRadius: (json['cardRadius'] as num?)?.toDouble() ?? 12,
       cardElevation: (json['cardElevation'] as num?)?.toDouble() ?? 0,
       buttonRadius: (json['buttonRadius'] as num?)?.toDouble() ?? 12,
       inputRadius: (json['inputRadius'] as num?)?.toDouble() ?? 12,

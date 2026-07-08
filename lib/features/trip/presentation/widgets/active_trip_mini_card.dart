@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +18,7 @@ class ActiveTripMiniCard extends ConsumerWidget {
     final tripsAsync = ref.watch(allTripsProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return tripsAsync.when(
       data: (trips) {
@@ -40,7 +41,7 @@ class ActiveTripMiniCard extends ConsumerWidget {
                 color: color.errorContainer,
                 shape: RoundedRectangleBorder(
                   borderRadius:
-                      BorderRadius.circular(Tone.current.borderRadius),
+                      BorderRadius.circular(spacing.radiusSmall),
                   side: BorderSide(color: color.error, width: 2),
                 ),
                 child: InkWell(
@@ -49,7 +50,7 @@ class ActiveTripMiniCard extends ConsumerWidget {
                     context.push(AppRoutes.tripDetail, extra: trip.id);
                   },
                   borderRadius:
-                      BorderRadius.circular(Tone.current.borderRadius),
+                      BorderRadius.circular(spacing.radiusSmall),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(

@@ -969,7 +969,7 @@ class _AnimatedSwipeableAccountCardsState
               decoration: BoxDecoration(
                 color: Color(account.colorValue ?? 0xFF6B4CE6),
                 borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(spacing.radiusLarge),
+                  top: Radius.circular(spacing.radiusSmall),
                 ),
               ),
               padding: EdgeInsets.symmetric(

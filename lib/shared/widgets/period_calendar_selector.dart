@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -145,7 +144,7 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
             decoration: BoxDecoration(
               color: color.surface,
               borderRadius:
-                  BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+                  BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
             ),
             padding: EdgeInsets.fromLTRB(
               spacing.cardHorizontal,

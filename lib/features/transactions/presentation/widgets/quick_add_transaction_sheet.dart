@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +97,7 @@ class _QuickAddTransactionSheetState
       decoration: BoxDecoration(
         color: color.surface,
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2),),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -575,7 +574,7 @@ class _QuickAddTransactionSheetState
                   ? null
                   : () {
                       HapticFeedback.mediumImpact();
-                      _save();
+                      _save(spacing);
                     },
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 52),
@@ -709,18 +708,18 @@ class _QuickAddTransactionSheetState
     );
   }
 
-  Future<void> _save() async {
+  Future<void> _save(AppSpacing spacing) async {
     if (_amountController.text.isEmpty ||
         double.tryParse(_amountController.text) == null) {
-      SnackbarService.error(BuddyMessages.invalidAmount);
+      SnackbarService.error(BuddyMessages.invalidAmount, spacing);
       return;
     }
     if (_selectedAccount == null) {
-      SnackbarService.error(BuddyMessages.pickAccount);
+      SnackbarService.error(BuddyMessages.pickAccount, spacing);
       return;
     }
     if (_selectedCategory == null) {
-      SnackbarService.error(BuddyMessages.pickCategory);
+      SnackbarService.error(BuddyMessages.pickCategory, spacing);
       return;
     }
 
@@ -746,10 +745,10 @@ class _QuickAddTransactionSheetState
 
       if (context.mounted) {
         Navigator.pop(context);
-        SnackbarService.success(BuddyMessages.txnAdded);
+        SnackbarService.success(BuddyMessages.txnAdded, spacing);
       }
     } catch (e) {
-      SnackbarService.error(BuddyMessages.errorWith('$e'));
+      SnackbarService.error(BuddyMessages.errorWith('$e'), spacing);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -759,12 +758,13 @@ class _QuickAddTransactionSheetState
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2),),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (ctx) => SafeArea(
         child: Padding(

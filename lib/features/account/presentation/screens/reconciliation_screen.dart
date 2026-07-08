@@ -58,10 +58,10 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
     return entered - _calculatedBalance!;
   }
 
-  Future<void> _reconcile() async {
+  Future<void> _reconcile(AppSpacing spacing) async {
     final entered = _enteredBalance;
     if (entered == null) {
-      SnackbarService.error(BuddyMessages.invalidAmount);
+      SnackbarService.error(BuddyMessages.invalidAmount, spacing,);
       return;
     }
 
@@ -78,11 +78,12 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
 
       if (context.mounted) {
         if (adj.abs() < 0.01) {
-          SnackbarService.success(BuddyMessages.txnAdded);
+          SnackbarService.success(BuddyMessages.txnAdded, spacing,);
         } else {
           final sign = adj > 0 ? '+' : '';
           SnackbarService.success(
             'Balance adjusted by $sign${formatCurrency(adj, code: widget.account.currencyCode, decimals: 2)}',
+            spacing,
           );
         }
         Navigator.pop(context, true);
@@ -90,7 +91,7 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _saving = false);
-        SnackbarService.error(BuddyMessages.genericError);
+        SnackbarService.error(BuddyMessages.genericError, spacing);
       }
     }
   }
@@ -115,7 +116,7 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
           label: diff != null && diff.abs() < 0.01
               ? ctxt.common_confirm
               : ctxt.reconcile_title,
-          onTap: _saving || _enteredBalance == null ? null : _reconcile,
+          onTap: () => _saving || _enteredBalance == null ? null : _reconcile(spacing),
           isLoading: _saving,
         ),
       ),

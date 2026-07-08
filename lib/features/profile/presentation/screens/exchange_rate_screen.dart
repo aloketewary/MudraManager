@@ -162,6 +162,7 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
                               r.currencyCode,
                               newRate,
                               ctxt,
+                              spacing,
                             ),
                           );
                         },
@@ -182,12 +183,13 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
     String code,
     double newRate,
     AppLocalizations ctxt,
+    AppSpacing spacing,
   ) async {
     final service = await ref.read(currencyServiceProvider.future);
     await service.updateRates({code: newRate});
     ref.invalidate(_ratesProvider);
     if (!context.mounted) return;
-    SnackbarService.success(ctxt.exchange_rateUpdated(code));
+    SnackbarService.success(ctxt.exchange_rateUpdated(code), spacing);
   }
 }
 
@@ -303,7 +305,7 @@ class _RateTile extends StatelessWidget {
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius:
-            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall)),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(
@@ -377,7 +379,7 @@ class _RateTile extends StatelessWidget {
                     onPressed: () {
                       final val = double.tryParse(controller.text);
                       if (val == null || val <= 0) {
-                        SnackbarService.error(ctxt.exchange_invalidRate);
+                        SnackbarService.error(ctxt.exchange_invalidRate, spacing);
                         return;
                       }
                       onSave(val);

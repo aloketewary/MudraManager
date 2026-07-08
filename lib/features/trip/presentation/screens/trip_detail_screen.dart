@@ -99,7 +99,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   id: 'archive_trip',
                   label: ctxt.trip_archiveTrip,
                   icon: LucideIcons.archive,
-                  onTap: () => _archiveTrip(header.id),
+                  onTap: () => _archiveTrip(header.id, spacing,),
                 ),
             ],
           ),
@@ -184,10 +184,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     );
   }
 
-  Future<void> _archiveTrip(int tripId) async {
+  Future<void> _archiveTrip(int tripId, AppSpacing spacing,) async {
     final l10n = AppLocalizations.of(context)!;
     final confirm = await DialogUtils.showConfirmation(
-      context,
+      context, spacing,
       title: l10n.trip_archiveGroupTitle,
       message: l10n.trip_archiveGroupMsg,
       confirmText: l10n.trip_archive,
@@ -455,7 +455,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
       confirmDismiss: (direction) async {
         HapticFeedback.mediumImpact();
         final confirmed = await DialogUtils.showDeleteConfirmation(
-          context,
+          context, spacing,
           title: AppLocalizations.of(context)!.trip_removeExpense,
           message: AppLocalizations.of(context)!.trip_removeExpenseMsg,
           deleteText: AppLocalizations.of(context)!.trip_remove,

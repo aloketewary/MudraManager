@@ -1,9 +1,6 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
-// lib/features/profile/presentation/screens/notification_settings_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,76 +60,76 @@ class _NotificationSettingsScreenState
     });
   }
 
-  Future<void> _toggleDailySummary(bool enabled) async {
+  Future<void> _toggleDailySummary(bool enabled, AppSpacing spacing) async {
     HapticFeedback.mediumImpact();
     final label = AppLocalizations.of(context)!.notifSettings_dailySummary;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('daily_summary_enabled', enabled);
     if (enabled) {
       await NotificationService.scheduleDailyReminder(_reminderTime);
-      SnackbarService.success(BuddyMessages.toggledOn('Daily summary'));
+      SnackbarService.success(BuddyMessages.toggledOn('Daily summary'), spacing);
     } else {
       await NotificationService.cancelReminder();
-      SnackbarService.success(BuddyMessages.toggledOff(label));
+      SnackbarService.success(BuddyMessages.toggledOff(label), spacing);
     }
     if (mounted) setState(() => _dailySummaryEnabled = enabled);
   }
 
-  Future<void> _toggleWeeklySummary(bool enabled) async {
+  Future<void> _toggleWeeklySummary(bool enabled, AppSpacing spacing) async {
     HapticFeedback.mediumImpact();
     final label = AppLocalizations.of(context)!.notifSettings_weeklySummary;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('weekly_summary_enabled', enabled);
     if (enabled) {
       await NotificationService.scheduleWeeklySummary(_weeklyDay);
-      SnackbarService.success(BuddyMessages.toggledOn(label));
+      SnackbarService.success(BuddyMessages.toggledOn(label), spacing);
     } else {
-      SnackbarService.success(BuddyMessages.toggledOff(label));
+      SnackbarService.success(BuddyMessages.toggledOff(label), spacing);
     }
     if (mounted) setState(() => _weeklySummaryEnabled = enabled);
   }
 
-  Future<void> _toggleStreakReminder(bool enabled) async {
+  Future<void> _toggleStreakReminder(bool enabled, AppSpacing spacing) async {
     HapticFeedback.mediumImpact();
     final label = AppLocalizations.of(context)!.notifSettings_streakReminder;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('streak_reminder_enabled', enabled);
     if (enabled) {
-      SnackbarService.success(BuddyMessages.toggledOn(label));
+      SnackbarService.success(BuddyMessages.toggledOn(label), spacing);
     } else {
       await NotificationService.cancelStreakReminder();
-      SnackbarService.success(BuddyMessages.toggledOff(label));
+      SnackbarService.success(BuddyMessages.toggledOff(label), spacing);
     }
     if (mounted) setState(() => _streakReminderEnabled = enabled);
   }
 
-  Future<void> _toggleReEngagement(bool enabled) async {
+  Future<void> _toggleReEngagement(bool enabled, AppSpacing spacing) async {
     HapticFeedback.mediumImpact();
     final label = AppLocalizations.of(context)!.notifSettings_comeBackNudges;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('re_engagement_enabled', enabled);
     if (enabled) {
-      SnackbarService.success(BuddyMessages.toggledOn(label));
+      SnackbarService.success(BuddyMessages.toggledOn(label), spacing);
     } else {
-      SnackbarService.success(BuddyMessages.toggledOff(label));
+      SnackbarService.success(BuddyMessages.toggledOff(label), spacing);
     }
     if (mounted) setState(() => _reEngagementEnabled = enabled);
   }
 
-  Future<void> _toggleSmartAlerts(bool enabled) async {
+  Future<void> _toggleSmartAlerts(bool enabled, AppSpacing spacing) async {
     HapticFeedback.mediumImpact();
     final label = AppLocalizations.of(context)!.notifSettings_smartAlerts;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('smart_alerts_enabled', enabled);
     if (enabled) {
-      SnackbarService.success(BuddyMessages.toggledOn(label));
+      SnackbarService.success(BuddyMessages.toggledOn(label), spacing);
     } else {
-      SnackbarService.success(BuddyMessages.toggledOff(label));
+      SnackbarService.success(BuddyMessages.toggledOff(label), spacing);
     }
     if (mounted) setState(() => _smartAlertsEnabled = enabled);
   }
 
-  Future<void> _selectTime() async {
+  Future<void> _selectTime(AppSpacing spacing) async {
     final time = await showTimePicker(
       context: context,
       initialTime: _reminderTime,
@@ -141,11 +138,11 @@ class _NotificationSettingsScreenState
     setState(() => _reminderTime = time);
     if (_dailySummaryEnabled) {
       await NotificationService.scheduleDailyReminder(time);
-      SnackbarService.success(BuddyMessages.reminderUpdated);
+      SnackbarService.success(BuddyMessages.reminderUpdated, spacing);
     }
   }
 
-  Future<void> _selectStreakReminderTime() async {
+  Future<void> _selectStreakReminderTime(AppSpacing spacing) async {
     final time = await showTimePicker(
       context: context,
       initialTime: _streakReminderTime,
@@ -153,17 +150,17 @@ class _NotificationSettingsScreenState
     if (time == null) return;
     setState(() => _streakReminderTime = time);
     await NotificationService.saveStreakReminderTime(time);
-    SnackbarService.success(BuddyMessages.reminderUpdated);
+    SnackbarService.success(BuddyMessages.reminderUpdated, spacing);
   }
 
-  Future<void> _selectWeeklyDay() async {
+  Future<void> _selectWeeklyDay(AppSpacing spacing) async {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     final day = await showModalBottomSheet<int>(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(16),
@@ -191,7 +188,7 @@ class _NotificationSettingsScreenState
               return ListTile(
                 dense: true,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 selected: selected,
                 selectedTileColor: color.primaryContainer,
@@ -225,7 +222,7 @@ class _NotificationSettingsScreenState
     setState(() => _weeklyDay = day);
     if (_weeklySummaryEnabled) {
       await NotificationService.scheduleWeeklySummary(day);
-      SnackbarService.success(BuddyMessages.settingsSaved);
+      SnackbarService.success(BuddyMessages.settingsSaved, spacing);
     }
   }
 
@@ -355,9 +352,10 @@ class _NotificationSettingsScreenState
                       title: ctxt.notifSettings_dailySummary,
                       subtitle: ctxt.notifSettings_dailySummaryDesc,
                       value: _dailySummaryEnabled,
-                      onChanged: _toggleDailySummary,
+                      onChanged: (value) => _toggleDailySummary(value, spacing),
                       color: color,
                       textTheme: textTheme,
+                      spacing: spacing,
                     ),
                     if (_dailySummaryEnabled) ...[
                       _divider(color),
@@ -365,9 +363,10 @@ class _NotificationSettingsScreenState
                         icon: LucideIcons.clock,
                         title: ctxt.notifSettings_reminderTime,
                         trailing: _reminderTime.format(context),
-                        onTap: _selectTime,
+                        onTap: () => _selectTime(spacing),
                         color: color,
                         textTheme: textTheme,
+                        spacing: spacing,
                       ),
                       _divider(color),
                       _buildTapRow(
@@ -382,10 +381,11 @@ class _NotificationSettingsScreenState
                             body: ctxt.notifSettings_dailySummaryDesc,
                             bypassThrottle: true,
                           );
-                          SnackbarService.success(msg);
+                          SnackbarService.success(msg, spacing);
                         },
                         color: color,
                         textTheme: textTheme,
+                        spacing: spacing,
                       ),
                     ],
                   ],
@@ -409,10 +409,11 @@ class _NotificationSettingsScreenState
                       title: ctxt.notifSettings_streakReminder,
                       subtitle: ctxt.notifSettings_dailyNudgeStreak,
                       value: _streakReminderEnabled,
-                      onChanged: _toggleStreakReminder,
+                      onChanged: (value) => _toggleStreakReminder(value, spacing),
                       color: color,
                       textTheme: textTheme,
                       iconColor: color.tertiary,
+                      spacing: spacing,
                     ),
                     if (_streakReminderEnabled) ...[
                       _divider(color),
@@ -420,9 +421,10 @@ class _NotificationSettingsScreenState
                         icon: LucideIcons.clock,
                         title: ctxt.notifSettings_reminderTime,
                         trailing: _streakReminderTime.format(context),
-                        onTap: _selectStreakReminderTime,
+                        onTap: () => _selectStreakReminderTime(spacing),
                         color: color,
                         textTheme: textTheme,
+                        spacing: spacing,
                       ),
                     ],
                   ],
@@ -446,9 +448,10 @@ class _NotificationSettingsScreenState
                       title: ctxt.notifSettings_weeklySummary,
                       subtitle: ctxt.notifSettings_weeklySchedule(_getDayName(_weeklyDay)),
                       value: _weeklySummaryEnabled,
-                      onChanged: _toggleWeeklySummary,
+                      onChanged: (value) => _toggleWeeklySummary(value, spacing),
                       color: color,
                       textTheme: textTheme,
+                      spacing: spacing,
                     ),
                     if (_weeklySummaryEnabled) ...[
                       _divider(color),
@@ -456,9 +459,10 @@ class _NotificationSettingsScreenState
                         icon: LucideIcons.calendarCheck,
                         title: ctxt.notifSettings_summaryDay,
                         trailing: _getDayName(_weeklyDay),
-                        onTap: _selectWeeklyDay,
+                        onTap: () => _selectWeeklyDay(spacing),
                         color: color,
                         textTheme: textTheme,
+                        spacing: spacing,
                       ),
                       _divider(color),
                       _buildTapRow(
@@ -473,10 +477,11 @@ class _NotificationSettingsScreenState
                             body: ctxt.notifSettings_summaryDesc,
                             bypassThrottle: true,
                           );
-                          SnackbarService.success(msg);
+                          SnackbarService.success(msg, spacing);
                         },
                         color: color,
                         textTheme: textTheme,
+                        spacing: spacing,
                       ),
                     ],
                   ],
@@ -495,9 +500,10 @@ class _NotificationSettingsScreenState
                       subtitle:
                           ctxt.notifSettings_gentleReminders,
                       value: _reEngagementEnabled,
-                      onChanged: _toggleReEngagement,
+                      onChanged: (value) => _toggleReEngagement(value, spacing),
                       color: color,
                       textTheme: textTheme,
+                      spacing: spacing
                     ),
                   ],
                 ),
@@ -515,9 +521,10 @@ class _NotificationSettingsScreenState
                       subtitle:
                           ctxt.notifSettings_budgetWarningsDesc,
                       value: _smartAlertsEnabled,
-                      onChanged: _toggleSmartAlerts,
+                      onChanged: (value) => _toggleSmartAlerts(value, spacing),
                       color: color,
                       textTheme: textTheme,
+                      spacing: spacing
                     ),
                   ],
                 ),
@@ -618,6 +625,7 @@ class _NotificationSettingsScreenState
     required ValueChanged<bool> onChanged,
     required ColorScheme color,
     required TextTheme textTheme,
+    required AppSpacing spacing,
     Color? iconColor,
   }) {
     final ic = iconColor ?? color.primary;
@@ -629,7 +637,7 @@ class _NotificationSettingsScreenState
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: ic.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             child: Icon(icon, color: ic, size: 20),
           ),
@@ -664,6 +672,7 @@ class _NotificationSettingsScreenState
     required VoidCallback onTap,
     required ColorScheme color,
     required TextTheme textTheme,
+    required AppSpacing spacing,
   }) {
     return InkWell(
       onTap: onTap,
@@ -675,7 +684,7 @@ class _NotificationSettingsScreenState
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: color.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
               ),
               child: Icon(icon, color: color.primary, size: 20),
             ),

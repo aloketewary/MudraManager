@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -40,7 +39,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     super.dispose();
   }
 
-  void _checkLevelUp(UserLevel? level, AppLocalizations ctxt) async {
+  void _checkLevelUp(UserLevel? level, AppLocalizations ctxt, AppSpacing spacing) async {
     if (level == null) return;
     final prefs = await SharedPreferences.getInstance();
     final lastSeen = prefs.getInt('last_seen_level');
@@ -55,6 +54,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
         _confettiController.play();
         SnackbarService.success(
           ctxt.achieve_levelUpSnack(level.level),
+          spacing
         );
       });
       await prefs.setInt('last_seen_level', level.level);
@@ -72,7 +72,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     final ctxt = AppLocalizations.of(context)!;
 
     levelAsync.maybeWhen(
-      data: (level) => _checkLevelUp(level, ctxt),
+      data: (level) => _checkLevelUp(level, ctxt, spacing),
       orElse: () {},
     );
 
@@ -129,7 +129,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                       delegate: SliverChildListDelegate([
                         // ── TROPHY SHELF ──
                         if (recentUnlocked.isNotEmpty) ...[
-                          _buildTrophyShelf(recentUnlocked, color, textTheme, ctxt),
+                          _buildTrophyShelf(recentUnlocked, color, textTheme, ctxt, spacing),
                           const SizedBox(height: 20),
                         ],
 
@@ -142,6 +142,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                             color,
                             textTheme,
                             ctxt,
+                            spacing
                           ),
                           loading: () => const SizedBox.shrink(),
                           error: (_, __) => const SizedBox.shrink(),
@@ -260,6 +261,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     ColorScheme color,
     TextTheme textTheme,
     AppLocalizations ctxt,
+    AppSpacing spacing,
   ) {
     final items = recentUnlocked.take(10).toList();
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -279,7 +281,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
         Container(
           decoration: BoxDecoration(
             color: color.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
             border: Border.all(
               color: color.outlineVariant.withValues(alpha: 0.3),
             ),
@@ -351,7 +353,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: accent.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
+                                borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.5),
                               ),
                               child: Text(
                                 a.title,
@@ -479,6 +481,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     ColorScheme color,
     TextTheme textTheme,
     AppLocalizations ctxt,
+    AppSpacing spacing
   ) {
     return Row(
       children: [
@@ -489,6 +492,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
           color.primary,
           color,
           textTheme,
+          spacing
         ),
         const SizedBox(width: 8),
         _statPill(
@@ -498,6 +502,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
           color.tertiary,
           color,
           textTheme,
+          spacing
         ),
         const SizedBox(width: 8),
         _statPill(
@@ -507,6 +512,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
           color.primary,
           color,
           textTheme,
+          spacing
         ),
       ],
     );
@@ -519,13 +525,14 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     Color accent,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing
   ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: accent.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
         ),
         child: Column(
           children: [
@@ -601,7 +608,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: accent.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
                           ),
                           child: Icon(icon, color: accent, size: 20),
                         ),
@@ -632,7 +639,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                           ),
                           decoration: BoxDecoration(
                             color: accent.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
                           ),
                           child: Text(
                             '${streak.currentCount}',

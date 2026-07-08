@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/services/background_task_manager.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
@@ -19,6 +18,7 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/utils.dart';
 import 'package:mudra_manager/features/transactions/data/bill_control_center_provider.dart';
+import 'package:mudra_manager/features/dashboard/data/today_card_analytics.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
@@ -43,6 +43,7 @@ class _BillControlCenterScreenState
   @override
   void initState() {
     super.initState();
+    TodayCardAnalytics.recordDestinationOpened(destination: 'billCenter');
     BackgroundTaskManager.processRecurringNow();
   }
 
@@ -825,7 +826,7 @@ class _BillControlCenterScreenState
                       child: InkWell(
                         onTap: () {
                           HapticFeedback.mediumImpact();
-                          _markAsPaid(bill);
+                          _markAsPaid(bill, spacing);
                         },
                         borderRadius:
                             BorderRadius.circular(spacing.radiusSmall),
@@ -916,7 +917,7 @@ class _BillControlCenterScreenState
 
   // ── Mark As Paid (preserved from original) ──
 
-  void _markAsPaid(RecurringTransaction bill) async {
+  void _markAsPaid(RecurringTransaction bill, AppSpacing spacing) async {
     final ctxt = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -929,6 +930,7 @@ class _BillControlCenterScreenState
     if (dueDate.isAfter(today)) {
       SnackbarService.error(
         '${ctxt.billCenter_cannotPayFuture}. Due on ${DateFormat('MMM d').format(bill.nextDueDate)}',
+        spacing,
       );
       return;
     }
@@ -984,8 +986,12 @@ class _BillControlCenterScreenState
     ref.invalidate(billControlCenterProvider);
     if (context.mounted) {
       HapticFeedback.mediumImpact();
+      TodayCardAnalytics.recordBillResolved(
+        billName: bill.category.value?.name ?? 'Bill',
+      );
       SnackbarService.success(
         ctxt.billCenter_markedPaid(bill.category.value?.name ?? 'Bill'),
+        spacing,
       );
     }
   }
@@ -998,12 +1004,13 @@ class _BillControlCenterScreenState
     final tt = Theme.of(context).textTheme;
     final sp = ref.read(spacingProvider);
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     return showModalBottomSheet<_PaidAction>(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(Tone.current.borderRadius * 2),
+          top: Radius.circular(spacing.radiusSmall * 2),
         ),
       ),
       builder: (ctx) => SafeArea(

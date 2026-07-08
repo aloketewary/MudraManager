@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -19,14 +19,15 @@ class AccountSelectorBottomSheet extends ConsumerWidget {
   });
 
   static Future<Account?> show(
-    BuildContext context, {
+    BuildContext context, 
+    AppSpacing spacing,    {
     Account? selectedAccount,
   }) {
     return showModalBottomSheet<Account>(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (context) => AccountSelectorBottomSheet(
         selectedAccount: selectedAccount,

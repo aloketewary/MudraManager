@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/theme/theme_preview_screen.dart';
@@ -30,11 +31,12 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
     _tempSelectedTheme = ref.read(themeNotifierProvider);
   }
 
-  void _applyTheme() {
+  void _applyTheme(AppSpacing spacing,) {
     final ctxt = context.mounted ? AppLocalizations.of(context)! : null;
     ref.read(themeNotifierProvider.notifier).setTheme(_tempSelectedTheme);
     SnackbarService.success(
       ctxt?.theme_themeAppliedMessage ?? 'Theme applied!',
+      spacing
     );
   }
 
@@ -44,6 +46,7 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
     final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
     final isPro = ref.watch(hasFullAccessProvider).value ?? false;
+    final spacing = ref.watch(spacingProvider);
 
     // Separate free and pro themes
     final freeThemes = AppColorTheme.values.where((t) => !t.isPro).toList();
@@ -60,7 +63,7 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
           id: 'apply_theme',
           label: ctxt.theme_applyThemeLabel,
           icon: LucideIcons.circleCheck,
-          onTap: _applyTheme,
+          onTap: ()=> _applyTheme(spacing),
         ),
       ),
       body: ListView(

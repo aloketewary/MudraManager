@@ -1,11 +1,12 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 
 /// Skeleton loading component for displaying placeholder content
 /// while data is being loaded
-class SkeletonLoader extends StatelessWidget {
+class SkeletonLoader extends ConsumerWidget {
   final double? width;
   final double? height;
   final BorderRadius? borderRadius;
@@ -20,8 +21,9 @@ class SkeletonLoader extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
       width: width,
@@ -29,7 +31,7 @@ class SkeletonLoader extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest,
-        borderRadius: borderRadius ?? BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: borderRadius ?? BorderRadius.circular(spacing.radiusSmall),
       ),
     )
         .animate(onComplete: (controller) => controller.repeat())
@@ -41,12 +43,13 @@ class SkeletonLoader extends StatelessWidget {
 }
 
 /// Skeleton loader for transaction card
-class TransactionCardSkeleton extends StatelessWidget {
+class TransactionCardSkeleton extends ConsumerWidget {
   const TransactionCardSkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Card(
       margin: const EdgeInsets.symmetric(
@@ -56,7 +59,7 @@ class TransactionCardSkeleton extends StatelessWidget {
       elevation: 0,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -65,7 +68,7 @@ class TransactionCardSkeleton extends StatelessWidget {
             SkeletonLoader(
               width: 48,
               height: 48,
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             const SizedBox(width: 16.0),
             const Expanded(
@@ -106,12 +109,13 @@ class TransactionCardSkeleton extends StatelessWidget {
 }
 
 /// Skeleton loader for dashboard account card
-class AccountCardSkeleton extends StatelessWidget {
+class AccountCardSkeleton extends ConsumerWidget {
   const AccountCardSkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
           height: 250,
@@ -122,7 +126,7 @@ class AccountCardSkeleton extends StatelessWidget {
           padding: const EdgeInsets.all(24.0),
           decoration: BoxDecoration(
             color: color.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,12 +147,13 @@ class AccountCardSkeleton extends StatelessWidget {
 }
 
 /// Skeleton loader for budget card
-class BudgetCardSkeleton extends StatelessWidget {
+class BudgetCardSkeleton extends ConsumerWidget {
   const BudgetCardSkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -159,7 +164,7 @@ class BudgetCardSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: color.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
         ),
         child: Row(
           children: [
@@ -210,12 +215,13 @@ class BudgetCardSkeleton extends StatelessWidget {
 }
 
 /// Skeleton loader for goal/net worth cards
-class DashboardCardSkeleton extends StatelessWidget {
+class DashboardCardSkeleton extends ConsumerWidget {
   const DashboardCardSkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Padding(
       padding: const EdgeInsets.only(top: 16),
@@ -224,7 +230,7 @@ class DashboardCardSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
         ),
         child: Row(
           children: [
@@ -275,12 +281,13 @@ class DashboardCardSkeleton extends StatelessWidget {
 }
 
 /// Skeleton loader for spending personality card
-class PersonalityCardSkeleton extends StatelessWidget {
+class PersonalityCardSkeleton extends ConsumerWidget {
   const PersonalityCardSkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Padding(
       padding: const EdgeInsets.only(top: 16),
@@ -289,14 +296,14 @@ class PersonalityCardSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
         ),
         child: Row(
           children: [
             SkeletonLoader(
               width: 64,
               height: 64,
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             const SizedBox(width: 16),
             const Expanded(

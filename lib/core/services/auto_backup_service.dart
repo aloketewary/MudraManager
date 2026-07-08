@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/services/backup_restore_service.dart';
@@ -58,7 +59,7 @@ class AutoBackupService {
 
   /// Create an auto backup with the rolling prefix.
   /// Returns the file path if successful.
-  static Future<String?> createAutoBackup(String password) async {
+  static Future<String?> createAutoBackup(String password, AppSpacing spacing) async {
     try {
       // Ensure Isar is initialized (critical for background isolate)
       await IsarService().getInstance();
@@ -67,7 +68,7 @@ class AutoBackupService {
       final dateTime = DateTime.now();
       final fileName =
           '$_autoBackupPrefix${DateFormat('yyyyMMdd_HHmmss').format(dateTime)}.mudra';
-      final content = await _createBackupBytes(password);
+      final content = await _createBackupBytes(password, spacing);
       if (content == null) return null;
 
       final file = File('${directory.path}/$fileName');
@@ -80,9 +81,9 @@ class AutoBackupService {
     }
   }
 
-  static Future<List<int>?> _createBackupBytes(String password) async {
+  static Future<List<int>?> _createBackupBytes(String password, AppSpacing spacing,) async {
     final path = await BackupService.createEncryptedBackup(
-      password,
+      password, spacing,
       interactive: false,
     );
     if (path == null) return null;

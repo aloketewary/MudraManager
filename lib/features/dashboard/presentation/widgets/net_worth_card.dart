@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
@@ -64,13 +63,13 @@ class NetWorthCard extends ConsumerWidget {
                   HapticFeedback.mediumImpact();
                   context.push(AppRoutes.netWorth);
                 },
-                borderRadius: BorderRadius.circular(spacing.radiusLarge),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 child: Stack(
                   children: [
                     // Background chart
                     Positioned.fill(
                       child: historyAsync.when(
-                        data: (history) => _buildMiniChart(history, color),
+                        data: (history) => _buildMiniChart(history, color, spacing),
                         loading: () => const SizedBox.shrink(),
                         error: (_, __) => const SizedBox.shrink(),
                       ),
@@ -281,6 +280,7 @@ class NetWorthCard extends ConsumerWidget {
   Widget _buildMiniChart(
     List<NetWorthHistoryPoint> history,
     ColorScheme color,
+    AppSpacing spacing,
   ) {
     if (history.isEmpty) return const SizedBox.shrink();
 
@@ -291,7 +291,7 @@ class NetWorthCard extends ConsumerWidget {
         .toList();
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(Tone.current.borderRadius * 1.25),
+      borderRadius: BorderRadius.circular(spacing.radiusSmall * 1.25),
       child: LineChart(
         LineChartData(
           gridData: const FlGridData(show: false),
@@ -326,7 +326,7 @@ class NetWorthCard extends ConsumerWidget {
   }
 }
 
-class _MetricChip extends StatelessWidget {
+class _MetricChip extends ConsumerWidget {
   final String label;
   final double amount;
   final IconData icon;
@@ -344,12 +344,13 @@ class _MetricChip extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: colorScheme.onPrimaryContainer.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

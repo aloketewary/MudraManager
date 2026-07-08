@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +35,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     return ScreenShell(
       config: ScreenShellConfig(
@@ -57,6 +58,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
               HapticFeedback.mediumImpact();
               context.push('/plugins');
             },
+            spacing
           ),
           const SizedBox(height: 8),
           _buildSettingCard(
@@ -70,6 +72,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
               HapticFeedback.mediumImpact();
               context.push(AppRoutes.dashboardCustomize);
             },
+            spacing
           ),
           const SizedBox(height: 8),
           _buildSettingCard(
@@ -83,6 +86,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
               HapticFeedback.mediumImpact();
               context.push('/language');
             },
+            spacing
           ),
           const SizedBox(height: 8),
           FutureBuilder<bool>(
@@ -105,7 +109,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
               showModalBottomSheet(
                 context: context,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
                 ),
                 builder: (_) => Padding(
                   padding: const EdgeInsets.all(16),
@@ -162,6 +166,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
                 ),
               );
             },
+            spacing
           ),
         ],
       ),
@@ -176,13 +181,14 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
     String title,
     String subtitle,
     VoidCallback onTap,
+    AppSpacing spacing,
   ) {
     return Card(
       elevation: 0,
       color: color.surfaceContainer,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -191,7 +197,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: color.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Icon(icon, color: color.primary, size: 24),
               ),

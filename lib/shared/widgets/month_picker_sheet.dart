@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +11,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 Future<DateTime?> showMonthPicker({
   required BuildContext context,
   required DateTime initialMonth,
+  required AppSpacing spacing,
   DateTime? firstMonth,
   DateTime? lastMonth,
 }) {
@@ -16,7 +19,7 @@ Future<DateTime?> showMonthPicker({
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surface,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
     ),
     builder: (_) => _MonthPickerSheet(
       initial: initialMonth,
@@ -26,7 +29,7 @@ Future<DateTime?> showMonthPicker({
   );
 }
 
-class _MonthPickerSheet extends StatefulWidget {
+class _MonthPickerSheet extends ConsumerStatefulWidget {
   final DateTime initial;
   final DateTime first;
   final DateTime last;
@@ -38,10 +41,10 @@ class _MonthPickerSheet extends StatefulWidget {
   });
 
   @override
-  State<_MonthPickerSheet> createState() => _MonthPickerSheetState();
+  ConsumerState<_MonthPickerSheet> createState() => _MonthPickerSheetState();
 }
 
-class _MonthPickerSheetState extends State<_MonthPickerSheet> {
+class _MonthPickerSheetState extends ConsumerState<_MonthPickerSheet> {
   late int _year;
 
   @override
@@ -55,6 +58,7 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
     final color = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final now = DateTime.now();
+    final spacing = ref.watch(spacingProvider);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
@@ -128,7 +132,7 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
                           HapticFeedback.lightImpact();
                           Navigator.of(context).pop(date);
                         },
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   child: Container(
                     decoration: BoxDecoration(
                       color: isSelected
@@ -136,7 +140,7 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
                           : isCurrent
                               ? color.primary.withValues(alpha: 0.1)
                               : color.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     ),
                     alignment: Alignment.center,
                     child: Text(

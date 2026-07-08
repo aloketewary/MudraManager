@@ -11,14 +11,6 @@ class SkinAwareTone extends TonePack {
 
   // ── Styling overrides from skin ──
   @override
-  double get borderRadius => _style.cardRadius;
-  @override
-  double get cardElevation => _style.cardElevation;
-  @override
-  double get buttonRadius => _style.buttonRadius;
-  @override
-  double get inputRadius => _style.inputRadius;
-  @override
   double get borderOpacity => _style.borderOpacity;
   @override
   double get borderWidth => _style.borderWidth;

@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +15,7 @@ class GuestModeToggle extends ConsumerWidget {
     final isGuestMode = ref.watch(guestModeProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Card(
       elevation: 0,
@@ -25,7 +26,7 @@ class GuestModeToggle extends ConsumerWidget {
           showModalBottomSheet(
             context: context,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
             ),
             builder: (ctx) => Padding(
               padding: const EdgeInsets.all(24),
@@ -64,7 +65,7 @@ class GuestModeToggle extends ConsumerWidget {
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                              borderRadius: BorderRadius.circular(spacing.radiusSmall),
                             ),
                           ),
                           child: Text(AppLocalizations.of(context)!.common_cancel),
@@ -80,7 +81,7 @@ class GuestModeToggle extends ConsumerWidget {
                           style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                              borderRadius: BorderRadius.circular(spacing.radiusSmall),
                             ),
                           ),
                           child: Text(isGuestMode ? 'Disable' : 'Enable'),
@@ -93,7 +94,7 @@ class GuestModeToggle extends ConsumerWidget {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -102,7 +103,7 @@ class GuestModeToggle extends ConsumerWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: color.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Icon(LucideIcons.eyeOff, color: color.primary, size: 24),
               ),

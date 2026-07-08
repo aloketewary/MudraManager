@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +7,8 @@ import 'package:mudra_manager/core/utils/buddy_messages.dart';
 
 class DialogUtils {
   static Future<bool?> showDeleteConfirmation(
-    BuildContext context, {
+    BuildContext context,
+    AppSpacing spacing, {
     String? title,
     String? message,
     String? cancelText,
@@ -18,7 +21,7 @@ class DialogUtils {
       context: context,
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (context) => SafeArea(
         child: Padding(
@@ -57,7 +60,7 @@ class DialogUtils {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: color.outline),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
                       ),
                       child: Text(
                         (cancelText ?? BuddyMessages.deleteCancel).toUpperCase(),
@@ -73,7 +76,7 @@ class DialogUtils {
                         backgroundColor: color.error,
                         foregroundColor: color.onError,
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
                       ),
                       child: Text(
                         (deleteText ?? BuddyMessages.deleteConfirm).toUpperCase(),
@@ -91,7 +94,8 @@ class DialogUtils {
   }
 
   static Future<bool?> showConfirmation(
-    BuildContext context, {
+    BuildContext context,
+    AppSpacing spacing, {
     required String title,
     required String message,
     String? cancelText,
@@ -105,7 +109,7 @@ class DialogUtils {
       context: context,
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (context) => SafeArea(
         child: Padding(
@@ -146,7 +150,7 @@ class DialogUtils {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: color.outline),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
                       ),
                       child: Text(
                         (cancelText ?? 'CANCEL').toUpperCase(),
@@ -160,7 +164,7 @@ class DialogUtils {
                       onPressed: () => Navigator.pop(context, true),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
                       ),
                       child: Text(
                         (confirmText ?? 'CONFIRM').toUpperCase(),
@@ -178,7 +182,8 @@ class DialogUtils {
   }
 
   static Future<String?> showPasswordDialog(
-    BuildContext context, {
+    BuildContext context,
+    AppSpacing spacing, {
     required bool isRestore,
   }) {
     final color = Theme.of(context).colorScheme;
@@ -189,7 +194,7 @@ class DialogUtils {
       backgroundColor: color.surface,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (context) => _PasswordDialogContent(isRestore: isRestore, color: color, textTheme: textTheme),
     );
@@ -202,6 +207,7 @@ class DialogUtils {
     IconData? icon,
     required void Function(String item) onItemSelected,
     required String selectedValue,
+    required AppSpacing spacing,
   }) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -210,7 +216,7 @@ class DialogUtils {
       context: context,
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (context) => SafeArea(
         child: Padding(
@@ -254,7 +260,7 @@ class DialogUtils {
   }
 }
 
-class _PasswordDialogContent extends StatefulWidget {
+class _PasswordDialogContent extends ConsumerStatefulWidget {
   final bool isRestore;
   final ColorScheme color;
   final TextTheme textTheme;
@@ -266,10 +272,10 @@ class _PasswordDialogContent extends StatefulWidget {
   });
 
   @override
-  State<_PasswordDialogContent> createState() => _PasswordDialogContentState();
+  ConsumerState<_PasswordDialogContent> createState() => _PasswordDialogContentState();
 }
 
-class _PasswordDialogContentState extends State<_PasswordDialogContent> {
+class _PasswordDialogContentState extends ConsumerState<_PasswordDialogContent> {
   late final TextEditingController _controller;
   late final TextEditingController _confirmController;
 
@@ -289,6 +295,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
 
   @override
   Widget build(BuildContext context) {
+    final spacing = ref.watch(spacingProvider);
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -320,7 +327,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
             obscureText: true,
             decoration: InputDecoration(
               labelText: 'Password',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
               prefixIcon: const Icon(LucideIcons.keyRound),
             ),
           ),
@@ -331,7 +338,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
                 prefixIcon: const Icon(LucideIcons.keyRound),
               ),
             ),
@@ -344,7 +351,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
                   ),
                   child: const Text('CANCEL', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
@@ -369,7 +376,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
                   },
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
                   ),
                   child: const Text('CONTINUE', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),

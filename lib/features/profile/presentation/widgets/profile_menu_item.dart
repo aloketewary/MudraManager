@@ -1,9 +1,10 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class ProfileMenuItem extends StatelessWidget {
+class ProfileMenuItem extends ConsumerWidget {
   final IconData icon;
   final String title;
   final String? subtitle;
@@ -22,8 +23,9 @@ class ProfileMenuItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -32,7 +34,7 @@ class ProfileMenuItem extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: (iconColor ?? color.primary).withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
           ),
           child: Icon(icon, color: iconColor ?? color.primary),
         ),

@@ -212,7 +212,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: _exporting ? null : _doExport,
+                onPressed: () => _exporting ? null : _doExport(spacing),
                 icon: _exporting
                     ? SizedBox(
                         width: 18,
@@ -311,7 +311,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
             SizedBox(
               width: double.infinity,
               child: FilledButton.tonalIcon(
-                onPressed: _pickAndImport,
+                onPressed: () => _pickAndImport(spacing),
                 icon: const Icon(LucideIcons.filePlus, size: 18),
                 label: Text(ctxt.importExport_pickFile),
                 style: FilledButton.styleFrom(
@@ -359,7 +359,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
     );
   }
 
-  Future<void> _doExport() async {
+  Future<void> _doExport(AppSpacing spacing) async {
     setState(() => _exporting = true);
     try {
       final bytes = await ExcelExportService.exportTransactions(
@@ -371,15 +371,15 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
       final fileName =
           'Mudra_${safeDateFormat('yyyyMMdd').format(_exportStart)}_${safeDateFormat('yyyyMMdd').format(_exportEnd)}.xlsx';
       await saveExportedFile(bytes, fileName, askUser: true);
-      SnackbarService.success(BuddyMessages.exportSuccess);
+      SnackbarService.success(BuddyMessages.exportSuccess, spacing);
     } catch (e) {
-      SnackbarService.error(BuddyMessages.exportFailed('$e'));
+      SnackbarService.error(BuddyMessages.exportFailed('$e'), spacing);
     } finally {
       if (mounted) setState(() => _exporting = false);
     }
   }
 
-  Future<void> _pickAndImport() async {
+  Future<void> _pickAndImport(AppSpacing spacing) async {
     HapticFeedback.mediumImpact();
     try {
       final result = await FilePicker.pickFiles(
@@ -401,7 +401,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
       }
 
       if (bytes == null || bytes.isEmpty) {
-        SnackbarService.error(BuddyMessages.invalidBackupFile);
+        SnackbarService.error(BuddyMessages.invalidBackupFile, spacing);
         return;
       }
 
@@ -412,7 +412,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
         );
       }
     } catch (e, _) {
-      SnackbarService.error(BuddyMessages.errorWith('$e'));
+      SnackbarService.error(BuddyMessages.errorWith('$e'), spacing);
     }
   }
 }

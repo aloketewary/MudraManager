@@ -1,9 +1,10 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
-class LazyLoadWidget extends StatefulWidget {
+class LazyLoadWidget extends ConsumerStatefulWidget {
   final Widget child;
   final Widget? placeholder;
   final double visibilityThreshold;
@@ -18,10 +19,10 @@ class LazyLoadWidget extends StatefulWidget {
   });
 
   @override
-  State<LazyLoadWidget> createState() => _LazyLoadWidgetState();
+  ConsumerState<LazyLoadWidget> createState() => _LazyLoadWidgetState();
 }
 
-class _LazyLoadWidgetState extends State<LazyLoadWidget> {
+class _LazyLoadWidgetState extends ConsumerState<LazyLoadWidget> {
   bool _isLoaded = false;
 
   void _onVisibilityChanged(VisibilityInfo info) {
@@ -38,22 +39,24 @@ class _LazyLoadWidgetState extends State<LazyLoadWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final spacing = ref.watch(spacingProvider);
+
     return VisibilityDetector(
       key: Key('lazy-${widget.child.hashCode}'),
       onVisibilityChanged: _onVisibilityChanged,
       child: _isLoaded
           ? widget.child
-          : widget.placeholder ?? _buildDefaultPlaceholder(),
+          : widget.placeholder ?? _buildDefaultPlaceholder(spacing),
     );
   }
 
-  Widget _buildDefaultPlaceholder() {
+  Widget _buildDefaultPlaceholder(AppSpacing spacing) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SkeletonLoader(
         width: double.infinity,
         height: 200,
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
     );
   }

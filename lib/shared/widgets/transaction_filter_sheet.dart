@@ -1,9 +1,10 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class TransactionFilterSheet extends StatefulWidget {
+class TransactionFilterSheet extends ConsumerStatefulWidget {
   final DateTime? initialStartDate;
   final DateTime? initialEndDate;
   final bool? initialFilterIncome;
@@ -20,10 +21,10 @@ class TransactionFilterSheet extends StatefulWidget {
   });
 
   @override
-  State<TransactionFilterSheet> createState() => _TransactionFilterSheetState();
+  ConsumerState<TransactionFilterSheet> createState() => _TransactionFilterSheetState();
 }
 
-class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
+class _TransactionFilterSheetState extends ConsumerState<TransactionFilterSheet> {
   late DateTime? _startDate;
   late DateTime? _endDate;
   late bool? _filterIncome;
@@ -42,6 +43,7 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -51,7 +53,7 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
         child: Container(
           decoration: BoxDecoration(
             color: color.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
             border: Border.all(
               color: color.primary.withValues(alpha: 0.3),
               width: 1.5,
@@ -75,11 +77,11 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
                   labelText: 'Search by sender',
                   prefixIcon: Icon(LucideIcons.search, color: color.primary),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3)),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3)),
                   ),
                 ),

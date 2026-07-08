@@ -1,11 +1,12 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class AmountInput extends StatelessWidget {
+class AmountInput extends ConsumerWidget {
   final TextEditingController controller;
   final String? errorText;
   final VoidCallback? onCalculatorTap;
@@ -18,9 +19,10 @@ class AmountInput extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return TextField(
       controller: controller,
@@ -51,7 +53,7 @@ class AmountInput extends StatelessWidget {
               )
             : null,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
         ),
       ),
     );

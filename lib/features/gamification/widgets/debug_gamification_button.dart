@@ -1,6 +1,7 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
@@ -10,6 +11,7 @@ class DebugGamificationButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
     return FloatingActionButton.extended(
       onPressed: () async {
         final service = ref.read(gamificationServiceProvider);
@@ -23,7 +25,7 @@ class DebugGamificationButton extends ConsumerWidget {
         await service?.track(GamificationEvent.budgetCreated);
         await service?.track(GamificationEvent.goalCompleted);
 
-        SnackbarService.success('✅ Dummy data created!');
+        SnackbarService.success('✅ Dummy data created!', spacing);
       },
       icon: const Icon(LucideIcons.bug),
       label: const Text('Test Gamification'),

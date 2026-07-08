@@ -100,8 +100,8 @@ class SpendingPersonalityCard extends ConsumerWidget {
                           ),
                           // Status dot
                           Container(
-                            width: 8,
-                            height: 8,
+                            width: spacing.elementGap * 2,
+                            height: spacing.elementGap * 2,
                             decoration: BoxDecoration(
                               color: status.color,
                               shape: BoxShape.circle,

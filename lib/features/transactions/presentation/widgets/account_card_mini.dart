@@ -1,10 +1,11 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 
-class AccountCardMini extends StatelessWidget {
+class AccountCardMini extends ConsumerWidget {
   final Account? account;
   final bool selected;
   final Future<double>? balance;
@@ -26,9 +27,10 @@ class AccountCardMini extends StatelessWidget {
       isSkeleton = true;
 
   @override
-  Widget build(BuildContext ctx) {
+  Widget build(BuildContext ctx, WidgetRef ref) {
     final color = Theme.of(ctx).colorScheme;
     final textTheme = Theme.of(ctx).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     // Calculate proper text color based on account color
     final accountColor = Color(account?.colorValue ?? 0xFFBDBDBD);
@@ -47,7 +49,7 @@ class AccountCardMini extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         border: Border.all(
           color: selected ? color.tertiary : color.primary,
           width: 2,

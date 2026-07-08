@@ -1,11 +1,14 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 
-class TopHeader extends StatelessWidget {
+class TopHeader extends ConsumerWidget {
   const TopHeader({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -13,7 +16,7 @@ class TopHeader extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(Tone.current.borderRadius * 2)), // Optional rounded bottom
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(spacing.radiusSmall * 2)), // Optional rounded bottom
       ),
       padding: const EdgeInsets.only(top: 40.0, left: 16.0, right: 16.0, bottom: 24.0),
       child: Column(

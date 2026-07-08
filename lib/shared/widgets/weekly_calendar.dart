@@ -1,16 +1,17 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class WeeklyCalendar extends StatefulWidget {
+class WeeklyCalendar extends ConsumerStatefulWidget {
   const WeeklyCalendar({super.key});
 
   @override
-  State<WeeklyCalendar> createState() => _WeeklyCalendarState();
+  ConsumerState<WeeklyCalendar> createState() => _WeeklyCalendarState();
 }
 
-class _WeeklyCalendarState extends State<WeeklyCalendar> {
+class _WeeklyCalendarState extends ConsumerState<WeeklyCalendar> {
   DateTime _currentDate = DateTime.now();
   late DateTime _firstDayOfWeek;
 
@@ -61,6 +62,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
   Widget _buildDay(DateTime day) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     final isSameDay =
         day.year == _currentDate.year &&
@@ -79,7 +81,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
           child: Container(
             decoration: BoxDecoration(
               color: isSameDay ? color.secondary : Colors.transparent,
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             child: Center(
               child: Padding(

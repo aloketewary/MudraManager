@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:flutter/foundation.dart';
@@ -64,12 +63,12 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
     }
   }
 
-  void _launchURL(String url) async {
+  void _launchURL(String url, AppSpacing spacing) async {
     final uri = Uri.parse(url);
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
-      SnackbarService.error(ctxt.about_couldNotOpenLink);
+      SnackbarService.error(ctxt.about_couldNotOpenLink, spacing);
     }
   }
 
@@ -152,7 +151,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                     AppLocalizations.of(context)!.about_privacyPolicyDesc,
                     () {
                       HapticFeedback.mediumImpact();
-                      _launchURL('https://mudramanager.com/privacy.html');
+                      _launchURL('https://mudramanager.com/privacy.html', spacing);
                     },
                   ),
                   _ItemData(
@@ -161,7 +160,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                     AppLocalizations.of(context)!.about_termsDesc,
                     () {
                       HapticFeedback.mediumImpact();
-                      _launchURL('https://mudramanager.com/terms.html');
+                      _launchURL('https://mudramanager.com/terms.html', spacing);
                     },
                   ),
                   _ItemData(
@@ -228,7 +227,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                         }
                       } catch (e) {
                         if (!context.mounted) return;
-                        SnackbarService.error(ctxt.about_unableToCheck);
+                        SnackbarService.error(ctxt.about_unableToCheck, spacing);
                       }
                     },
                   ),
@@ -238,7 +237,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                     AppLocalizations.of(context)!.about_visitWebsite,
                     () {
                       HapticFeedback.mediumImpact();
-                      _launchURL('https://mudramanager.com');
+                      _launchURL('https://mudramanager.com', spacing);
                     },
                   ),
                   _ItemData(
@@ -247,7 +246,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                     AppLocalizations.of(context)!.about_contactSupportDesc,
                     () {
                       HapticFeedback.mediumImpact();
-                      _launchURL('https://mudramanager.com/support.html');
+                      _launchURL('https://mudramanager.com/support.html', spacing);
                     },
                   ),
                   _ItemData(
@@ -393,7 +392,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
                 border: Border.all(color: accent.withValues(alpha: 0.3)),
               ),
               child: Row(
@@ -548,17 +547,18 @@ class _ItemData {
 }
 
 // ── LICENSE SCREEN ──
-class LicenseScreen extends StatelessWidget {
+class LicenseScreen extends ConsumerWidget {
   final String? appName;
   final String? version;
 
   const LicenseScreen({super.key, this.appName, this.version});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -598,7 +598,7 @@ class LicenseScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -641,7 +641,7 @@ class LicenseScreen extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: color.primary.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                              borderRadius: BorderRadius.circular(spacing.radiusSmall),
                             ),
                             child: Text(
                               'Version $version',
@@ -687,7 +687,7 @@ class LicenseScreen extends StatelessWidget {
                         elevation: 0,
                         color: color.surfaceContainerLow,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                           side: BorderSide(
                             color: color.outlineVariant.withValues(alpha: 0.5),
                           ),

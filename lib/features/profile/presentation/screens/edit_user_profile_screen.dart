@@ -330,7 +330,7 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
               .read(userProfileServiceProvider)
               .saveProfile(updatedProfile);
           ref.invalidate(userProfileProvider);
-          SnackbarService.success(BuddyMessages.settingsSaved);
+          SnackbarService.success(BuddyMessages.settingsSaved, spacing, );
           router.pop();
         }
       },

@@ -115,13 +115,13 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
     if (color != null) setState(() => _selectedColor = color);
   }
 
-  Future<void> _saveGoal() async {
+  Future<void> _saveGoal(AppSpacing spacing) async {
     if (_saving) return;
     if (widget.goal == null) {
       final limitMsg = AppLocalizations.of(context)!.goal_freePlanLimit;
       final canCreate = await ref.read(canCreateGoalProvider.future);
       if (!canCreate) {
-        SnackbarService.warning(limitMsg);
+        SnackbarService.warning(limitMsg, spacing);
         return;
       }
     }
@@ -159,6 +159,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
       widget.goal == null
           ? BuddyMessages.goalCreated
           : BuddyMessages.goalUpdated,
+          spacing
     );
     router.pop();
   }
@@ -182,7 +183,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
         elevation: 0,
         actions: [
           TextButton(
-            onPressed: (_isFormValid && !_saving) ? _saveGoal : null,
+            onPressed: () => (_isFormValid && !_saving) ? _saveGoal(spacing) : null,
             child: _saving
                 ? SizedBox(
                     width: 18,

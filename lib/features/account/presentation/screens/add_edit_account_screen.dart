@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -124,7 +123,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         trailing: ScreenTextAction(
           id: 'save_account',
           label: _isEditing ? ctxt.common_update : ctxt.common_create,
-          onTap: _saving ? null : () => _saveAccount(widget.account?.id),
+          onTap: _saving ? null : () => _saveAccount(widget.account?.id, spacing),
           isLoading: _saving,
         ),
       ),
@@ -691,7 +690,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(Tone.current.borderRadius * 2),),
+                      top: Radius.circular(spacing.radiusSmall * 2),),
                 ),
                 builder: (_) => _CurrencyPickerInline(selected: displayCode),
               );
@@ -836,7 +835,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2),),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(
@@ -997,13 +996,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     if (c != null) setState(() => _selectedColor = c);
   }
 
-  Future<void> _saveAccount(Id? id) async {
+  Future<void> _saveAccount(Id? id, AppSpacing spacing) async {
     // ── Entitlement check (new accounts only) ──
     if (!_isEditing) {
       final canCreate = await ref.read(canCreateAccountProvider.future);
       if (!canCreate) {
         SnackbarService.warning(
-          'Free plan allows up to 3 accounts. Upgrade to Pro for unlimited.',
+          'Free plan allows up to 3 accounts. Upgrade to Pro for unlimited.', spacing
         );
         return;
       }
@@ -1024,7 +1023,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           await isar.accounts.filter().nameEqualTo(accountName).findFirst();
       if (existingName != null && existingName.id != id) {
         SnackbarService.warning(
-          'Account with name "$accountName" already exists',
+          'Account with name "$accountName" already exists', spacing
         );
         return;
       }
@@ -1036,7 +1035,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             .findFirst();
         if (existingNum != null && existingNum.id != id) {
           SnackbarService.warning(
-            'Account with number "$accountNumber" already exists',
+            'Account with number "$accountNumber" already exists', spacing
           );
           return;
         }
@@ -1086,15 +1085,15 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 }
 
-class _CurrencyPickerInline extends StatefulWidget {
+class _CurrencyPickerInline extends ConsumerStatefulWidget {
   final String selected;
   const _CurrencyPickerInline({required this.selected});
 
   @override
-  State<_CurrencyPickerInline> createState() => _CurrencyPickerInlineState();
+  ConsumerState<_CurrencyPickerInline> createState() => _CurrencyPickerInlineState();
 }
 
-class _CurrencyPickerInlineState extends State<_CurrencyPickerInline> {
+class _CurrencyPickerInlineState extends ConsumerState<_CurrencyPickerInline> {
   String _query = '';
 
   List<CurrencyMeta> get _filtered {
@@ -1115,6 +1114,7 @@ class _CurrencyPickerInlineState extends State<_CurrencyPickerInline> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -1141,7 +1141,7 @@ class _CurrencyPickerInlineState extends State<_CurrencyPickerInline> {
                 prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
                   borderRadius:
-                      BorderRadius.circular(Tone.current.borderRadius),
+                      BorderRadius.circular(spacing.radiusSmall),
                   borderSide: BorderSide(color: color.outlineVariant),
                 ),
                 isDense: true,

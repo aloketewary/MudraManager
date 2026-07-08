@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -406,7 +405,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             isScrollControlled: true,
             backgroundColor: color.surface,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
             ),
             builder: (_) => _ParentCategoryPicker(
               categories: filtered,
@@ -626,17 +625,18 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 }
 
 // ── PARENT CATEGORY PICKER ──
-class _ParentCategoryPicker extends StatelessWidget {
+class _ParentCategoryPicker extends ConsumerWidget {
   final List<Category> categories;
   final Category? selected;
 
   const _ParentCategoryPicker({required this.categories, this.selected});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.5,
@@ -688,7 +688,7 @@ class _ParentCategoryPicker extends StatelessWidget {
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: catColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       ),
                       child: Icon(
                         IconHelper.getIconData(c.iconName),

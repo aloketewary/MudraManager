@@ -1,18 +1,19 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:math_expressions/math_expressions.dart';
 
-class SimpleCalculator extends StatefulWidget {
+class SimpleCalculator extends ConsumerStatefulWidget {
   final Function(double) onResultSelected;
 
   const SimpleCalculator({super.key, required this.onResultSelected});
 
   @override
-  State<SimpleCalculator> createState() => _SimpleCalculatorState();
+  ConsumerState<SimpleCalculator> createState() => _SimpleCalculatorState();
 }
 
-class _SimpleCalculatorState extends State<SimpleCalculator> {
+class _SimpleCalculatorState extends ConsumerState<SimpleCalculator> {
   String input = '';
   String result = '';
 
@@ -51,7 +52,7 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
     try {
       final ExpressionParser p = ShuntingYardParser();
       final Expression exp = p.parse(expression);
-      final evaluate = exp.evaluate(EvaluationType.REAL, ContextModel());
+      final evaluate = RealEvaluator().evaluate(exp);
       return evaluate
           .toStringAsFixed(evaluate.truncateToDouble() == evaluate ? 0 : 2);
     } catch (err) {
@@ -63,12 +64,14 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return SingleChildScrollView(
       child: Container(
         decoration: BoxDecoration(
           color: color.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+          borderRadius: BorderRadius.vertical(
+              top: Radius.circular(spacing.radiusSmall * 2)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -114,15 +117,40 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
               padding: const EdgeInsets.all(12),
               child: Column(
                 children: [
-                  _buildButtonRow(['AC', '⌫', '÷'], color, textTheme),
+                  _buildButtonRow(
+                    ['AC', '⌫', '÷'],
+                    color,
+                    textTheme,
+                    spacing,
+                  ),
                   const SizedBox(height: 8),
-                  _buildButtonRow(['7', '8', '9', '×'], color, textTheme),
+                  _buildButtonRow(
+                    ['7', '8', '9', '×'],
+                    color,
+                    textTheme,
+                    spacing,
+                  ),
                   const SizedBox(height: 8),
-                  _buildButtonRow(['4', '5', '6', '-'], color, textTheme),
+                  _buildButtonRow(
+                    ['4', '5', '6', '-'],
+                    color,
+                    textTheme,
+                    spacing,
+                  ),
                   const SizedBox(height: 8),
-                  _buildButtonRow(['1', '2', '3', '+'], color, textTheme),
+                  _buildButtonRow(
+                    ['1', '2', '3', '+'],
+                    color,
+                    textTheme,
+                    spacing,
+                  ),
                   const SizedBox(height: 8),
-                  _buildButtonRow(['0', '.', '=', '✓'], color, textTheme),
+                  _buildButtonRow(
+                    ['0', '.', '=', '✓'],
+                    color,
+                    textTheme,
+                    spacing,
+                  ),
                 ],
               ),
             ),
@@ -132,15 +160,15 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
     );
   }
 
-  Widget _buildButtonRow(
-      List<String> buttons, ColorScheme color, TextTheme textTheme,) {
+  Widget _buildButtonRow(List<String> buttons, ColorScheme color,
+      TextTheme textTheme, AppSpacing spacing) {
     return Row(
       children: buttons
           .map(
             (btn) => Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: _buildButton(btn, color, textTheme),
+                child: _buildButton(btn, color, textTheme, spacing),
               ),
             ),
           )
@@ -148,7 +176,8 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
     );
   }
 
-  Widget _buildButton(String text, ColorScheme color, TextTheme textTheme) {
+  Widget _buildButton(
+      String text, ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     final isOperator = ['÷', '×', '-', '+', '='].contains(text);
     final isSpecial = ['AC', '⌫', '✓'].contains(text);
     final isConfirm = text == '✓';
@@ -172,10 +201,10 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
 
     return Material(
       color: bgColor,
-      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+      borderRadius: BorderRadius.circular(spacing.radiusSmall),
       child: InkWell(
         onTap: () => onButtonPressed(text),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         child: Container(
           height: 56,
           alignment: Alignment.center,

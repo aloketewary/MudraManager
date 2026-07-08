@@ -1,11 +1,12 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 enum FrequencyType { daily, weekly, monthly, yearly }
 
-class FrequencySelector extends StatelessWidget {
+class FrequencySelector extends ConsumerWidget {
   final FrequencyType selectedFrequency;
   final Function(FrequencyType) onChanged;
   final int? customInterval;
@@ -20,8 +21,9 @@ class FrequencySelector extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +70,7 @@ class FrequencySelector extends StatelessWidget {
               labelText: 'Repeat every',
               suffixText: _getIntervalSuffix(),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
               ),
             ),
             onChanged: (value) {

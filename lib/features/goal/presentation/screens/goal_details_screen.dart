@@ -57,10 +57,10 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     super.dispose();
   }
 
-  Future<void> _deleteGoal() async {
+  Future<void> _deleteGoal(AppSpacing spacing) async {
     final ctxt = AppLocalizations.of(context)!;
     final confirmed = await DialogUtils.showDeleteConfirmation(
-      context,
+      context, spacing,
       title: ctxt.goal_deleteGoalTitle,
     );
     if (confirmed == true && mounted) {
@@ -75,6 +75,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
 
       SnackbarService.success(
         BuddyMessages.goalDeleted,
+        spacing,
         actionLabel: ctxt.common_undo,
         onAction: () {
           undone = true;
@@ -135,7 +136,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
             id: 'delete_goal',
             label: ctxt.goal_deleteGoal,
             icon: LucideIcons.trash2,
-            onTap: _deleteGoal,
+            onTap: () => _deleteGoal(spacing),
           ),
         ],
       ),

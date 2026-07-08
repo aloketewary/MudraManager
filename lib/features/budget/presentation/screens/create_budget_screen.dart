@@ -88,7 +88,7 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     return days > 0 && amount > 0 ? amount / days : 0;
   }
 
-  Future<void> _save() async {
+  Future<void> _save(AppSpacing spacing) async {
     if (_saving) return;
     setState(() => _saving = true);
 
@@ -98,7 +98,7 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     final canCreate = await ref.read(canCreateBudgetProvider.future);
     if (!canCreate) {
       setState(() => _saving = false);
-      SnackbarService.warning(l10n.budget_freePlanLimit);
+      SnackbarService.warning(l10n.budget_freePlanLimit, spacing);
       return;
     }
 
@@ -106,26 +106,26 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     final amount = double.tryParse(_amountC.text.trim().replaceAll(',', '')) ?? 0;
     if (amount <= 0) {
       setState(() => _saving = false);
-      SnackbarService.error(l10n.budget_amountRequiredHintText);
+      SnackbarService.error(l10n.budget_amountRequiredHintText, spacing);
       return;
     }
 
     if (_budgetType == BudgetType.categoryWise && _selectedCategory == null) {
       setState(() => _saving = false);
-      SnackbarService.error(l10n.budget_selectAtLeastOneCategoryErrorText);
+      SnackbarService.error(l10n.budget_selectAtLeastOneCategoryErrorText, spacing);
       return;
     }
 
     if (_budgetType == BudgetType.tagWise && _selectedTagIds.isEmpty) {
       setState(() => _saving = false);
-      SnackbarService.error(l10n.budget_selectAtLeastOneTag);
+      SnackbarService.error(l10n.budget_selectAtLeastOneTag, spacing);
       return;
     }
 
     if (_period == _BudgetPeriod.custom &&
         (_customStart == null || _customEnd == null)) {
       setState(() => _saving = false);
-      SnackbarService.error(l10n.budget_pickBothDatesErrorText);
+      SnackbarService.error(l10n.budget_pickBothDatesErrorText, spacing);
       return;
     }
 
@@ -169,7 +169,7 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     if (mounted) {
       HapticFeedback.mediumImpact();
       ref.invalidate(budgetServiceProvider);
-      SnackbarService.success(BuddyMessages.budgetCreated);
+      SnackbarService.success(BuddyMessages.budgetCreated, spacing);
       context.pop();
     }
   }
@@ -359,7 +359,7 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(spacing.radiusLarge),
+          top: Radius.circular(spacing.radiusSmall),
         ),
       ),
       builder: (ctx) => DraggableScrollableSheet(
@@ -1115,7 +1115,7 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
         child: SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: _saving ? null : _save,
+            onPressed: () => _saving ? null : _save(spacing),
             style: FilledButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: spacing.cardInner),
               shape: RoundedRectangleBorder(

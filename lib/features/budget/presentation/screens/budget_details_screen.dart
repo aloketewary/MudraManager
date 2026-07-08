@@ -60,6 +60,7 @@ class _BudgetDetailShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     return ScreenShell(
       config: ScreenShellConfig(
@@ -91,13 +92,14 @@ class _BudgetDetailShell extends ConsumerWidget {
               HapticFeedback.mediumImpact();
               final confirmed = await DialogUtils.showDeleteConfirmation(
                 context,
+                spacing,
                 title: '${ctxt.budget_delete} \'${snapshot.budgetName}\'',
               );
               if (confirmed == true && context.mounted) {
                 await ref
                     .read(budgetServiceProvider)
                     .deleteBudget(snapshot.budgetId);
-                SnackbarService.success(BuddyMessages.budgetDeleted);
+                SnackbarService.success(BuddyMessages.budgetDeleted, spacing);
                 if (context.mounted) context.pop();
               }
             },

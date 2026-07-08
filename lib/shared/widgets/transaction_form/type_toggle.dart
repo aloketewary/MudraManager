@@ -1,9 +1,10 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class TypeToggle extends StatelessWidget {
+class TypeToggle extends ConsumerWidget {
   final bool isExpense;
   final ValueChanged<bool> onChanged;
   final String expenseLabel;
@@ -18,15 +19,16 @@ class TypeToggle extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Row(
         children: [

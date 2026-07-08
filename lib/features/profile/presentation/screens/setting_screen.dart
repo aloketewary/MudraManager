@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -51,14 +50,14 @@ class _SecuritySettingsScreenState
     });
   }
 
-  Future<void> _toggleBiometric(bool on) async {
+  Future<void> _toggleBiometric(bool on, AppSpacing spacing) async {
     HapticFeedback.mediumImpact();
     final auth = ref.read(authServiceProvider);
     final ctxt = AppLocalizations.of(context)!;
     if (on) {
       final ok = await auth.authenticateBiometric();
       if (!ok) {
-        SnackbarService.error(BuddyMessages.biometricFailed);
+        SnackbarService.error(BuddyMessages.biometricFailed, spacing);
         return;
       }
     }
@@ -66,10 +65,11 @@ class _SecuritySettingsScreenState
     setState(() => _bioEnabled = on);
     SnackbarService.success(
       on ? ctxt.security_biometricEnabled : ctxt.security_biometricDisabled,
+      spacing
     );
   }
 
-  Future<void> _togglePin(bool on) async {
+  Future<void> _togglePin(bool on, AppSpacing spacing) async {
     HapticFeedback.mediumImpact();
     final auth = ref.read(authServiceProvider);
     if (on) {
@@ -79,17 +79,17 @@ class _SecuritySettingsScreenState
       );
       if (pin == null || pin.length < 4) return;
       await auth.setPin(pin);
-      SnackbarService.success(BuddyMessages.toggledOn('PIN'));
+      SnackbarService.success(BuddyMessages.toggledOn('PIN'), spacing);
     } else {
       await auth.clearPin();
       await auth.setBiometricEnabled(false);
       setState(() => _bioEnabled = false);
-      SnackbarService.success(BuddyMessages.toggledOff('PIN'));
+      SnackbarService.success(BuddyMessages.toggledOff('PIN'), spacing);
     }
     setState(() => _pinEnabled = on);
   }
 
-  Future<void> _changePin() async {
+  Future<void> _changePin(AppSpacing spacing) async {
     HapticFeedback.mediumImpact();
     final auth = ref.read(authServiceProvider);
 
@@ -99,7 +99,7 @@ class _SecuritySettingsScreenState
     );
     if (current == null) return;
     if (!await auth.validatePin(current)) {
-      SnackbarService.error(BuddyMessages.incorrectPin);
+      SnackbarService.error(BuddyMessages.incorrectPin, spacing);
       return;
     }
 
@@ -112,7 +112,7 @@ class _SecuritySettingsScreenState
     if (newPin == null || newPin.length < 4) return;
 
     await auth.setPin(newPin);
-    SnackbarService.success(BuddyMessages.settingsSaved);
+    SnackbarService.success(BuddyMessages.settingsSaved, spacing);
   }
 
   int get _securityScore {
@@ -298,10 +298,11 @@ class _SecuritySettingsScreenState
                     ? ctxt.security_pinActive
                     : ctxt.security_pinSet,
                 value: _pinEnabled,
-                onChanged: _togglePin,
+                onChanged: (value) => _togglePin(value, spacing),
                 color: color,
                 textTheme: textTheme,
                 ctxt: ctxt,
+                spacing: spacing,
               ),
               if (_biometricAvailable) ...[
                 Divider(
@@ -314,11 +315,12 @@ class _SecuritySettingsScreenState
                   title: ctxt.security_biometric,
                   subtitle: ctxt.security_biometricDesc,
                   value: _bioEnabled,
-                  onChanged: _pinEnabled ? _toggleBiometric : null,
+                  onChanged: (value) => _pinEnabled ? _toggleBiometric(value, spacing) : null,
                   color: color,
                   textTheme: textTheme,
                   disabled: !_pinEnabled,
                   ctxt: ctxt,
+                  spacing: spacing,
                 ),
               ],
             ],
@@ -342,7 +344,7 @@ class _SecuritySettingsScreenState
             ),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
-              onTap: _changePin,
+              onTap: () => _changePin(spacing),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -354,7 +356,7 @@ class _SecuritySettingsScreenState
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: color.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       ),
                       child: Icon(
                         LucideIcons.refreshCw,
@@ -458,6 +460,7 @@ class _SecuritySettingsScreenState
     required TextTheme textTheme,
     bool disabled = false,
     required AppLocalizations ctxt,
+    required AppSpacing spacing,
   }) {
     final alpha = disabled ? 0.4 : 1.0;
     return Padding(
@@ -468,7 +471,7 @@ class _SecuritySettingsScreenState
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.primary.withValues(alpha: 0.12 * alpha),
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             child: Icon(
               icon,

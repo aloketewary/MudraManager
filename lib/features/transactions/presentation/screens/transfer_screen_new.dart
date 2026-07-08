@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
@@ -138,7 +137,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
     return fromCur != toCur;
   }
 
-  Future<void> _executeTransfer() async {
+  Future<void> _executeTransfer(AppSpacing spacing) async {
     if (!_canTransfer) return;
     setState(() => _saving = true);
 
@@ -192,7 +191,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         ref.invalidate(transactionQueryProvider);
 
         SnackbarService.success(
-          _isEditing ? 'Transfer updated' : 'Transfer completed',
+          _isEditing ? 'Transfer updated' : 'Transfer completed', spacing
         );
 
         context.pop(true); // return true so list screen knows to refresh
@@ -530,7 +529,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
               // ── SLIDE TO TRANSFER ──
               _SlideToTransferButton(
                 enabled: _canTransfer,
-                onSlideComplete: _executeTransfer,
+                onSlideComplete: () => _executeTransfer(spacing),
               ),
             ],
           );
@@ -744,7 +743,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius:
-            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall)),
       ),
       builder: (ctx) => SafeArea(
         child: Column(
@@ -778,7 +777,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                   decoration: BoxDecoration(
                     color: acColor.withValues(alpha: 0.1),
                     borderRadius:
-                        BorderRadius.circular(Tone.current.borderRadius),
+                        BorderRadius.circular(spacing.radiusSmall),
                   ),
                   child: Icon(
                     account.accountType.icon,

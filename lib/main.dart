@@ -8,6 +8,7 @@ import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/entitlement/billing_provider.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -299,6 +300,7 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
   Widget build(BuildContext context) {
     final activeTone = ref.watch(tonePackProvider);
     final activeSkin = ref.watch(activeSkinProvider).value;
+    final spacing = ref.watch(spacingProvider);
     // Merge skin style into tone for radii/elevation
     final effectiveTone = activeSkin != null
         ? SkinAwareTone(activeTone, activeSkin.style)
@@ -336,10 +338,10 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
         return MaterialApp.router(
           key: ValueKey(activeSkin?.id ?? 'default'),
           title: 'Mudra Manager',
-          theme: appTheme.buildTheme(lightScheme, effectiveTone),
+          theme: appTheme.buildTheme(lightScheme, effectiveTone, spacing),
           darkTheme: appThemeMode == AppThemeMode.amoled
-              ? appTheme.buildTheme(amoledScheme, effectiveTone)
-              : appTheme.buildTheme(darkScheme, effectiveTone),
+              ? appTheme.buildTheme(amoledScheme, effectiveTone, spacing)
+              : appTheme.buildTheme(darkScheme, effectiveTone, spacing),
           themeMode: switch (appThemeMode) {
             AppThemeMode.light => ThemeMode.light,
             AppThemeMode.dark => ThemeMode.dark,

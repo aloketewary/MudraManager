@@ -63,6 +63,7 @@ class FinancialHealthCard extends ConsumerWidget {
                           score: health.score / 100,
                           scoreColor: scoreColor,
                           textTheme: textTheme,
+                          spacing: spacing,
                         ),
                         SizedBox(width: spacing.elementGap * 1.5),
                         Expanded(
@@ -185,11 +186,13 @@ class _AnimatedMiniRing extends StatefulWidget {
   final double score;
   final Color scoreColor;
   final TextTheme textTheme;
+  final AppSpacing spacing;
 
   const _AnimatedMiniRing({
     required this.score,
     required this.scoreColor,
     required this.textTheme,
+    required this.spacing,
   });
 
   @override
@@ -233,16 +236,20 @@ class _AnimatedMiniRingState extends State<_AnimatedMiniRing>
         builder: (_, __) {
           final value = _anim.value * widget.score;
           return SizedBox(
-            width: 52,
-            height: 52,
+            width: widget.spacing.sectionGap * 2,
+            height: widget.spacing.sectionGap * 2,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 CustomPaint(
-                  size: const Size(52, 52),
+                  size: Size(
+                    widget.spacing.sectionGap * 2,
+                    widget.spacing.sectionGap * 2,
+                  ),
                   painter: _CompactRingPainter(
                     progress: value,
                     color: widget.scoreColor,
+                    spacing: widget.spacing,
                   ),
                 ),
                 Text(
@@ -264,13 +271,18 @@ class _AnimatedMiniRingState extends State<_AnimatedMiniRing>
 class _CompactRingPainter extends CustomPainter {
   final double progress;
   final Color color;
+  final AppSpacing spacing;
 
-  _CompactRingPainter({required this.progress, required this.color});
+  _CompactRingPainter({
+    required this.progress,
+    required this.color,
+    required this.spacing,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 4;
+    final radius = size.width / 2 - spacing.cardVerticalMin;
     const strokeWidth = 5.0;
 
     final bgPaint = Paint()

@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -12,8 +12,10 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/shared/widgets/account_selector.dart';
 import 'package:mudra_manager/shared/widgets/category_selector.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ApproveTransactionSheet extends StatefulWidget {
+
+class ApproveTransactionSheet extends ConsumerStatefulWidget {
   final PendingTransaction transaction;
   final Account? matchedAccount;
   final Account? matchedToAccount;
@@ -32,11 +34,11 @@ class ApproveTransactionSheet extends StatefulWidget {
   });
 
   @override
-  State<ApproveTransactionSheet> createState() =>
+  ConsumerState<ApproveTransactionSheet> createState() =>
       _ApproveTransactionSheetState();
 }
 
-class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
+class _ApproveTransactionSheetState extends ConsumerState<ApproveTransactionSheet> {
   Account? _selectedAccount;
   Account? _selectedToAccount;
   Category? _selectedCategory;
@@ -71,6 +73,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
       padding: EdgeInsets.only(
@@ -81,7 +84,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
       ),
       decoration: BoxDecoration(
         color: color.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -109,7 +112,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: color.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
               ),
               child: Row(
                 children: [
@@ -173,7 +176,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
                   child: CurrencyBadge(code: BaseCurrency.code, size: 14),
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
               ),
             ),
@@ -196,7 +199,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   border: Border.all(color: color.outline),
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Row(
                   children: [
@@ -224,26 +227,27 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
                   } else {
                     SnackbarService.warning(
                       'Select both accounts for transfer',
+                      spacing,
                     );
                   }
                 } else {
                   if (_selectedCategory != null && _selectedAccount != null) {
                     final amount = double.tryParse(_amountController.text);
                     if (amount == null || amount <= 0) {
-                      SnackbarService.warning(BuddyMessages.enterAmount);
+                      SnackbarService.warning(BuddyMessages.enterAmount, spacing,);
                       return;
                     }
                     Navigator.pop(context);
                     widget.onApprove(_selectedAccount!, _selectedCategory!, _selectedDate, amount);
                   } else {
-                    SnackbarService.warning(BuddyMessages.selectAccountAndCategory);
+                    SnackbarService.warning(BuddyMessages.selectAccountAndCategory, spacing,);
                   }
                 }
               },
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 52),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
               ),
               child: Text(

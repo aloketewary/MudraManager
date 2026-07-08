@@ -57,7 +57,7 @@ class BudgetOverviewCard extends ConsumerWidget {
             HapticFeedback.mediumImpact();
             context.push(AppRoutes.budgetDashboard);
           },
-          borderRadius: BorderRadius.circular(spacing.radiusLarge),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           child: Padding(
             padding: EdgeInsets.all(spacing.cardInner),
             child: Row(
@@ -108,10 +108,10 @@ class BudgetOverviewCard extends ConsumerWidget {
                         height: 10,
                         decoration: BoxDecoration(
                           color: color.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                           child: TweenAnimationBuilder<double>(
                             duration: const Duration(milliseconds: 1500),
                             curve: Curves.easeOutCubic,

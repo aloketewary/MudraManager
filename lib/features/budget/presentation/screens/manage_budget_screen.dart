@@ -322,7 +322,7 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(spacing.radiusLarge),
+          top: Radius.circular(spacing.radiusSmall),
         ),
       ),
       builder: (ctx) => Padding(
@@ -377,7 +377,7 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
                   if (mounted) {
                     Navigator.pop(ctx);
                     HapticFeedback.mediumImpact();
-                    SnackbarService.success(BuddyMessages.budgetUpdated);
+                    SnackbarService.success(BuddyMessages.budgetUpdated, spacing);
                     setState(() {});
                   }
                 },
@@ -436,7 +436,7 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => _archiveBudget(l10n),
+                  onPressed: () => _archiveBudget(l10n, spacing),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: color.onSurfaceVariant,
                     side: BorderSide(color: color.outlineVariant),
@@ -462,7 +462,7 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     );
   }
 
-  Future<void> _archiveBudget(AppLocalizations l10n) async {
+  Future<void> _archiveBudget(AppLocalizations l10n, AppSpacing spacing) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -486,7 +486,7 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
       await service.archiveBudget(_budget.id);
       if (mounted) {
         ref.invalidate(budgetsWithProgressProvider);
-        SnackbarService.success(BuddyMessages.budgetUpdated);
+        SnackbarService.success(BuddyMessages.budgetUpdated, spacing);
         context.pop();
       }
     }

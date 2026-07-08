@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -28,12 +27,13 @@ class CategorySelectorBottomSheet extends ConsumerStatefulWidget {
     BuildContext context, {
     Category? selectedCategory,
     required bool isExpense,
+    required AppSpacing spacing,
   }) {
     return showModalBottomSheet<Category>(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (context) => CategorySelectorBottomSheet(
         selectedCategory: selectedCategory,

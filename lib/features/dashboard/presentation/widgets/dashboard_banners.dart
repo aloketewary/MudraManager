@@ -238,14 +238,14 @@ class AutoImportBanner extends ConsumerWidget {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(spacing.elementGap + 4),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Icon(LucideIcons.bellRing, color: accent, size: 18),
               ),
-              SizedBox(width: spacing.elementGap + 4),
+              SizedBox(width: spacing.elementGap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,7 +267,10 @@ class AutoImportBanner extends ConsumerWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.elementGap,
+                  vertical: spacing.elementGapMin,
+                ),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(spacing.radiusSmall),
@@ -321,14 +324,14 @@ class AutoImportBanner extends ConsumerWidget {
           child: Row(
             children: [
               Container(
-                width: 8,
-                height: 8,
+                width: spacing.elementGap * 2,
+                height: spacing.elementGap * 2,
                 decoration: BoxDecoration(
                   color: accent,
                   shape: BoxShape.circle,
                 ),
               ),
-              SizedBox(width: spacing.elementGap + 2),
+              SizedBox(width: spacing.elementGap),
               Text(
                 AppLocalizations.of(context)!.dashboard_autoImportPaused,
                 style: textTheme.labelMedium?.copyWith(
@@ -416,7 +419,7 @@ class AutoImportBanner extends ConsumerWidget {
                           color: color.onSurface,
                         ),
                       ),
-                      SizedBox(height: spacing.cardVerticalMin / 2),
+                      SizedBox(height: spacing.elementGap),
                       Text(
                         AppLocalizations.of(context)!.dashboard_autoTrackDesc,
                         style: textTheme.bodySmall?.copyWith(

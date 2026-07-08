@@ -1,9 +1,10 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class TransactionSearchBar extends StatelessWidget {
+class TransactionSearchBar extends ConsumerWidget {
   final String searchQuery;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
@@ -16,14 +17,15 @@ class TransactionSearchBar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Material(
         elevation: 2,
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         child: TextField(
           autofocus: true,
           onChanged: onChanged,
@@ -44,7 +46,7 @@ class TransactionSearchBar extends StatelessWidget {
                   )
                 : null,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
               borderSide: BorderSide.none,
             ),
             filled: true,

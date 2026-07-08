@@ -255,7 +255,7 @@ class _AddRecurringTransactionScreenState
             child: Column(
               children: [
                 FilledButton(
-                  onPressed: _save,
+                  onPressed: ()=> _save(spacing),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(double.infinity, 52),
                     shape: RoundedRectangleBorder(
@@ -270,7 +270,7 @@ class _AddRecurringTransactionScreenState
                 if (_isEditing) ...[
                   SizedBox(height: spacing.elementGap),
                   OutlinedButton.icon(
-                    onPressed: _delete,
+                    onPressed: ()=> _delete(spacing),
                     icon: const Icon(LucideIcons.trash2, size: 18),
                     label: Text(AppLocalizations.of(context)!.common_delete),
                     style: OutlinedButton.styleFrom(
@@ -749,15 +749,15 @@ class _AddRecurringTransactionScreenState
     };
   }
 
-  Future<void> _save() async {
+  Future<void> _save(AppSpacing spacing,) async {
     if (_saving) return;
     if (_amountController.text.isEmpty ||
         double.tryParse(_amountController.text) == null) {
-      SnackbarService.error(BuddyMessages.invalidAmount);
+      SnackbarService.error(BuddyMessages.invalidAmount, spacing,);
       return;
     }
     if (_selectedAccount == null || _selectedCategory == null) {
-      SnackbarService.error(BuddyMessages.selectAccountAndCategory);
+      SnackbarService.error(BuddyMessages.selectAccountAndCategory, spacing,);
       return;
     }
 
@@ -791,22 +791,22 @@ class _AddRecurringTransactionScreenState
 
       if (context.mounted) {
         SnackbarService.success(
-          _isEditing ? BuddyMessages.txnUpdated : BuddyMessages.txnAdded,
+          _isEditing ? BuddyMessages.txnUpdated : BuddyMessages.txnAdded, spacing
         );
         context.pop();
       }
     } catch (e) {
-      SnackbarService.error(BuddyMessages.errorWith('$e'));
+      SnackbarService.error(BuddyMessages.errorWith('$e'), spacing);
     }
   }
 
-  Future<void> _delete() async {
+  Future<void> _delete(AppSpacing spacing) async {
     HapticFeedback.mediumImpact();
     await ref
         .read(recurringTransactionServiceProvider)
         .delete(widget.recurring!.id);
     if (context.mounted) {
-      SnackbarService.success(BuddyMessages.txnDeleted);
+      SnackbarService.success(BuddyMessages.txnDeleted, spacing);
       context.pop();
     }
   }

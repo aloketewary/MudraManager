@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/tone/tone_pack.dart';
 
 class AppTheme {
@@ -11,13 +11,13 @@ class AppTheme {
   final Iterable<ThemeExtension<dynamic>>? extensions;
 
   // ── Font Strategy ──
-  // Headings (display/headline/title) → Geist Sans (premium, tight)
-  // Body (body/label)                 → Inter (clarity, tabular nums)
+  // Headings (display/headline/title) → Hanken Grotesk (premium, tight)
+  // Body (body/label)                 → Hanken Grotesk (clarity, professional)
   // Hindi fallback                    → NotoSansDevanagari
   // Bengali fallback                  → NotoSansBengali
   // Monospace                         → GeistMono (account numbers, SMS)
   static const _headingFont = 'Geist';
-  static const _bodyFont = 'Inter';
+  static const _bodyFont = 'Geist';
   static const _monoFont = 'GeistMono';
   static const _indicFallback = ['NotoSansDevanagari', 'NotoSansBengali'];
 
@@ -127,7 +127,8 @@ class AppTheme {
   }
 
   // Build the Theme based on ColorScheme
-  ThemeData buildTheme(ColorScheme colorScheme, TonePack tone) {
+  ThemeData buildTheme(
+      ColorScheme colorScheme, TonePack tone, AppSpacing spacing,) {
     final isDark = colorScheme.brightness == Brightness.dark;
     final isAmoled = isDark && colorScheme.surface == Colors.black;
 
@@ -142,23 +143,27 @@ class AppTheme {
       fontFamily: _bodyFont,
       fontFamilyFallback: _indicFallback,
       appBarTheme: _appBarTheme(colorScheme, textTheme, colorScheme.brightness),
-      elevatedButtonTheme: _elevatedButtonTheme(colorScheme, textTheme, tone),
-      outlinedButtonTheme: _outlinedButtonTheme(colorScheme, textTheme, tone),
-      filledButtonTheme: _filledButtonTheme(colorScheme, textTheme, tone),
-      textButtonTheme: _textButtonTheme(colorScheme, textTheme, tone),
-      inputDecorationTheme: _inputDecorationTheme(colorScheme, textTheme, tone),
-      cardTheme: _cardTheme(colorScheme, tone),
-      dialogTheme: _dialogTheme(colorScheme, textTheme),
-      chipTheme: _chipTheme(colorScheme, textTheme, tone),
+      elevatedButtonTheme:
+          _elevatedButtonTheme(colorScheme, textTheme, tone, spacing),
+      outlinedButtonTheme:
+          _outlinedButtonTheme(colorScheme, textTheme, tone, spacing),
+      filledButtonTheme:
+          _filledButtonTheme(colorScheme, textTheme, tone, spacing),
+      textButtonTheme: _textButtonTheme(colorScheme, textTheme, tone, spacing),
+      inputDecorationTheme:
+          _inputDecorationTheme(colorScheme, textTheme, tone, spacing),
+      cardTheme: _cardTheme(colorScheme, tone, spacing),
+      dialogTheme: _dialogTheme(colorScheme, textTheme, spacing),
+      chipTheme: _chipTheme(colorScheme, textTheme, tone, spacing),
       tabBarTheme: _tabBarTheme(colorScheme),
       tooltipTheme: _tooltipTheme(colorScheme, textTheme),
       listTileTheme: _listTileTheme(colorScheme, textTheme),
-      floatingActionButtonTheme: _fabTheme(colorScheme, tone),
+      floatingActionButtonTheme: _fabTheme(colorScheme, tone, spacing),
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(
           shape: WidgetStatePropertyAll(
             RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(tone.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
           ),
         ),
@@ -166,7 +171,7 @@ class AppTheme {
       bottomSheetTheme: BottomSheetThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(tone.borderRadius * 2),
+            top: Radius.circular(spacing.radiusSmall * 2),
           ),
         ),
       ),
@@ -185,7 +190,8 @@ class AppTheme {
         contentTextStyle: textTheme.bodyMedium?.copyWith(
           color: colorScheme.onInverseSurface,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),),
         behavior: SnackBarBehavior.floating,
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -228,12 +234,14 @@ class AppTheme {
     ColorScheme colorScheme,
     TextTheme textTheme,
     TonePack tone,
+    AppSpacing spacing,
   ) {
     return FilledButtonThemeData(
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tone.buttonRadius),),
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        ),
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -245,24 +253,31 @@ class AppTheme {
     ColorScheme colorScheme,
     TextTheme textTheme,
     TonePack tone,
+    AppSpacing spacing,
   ) {
     return TextButtonThemeData(
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tone.buttonRadius),),
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        ),
         foregroundColor: colorScheme.primary,
         textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
       ),
     );
   }
 
-  FloatingActionButtonThemeData _fabTheme(ColorScheme colorScheme, TonePack tone) {
+  FloatingActionButtonThemeData _fabTheme(
+    ColorScheme colorScheme,
+    TonePack tone,
+    AppSpacing spacing,
+  ) {
     return FloatingActionButtonThemeData(
       backgroundColor: colorScheme.primaryContainer,
       foregroundColor: colorScheme.onPrimaryContainer,
       elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(tone.borderRadius)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),),
     );
   }
 
@@ -306,12 +321,14 @@ class AppTheme {
     ColorScheme colorScheme,
     TextTheme textTheme,
     TonePack tone,
+    AppSpacing spacing,
   ) {
     return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tone.buttonRadius),),
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        ),
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         elevation: 1,
@@ -324,12 +341,14 @@ class AppTheme {
     ColorScheme colorScheme,
     TextTheme textTheme,
     TonePack tone,
+    AppSpacing spacing,
   ) {
     return OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tone.buttonRadius),),
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        ),
         foregroundColor: colorScheme.primary,
         side: BorderSide(color: colorScheme.outline),
         textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -341,6 +360,7 @@ class AppTheme {
     ColorScheme colorScheme,
     TextTheme textTheme,
     TonePack tone,
+    AppSpacing spacing,
   ) {
     return InputDecorationTheme(
       labelStyle: textTheme.bodyLarge?.copyWith(
@@ -351,21 +371,22 @@ class AppTheme {
       ),
       errorStyle: textTheme.bodySmall?.copyWith(color: colorScheme.error),
       border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(tone.inputRadius),),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+      ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(tone.inputRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
         borderSide: BorderSide(color: colorScheme.primary, width: 2),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(tone.inputRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
         borderSide: BorderSide(color: colorScheme.outline),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(tone.inputRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
         borderSide: BorderSide(color: colorScheme.error, width: 2),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(tone.inputRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
         borderSide: BorderSide(color: colorScheme.error, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -374,25 +395,34 @@ class AppTheme {
     );
   }
 
-  CardThemeData _cardTheme(ColorScheme colorScheme, TonePack tone) {
+  CardThemeData _cardTheme(
+    ColorScheme colorScheme,
+    TonePack tone,
+    AppSpacing spacing,
+  ) {
     // Hairline style: transparent cards with faint border (cross-grid look)
     final isHairline = tone.useTransparentCards;
 
     return CardThemeData(
-      elevation: tone.cardElevation,
+      elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(tone.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         side: BorderSide(
           color: colorScheme.outline.withValues(alpha: tone.borderOpacity),
           width: tone.borderWidth,
         ),
       ),
       color: isHairline ? Colors.transparent : colorScheme.surfaceContainer,
-      surfaceTintColor: isHairline ? Colors.transparent : colorScheme.surfaceTint,
+      surfaceTintColor:
+          isHairline ? Colors.transparent : colorScheme.surfaceTint,
     );
   }
 
-  DialogThemeData _dialogTheme(ColorScheme colorScheme, TextTheme textTheme) {
+  DialogThemeData _dialogTheme(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     return DialogThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       backgroundColor: colorScheme.surfaceContainerHigh,
@@ -406,14 +436,20 @@ class AppTheme {
     );
   }
 
-  ChipThemeData _chipTheme(ColorScheme colorScheme, TextTheme textTheme, TonePack tone) {
+  ChipThemeData _chipTheme(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    TonePack tone,
+    AppSpacing spacing,
+  ) {
     return ChipThemeData(
       backgroundColor: colorScheme.surfaceContainerLow,
       selectedColor: colorScheme.secondaryContainer,
       labelStyle: textTheme.labelLarge?.copyWith(
         color: colorScheme.onSurfaceVariant,
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(tone.borderRadius)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),),
       side: BorderSide.none,
     );
   }

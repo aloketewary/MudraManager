@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -85,6 +86,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Scaffold(
       backgroundColor: color.surface,
@@ -107,7 +109,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 ? null
                 : () {
                     HapticFeedback.mediumImpact();
-                    _saveAccount(widget.account?.id);
+                    _saveAccount(widget.account?.id, spacing);
                   },
             child: _saving
                 ? SizedBox(
@@ -140,19 +142,19 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             // ── ACCOUNT TYPE ──
             _sectionLabel('Account Type', textTheme),
             const SizedBox(height: 10),
-            _buildTypeGrid(color, textTheme),
+            _buildTypeGrid(color, textTheme, spacing),
             const SizedBox(height: 28),
 
             // ── DETAILS ──
             _sectionLabel('Details', textTheme),
             const SizedBox(height: 10),
-            _buildDetailsCard(color, textTheme),
+            _buildDetailsCard(color, textTheme, spacing),
             const SizedBox(height: 28),
 
             // ── COLOR ──
             _sectionLabel('Color', textTheme),
             const SizedBox(height: 10),
-            _buildColorSection(color, textTheme),
+            _buildColorSection(color, textTheme, spacing),
           ],
         ),
       ),
@@ -165,6 +167,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     final number = _accountNumberController.text.trim();
     final balance = double.tryParse(_balanceController.text) ?? 0.0;
     final isCreditCard = _selectedType == AccountType.creditCard;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -177,7 +180,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             _selectedColor.withValues(alpha: 0.06),
           ],
         ),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Stack(
         children: [
@@ -240,7 +243,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                           ),
                           decoration: BoxDecoration(
                             color: _selectedColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
                           ),
                           child: Text(
                             _selectedType.label,
@@ -287,7 +290,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   // ── ACCOUNT TYPE GRID (2×3) ──
-  Widget _buildTypeGrid(ColorScheme color, TextTheme textTheme) {
+  Widget _buildTypeGrid(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     return GridView.count(
       crossAxisCount: 3,
       shrinkWrap: true,
@@ -308,7 +311,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               color: isSelected
                   ? _selectedColor.withValues(alpha: 0.12)
                   : color.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
               border: Border.all(
                 color: isSelected
                     ? _selectedColor
@@ -341,14 +344,14 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   // ── DETAILS CARD ──
-  Widget _buildDetailsCard(ColorScheme color, TextTheme textTheme) {
+  Widget _buildDetailsCard(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     final isCreditCard = _selectedType == AccountType.creditCard;
 
     return Card(
       elevation: 0,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         side: BorderSide(
           color: color.outlineVariant.withValues(alpha: 0.3),
         ),
@@ -444,12 +447,12 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   // ── COLOR SECTION ──
-  Widget _buildColorSection(ColorScheme color, TextTheme textTheme) {
+  Widget _buildColorSection(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     return Card(
       elevation: 0,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         side: BorderSide(
           color: color.outlineVariant.withValues(alpha: 0.3),
         ),
@@ -555,7 +558,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     if (c != null) setState(() => _selectedColor = c);
   }
 
-  Future<void> _saveAccount(Id? id) async {
+  Future<void> _saveAccount(Id? id, AppSpacing spacing) async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _saving = true);
@@ -571,7 +574,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           await isar.accounts.filter().nameEqualTo(accountName).findFirst();
       if (existingName != null && existingName.id != id) {
         SnackbarService.warning(
-          'Account with name "$accountName" already exists',
+          'Account with name "$accountName" already exists', spacing
         );
         return;
       }
@@ -583,7 +586,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             .findFirst();
         if (existingNum != null && existingNum.id != id) {
           SnackbarService.warning(
-            'Account with number "$accountNumber" already exists',
+            'Account with number "$accountNumber" already exists', spacing
           );
           return;
         }

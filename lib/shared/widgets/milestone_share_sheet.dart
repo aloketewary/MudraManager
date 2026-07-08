@@ -62,7 +62,7 @@ class _MilestoneShareSheet extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: color.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
         ),
         padding: EdgeInsets.fromLTRB(
           spacing.cardHorizontalMax,
@@ -166,12 +166,14 @@ class _MilestoneShareSheet extends ConsumerWidget {
 }
 
 /// Branded 9:16 share card rendered offscreen, captured as image.
-class _MilestoneShareCard extends StatelessWidget {
+class _MilestoneShareCard extends ConsumerWidget {
   final MilestoneData data;
   const _MilestoneShareCard({required this.data});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    
     return SizedBox(
       width: 360,
       height: 640,
@@ -210,7 +212,7 @@ class _MilestoneShareCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: data.accent.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         border: Border.all(
                           color: data.accent.withValues(alpha: 0.4),
                         ),

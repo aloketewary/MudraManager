@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -10,7 +10,8 @@ class SnackbarService {
 
   static void show(
     String message,
-    SnackbarType type, {
+    SnackbarType type,
+    AppSpacing spacing, {
     String? actionLabel,
     VoidCallback? onAction,
     Duration duration = const Duration(seconds: 4),
@@ -69,7 +70,7 @@ class SnackbarService {
               ),
         backgroundColor: bg,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         padding: EdgeInsets.symmetric(
           horizontal: 16,
@@ -83,49 +84,57 @@ class SnackbarService {
   }
 
   static void error(
-    String message, {
+    String message,
+    AppSpacing spacing, {
     String? actionLabel,
     VoidCallback? onAction,
   }) =>
       show(
         message,
         SnackbarType.error,
+        spacing,
         actionLabel: actionLabel,
         onAction: onAction,
       );
 
   static void success(
-    String message, {
+    String message, 
+    AppSpacing spacing, {
     String? actionLabel,
     VoidCallback? onAction,
   }) =>
       show(
         message,
         SnackbarType.success,
+        spacing,
         actionLabel: actionLabel,
         onAction: onAction,
       );
 
   static void info(
-    String message, {
+    String message,
+    AppSpacing spacing, {
     String? actionLabel,
     VoidCallback? onAction,
   }) =>
       show(
         message,
         SnackbarType.info,
+        spacing,
         actionLabel: actionLabel,
         onAction: onAction,
       );
 
   static void warning(
-    String message, {
+    String message, 
+    AppSpacing spacing, {
     String? actionLabel,
     VoidCallback? onAction,
   }) =>
       show(
         message,
         SnackbarType.warning,
+        spacing,
         actionLabel: actionLabel,
         onAction: onAction,
       );

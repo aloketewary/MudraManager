@@ -206,6 +206,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
 
   Widget _buildAccountStyleRow(ColorScheme color, TextTheme textTheme) {
     final current = ref.watch(accountDisplayStyleProvider);
+    final spacing = ref.watch(spacingProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -214,7 +215,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             child: Icon(
               LucideIcons.layoutDashboard,
@@ -296,7 +297,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: currentColorTheme.seedColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Container(
                   width: 20,
@@ -394,7 +395,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                         decoration: BoxDecoration(
                           color: (isSelected ? color.primary : color.onSurface)
                               .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: Icon(
                           icon,
@@ -472,6 +473,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
             },
             color: color,
             textTheme: textTheme,
+            spacing: spacing,
           ),
           if (guestPluginEnabled) ...[
             Divider(
@@ -492,6 +494,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
               },
               color: color,
               textTheme: textTheme,
+              spacing: spacing,
             ),
           ],
         ],
@@ -535,6 +538,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                     ref.read(tonePackProvider.notifier).select(tone);
                     SnackbarService.success(
                       ctxt.appearance_toneActivated(tone.name),
+                      spacing
                     );
                   },
                   child: Padding(
@@ -551,7 +555,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                                     ? color.tertiary
                                     : color.onSurface)
                                 .withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
                           ),
                           child: Icon(
                             icon,
@@ -677,6 +681,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
     required ValueChanged<bool> onChanged,
     required ColorScheme color,
     required TextTheme textTheme,
+    required AppSpacing spacing,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -686,7 +691,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             child: Icon(icon, color: color.primary, size: 20),
           ),

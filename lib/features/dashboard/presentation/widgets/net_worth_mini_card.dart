@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
@@ -85,7 +84,7 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                           decoration: BoxDecoration(
                             color: color.secondary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(
-                                Tone.current.borderRadius,),
+                                spacing.radiusSmall,),
                           ),
                           child: Icon(
                             LucideIcons.wallet,

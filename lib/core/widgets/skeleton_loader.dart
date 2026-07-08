@@ -160,7 +160,7 @@ class QuickActionsSkeleton extends ConsumerWidget {
                     _Bone(
                       width: 48,
                       height: 48,
-                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     ),
                     const SizedBox(height: 6),
                     const _Bone(width: 40, height: 10),
@@ -373,7 +373,7 @@ class TransactionCardSkeleton extends ConsumerWidget {
               _Bone(
                 width: 48,
                 height: 48,
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
               ),
               SizedBox(width: spacing.cardInner),
               Expanded(

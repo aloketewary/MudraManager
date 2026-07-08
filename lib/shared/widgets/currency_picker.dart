@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
@@ -5,26 +7,26 @@ import 'package:flutter/services.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 
 /// Shows a bottom sheet to pick a currency. Returns the selected currency code.
-Future<String?> showCurrencyPicker(BuildContext context, {String? selected}) {
+Future<String?> showCurrencyPicker(BuildContext context, AppSpacing spacing, {String? selected}) {
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
     ),
     builder: (_) => _CurrencyPickerSheet(selected: selected),
   );
 }
 
-class _CurrencyPickerSheet extends StatefulWidget {
+class _CurrencyPickerSheet extends ConsumerStatefulWidget {
   final String? selected;
   const _CurrencyPickerSheet({this.selected});
 
   @override
-  State<_CurrencyPickerSheet> createState() => _CurrencyPickerSheetState();
+  ConsumerState<_CurrencyPickerSheet> createState() => _CurrencyPickerSheetState();
 }
 
-class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
+class _CurrencyPickerSheetState extends ConsumerState<_CurrencyPickerSheet> {
   String _query = '';
 
   List<CurrencyMeta> get _filtered {
@@ -41,6 +43,7 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -65,7 +68,7 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                 hintText: 'Search currency...',
                 prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   borderSide: BorderSide(color: color.outlineVariant),
                 ),
                 isDense: true,

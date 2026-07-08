@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class RecentAchievementCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final color = theme.colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     final achievements = ref.watch(achievementsProvider);
 
@@ -57,7 +59,7 @@ class RecentAchievementCard extends ConsumerWidget {
 /* Card Widget */
 /* ---------------------------------------------------------- */
 
-class _AchievementCard extends StatelessWidget {
+class _AchievementCard extends ConsumerWidget {
   final dynamic achievement;
   final ThemeData theme;
   final ColorScheme color;
@@ -72,7 +74,8 @@ class _AchievementCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
     return Container(
       margin: EdgeInsets.symmetric(horizontal: padding, vertical: 6),
 
@@ -80,12 +83,12 @@ class _AchievementCard extends StatelessWidget {
         elevation: 1,
         shadowColor: color.shadow.withValues(alpha: 0.2),
 
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
 
         color: color.surfaceContainerHighest,
 
         child: InkWell(
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
 
           onTap: () {
             HapticFeedback.selectionClick();
@@ -117,14 +120,15 @@ class _AchievementCard extends StatelessWidget {
 /* Icon */
 /* ---------------------------------------------------------- */
 
-class _IconBadge extends StatelessWidget {
+class _IconBadge extends ConsumerWidget {
   final String icon;
 
   const _IconBadge({required this.icon});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
       width: 52,
@@ -134,7 +138,7 @@ class _IconBadge extends StatelessWidget {
 
       decoration: BoxDecoration(
         color: color.primaryContainer,
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
 
       child: Text(icon, style: const TextStyle(fontSize: 26)),
@@ -200,12 +204,13 @@ class _TextSection extends StatelessWidget {
 /* Skeleton Loader */
 /* ---------------------------------------------------------- */
 
-class _AchievementSkeleton extends StatelessWidget {
+class _AchievementSkeleton extends ConsumerWidget {
   const _AchievementSkeleton();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -214,7 +219,7 @@ class _AchievementSkeleton extends StatelessWidget {
         color: color.surfaceContainerHighest,
         elevation: 0,
 
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
 
         child: const Padding(
           padding: EdgeInsets.all(16),
@@ -246,15 +251,16 @@ class _AchievementSkeleton extends StatelessWidget {
   }
 }
 
-class _SkeletonBox extends StatelessWidget {
+class _SkeletonBox extends ConsumerWidget {
   final double width;
   final double height;
 
   const _SkeletonBox(this.width, this.height);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
       width: width,
@@ -262,7 +268,7 @@ class _SkeletonBox extends StatelessWidget {
 
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.5),
       ),
     );
   }

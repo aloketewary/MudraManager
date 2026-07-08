@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -25,6 +25,7 @@ class CommandCenterScreen extends ConsumerWidget {
     final accountsAsync = ref.watch(accountsProvider);
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return ScreenShell(
       config: const ScreenShellConfig(
@@ -138,7 +139,7 @@ class CommandCenterScreen extends ConsumerWidget {
                                 color:
                                     color.errorContainer.withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(
-                                    Tone.current.borderRadius,),
+                                    spacing.radiusSmall,),
                                 border: Border.all(
                                   color: color.error.withValues(alpha: 0.3),
                                   width: 1,
@@ -193,7 +194,7 @@ class CommandCenterScreen extends ConsumerWidget {
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(
-                                  Tone.current.borderRadius,),
+                                  spacing.radiusSmall,),
                               boxShadow: [
                                 BoxShadow(
                                   color: color.primary.withValues(alpha: 0.3),

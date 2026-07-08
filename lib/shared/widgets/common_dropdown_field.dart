@@ -1,7 +1,8 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 
-class CommonDropdownField<T> extends StatelessWidget {
+class CommonDropdownField<T> extends ConsumerWidget {
   const CommonDropdownField({
     super.key,
     required this.value,
@@ -20,8 +21,9 @@ class CommonDropdownField<T> extends StatelessWidget {
   final String? hintText;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -40,10 +42,10 @@ class CommonDropdownField<T> extends StatelessWidget {
         decoration: InputDecoration(
           labelText: labelText,
           hintText: hintText,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
           fillColor: Colors.transparent,
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
             borderSide: BorderSide(color: color.secondary),
           ),
           contentPadding: const EdgeInsets.symmetric(

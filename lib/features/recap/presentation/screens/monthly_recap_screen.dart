@@ -43,7 +43,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
         .generate(_selectedMonth, currency: _currency);
   }
 
-  Future<void> _downloadPdf(MonthlyRecapData data) async {
+  Future<void> _downloadPdf(MonthlyRecapData data, AppSpacing spacing) async {
     setState(() => _downloading = true);
     try {
       final bytes = await MonthlyRecapPdf.generate(data);
@@ -53,9 +53,9 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
         'MudraManager_Recap_$monthStr.pdf',
         askUser: true,
       );
-      SnackbarService.success(BuddyMessages.exportSuccess);
+      SnackbarService.success(BuddyMessages.exportSuccess, spacing);
     } catch (e) {
-      SnackbarService.error(BuddyMessages.exportFailed('$e'));
+      SnackbarService.error(BuddyMessages.exportFailed('$e'), spacing);
     } finally {
       if (mounted) setState(() => _downloading = false);
     }
@@ -141,7 +141,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
 
               // ── DOWNLOAD PDF ──
               FilledButton.icon(
-                onPressed: _downloading ? null : () => _downloadPdf(data),
+                onPressed: _downloading ? null : () => _downloadPdf(data, spacing),
                 icon: _downloading
                     ? const SizedBox(
                         width: 18,

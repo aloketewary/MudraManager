@@ -10,7 +10,6 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
@@ -67,6 +66,7 @@ class MonthlyComparisonScreen extends ConsumerWidget {
     final current = ref.read(compareMonthProvider);
     final picked = await showMonthPicker(
       context: context,
+      spacing: ref.watch(spacingProvider),
       initialMonth: current,
       lastMonth: DateTime(now.year, now.month - 1, 1),
     );
@@ -232,7 +232,7 @@ class _HeroSummary extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: deltaColor.withValues(alpha: 0.1),
                     borderRadius:
-                        BorderRadius.circular(Tone.current.borderRadius),
+                        BorderRadius.circular(spacing.radiusSmall),
                   ),
                   child: Text(
                     '${isUp ? '▲' : '▼'} ${pct.abs().toStringAsFixed(0)}% vs $cmpName',
@@ -417,7 +417,7 @@ class _InsightCard extends ConsumerWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: accent.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             child: Icon(icon, size: 18, color: accent),
           ),
@@ -535,7 +535,7 @@ class _PaceCard extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: color.primary.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
               ),
               child: Row(
                 children: [
@@ -826,7 +826,7 @@ class _CategoryImpact extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: deltaColor.withValues(alpha: 0.1),
                       borderRadius:
-                          BorderRadius.circular(Tone.current.borderRadius),
+                          BorderRadius.circular(spacing.radiusSmall),
                     ),
                     child: Icon(
                       IconHelper.getIconData(cat.iconName),
@@ -867,7 +867,7 @@ class _CategoryImpact extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: deltaColor.withValues(alpha: 0.1),
                           borderRadius:
-                              BorderRadius.circular(Tone.current.borderRadius),
+                              BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: Text(
                           isZero
@@ -1032,7 +1032,7 @@ class _MetricRow extends StatelessWidget {
   }
 }
 
-class _BehaviorExplanation extends StatelessWidget {
+class _BehaviorExplanation extends ConsumerWidget {
   final int countDelta;
   final double avgDelta;
   const _BehaviorExplanation({
@@ -1041,9 +1041,10 @@ class _BehaviorExplanation extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     final String explanation;
     if (countDelta > 0 && avgDelta > 1) {
@@ -1066,7 +1067,7 @@ class _BehaviorExplanation extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Text(
         explanation,

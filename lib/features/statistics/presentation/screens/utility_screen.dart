@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -182,7 +181,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2),),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) => Container(
@@ -222,7 +221,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                             setModalState(() => _hiddenUtilities = []);
                             setState(() {});
                             _savePreferences();
-                            SnackbarService.info(BuddyMessages.settingsSaved);
+                            SnackbarService.info(BuddyMessages.settingsSaved, spacing);
                           },
                           child:
                               Text(AppLocalizations.of(context)!.common_reset),
@@ -879,7 +878,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                     decoration: BoxDecoration(
                       color: color.primary.withValues(alpha: 0.1),
                       borderRadius:
-                          BorderRadius.circular(Tone.current.borderRadius),
+                          BorderRadius.circular(spacing.radiusSmall),
                     ),
                     child: Icon(item.icon, size: 20, color: color.primary),
                   ),
@@ -970,7 +969,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                     decoration: BoxDecoration(
                       color: color.secondary.withValues(alpha: 0.1),
                       borderRadius:
-                          BorderRadius.circular(Tone.current.borderRadius),
+                          BorderRadius.circular(spacing.radiusSmall),
                     ),
                     child: Icon(item.icon, size: 18, color: color.secondary),
                   ),

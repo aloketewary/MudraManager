@@ -44,7 +44,7 @@ class _IconPickerBottomSheetState extends ConsumerState<IconPickerBottomSheet> {
     return Container(
       decoration: BoxDecoration(
         color: color.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall)),
       ),
       child: Column(
         children: [

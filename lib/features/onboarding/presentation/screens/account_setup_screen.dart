@@ -144,10 +144,10 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     super.dispose();
   }
 
-  void _nextStep() {
+  void _nextStep(AppSpacing spacing) {
     if (_step == 0) {
       if (_nameController.text.trim().isEmpty) {
-        SnackbarService.error(BuddyMessages.categoryNameRequired);
+        SnackbarService.error(BuddyMessages.categoryNameRequired, spacing);
         return;
       }
       HapticFeedback.lightImpact();
@@ -173,7 +173,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
         _starterControllers.putIfAbsent(item.$1, () => TextEditingController());
       }
     } else {
-      _completeSetup();
+      _completeSetup(spacing);
     }
   }
 
@@ -186,10 +186,10 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     }
   }
 
-  Future<void> _restoreBackup() async {
+  Future<void> _restoreBackup(AppSpacing spacing) async {
     try {
       final password = await DialogUtils.showPasswordDialog(
-        context,
+        context, spacing,
         isRestore: true,
       );
       if (password == null) return;
@@ -200,18 +200,19 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       if (!context.mounted) return;
       final data = await BackupService.restoreEncryptedBackup(
         context,
+        spacing,
         isar,
         password,
       );
 
       if (data != null) {
         SharedPrefsUtil.instance.setOnboardingComplete();
-        SnackbarService.success(BuddyMessages.restoreSuccess);
+        SnackbarService.success(BuddyMessages.restoreSuccess, spacing);
         if (context.mounted) context.go(AppRoutes.home);
       }
     } catch (e) {
       if (context.mounted) {
-        SnackbarService.error(BuddyMessages.restoreFailed);
+        SnackbarService.error(BuddyMessages.restoreFailed, spacing);
       }
     } finally {
       if (mounted) {
@@ -220,7 +221,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     }
   }
 
-  Future<void> _completeSetup() async {
+  Future<void> _completeSetup(AppSpacing spacing) async {
     setState(() => _isLoading = true);
     HapticFeedback.mediumImpact();
 
@@ -267,7 +268,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       }
     } catch (e) {
       if (context.mounted) {
-        SnackbarService.error(BuddyMessages.genericError);
+        SnackbarService.error(BuddyMessages.genericError, spacing);
       }
     } finally {
       if (mounted) {
@@ -374,7 +375,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                       width: double.infinity,
                       height: 52,
                       child: FilledButton(
-                        onPressed: _isLoading ? null : _nextStep,
+                        onPressed:() => _isLoading ? null : _nextStep(spacing),
                         style: FilledButton.styleFrom(
                           shape: RoundedRectangleBorder(
                             borderRadius:
@@ -416,7 +417,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     if (_step < 2) ...[
                       const SizedBox(height: 12),
                       TextButton.icon(
-                        onPressed: _isLoading ? null : _restoreBackup,
+                        onPressed: () => _isLoading ? null : _restoreBackup(spacing),
                         icon: Icon(
                           LucideIcons.archiveRestore,
                           size: 16,
@@ -433,7 +434,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     if (_step == 5) ...[
                       const SizedBox(height: 12),
                       TextButton(
-                        onPressed: _isLoading ? null : _completeSetup,
+                        onPressed: () => _isLoading ? null : _completeSetup(spacing),
                         child: Text(
                           ctxt.onboard_skipAddLater,
                           style: textTheme.labelLarge?.copyWith(
@@ -542,7 +543,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
               ),
             ),
             textInputAction: TextInputAction.next,
-            onFieldSubmitted: (_) => _nextStep(),
+            onFieldSubmitted: (_) => _nextStep(spacing),
           ),
         ],
       ),
@@ -654,7 +655,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     color: isSelected
                         ? accent.withValues(alpha: isDark ? 0.2 : 0.12)
                         : color.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     border: Border.all(
                       color: isSelected
                           ? accent.withValues(alpha: 0.5)
@@ -694,7 +695,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                 context: context,
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
                 ),
                 builder: (_) => _AllCurrenciesSheet(
                   selected: _selectedCurrency,
@@ -856,7 +857,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
               return null;
             },
             textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _nextStep(),
+            onFieldSubmitted: (_) => _nextStep(spacing),
           ),
           const SizedBox(height: 12),
           Row(
@@ -1544,15 +1545,15 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
   }
 }
 
-class _AllCurrenciesSheet extends StatefulWidget {
+class _AllCurrenciesSheet extends ConsumerStatefulWidget {
   final String selected;
   const _AllCurrenciesSheet({required this.selected});
 
   @override
-  State<_AllCurrenciesSheet> createState() => _AllCurrenciesSheetState();
+  ConsumerState<_AllCurrenciesSheet> createState() => _AllCurrenciesSheetState();
 }
 
-class _AllCurrenciesSheetState extends State<_AllCurrenciesSheet> {
+class _AllCurrenciesSheetState extends ConsumerState<_AllCurrenciesSheet> {
   String _query = '';
 
   List<CurrencyMeta> get _filtered {
@@ -1572,6 +1573,7 @@ class _AllCurrenciesSheetState extends State<_AllCurrenciesSheet> {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -1597,7 +1599,7 @@ class _AllCurrenciesSheetState extends State<_AllCurrenciesSheet> {
                 hintText: AppLocalizations.of(context)!.common_searchCurrency,
                 prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   borderSide: BorderSide(color: color.outlineVariant),
                 ),
                 isDense: true,

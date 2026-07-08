@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,12 +25,13 @@ import 'package:mudra_manager/core/router/app_routes.dart';
 // Skeleton Loaders
 // ─────────────────────────────────────────────
 
-class AccountSelectorSkeleton extends StatelessWidget {
+class AccountSelectorSkeleton extends ConsumerWidget {
   const AccountSelectorSkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
     return SizedBox(
       height: 64,
       child: ListView.separated(
@@ -42,7 +42,7 @@ class AccountSelectorSkeleton extends StatelessWidget {
           width: 150,
           decoration: BoxDecoration(
             color: color.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
           ),
         ),
       ),
@@ -52,12 +52,13 @@ class AccountSelectorSkeleton extends StatelessWidget {
   }
 }
 
-class CategorySelectorSkeleton extends StatelessWidget {
+class CategorySelectorSkeleton extends ConsumerWidget {
   const CategorySelectorSkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
     return SizedBox(
       height: 52,
       child: ListView.separated(
@@ -68,7 +69,7 @@ class CategorySelectorSkeleton extends StatelessWidget {
           width: 110,
           decoration: BoxDecoration(
             color: color.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
           ),
         ),
       ),
@@ -78,12 +79,13 @@ class CategorySelectorSkeleton extends StatelessWidget {
   }
 }
 
-class TagSelectorSkeleton extends StatelessWidget {
+class TagSelectorSkeleton extends ConsumerWidget {
   const TagSelectorSkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -94,7 +96,7 @@ class TagSelectorSkeleton extends StatelessWidget {
           height: 32,
           decoration: BoxDecoration(
             color: color.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
           ),
         ),
       ),

@@ -87,6 +87,7 @@ class SubscriptionTransactionCardBody extends ConsumerWidget {
                             final confirmed =
                                 await DialogUtils.showConfirmation(
                               context,
+                              spacing,
                               title: 'Remove Subscription Tag?',
                               message:
                                   'This will unlink this transaction from the recurring bill.',

@@ -57,12 +57,13 @@ class GoalCard extends ConsumerWidget {
                       alignment: Alignment.center,
                       children: [
                         SizedBox(
-                          width: 60,
-                          height: 60,
+                          width: spacing.sectionGap * 2,
+                          height: spacing.sectionGap * 2,
                           child: CustomPaint(
                             painter: _CompactRingPainter(
                               progress: value,
                               color: color.primary,
+                              spacing: spacing,
                             ),
                           ),
                         ),
@@ -131,6 +132,7 @@ class GoalCard extends ConsumerWidget {
                               color.primary,
                               color,
                               textTheme,
+                              spacing,
                             ),
                           ),
                           SizedBox(width: spacing.radiusMedium),
@@ -143,6 +145,7 @@ class GoalCard extends ConsumerWidget {
                               color.tertiary,
                               color,
                               textTheme,
+                              spacing,
                             ),
                           ),
                         ],
@@ -170,11 +173,12 @@ class GoalCard extends ConsumerWidget {
     Color itemColor,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     return Row(
       children: [
         Icon(icon, color: itemColor, size: 16),
-        const SizedBox(width: 6),
+        SizedBox(width: spacing.elementGapMin),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,13 +209,18 @@ class GoalCard extends ConsumerWidget {
 class _CompactRingPainter extends CustomPainter {
   final double progress;
   final Color color;
+  final AppSpacing spacing;
 
-  _CompactRingPainter({required this.progress, required this.color});
+  _CompactRingPainter({
+    required this.progress,
+    required this.color,
+    required this.spacing,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 4;
+    final radius = size.width / 2 - spacing.cardVerticalMin;
     const strokeWidth = 6.0;
 
     final bgPaint = Paint()

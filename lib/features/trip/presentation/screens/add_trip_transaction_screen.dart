@@ -1,5 +1,4 @@
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:flutter/material.dart';
@@ -281,7 +280,7 @@ class _AddTripTransactionScreenState
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius:
-                            BorderRadius.circular(Tone.current.borderRadius),
+                            BorderRadius.circular(spacing.radiusSmall),
                         border: Border.all(
                           color: color.outlineVariant.withValues(alpha: 0.5),
                         ),
@@ -291,7 +290,7 @@ class _AddTripTransactionScreenState
                           shape: WidgetStateProperty.all(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
-                                  Tone.current.borderRadius,),
+                                  spacing.radiusSmall,),
                             ),
                           ),
                           padding: WidgetStateProperty.all(
@@ -395,7 +394,7 @@ class _AddTripTransactionScreenState
                             });
                           },
                           borderRadius:
-                              BorderRadius.circular(Tone.current.borderRadius),
+                              BorderRadius.circular(spacing.radiusSmall),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -407,7 +406,7 @@ class _AddTripTransactionScreenState
                                       .withValues(alpha: 0.2)
                                   : color.surface,
                               borderRadius: BorderRadius.circular(
-                                  Tone.current.borderRadius,),
+                                  spacing.radiusSmall,),
                               border: Border.all(
                                 color: isChecked
                                     ? color.primary.withValues(alpha: 0.5)
@@ -481,7 +480,7 @@ class _AddTripTransactionScreenState
                       MediaQuery.of(context).padding.bottom,
                 ),
                 child: FilledButton(
-                  onPressed: _canSave ? () => _save(trip) : null,
+                  onPressed: _canSave ? () => _save(trip, spacing,) : null,
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -622,18 +621,18 @@ class _AddTripTransactionScreenState
     );
   }
 
-  Future<void> _save(Trip trip) async {
+  Future<void> _save(Trip trip, AppSpacing spacing,) async {
     final amount = _resolvedAmount;
     if (amount == null || amount <= 0) {
-      SnackbarService.error(BuddyMessages.invalidAmount);
+      SnackbarService.error(BuddyMessages.invalidAmount, spacing,);
       return;
     }
     if (_paidById == null) {
-      SnackbarService.error(BuddyMessages.fillAllFields);
+      SnackbarService.error(BuddyMessages.fillAllFields, spacing,);
       return;
     }
     if (_selectedParticipants.isEmpty) {
-      SnackbarService.error(BuddyMessages.addParticipant);
+      SnackbarService.error(BuddyMessages.addParticipant, spacing,);
       return;
     }
 
@@ -641,7 +640,7 @@ class _AddTripTransactionScreenState
     HapticFeedback.mediumImpact();
 
     try {
-      final splitAmounts = _computeSplitAmounts(amount);
+      final splitAmounts = _computeSplitAmounts(amount, spacing,);
       if (splitAmounts == null) return; // validation error shown inside
 
       final expense = SplitExpense.create(
@@ -677,6 +676,7 @@ class _AddTripTransactionScreenState
       if (context.mounted) {
         SnackbarService.success(
           BuddyMessages.expenseAddedToTrip(trip.isTrip),
+          spacing,
         );
         context.pop();
       }
@@ -685,7 +685,7 @@ class _AddTripTransactionScreenState
     }
   }
 
-  List<double>? _computeSplitAmounts(double amount) {
+  List<double>? _computeSplitAmounts(double amount, AppSpacing spacing,) {
     if (_splitType == SplitType.equal) {
       return List.filled(
         _selectedParticipants.length,
@@ -707,6 +707,7 @@ class _AddTripTransactionScreenState
       if ((sum - amount).abs() > 0.1) {
         SnackbarService.error(
           'Total split (${formatCurrency(sum, decimals: 0)}) must match ${formatCurrency(amount, decimals: 0)}',
+          spacing,
         );
         setState(() => _saving = false);
         return null;
@@ -728,6 +729,7 @@ class _AddTripTransactionScreenState
       if ((sum - 100).abs() > 0.1) {
         SnackbarService.error(
           'Total percentage (${sum.toStringAsFixed(1)}%) must equal 100%',
+          spacing,
         );
         setState(() => _saving = false);
         return null;

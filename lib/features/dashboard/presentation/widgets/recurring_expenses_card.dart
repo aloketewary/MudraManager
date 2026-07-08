@@ -40,7 +40,7 @@ class RecurringExpensesCard extends ConsumerWidget {
             HapticFeedback.mediumImpact();
             context.push(AppRoutes.recurringTransactions);
           },
-          borderRadius: BorderRadius.circular(spacing.radiusLarge),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           child: Padding(
             padding: EdgeInsets.all(spacing.cardInner),
             child: Row(

@@ -1,4 +1,5 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'dart:math';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -11,7 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
 
-class AchievementUnlockDialog extends StatelessWidget {
+class AchievementUnlockDialog extends ConsumerWidget {
   final Achievement achievement;
 
   const AchievementUnlockDialog({
@@ -35,9 +36,10 @@ class AchievementUnlockDialog extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final accent = _categoryAccent();
+    final spacing = ref.watch(spacingProvider);
 
     return GestureDetector(
       onTap: () => Navigator.of(context).pop(),
@@ -165,7 +167,7 @@ class AchievementUnlockDialog extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     border: Border.all(
                       color: accent.withValues(alpha: 0.3),
                     ),
@@ -205,7 +207,7 @@ class AchievementUnlockDialog extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: [accent, accent.withValues(alpha: 0.8)],
                       ),
-                      borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
                       boxShadow: [
                         BoxShadow(
                           color: accent.withValues(alpha: 0.4),
@@ -270,7 +272,7 @@ class AchievementUnlockDialog extends StatelessWidget {
 }
 
 /// Bottom sheet that shows the share card preview with Share and Close buttons.
-class _ShareCardPreview extends StatelessWidget {
+class _ShareCardPreview extends ConsumerWidget {
   final Achievement achievement;
   final Color accent;
   final _cardKey = GlobalKey();
@@ -281,8 +283,9 @@ class _ShareCardPreview extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return SafeArea(
       child: Padding(
@@ -296,14 +299,14 @@ class _ShareCardPreview extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.5),
               ),
             ),
             const SizedBox(height: 20),
 
             // ── CARD PREVIEW ──
             ClipRRect(
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
               child: RepaintBoundary(
                 key: _cardKey,
                 child: _ShareCard(
@@ -331,7 +334,7 @@ class _ShareCardPreview extends StatelessWidget {
                 style: FilledButton.styleFrom(
                   backgroundColor: accent,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
                 ),
               ),
@@ -404,14 +407,15 @@ class _ShareCardPreview extends StatelessWidget {
 /// - Large achievement badge
 /// - Title + description + XP
 /// - Mudra Manager branding at bottom
-class _ShareCard extends StatelessWidget {
+class _ShareCard extends ConsumerWidget {
   final Achievement achievement;
   final Color accent;
 
   const _ShareCard({required this.achievement, required this.accent});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
     return SizedBox(
       width: 360,
       height: 640,
@@ -452,7 +456,7 @@ class _ShareCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: accent.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         border: Border.all(
                           color: accent.withValues(alpha: 0.4),
                         ),
@@ -566,7 +570,7 @@ class _ShareCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: accent.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         border: Border.all(
                           color: accent.withValues(alpha: 0.4),
                         ),

@@ -145,7 +145,7 @@ class _SimpleColorPickerDialogState
     return Dialog(
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Container(
         constraints: BoxConstraints(

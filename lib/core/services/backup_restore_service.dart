@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:convert';
 import 'dart:math';
@@ -50,7 +51,8 @@ class BackupService {
 
   /// Create encrypted backup with password
   static Future<String?> createEncryptedBackup(
-    String password, {
+    String password,
+    AppSpacing spacing, {
     bool includeAttachments = true,
     bool interactive = true,
   }) async {
@@ -58,7 +60,7 @@ class BackupService {
       final isar = Isar.getInstance();
       if (isar == null) {
         _log.e('Isar instance not available');
-        SnackbarService.error(BuddyMessages.genericError);
+        SnackbarService.error(BuddyMessages.genericError, spacing);
         return null;
       }
 
@@ -121,7 +123,7 @@ class BackupService {
       return filePath;
     } catch (e, stackTrace) {
       _log.e('Backup creation failed', e, stackTrace);
-      SnackbarService.error(BuddyMessages.backupFailed);
+      SnackbarService.error(BuddyMessages.backupFailed, spacing);
       return null;
     }
   }
@@ -129,6 +131,7 @@ class BackupService {
   /// Restore backup with password
   static Future<String?> restoreEncryptedBackup(
     BuildContext context,
+    AppSpacing spacing,
     Isar isar,
     String password,
   ) async {
@@ -145,7 +148,7 @@ class BackupService {
       }
 
       if (result.files.first.extension != 'mudra') {
-        SnackbarService.error(BuddyMessages.invalidBackupFile);
+        SnackbarService.error(BuddyMessages.invalidBackupFile, spacing);
         return null;
       }
 
@@ -154,7 +157,7 @@ class BackupService {
       // Reject excessively large files to prevent OOM
       final fileSize = selectedFile.lengthSync();
       if (fileSize > 100 * 1024 * 1024) {
-        SnackbarService.error('Backup file too large (max 100MB)');
+        SnackbarService.error('Backup file too large (max 100MB)', spacing);
         return null;
       }
 
@@ -179,7 +182,7 @@ class BackupService {
         final hmacPayload = '${backupData['iv']}:${backupData['data']}';
         final expectedMac = Hmac(sha256, macKey).convert(utf8.encode(hmacPayload)).toString();
         if (expectedMac != backupData['mac']) {
-          SnackbarService.error(BuddyMessages.corruptBackup);
+          SnackbarService.error(BuddyMessages.corruptBackup, spacing);
           return null;
         }
       }
@@ -192,7 +195,7 @@ class BackupService {
       if (backupData['hash'] != null) {
         final hash = sha256.convert(utf8.encode(decrypted)).toString();
         if (hash != backupData['hash']) {
-          SnackbarService.error(BuddyMessages.corruptBackup);
+          SnackbarService.error(BuddyMessages.corruptBackup, spacing);
           return null;
         }
       }
@@ -209,7 +212,7 @@ class BackupService {
     } catch (e, stackTrace) {
       _log.e('Restore failed', e, stackTrace);
       SnackbarService.error(
-        'Restore failed: Invalid password or corrupted file',
+        'Restore failed: Invalid password or corrupted file', spacing
       );
       return null;
     }

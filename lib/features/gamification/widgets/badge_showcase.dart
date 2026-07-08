@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +15,7 @@ class BadgeShowcase extends ConsumerWidget {
     final achievementsAsync = ref.watch(achievementsProvider);
     final theme = Theme.of(context);
     final color = theme.colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     return achievementsAsync.when(
       data: (achievements) {
@@ -31,7 +32,7 @@ class BadgeShowcase extends ConsumerWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: color.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Row(
                   children: [
@@ -84,7 +85,7 @@ class BadgeShowcase extends ConsumerWidget {
                     semanticsLabel: 'Progress',
                     value: total > 0 ? unlocked.length / total : 0,
                     backgroundColor: color.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.5),
                   ),
                 ),
                 const SizedBox(width: 12),

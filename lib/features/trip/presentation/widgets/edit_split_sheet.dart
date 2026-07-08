@@ -1,5 +1,5 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -18,6 +18,7 @@ void showEditSplitSheet({
   required SplitType splitType,
   required Map<int, double> splitAmounts,
   required VoidCallback onChanged,
+  required AppSpacing spacing,
 }) {
   final amount = tripTxn.resolvedAmount ?? 0.0;
   final controllers = <int, TextEditingController>{};
@@ -34,7 +35,7 @@ void showEditSplitSheet({
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
-        top: Radius.circular(Tone.current.borderRadius * 2),
+        top: Radius.circular(spacing.radiusSmall * 2),
       ),
     ),
     builder: (ctx) => StatefulBuilder(
@@ -147,7 +148,7 @@ void showEditSplitSheet({
                         setModalState(() {});
                       },
                       borderRadius:
-                          BorderRadius.circular(Tone.current.borderRadius),
+                          BorderRadius.circular(spacing.radiusSmall),
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -155,7 +156,7 @@ void showEditSplitSheet({
                               ? color.primaryContainer.withValues(alpha: 0.2)
                               : color.surface,
                           borderRadius:
-                              BorderRadius.circular(Tone.current.borderRadius),
+                              BorderRadius.circular(spacing.radiusSmall),
                           border: Border.all(
                             color: isSelected
                                 ? color.primary.withValues(alpha: 0.5)

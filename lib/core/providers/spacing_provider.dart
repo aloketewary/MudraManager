@@ -56,21 +56,21 @@ class AppSpacing {
   final double touchTargetSmall;
 
   const AppSpacing({
-    // Layout
+    // Layout - Mudra Precision spacing scale
     this.cardHorizontalMin = 4.0,
     this.cardHorizontal = 8.0,
     this.cardHorizontalMax = 16.0,
     this.cardVerticalMin = 4.0,
     this.cardVertical = 8.0,
     this.cardVerticalMax = 16.0,
-    this.cardInner = 16.0,
-    this.sectionGap = 16.0,
+    this.cardInner = 24.0,
+    this.sectionGap = 24.0,
     this.elementGap = 8.0,
     this.elementGapMin = 4.0,
     this.elementGapUltraMin = 2.0,
-    // Radius
-    this.radiusSmall = 8.0,
-    this.radiusMedium = 12.0,
+    // Radius - Mudra Precision rounded scale
+    this.radiusSmall = 4.0,
+    this.radiusMedium = 8.0,
     this.radiusLarge = 16.0,
     // Icons
     this.iconXS = 14.0,
@@ -114,14 +114,14 @@ class AppSpacing {
         cardVerticalMin = 8.0,
         cardVertical = 14.0,
         cardVerticalMax = 22.0,
-        cardInner = 22.0,
+        cardInner = 28.0,
         sectionGap = 24.0,
         elementGap = 14.0,
         elementGapMin = 8.0,
         elementGapUltraMin = 4.0,
         // Radius — slightly larger
-        radiusSmall = rSmall ?? 10.0,
-        radiusMedium = rMedium ?? 16.0,
+        radiusSmall = rSmall ?? 6.0,
+        radiusMedium = rMedium ?? 10.0,
         radiusLarge = rLarge ?? 20.0,
         // Icons — 2px larger
         iconXS = 16.0,

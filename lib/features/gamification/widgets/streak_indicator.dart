@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +11,7 @@ class StreakIndicator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final streak = ref.watch(dailyStreakProvider);
+    final spacing = ref.watch(spacingProvider);
     if (streak == null || streak.currentCount == 0) {
       return const SizedBox.shrink();
     }
@@ -35,7 +36,7 @@ class StreakIndicator extends ConsumerWidget {
               color.error,
             ],
           ),
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

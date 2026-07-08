@@ -114,7 +114,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                   id: 'archive_group',
                   label: ctxt.trip_archiveTrip,
                   icon: LucideIcons.archive,
-                  onTap: () => _archiveGroup(header.id),
+                  onTap: () => _archiveGroup(header.id, spacing,),
                 ),
             ],
           ),
@@ -229,9 +229,9 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
     );
   }
 
-  Future<void> _archiveGroup(int groupId) async {
+  Future<void> _archiveGroup(int groupId, AppSpacing spacing,) async {
     final confirm = await DialogUtils.showConfirmation(
-      context,
+      context, spacing,
       title: AppLocalizations.of(context)!.trip_archiveGroupTitle,
       message: AppLocalizations.of(context)!.trip_archiveGroupMsg,
       confirmText: AppLocalizations.of(context)!.trip_archive,
@@ -571,7 +571,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
       confirmDismiss: (direction) async {
         HapticFeedback.mediumImpact();
         final confirmed = await DialogUtils.showDeleteConfirmation(
-          context,
+          context, spacing,
           title: AppLocalizations.of(context)!.trip_removeExpense,
           message: header.isTrip
               ? AppLocalizations.of(context)!.trip_removeExpenseMsg

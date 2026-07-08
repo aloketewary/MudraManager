@@ -60,14 +60,14 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
     super.dispose();
   }
 
-  Future<void> _create() async {
+  Future<void> _create(AppSpacing spacing) async {
     if (_saving) return;
     final ctxt = AppLocalizations.of(context)!;
 
     if (!_formKey.currentState!.validate()) return;
 
     if (_current > _target) {
-      SnackbarService.warning(ctxt.goal_currentExceedsTarget);
+      SnackbarService.warning(ctxt.goal_currentExceedsTarget, spacing);
       return;
     }
 
@@ -76,7 +76,7 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
     try {
       final canCreate = await ref.read(canCreateGoalProvider.future);
       if (!canCreate) {
-        SnackbarService.warning(ctxt.goal_freePlanLimit);
+        SnackbarService.warning(ctxt.goal_freePlanLimit, spacing);
         setState(() => _saving = false);
         return;
       }
@@ -94,11 +94,11 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
       await ref.read(goalServiceProvider).addGoal(goal);
 
       HapticFeedback.mediumImpact();
-      SnackbarService.success(BuddyMessages.goalCreated);
+      SnackbarService.success(BuddyMessages.goalCreated, spacing);
       if (mounted) context.pop();
     } catch (e) {
       setState(() => _saving = false);
-      SnackbarService.error(e.toString());
+      SnackbarService.error(e.toString(), spacing);
     }
   }
 
@@ -119,7 +119,7 @@ class _CreateGoalScreenState extends ConsumerState<CreateGoalScreen> {
         trailing: ScreenTextAction(
           id: 'create_goal',
           label: ctxt.goal_createGoal,
-          onTap: (_isFormValid && !_saving) ? _create : null,
+          onTap: () => (_isFormValid && !_saving) ? _create(spacing) : null,
           isLoading: _saving,
         ),
       ),

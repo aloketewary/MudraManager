@@ -1,4 +1,5 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
 
-class AchievementCard extends StatelessWidget {
+class AchievementCard extends ConsumerWidget {
   final Achievement achievement;
 
   const AchievementCard({super.key, required this.achievement});
@@ -28,7 +29,7 @@ class AchievementCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isUnlocked = achievement.isUnlocked;
@@ -36,6 +37,7 @@ class AchievementCard extends StatelessWidget {
     final progress = achievement.target > 0
         ? (achievement.progress / achievement.target).clamp(0.0, 1.0)
         : 0.0;
+    final spacing = ref.watch(spacingProvider);
 
     return Card(
       elevation: isUnlocked ? 2 : 0,
@@ -43,7 +45,7 @@ class AchievementCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       color: isUnlocked ? null : color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         side: BorderSide(
           color: isUnlocked
               ? accent.withValues(alpha: 0.4)
@@ -56,7 +58,7 @@ class AchievementCard extends StatelessWidget {
           HapticFeedback.lightImpact();
           _showShowcase(context);
         },
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         child: Container(
           decoration: isUnlocked
               ? BoxDecoration(
@@ -179,7 +181,7 @@ class AchievementCard extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -200,7 +202,7 @@ class AchievementCard extends StatelessWidget {
                 Column(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.5),
                       child: LinearProgressIndicator(
                         semanticsLabel: 'Progress',
                         value: progress,
@@ -255,7 +257,7 @@ class AchievementCard extends StatelessWidget {
 // FULL-SCREEN TRANSPARENT SHOWCASE
 // ══════════════════════════════════════════════════════════════
 
-class _AchievementShowcase extends StatelessWidget {
+class _AchievementShowcase extends ConsumerWidget {
   final Achievement achievement;
 
   const _AchievementShowcase({required this.achievement});
@@ -291,7 +293,7 @@ class _AchievementShowcase extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final isUnlocked = achievement.isUnlocked;
     final accent = _categoryAccent();
@@ -299,6 +301,7 @@ class _AchievementShowcase extends StatelessWidget {
         ? (achievement.progress / achievement.target).clamp(0.0, 1.0)
         : 0.0;
     final remaining = achievement.target - achievement.progress;
+    final spacing = ref.watch(spacingProvider);
 
     return GestureDetector(
       onTap: () => Navigator.of(context).pop(),
@@ -435,21 +438,25 @@ class _AchievementShowcase extends StatelessWidget {
                     _showcasePill(
                       _categoryLabel(achievement.category),
                       accent,
+                      spacing,
                     ),
                     _showcasePill(
                       '+${achievement.rewardXP} XP',
                       accent,
+                      spacing,
                     ),
                     if (isUnlocked && achievement.unlockedAt != null)
                       _showcasePill(
                         DateFormat('MMM dd, yyyy')
                             .format(achievement.unlockedAt!),
                         Colors.white.withValues(alpha: 0.5),
+                        spacing,
                       ),
                     if (!isUnlocked)
                       _showcasePill(
                         '$remaining more to go',
                         Colors.white.withValues(alpha: 0.5),
+                        spacing,
                       ),
                   ],
                 )
@@ -465,7 +472,7 @@ class _AchievementShowcase extends StatelessWidget {
                     child: Column(
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.5),
                           child: LinearProgressIndicator(
                             semanticsLabel: 'Progress',
                             value: progress,
@@ -505,12 +512,12 @@ class _AchievementShowcase extends StatelessWidget {
     );
   }
 
-  Widget _showcasePill(String label, Color accent) {
+  Widget _showcasePill(String label, Color accent, AppSpacing spacing) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         border: Border.all(
           color: accent.withValues(alpha: 0.25),
         ),

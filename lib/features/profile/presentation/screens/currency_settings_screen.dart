@@ -379,7 +379,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
   ) async {
     final ctxt = AppLocalizations.of(context)!;
     final newCurrency =
-        await showCurrencyPicker(context, selected: currentBase);
+        await showCurrencyPicker(context, spacing, selected: currentBase);
     if (newCurrency == null || newCurrency == currentBase) return;
     if (!context.mounted) return;
 
@@ -390,7 +390,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius:
-            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall)),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(
@@ -578,12 +578,13 @@ class CurrencySettingsScreen extends ConsumerWidget {
         Navigator.of(context).pop();
         SnackbarService.success(
           BuddyMessages.currencyArchivedCount(archivedCount, newCurrency),
+          spacing,
         );
       }
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop();
-        SnackbarService.error(BuddyMessages.genericError);
+        SnackbarService.error(BuddyMessages.genericError, spacing);
       }
     }
   }

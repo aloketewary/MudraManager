@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -285,8 +284,8 @@ class ManageCategoriesScreen extends ConsumerWidget {
                   AppRoutes.addCategory,
                   extra: {'category': category},
                 ),
-                onDelete: () => _deleteCategory(context, ref, category, ctxt),
-                onDeleteSubcategory: (sub) => _deleteCategory(context, ref, sub, ctxt),
+                onDelete: () => _deleteCategory(context, ref, category, ctxt, spacing),
+                onDeleteSubcategory: (sub) => _deleteCategory(context, ref, sub, ctxt, spacing),
               ),
               if (!isLast)
                 Divider(
@@ -306,6 +305,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
     WidgetRef ref,
     Category category,
     AppLocalizations ctxt,
+    AppSpacing spacing,
   ) async {
     final service = ref.read(categoryServiceProvider);
     final txCount = await service.getLinkedTransactionCount(category.id);
@@ -326,6 +326,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
 
     final shouldDelete = await DialogUtils.showDeleteConfirmation(
       context,
+      spacing,
       title: BuddyMessages.deleteTitle,
       message: message,
       deleteText: (txCount > 0 || budgetCount > 0) ? ctxt.categories_deleteAll : null,
@@ -337,13 +338,13 @@ class ManageCategoriesScreen extends ConsumerWidget {
       ref.invalidate(transactionCountsProvider);
       ref.invalidate(transactionProvider);
       if (budgetCount > 0) ref.invalidate(budgetsWithProgressProvider);
-      SnackbarService.success(BuddyMessages.categoryDeleted);
+      SnackbarService.success(BuddyMessages.categoryDeleted, spacing);
     }
   }
 }
 
 // ── CATEGORY ROW (with expandable subcategories) ──
-class _CategoryRow extends StatefulWidget {
+class _CategoryRow extends ConsumerStatefulWidget {
   final Category category;
   final List<Category> subcategories;
   final List<Category> allCategories;
@@ -363,10 +364,10 @@ class _CategoryRow extends StatefulWidget {
   });
 
   @override
-  State<_CategoryRow> createState() => _CategoryRowState();
+  ConsumerState<_CategoryRow> createState() => _CategoryRowState();
 }
 
-class _CategoryRowState extends State<_CategoryRow> {
+class _CategoryRowState extends ConsumerState<_CategoryRow> {
   bool _expanded = false;
 
   @override
@@ -381,6 +382,7 @@ class _CategoryRowState extends State<_CategoryRow> {
       error: (_, __) => 0,
     );
     final hasChildren = widget.subcategories.isNotEmpty;
+    final spacing = ref.watch(spacingProvider);
 
     return Column(
       children: [
@@ -392,6 +394,7 @@ class _CategoryRowState extends State<_CategoryRow> {
               widget.category,
               color,
               textTheme,
+              spacing,
               onEdit: widget.onEdit,
               onDelete: widget.onDelete,
             );
@@ -404,7 +407,7 @@ class _CategoryRowState extends State<_CategoryRow> {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: categoryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
                   child: Icon(
                     IconHelper.getIconData(widget.category.iconName),
@@ -531,6 +534,7 @@ class _CategoryRowState extends State<_CategoryRow> {
                     sub,
                     color,
                     textTheme,
+                    spacing,
                     onEdit: () => context.push(
                       AppRoutes.addCategory,
                       extra: {'category': sub},
@@ -584,7 +588,9 @@ class _CategoryRowState extends State<_CategoryRow> {
     BuildContext context,
     Category category,
     ColorScheme color,
-    TextTheme textTheme, {
+    TextTheme textTheme, 
+    AppSpacing spacing,
+    {
     required VoidCallback onEdit,
     required VoidCallback onDelete,
   }) {
@@ -595,7 +601,7 @@ class _CategoryRowState extends State<_CategoryRow> {
       context: context,
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => SafeArea(
         child: Column(
@@ -619,7 +625,7 @@ class _CategoryRowState extends State<_CategoryRow> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: catColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     ),
                     child: Icon(
                       IconHelper.getIconData(category.iconName),
@@ -668,7 +674,7 @@ class _CategoryRowState extends State<_CategoryRow> {
               onTap: () {
                 HapticFeedback.mediumImpact();
                 Navigator.pop(ctx);
-                _showMergeSheet(context, category, color, textTheme);
+                _showMergeSheet(context, category, color, textTheme, spacing);
               },
             ),
             ListTile(
@@ -696,6 +702,7 @@ class _CategoryRowState extends State<_CategoryRow> {
     Category source,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     final ctxt = AppLocalizations.of(context)!;
     final candidates = widget.allCategories
@@ -703,7 +710,7 @@ class _CategoryRowState extends State<_CategoryRow> {
         .toList();
 
     if (candidates.isEmpty) {
-      SnackbarService.info(ctxt.category_mergeSameError);
+      SnackbarService.info(ctxt.category_mergeSameError, spacing);
       return;
     }
 
@@ -711,7 +718,7 @@ class _CategoryRowState extends State<_CategoryRow> {
       context: context,
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => SafeArea(
         child: Column(
@@ -760,7 +767,7 @@ class _CategoryRowState extends State<_CategoryRow> {
                     title: Text(target.name),
                     onTap: () async {
                       Navigator.pop(ctx);
-                      await _executeMerge(context, source, target);
+                      await _executeMerge(context, source, target, spacing);
                     },
                   );
                 },
@@ -776,6 +783,7 @@ class _CategoryRowState extends State<_CategoryRow> {
     BuildContext context,
     Category source,
     Category target,
+    AppSpacing spacing,
   ) async {
     final ctxt = AppLocalizations.of(context)!;
     // This is inside _CategoryRowState which is a State, not ConsumerState.
@@ -792,6 +800,7 @@ class _CategoryRowState extends State<_CategoryRow> {
 
     final confirmed = await DialogUtils.showDeleteConfirmation(
       context,
+      spacing,
       title: ctxt.category_merge,
       message: ctxt.category_mergePreview(preview.totalAffected, target.name),
       deleteText: ctxt.category_mergeConfirm,
@@ -802,7 +811,7 @@ class _CategoryRowState extends State<_CategoryRow> {
     await mergeService.merge(source.id, target.id);
 
     if (context.mounted) {
-      SnackbarService.success(ctxt.category_mergeSuccess);
+      SnackbarService.success(ctxt.category_mergeSuccess, spacing);
     }
   }
 }

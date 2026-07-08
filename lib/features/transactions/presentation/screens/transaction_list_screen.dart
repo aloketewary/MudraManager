@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:async';
@@ -130,7 +129,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   void _clearCache() {
     _clearTripCache();
   }
-
 
   // ignore: use_setters_to_change_properties
   set _selectedDate(DateTime date) {
@@ -319,7 +317,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     actions: [
                       if (_selectedTxnIds.length == 2)
                         TextButton.icon(
-                          onPressed: () => _mergeAsTransfer(ctxt),
+                          onPressed: () => _mergeAsTransfer(ctxt, spacing,),
                           icon:
                               const Icon(LucideIcons.arrowLeftRight, size: 18),
                           label: Text(ctxt.txnList_convertToTransfer),
@@ -624,8 +622,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             GestureDetector(
               onTap: () {
                 HapticFeedback.mediumImpact();
-                context.push(AppRoutes.budgetDetails,
-                    extra: matchingBudget!.budget.id,);
+                context.push(
+                  AppRoutes.budgetDetails,
+                  extra: matchingBudget!.budget.id,
+                );
               },
               child: Row(
                 children: [
@@ -700,7 +700,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           decoration: BoxDecoration(
                             color: color.primaryContainer,
                             borderRadius: BorderRadius.circular(
-                                Tone.current.borderRadius,),
+                              spacing.radiusSmall,
+                            ),
                           ),
                           child: Icon(
                             LucideIcons.calendar,
@@ -765,7 +766,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             ButtonSegment(
                               value: RangeSelectionMode.toggledOff,
                               label: Text(
-                                  AppLocalizations.of(context)!.txnList_month,),
+                                AppLocalizations.of(context)!.txnList_month,
+                              ),
                               icon: const Icon(
                                 LucideIcons.calendarDays,
                                 size: 16,
@@ -773,10 +775,13 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             ),
                             ButtonSegment(
                               value: RangeSelectionMode.toggledOn,
-                              label: Text(AppLocalizations.of(context)!
-                                  .txnList_dateRange,),
-                              icon: const Icon(LucideIcons.calendarRange,
-                                  size: 16,),
+                              label: Text(
+                                AppLocalizations.of(context)!.txnList_dateRange,
+                              ),
+                              icon: const Icon(
+                                LucideIcons.calendarRange,
+                                size: 16,
+                              ),
                             ),
                           ],
                           selected: {_rangeSelectionMode},
@@ -1285,8 +1290,15 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 displayItems.indexWhere((e) => e is TxItem);
 
             return _selectMode
-                ? _buildSelectableCard(transaction, tags, isRecurring, tripName,
-                    ctxt, color, spacing,)
+                ? _buildSelectableCard(
+                    transaction,
+                    tags,
+                    isRecurring,
+                    tripName,
+                    ctxt,
+                    color,
+                    spacing,
+                  )
                 : TransactionCard(
                     category: transaction.category.value,
                     description: transaction.description,
@@ -1301,10 +1313,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     related: transaction.related.value,
                     tripName: tripName,
                     isRecurring: isRecurring,
-                    onEdit: () => _onEditTransaction(transaction),
-                    onRemove: () => _onRemoveTransaction(transaction, ctxt),
+                    onEdit: () => _onEditTransaction(transaction, spacing,),
+                    onRemove: () => _onRemoveTransaction(transaction, ctxt, spacing,),
                     onUnlinkRecurring: isRecurring
-                        ? () => _onUnlinkRecurring(transaction)
+                        ? () => _onUnlinkRecurring(transaction, spacing,)
                         : null,
                     enablePeek: index == firstTxIndex && widget.isTabActive,
                   );
@@ -1316,7 +1328,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
   // ── SELECT MODE HINT BAR ──
   Widget _buildSelectModeHint(
-      ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     final hint = _selectedTxnIds.length == 1
         ? 'Select the matching transaction'
         : 'Tap merge in the app bar';
@@ -1432,7 +1447,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   // ── MERGE AS TRANSFER ──
-  Future<void> _mergeAsTransfer(AppLocalizations ctxt) async {
+  Future<void> _mergeAsTransfer(AppLocalizations ctxt, AppSpacing spacing) async {
     if (_selectedTxnIds.length != 2) return;
 
     final isar = await ref.read(isarServiceProvider).getInstance();
@@ -1446,7 +1461,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     }
 
     if (txns.length != 2) {
-      SnackbarService.error(BuddyMessages.genericError);
+      SnackbarService.error(BuddyMessages.genericError, spacing,);
       return;
     }
 
@@ -1454,19 +1469,19 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final expense = txns.where((t) => t.isExpense).firstOrNull;
     final income = txns.where((t) => !t.isExpense).firstOrNull;
     if (expense == null || income == null) {
-      SnackbarService.error('Select one expense and one income transaction');
+      SnackbarService.error('Select one expense and one income transaction', spacing,);
       return;
     }
 
     // Validate: same amount (±1% tolerance)
     if ((expense.amount - income.amount).abs() > expense.amount * 0.01) {
-      SnackbarService.error('Amounts must match (within 1%)');
+      SnackbarService.error('Amounts must match (within 1%)', spacing,);
       return;
     }
 
     // Validate: within 24 hours
     if (expense.date.difference(income.date).inHours.abs() > 24) {
-      SnackbarService.error('Transactions must be within 24 hours');
+      SnackbarService.error('Transactions must be within 24 hours', spacing,);
       return;
     }
 
@@ -1475,7 +1490,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
     // Validate: different accounts
     if (fromAccount?.id == toAccount?.id) {
-      SnackbarService.error('Cannot transfer between the same account');
+      SnackbarService.error('Cannot transfer between the same account', spacing,);
       return;
     }
 
@@ -1505,13 +1520,13 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       });
 
       if (context.mounted) {
-        SnackbarService.success(ctxt.txnList_convertedToTransfer);
+        SnackbarService.success(ctxt.txnList_convertedToTransfer, spacing,);
       }
     }
   }
 
   // ── EDIT HANDLER ──
-  Future<void> _onEditTransaction(transaction) async {
+  Future<void> _onEditTransaction(transaction, AppSpacing spacing,) async {
     final bool? result;
     if (transaction.isTransfer) {
       await transaction.related.load();
@@ -1519,7 +1534,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       final relatedTx = transaction.related.value;
       if (relatedTx == null) {
         if (context.mounted) {
-          SnackbarService.error(BuddyMessages.genericError);
+          SnackbarService.error(BuddyMessages.genericError, spacing);
         }
         return;
       }
@@ -1550,7 +1565,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   // ── DELETE HANDLER ──
-  Future<void> _onUnlinkRecurring(Transaction transaction) async {
+  Future<void> _onUnlinkRecurring(Transaction transaction, AppSpacing spacing,) async {
     final isar = await ref.read(isarServiceProvider).getInstance();
     await isar.writeTxn(() async {
       transaction.recurringTransactionSource.value = null;
@@ -1561,12 +1576,16 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     setState(() => _clearCache());
     if (!context.mounted) return;
     SnackbarService.success(
-        AppLocalizations.of(context)!.txnList_subscriptionTagRemoved,);
+      AppLocalizations.of(context)!.txnList_subscriptionTagRemoved,
+      spacing,
+    );
   }
 
-  Future<void> _onRemoveTransaction(transaction, AppLocalizations ctxt) async {
+  Future<void> _onRemoveTransaction(
+      transaction, AppLocalizations ctxt, AppSpacing spacing,) async {
     final confirm = await DialogUtils.showDeleteConfirmation(
       context,
+      spacing,
       title: BuddyMessages.deleteTitle,
       message: BuddyMessages.deleteMessage(null),
       cancelText: BuddyMessages.deleteCancel,
@@ -1605,6 +1624,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     if (context.mounted) {
       SnackbarService.success(
         BuddyMessages.txnDeleted,
+        spacing,
         actionLabel: ctxt.common_undo,
         onAction: () {
           undone = true;
@@ -1631,12 +1651,14 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   void _showTagFilterSheet(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2),),
+          top: Radius.circular(spacing.radiusSmall * 2),
+        ),
       ),
       builder: (ctx) {
         return Consumer(
@@ -1675,8 +1697,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           children: [
                             if (_selectedTagId != null)
                               ActionChip(
-                                label: Text(AppLocalizations.of(context)!
-                                    .txnList_clear,),
+                                label: Text(
+                                  AppLocalizations.of(context)!.txnList_clear,
+                                ),
                                 avatar: const Icon(LucideIcons.x, size: 16),
                                 onPressed: () {
                                   setState(() {
@@ -1712,8 +1735,11 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               _ => Padding(
                   padding: const EdgeInsets.all(48),
                   child: Column(
-                      children: List.generate(
-                          5, (_) => const TransactionCardSkeleton(),),),
+                    children: List.generate(
+                      5,
+                      (_) => const TransactionCardSkeleton(),
+                    ),
+                  ),
                 ),
             };
           },
@@ -1833,8 +1859,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             children: [
                               RadioListTile<int?>(
                                 value: null,
-                                title: Text(AppLocalizations.of(context)!
-                                    .txnList_allCategories,),
+                                title: Text(
+                                  AppLocalizations.of(context)!
+                                      .txnList_allCategories,
+                                ),
                               ),
                               ...parentCategories.map((parent) {
                                 final subcategories = allCategories
@@ -1855,7 +1883,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                         children: [
                                           Icon(
                                             IconHelper.getIconData(
-                                                parent.iconName,),
+                                              parent.iconName,
+                                            ),
                                             size: 20,
                                             color: Color(
                                               parent.colorValue ?? 0xFF9E9E9E,
@@ -1892,7 +1921,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                                   ),
                                                 ),
                                                 SizedBox(
-                                                    width: spacing.elementGap,),
+                                                  width: spacing.elementGap,
+                                                ),
                                                 Text(
                                                   sub.name,
                                                   style: textTheme.bodyMedium,
@@ -1922,8 +1952,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           ),
                         ),
                         ListTile(
-                          leading: Icon(LucideIcons.calendarRange,
-                              color: color.primary,),
+                          leading: Icon(
+                            LucideIcons.calendarRange,
+                            color: color.primary,
+                          ),
                           title: Text(
                             _filterStartDate != null && _filterEndDate != null
                                 ? '${DateFormat.yMMMd().format(_filterStartDate!)} - ${DateFormat.yMMMd().format(_filterEndDate!)}'
@@ -1971,8 +2003,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                 setModalState(() {});
                               },
                               icon: const Icon(LucideIcons.x),
-                              label: Text(AppLocalizations.of(context)!
-                                  .txnList_clearDateRange,),
+                              label: Text(
+                                AppLocalizations.of(context)!
+                                    .txnList_clearDateRange,
+                              ),
                             ),
                           ),
                       ],

@@ -1,10 +1,11 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-class TransactionMonthPicker extends StatelessWidget {
+class TransactionMonthPicker extends ConsumerWidget {
   final DateTime selectedDate;
   final ValueChanged<DateTime> onMonthSelected;
 
@@ -15,17 +16,19 @@ class TransactionMonthPicker extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
       constraints: const BoxConstraints(maxHeight: 280),
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       decoration: BoxDecoration(
         color: color.surface,
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
-        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5), width: 1),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+        border: Border.all(
+            color: color.outlineVariant.withValues(alpha: 0.5), width: 1,),
       ),
       child: SingleChildScrollView(
         child: Padding(
@@ -55,17 +58,20 @@ class TransactionMonthPicker extends StatelessWidget {
                           ? null
                           : () {
                               HapticFeedback.lightImpact();
-                              onMonthSelected(DateTime(selectedDate.year, month, 1));
+                              onMonthSelected(
+                                  DateTime(selectedDate.year, month, 1),);
                             },
-                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       child: Container(
                         decoration: BoxDecoration(
                           color: isSelected
                               ? color.primaryContainer
                               : color.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
                           border: Border.all(
-                            color: isSelected ? color.primary : Colors.transparent,
+                            color:
+                                isSelected ? color.primary : Colors.transparent,
                             width: 2,
                           ),
                         ),
@@ -78,7 +84,8 @@ class TransactionMonthPicker extends StatelessWidget {
                                 : isSelected
                                     ? color.primary
                                     : color.onSurface,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.w500,
                           ),
                         ),
                       ),
@@ -101,7 +108,7 @@ class TransactionMonthPicker extends StatelessWidget {
   }
 }
 
-class _YearSelector extends StatelessWidget {
+class _YearSelector extends ConsumerWidget {
   final DateTime selectedDate;
   final ValueChanged<int> onYearChanged;
 
@@ -111,15 +118,16 @@ class _YearSelector extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

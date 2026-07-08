@@ -1,8 +1,9 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
-class SettingsActionCard extends StatelessWidget {
+class SettingsActionCard extends ConsumerWidget {
   final IconData icon;
   final String title;
   final String subtitle;
@@ -19,16 +20,17 @@ class SettingsActionCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Card(
       elevation: 0,
       color: color.surfaceContainerHighest,
       child: InkWell(
         onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -37,7 +39,7 @@ class SettingsActionCard extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: color.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Icon(icon, color: color.primary, size: 24),
               ),

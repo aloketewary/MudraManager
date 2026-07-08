@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +18,7 @@ class EnhancedBackupService extends BackupService {
     bool includeAttachments = true,
   }) async {
     final localPath = await BackupService.createEncryptedBackup(
-      password,
+      password, const AppSpacing.comfortable(),
       includeAttachments: includeAttachments,
     );
 

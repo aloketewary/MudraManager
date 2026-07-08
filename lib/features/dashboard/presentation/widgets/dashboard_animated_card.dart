@@ -1,4 +1,5 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,7 @@ const List<(AnimationStyles, String)> animationStyleSegments =
 
 enum Menu { edit, archive, remove }
 
-class AnimatedAccountCard extends StatefulWidget {
+class AnimatedAccountCard extends ConsumerStatefulWidget {
   final String totalBalance;
   final String accountNumber;
   final Color backgroundColor;
@@ -83,16 +84,17 @@ class AnimatedAccountCard extends StatefulWidget {
   });
 
   @override
-  State<AnimatedAccountCard> createState() => _AnimatedAccountCard();
+  ConsumerState<AnimatedAccountCard> createState() => _AnimatedAccountCard();
 }
 
-class _AnimatedAccountCard extends State<AnimatedAccountCard> {
+class _AnimatedAccountCard extends ConsumerState<AnimatedAccountCard> {
   AnimationStyle? _animationStyle;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     final accentLuminance = widget.accentColor.computeLuminance();
     final textColor = accentLuminance > 0.5 ? Colors.black : Colors.white;
@@ -113,7 +115,7 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Stack(
         children: [
@@ -172,7 +174,7 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                         decoration: BoxDecoration(
                           color: textColor.withValues(alpha: 0.15),
                           borderRadius:
-                              BorderRadius.circular(Tone.current.borderRadius),
+                              BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: PopupMenuButton<Menu>(
                           popUpAnimationStyle: _animationStyle,

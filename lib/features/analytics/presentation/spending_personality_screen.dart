@@ -158,7 +158,7 @@ class SpendingPersonalityScreen extends ConsumerWidget {
             ),
             decoration: BoxDecoration(
               color: archetype.color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(spacing.radiusLarge),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             child: Text(
               archetype.tagline,

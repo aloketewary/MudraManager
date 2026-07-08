@@ -87,11 +87,12 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     return DateTime.now().add(Duration(days: (monthsNeeded * 30).ceil()));
   }
 
-  Future<void> _save() async {
+  Future<void> _save(AppSpacing spacing) async {
     if (_saving) return;
     if (_nameController.text.trim().isEmpty) {
       SnackbarService.warning(
         AppLocalizations.of(context)!.goal_giveGoalName,
+        spacing
       );
       return;
     }
@@ -100,6 +101,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     if (_targetAmount < widget.goal.currentAmount) {
       SnackbarService.warning(
         AppLocalizations.of(context)!.goal_targetBelowSaved,
+        spacing
       );
       return;
     }
@@ -120,38 +122,39 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     goal.decryptFields();
 
     HapticFeedback.mediumImpact();
-    SnackbarService.success(BuddyMessages.goalUpdated);
+    SnackbarService.success(BuddyMessages.goalUpdated, spacing);
     if (mounted) context.pop();
   }
 
-  Future<void> _deleteGoal() async {
+  Future<void> _deleteGoal(AppSpacing spacing) async {
     final ctxt = AppLocalizations.of(context)!;
     final confirmed = await DialogUtils.showDeleteConfirmation(
       context,
+      spacing,
       title: ctxt.goal_deleteGoalTitle,
     );
     if (confirmed == true && mounted) {
       await ref.read(goalServiceProvider).deleteGoal(widget.goal.id);
-      SnackbarService.success(BuddyMessages.goalDeleted);
+      SnackbarService.success(BuddyMessages.goalDeleted, spacing);
       if (mounted) context.pop();
     }
   }
 
-  Future<void> _markCompleted() async {
+  Future<void> _markCompleted(AppSpacing spacing) async {
     final goal = widget.goal
       ..currentAmount = widget.goal.targetAmount
       ..isActive = false;
     await ref.read(goalServiceProvider).updateGoal(goal);
     goal.decryptFields();
-    SnackbarService.success(BuddyMessages.goalUpdated);
+    SnackbarService.success(BuddyMessages.goalUpdated, spacing);
     if (mounted) context.pop();
   }
 
-  Future<void> _archiveGoal() async {
+  Future<void> _archiveGoal(AppSpacing spacing) async {
     final goal = widget.goal..isActive = false;
     await ref.read(goalServiceProvider).updateGoal(goal);
     goal.decryptFields();
-    SnackbarService.success(BuddyMessages.goalUpdated);
+    SnackbarService.success(BuddyMessages.goalUpdated, spacing);
     if (mounted) context.pop();
   }
 
@@ -172,7 +175,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
         trailing: ScreenTextAction(
           id: 'save_goal',
           label: ctxt.goal_updateGoal,
-          onTap: !_saving ? _save : null,
+          onTap: () => !_saving ? _save(spacing) : null,
           isLoading: _saving,
         ),
       ),
@@ -692,7 +695,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
             color: color,
             textTheme: textTheme,
             spacing: spacing,
-            onTap: _archiveGoal,
+            onTap: () => _archiveGoal(spacing),
           ),
           Divider(height: 1, color: color.error.withValues(alpha: 0.15)),
           _dangerAction(
@@ -701,7 +704,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
             color: color,
             textTheme: textTheme,
             spacing: spacing,
-            onTap: _markCompleted,
+            onTap: () => _markCompleted(spacing),
           ),
           Divider(height: 1, color: color.error.withValues(alpha: 0.15)),
           _dangerAction(
@@ -710,7 +713,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
             color: color,
             textTheme: textTheme,
             spacing: spacing,
-            onTap: _deleteGoal,
+            onTap: () => _deleteGoal(spacing),
             isDestructive: true,
           ),
         ],

@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
 /// Wraps a child widget — shows the actual content behind a blur
@@ -38,16 +38,17 @@ class ProGate extends ConsumerWidget {
   }
 }
 
-class _BlurUpgradeOverlay extends StatelessWidget {
+class _BlurUpgradeOverlay extends ConsumerWidget {
   final ProFeature feature;
 
   const _BlurUpgradeOverlay({required this.feature});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final spacing = ref.watch(spacingProvider);
 
     return Positioned.fill(
       child: ClipRect(
@@ -145,7 +146,7 @@ class _BlurUpgradeOverlay extends StatelessWidget {
                         },
                         style: FilledButton.styleFrom(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
                           ),
                         ),
                         child: const Row(

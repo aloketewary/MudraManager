@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/providers/state_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
@@ -161,6 +162,8 @@ class _AuthGateState extends ConsumerState<AuthGate>
   @override
   Widget build(BuildContext context) {
     final unlocked = ref.watch(_authStateProvider);
+    final spacing = ref.watch(spacingProvider);
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
@@ -169,7 +172,7 @@ class _AuthGateState extends ConsumerState<AuthGate>
         final location = GoRouterState.of(context).uri.toString();
         if (location == AppRoutes.home) {
           final shouldExit = await DialogUtils.showConfirmation(
-            context,
+            context, spacing,
             title: 'Exit Mudra Manager?',
             message: 'Are you sure you want to exit?',
             icon: LucideIcons.logOut,

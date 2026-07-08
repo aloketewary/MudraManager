@@ -1,8 +1,9 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 
-class TrendIndicator extends StatelessWidget {
+class TrendIndicator extends ConsumerWidget {
   final double current;
   final double previous;
   final bool isIncome;
@@ -15,9 +16,10 @@ class TrendIndicator extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     if (previous == 0) return const SizedBox.shrink();
 
@@ -29,7 +31,7 @@ class TrendIndicator extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: (isGood ? color.primary : color.tertiary).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

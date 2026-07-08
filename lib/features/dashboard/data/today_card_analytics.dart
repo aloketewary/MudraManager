@@ -21,6 +21,15 @@ class TodayCardAnalytics {
   static const _maxEvents = 200;
   static const _retentionDays = 30;
 
+  /// Record a session start (dashboard opened).
+  /// Creates natural grouping for sequence analysis.
+  static void recordSessionStart() {
+    _addEvent({
+      'type': 'sessionStart',
+      'ts': DateTime.now().toIso8601String(),
+    });
+  }
+
   /// Record that Today Card was shown in healthy state.
   static void recordCardShownHealthy() {
     _addEvent({

@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 
@@ -15,6 +14,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/card_interaction_tracker.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/features/dashboard/data/widget_analytics_provider.dart';
+import 'package:mudra_manager/features/dashboard/data/today_card_analytics.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/reconciliation_service.dart';
@@ -49,15 +49,16 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
   @override
   void initState() {
     super.initState();
+    TodayCardAnalytics.recordSessionStart();
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
-      _performDailyCheckIn();
+      _performDailyCheckIn(ref.watch(spacingProvider));
       ref.read(reconciliationServiceProvider).patchUncategorizedTransactions();
-      _checkSmsFirstImportCelebration();
+      _checkSmsFirstImportCelebration(ref.watch(spacingProvider));
     });
   }
 
-  Future<void> _performDailyCheckIn() async {
+  Future<void> _performDailyCheckIn(AppSpacing spacing) async {
     if (!mounted) return;
 
     await NotificationService.cancelStreakReminder();
@@ -94,18 +95,18 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             );
           } else {
             SnackbarService.success(
-              '🔥 ${BuddyMessages.streakMessage(streakCount)}',
+              '🔥 ${BuddyMessages.streakMessage(streakCount)}', spacing
             );
           }
         } else {
-          SnackbarService.success('🔥 $result');
+          SnackbarService.success('🔥 $result', spacing);
         }
         log.i('✅ Daily check-in completed');
       }
     }
   }
 
-  void _checkSmsFirstImportCelebration() {
+  void _checkSmsFirstImportCelebration(AppSpacing spacing) {
     final prefs = SharedPrefsUtil.instance;
     if (!prefs.getSmsFirstImportReady() ||
         prefs.getSmsFirstImportCelebrated()) {
@@ -116,7 +117,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(Tone.current.borderRadius * 2),
+          top: Radius.circular(spacing.radiusSmall * 2),
         ),
       ),
       builder: (_) => const SmsSuccessCelebrationSheet(),
@@ -239,7 +240,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             await widget.refresh(ref);
           }
           if (mounted) {
-            SnackbarService.success('✓');
+            SnackbarService.success('✓', spacing);
           }
         }),
         child: CustomScrollView(

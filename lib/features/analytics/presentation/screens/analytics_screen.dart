@@ -1,5 +1,5 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +51,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return ScreenShell(
       config: ScreenShellConfig(
@@ -250,7 +251,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   color: color.surfaceContainerLow,
                   shape: RoundedRectangleBorder(
                     borderRadius:
-                        BorderRadius.circular(Tone.current.borderRadius),
+                        BorderRadius.circular(spacing.radiusSmall),
                     side: BorderSide(
                       color: color.outlineVariant.withValues(alpha: 0.5),
                     ),
@@ -289,7 +290,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                     Theme.of(context).brightness,
                                   ).withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(
-                              Tone.current.borderRadius,
+                              spacing.radiusSmall,
                             ),
                           ),
                           child: Row(
@@ -406,7 +407,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             // Tax Estimation
             taxAsync.when(
               data: (tax) =>
-                  _buildTaxCard(tax, color, textTheme, isGuestMode, context),
+                  _buildTaxCard(tax, color, textTheme, isGuestMode, context, spacing,),
               loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const InlineError(),
             ),
@@ -685,6 +686,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     TextTheme textTheme,
     bool isGuestMode,
     BuildContext context,
+    AppSpacing spacing,
   ) {
     final brightness = Theme.of(context).brightness;
     final ctxt = AppLocalizations.of(context)!;
@@ -697,7 +699,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         elevation: 0,
         color: color.surfaceContainerLow,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: Padding(

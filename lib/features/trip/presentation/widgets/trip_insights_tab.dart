@@ -90,7 +90,7 @@ class TripInsightsTab extends StatelessWidget {
       margin: EdgeInsets.zero,
       color: color.primaryContainer,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Padding(
         padding: EdgeInsets.all(spacing.cardInner),

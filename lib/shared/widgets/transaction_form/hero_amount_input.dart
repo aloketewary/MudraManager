@@ -1,4 +1,5 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
@@ -6,7 +7,7 @@ import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class HeroAmountInput extends StatelessWidget {
+class HeroAmountInput extends ConsumerWidget {
   final TextEditingController controller;
   final FocusNode? focusNode;
   final Color accentColor;
@@ -23,8 +24,9 @@ class HeroAmountInput extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -37,7 +39,7 @@ class HeroAmountInput extends StatelessWidget {
             accentColor.withValues(alpha: 0.03),
           ],
         ),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         boxShadow: [
           BoxShadow(
             color: accentColor.withValues(alpha: 0.08),

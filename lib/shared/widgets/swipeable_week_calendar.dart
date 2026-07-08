@@ -1,4 +1,5 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 
-class SwipeableWeeklyCalendar extends StatefulWidget {
+class SwipeableWeeklyCalendar extends ConsumerStatefulWidget {
   final bool allowFutureDateSelection;
   final Function onDateSelected;
   final DateTime? existingDateTime;
@@ -19,11 +20,11 @@ class SwipeableWeeklyCalendar extends StatefulWidget {
   });
 
   @override
-  State<SwipeableWeeklyCalendar> createState() =>
+  ConsumerState<SwipeableWeeklyCalendar> createState() =>
       _SwipeableWeeklyCalendarState();
 }
 
-class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
+class _SwipeableWeeklyCalendarState extends ConsumerState<SwipeableWeeklyCalendar> {
   late DateTime _currentDate;
   List<DateTime> _firstDaysOfVisibleWeeks = [];
 
@@ -69,6 +70,8 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
   }
 
   Future<void> _selectMonthYear(BuildContext context) async {
+    final spacing = ref.watch(spacingProvider);
+    
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _currentDate,
@@ -89,7 +92,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
         });
       } else {
         // Optionally show a message to the user that future dates are not allowed
-        SnackbarService.warning(BuddyMessages.futureDate);
+        SnackbarService.warning(BuddyMessages.futureDate, spacing,);
       }
     }
   }
@@ -133,6 +136,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
     final today = DateTime(now.year, now.month, now.day);
     final isFutureDate = DateTime(day.year, day.month, day.day).isAfter(today);
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     final isSameDay =
         day.year == _currentDate.year &&
@@ -150,7 +154,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
                 widget.onDateSelected(day);
               });
             } else {
-              SnackbarService.warning(BuddyMessages.futureDate);
+              SnackbarService.warning(BuddyMessages.futureDate, spacing,);
             }
           },
           child: Container(
@@ -160,7 +164,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
                   : (isFutureDate && !widget.allowFutureDateSelection
                         ? Colors.grey[700]
                         : Colors.transparent),
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             child: Center(
               child: Padding(

@@ -6,10 +6,60 @@
   "tier": "free",
   "palette": {
     "light": {
-      "seed": "#10B981"
+      "seed": "#006c46",
+      "primary": "#006c46",
+      "onPrimary": "#FFFFFF",
+      "primaryContainer": "#01e599",
+      "onPrimaryContainer": "#00613e",
+      "secondary": "#296a4b",
+      "onSecondary": "#FFFFFF",
+      "secondaryContainer": "#abeec7",
+      "onSecondaryContainer": "#2e6e4f",
+      "tertiary": "#825500",
+      "onTertiary": "#FFFFFF",
+      "tertiaryContainer": "#ffbd5d",
+      "onTertiaryContainer": "#754c00",
+      "error": "#ba1a1a",
+      "onError": "#FFFFFF",
+      "errorContainer": "#ffdad6",
+      "onErrorContainer": "#93000a",
+      "background": "#f3fcf3",
+      "onBackground": "#151d18",
+      "surface": "#f3fcf3",
+      "onSurface": "#151d18",
+      "surfaceVariant": "#dce5dc",
+      "onSurfaceVariant": "#3b4a41",
+      "outline": "#6b7b70",
+      "outlineVariant": "#bacbbe",
+      "surfaceTint": "#006c46"
     },
     "dark": {
-      "seed": "#10B981"
+      "seed": "#006c46",
+      "primary": "#00e297",
+      "onPrimary": "#002112",
+      "primaryContainer": "#005234",
+      "onPrimaryContainer": "#4dffb2",
+      "secondary": "#92d5af",
+      "onSecondary": "#003a22",
+      "secondaryContainer": "#075134",
+      "onSecondaryContainer": "#aef1ca",
+      "tertiary": "#fcba5b",
+      "onTertiary": "#291800",
+      "tertiaryContainer": "#633f00",
+      "onTertiaryContainer": "#ffddb3",
+      "error": "#ffdad6",
+      "onError": "#600a0a",
+      "errorContainer": "#93000a",
+      "onErrorContainer": "#ffdad6",
+      "background": "#151d18",
+      "onBackground": "#eaf3ea",
+      "surface": "#151d18",
+      "onSurface": "#eaf3ea",
+      "surfaceVariant": "#3b4a41",
+      "onSurfaceVariant": "#bacbbe",
+      "outline": "#6b7b70",
+      "outlineVariant": "#6b7b70",
+      "surfaceTint": "#00e297"
     }
   },
   "style": {
@@ -17,12 +67,12 @@
     "cardElevation": 0,
     "buttonRadius": 12,
     "inputRadius": 12,
-    "borderOpacity": 0.12,
+    "borderOpacity": 0.1,
     "borderWidth": 1,
     "dividerStyle": "standard"
   },
   "meta": {
-    "description": "Growth & savings",
-    "tags": ["green", "default", "clean"]
+    "description": "Growth & savings - Mudra Precision",
+    "tags": ["green", "default", "clean", "premium", "precision"]
   }
 }

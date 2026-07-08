@@ -1,10 +1,11 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class DateTimeRow extends StatelessWidget {
+class DateTimeRow extends ConsumerWidget {
   final DateTime selectedDate;
   final ValueChanged<DateTime> onDateChanged;
   final bool allowFuture;
@@ -17,9 +18,10 @@ class DateTimeRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Row(
       children: [
@@ -32,6 +34,7 @@ class DateTimeRow extends StatelessWidget {
             color: color,
             textTheme: textTheme,
             onTap: () => _pickDate(context),
+            spacing: spacing,
           ),
         ),
         const SizedBox(width: 8),
@@ -44,6 +47,7 @@ class DateTimeRow extends StatelessWidget {
             color: color,
             textTheme: textTheme,
             onTap: () => _pickTime(context),
+            spacing: spacing,
           ),
         ),
       ],
@@ -57,15 +61,16 @@ class DateTimeRow extends StatelessWidget {
     required ColorScheme color,
     required TextTheme textTheme,
     required VoidCallback onTap,
+    required AppSpacing spacing,
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+      borderRadius: BorderRadius.circular(spacing.radiusSmall),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
           color: color.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           border: Border.all(
             color: color.outlineVariant.withValues(alpha: 0.2),
           ),

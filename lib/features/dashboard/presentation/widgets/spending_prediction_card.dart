@@ -77,7 +77,7 @@ class SpendingPredictionCard extends ConsumerWidget {
               HapticFeedback.mediumImpact();
               context.push(AppRoutes.statistics);
             },
-            borderRadius: BorderRadius.circular(spacing.radiusLarge),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
             child: Padding(
               padding: EdgeInsets.all(spacing.cardInner),
               child: Row(

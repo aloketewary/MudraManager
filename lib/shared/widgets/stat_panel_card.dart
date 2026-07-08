@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/trend_indicator.dart';
 
 /// Reusable stat panel — accent-tinted card with icon, label, animated amount,
 /// and optional trend indicator. Matches the cash flow card style.
-class StatPanelCard extends StatelessWidget {
+class StatPanelCard extends ConsumerWidget {
   final String label;
   final double amount;
   final IconData icon;
@@ -29,8 +30,9 @@ class StatPanelCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return GestureDetector(
       onTap: onTap,
@@ -39,7 +41,7 @@ class StatPanelCard extends StatelessWidget {
         elevation: 0,
         color: accent.withValues(alpha: 0.12),
         shape: RoundedRectangleBorder(
-          borderRadius: borderRadius ?? BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: borderRadius ?? BorderRadius.circular(spacing.radiusSmall),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),

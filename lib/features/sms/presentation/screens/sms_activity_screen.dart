@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/providers/state_value.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
@@ -92,7 +91,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
                   : LucideIcons.listFilter,
               size: 20,
             ),
-            onPressed: () => _showFilterSheet(color, textTheme),
+            onPressed: () => _showFilterSheet(color, textTheme, spacing),
           ),
         ],
       ),
@@ -258,7 +257,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -391,12 +390,12 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
 
   // ── FILTER SHEET ──
 
-  void _showFilterSheet(ColorScheme color, TextTheme textTheme) {
+  void _showFilterSheet(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(16),
@@ -549,7 +548,7 @@ class _ActivityCard extends ConsumerWidget {
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
-          _showActivityDetails(context);
+          _showActivityDetails(context, spacing);
         },
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -560,7 +559,7 @@ class _ActivityCard extends ConsumerWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Icon(
                   _getStatusIcon(),
@@ -709,12 +708,12 @@ class _ActivityCard extends ConsumerWidget {
     }
   }
 
-  void _showActivityDetails(BuildContext context) {
+  void _showActivityDetails(BuildContext context, AppSpacing spacing) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (_) => _ActivityDetailsSheet(activity: activity),
     );
@@ -1123,6 +1122,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
 
                           SnackbarService.success(
                             ctxt.smsActivity_rejected,
+                            spacing,
                             actionLabel: ctxt.common_undo,
                             onAction: () async {
                               final isar = await ref.read(isarServiceProvider).getInstance();

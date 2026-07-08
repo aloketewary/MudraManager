@@ -1,10 +1,11 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-class DateRangeSelector extends StatelessWidget {
+class DateRangeSelector extends ConsumerWidget {
   final DateTime selectedDate;
   final DateTime? filterStartDate;
   final DateTime? filterEndDate;
@@ -44,14 +45,15 @@ class DateRangeSelector extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Container(
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
         border: Border.all(
           color: color.outlineVariant.withValues(alpha: 0.5),
           width: 1,
@@ -65,7 +67,7 @@ class DateRangeSelector extends StatelessWidget {
             HapticFeedback.mediumImpact();
             onToggleCalendar();
           },
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius * 2),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -74,7 +76,7 @@ class DateRangeSelector extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: color.primaryContainer,
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
                   child: Icon(
                     LucideIcons.calendar,
@@ -110,7 +112,7 @@ class DateRangeSelector extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     color: color.surface,
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

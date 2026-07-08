@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:go_router/go_router.dart';
@@ -64,7 +63,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             actions: [
               IconButton(
                 icon: const Icon(LucideIcons.info),
-                onPressed: () => _showAboutSheet(color, textTheme),
+                onPressed: () => _showAboutSheet(color, textTheme, spacing),
               ),
             ],
             flexibleSpace: LayoutBuilder(
@@ -92,6 +91,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     color,
                     textTheme,
                     isDark,
+                    spacing
                   ),
                 );
               },
@@ -322,7 +322,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           SkeletonLoader(
             width: double.infinity,
             height: 220,
-            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
           ),
           const SizedBox(height: 16),
           ...List.generate(
@@ -332,7 +332,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: SkeletonLoader(
                 width: double.infinity,
                 height: 70,
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
               ),
             ),
           ),
@@ -376,7 +376,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       decoration: BoxDecoration(
                         color: (isPro ? color.primary : color.error)
                             .withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       ),
                       child: Icon(
                         isPro ? LucideIcons.shieldCheck : LucideIcons.shieldOff,
@@ -414,7 +414,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   'dbg_${DateTime.now().millisecondsSinceEpoch}',
                             );
                         invalidateEntitlements(ref);
-                        SnackbarService.success('✅ Pro granted (debug)');
+                        SnackbarService.success('✅ Pro granted (debug)', spacing);
                       },
                 child: Padding(
                   padding:
@@ -425,7 +425,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: Icon(
                           LucideIcons.crown,
@@ -469,6 +469,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ref.invalidate(proPlanInfoProvider);
                         SnackbarService.success(
                           '✅ Pro granted — expires in 1 min',
+                          spacing
                         );
                       },
                 child: Padding(
@@ -480,7 +481,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.tertiary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: Icon(
                           LucideIcons.timer,
@@ -514,7 +515,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         await ref.read(entitlementServiceProvider).revokePro();
                         ref.invalidate(isProProvider);
                         ref.invalidate(proPlanInfoProvider);
-                        SnackbarService.success('🔒 Pro revoked');
+                        SnackbarService.success('🔒 Pro revoked', spacing);
                       },
                 child: Padding(
                   padding:
@@ -525,7 +526,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.error.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child:
                             Icon(LucideIcons.ban, color: color.error, size: 20),
@@ -553,6 +554,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     dynamic profile,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     final streak = ref.watch(dailyStreakProvider);
     final memberSince = profile?.createdAt;
@@ -569,6 +571,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             badgeColor: color.tertiary,
             color: color,
             textTheme: textTheme,
+            spacing: spacing,
           ),
         ],
         if (memberSince != null) ...[
@@ -579,6 +582,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             badgeColor: color.primary,
             color: color,
             textTheme: textTheme,
+            spacing: spacing,
           ),
         ],
       ],
@@ -632,7 +636,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: accent.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: Icon(
                           info.isPro
@@ -671,7 +675,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     decoration: BoxDecoration(
                                       color:
                                           color.primary.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
+                                      borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.5),
                                     ),
                                     child: Text(
                                       '${info.trialDaysRemaining}d LEFT',
@@ -693,7 +697,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: accent.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
+                                      borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.5),
                                     ),
                                     child: Text(
                                       'ACTIVE',
@@ -762,6 +766,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     ColorScheme color,
     TextTheme textTheme,
     bool isDark,
+    AppSpacing spacing,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -804,6 +809,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     profile,
                     color,
                     textTheme,
+                    spacing,
                   ),
                   const SizedBox(height: 14),
                   GestureDetector(
@@ -841,7 +847,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ],
                   const SizedBox(height: 10),
                   // Streak + member since row
-                  _buildHeroBadges(profile, color, textTheme),
+                  _buildHeroBadges(profile, color, textTheme, spacing),
                 ],
               ),
             ),
@@ -855,6 +861,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     dynamic profile,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     final userLevelAsync = ref.watch(userLevelProvider);
 
@@ -917,7 +924,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: color.primary,
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Text(
                   'Lv${level.level}',
@@ -942,12 +949,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     required Color badgeColor,
     required ColorScheme color,
     required TextTheme textTheme,
+    required AppSpacing spacing,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1246,7 +1254,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: Icon(
                           item.icon,
@@ -1337,7 +1345,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     decoration: BoxDecoration(
                       color: color.error,
-                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     ),
                     child: Text(
                       '$pendingCount',
@@ -1366,12 +1374,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   // ── BOTTOM SHEETS ──
 
-  void _showAboutSheet(ColorScheme color, TextTheme textTheme) {
+  void _showAboutSheet(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),
@@ -1417,7 +1425,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall)),
       ),
       builder: (ctx) {
         return Padding(

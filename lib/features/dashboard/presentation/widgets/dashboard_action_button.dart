@@ -55,11 +55,12 @@ class QuickActionButton extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 for (int i = 0; i < actions.length; i++) ...[
-                  if (i > 0) const SizedBox(height: 8),
+                  if (i > 0) SizedBox(height: spacing.elementGap),
                   _DashboardActionButton(
                     data: actions[i],
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     isRow: true,
+                    spacing: spacing,
                   ),
                 ],
               ],
@@ -69,7 +70,7 @@ class QuickActionButton extends ConsumerWidget {
           return Row(
             children: [
               for (int i = 0; i < actions.length; i++) ...[
-                if (i > 0) const SizedBox(width: 4),
+                if (i > 0) SizedBox(width: spacing.elementGapMin),
                 Expanded(
                   child: _DashboardActionButton(
                     data: actions[i],
@@ -79,6 +80,7 @@ class QuickActionButton extends ConsumerWidget {
                         i == actions.length - 1 ? spacing.radiusMedium : 0,
                       ),
                     ),
+                    spacing: spacing,
                   ),
                 ),
               ],
@@ -108,11 +110,13 @@ class _DashboardActionButton extends StatelessWidget {
   final _ActionData data;
   final BorderRadius borderRadius;
   final bool isRow;
+  final AppSpacing spacing;
 
   const _DashboardActionButton({
     required this.data,
     required this.borderRadius,
     this.isRow = false,
+    required this.spacing,
   });
 
   @override
@@ -131,14 +135,14 @@ class _DashboardActionButton extends StatelessWidget {
         borderRadius: borderRadius,
         child: Padding(
           padding: EdgeInsets.symmetric(
-            vertical: isRow ? 12 : 14,
-            horizontal: isRow ? 16 : 4,
+            vertical: isRow ? spacing.elementGap + 4 : spacing.elementGap + 8,
+            horizontal: isRow ? spacing.cardInner : spacing.elementGap,
           ),
           child: isRow
               ? Row(
                   children: [
                     Icon(data.icon, color: data.color, size: 22),
-                    const SizedBox(width: 12),
+                    SizedBox(width: spacing.elementGap),
                     Text(
                       data.label,
                       style: textTheme.labelMedium?.copyWith(
@@ -152,7 +156,7 @@ class _DashboardActionButton extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(data.icon, color: data.color, size: 24),
-                    const SizedBox(height: 6),
+                    SizedBox(height: spacing.elementGapMin),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(

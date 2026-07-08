@@ -530,7 +530,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius:
-            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall)),
       ),
       builder: (ctx) => SafeArea(
         child: SingleChildScrollView(
@@ -618,7 +618,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                   ref.invalidate(primaryAccountProvider);
                   if (mounted) {
                     SnackbarService.success(
-                      '${account.name} is now your primary account',
+                      '${account.name} is now your primary account', spacing
                     );
                   }
                 }),
@@ -628,10 +628,10 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                 Navigator.pop(ctx);
                 if (activeCount <= 1) {
                   SnackbarService.warning(
-                    ctxt.accounts_atLeastOneAccountRequired,
+                    ctxt.accounts_atLeastOneAccountRequired, spacing
                   );
                 } else {
-                  _showArchiveConfirmation(account, ctxt);
+                  _showArchiveConfirmation(account, ctxt, spacing);
                 }
               }),
               SizedBox(height: spacing.elementGap),
@@ -659,7 +659,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius:
-            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall)),
       ),
       builder: (ctx) => SafeArea(
         child: SingleChildScrollView(
@@ -688,12 +688,12 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
               _sheetOption(ctx, LucideIcons.archiveRestore, ctxt.accounts_unarchive,
                   ctxt.accounts_unarchiveDesc, color.primary, () {
                 Navigator.pop(ctx);
-                _unarchiveAccount(account, ctxt);
+                _unarchiveAccount(account, ctxt, spacing);
               }),
               _sheetOption(ctx, LucideIcons.trash2, ctxt.common_delete,
                   ctxt.accounts_deleteDesc, color.error, () {
                 Navigator.pop(ctx);
-                _showDeleteConfirmation(account, ctxt);
+                _showDeleteConfirmation(account, ctxt, spacing);
               }),
               SizedBox(height: spacing.elementGap),
             ],
@@ -808,6 +808,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   Future<void> _unarchiveAccount(
     Account account,
     AppLocalizations ctxt,
+    AppSpacing spacing,
   ) async {
     final isarService = ref.read(isarServiceProvider);
     final isar = await isarService.getInstance();
@@ -819,16 +820,17 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     ref.invalidate(accountsProvider);
 
     if (context.mounted) {
-      SnackbarService.success('${account.name} restored');
+      SnackbarService.success('${account.name} restored', spacing);
     }
   }
 
   Future<void> _showDeleteConfirmation(
     Account account,
     AppLocalizations ctxt,
+    AppSpacing spacing,
   ) async {
     final confirmed = await DialogUtils.showDeleteConfirmation(
-      context,
+      context, spacing,
       title: BuddyMessages.deleteTitle,
       message: BuddyMessages.deleteMessage(account.name),
     );
@@ -847,9 +849,10 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   Future<void> _showArchiveConfirmation(
     Account account,
     AppLocalizations ctxt,
+    AppSpacing spacing,
   ) async {
     final confirmed = await DialogUtils.showConfirmation(
-      context,
+      context, spacing,
       title: BuddyMessages.deleteTitle,
       message: ctxt.accounts_archiveAccountMessage(account.name),
       icon: LucideIcons.archive,
@@ -867,7 +870,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
 
       if (context.mounted) {
         SnackbarService.success(
-          ctxt.accounts_accountArchivedMessage(account.name),
+          ctxt.accounts_accountArchivedMessage(account.name), spacing
         );
       }
     }
@@ -884,7 +887,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius:
-            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall)),
       ),
       builder: (ctx) => SafeArea(
         child: SingleChildScrollView(

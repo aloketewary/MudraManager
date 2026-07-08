@@ -1,5 +1,5 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,7 +59,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
     }
   }
 
-  Future<void> _addAccount() async {
+  Future<void> _addAccount(AppSpacing spacing) async {
     final result = await context.push<bool>(
       '/manage-accounts/add',
       extra: {
@@ -71,7 +71,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
     if (result == true && mounted) {
       // Ask if user wants to auto-approve pending transactions
       final autoApprove = await DialogUtils.showConfirmation(
-        context,
+        context, spacing,
         title: 'Auto-approve pending?',
         message:
             'Do you want to automatically approve pending transactions for "${widget.activity.account}"?',
@@ -180,6 +180,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final statusColor = _getStatusColor(context);
+    final spacing = ref.watch(spacingProvider);
 
     // Check if account exists in database (only if account was detected in SMS)
     final accountsAsync = ref.watch(accountsProvider);
@@ -202,14 +203,14 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
       elevation: 0,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         side: BorderSide(color: statusColor.withValues(alpha: 0.3), width: 2),
       ),
       child: Column(
         children: [
           InkWell(
             onTap: () => setState(() => _isExpanded = !_isExpanded),
-            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: Row(
@@ -222,7 +223,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                         decoration: BoxDecoration(
                           color: statusColor.withValues(alpha: 0.15),
                           borderRadius:
-                              BorderRadius.circular(Tone.current.borderRadius),
+                              BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: Icon(
                           widget.activity.isIncome == true
@@ -418,7 +419,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: FilledButton.icon(
-                          onPressed: hasUnknownAccount ? _addAccount : _approve,
+                          onPressed: () => hasUnknownAccount ? _addAccount : _approve,
                           icon: Icon(
                             hasUnknownAccount
                                 ? LucideIcons.plus

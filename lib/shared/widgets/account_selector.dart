@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -27,6 +27,7 @@ class AccountSelector extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return ref.watch(accountsProvider).when(
           data: (accounts) {
@@ -70,7 +71,7 @@ class AccountSelector extends ConsumerWidget {
                         color: isSelected
                             ? color.primaryContainer
                             : color.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         border: isSelected
                             ? Border.all(color: color.primary, width: 2)
                             : null,
@@ -156,7 +157,7 @@ class AccountSelector extends ConsumerWidget {
   }
 }
 
-class _AddAccountButton extends StatelessWidget {
+class _AddAccountButton extends ConsumerWidget {
   final String accountNumber;
   final String? bankName;
   final ColorScheme color;
@@ -170,7 +171,9 @@ class _AddAccountButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+
     return GestureDetector(
       onTap: () => context.push(
         '/manage-accounts/add',
@@ -183,7 +186,7 @@ class _AddAccountButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: color.surface,
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           border: Border.all(color: color.error, width: 2),
         ),
         child: Column(

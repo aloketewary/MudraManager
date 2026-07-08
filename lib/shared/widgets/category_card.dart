@@ -31,7 +31,7 @@ class CategoryCard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final size = MediaQuery.of(context).size;
     final spacing = ref.watch(spacingProvider);
-    final radius = BorderRadius.circular(spacing.radiusLarge);
+    final radius = BorderRadius.circular(spacing.radiusSmall);
 
     // Calculate proper text color for category color background
     final categoryLuminance = color.computeLuminance();

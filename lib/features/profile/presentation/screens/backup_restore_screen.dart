@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -149,7 +148,8 @@ class BackupRestoreScreen extends ConsumerWidget {
                   subtitle: ctxt.backup_backupDataSubtitle,
                   color: color,
                   textTheme: textTheme,
-                  onTap: () => _performBackup(context, ref, ctxt),
+                  onTap: () => _performBackup(context, ref, ctxt, spacing),
+                  spacing: spacing,
                 ),
                 Divider(
                   height: 1,
@@ -162,7 +162,8 @@ class BackupRestoreScreen extends ConsumerWidget {
                   subtitle: ctxt.backup_restoreBackupSubtitle,
                   color: color,
                   textTheme: textTheme,
-                  onTap: () => _performRestore(context, ref, ctxt),
+                  onTap: () => _performRestore(context, ref, ctxt, spacing),
+                  spacing: spacing,
                 ),
               ],
             ),
@@ -243,6 +244,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                           backup: backup,
                           color: color,
                           textTheme: textTheme,
+                          spacing: spacing
                         ),
                         if (!isLast)
                           Divider(
@@ -351,6 +353,7 @@ class BackupRestoreScreen extends ConsumerWidget {
     required ColorScheme color,
     required TextTheme textTheme,
     required VoidCallback onTap,
+    required AppSpacing spacing,
   }) {
     return InkWell(
       onTap: () {
@@ -365,7 +368,7 @@ class BackupRestoreScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: color.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
               ),
               child: Icon(icon, color: color.primary, size: 20),
             ),
@@ -402,6 +405,7 @@ class BackupRestoreScreen extends ConsumerWidget {
     required AppLocalizations ctxt, required BackupMetadata backup,
     required ColorScheme color,
     required TextTheme textTheme,
+    required AppSpacing spacing,
   }) {
     final dateStr = safeDateFormat('yMMMd',).add_jm().format(backup.backupDate);
     final sizeStr = _formatFileSize(backup.fileSize);
@@ -414,7 +418,7 @@ class BackupRestoreScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.tertiary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             child: Icon(LucideIcons.archive, color: color.tertiary, size: 20),
           ),
@@ -482,15 +486,18 @@ class BackupRestoreScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     AppLocalizations ctxt,
+    AppSpacing spacing,
   ) async {
     final password = await DialogUtils.showPasswordDialog(
       context,
+      spacing,
       isRestore: false,
     );
     if (password == null || !context.mounted) return;
 
     final includeAttachments = await DialogUtils.showConfirmation(
       context,
+      spacing,
       title: ctxt.backup_includeAttachmentsTitle,
       message: ctxt.backup_includeAttachmentsMessage,
       confirmText: ctxt.backup_yesLabel,
@@ -500,10 +507,11 @@ class BackupRestoreScreen extends ConsumerWidget {
 
     final filePath = await BackupService.createEncryptedBackup(
       password,
+      spacing,
       includeAttachments: includeAttachments ?? false,
     );
     if (filePath != null) {
-      SnackbarService.success(BuddyMessages.backupSuccess);
+      SnackbarService.success(BuddyMessages.backupSuccess, spacing);
       ref.invalidate(_backupHistoryProvider);
       ref
           .read(gamificationServiceProvider)
@@ -515,9 +523,11 @@ class BackupRestoreScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     AppLocalizations ctxt,
+    AppSpacing spacing,
   ) async {
     final password = await DialogUtils.showPasswordDialog(
       context,
+      spacing,
       isRestore: true,
     );
     if (password == null) return;
@@ -526,11 +536,12 @@ class BackupRestoreScreen extends ConsumerWidget {
     if (!context.mounted) return;
     final data = await BackupService.restoreEncryptedBackup(
       context,
+      spacing,
       isar,
       password,
     );
     if (data != null) {
-      SnackbarService.success(BuddyMessages.restoreSuccess);
+      SnackbarService.success(BuddyMessages.restoreSuccess, spacing);
       ref.invalidate(_backupHistoryProvider);
     }
   }
@@ -694,7 +705,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                 ),
               // Upload to Drive
               InkWell(
-                onTap: _isLoading ? null : _uploadToDrive,
+                onTap: () => _isLoading ? null : _uploadToDrive(spacing),
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -704,7 +715,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: _isLoading
                             ? SizedBox(
@@ -751,7 +762,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
               ),
               // Restore from Drive
               InkWell(
-                onTap: _isLoading ? null : () => _showCloudRestoreSheet(ctxt),
+                onTap: _isLoading ? null : () => _showCloudRestoreSheet(ctxt, spacing),
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -761,7 +772,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: Icon(LucideIcons.cloudDownload,
                             color: color.primary, size: 20,),
@@ -794,7 +805,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                                     horizontal: 8, vertical: 2,),
                                 decoration: BoxDecoration(
                                   color: color.primary.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                                 ),
                                 child: Text(
                                   '${backups.length}',
@@ -843,10 +854,11 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
     ref.read(driveEmailProvider.notifier).set(null);
   }
 
-  Future<void> _uploadToDrive() async {
+  Future<void> _uploadToDrive(AppSpacing spacing) async {
     final ctxt = AppLocalizations.of(context)!;
     final password = await DialogUtils.showPasswordDialog(
       context,
+      spacing,
       isRestore: false,
     );
     if (password == null || !mounted) return;
@@ -855,34 +867,35 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
     try {
       final localPath = await BackupService.createEncryptedBackup(
         password,
+        spacing,
         interactive: false,
       );
       if (localPath == null) {
-        SnackbarService.error(BuddyMessages.backupFailed);
+        SnackbarService.error(BuddyMessages.backupFailed, spacing);
         return;
       }
 
       final uploaded = await GoogleDriveService.uploadBackup(localPath);
       if (uploaded) {
-        SnackbarService.success(ctxt.backup_uploadSuccess);
+        SnackbarService.success(ctxt.backup_uploadSuccess, spacing);
         ref.invalidate(driveBackupsProvider);
         ref.invalidate(_backupHistoryProvider);
       } else {
-        SnackbarService.error(ctxt.backup_uploadFailed);
+        SnackbarService.error(ctxt.backup_uploadFailed, spacing);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _showCloudRestoreSheet(AppLocalizations ctxt) {
+  void _showCloudRestoreSheet(AppLocalizations ctxt, AppSpacing spacing) {
     final driveBackups = ref.read(driveBackupsProvider);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => DraggableScrollableSheet(
         initialChildSize: 0.5,
@@ -941,7 +954,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: color.tertiary.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                              borderRadius: BorderRadius.circular(spacing.radiusSmall),
                             ),
                             child: Icon(LucideIcons.cloud,
                                 color: color.tertiary, size: 20,),
@@ -962,7 +975,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                               color: color.primary, size: 20,),
                           onTap: () {
                             Navigator.pop(context);
-                            _restoreFromDrive(backup);
+                            _restoreFromDrive(backup, spacing);
                           },
                         );
                       },
@@ -987,10 +1000,11 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
     );
   }
 
-  Future<void> _restoreFromDrive(DriveBackupInfo backup) async {
+  Future<void> _restoreFromDrive(DriveBackupInfo backup, AppSpacing spacing) async {
     final ctxt = AppLocalizations.of(context)!;
     final password = await DialogUtils.showPasswordDialog(
       context,
+      spacing,
       isRestore: true,
     );
     if (password == null || !mounted) return;
@@ -999,7 +1013,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
     try {
       final localPath = await GoogleDriveService.downloadBackup(backup.id);
       if (localPath == null) {
-        SnackbarService.error(ctxt.backup_uploadFailed);
+        SnackbarService.error(ctxt.backup_uploadFailed, spacing);
         return;
       }
 
@@ -1033,11 +1047,12 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
         await SharedPrefsUtil.instance.importAll(data['settings']);
       }
 
-      SnackbarService.success(BuddyMessages.restoreSuccess);
+      SnackbarService.success(BuddyMessages.restoreSuccess, spacing);
       ref.invalidate(_backupHistoryProvider);
     } catch (e) {
       SnackbarService.error(
         'Restore failed: Invalid password or corrupted file',
+        spacing
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -1117,7 +1132,7 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
                   padding: EdgeInsets.all(spacing.elementGap),
                   decoration: BoxDecoration(
                     color: color.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
                   child: Icon(LucideIcons.timer, color: color.primary, size: 20),
                 ),
@@ -1176,7 +1191,7 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
                     ),
                   ],
                   selected: {_frequency},
-                  onSelectionChanged: (selected) => _setFrequency(selected.first),
+                  onSelectionChanged: (selected) => _setFrequency(selected.first, spacing),
                   style: ButtonStyle(
                     visualDensity: VisualDensity.compact,
                     textStyle: WidgetStatePropertyAll(
@@ -1194,13 +1209,13 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: spacing.cardInner),
               child: InkWell(
-                onTap: _setPassword,
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                onTap: () => _setPassword(spacing),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 child: Container(
                   padding: EdgeInsets.all(spacing.elementGap + 4),
                   decoration: BoxDecoration(
                     color: color.errorContainer.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     border: Border.all(
                       color: color.error.withValues(alpha: 0.3),
                     ),
@@ -1264,7 +1279,7 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
     );
   }
 
-  Future<void> _setFrequency(BackupFrequency freq) async {
+  Future<void> _setFrequency(BackupFrequency freq, AppSpacing spacing) async {
     setState(() => _frequency = freq);
     await SharedPrefsUtil.instance.setAutoBackupFrequency(freq.name);
 
@@ -1272,7 +1287,7 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
       await AutoBackupService.cancelAutoBackup();
     } else {
       if (!_hasPassword) {
-        await _setPassword();
+        await _setPassword(spacing);
         if (!_hasPassword) {
           // User cancelled password — revert to never
           setState(() => _frequency = BackupFrequency.never);
@@ -1284,10 +1299,11 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
     }
   }
 
-  Future<void> _setPassword() async {
+  Future<void> _setPassword(AppSpacing spacing) async {
     final ctxt = AppLocalizations.of(context)!;
     final password = await DialogUtils.showPasswordDialog(
       context,
+      spacing,
       isRestore: false,
     );
     if (password == null || password.isEmpty) return;
@@ -1295,7 +1311,7 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
     await AutoBackupService.setBackupPassword(password);
     if (mounted) {
       setState(() => _hasPassword = true);
-      SnackbarService.success(ctxt.backup_passwordSet);
+      SnackbarService.success(ctxt.backup_passwordSet, spacing);
     }
   }
 }

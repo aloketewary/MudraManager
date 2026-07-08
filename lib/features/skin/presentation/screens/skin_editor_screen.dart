@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/skin/model/skin.dart';
 import 'package:mudra_manager/core/skin/provider/skin_provider.dart';
 import 'package:mudra_manager/core/skin/converter/skin_to_theme.dart';
@@ -124,7 +125,7 @@ class _SkinEditorScreenState extends ConsumerState<SkinEditorScreen>
     if (!_hasChanges) setState(() => _hasChanges = true);
   }
 
-  Future<void> _save() async {
+  Future<void> _save(AppSpacing spacing) async {
     if (_baseSkin == null) return;
 
     final override = SkinOverride(
@@ -145,7 +146,7 @@ class _SkinEditorScreenState extends ConsumerState<SkinEditorScreen>
     );
 
     await ref.read(activeSkinProvider.notifier).applyOverride(override);
-    SnackbarService.success('Skin customized!');
+    SnackbarService.success('Skin customized!', spacing);
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -169,16 +170,17 @@ class _SkinEditorScreenState extends ConsumerState<SkinEditorScreen>
     );
   }
 
-  Future<void> _reset() async {
+  Future<void> _reset(AppSpacing spacing) async {
     await ref.read(activeSkinProvider.notifier).resetToDefault();
     _initFromSkin();
     setState(() => _hasChanges = false);
-    SnackbarService.success('Reset to default');
+    SnackbarService.success('Reset to default', spacing);
   }
 
   @override
   Widget build(BuildContext context) {
     final skin = ref.watch(activeSkinProvider).value;
+    final spacing = ref.watch(spacingProvider);
     if (skin == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -188,7 +190,7 @@ class _SkinEditorScreenState extends ConsumerState<SkinEditorScreen>
         title: Text('Customize ${skin.name}'),
         actions: [
           TextButton(
-            onPressed: _hasChanges ? _save : null,
+            onPressed:() => _hasChanges ? _save(spacing) : null,
             child: const Text('Save'),
           ),
         ],
@@ -205,7 +207,7 @@ class _SkinEditorScreenState extends ConsumerState<SkinEditorScreen>
         controller: _tabController,
         children: [
           _buildColorsTab(),
-          _buildStyleTab(),
+          _buildStyleTab(spacing),
           _buildPreviewTab(skin),
         ],
       ),
@@ -283,7 +285,7 @@ class _SkinEditorScreenState extends ConsumerState<SkinEditorScreen>
   // TAB 2: STYLE
   // ═══════════════════════════════════════════════════════════
 
-  Widget _buildStyleTab() {
+  Widget _buildStyleTab(AppSpacing spacing) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
 
@@ -326,7 +328,7 @@ class _SkinEditorScreenState extends ConsumerState<SkinEditorScreen>
 
         // ── Reset ──
         OutlinedButton.icon(
-          onPressed: _reset,
+          onPressed: () => _reset(spacing),
           icon: const Icon(LucideIcons.rotateCcw, size: 18),
           label: const Text('Reset to Default'),
         ),

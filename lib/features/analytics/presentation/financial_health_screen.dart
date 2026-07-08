@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -151,7 +150,7 @@ class FinancialHealthScreen extends ConsumerWidget {
           ),
           decoration: BoxDecoration(
             color: scoreColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(spacing.radiusLarge),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
           ),
           child: Text(
             '${health.rating} — $verdict',
@@ -538,7 +537,7 @@ class FinancialHealthScreen extends ConsumerWidget {
                     ),
                     SizedBox(width: spacing.elementGap),
                     // Trend label
-                    _trendLabel(trend.changePercent, textTheme, color, ctxt),
+                    _trendLabel(trend.changePercent, textTheme, color, ctxt, spacing,),
                     SizedBox(width: spacing.elementGap),
                     SizedBox(
                       width: 64,
@@ -564,13 +563,14 @@ class FinancialHealthScreen extends ConsumerWidget {
     TextTheme textTheme,
     ColorScheme color,
     AppLocalizations ctxt,
+    AppSpacing spacing,
   ) {
     if (changePercent.abs() < 5) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
           color: color.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
         ),
         child: Text(
           ctxt.health_stable,
@@ -591,7 +591,7 @@ class FinancialHealthScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: trendColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Text(
         label,

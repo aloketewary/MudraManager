@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,11 +38,12 @@ class LanguageService {
 
   static void showLanguagePicker(BuildContext context, WidgetRef ref) {
     final currentLocale = ref.read(localeProvider);
+    final spacing = ref.watch(spacingProvider);
 
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (_) {
         return Padding(

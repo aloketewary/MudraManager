@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -81,9 +80,9 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         ),
         actions: [
           TextButton.icon(
-            onPressed:
+            onPressed: () =>
                 _mapping.isValid && _selectedAccount != null && !_importing
-                    ? _doImport
+                    ? _doImport(spacing)
                     : null,
             icon: _importing
                 ? SizedBox(
@@ -649,7 +648,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
@@ -675,7 +674,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                       hintText: 'Search currency...',
                       prefixIcon: const Icon(LucideIcons.search, size: 18),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       ),
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
@@ -869,13 +868,13 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     );
   }
 
-  Future<void> _doImport() async {
+  Future<void> _doImport(AppSpacing spacing) async {
     if (_selectedAccount == null) {
-      SnackbarService.error(BuddyMessages.pickAccount);
+      SnackbarService.error(BuddyMessages.pickAccount, spacing);
       return;
     }
     if (_validCount == 0) {
-      SnackbarService.error(BuddyMessages.genericError);
+      SnackbarService.error(BuddyMessages.genericError, spacing);
       return;
     }
 
@@ -936,7 +935,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       _showResultDialog(result);
     } catch (e) {
       if (context.mounted) GoRouter.of(context).pop(); // dismiss loader
-      SnackbarService.error(BuddyMessages.errorWith('$e'));
+      SnackbarService.error(BuddyMessages.errorWith('$e'), spacing);
     } finally {
       if (mounted) setState(() => _importing = false);
     }

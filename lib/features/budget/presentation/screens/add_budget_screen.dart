@@ -164,7 +164,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     }
   }
 
-  Future<void> _save() async {
+  Future<void> _save(AppSpacing spacing) async {
     if (_saving) return;
     setState(() => _saving = true);
     final ctxt = AppLocalizations.of(context)!;
@@ -175,6 +175,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         setState(() => _saving = false);
         SnackbarService.warning(
           ctxt.budget_freePlanLimit,
+          spacing
         );
         return;
       }
@@ -186,17 +187,17 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
 
     if (_startDate == null || _endDate == null) {
       setState(() => _saving = false);
-      SnackbarService.error(ctxt.budget_pickBothDatesErrorText);
+      SnackbarService.error(ctxt.budget_pickBothDatesErrorText, spacing);
       return;
     }
     if (_budgetType == BudgetType.categoryWise && _selectedCats.isEmpty) {
       setState(() => _saving = false);
-      SnackbarService.error(ctxt.budget_selectAtLeastOneCategoryErrorText);
+      SnackbarService.error(ctxt.budget_selectAtLeastOneCategoryErrorText, spacing);
       return;
     }
     if (_budgetType == BudgetType.tagWise && _selectedTagIds.isEmpty) {
       setState(() => _saving = false);
-      SnackbarService.error(ctxt.budget_selectAtLeastOneTag);
+      SnackbarService.error(ctxt.budget_selectAtLeastOneTag, spacing);
       return;
     }
 
@@ -267,6 +268,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         setState(() => _saving = false);
         SnackbarService.error(
           ctxt.budget_allocatedAmountExceedsTotalBudgetText,
+          spacing
         );
         return;
       }
@@ -300,6 +302,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         isEditing
             ? BuddyMessages.budgetUpdated
             : BuddyMessages.budgetCreated,
+            spacing
       );
       context.pop();
     }
@@ -464,7 +467,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                     ? ctxt.budget_saveButtonText
                     : ctxt.budget_updateButtonText)
                 : ctxt.common_next,
-            onTap: (isLast && _saving) ? null : _nextStep,
+            onTap: () => (isLast && _saving) ? null : _nextStep(spacing),
             color: color,
             textTheme: textTheme,
             spacing: spacing,
@@ -683,7 +686,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             final isDisabled = isTravel && !hasActiveTrip;
             return GestureDetector(
               onTap: isDisabled
-                  ? () => SnackbarService.warning(ctxt.budget_noActiveTrip)
+                  ? () => SnackbarService.warning(ctxt.budget_noActiveTrip, spacing)
                   : () {
                       HapticFeedback.lightImpact();
                       setState(() => _budgetType = type);
@@ -1589,33 +1592,33 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     }
   }
 
-  bool _validateStep() {
+  bool _validateStep(AppSpacing spacing) {
     switch (_step) {
       case 0:
         if (_nameC.text.trim().isEmpty) {
-          SnackbarService.error(AppLocalizations.of(context)!.budget_nameRequiredHintText);
+          SnackbarService.error(AppLocalizations.of(context)!.budget_nameRequiredHintText, spacing);
           return false;
         }
         final amt = double.tryParse(_amountC.text.trim());
         if (amt == null || amt <= 0) {
-          SnackbarService.error(AppLocalizations.of(context)!.budget_amountRequiredHintText);
+          SnackbarService.error(AppLocalizations.of(context)!.budget_amountRequiredHintText, spacing);
           return false;
         }
         return true;
       case 1:
         if (_startDate == null || _endDate == null) {
-          SnackbarService.error(AppLocalizations.of(context)!.budget_pickBothDatesErrorText);
+          SnackbarService.error(AppLocalizations.of(context)!.budget_pickBothDatesErrorText, spacing);
           return false;
         }
         return true;
       case 2:
         final ctxt = AppLocalizations.of(context)!;
         if (_budgetType == BudgetType.categoryWise && _selectedCats.isEmpty) {
-          SnackbarService.error(ctxt.budget_selectAtLeastOneCategoryErrorText);
+          SnackbarService.error(ctxt.budget_selectAtLeastOneCategoryErrorText, spacing);
           return false;
         }
         if (_budgetType == BudgetType.tagWise && _selectedTagIds.isEmpty) {
-          SnackbarService.error(ctxt.budget_selectAtLeastOneTag);
+          SnackbarService.error(ctxt.budget_selectAtLeastOneTag, spacing);
           return false;
         }
         return true;
@@ -1624,13 +1627,13 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     }
   }
 
-  void _nextStep() {
-    if (!_validateStep()) return;
+  void _nextStep(AppSpacing spacing) {
+    if (!_validateStep(spacing)) return;
     HapticFeedback.lightImpact();
     if (_step < _totalSteps - 1) {
       setState(() => _step++);
     } else {
-      _save();
+      _save(spacing);
     }
   }
 

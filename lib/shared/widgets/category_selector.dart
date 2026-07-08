@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -86,7 +87,7 @@ class CategorySelector extends ConsumerWidget {
   }
 }
 
-class _CategoryCard extends StatelessWidget {
+class _CategoryCard extends ConsumerWidget {
   final Category category;
   final List<Category> allCategories;
   final Category? selectedCategory;
@@ -104,7 +105,7 @@ class _CategoryCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isParentSelected = selectedCategory?.id == category.id;
     final isChildSelected =
         selectedCategory?.parentCategory.value?.id == category.id;
@@ -112,6 +113,7 @@ class _CategoryCard extends StatelessWidget {
     final hasSubcategories = allCategories.any(
       (c) => c.parentCategory.value?.id == category.id,
     );
+    final spacing = ref.watch(spacingProvider);
 
     return GestureDetector(
       onTap: () async {
@@ -146,7 +148,7 @@ class _CategoryCard extends StatelessWidget {
             ? color.primaryContainer
             : color.surfaceContainerHighest,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           side: isSelected
               ? BorderSide(color: color.primary, width: 2)
               : BorderSide.none,

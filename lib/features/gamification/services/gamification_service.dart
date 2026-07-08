@@ -2,6 +2,7 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
@@ -316,9 +317,10 @@ class GamificationService {
       await _addXP(achievement.rewardXP, 'Achievement: ${achievement.title}');
       log.i('🏆 Achievement Unlocked: ${achievement.title}');
       SnackbarService.success(
-        Tone.appL10n?.notif_achievementBody(achievement.title, achievement.rewardXP) ??
-            '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
-      );
+          Tone.appL10n?.notif_achievementBody(
+                  achievement.title, achievement.rewardXP) ??
+              '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
+          const AppSpacing.comfortable());
       NotificationService.showAchievementUnlocked(
         achievement.title,
         achievement.rewardXP,
@@ -376,9 +378,10 @@ class GamificationService {
       await _addXP(achievement.rewardXP, 'Achievement: ${achievement.title}');
       log.i('🏆 Achievement Unlocked: ${achievement.title}');
       SnackbarService.success(
-        Tone.appL10n?.notif_achievementBody(achievement.title, achievement.rewardXP) ??
-            '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
-      );
+          Tone.appL10n?.notif_achievementBody(
+                  achievement.title, achievement.rewardXP) ??
+              '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
+          const AppSpacing.comfortable());
 
       NotificationService.showAchievementUnlocked(
         achievement.title,
@@ -479,7 +482,9 @@ class GamificationService {
   void _onLevelUp(int newLevel, int gainedLevels) {
     log.d('🎉 Level Up! New Level: $newLevel');
     SnackbarService.success(
-      Tone.appL10n?.notif_levelUpBody ?? '🎉 Level $newLevel! You just leveled up!',
+      Tone.appL10n?.notif_levelUpBody ??
+          '🎉 Level $newLevel! You just leveled up!',
+      const AppSpacing.comfortable(),
     );
     NotificationService.showLevelUp(newLevel);
   }
@@ -986,7 +991,8 @@ class GamificationService {
       final now = DateTime.now();
       final yesterday = now.subtract(const Duration(days: 1));
       final yStart = DateTime(yesterday.year, yesterday.month, yesterday.day);
-      final yEnd = DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
+      final yEnd =
+          DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
 
       // Get active budgets that cover yesterday
       final budgets = await isar.budgets
@@ -1004,7 +1010,8 @@ class GamificationService {
       for (final budget in budgets) {
         final (s, e) = budget.getCurrentPeriodRange(yesterday);
         final daysInPeriod = e.difference(s).inDays + 1;
-        final dailyAllowance = daysInPeriod > 0 ? budget.amount / daysInPeriod : budget.amount;
+        final dailyAllowance =
+            daysInPeriod > 0 ? budget.amount / daysInPeriod : budget.amount;
 
         final spent = await _calculateBudgetSpent(budget, yStart, yEnd);
         if (spent > dailyAllowance) {

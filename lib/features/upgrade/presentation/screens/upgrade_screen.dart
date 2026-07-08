@@ -48,6 +48,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   void _onPurchaseUpdate(PurchaseStatus status, String? error) {
     if (!mounted) return;
     setState(() => _purchasing = false);
+    final spacing = ref.watch(spacingProvider);
 
     switch (status) {
       case PurchaseStatus.purchased:
@@ -58,14 +59,14 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
         break;
       case PurchaseStatus.error:
         SnackbarService.error(
-          error ?? AppLocalizations.of(context)!.upgrade_purchaseFailed,
+          error ?? AppLocalizations.of(context)!.upgrade_purchaseFailed, spacing
         );
         break;
       case PurchaseStatus.canceled:
         break;
       case PurchaseStatus.pending:
         SnackbarService.info(
-          AppLocalizations.of(context)!.upgrade_purchasePending,
+          AppLocalizations.of(context)!.upgrade_purchasePending, spacing
         );
         break;
     }
@@ -398,7 +399,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
           onPressed: _purchasing ? null : _handlePurchase,
           style: FilledButton.styleFrom(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusLarge),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
           ),
           child: _purchasing
@@ -767,9 +768,10 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   Future<void> _handlePurchase() async {
     HapticFeedback.mediumImpact();
     final billing = ref.read(billingServiceProvider);
+    final spacing = ref.watch(spacingProvider);
 
     if (!billing.isAvailable) {
-      SnackbarService.error(BuddyMessages.playNotAvailable);
+      SnackbarService.error(BuddyMessages.playNotAvailable, spacing);
       return;
     }
 
@@ -779,16 +781,17 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
     final started = await billing.buy(EntitlementProducts.subscription);
     if (!started && mounted) {
       setState(() => _purchasing = false);
-      SnackbarService.error(BuddyMessages.purchaseFailed);
+      SnackbarService.error(BuddyMessages.purchaseFailed, spacing);
     }
   }
 
   Future<void> _handleRestore() async {
     HapticFeedback.mediumImpact();
     final billing = ref.read(billingServiceProvider);
+    final spacing = ref.watch(spacingProvider);
 
     if (!billing.isAvailable) {
-      SnackbarService.error(BuddyMessages.playNotAvailable);
+      SnackbarService.error(BuddyMessages.playNotAvailable, spacing);
       return;
     }
 
@@ -804,7 +807,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
         _confettiController.play();
         _showSuccessSheet();
       } else {
-        SnackbarService.info(BuddyMessages.genericError);
+        SnackbarService.info(BuddyMessages.genericError, spacing);
       }
     }
   }

@@ -6,7 +6,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart';
 
 class FirstTransactionNudge extends ConsumerWidget {
@@ -182,7 +181,7 @@ class FirstTransactionNudge extends ConsumerWidget {
   }
 }
 
-class _QuickActionChip extends StatelessWidget {
+class _QuickActionChip extends ConsumerWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -194,9 +193,10 @@ class _QuickActionChip extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Expanded(
       child: InkWell(
@@ -204,12 +204,12 @@ class _QuickActionChip extends StatelessWidget {
           HapticFeedback.mediumImpact();
           onTap();
         },
-        borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.625),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.625),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             borderRadius:
-                BorderRadius.circular(Tone.current.borderRadius * 0.625),
+                BorderRadius.circular(spacing.radiusSmall * 0.625),
             color: color.surfaceContainerHighest.withValues(alpha: 0.5),
           ),
           child: Row(

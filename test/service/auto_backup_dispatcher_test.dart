@@ -17,6 +17,7 @@ import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/auto_backup_service.dart';
 import 'package:mudra_manager/core/services/backup_restore_service.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
@@ -168,7 +169,7 @@ void main() {
 
         // ── Condition 3: createAutoBackup produces a mudra_auto_*.mudra file ──
         const password = 'test_password_123';
-        final path = await AutoBackupService.createAutoBackup(password);
+        final path = await AutoBackupService.createAutoBackup(password, const AppSpacing.comfortable());
 
         // Fallback: if path is null, check if file was created in tmpDir
         // (path_provider mock may not intercept all code paths)
@@ -287,7 +288,7 @@ void main() {
         const password = 'manual_backup_test';
 
         final path = await BackupService.createEncryptedBackup(
-          password,
+          password, const AppSpacing.comfortable(),
           interactive: false,
         );
 

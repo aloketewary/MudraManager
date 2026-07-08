@@ -1,10 +1,12 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class BudgetAmountInput extends StatelessWidget {
+class BudgetAmountInput extends ConsumerWidget {
   final TextEditingController controller;
   final String label;
   final String? errorText;
@@ -17,7 +19,9 @@ class BudgetAmountInput extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    
     return TextField(
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -32,7 +36,7 @@ class BudgetAmountInput extends StatelessWidget {
         ),
         errorText: errorText,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
         ),
       ),
     );

@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,12 +32,12 @@ class _SkinPickerScreenState extends ConsumerState<SkinPickerScreen> {
     _tempSelectedId = current?.id ?? 'finance';
   }
 
-  void _applySkin() {
+  void _applySkin(AppSpacing spacing) {
     if (_tempSelectedId == null) return;
     ref.read(activeSkinProvider.notifier).setSkin(_tempSelectedId!);
     SnackbarService.success(
       AppLocalizations.of(context)?.theme_themeAppliedMessage ??
-          'Skin applied!',
+          'Skin applied!', spacing
     );
   }
 
@@ -48,6 +48,7 @@ class _SkinPickerScreenState extends ConsumerState<SkinPickerScreen> {
     final ctxt = AppLocalizations.of(context)!;
     final isPro = ref.watch(hasFullAccessProvider).value ?? false;
     final catalog = ref.watch(skinCatalogProvider);
+    final spacing = ref.watch(spacingProvider);
 
     return ScreenShell(
       config: ScreenShellConfig(
@@ -68,11 +69,11 @@ class _SkinPickerScreenState extends ConsumerState<SkinPickerScreen> {
           id: 'apply_skin',
           label: ctxt.theme_applyThemeLabel,
           icon: LucideIcons.circleCheck,
-          onTap: _applySkin,
+          onTap: () => _applySkin(spacing),
         ),
       ),
       body: catalog.when(
-        data: (skins) => _buildBody(skins, isPro, color, textTheme),
+        data: (skins) => _buildBody(skins, isPro, color, textTheme, spacing),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
@@ -84,11 +85,12 @@ class _SkinPickerScreenState extends ConsumerState<SkinPickerScreen> {
     bool isPro,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _buildSectionHeader('Skins', color, textTheme),
+        _buildSectionHeader('Skins', color, textTheme, spacing),
         const SizedBox(height: 12),
         _buildSkinGrid(skins, isPro: true, color: color, textTheme: textTheme),
         const SizedBox(height: 80),
@@ -99,7 +101,8 @@ class _SkinPickerScreenState extends ConsumerState<SkinPickerScreen> {
   Widget _buildSectionHeader(
     String title,
     ColorScheme color,
-    TextTheme textTheme, {
+    TextTheme textTheme,
+    AppSpacing spacing, {
     bool showProBadge = false,
   }) {
     return Padding(
@@ -122,7 +125,7 @@ class _SkinPickerScreenState extends ConsumerState<SkinPickerScreen> {
                 gradient: LinearGradient(
                   colors: [color.primary, color.tertiary],
                 ),
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius * 0.5),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.5),
               ),
               child: Text(
                 'PRO',

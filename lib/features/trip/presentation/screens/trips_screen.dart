@@ -11,7 +11,6 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_service.dart';
@@ -520,7 +519,7 @@ class _TripsScreenState extends ConsumerState<TripsScreen>
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2),),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (ctx) => SafeArea(
         child: Padding(

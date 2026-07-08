@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
@@ -83,6 +82,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
     final nameController = TextEditingController();
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     showModalBottomSheet(
       context: context,
@@ -90,7 +90,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(Tone.current.borderRadius * 2),),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
@@ -138,7 +138,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                 hintText: AppLocalizations.of(context)!.editTrip_enterName,
                 border: OutlineInputBorder(
                   borderRadius:
-                      BorderRadius.circular(Tone.current.borderRadius),
+                      BorderRadius.circular(spacing.radiusSmall),
                 ),
                 prefixIcon: const Icon(LucideIcons.user),
               ),
@@ -154,7 +154,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.circular(Tone.current.borderRadius),
+                            BorderRadius.circular(spacing.radiusSmall),
                       ),
                     ),
                     child: Text(AppLocalizations.of(context)!.common_cancel),
@@ -179,7 +179,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.circular(Tone.current.borderRadius),
+                            BorderRadius.circular(spacing.radiusSmall),
                       ),
                     ),
                     child: Text(AppLocalizations.of(context)!.editTrip_add),
@@ -194,15 +194,15 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
     );
   }
 
-  Future<void> _saveTrip(Trip? originalTrip) async {
+  Future<void> _saveTrip(Trip? originalTrip, AppSpacing spacing,) async {
     if (_saving) return;
     if (_nameController.text.trim().isEmpty) {
-      SnackbarService.error(BuddyMessages.tripNameRequired(_isTrip));
+      SnackbarService.error(BuddyMessages.tripNameRequired(_isTrip), spacing,);
       return;
     }
 
     if (_participants.isEmpty) {
-      SnackbarService.error(BuddyMessages.addParticipant);
+      SnackbarService.error(BuddyMessages.addParticipant, spacing,);
       return;
     }
 
@@ -210,7 +210,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
     if (!isEditMode) {
       final canCreate = await ref.read(canCreateTripProvider.future);
       if (!canCreate) {
-        SnackbarService.warning(BuddyMessages.tripLimitReached(_isTrip));
+        SnackbarService.warning(BuddyMessages.tripLimitReached(_isTrip), spacing,);
         return;
       }
     }
@@ -248,7 +248,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
 
       ref.invalidate(allTripsProvider);
       ref.invalidate(tripByIdProvider(widget.tripId!));
-      SnackbarService.success(BuddyMessages.tripUpdated(_isTrip));
+      SnackbarService.success(BuddyMessages.tripUpdated(_isTrip), spacing,);
     } else {
       final trip = Trip.create(
         name: _nameController.text.trim(),
@@ -265,15 +265,15 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
 
       await ref.read(tripServiceProvider).createTrip(trip, _participants);
       ref.invalidate(allTripsProvider);
-      SnackbarService.success(BuddyMessages.tripCreated(_isTrip));
+      SnackbarService.success(BuddyMessages.tripCreated(_isTrip), spacing,);
     }
 
     router.pop();
   }
 
-  Future<void> _finalizeTrip(Trip trip) async {
+  Future<void> _finalizeTrip(Trip trip, AppSpacing spacing,) async {
     final confirm = await DialogUtils.showConfirmation(
-      context,
+      context, spacing,
       title: _isTrip ? AppLocalizations.of(context)!.trip_finalizeTrip : AppLocalizations.of(context)!.trip_closeGroup,
       message: _isTrip
           ? AppLocalizations.of(context)!.trip_finalizeTripMsg
@@ -291,7 +291,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
           clearTransactions: false,
         );
     ref.invalidate(allTripsProvider);
-    SnackbarService.success(BuddyMessages.tripFinalized(_isTrip));
+    SnackbarService.success(BuddyMessages.tripFinalized(_isTrip), spacing,);
     router.pop();
   }
 
@@ -389,7 +389,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
             label: Text(isEditMode ? AppLocalizations.of(context)!.common_update : AppLocalizations.of(context)!.common_create),
             onPressed: () {
               HapticFeedback.mediumImpact();
-              _saveTrip(trip);
+              _saveTrip(trip, spacing,);
             },
           ),
         ],
@@ -524,7 +524,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.vertical(
                             top:
-                                Radius.circular(Tone.current.borderRadius * 2),),
+                                Radius.circular(spacing.radiusSmall * 2),),
                       ),
                       builder: (_) => _TripCurrencyPicker(
                         selected: _tripCurrency,
@@ -648,7 +648,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                           if (datesChanged) {
                             if (!context.mounted) return;
                             final confirm = await DialogUtils.showConfirmation(
-                              context,
+                              context, spacing,
                               title: 'Warning: Date Change',
                               message:
                                   'Changing dates will remove all linked transactions. Continue?',
@@ -1003,7 +1003,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                   ),
                   const SizedBox(height: 16),
                   OutlinedButton.icon(
-                    onPressed: () => _finalizeTrip(trip),
+                    onPressed: () => _finalizeTrip(trip, spacing,),
                     icon: const Icon(LucideIcons.circleCheck, size: 20),
                     label: Text(_isTrip ? 'Finalize Trip' : 'Finalize Group'),
                     style: OutlinedButton.styleFrom(
@@ -1023,15 +1023,15 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
   }
 }
 
-class _TripCurrencyPicker extends StatefulWidget {
+class _TripCurrencyPicker extends ConsumerStatefulWidget {
   final String? selected;
   const _TripCurrencyPicker({this.selected});
 
   @override
-  State<_TripCurrencyPicker> createState() => _TripCurrencyPickerState();
+  ConsumerState<_TripCurrencyPicker> createState() => _TripCurrencyPickerState();
 }
 
-class _TripCurrencyPickerState extends State<_TripCurrencyPicker> {
+class _TripCurrencyPickerState extends ConsumerState<_TripCurrencyPicker> {
   String _query = '';
 
   List<CurrencyMeta> get _filtered {
@@ -1051,6 +1051,7 @@ class _TripCurrencyPickerState extends State<_TripCurrencyPicker> {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -1077,7 +1078,7 @@ class _TripCurrencyPickerState extends State<_TripCurrencyPicker> {
                 prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
                   borderRadius:
-                      BorderRadius.circular(Tone.current.borderRadius),
+                      BorderRadius.circular(spacing.radiusSmall),
                   borderSide: BorderSide(color: color.outlineVariant),
                 ),
                 isDense: true,

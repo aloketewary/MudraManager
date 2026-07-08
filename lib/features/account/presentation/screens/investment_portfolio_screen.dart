@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -59,6 +59,7 @@ class _InvestmentPortfolioScreenState
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isGuestMode = ref.watch(guestModeProvider);
+    final spacing = ref.watch(spacingProvider);
 
     return ScreenShell(
       config: ScreenShellConfig(
@@ -71,7 +72,7 @@ class _InvestmentPortfolioScreenState
           id: 'add_holding',
           label: 'Add',
           icon: LucideIcons.plus,
-          onTap: _showAddHoldingBottomSheet,
+          onTap: () => _showAddHoldingBottomSheet(spacing),
         ),
       ),
       body: FutureBuilder<Map<String, double>>(
@@ -269,7 +270,7 @@ class _InvestmentPortfolioScreenState
     );
   }
 
-  void _showAddHoldingBottomSheet() {
+  void _showAddHoldingBottomSheet(AppSpacing spacing) {
     final formKey = GlobalKey<FormState>();
     final symbolController = TextEditingController();
     final nameController = TextEditingController();
@@ -282,7 +283,7 @@ class _InvestmentPortfolioScreenState
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setState) => Padding(
@@ -436,13 +437,13 @@ class _InvestmentPortfolioScreenState
                               await ref.read(investmentPortfolioServiceProvider)
                                   .addHolding(holding, widget.account.id);
                               _loadData();
-                              SnackbarService.info(BuddyMessages.txnAdded);
+                              SnackbarService.info(BuddyMessages.txnAdded, spacing);
                               if (context.mounted) {
                                 formContext.pop();
                               }
                             } catch (e) {
                               SnackbarService.error(
-                                BuddyMessages.errorWith('$e'),
+                                BuddyMessages.errorWith('$e'), spacing
                               );
                             }
                           },

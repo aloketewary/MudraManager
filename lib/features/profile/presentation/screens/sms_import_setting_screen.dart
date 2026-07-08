@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/extension/case_extention.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -113,7 +112,7 @@ class _SmsImportSettingsScreenState
                           : ctxt
                               .smsImport_allowReadingNotif,
                       value: _permissionGranted,
-                      onChanged: _handlePermissionToggle,
+                      onChanged: (value) =>  _handlePermissionToggle(value, spacing),
                       color: color,
                       textTheme: textTheme,
                       ctxt: ctxt,
@@ -125,8 +124,8 @@ class _SmsImportSettingsScreenState
                       subtitle:
                           ctxt.smsImport_autoDetectTxn,
                       value: _smsImportEnabled && _permissionGranted,
-                      onChanged:
-                          _permissionGranted ? _handleAutoImportToggle : null,
+                      onChanged: (value) =>
+                          _permissionGranted ? _handleAutoImportToggle(value, spacing) : null,
                       color: color,
                       textTheme: textTheme,
                       ctxt: ctxt,
@@ -142,6 +141,7 @@ class _SmsImportSettingsScreenState
                         HapticFeedback.mediumImpact();
                         DialogUtils.showListItems(
                           context: context,
+                          spacing: spacing,
                           title: 'Select Detection Sensitivity',
                           items: DetectionSensitivity.values.map((d) => d.name.toTitleCase()).toList(),
                           selectedValue: SharedPrefsUtil.instance.getDetectionMode().name.toTitleCase(),
@@ -156,6 +156,7 @@ class _SmsImportSettingsScreenState
                                 .setString('detection_mode', level.name);
                             SnackbarService.info(
                               'Detection sensitivity set to ${level.name.toTitleCase()}',
+                              spacing
                             );
                           },
                         );
@@ -314,7 +315,7 @@ class _SmsImportSettingsScreenState
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -653,12 +654,13 @@ class _SmsImportSettingsScreenState
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),
@@ -702,7 +704,7 @@ class _SmsImportSettingsScreenState
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: color.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 border: Border.all(
                   color: color.outlineVariant.withValues(alpha: 0.5),
                 ),
@@ -748,7 +750,7 @@ class _SmsImportSettingsScreenState
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       ),
                     ),
                     child: Text(ctxt.common_cancel),
@@ -762,7 +764,7 @@ class _SmsImportSettingsScreenState
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       ),
                     ),
                     child: Text(
@@ -801,11 +803,12 @@ class _SmsImportSettingsScreenState
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),
@@ -842,7 +845,7 @@ class _SmsImportSettingsScreenState
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: color.errorContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 border: Border.all(color: color.error.withValues(alpha: 0.3)),
               ),
               child: Row(
@@ -873,7 +876,7 @@ class _SmsImportSettingsScreenState
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       ),
                     ),
                     child: Text(ctxt.common_cancel),
@@ -888,7 +891,7 @@ class _SmsImportSettingsScreenState
                       foregroundColor: color.error,
                       side: BorderSide(color: color.error),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       ),
                     ),
                     child: Text(ctxt.txnList_clear),
@@ -904,12 +907,12 @@ class _SmsImportSettingsScreenState
     if (confirmed == true) {
       SharedPrefsUtil.instance.clearProcessedHashes();
       if (!context.mounted) return;
-      SnackbarService.success(BuddyMessages.settingsSaved);
+      SnackbarService.success(BuddyMessages.settingsSaved, spacing);
     }
   }
 
   // ── SCAN LOGIC (unchanged) ──
-  Future<void> _handlePermissionToggle(bool on) async {
+  Future<void> _handlePermissionToggle(bool on, AppSpacing spacing) async {
     HapticFeedback.mediumImpact();
     if (on) {
       final confirmed = await _showSmsPermissionDisclosure(context);
@@ -921,9 +924,9 @@ class _SmsImportSettingsScreenState
       if (granted) {
         setState(() => _permissionGranted = true);
         ref.invalidate(smsPermissionGrantedProvider);
-        SnackbarService.success(BuddyMessages.smsImportEnabled);
+        SnackbarService.success(BuddyMessages.smsImportEnabled, spacing);
       } else {
-        SnackbarService.error(BuddyMessages.notificationAccessDenied);
+        SnackbarService.error(BuddyMessages.notificationAccessDenied, spacing);
       }
     } else {
       _permissionDisableTapCount++;
@@ -932,22 +935,22 @@ class _SmsImportSettingsScreenState
         _permissionDisableTapCount = 0;
       } else {
         SnackbarService.info(
-            AppLocalizations.of(context)!.smsImport_tapAgainSettings,);
+            AppLocalizations.of(context)!.smsImport_tapAgainSettings, spacing,);
       }
     }
   }
 
-  Future<void> _handleAutoImportToggle(bool on) async {
+  Future<void> _handleAutoImportToggle(bool on, AppSpacing spacing,) async {
     HapticFeedback.mediumImpact();
     setState(() => _smsImportEnabled = on);
     SharedPrefsUtil.instance.setSmsImportEnabled(on);
     ref.invalidate(smsPermissionGrantedProvider);
     if (on) {
       if (!context.mounted) return;
-      SnackbarService.success(BuddyMessages.smsImportEnabled);
+      SnackbarService.success(BuddyMessages.smsImportEnabled, spacing);
     } else {
       SnackbarService.info(BuddyMessages.toggledOff(
-          AppLocalizations.of(context)!.smsImport_autoImport,),);
+          AppLocalizations.of(context)!.smsImport_autoImport,),spacing,);
     }
   }
 }

@@ -1,4 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:flutter/material.dart';
@@ -6,9 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
-class PendingSplitsSection extends StatelessWidget {
+class PendingSplitsSection extends ConsumerWidget {
   final List<Transaction> pendingTransactions;
   final int tripId;
 
@@ -19,9 +20,10 @@ class PendingSplitsSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     if (pendingTransactions.isEmpty) {
       return const SizedBox.shrink();
@@ -56,7 +58,7 @@ class PendingSplitsSection extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: color.errorContainer,
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Text(
                   '${pendingTransactions.length}',
@@ -106,7 +108,7 @@ class PendingSplitsSection extends StatelessWidget {
                     elevation: 0,
                     color: color.surfaceContainerHighest,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       onTap: () {
                         HapticFeedback.lightImpact();
                         _showSplitOptions(context, txn);
@@ -247,7 +249,7 @@ class PendingSplitsSection extends StatelessWidget {
   }
 }
 
-class _SplitOptionButton extends StatelessWidget {
+class _SplitOptionButton extends ConsumerWidget {
   final IconData icon;
   final String label;
   final Color color;
@@ -261,15 +263,16 @@ class _SplitOptionButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+      borderRadius: BorderRadius.circular(spacing.radiusSmall),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Column(

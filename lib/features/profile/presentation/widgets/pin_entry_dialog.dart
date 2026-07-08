@@ -1,18 +1,20 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class PinEntryDialog extends StatefulWidget {
+class PinEntryDialog extends ConsumerStatefulWidget {
   /// Length of the PIN to collect
   final int length;
   const PinEntryDialog({super.key, this.length = 4});
 
   @override
-  State<PinEntryDialog> createState() => _PinEntryDialogState();
+  ConsumerState<PinEntryDialog> createState() => _PinEntryDialogState();
 }
 
-class _PinEntryDialogState extends State<PinEntryDialog> {
+class _PinEntryDialogState extends ConsumerState<PinEntryDialog> {
   late List<int> _keys; // randomized digits 0–9
   final List<String> _input = [];
 
@@ -46,9 +48,11 @@ class _PinEntryDialogState extends State<PinEntryDialog> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
+    
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 80),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Tone.current.borderRadius)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusSmall)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -153,7 +153,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                 decoration: BoxDecoration(
                                   color: isActive ? color.onPrimary : color.primary,
-                                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                                 ),
                                 child: Text(
                                   '$unreadAll',

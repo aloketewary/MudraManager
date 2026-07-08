@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -165,7 +164,8 @@ class _AddEditTransactionScreenState
         if (next case AsyncData(:final value)) {
           final List<Trip> trips = value;
           if (_tripManuallyCleared || _selectedTrip != null) return;
-          final Trip? activeTrip = trips.where((t) => t.isActive && t.isTrip).firstOrNull;
+          final Trip? activeTrip =
+              trips.where((t) => t.isActive && t.isTrip).firstOrNull;
           if (activeTrip != null && mounted) {
             setState(() {
               _selectedTrip = activeTrip;
@@ -220,10 +220,8 @@ class _AddEditTransactionScreenState
     final smsAccountNumber = widget.smsActivity?.account;
     if (smsAccountNumber == null || smsAccountNumber.isEmpty) return;
     final isar = await ref.read(isarServiceProvider).getInstance();
-    final accounts = await isar.accounts
-        .filter()
-        .isActiveEqualTo(true)
-        .findAll();
+    final accounts =
+        await isar.accounts.filter().isActiveEqualTo(true).findAll();
     final match = accounts.where((a) {
       final dbAccNo = a.accountNumber?.trim();
       return dbAccNo != null && dbAccNo.endsWith(smsAccountNumber.trim());
@@ -295,7 +293,6 @@ class _AddEditTransactionScreenState
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -327,7 +324,7 @@ class _AddEditTransactionScreenState
         trailing: ScreenTextAction(
           id: 'save_transaction',
           label: _isEditing ? ctxt.common_update : ctxt.common_save,
-          onTap: _saving ? null : _saveTransaction,
+          onTap: () => _saving ? null : _saveTransaction(spacing),
           isLoading: _saving,
         ),
       ),
@@ -339,135 +336,135 @@ class _AddEditTransactionScreenState
             if (!_typeLockedByFab)
               RepaintBoundary(
                 child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal,
-                  vertical: spacing.elementGap,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: color.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                    vertical: spacing.elementGap,
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            setState(() {
-                              _isExpense = true;
-                              _selectedCategory = null;
-                              _smartDefaultsApplied = false;
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeOutCubic,
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: _isExpense
-                                  ? color.error.withValues(alpha: 0.12)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(
-                                spacing.radiusMedium - 2,
-                              ),
-                              border: Border.all(
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: color.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              setState(() {
+                                _isExpense = true;
+                                _selectedCategory = null;
+                                _smartDefaultsApplied = false;
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOutCubic,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
                                 color: _isExpense
-                                    ? color.error.withValues(alpha: 0.3)
+                                    ? color.error.withValues(alpha: 0.12)
                                     : Colors.transparent,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  LucideIcons.circleMinus,
-                                  size: 16,
-                                  color: _isExpense
-                                      ? color.error
-                                      : color.onSurfaceVariant
-                                          .withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(
+                                  spacing.radiusMedium - 2,
                                 ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  ctxt.transaction_expenseButtonLabel,
-                                  style: textTheme.labelLarge?.copyWith(
-                                    fontWeight: _isExpense
-                                        ? FontWeight.bold
-                                        : FontWeight.w500,
+                                border: Border.all(
+                                  color: _isExpense
+                                      ? color.error.withValues(alpha: 0.3)
+                                      : Colors.transparent,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    LucideIcons.circleMinus,
+                                    size: 16,
                                     color: _isExpense
                                         ? color.error
                                         : color.onSurfaceVariant
                                             .withValues(alpha: 0.5),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    ctxt.transaction_expenseButtonLabel,
+                                    style: textTheme.labelLarge?.copyWith(
+                                      fontWeight: _isExpense
+                                          ? FontWeight.bold
+                                          : FontWeight.w500,
+                                      color: _isExpense
+                                          ? color.error
+                                          : color.onSurfaceVariant
+                                              .withValues(alpha: 0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            setState(() {
-                              _isExpense = false;
-                              _selectedCategory = null;
-                              _smartDefaultsApplied = false;
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeOutCubic,
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: !_isExpense
-                                  ? color.primary.withValues(alpha: 0.12)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(
-                                spacing.radiusMedium - 2,
-                              ),
-                              border: Border.all(
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              setState(() {
+                                _isExpense = false;
+                                _selectedCategory = null;
+                                _smartDefaultsApplied = false;
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOutCubic,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
                                 color: !_isExpense
-                                    ? color.primary.withValues(alpha: 0.3)
+                                    ? color.primary.withValues(alpha: 0.12)
                                     : Colors.transparent,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  LucideIcons.circlePlus,
-                                  size: 16,
-                                  color: !_isExpense
-                                      ? color.primary
-                                      : color.onSurfaceVariant
-                                          .withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(
+                                  spacing.radiusMedium - 2,
                                 ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  ctxt.transaction_incomeButtonLabel,
-                                  style: textTheme.labelLarge?.copyWith(
-                                    fontWeight: !_isExpense
-                                        ? FontWeight.bold
-                                        : FontWeight.w500,
+                                border: Border.all(
+                                  color: !_isExpense
+                                      ? color.primary.withValues(alpha: 0.3)
+                                      : Colors.transparent,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    LucideIcons.circlePlus,
+                                    size: 16,
                                     color: !_isExpense
                                         ? color.primary
                                         : color.onSurfaceVariant
                                             .withValues(alpha: 0.5),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    ctxt.transaction_incomeButtonLabel,
+                                    style: textTheme.labelLarge?.copyWith(
+                                      fontWeight: !_isExpense
+                                          ? FontWeight.bold
+                                          : FontWeight.w500,
+                                      color: !_isExpense
+                                          ? color.primary
+                                          : color.onSurfaceVariant
+                                              .withValues(alpha: 0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
               ),
 
             // ── Trip banner (top, outside ListView) ──
@@ -510,7 +507,7 @@ class _AddEditTransactionScreenState
                       ),
                       const SizedBox(width: 4),
                       GestureDetector(
-                        onTap: () => _showSplitCustomizer(),
+                        onTap: () => _showSplitCustomizer(spacing),
                         child: Icon(
                           LucideIcons.pencil,
                           size: 16,
@@ -564,90 +561,97 @@ class _AddEditTransactionScreenState
                   // ── Hero Amount ──
                   RepaintBoundary(
                     child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.cardHorizontal,
-                      vertical: spacing.cardVertical,
-                    ),
-                    decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    ),
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: _amountController,
-                          focusNode: _amountFocus,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          textAlign: TextAlign.center,
-                          style: textTheme.displaySmall?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: accentColor,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: '0.00',
-                            hintStyle: textTheme.displaySmall?.copyWith(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardHorizontal,
+                        vertical: spacing.cardVertical,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.06),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
+                      ),
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: _amountController,
+                            focusNode: _amountFocus,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            textAlign: TextAlign.center,
+                            style: textTheme.displaySmall?.copyWith(
                               fontWeight: FontWeight.w900,
-                              color: accentColor.withValues(alpha: 0.2),
+                              color: accentColor,
                             ),
-                            prefix: Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: CurrencyBadge(
-                                code: _effectiveCurrency ?? BaseCurrency.code,
-                                size: 28,
-                                color: accentColor.withValues(alpha: 0.6),
+                            decoration: InputDecoration(
+                              hintText: '0.00',
+                              hintStyle: textTheme.displaySmall?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: accentColor.withValues(alpha: 0.2),
+                              ),
+                              prefix: Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: CurrencyBadge(
+                                  code: _effectiveCurrency ?? BaseCurrency.code,
+                                  size: 28,
+                                  color: accentColor.withValues(alpha: 0.6),
+                                ),
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: spacing.cardVerticalMax,
+                              ),
+                              filled: false,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              suffixIcon: IconButton(
+                                onPressed: () => _showCalculator(context, (v) {
+                                  _amountController.text = v.toString();
+                                }),
+                                icon: Icon(
+                                  LucideIcons.calculator,
+                                  color: accentColor.withValues(alpha: 0.6),
+                                  size: 22,
+                                ),
                               ),
                             ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: spacing.cardVerticalMax,
-                            ),
-                            filled: false,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            suffixIcon: IconButton(
-                              onPressed: () => _showCalculator(context, (v) {
-                                _amountController.text = v.toString();
-                              }),
-                              icon: Icon(
-                                LucideIcons.calculator,
-                                color: accentColor.withValues(alpha: 0.6),
-                                size: 22,
-                              ),
+                          ),
+                          // Quick amounts
+                          Padding(
+                            padding:
+                                EdgeInsets.only(bottom: spacing.elementGap),
+                            child: QuickAmounts(
+                              accentColor: accentColor,
+                              onAmountSelected: (amt) {
+                                _amountController.text = amt.toString();
+                              },
                             ),
                           ),
-                        ),
-                        // Quick amounts
-                        Padding(
-                          padding: EdgeInsets.only(bottom: spacing.elementGap),
-                          child: QuickAmounts(
-                            accentColor: accentColor,
-                            onAmountSelected: (amt) {
-                              _amountController.text = amt.toString();
-                            },
-                          ),
-                        ),
-                        if (!_isEditing && widget.smsActivity == null)
-                          SmartDefaultsBanner(
-                            isExpense: _isExpense,
-                            onApply: () {
-                              final d = ref.read(smartDefaultsProvider(_isExpense)).value;
-                              if (d == null) return;
-                              setState(() {
-                                _selectedCategory = d.suggestedCategory;
-                                if (d.suggestedAccount != null && _selectedAccount == null) {
-                                  _selectedAccount = d.suggestedAccount;
-                                }
-                                if (d.suggestedAmount != null && _amountController.text.isEmpty) {
-                                  _amountController.text = d.suggestedAmount!.toStringAsFixed(0);
-                                }
-                              });
-                            },
-                          ),
-                      ],
+                          if (!_isEditing && widget.smsActivity == null)
+                            SmartDefaultsBanner(
+                              isExpense: _isExpense,
+                              onApply: () {
+                                final d = ref
+                                    .read(smartDefaultsProvider(_isExpense))
+                                    .value;
+                                if (d == null) return;
+                                setState(() {
+                                  _selectedCategory = d.suggestedCategory;
+                                  if (d.suggestedAccount != null &&
+                                      _selectedAccount == null) {
+                                    _selectedAccount = d.suggestedAccount;
+                                  }
+                                  if (d.suggestedAmount != null &&
+                                      _amountController.text.isEmpty) {
+                                    _amountController.text =
+                                        d.suggestedAmount!.toStringAsFixed(0);
+                                  }
+                                });
+                              },
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
                   ),
                   SizedBox(height: spacing.sectionGap),
                   // ── Account selector ──
@@ -677,7 +681,7 @@ class _AddEditTransactionScreenState
                           if (mounted) setState(() => _balanceMap = val);
                         });
                       },
-                      onShowUnlockPrompt: _showUnlockPrompt,
+                      onShowUnlockPrompt: (count) => _showUnlockPrompt(count, spacing),
                     ),
                   ),
 
@@ -893,32 +897,31 @@ class _AddEditTransactionScreenState
                 ],
               ),
             ),
-
           ],
         ),
       ),
     );
   }
 
-  Future<void> _saveTransaction() async {
+  Future<void> _saveTransaction(AppSpacing spacing) async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     if (_amountController.text.isEmpty ||
         double.tryParse(_amountController.text) == null) {
-      SnackbarService.error(BuddyMessages.invalidAmount);
+      SnackbarService.error(BuddyMessages.invalidAmount, spacing);
       return;
     }
     if (_selectedAccount == null) {
       setState(() => _showAccountError = true);
       _scrollToKey(_accountKey);
-      SnackbarService.error(BuddyMessages.pickAccount);
+      SnackbarService.error(BuddyMessages.pickAccount, spacing);
       return;
     }
 
     final unlocked =
         await ref.read(isAccountUnlockedProvider(_selectedAccount!.id).future);
     if (!unlocked) {
-      SnackbarService.error(BuddyMessages.accountLocked);
+      SnackbarService.error(BuddyMessages.accountLocked, spacing);
       setState(() => _saving = false);
       return;
     }
@@ -926,16 +929,17 @@ class _AddEditTransactionScreenState
     if (_selectedCategory == null) {
       setState(() => _showCategoryError = true);
       _scrollToKey(_categoryKey);
-      SnackbarService.error(BuddyMessages.pickCategory);
+      SnackbarService.error(BuddyMessages.pickCategory, spacing);
       return;
     }
 
     setState(() => _saving = true);
 
     try {
-      final amount = double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
+      final amount =
+          double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
       if (amount <= 0) {
-        SnackbarService.error(BuddyMessages.invalidAmount);
+        SnackbarService.error(BuddyMessages.invalidAmount, spacing);
         return;
       }
 
@@ -944,9 +948,9 @@ class _AddEditTransactionScreenState
       double? rateUsed;
 
       if (saveCurrency != null) {
-        final currencyService =
-            await ref.read(currencyServiceProvider.future);
-        final result = await currencyService.convertToBase(amount, saveCurrency);
+        final currencyService = await ref.read(currencyServiceProvider.future);
+        final result =
+            await currencyService.convertToBase(amount, saveCurrency);
         if (result != null) {
           convertedAmount = result.converted;
           rateUsed = result.rate;
@@ -1043,7 +1047,9 @@ class _AddEditTransactionScreenState
           merchant: widget.smsActivity!.merchant,
           recipient: widget.smsActivity!.toAccount,
         );
-        await ref.read(recurringDetectorServiceProvider).detectAndTagRecurring(txn);
+        await ref
+            .read(recurringDetectorServiceProvider)
+            .detectAndTagRecurring(txn);
       }
 
       // Pop first so the user sees immediate feedback, then run side effects
@@ -1061,10 +1067,8 @@ class _AddEditTransactionScreenState
 
         context.pop(true);
         SnackbarService.success(
-          _isEditing
-              ? BuddyMessages.txnUpdated
-              : BuddyMessages.txnAdded,
-        );
+            _isEditing ? BuddyMessages.txnUpdated : BuddyMessages.txnAdded,
+            spacing,);
       }
 
       // Fire-and-forget side effects after pop
@@ -1072,7 +1076,7 @@ class _AddEditTransactionScreenState
       _checkBudgetAlerts(txn);
       WidgetService.updateWidget(ref);
     } catch (e) {
-      SnackbarService.error(BuddyMessages.txnAdded); // fallback error
+      SnackbarService.error(BuddyMessages.txnAdded, spacing); // fallback error
       debugPrint('Save transaction error: $e');
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -1083,12 +1087,14 @@ class _AddEditTransactionScreenState
     final TextEditingController controller = TextEditingController();
     final isarService = ref.read(isarServiceProvider);
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (sheetContext) {
         return Padding(
@@ -1115,7 +1121,7 @@ class _AddEditTransactionScreenState
                   hintText: 'e.g., Travel, Food, Shopping',
                   prefixIcon: const Icon(LucideIcons.tag),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
                 ),
               ),
@@ -1140,7 +1146,7 @@ class _AddEditTransactionScreenState
                 style: FilledButton.styleFrom(
                   minimumSize: const Size(double.infinity, 48),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
                 ),
                 child: Text(
@@ -1155,7 +1161,7 @@ class _AddEditTransactionScreenState
     );
   }
 
-  void _showSplitCustomizer() {
+  void _showSplitCustomizer(AppSpacing spacing) {
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     final controllers = <int, TextEditingController>{};
 
@@ -1169,12 +1175,14 @@ class _AddEditTransactionScreenState
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
           final color = Theme.of(context).colorScheme;
           final textTheme = Theme.of(context).textTheme;
+          final spacing = ref.watch(spacingProvider);
 
           double currentSum = 0;
           for (var id in _selectedParticipants.map((p) => p.id)) {
@@ -1210,7 +1218,7 @@ class _AddEditTransactionScreenState
                     TextButton(
                       onPressed: () {
                         ctx.pop();
-                        _showTripSelector();
+                        _showTripSelector(spacing);
                       },
                       child: const Text('Change Trip'),
                     ),
@@ -1295,14 +1303,16 @@ class _AddEditTransactionScreenState
                           });
                           setModalState(() {});
                         },
-                        borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? color.primaryContainer.withValues(alpha: 0.2)
                                 : color.surface,
-                            borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusSmall),
                             border: Border.all(
                               color: isSelected
                                   ? color.primary.withValues(alpha: 0.5)
@@ -1365,10 +1375,20 @@ class _AddEditTransactionScreenState
                                                         SplitType.percentage
                                                     ? ''
                                                     : null,
-                                                prefix: _splitType != SplitType.percentage ? Padding(
-                                                  padding: const EdgeInsets.only(right: 4),
-                                                  child: CurrencyBadge(code: _effectiveCurrency ?? BaseCurrency.code, size: 12),
-                                                ) : null,
+                                                prefix: _splitType !=
+                                                        SplitType.percentage
+                                                    ? Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(right: 4),
+                                                        child: CurrencyBadge(
+                                                            code:
+                                                                _effectiveCurrency ??
+                                                                    BaseCurrency
+                                                                        .code,
+                                                            size: 12,),
+                                                      )
+                                                    : null,
                                                 suffixText: _splitType ==
                                                         SplitType.percentage
                                                     ? '%'
@@ -1490,7 +1510,7 @@ class _AddEditTransactionScreenState
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     ),
                   ),
                   child: Text(AppLocalizations.of(context)!.common_done),
@@ -1503,7 +1523,7 @@ class _AddEditTransactionScreenState
     );
   }
 
-  void _showTripSelector() {
+  void _showTripSelector(AppSpacing spacing) {
     final tripsAsync = ref.read(allTripsProvider);
 
     if (tripsAsync case AsyncData(:final value)) {
@@ -1511,61 +1531,62 @@ class _AddEditTransactionScreenState
       final trips = value.where((t) => t.isTrip).toList();
 
       showModalBottomSheet(
-          context: context,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
-          ),
-          builder: (ctx) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Select Trip',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                  leading: const Icon(LucideIcons.x),
-                  title: const Text('None'),
+        context: context,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+              top: Radius.circular(spacing.radiusSmall * 2),),
+        ),
+        builder: (ctx) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Select Trip',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(LucideIcons.x),
+                title: const Text('None'),
+                onTap: () {
+                  setState(() {
+                    _selectedTrip = null;
+                    _selectedParticipants.clear();
+                    _paidBy = null;
+                    _tripManuallyCleared = true;
+                  });
+                  ctx.pop();
+                },
+              ),
+              ...trips.map(
+                (trip) => ListTile(
+                  leading: Icon(
+                    trip.isActive ? LucideIcons.luggage : LucideIcons.luggage,
+                  ),
+                  title: Text(trip.name),
+                  subtitle: Text(
+                    trip.isActive ? 'Active' : 'Inactive',
+                  ),
+                  selected: _selectedTrip?.id == trip.id,
                   onTap: () {
                     setState(() {
-                      _selectedTrip = null;
-                      _selectedParticipants.clear();
-                      _paidBy = null;
-                      _tripManuallyCleared = true;
+                      _selectedTrip = trip;
+                      _selectedParticipants = trip.participants.toList();
+                      _paidBy = trip.participants.firstOrNull;
+                      _tripManuallyCleared = false;
                     });
                     ctx.pop();
                   },
                 ),
-                ...trips.map(
-                  (trip) => ListTile(
-                    leading: Icon(
-                      trip.isActive ? LucideIcons.luggage : LucideIcons.luggage,
-                    ),
-                    title: Text(trip.name),
-                    subtitle: Text(
-                      trip.isActive ? 'Active' : 'Inactive',
-                    ),
-                    selected: _selectedTrip?.id == trip.id,
-                    onTap: () {
-                      setState(() {
-                        _selectedTrip = trip;
-                        _selectedParticipants = trip.participants.toList();
-                        _paidBy = trip.participants.firstOrNull;
-                        _tripManuallyCleared = false;
-                      });
-                      ctx.pop();
-                    },
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
+        ),
+      );
     }
   }
 
@@ -1584,13 +1605,15 @@ class _AddEditTransactionScreenState
       final notificationService = ref.read(notificationRecordServiceProvider);
       await notificationService.logNotification(
         title: ctxt.notif_lowBalanceTitle,
-        body: ctxt.notif_lowBalanceBody(account.name, formatCurrency(currentBalance, decimals: 2)),
+        body: ctxt.notif_lowBalanceBody(
+            account.name, formatCurrency(currentBalance, decimals: 2),),
         type: 'low_balance',
       );
       await NotificationService.showLocalNotification(
         id: 1000 + account.id,
         title: ctxt.notif_lowBalanceTitle,
-        body: ctxt.notif_lowBalanceBody(account.name, formatCurrency(currentBalance, decimals: 2)),
+        body: ctxt.notif_lowBalanceBody(
+            account.name, formatCurrency(currentBalance, decimals: 2),),
         dedupKey: 'low_balance_${account.id}',
       );
     }
@@ -1609,14 +1632,15 @@ class _AddEditTransactionScreenState
     }
   }
 
-  void _showUnlockPrompt(int lockedCount) {
+  void _showUnlockPrompt(int lockedCount, AppSpacing spacing) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
@@ -1647,7 +1671,7 @@ class _AddEditTransactionScreenState
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
               ),
               child: const Text(

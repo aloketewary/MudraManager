@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
@@ -525,6 +524,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                               : ctxt.plugins_disabled(
                                                   plugin.name,
                                                 ),
+                                                spacing
                                         );
                                       },
                                     );
@@ -556,6 +556,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                     val
                                         ? ctxt.plugins_enabled(plugin.name)
                                         : ctxt.plugins_disabled(plugin.name),
+                                        spacing
                                   );
                                 },
                               ),
@@ -599,7 +600,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) {
         final controllers = <String, TextEditingController>{};
@@ -697,7 +698,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                         }
                         if (ctx.mounted) {
                           Navigator.pop(ctx);
-                          SnackbarService.success(BuddyMessages.settingsSaved);
+                          SnackbarService.success(BuddyMessages.settingsSaved, spacing);
                         }
                       },
                       style: FilledButton.styleFrom(
@@ -768,7 +769,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Tone.current.borderRadius * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) {
         return Consumer(
@@ -1026,6 +1027,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                         Navigator.pop(ctx);
                                         SnackbarService.success(
                                           ctxt.plugins_remindersConfigured,
+                                          spacing
                                         );
                                       }
                                     },

@@ -2,6 +2,7 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/auto_backup_service.dart';
 import 'package:mudra_manager/core/services/category_rule_service.dart';
 import 'package:mudra_manager/core/utils/error_tracker.dart';
@@ -93,7 +94,7 @@ class BackgroundTaskManager {
         return;
       }
 
-      final path = await AutoBackupService.createAutoBackup(password);
+      final path = await AutoBackupService.createAutoBackup(password, const AppSpacing.comfortable());
       if (path != null) {
         _log.i('Auto backup completed: $path');
         await AutoBackupService.cleanupOldBackups();

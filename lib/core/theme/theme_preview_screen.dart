@@ -1,9 +1,10 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 
-class ThemePreviewCard extends StatelessWidget {
+class ThemePreviewCard extends ConsumerWidget {
   final AppColorTheme theme;
   final bool isSelected;
   final VoidCallback onTap;
@@ -16,19 +17,20 @@ class ThemePreviewCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Determine which brightness to show based on system/app setting
     final brightness = Theme.of(context).brightness;
     final colorScheme = brightness == Brightness.light
         ? theme.lightColorScheme()
         : theme.darkColorScheme();
+    final spacing = ref.watch(spacingProvider);
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           border: Border.all(
             color: isSelected ? colorScheme.primary : Colors.transparent,
             width: 3,
@@ -43,7 +45,7 @@ class ThemePreviewCard extends StatelessWidget {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           child: Stack(
             children: [
               // Mini App Preview
@@ -87,7 +89,7 @@ class ThemePreviewCard extends StatelessWidget {
                             height: 60,
                             decoration: BoxDecoration(
                               color: colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(Tone.current.borderRadius),
+                              borderRadius: BorderRadius.circular(spacing.radiusSmall),
                             ),
                             padding: const EdgeInsets.all(8),
                             child: Row(
