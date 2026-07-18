@@ -89,7 +89,7 @@ void main() {
         totalIncome: 0,
         totalExpense: 0,
         totalBalance: 0,
-        netWorth: 0,
+        netWorth: 0, pendingSmsCount: 0,
       );
 
   group('Urgency scoring', () {
@@ -122,7 +122,7 @@ void main() {
         totalIncome: 0,
         totalExpense: 0,
         totalBalance: 0,
-        netWorth: 0,
+        netWorth: 0, pendingSmsCount: 0,
       );
       expect(urgencyScore('budget_overview', data, DateTime.now()), 1.0);
     });
@@ -145,6 +145,7 @@ void main() {
         totalExpense: 0,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(urgencyScore('budget_overview', data, DateTime.now()), 0.7);
     });
@@ -167,6 +168,7 @@ void main() {
         totalExpense: 0,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(urgencyScore('budget_overview', data, DateTime.now()), 0.2);
     });
@@ -191,6 +193,7 @@ void main() {
         totalExpense: 0,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(urgencyScore('recurring_expenses', data, now), 0.9);
     });
@@ -215,6 +218,7 @@ void main() {
         totalExpense: 0,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(urgencyScore('recurring_expenses', data, now), 0.1);
     });
@@ -236,6 +240,7 @@ void main() {
         totalExpense: 0,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(urgencyScore('goals_progress', data, DateTime.now()), 0.7);
     });
@@ -256,6 +261,7 @@ void main() {
         totalExpense: 15000,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(urgencyScore('cash_flow', data, DateTime.now()), 0.8);
     });
@@ -272,6 +278,7 @@ void main() {
         totalExpense: 10000,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(urgencyScore('cash_flow', data, DateTime.now()), 0.3);
     });
@@ -294,6 +301,7 @@ void main() {
         totalExpense: 0,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(urgencyScore('recent_transactions', data, now), 0.4);
     });
@@ -326,6 +334,7 @@ void main() {
         totalExpense: 0,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(freshnessScore('recent_transactions', data, now), 1.0);
     });
@@ -348,6 +357,7 @@ void main() {
         totalExpense: 0,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(freshnessScore('recent_transactions', data, now), 0.7);
     });
@@ -370,6 +380,7 @@ void main() {
         totalExpense: 0,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(freshnessScore('recent_transactions', data, now), 0.4);
     });
@@ -392,6 +403,7 @@ void main() {
         totalExpense: 0,
         totalBalance: 0,
         netWorth: 0,
+        pendingSmsCount: 0,
       );
       expect(freshnessScore('recent_transactions', data, now), 0.1);
     });

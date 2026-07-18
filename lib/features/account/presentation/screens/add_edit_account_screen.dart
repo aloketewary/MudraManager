@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -43,6 +45,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   late TextEditingController _accountNumberController;
   late TextEditingController _balanceController;
   late TextEditingController _creditLimitController;
+  late FocusNode _nameFocusNode;
+  late FocusNode _accountNumberFocusNode;
+  late FocusNode _balanceFocusNode;
+  late FocusNode _creditLimitFocusNode;
   late AccountType _selectedType;
   late Color _selectedColor;
   String? _selectedCurrency;
@@ -73,15 +79,19 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     _nameController = TextEditingController(
       text: widget.account?.name ?? widget.bankName ?? '',
     );
+    _nameFocusNode = FocusNode();
     _accountNumberController = TextEditingController(
       text: widget.account?.accountNumber ?? widget.accountNumber ?? '',
     );
+    _accountNumberFocusNode = FocusNode();
     _balanceController = TextEditingController(
       text: widget.account?.initialBalance.toString() ?? '',
     );
+    _balanceFocusNode = FocusNode();
     _creditLimitController = TextEditingController(
       text: widget.account?.creditLimit?.toString() ?? '',
     );
+    _creditLimitFocusNode = FocusNode();
     _statementDay = widget.account?.statementDay;
     _dueDay = widget.account?.dueDay;
     _selectedType = widget.account?.accountType ?? AccountType.cash;
@@ -94,9 +104,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   @override
   void dispose() {
     _nameController.dispose();
+    _nameFocusNode.dispose();
     _accountNumberController.dispose();
+    _accountNumberFocusNode.dispose();
     _balanceController.dispose();
+    _balanceFocusNode.dispose();
     _creditLimitController.dispose();
+    _creditLimitFocusNode.dispose();
     super.dispose();
   }
 
@@ -105,6 +119,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
 
     return ScreenShell(
       config: ScreenShellConfig(
@@ -123,7 +139,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         trailing: ScreenTextAction(
           id: 'save_account',
           label: _isEditing ? ctxt.common_update : ctxt.common_create,
-          onTap: _saving ? null : () => _saveAccount(widget.account?.id, spacing),
+          onTap:
+              _saving ? null : () => _saveAccount(widget.account?.id, spacing),
           isLoading: _saving,
         ),
       ),
@@ -144,9 +161,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               textTheme,
               spacing,
               ctxt,
+              isDark,
+              reduceMotion,
             ),
             SizedBox(height: spacing.sectionGap),
-            _sectionLabel(ctxt.account_typeLabel, textTheme),
+            _buildTypeHeader(ctxt.account_typeLabel, color, textTheme, spacing, _selectedType.icon),
             SizedBox(
               height: spacing.sectionGap,
             ),
@@ -154,25 +173,28 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               color,
               textTheme,
               spacing,
+              reduceMotion,
             ),
             SizedBox(height: spacing.sectionGap),
-            _sectionLabel(ctxt.account_detailsLabel, textTheme),
+            _buildTypeHeader(ctxt.account_detailsLabel, color, textTheme, spacing, LucideIcons.form),
             SizedBox(height: spacing.sectionGap),
             _buildDetailsCard(
               color,
               textTheme,
               spacing,
+              isDark,
             ),
             SizedBox(height: spacing.sectionGap),
-            _sectionLabel(ctxt.account_colorLabel, textTheme),
+            _buildTypeHeader(ctxt.account_colorLabel, color, textTheme, spacing, LucideIcons.palette),
             SizedBox(height: spacing.sectionGap),
             _buildColorSection(
               color,
               textTheme,
               spacing,
+              reduceMotion,
             ),
             SizedBox(height: spacing.sectionGap),
-            _sectionLabel(ctxt.account_currencyLabel, textTheme),
+            _buildTypeHeader(ctxt.account_currencyLabel, color, textTheme, spacing, LucideIcons.wallet),
             SizedBox(height: spacing.sectionGap),
             _buildCurrencySelector(color, textTheme, spacing),
           ],
@@ -187,129 +209,291 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     TextTheme textTheme,
     AppSpacing spacing,
     AppLocalizations ctxt,
+    bool isDark,
+    bool reduceMotion,
   ) {
     final name = _nameController.text.trim();
     final number = _accountNumberController.text.trim();
     final balance = double.tryParse(_balanceController.text) ?? 0.0;
     final isCreditCard = _selectedType == AccountType.creditCard;
 
-    return Container(
-      padding: EdgeInsets.all(spacing.cardInner),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            _selectedColor.withValues(alpha: 0.2),
-            _selectedColor.withValues(alpha: 0.06),
-          ],
+    return RepaintBoundary(
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(0.8, -0.5),
+            radius: 1.2,
+            colors: [
+              _selectedColor.withValues(alpha: isDark ? 0.25 : 0.2),
+              _selectedColor.withValues(alpha: isDark ? 0.15 : 0.08),
+              color.surface.withValues(alpha: 0.0),
+            ],
+            stops: const [0.0, 0.6, 1.0],
+          ),
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          border: Border.all(
+            color: color.outlineVariant.withValues(alpha: 0.3),
+          ),
         ),
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -30,
-            top: -30,
-            child: Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    _selectedColor.withValues(alpha: 0.18),
-                    _selectedColor.withValues(alpha: 0.0),
-                  ],
+        child: Stack(
+          children: [
+            // Ambient glow behind content
+            Positioned(
+              right: -40,
+              top: -40,
+              child: Container(
+                width: 160,
+                height: 160,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      _selectedColor.withValues(alpha: isDark ? 0.2 : 0.15),
+                      _selectedColor.withValues(alpha: 0.0),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(spacing.cardInner),
-                decoration: BoxDecoration(
-                  color: _selectedColor.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: _selectedColor.withValues(alpha: 0.3),
-                    width: 1.5,
-                  ),
-                ),
-                child:
-                    Icon(_selectedType.icon, size: 28, color: _selectedColor),
-              ),
-              SizedBox(width: spacing.sectionGap),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name.isEmpty ? ctxt.account_name : name,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: name.isEmpty
-                            ? color.onSurfaceVariant.withValues(alpha: 0.4)
-                            : color.onSurface,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Padding(
+                  padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Identity block
+                      _buildIdentityBlock(
+                        color,
+                        textTheme,
+                        spacing,
+                        ctxt,
+                        isDark,
+                        name,
+                        number,
                       ),
-                    ),
-                    SizedBox(height: spacing.elementGapUltraMin),
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: spacing.elementGap,
-                            vertical: spacing.elementGapUltraMin,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _selectedColor.withValues(alpha: 0.1),
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusMedium),
-                          ),
-                          child: Text(
-                            _selectedType.label,
-                            style: textTheme.labelSmall?.copyWith(
+                      SizedBox(height: spacing.sectionGap),
+                      // Row with account type icon + details
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Account type icon with glass container
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: _selectedColor.withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: _selectedColor.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Icon(
+                              _selectedType.icon,
+                              size: 28,
                               color: _selectedColor,
-                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ),
-                        if (number.isNotEmpty) ...[
-                          SizedBox(width: spacing.elementGap),
-                          Text(
-                            '•••• $number',
-                            style: textTheme.labelSmall?.copyWith(
-                              color: color.onSurfaceVariant,
-                              letterSpacing: 1.2,
+                          SizedBox(width: spacing.sectionGap),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: spacing.elementGap,
+                                        vertical: spacing.elementGapUltraMin,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: _selectedColor.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                                        border: Border.all(
+                                          color: _selectedColor.withValues(alpha: 0.2),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        _selectedType.label,
+                                        style: textTheme.labelSmall?.copyWith(
+                                          color: _selectedColor,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    if (number.isNotEmpty) ...[
+                                      SizedBox(width: spacing.elementGap),
+                                      Text(
+                                        '•••• $number',
+                                        style: textTheme.labelSmall?.copyWith(
+                                          color: color.onSurfaceVariant,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                SizedBox(height: spacing.elementGap),
+                                Text(
+                                  isCreditCard
+                                      ? ctxt.account_outstanding
+                                      : ctxt.account_balance,
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                                Semantics(
+                                  label: ctxt.account_balance,
+                                  excludeSemantics: balance == 0,
+                                  child: CurrencyText(
+                                    amount: balance,
+                                    currencyCode: _selectedCurrency,
+                                    compact: false,
+                                    fixedLength: 2,
+                                    style: textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                      color: _selectedColor,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
-                      ],
-                    ),
-                    SizedBox(height: spacing.elementGap),
-                    Text(
-                      isCreditCard
-                          ? ctxt.account_outstanding
-                          : ctxt.account_balance,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: color.onSurfaceVariant.withValues(alpha: 0.6),
                       ),
-                    ),
-                    CurrencyText(
-                      amount: balance,
-                      currencyCode: _selectedCurrency,
-                      compact: false,
-                      fixedLength: 2,
-                      style: textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: _selectedColor,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── IDENTITY BLOCK (glass surface like ProfileScreen) ──
+  Widget _buildIdentityBlock(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+    bool isDark,
+    String name,
+    String number,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.surface.withValues(alpha: isDark ? 0.1 : 0.15),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(
+          color: color.outlineVariant.withValues(alpha: isDark ? 0.2 : 0.3),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontalMax,
+              vertical: spacing.elementGap,
+            ),
+            decoration: BoxDecoration(
+              color: _selectedColor.withValues(alpha: isDark ? 0.08 : 0.06),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    name.isEmpty ? ctxt.account_name : name,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (number.isNotEmpty) ...[
+            SizedBox(height: spacing.elementGapMin),
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.elementGap * 1.5,
+                vertical: spacing.elementGapUltraMin + 2,
+              ),
+              decoration: BoxDecoration(
+                color: color.onSurfaceVariant.withValues(alpha: spacing.opacitySubtle),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
+              ),
+              child: Text(
+                '•••• $number',
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ── TYPE HEADER ──
+  Widget _buildTypeHeader(
+    String headerText,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    IconData headerIcon,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Row(
+        children: [
+          Container(
+            width: spacing.elementGapMin,
+            height: 20,
+            decoration: BoxDecoration(
+              color: _selectedColor,
+              borderRadius: BorderRadius.circular(spacing.elementGapMin / 2),
+            ),
+          ),
+          SizedBox(width: spacing.elementGapMin),
+          Container(
+            padding: EdgeInsets.all(spacing.elementGap),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  _selectedColor.withValues(alpha: 0.12),
+                  _selectedColor.withValues(alpha: 0.06),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
+            ),
+            child: Icon(
+              headerIcon,
+              size: 16,
+              color: _selectedColor,
+            ),
+          ),
+          SizedBox(width: spacing.elementGap),
+          Expanded(
+            child: Text(
+              headerText,
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: color.onSurface,
+                letterSpacing: 0.5,
+              ),
+            ),
           ),
         ],
       ),
@@ -321,6 +505,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    bool reduceMotion,
   ) {
     return GridView.count(
       crossAxisCount: 3,
@@ -331,42 +516,50 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       childAspectRatio: 1.4,
       children: AccountType.values.map((type) {
         final isSelected = _selectedType == type;
-        return GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            setState(() => _selectedType = type);
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? _selectedColor.withValues(alpha: 0.12)
-                  : color.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              border: Border.all(
+        return Semantics(
+          label: '${type.label}${isSelected ? ' selected' : ''}',
+          button: true,
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              setState(() => _selectedType = type);
+            },
+            child: AnimatedContainer(
+              duration: reduceMotion
+                  ? Duration.zero
+                  : const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
                 color: isSelected
-                    ? _selectedColor
-                    : color.outlineVariant.withValues(alpha: 0.3),
-                width: isSelected ? 1.5 : 1,
+                    ? _selectedColor.withValues(alpha: 0.12)
+                    : color.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                border: Border.all(
+                  color: isSelected
+                      ? _selectedColor
+                      : color.outlineVariant.withValues(alpha: 0.3),
+                  width: isSelected ? 1.5 : 1,
+                ),
               ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  type.icon,
-                  size: 22,
-                  color: isSelected ? _selectedColor : color.onSurfaceVariant,
-                ),
-                SizedBox(height: spacing.elementGapMin),
-                Text(
-                  type.label,
-                  style: textTheme.labelSmall?.copyWith(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    type.icon,
+                    size: 22,
                     color: isSelected ? _selectedColor : color.onSurfaceVariant,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   ),
-                ),
-              ],
+                  SizedBox(height: spacing.elementGapMin),
+                  Text(
+                    type.label,
+                    style: textTheme.labelSmall?.copyWith(
+                      color:
+                          isSelected ? _selectedColor : color.onSurfaceVariant,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -379,50 +572,52 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    bool isDark,
   ) {
     final isCreditCard = _selectedType == AccountType.creditCard;
 
+    final inputDecoration = InputDecoration(
+      filled: true,
+      fillColor: color.surface.withValues(alpha: isDark ? 0.6 : 0.7),
+      labelText: ctxt.account_name,
+      prefixIcon: Icon(LucideIcons.wallet, size: 18, color: _selectedColor),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        borderSide: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        borderSide: BorderSide(color: _selectedColor, width: 2),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        borderSide: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+      ),
+    );
+
     return Column(
       children: [
-        TextFormField(
+        _glassTextField(
           controller: _nameController,
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            labelText: ctxt.account_name,
-            prefixIcon:
-                Icon(LucideIcons.wallet, size: 18, color: _selectedColor),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              borderSide: BorderSide(color: _selectedColor, width: 2),
-            ),
-          ),
-          style: textTheme.bodyLarge,
+          focusNode: _nameFocusNode,
+          decoration: inputDecoration.copyWith(labelText: ctxt.account_name),
+          textTheme: textTheme,
           validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
         ),
         SizedBox(height: spacing.sectionGap),
-        TextFormField(
+        _glassTextField(
           controller: _accountNumberController,
+          focusNode: _accountNumberFocusNode,
           keyboardType: TextInputType.number,
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
+          decoration: inputDecoration.copyWith(
             labelText: ctxt.account_last4,
             helperText: ctxt.account_last4Helper,
             helperStyle: textTheme.labelSmall?.copyWith(
               color: color.onSurfaceVariant.withValues(alpha: 0.6),
             ),
             prefixIcon: Icon(LucideIcons.hash, size: 18, color: _selectedColor),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              borderSide: BorderSide(color: _selectedColor, width: 2),
-            ),
           ),
-          style: textTheme.bodyLarge,
+          textTheme: textTheme,
           validator: (v) {
             if (v == null || v.isEmpty) return ctxt.common_required;
             if (v.length < 4) return ctxt.account_min4;
@@ -431,52 +626,32 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           },
         ),
         SizedBox(height: spacing.sectionGap),
-        TextFormField(
+        _glassTextField(
           controller: _balanceController,
+          focusNode: _balanceFocusNode,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            labelText: isCreditCard
-                ? ctxt.account_outstanding
-                : ctxt.account_initialBalance,
+          decoration: inputDecoration.copyWith(
+            labelText: isCreditCard ? ctxt.account_outstanding : ctxt.account_initialBalance,
             helperText: isCreditCard ? ctxt.account_cardPaidOff : null,
             helperStyle: textTheme.labelSmall?.copyWith(
               color: color.onSurfaceVariant.withValues(alpha: 0.6),
             ),
-            prefixIcon: Icon(
-              currencyIcon(_selectedCurrency),
-              size: 18,
-              color: _selectedColor,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              borderSide: BorderSide(color: _selectedColor, width: 2),
-            ),
+            prefixIcon: Icon(currencyIcon(_selectedCurrency), size: 18, color: _selectedColor),
           ),
-          style: textTheme.bodyLarge,
+          textTheme: textTheme,
           validator: (v) => v == null || v.isEmpty ? 'Required' : null,
         ),
         if (isCreditCard) ...[
           SizedBox(height: spacing.sectionGap),
-          TextFormField(
+          _glassTextField(
             controller: _creditLimitController,
+            focusNode: _creditLimitFocusNode,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(
+            decoration: inputDecoration.copyWith(
               labelText: ctxt.account_creditLimit,
-              prefixIcon:
-                  Icon(LucideIcons.gauge, size: 18, color: _selectedColor),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                borderSide: BorderSide(color: _selectedColor, width: 2),
-              ),
+              prefixIcon: Icon(LucideIcons.gauge, size: 18, color: _selectedColor),
             ),
-            style: textTheme.bodyLarge,
+            textTheme: textTheme,
           ),
           SizedBox(height: spacing.sectionGap),
           Row(
@@ -490,6 +665,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   color: color,
                   textTheme: textTheme,
                   spacing: spacing,
+                  isDark: isDark,
                 ),
               ),
               SizedBox(width: spacing.elementGap),
@@ -502,12 +678,40 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   color: color,
                   textTheme: textTheme,
                   spacing: spacing,
+                  isDark: isDark,
                 ),
               ),
             ],
           ),
         ],
       ],
+    );
+  }
+
+  Widget _glassTextField({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required InputDecoration decoration,
+    required TextTheme textTheme,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: keyboardType,
+        onChanged: (_) => setState(() {}),
+        decoration: decoration,
+        style: textTheme.bodyLarge,
+        validator: validator,
+      ),
     );
   }
 
@@ -520,31 +724,46 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     required ColorScheme color,
     required TextTheme textTheme,
     required AppSpacing spacing,
+    required bool isDark,
   }) {
-    return InputDecorator(
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, size: 18, color: _selectedColor),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.outlineVariant.withValues(alpha: 0.3),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int?>(
-          value: value,
-          isExpanded: true,
-          isDense: true,
-          hint: Text('—', style: textTheme.bodyLarge),
-          items: [
-            DropdownMenuItem<int?>(
-                value: null, child: Text('—', style: textTheme.bodyLarge),),
-            ...List.generate(31, (i) => i + 1).map(
-              (day) => DropdownMenuItem(
-                  value: day, child: Text('$day', style: textTheme.bodyLarge),),
-            ),
-          ],
-          onChanged: onChanged,
+      child: InputDecorator(
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: color.surface.withValues(alpha: isDark ? 0.6 : 0.7),
+          labelText: label,
+          prefixIcon: Icon(icon, size: 18, color: _selectedColor),
+          border: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<int?>(
+            value: value,
+            isExpanded: true,
+            isDense: true,
+            hint: Text('—', style: textTheme.bodyLarge),
+            items: [
+              DropdownMenuItem<int?>(
+                value: null,
+                child: Text('—', style: textTheme.bodyLarge),
+              ),
+              ...List.generate(31, (i) => i + 1).map(
+                (day) => DropdownMenuItem(
+                  value: day,
+                  child: Text('$day', style: textTheme.bodyLarge),
+                ),
+              ),
+            ],
+            onChanged: onChanged,
+          ),
         ),
       ),
     );
@@ -555,6 +774,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    bool reduceMotion,
   ) {
     return Card(
       elevation: 0,
@@ -575,65 +795,75 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 runSpacing: spacing.elementGap,
                 children: _quickColors.map((c) {
                   final isSelected = _selectedColor.toARGB32() == c.toARGB32();
-                  return GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      setState(() => _selectedColor = c);
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: c,
-                        shape: BoxShape.circle,
-                        border: isSelected
-                            ? Border.all(
-                                color: color.onSurface,
-                                width: 2.5,
+                  return Semantics(
+                    label: '${c.toString()}${isSelected ? ' selected' : ''}',
+                    button: true,
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _selectedColor = c);
+                      },
+                      child: AnimatedContainer(
+                        duration: reduceMotion
+                            ? Duration.zero
+                            : const Duration(milliseconds: 200),
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: c,
+                          shape: BoxShape.circle,
+                          border: isSelected
+                              ? Border.all(
+                                  color: color.onSurface,
+                                  width: 2.5,
+                                )
+                              : null,
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: c.withValues(alpha: 0.4),
+                                    blurRadius: 8,
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: isSelected
+                            ? const Icon(
+                                LucideIcons.check,
+                                color: Colors.white,
+                                size: 16,
                               )
                             : null,
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: c.withValues(alpha: 0.4),
-                                  blurRadius: 8,
-                                ),
-                              ]
-                            : null,
                       ),
-                      child: isSelected
-                          ? const Icon(
-                              LucideIcons.check,
-                              color: Colors.white,
-                              size: 16,
-                            )
-                          : null,
                     ),
                   );
                 }).toList(),
               ),
             ),
             SizedBox(width: spacing.elementGap),
-            GestureDetector(
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                _pickColor();
-              },
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: color.outlineVariant,
-                    width: 1.5,
+            Semantics(
+              label: ctxt.quickAdd_moreOptions,
+              button: true,
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  _pickColor();
+                },
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: color.outlineVariant,
+                      width: 1.5,
+                    ),
                   ),
-                ),
-                child: Icon(
-                  LucideIcons.ellipsis,
-                  size: 16,
-                  color: color.onSurfaceVariant,
+                  child: Icon(
+                    LucideIcons.ellipsis,
+                    size: 16,
+                    color: color.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
@@ -643,20 +873,6 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     );
   }
 
-  // ── HELPERS ──
-
-  Widget _sectionLabel(String text, TextTheme textTheme) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        text,
-        style: textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.3,
-        ),
-      ),
-    );
-  }
 
   Widget _buildCurrencySelector(
     ColorScheme color,
@@ -690,7 +906,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(spacing.radiusSmall * 2),),
+                    top: Radius.circular(spacing.radiusSmall * 2),
+                  ),
                 ),
                 builder: (_) => _CurrencyPickerInline(selected: displayCode),
               );
@@ -835,7 +1052,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2),),
+          top: Radius.circular(spacing.radiusSmall * 2),
+        ),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(
@@ -1002,13 +1220,22 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       final canCreate = await ref.read(canCreateAccountProvider.future);
       if (!canCreate) {
         SnackbarService.warning(
-          'Free plan allows up to 3 accounts. Upgrade to Pro for unlimited.', spacing
+          'Free plan allows up to 3 accounts. Upgrade to Pro for unlimited.',
+          spacing,
         );
         return;
       }
     }
 
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      // Focus first invalid field
+      if (_nameController.text.trim().isNotEmpty) {
+        FocusScope.of(context).requestFocus(_accountNumberFocusNode);
+      } else {
+        FocusScope.of(context).requestFocus(_nameFocusNode);
+      }
+      return;
+    }
 
     setState(() => _saving = true);
 
@@ -1023,7 +1250,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           await isar.accounts.filter().nameEqualTo(accountName).findFirst();
       if (existingName != null && existingName.id != id) {
         SnackbarService.warning(
-          'Account with name "$accountName" already exists', spacing
+          'Account with name "$accountName" already exists',
+          spacing,
         );
         return;
       }
@@ -1035,7 +1263,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             .findFirst();
         if (existingNum != null && existingNum.id != id) {
           SnackbarService.warning(
-            'Account with number "$accountNumber" already exists', spacing
+            'Account with number "$accountNumber" already exists',
+            spacing,
           );
           return;
         }
@@ -1090,7 +1319,8 @@ class _CurrencyPickerInline extends ConsumerStatefulWidget {
   const _CurrencyPickerInline({required this.selected});
 
   @override
-  ConsumerState<_CurrencyPickerInline> createState() => _CurrencyPickerInlineState();
+  ConsumerState<_CurrencyPickerInline> createState() =>
+      _CurrencyPickerInlineState();
 }
 
 class _CurrencyPickerInlineState extends ConsumerState<_CurrencyPickerInline> {
@@ -1140,8 +1370,7 @@ class _CurrencyPickerInlineState extends ConsumerState<_CurrencyPickerInline> {
                 hintText: ctxt.common_searchCurrency,
                 prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(spacing.radiusSmall),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   borderSide: BorderSide(color: color.outlineVariant),
                 ),
                 isDense: true,

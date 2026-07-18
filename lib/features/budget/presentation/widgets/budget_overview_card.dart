@@ -1,6 +1,4 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,34 +60,18 @@ class BudgetOverviewCard extends ConsumerWidget {
             padding: EdgeInsets.all(spacing.cardInner),
             child: Row(
               children: [
-                TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 1500),
-                  curve: Curves.easeOutCubic,
-                  tween: Tween(begin: 0.0, end: percent / 100),
-                  builder: (context, value, child) {
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: CustomPaint(
-                            painter: _CompactRingPainter(
-                              progress: value,
-                              color: progressColor,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          '${(value * 100).toInt()}%',
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: progressColor,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                ProgressRing(
+                  progress: percent / 100,
+                  color: progressColor,
+                  size: spacing.sectionGap * 2.5,
+                  insetPadding: spacing.cardVerticalMin,
+                  labelBuilder: (value) => Text(
+                    '${(value * 100).toInt()}%',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: progressColor,
+                    ),
+                  ),
                 ),
                 SizedBox(width: spacing.sectionGap),
                 Expanded(
@@ -103,15 +85,17 @@ class BudgetOverviewCard extends ConsumerWidget {
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: spacing.elementGap),
                       Container(
                         height: 10,
                         decoration: BoxDecoration(
                           color: color.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
                           child: TweenAnimationBuilder<double>(
                             duration: const Duration(milliseconds: 1500),
                             curve: Curves.easeOutCubic,
@@ -146,6 +130,7 @@ class BudgetOverviewCard extends ConsumerWidget {
                               progressColor,
                               color,
                               textTheme,
+                              spacing,
                             ),
                           ),
                           SizedBox(width: spacing.radiusMedium),
@@ -157,6 +142,7 @@ class BudgetOverviewCard extends ConsumerWidget {
                               color.primary,
                               color,
                               textTheme,
+                              spacing,
                             ),
                           ),
                         ],
@@ -184,11 +170,12 @@ class BudgetOverviewCard extends ConsumerWidget {
     Color itemColor,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     return Row(
       children: [
         Icon(icon, color: itemColor, size: 16),
-        const SizedBox(width: 6),
+        SizedBox(width: spacing.elementGapMin + 2),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,51 +203,4 @@ class BudgetOverviewCard extends ConsumerWidget {
       ],
     );
   }
-}
-
-class _CompactRingPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-
-  _CompactRingPainter({required this.progress, required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 4;
-    const strokeWidth = 6.0;
-
-    final bgPaint = Paint()
-      ..color = color.withValues(alpha: 0.15)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawCircle(center, radius, bgPaint);
-
-    final rect = Rect.fromCircle(center: center, radius: radius);
-    final gradient = SweepGradient(
-      colors: [color, color.withValues(alpha: 0.6), color],
-      stops: const [0.0, 0.5, 1.0],
-      transform: const GradientRotation(-math.pi / 2),
-    );
-
-    final progressPaint = Paint()
-      ..shader = gradient.createShader(rect)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(
-      rect,
-      -math.pi / 2,
-      2 * math.pi * progress,
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_CompactRingPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.color != color;
 }

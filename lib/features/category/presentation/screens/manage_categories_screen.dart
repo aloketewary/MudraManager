@@ -18,6 +18,8 @@ import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/category/data/category_merge_service.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/shared/widgets/category_summary_card.dart';
+import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
@@ -89,69 +91,72 @@ class ManageCategoriesScreen extends ConsumerWidget {
             error: (_, __) => 0,
           );
 
-          return ListView(
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.cardHorizontal,
-              vertical: spacing.cardVertical,
-            ),
-            children: [
-              // ── SUMMARY ──
-              _buildSummary(
-                categories.length,
-                totalCount,
-                color,
-                textTheme,
-                spacing,
-                ctxt,
-              ),
-              SizedBox(height: spacing.sectionGap),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final horizontalPadding =
+                  constraints.maxWidth > 600 ? spacing.cardHorizontalMax : spacing.cardHorizontal;
 
-              // ── EXPENSE CATEGORIES ──
-              if (expenses.isNotEmpty) ...[
-                _buildTypeHeader(
-                  ctxt.transaction_type_expense,
-                  LucideIcons.arrowUpRight,
-                  color.error,
-                  textTheme,
+              return ListView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: spacing.cardVertical,
                 ),
-                SizedBox(height: spacing.elementGap),
-                _buildCategoryGroup(
-                  context,
-                  ref,
-                  expenses,
-                  categories,
-                  transactionCounts,
-                  color,
-                  textTheme,
-                  ctxt,
-                  spacing,
-                ),
-                SizedBox(height: spacing.sectionGap),
-              ],
+                children: [
+                  // ── SUMMARY ──
+                  CategorySummaryCard(
+                    categoryCount: categories.length,
+                    expenseCount: expenses.length,
+                    incomeCount: incomes.length,
+                    transactionCount: totalCount,
+                  ),
+                  SizedBox(height: spacing.sectionGap),
 
-              // ── INCOME CATEGORIES ──
-              if (incomes.isNotEmpty) ...[
-                _buildTypeHeader(
-                  ctxt.transaction_type_income,
-                  LucideIcons.arrowDownLeft,
-                  color.primary,
-                  textTheme,
-                ),
-                SizedBox(height: spacing.elementGap),
-                _buildCategoryGroup(
-                  context,
-                  ref,
-                  incomes,
-                  categories,
-                  transactionCounts,
-                  color,
-                  textTheme,
-                  ctxt,
-                  spacing,
-                ),
-                SizedBox(height: spacing.sectionGap * 3),
-              ],
-            ],
+                  // ── EXPENSE CATEGORIES ──
+                  if (expenses.isNotEmpty) ...[
+                    TypeSectionHeader(
+                      label: ctxt.transaction_type_expense,
+                      icon: LucideIcons.arrowUpRight,
+                      accentColor: color.error,
+                    ),
+                    SizedBox(height: spacing.elementGap),
+                    _buildCategoryGroup(
+                      context,
+                      ref,
+                      expenses,
+                      categories,
+                      transactionCounts,
+                      color,
+                      textTheme,
+                      ctxt,
+                      spacing,
+                    ),
+                    SizedBox(height: spacing.sectionGap),
+                  ],
+
+                  // ── INCOME CATEGORIES ──
+                  if (incomes.isNotEmpty) ...[
+                    TypeSectionHeader(
+                      label: ctxt.transaction_type_income,
+                      icon: LucideIcons.arrowDownLeft,
+                      accentColor: color.primary,
+                    ),
+                    SizedBox(height: spacing.elementGap),
+                    _buildCategoryGroup(
+                      context,
+                      ref,
+                      incomes,
+                      categories,
+                      transactionCounts,
+                      color,
+                      textTheme,
+                      ctxt,
+                      spacing,
+                    ),
+                    SizedBox(height: spacing.sectionGap * 3),
+                  ],
+                ],
+              );
+            },
           );
         },
         loading: () => ListView.builder(
@@ -166,78 +171,6 @@ class ManageCategoriesScreen extends ConsumerWidget {
         ),
         error: (err, _) => Center(child: Text(BuddyMessages.errorWith('$err'))),
       ),
-    );
-  }
-
-  // ── SUMMARY CARD ──
-  Widget _buildSummary(
-    int categoryCount,
-    int totalTransactions,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-    AppLocalizations ctxt,
-  ) {
-    final isDark = color.brightness == Brightness.dark;
-    return Container(
-      padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.primary.withValues(alpha: isDark ? 0.15 : 0.08),
-            color.surface,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$categoryCount ${ctxt.categories_label}',
-                  style: textTheme.labelLarge
-                      ?.copyWith(color: color.onSurfaceVariant),
-                ),
-                SizedBox(height: spacing.elementGapMin),
-                Text(
-                  '$totalTransactions ${ctxt.categories_transactionsLabel}',
-                  style: textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── TYPE HEADER ──
-  Widget _buildTypeHeader(
-    String label,
-    IconData icon,
-    Color iconColor,
-    TextTheme textTheme,
-  ) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: iconColor),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: iconColor,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
     );
   }
 
@@ -264,38 +197,34 @@ class ManageCategoriesScreen extends ConsumerWidget {
           color: color.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
-      child: Column(
-        children: parents.asMap().entries.map((entry) {
-          final index = entry.key;
-          final category = entry.value;
-          final isLast = index == parents.length - 1;
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: parents.length,
+        separatorBuilder: (_, index) => Divider(
+          height: 1,
+          indent: 60,
+          color: color.outlineVariant.withValues(alpha: 0.3),
+        ),
+        itemBuilder: (context, index) {
+          final category = parents[index];
           final subcategories = allCategories
               .where((c) => c.parentCategory.value?.id == category.id)
               .toList();
 
-          return Column(
-            children: [
-              _CategoryRow(
-                category: category,
-                subcategories: subcategories,
-                allCategories: allCategories,
-                transactionCounts: transactionCounts,
-                onEdit: () => context.push(
-                  AppRoutes.addCategory,
-                  extra: {'category': category},
-                ),
-                onDelete: () => _deleteCategory(context, ref, category, ctxt, spacing),
-                onDeleteSubcategory: (sub) => _deleteCategory(context, ref, sub, ctxt, spacing),
-              ),
-              if (!isLast)
-                Divider(
-                  height: 1,
-                  indent: 60,
-                  color: color.outlineVariant.withValues(alpha: 0.3),
-                ),
-            ],
+          return CategoryRow(
+            category: category,
+            subcategories: subcategories,
+            allCategories: allCategories,
+            transactionCounts: transactionCounts,
+            onEdit: () => context.push(
+              AppRoutes.addCategory,
+              extra: {'category': category},
+            ),
+            onDelete: () => _deleteCategory(context, ref, category, ctxt, spacing),
+            onDeleteSubcategory: (sub) => _deleteCategory(context, ref, sub, ctxt, spacing),
           );
-        }).toList(),
+        },
       ),
     );
   }
@@ -343,8 +272,8 @@ class ManageCategoriesScreen extends ConsumerWidget {
   }
 }
 
-// ── CATEGORY ROW (with expandable subcategories) ──
-class _CategoryRow extends ConsumerStatefulWidget {
+// ── CATEGORY ROW ──
+class CategoryRow extends ConsumerStatefulWidget {
   final Category category;
   final List<Category> subcategories;
   final List<Category> allCategories;
@@ -353,7 +282,8 @@ class _CategoryRow extends ConsumerStatefulWidget {
   final VoidCallback onDelete;
   final void Function(Category subcategory) onDeleteSubcategory;
 
-  const _CategoryRow({
+  const CategoryRow({
+    super.key,
     required this.category,
     required this.subcategories,
     required this.allCategories,
@@ -364,11 +294,13 @@ class _CategoryRow extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<_CategoryRow> createState() => _CategoryRowState();
+  ConsumerState<CategoryRow> createState() => _CategoryRowState();
 }
 
-class _CategoryRowState extends ConsumerState<_CategoryRow> {
+class _CategoryRowState extends ConsumerState<CategoryRow> {
   bool _expanded = false;
+
+  bool get _hasChildren => widget.subcategories.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -381,214 +313,200 @@ class _CategoryRowState extends ConsumerState<_CategoryRow> {
       loading: () => 0,
       error: (_, __) => 0,
     );
-    final hasChildren = widget.subcategories.isNotEmpty;
     final spacing = ref.watch(spacingProvider);
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
 
     return Column(
+      key: ValueKey('category_${widget.category.id}'),
       children: [
-        InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            _showContextSheet(
-              context,
-              widget.category,
-              color,
-              textTheme,
-              spacing,
-              onEdit: widget.onEdit,
-              onDelete: widget.onDelete,
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: categoryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                  ),
-                  child: Icon(
-                    IconHelper.getIconData(widget.category.iconName),
-                    color: categoryColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.category.name,
-                        style: textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+        RepaintBoundary(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                _showContextSheet(
+                  context,
+                  widget.category,
+                  color,
+                  textTheme,
+                  spacing,
+                  onEdit: widget.onEdit,
+                  onDelete: widget.onDelete,
+                );
+              },
+              child: AnimatedPadding(
+                duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    RepaintBoundary(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: categoryColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Text(
-                            '$count txn${count == 1 ? '' : 's'}',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant,
-                            ),
-                          ),
-                          if (hasChildren) ...[
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 6),
-                              child: Text(
-                                '•',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant
-                                      .withValues(alpha: 0.4),
-                                ),
-                              ),
-                            ),
-                            Text(
-                              '${widget.subcategories.length} sub',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: color.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                          if (widget.category.keywords != null &&
-                              widget.category.keywords!.isNotEmpty) ...[
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 6),
-                              child: Text(
-                                '•',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant
-                                      .withValues(alpha: 0.4),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                widget.category.keywords!.join(', '),
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.primary.withValues(alpha: 0.7),
-                                  fontStyle: FontStyle.italic,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                if (hasChildren)
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      setState(() => _expanded = !_expanded);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: AnimatedRotation(
-                        turns: _expanded ? 0.5 : 0,
-                        duration: const Duration(milliseconds: 200),
                         child: Icon(
-                          LucideIcons.chevronDown,
-                          size: 18,
-                          color: color.onSurfaceVariant,
+                          IconHelper.getIconData(widget.category.iconName),
+                          color: categoryColor,
+                          size: 20,
                         ),
                       ),
                     ),
-                  )
-                else
-                  Icon(
-                    LucideIcons.chevronRight,
-                    size: 16,
-                    color: color.onSurfaceVariant,
-                  ),
-              ],
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.category.name,
+                            style: textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                            semanticsLabel: 'Category: ${widget.category.name}',
+                          ),
+                          SizedBox(height: spacing.elementGapMin),
+                          Row(
+                            children: [
+                              Text(
+                                '$count txn${count == 1 ? '' : 's'}',
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurfaceVariant,
+                                ),
+                                semanticsLabel: '$count transactions',
+                              ),
+                              if (_hasChildren) ...[
+                                const SizedBox(width: 12),
+                                Text(
+                                  '•',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${widget.subcategories.length} sub',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: color.onSurfaceVariant,
+                                  ),
+                                  semanticsLabel: '${widget.subcategories.length} subcategories',
+                                ),
+                              ],
+                              if (widget.category.keywords != null &&
+                                  widget.category.keywords!.isNotEmpty) ...[
+                                const SizedBox(width: 12),
+                                Text(
+                                  '•',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    widget.category.keywords!.join(', '),
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: color.primary.withValues(alpha: 0.7),
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_hasChildren)
+                      _buildExpandButton(color, reduceMotion)
+                    else
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 16,
+                        color: color.onSurfaceVariant,
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
-
         // ── SUBCATEGORIES ──
-        AnimatedCrossFade(
-          firstChild: const SizedBox.shrink(),
-          secondChild: Column(
-            children: widget.subcategories.map((sub) {
-              final subColor = Color(sub.colorValue ?? Colors.grey.toARGB32());
-              final subCount = widget.transactionCounts.when(
-                data: (map) => map[sub.id] ?? 0,
-                loading: () => 0,
-                error: (_, __) => 0,
-              );
-              return InkWell(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  _showContextSheet(
-                    context,
-                    sub,
-                    color,
-                    textTheme,
-                    spacing,
-                    onEdit: () => context.push(
-                      AppRoutes.addCategory,
-                      extra: {'category': sub},
-                    ),
-                    onDelete: () => widget.onDeleteSubcategory(sub),
+        if (_hasChildren)
+          RepaintBoundary(
+            child: AnimatedCrossFade(
+              firstChild: const SizedBox.shrink(),
+              secondChild: Column(
+                children: widget.subcategories.map((sub) {
+                  final subColor = Color(sub.colorValue ?? Colors.grey.toARGB32());
+                  final subCount = widget.transactionCounts.when(
+                    data: (map) => map[sub.id] ?? 0,
+                    loading: () => 0,
+                    error: (_, __) => 0,
                   );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 60,
-                    right: 16,
-                    top: 10,
-                    bottom: 10,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        IconHelper.getIconData(sub.iconName),
-                        color: subColor,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          sub.name,
-                          style: textTheme.bodyMedium,
+                  return _SubcategoryRow(
+                    subcategory: sub,
+                    subCount: subCount,
+                    color: color,
+                    textTheme: textTheme,
+                    spacing: spacing,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      _showContextSheet(
+                        context,
+                        sub,
+                        color,
+                        textTheme,
+                        spacing,
+                        onEdit: () => context.push(
+                          AppRoutes.addCategory,
+                          extra: {'category': sub},
                         ),
-                      ),
-                      Text(
-                        '$subCount',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
+                        onDelete: () => widget.onDeleteSubcategory(sub),
+                      );
+                    },
+                  );
+                }).toList(),
+              ),
+              crossFadeState:
+                  _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+              duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+            ),
           ),
-          crossFadeState:
-              _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-          duration: const Duration(milliseconds: 200),
-        ),
       ],
     );
   }
 
-  // ── SHARED CONTEXT BOTTOM SHEET ──
+  Widget _buildExpandButton(ColorScheme color, bool reduceMotion) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        setState(() => _expanded = !_expanded);
+      },
+      child: AnimatedRotation(
+        turns: _expanded ? 0.5 : 0,
+        duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            LucideIcons.chevronDown,
+            size: 18,
+            color: color.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showContextSheet(
     BuildContext context,
     Category category,
     ColorScheme color,
-    TextTheme textTheme, 
+    TextTheme textTheme,
     AppSpacing spacing,
     {
     required VoidCallback onEdit,
@@ -786,8 +704,6 @@ class _CategoryRowState extends ConsumerState<_CategoryRow> {
     AppSpacing spacing,
   ) async {
     final ctxt = AppLocalizations.of(context)!;
-    // This is inside _CategoryRowState which is a State, not ConsumerState.
-    // Access Isar directly for the merge.
     final isarService = IsarService();
     final mergeService = CategoryMergeService(
       isarService,
@@ -813,5 +729,70 @@ class _CategoryRowState extends ConsumerState<_CategoryRow> {
     if (context.mounted) {
       SnackbarService.success(ctxt.category_mergeSuccess, spacing);
     }
+  }
+}
+
+// ── SUBCATEGORY ROW ──
+class _SubcategoryRow extends StatelessWidget {
+  final Category subcategory;
+  final int subCount;
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+  final VoidCallback onTap;
+
+  const _SubcategoryRow({
+    required this.subcategory,
+    required this.subCount,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final subColor = Color(subcategory.colorValue ?? Colors.grey.toARGB32());
+
+    return RepaintBoundary(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.only(
+              left: 60,
+              right: 16,
+              top: 10,
+              bottom: 10,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  IconHelper.getIconData(subcategory.iconName),
+                  color: subColor,
+                  size: 18,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    subcategory.name,
+                    style: textTheme.bodyMedium,
+                    semanticsLabel: 'Subcategory: ${subcategory.name}',
+                  ),
+                ),
+                Text(
+                  '$subCount',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                  semanticsLabel: '$subCount transactions',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

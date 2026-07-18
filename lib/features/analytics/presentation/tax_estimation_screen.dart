@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -15,24 +16,95 @@ import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
-class TaxEstimationScreen extends ConsumerWidget {
+class TaxEstimationScreen extends ConsumerStatefulWidget {
   const TaxEstimationScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TaxEstimationScreen> createState() =>
+      _TaxEstimationScreenState();
+}
+
+class _TaxEstimationScreenState extends ConsumerState<TaxEstimationScreen>
+    with TickerProviderStateMixin {
+  // Planning mode state
+  bool _isPlanningMode = false;
+  final Map<String, double> _plannedDeductions = {};
+  late AnimationController _slideController;
+
+  @override
+  void initState() {
+    super.initState();
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    super.dispose();
+  }
+
+  void _togglePlanningMode() {
+    setState(() {
+      _isPlanningMode = !_isPlanningMode;
+      if (_isPlanningMode) {
+        _slideController.forward();
+      } else {
+        _slideController.reverse();
+      }
+    });
+  }
+
+  void _updatePlannedDeduction(String key, double amount) {
+    setState(() {
+      if (amount <= 0) {
+        _plannedDeductions.remove(key);
+      } else {
+        _plannedDeductions[key] = amount;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final taxAsync = ref.watch(taxEstimationProvider);
     final ctxt = AppLocalizations.of(context)!;
     final spacing = ref.watch(spacingProvider);
 
     return ScreenShell(
       config: ScreenShellConfig(
-        title: ctxt.tax_title,
+        title: _isPlanningMode ? ctxt.tax_plannerTitle : ctxt.tax_title,
         appBarMode: AppBarMode.standard,
         enableRefresh: false,
       ),
-      actions: ScreenActions.empty,
+      leading: IconButton(
+        icon: const Icon(LucideIcons.arrowLeft),
+        onPressed: () {
+          if (_isPlanningMode) {
+            _togglePlanningMode();
+          } else {
+            context.pop();
+          }
+        },
+      ),
+      actions: ScreenActions.build(
+        trailing: ScreenTextAction(
+          id: 'plan',
+          label: _isPlanningMode ? ctxt.common_done : ctxt.tax_startPlanning,
+          onTap: _togglePlanningMode,
+        ),
+      ),
       body: taxAsync.when(
-        data: (tax) => _TaxContent(tax: tax, ctxt: ctxt, spacing: spacing),
+        data: (tax) => _TaxContent(
+          tax: tax,
+          ctxt: ctxt,
+          spacing: spacing,
+          isPlanningMode: _isPlanningMode,
+          plannedDeductions: _plannedDeductions,
+          onUpdateDeduction: _updatePlannedDeduction,
+        ),
         loading: () => const Center(child: DashboardCardSkeleton()),
         error: (_, __) => Center(child: Text(ctxt.tax_noData)),
       ),
@@ -40,94 +112,585 @@ class TaxEstimationScreen extends ConsumerWidget {
   }
 }
 
-class _TaxContent extends ConsumerWidget {
+typedef _DeductionUpdater = void Function(String key, double amount);
+
+class _TaxContent extends ConsumerStatefulWidget {
   final TaxEstimate tax;
   final AppLocalizations ctxt;
   final AppSpacing spacing;
+  final bool isPlanningMode;
+  final Map<String, double> plannedDeductions;
+  final _DeductionUpdater onUpdateDeduction;
 
   const _TaxContent({
     required this.tax,
     required this.ctxt,
     required this.spacing,
+    required this.isPlanningMode,
+    required this.plannedDeductions,
+    required this.onUpdateDeduction,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_TaxContent> createState() => _TaxContentState();
+}
+
+class _TaxContentState extends ConsumerState<_TaxContent> {
+  bool get _isReducedMotion => MediaQuery.of(context).disableAnimations;
+
+  @override
+  Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final brightness = Theme.of(context).brightness;
     final isGuestMode = ref.watch(guestModeProvider);
     final opportunities = ref.watch(taxOpportunitiesProvider);
+    final tax = widget.tax;
+    final spacing = widget.spacing;
+    final ctxt = AppLocalizations.of(context)!;
+    final isReducedMotion = _isReducedMotion;
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(spacing.cardInner),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Hero summary
-          _buildSummaryCard(color, textTheme, brightness, isGuestMode),
-          SizedBox(height: spacing.sectionGap),
-
-          // 2. Regime comparison (promoted — decision before detail)
-          if (tax.oldRegimeEstimate != null) ...[
-            _buildRegimeComparisonCard(
+          // 1. Hero summary with planning toggle
+          RepaintBoundary(
+            child: _buildSummaryCard(
               color,
               textTheme,
               brightness,
               isGuestMode,
+              spacing,
+              ctxt,
             ),
-            SizedBox(height: spacing.sectionGap),
-          ],
+          ),
+          SizedBox(height: spacing.sectionGap),
 
-          // 3. Opportunities (what can reduce tax?)
-          if (!tax.isZeroTax)
-            opportunities.when(
-              data: (opps) => opps.isEmpty
-                  ? const SizedBox.shrink()
-                  : _buildOpportunitiesCard(
-                      context,
-                      opps,
+          // 2. Planning mode indicator and quick actions
+          AnimatedSize(
+            duration: isReducedMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: widget.isPlanningMode
+                ? RepaintBoundary(
+                    child: _buildPlanningIndicator(
                       color,
                       textTheme,
-                      brightness,
-                      isGuestMode,
+                      spacing,
+                      ctxt,
                     ),
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          if (widget.isPlanningMode) SizedBox(height: spacing.sectionGap),
+
+          // 3. Regime comparison (promoted — decision before detail)
+          if (tax.oldRegimeEstimate != null)
+            RepaintBoundary(
+              child: _buildRegimeComparisonCard(
+                color,
+                textTheme,
+                brightness,
+                isGuestMode,
+                spacing,
+              ),
             ),
-          if (!tax.isZeroTax) SizedBox(height: spacing.sectionGap),
+          if (tax.oldRegimeEstimate != null)
+            SizedBox(height: spacing.sectionGap),
 
-          // 4. Tax computation
-          _buildDeductionsCard(color, textTheme, brightness, isGuestMode),
-          SizedBox(height: spacing.sectionGap),
+          // 4. Planning Mode: Interactive Deduction Planner
+          AnimatedSize(
+            duration: isReducedMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: widget.isPlanningMode
+                ? RepaintBoundary(
+                    child: Column(
+                      key: const ValueKey('planning_widgets'),
+                      children: [
+                        RepaintBoundary(
+                          child: _buildDeductionPlannerCard(
+                            context,
+                            color,
+                            textTheme,
+                            brightness,
+                            isGuestMode,
+                            spacing,
+                            ctxt,
+                          ),
+                        ),
+                        SizedBox(height: spacing.sectionGap),
 
-          // 5. Slab breakdown
-          _buildSlabCard(color, textTheme, brightness, isGuestMode),
-          SizedBox(height: spacing.sectionGap),
+                        // 5. Planning impact summary
+                        RepaintBoundary(
+                          child: _buildPlanningImpactCard(
+                            color,
+                            textTheme,
+                            brightness,
+                            isGuestMode,
+                            spacing,
+                            ctxt,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          if (widget.isPlanningMode) SizedBox(height: spacing.sectionGap),
 
-          // 6. Income breakdown (with percentages)
-          if (tax.incomeByCategory.isNotEmpty) ...[
-            _buildCategoryCard(
-              ctxt.tax_incomeBreakdown,
-              tax.incomeByCategory,
-              LucideIcons.trendingUp,
-              FinanceColors.incomeColor(brightness),
+          // 6. Opportunities (what can reduce tax?)
+          AnimatedSwitcher(
+            duration: isReducedMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 200),
+            child: !tax.isZeroTax && !widget.isPlanningMode
+                ? opportunities.when(
+                    data: (opps) => opps.isEmpty
+                        ? const SizedBox.shrink()
+                        : RepaintBoundary(
+                            child: _buildOpportunitiesCard(
+                              context,
+                              opps,
+                              color,
+                              textTheme,
+                              brightness,
+                              isGuestMode,
+                              spacing,
+                              ctxt,
+                            ),
+                          ),
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          if (!tax.isZeroTax && !widget.isPlanningMode)
+            SizedBox(height: spacing.sectionGap),
+
+          // 7. Tax computation
+          RepaintBoundary(
+            child: _buildDeductionsCard(
               color,
               textTheme,
+              brightness,
               isGuestMode,
+              spacing,
+              ctxt,
             ),
+          ),
+          SizedBox(height: spacing.sectionGap),
+
+          // 8. Slab breakdown
+          RepaintBoundary(
+            child: _buildSlabCard(
+              color,
+              textTheme,
+              brightness,
+              isGuestMode,
+              spacing,
+              ctxt,
+            ),
+          ),
+          SizedBox(height: spacing.sectionGap),
+
+          // 9. Income breakdown (with percentages)
+          if (tax.incomeByCategory.isNotEmpty)
+            RepaintBoundary(
+              child: _buildCategoryCard(
+                ctxt.tax_incomeBreakdown,
+                tax.incomeByCategory,
+                LucideIcons.trendingUp,
+                FinanceColors.incomeColor(brightness),
+                color,
+                textTheme,
+                isGuestMode,
+                spacing,
+              ),
+            ),
+          if (tax.incomeByCategory.isNotEmpty)
             SizedBox(height: spacing.sectionGap),
-          ],
 
-          // 7. Assumptions
+          // 10. Assumptions
           if (tax.assumptions.isNotEmpty)
-            _buildAssumptionsCard(color, textTheme),
-          if (tax.assumptions.isNotEmpty) SizedBox(height: spacing.sectionGap),
+            RepaintBoundary(
+              child: _buildAssumptionsCard(
+                color,
+                textTheme,
+                spacing,
+                ctxt,
+              ),
+            ),
+          if (tax.assumptions.isNotEmpty)
+            SizedBox(height: spacing.sectionGap),
 
-          // 8. Disclaimer
-          _buildDisclaimer(color, textTheme),
+          // 11. Disclaimer
+          RepaintBoundary(
+            child: _buildDisclaimer(
+              color,
+              textTheme,
+              spacing,
+              ctxt,
+            ),
+          ),
         ],
       ),
+    );
+  }
+
+  // ===== PLANNING MODE WIDGETS =====
+
+  Widget _buildPlanningIndicator(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final totalPlanned =
+        widget.plannedDeductions.values.fold<double>(0, (a, b) => a + b);
+    final potentialSavings = totalPlanned * 0.3; // Rough estimate
+
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: color.primary.withValues(alpha: 0.08),
+        borderRadius: spacing.borderRadiusLarge,
+        border: Border.all(color: color.primary.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                LucideIcons.slidersHorizontal,
+                color: color.primary,
+                size: spacing.iconLG,
+              ),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Text(
+                  ctxt.tax_planningMode,
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: color.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: spacing.elementGap),
+          if (totalPlanned > 0) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  ctxt.tax_plannedDeductions,
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+                CurrencyText(
+                  amount: totalPlanned,
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: color.primary,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: spacing.elementGapMin),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  ctxt.tax_potentialSavings,
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+                CurrencyText(
+                  amount: potentialSavings,
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color:
+                        FinanceColors.goodColor(Theme.of(context).brightness),
+                  ),
+                ),
+              ],
+            ),
+          ] else
+            Text(
+              ctxt.tax_addDeductionsPrompt,
+              style:
+                  textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeductionPlannerCard(
+    BuildContext context,
+    ColorScheme color,
+    TextTheme textTheme,
+    Brightness brightness,
+    bool isGuestMode,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final deductionOptions = [
+      (_PlannerOption.nps, ctxt.tax_nps80CCD1B, 50000.0),
+      (_PlannerOption.section80C, ctxt.tax_section80C, 150000.0),
+      (_PlannerOption.section80D, ctxt.tax_section80D, 50000.0),
+      (_PlannerOption.hra, ctxt.tax_hraExemption, 60000.0),
+      (_PlannerOption.homeLoan, ctxt.tax_homeLoanInterest, 200000.0),
+    ];
+
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
+        borderRadius: spacing.borderRadiusLarge,
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                LucideIcons.calculator,
+                color: color.primary,
+                size: spacing.iconLG,
+              ),
+              SizedBox(width: spacing.elementGap),
+              Text(
+                ctxt.tax_plannerDeductions,
+                style:
+                    textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+          SizedBox(height: spacing.sectionGap),
+          ...deductionOptions.map((option) {
+            final (key, label, maxAmount) = option;
+            final currentValue = widget.plannedDeductions[key.name] ?? 0;
+
+            return Column(
+              key: ValueKey(key.name),
+              children: [
+                _buildDeductionSlider(
+                  label: label,
+                  currentValue: currentValue,
+                  maxValue: maxAmount,
+                  color: color,
+                  textTheme: textTheme,
+                  onChanged: (value) =>
+                      widget.onUpdateDeduction(key.name, value),
+                  spacing: spacing,
+                  ctxt: ctxt,
+                ),
+                SizedBox(height: spacing.elementGap),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeductionSlider({
+    required String label,
+    required double currentValue,
+    required double maxValue,
+    required ColorScheme color,
+    required TextTheme textTheme,
+    required ValueChanged<double> onChanged,
+    required AppSpacing spacing,
+    required AppLocalizations ctxt,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: textTheme.bodyMedium),
+            CurrencyText(
+              amount: currentValue,
+              style: textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: color.primary,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: spacing.elementGapMin),
+        Slider(
+          value: currentValue,
+          min: 0,
+          max: maxValue,
+          onChanged: onChanged,
+          activeColor: color.primary,
+          inactiveColor: color.surfaceContainerHighest,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '0',
+              style:
+                  textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+            ),
+            Text(
+              ctxt.tax_upTo(maxValue.toInt()),
+              style:
+                  textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlanningImpactCard(
+    ColorScheme color,
+    TextTheme textTheme,
+    Brightness brightness,
+    bool isGuestMode,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final totalPlanned =
+        widget.plannedDeductions.values.fold<double>(0, (a, b) => a + b);
+    final currentTax = widget.tax.totalTax;
+    final estimatedSavings = totalPlanned * 0.3; // Simplified rate
+    final newTax =
+        (currentTax - estimatedSavings).clamp(0, currentTax).toDouble();
+    final savingsColor = FinanceColors.goodColor(brightness);
+
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            savingsColor.withValues(alpha: 0.08),
+            savingsColor.withValues(alpha: 0.02),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: spacing.borderRadiusLarge,
+        border: Border.all(color: savingsColor.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                LucideIcons.trendingDown,
+                color: savingsColor,
+                size: spacing.iconLG,
+              ),
+              SizedBox(width: spacing.elementGap),
+              Text(
+                ctxt.tax_planningImpact,
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: savingsColor,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: spacing.sectionGap),
+          Row(
+            children: [
+              Expanded(
+                child: _impactColumn(
+                  ctxt.tax_currentTax,
+                  currentTax,
+                  color,
+                  textTheme,
+                  isGuestMode,
+                  spacing,
+                ),
+              ),
+              Icon(LucideIcons.arrowRight, color: color.onSurfaceVariant),
+              Expanded(
+                child: _impactColumn(
+                  ctxt.tax_projectedTax,
+                  newTax,
+                  color,
+                  textTheme,
+                  isGuestMode,
+                  spacing,
+                  highlight: true,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: spacing.sectionGap),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(spacing.elementGap),
+            decoration: BoxDecoration(
+              color: savingsColor.withValues(alpha: 0.1),
+              borderRadius: spacing.borderRadiusMedium,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(LucideIcons.circleCheck, size: 16, color: savingsColor),
+                SizedBox(width: spacing.elementGapMin),
+                Text(
+                  ctxt.tax_totalSavings,
+                  style: textTheme.bodySmall?.copyWith(color: savingsColor),
+                ),
+                SizedBox(width: spacing.elementGapMin),
+                CurrencyText(
+                  amount: estimatedSavings,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: savingsColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _impactColumn(
+    String label,
+    double amount,
+    ColorScheme color,
+    TextTheme textTheme,
+    bool isGuestMode,
+    AppSpacing spacing, {
+    bool highlight = false,
+  }) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: textTheme.labelSmall?.copyWith(
+            color: color.onSurfaceVariant,
+          ),
+        ),
+        SizedBox(height: spacing.elementGapUltraMin),
+        CurrencyText(
+          amount: GuestModeUtil.applyGuestMode(amount, isGuestMode),
+          style: textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: highlight ? color.primary : null,
+          ),
+        ),
+      ],
     );
   }
 
@@ -136,9 +699,12 @@ class _TaxContent extends ConsumerWidget {
     TextTheme textTheme,
     Brightness brightness,
     bool isGuestMode,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
-    final taxColor =
-        tax.isZeroTax ? FinanceColors.goodColor(brightness) : color.onSurface;
+    final taxColor = widget.tax.isZeroTax
+        ? FinanceColors.goodColor(brightness)
+        : color.onSurface;
 
     return Container(
       padding: EdgeInsets.all(spacing.cardInner),
@@ -163,16 +729,16 @@ class _TaxContent extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                tax.financialYear,
+                widget.tax.financialYear,
                 style: textTheme.titleSmall?.copyWith(
                   color: color.onSurfaceVariant,
                 ),
               ),
               SizedBox(width: spacing.elementGap),
-              _buildConfidenceBadge(color, textTheme),
+              _buildConfidenceBadge(color, textTheme, spacing),
             ],
           ),
-          if (tax.isProjected)
+          if (widget.tax.isProjected)
             Text(
               ctxt.tax_projected,
               style: textTheme.bodySmall?.copyWith(
@@ -189,7 +755,8 @@ class _TaxContent extends ConsumerWidget {
           ),
           SizedBox(height: spacing.elementGapMin),
           CurrencyText(
-            amount: GuestModeUtil.applyGuestMode(tax.totalTax, isGuestMode),
+            amount:
+                GuestModeUtil.applyGuestMode(widget.tax.totalTax, isGuestMode),
             style: textTheme.displaySmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: taxColor,
@@ -201,17 +768,19 @@ class _TaxContent extends ConsumerWidget {
             children: [
               _summaryChip(
                 ctxt.tax_effectiveRate,
-                '${GuestModeUtil.applyGuestMode(tax.effectiveRate, isGuestMode).toStringAsFixed(1)}%',
+                '${GuestModeUtil.applyGuestMode(widget.tax.effectiveRate, isGuestMode).toStringAsFixed(1)}%',
                 textTheme,
                 color,
+                spacing,
               ),
               _summaryChip(
                 ctxt.tax_monthlyTax,
                 null,
                 textTheme,
                 color,
+                spacing,
                 amount: GuestModeUtil.applyGuestMode(
-                  tax.monthlyTax,
+                  widget.tax.monthlyTax,
                   isGuestMode,
                 ),
               ),
@@ -221,14 +790,14 @@ class _TaxContent extends ConsumerWidget {
           // FY progress
           LinearProgressIndicator(
             semanticsLabel: 'Progress',
-            value: tax.progressPercent.clamp(0.0, 1.0),
+            value: widget.tax.progressPercent.clamp(0.0, 1.0),
             backgroundColor: color.surfaceContainerHighest,
             color: color.primary,
             borderRadius: spacing.borderRadiusSmall,
           ),
           SizedBox(height: spacing.elementGapMin),
           Text(
-            ctxt.tax_fyProgress(tax.daysElapsed, tax.totalDays),
+            ctxt.tax_fyProgress(widget.tax.daysElapsed, widget.tax.totalDays),
             style: textTheme.bodySmall?.copyWith(
               color: color.onSurfaceVariant,
             ),
@@ -238,8 +807,13 @@ class _TaxContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildConfidenceBadge(ColorScheme color, TextTheme textTheme) {
-    final (String label, Color badgeColor) = switch (tax.confidenceTier) {
+  Widget _buildConfidenceBadge(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final (String label, Color badgeColor) =
+        switch (widget.tax.confidenceTier) {
       ConfidenceTier.high => ('HIGH', color.primary),
       ConfidenceTier.medium => ('MEDIUM', Colors.amber.shade700),
       ConfidenceTier.low => ('LOW', color.error),
@@ -270,7 +844,8 @@ class _TaxContent extends ConsumerWidget {
     String label,
     String? value,
     TextTheme textTheme,
-    ColorScheme color, {
+    ColorScheme color,
+    AppSpacing spacing, {
     double? amount,
   }) {
     return Column(
@@ -303,9 +878,11 @@ class _TaxContent extends ConsumerWidget {
     TextTheme textTheme,
     Brightness brightness,
     bool isGuestMode,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final activeSlabs =
-        tax.slabBreakdown.where((s) => s.taxableAmount > 0).toList();
+        widget.tax.slabBreakdown.where((s) => s.taxableAmount > 0).toList();
     if (activeSlabs.isEmpty) return const SizedBox.shrink();
 
     return Container(
@@ -385,7 +962,8 @@ class _TaxContent extends ConsumerWidget {
                 ),
               ),
               CurrencyText(
-                amount: GuestModeUtil.applyGuestMode(tax.baseTax, isGuestMode),
+                amount: GuestModeUtil.applyGuestMode(
+                    widget.tax.baseTax, isGuestMode),
                 style: textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -402,6 +980,8 @@ class _TaxContent extends ConsumerWidget {
     TextTheme textTheme,
     Brightness brightness,
     bool isGuestMode,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     return Container(
       padding: EdgeInsets.all(spacing.cardInner),
@@ -434,58 +1014,65 @@ class _TaxContent extends ConsumerWidget {
           SizedBox(height: spacing.sectionGap),
           _computationRow(
             ctxt.tax_grossIncome,
-            tax.projectedAnnualIncome,
+            widget.tax.projectedAnnualIncome,
             textTheme,
             color,
             isGuestMode,
+            spacing,
           ),
           _computationRow(
             ctxt.tax_standardDeduction,
-            -tax.standardDeduction,
+            -widget.tax.standardDeduction,
             textTheme,
             color,
             isGuestMode,
+            spacing,
           ),
           Divider(color: color.outlineVariant.withValues(alpha: 0.5)),
           _computationRow(
             ctxt.tax_taxableIncome,
-            tax.taxableIncome,
+            widget.tax.taxableIncome,
             textTheme,
             color,
             isGuestMode,
+            spacing,
             bold: true,
           ),
           SizedBox(height: spacing.elementGap),
           _computationRow(
             ctxt.tax_baseTax,
-            tax.baseTax,
+            widget.tax.baseTax,
             textTheme,
             color,
             isGuestMode,
+            spacing,
           ),
-          if (tax.rebate > 0)
+          if (widget.tax.rebate > 0)
             _computationRow(
               ctxt.tax_rebate87A,
-              -tax.rebate,
+              -widget.tax.rebate,
               textTheme,
               color,
               isGuestMode,
+              spacing,
               valueColor: FinanceColors.goodColor(brightness),
             ),
           _computationRow(
             ctxt.tax_cess,
-            tax.cess,
+            widget.tax.cess,
             textTheme,
             color,
             isGuestMode,
+            spacing,
           ),
           Divider(color: color.outlineVariant.withValues(alpha: 0.5)),
           _computationRow(
             ctxt.tax_totalTax,
-            tax.totalTax,
+            widget.tax.totalTax,
             textTheme,
             color,
             isGuestMode,
+            spacing,
             bold: true,
           ),
         ],
@@ -498,7 +1085,8 @@ class _TaxContent extends ConsumerWidget {
     double amount,
     TextTheme textTheme,
     ColorScheme color,
-    bool isGuestMode, {
+    bool isGuestMode,
+    AppSpacing spacing, {
     bool bold = false,
     Color? valueColor,
   }) {
@@ -535,28 +1123,33 @@ class _TaxContent extends ConsumerWidget {
     TextTheme textTheme,
     Brightness brightness,
     bool isGuestMode,
+    AppSpacing spacing,
   ) {
-    final oldRegime = tax.oldRegimeEstimate!;
-    final newBetter = !tax.oldRegimeBetter;
-    final savings = tax.regimeSavings;
-    final betterColor = FinanceColors.goodColor(brightness);
+    final oldRegime = widget.tax.oldRegimeEstimate!;
+    final newBetter = !widget.tax.oldRegimeBetter;
+    final savings = widget.tax.regimeSavings;
+    final savingsColor = FinanceColors.goodColor(brightness);
 
     return Container(
       padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
-        color: betterColor.withValues(alpha: 0.06),
+        color: savingsColor.withValues(alpha: 0.06),
         borderRadius: spacing.borderRadiusLarge,
-        border: Border.all(color: betterColor.withValues(alpha: 0.25)),
+        border: Border.all(color: savingsColor.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(LucideIcons.scale, color: betterColor, size: spacing.iconLG),
+              Icon(
+                LucideIcons.scale,
+                color: savingsColor,
+                size: spacing.iconLG,
+              ),
               SizedBox(width: spacing.elementGap),
               Text(
-                ctxt.tax_regimeComparison,
+                widget.ctxt.tax_regimeComparison,
                 style:
                     textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
               ),
@@ -567,25 +1160,27 @@ class _TaxContent extends ConsumerWidget {
             children: [
               Expanded(
                 child: _regimeColumn(
-                  ctxt.tax_newRegime,
-                  tax.totalTax,
+                  widget.ctxt.tax_newRegime,
+                  widget.tax.totalTax,
                   newBetter,
                   color,
                   textTheme,
                   isGuestMode,
-                  betterColor,
+                  savingsColor,
+                  spacing,
                 ),
               ),
               SizedBox(width: spacing.elementGap),
               Expanded(
                 child: _regimeColumn(
-                  ctxt.tax_oldRegime,
+                  widget.ctxt.tax_oldRegime,
                   oldRegime.totalTax,
                   !newBetter,
                   color,
                   textTheme,
                   isGuestMode,
-                  betterColor,
+                  savingsColor,
+                  spacing,
                 ),
               ),
             ],
@@ -595,20 +1190,22 @@ class _TaxContent extends ConsumerWidget {
             width: double.infinity,
             padding: EdgeInsets.all(spacing.elementGap),
             decoration: BoxDecoration(
-              color: betterColor.withValues(alpha: 0.08),
+              color: savingsColor.withValues(alpha: 0.08),
               borderRadius: spacing.borderRadiusMedium,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(LucideIcons.circleCheck, size: 16, color: betterColor),
+                Icon(LucideIcons.circleCheck, size: 16, color: savingsColor),
                 SizedBox(width: spacing.elementGapMin),
                 Text(
-                  ctxt.tax_regimeSavings(
-                    newBetter ? ctxt.tax_newRegime : ctxt.tax_oldRegime,
+                  widget.ctxt.tax_regimeSavings(
+                    newBetter
+                        ? widget.ctxt.tax_newRegime
+                        : widget.ctxt.tax_oldRegime,
                   ),
                   style: textTheme.bodySmall?.copyWith(
-                    color: betterColor,
+                    color: savingsColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -617,7 +1214,7 @@ class _TaxContent extends ConsumerWidget {
                   amount: GuestModeUtil.applyGuestMode(savings, isGuestMode),
                   fixedLength: 0,
                   style: textTheme.bodySmall?.copyWith(
-                    color: betterColor,
+                    color: savingsColor,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -626,7 +1223,7 @@ class _TaxContent extends ConsumerWidget {
           ),
           SizedBox(height: spacing.elementGap),
           Text(
-            ctxt.tax_oldRegimeDisclaimer,
+            widget.ctxt.tax_oldRegimeDisclaimer,
             style: textTheme.bodySmall?.copyWith(
               color: color.onSurfaceVariant,
               fontStyle: FontStyle.italic,
@@ -644,18 +1241,19 @@ class _TaxContent extends ConsumerWidget {
     ColorScheme color,
     TextTheme textTheme,
     bool isGuestMode,
-    Color betterColor,
+    Color savingsColor,
+    AppSpacing spacing,
   ) {
     return Container(
       padding: EdgeInsets.all(spacing.elementGap),
       decoration: BoxDecoration(
         color: isBetter
-            ? betterColor.withValues(alpha: 0.08)
+            ? savingsColor.withValues(alpha: 0.08)
             : color.surfaceContainerLow,
         borderRadius: spacing.borderRadiusMedium,
         border: Border.all(
           color: isBetter
-              ? betterColor.withValues(alpha: 0.3)
+              ? savingsColor.withValues(alpha: 0.3)
               : color.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
@@ -672,7 +1270,7 @@ class _TaxContent extends ConsumerWidget {
               ),
               if (isBetter) ...[
                 SizedBox(width: spacing.elementGapMin),
-                Icon(LucideIcons.circleCheck, size: 14, color: betterColor),
+                Icon(LucideIcons.circleCheck, size: 14, color: savingsColor),
               ],
             ],
           ),
@@ -682,7 +1280,7 @@ class _TaxContent extends ConsumerWidget {
             fixedLength: 0,
             style: textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
-              color: isBetter ? betterColor : color.onSurface,
+              color: isBetter ? savingsColor : color.onSurface,
             ),
           ),
         ],
@@ -698,6 +1296,7 @@ class _TaxContent extends ConsumerWidget {
     ColorScheme color,
     TextTheme textTheme,
     bool isGuestMode,
+    AppSpacing spacing,
   ) {
     final sorted = categories.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -770,6 +1369,8 @@ class _TaxContent extends ConsumerWidget {
     TextTheme textTheme,
     Brightness brightness,
     bool isGuestMode,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     // Skip regime from this card — it has its own dedicated section above
     final nonRegime =
@@ -806,7 +1407,14 @@ class _TaxContent extends ConsumerWidget {
           ),
           SizedBox(height: spacing.sectionGap),
           ...nonRegime.map(
-            (opp) => _buildOpportunityRow(opp, color, textTheme, isGuestMode),
+            (opp) => _buildOpportunityRow(
+              opp,
+              color,
+              textTheme,
+              isGuestMode,
+              spacing,
+              ctxt,
+            ),
           ),
           SizedBox(height: spacing.elementGap),
           SizedBox(
@@ -839,9 +1447,17 @@ class _TaxContent extends ConsumerWidget {
     ColorScheme color,
     TextTheme textTheme,
     bool isGuestMode,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
-    final title = _opportunityTitle(opp.type);
-    final description = _opportunityDescription(opp.type);
+    final title = _opportunityTitle(
+      opp.type,
+      ctxt,
+    );
+    final description = _opportunityDescription(
+      opp.type,
+      ctxt,
+    );
 
     final isQuantified = opp.status == OpportunityStatus.quantified;
 
@@ -905,7 +1521,7 @@ class _TaxContent extends ConsumerWidget {
     );
   }
 
-  String _opportunityTitle(OpportunityType type) {
+  String _opportunityTitle(OpportunityType type, AppLocalizations ctxt) {
     return switch (type) {
       OpportunityType.regime => ctxt.tax_oppRegime,
       OpportunityType.nps => ctxt.tax_oppNps,
@@ -916,7 +1532,7 @@ class _TaxContent extends ConsumerWidget {
     };
   }
 
-  String _opportunityDescription(OpportunityType type) {
+  String _opportunityDescription(OpportunityType type, AppLocalizations ctxt) {
     return switch (type) {
       OpportunityType.regime => ctxt.tax_oppRegimeDesc,
       OpportunityType.nps => ctxt.tax_oppNpsDesc,
@@ -927,7 +1543,12 @@ class _TaxContent extends ConsumerWidget {
     };
   }
 
-  Widget _buildAssumptionsCard(ColorScheme color, TextTheme textTheme) {
+  Widget _buildAssumptionsCard(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
     return Container(
       padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
@@ -957,7 +1578,7 @@ class _TaxContent extends ConsumerWidget {
             ],
           ),
           SizedBox(height: spacing.elementGap),
-          ...tax.assumptions.map(
+          ...widget.tax.assumptions.map(
             (a) => Padding(
               padding: EdgeInsets.only(bottom: spacing.elementGapMin),
               child: Row(
@@ -982,9 +1603,9 @@ class _TaxContent extends ConsumerWidget {
             ),
           ),
           // Warnings if any
-          if (tax.warnings.isNotEmpty) ...[
+          if (widget.tax.warnings.isNotEmpty) ...[
             SizedBox(height: spacing.elementGap),
-            ...tax.warnings.map(
+            ...widget.tax.warnings.map(
               (w) => Padding(
                 padding: EdgeInsets.only(bottom: spacing.elementGapMin),
                 child: Row(
@@ -1032,7 +1653,12 @@ class _TaxContent extends ConsumerWidget {
     };
   }
 
-  Widget _buildDisclaimer(ColorScheme color, TextTheme textTheme) {
+  Widget _buildDisclaimer(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
     return Container(
       padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
@@ -1064,4 +1690,12 @@ class _TaxContent extends ConsumerWidget {
       ),
     );
   }
+}
+
+enum _PlannerOption {
+  nps,
+  section80C,
+  section80D,
+  hra,
+  homeLoan,
 }

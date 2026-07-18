@@ -31,12 +31,12 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
     _tempSelectedTheme = ref.read(themeNotifierProvider);
   }
 
-  void _applyTheme(AppSpacing spacing,) {
+  void _applyTheme(AppSpacing spacing) {
     final ctxt = context.mounted ? AppLocalizations.of(context)! : null;
     ref.read(themeNotifierProvider.notifier).setTheme(_tempSelectedTheme);
     SnackbarService.success(
       ctxt?.theme_themeAppliedMessage ?? 'Theme applied!',
-      spacing
+      spacing,
     );
   }
 

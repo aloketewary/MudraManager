@@ -42,7 +42,7 @@ enum IconType {
 
 final aiInsightProvider = Provider<List<AiInsight>>((ref) {
   final dashboardData = ref.watch(dashboardDataProvider);
-  final briefing = ref.watch(dailyBriefingProvider);
+  final briefing = ref.watch(todayCardProvider);
 
   return dashboardData.maybeWhen(
     data: (data) => _generateInsights(data, briefing),
@@ -50,15 +50,16 @@ final aiInsightProvider = Provider<List<AiInsight>>((ref) {
   );
 });
 
-List<AiInsight> _generateInsights(DashboardData data, Briefing? briefing) {
+List<AiInsight> _generateInsights(
+    DashboardData data, TodayCardState? briefing) {
   final candidates = <AiInsight>[];
   final now = DateTime.now();
 
   // Determine which signal categories the Briefing already covers
   // Philosophy principle #3: "Signals must compete, not coexist."
   final briefingCovers = <String>{};
-  if (briefing != null) {
-    switch (briefing.signalType) {
+  if (briefing != null && briefing.signalType != null) {
+    switch (briefing.signalType!) {
       case BriefingSignalType.billDueToday:
       case BriefingSignalType.billDueSoon:
         briefingCovers.add('bills');
@@ -177,7 +178,8 @@ List<AiInsight> _generateInsights(DashboardData data, Briefing? briefing) {
       AiInsight(
         title: BuddyMessages.insightOverspending,
         message: BuddyMessages.insightOverspendingMessage(
-            deficit.toStringAsFixed(0),),
+          deficit.toStringAsFixed(0),
+        ),
         type: 'warning',
         iconType: IconType.warning,
         generatedAt: now,
@@ -317,7 +319,8 @@ List<AiInsight> _generateInsights(DashboardData data, Briefing? briefing) {
       final top = leaks.first;
       candidates.add(
         AiInsight(
-          title: Tone.appL10n?.insight_moneyLeakTitle ?? 'Frequent small spends',
+          title:
+              Tone.appL10n?.insight_moneyLeakTitle ?? 'Frequent small spends',
           message: BuddyMessages.insightMoneyLeak(
             top.key,
             top.value.count,

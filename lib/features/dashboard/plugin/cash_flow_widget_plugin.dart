@@ -1,11 +1,9 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/modern_cashflow_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
-import 'package:mudra_manager/core/router/app_routes.dart';
 
 class CashFlowWidgetPlugin extends DashboardWidgetPlugin {
   @override
@@ -18,7 +16,7 @@ class CashFlowWidgetPlugin extends DashboardWidgetPlugin {
   IconData get icon => LucideIcons.wallet;
 
   @override
-  int get defaultOrder => 3;
+  int get defaultOrder => 4; // Fifth
 
   @override
   WidgetCategory get category => WidgetCategory.essential;
@@ -47,9 +45,7 @@ class CashFlowWidgetPlugin extends DashboardWidgetPlugin {
   }
 
   @override
-  void onTap(BuildContext context, WidgetRef ref) {
-    context.push(AppRoutes.transactions);
-  }
+  void onTap(BuildContext context, WidgetRef ref) {}
 
   @override
   Future<void> refresh(WidgetRef ref) async {

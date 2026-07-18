@@ -28,8 +28,9 @@ class RobustCategoryMatcher {
     required List<Category> relevantCategories,
     double? amount,
     bool? isIncome,
+    String? merchant, // NEW: Use merchant name for priority matching
   }) {
-    if (text.trim().isEmpty) {
+    if (text.trim().isEmpty && (merchant == null || merchant.isEmpty)) {
       return _applyDefaultFallback(
         relevantCategories.isEmpty ? allCategories : relevantCategories,
         amount,
@@ -38,6 +39,14 @@ class RobustCategoryMatcher {
 
     if (relevantCategories.isEmpty) {
       return _applyDefaultFallback(allCategories, amount);
+    }
+
+    // Priority 0: Merchant name matching (highest priority if provided)
+    if (merchant != null && merchant.isNotEmpty) {
+      final merchantResult = _tryMerchantMatch(merchant, relevantCategories);
+      if (merchantResult.category != null) {
+        return merchantResult;
+      }
     }
 
     // Strategy 1: Exact category name match (highest priority)
@@ -69,6 +78,44 @@ class RobustCategoryMatcher {
 
     // Strategy 5: Default fallback
     return _applyDefaultFallback(relevantCategories, amount);
+  }
+
+  /// Strategy 0: Merchant name matching (highest confidence)
+  static CategoryMatchResult _tryMerchantMatch(
+    String merchant,
+    List<Category> categories,
+  ) {
+    final merchantLower = merchant.toLowerCase();
+
+    // Direct name match (exact match = very high confidence)
+    for (final category in categories) {
+      if (category.name.toLowerCase() == merchantLower) {
+        return CategoryMatchResult(
+          category: category,
+          confidenceScore: 95, // Very high confidence
+          matchStrategy: 'merchant_exact_match',
+        );
+      }
+    }
+
+    // Partial name match (high confidence)
+    for (final category in categories) {
+      if (category.name.toLowerCase().contains(merchantLower) ||
+          merchantLower.contains(category.name.toLowerCase())) {
+        return CategoryMatchResult(
+          category: category,
+          confidenceScore: 85, // High confidence
+          matchStrategy: 'merchant_partial_match',
+        );
+      }
+    }
+
+    // No match
+    return CategoryMatchResult(
+      category: null,
+      confidenceScore: 0,
+      matchStrategy: 'merchant_match',
+    );
   }
 
   /// Strategy 1: Exact category name match

@@ -28,10 +28,10 @@ import 'package:mudra_manager/features/profile/presentation/screens/profile_scre
 import 'package:mudra_manager/features/statistics/presentation/screens/statistics_screen.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/export_options_screen.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
+import 'package:mudra_manager/features/transactions/presentation/screens/transaction_list_screen.dart';
 import 'package:mudra_manager/plugins/export_plugin.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/utility_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart';
-import 'package:mudra_manager/features/transactions/presentation/screens/transaction_list_screen.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/animated_greeting.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';

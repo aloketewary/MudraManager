@@ -8,7 +8,9 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
 class QuickActionButton extends ConsumerWidget {
-  const QuickActionButton({super.key});
+  final bool isWide;
+
+  const QuickActionButton({super.key, required this.isWide});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,7 +52,7 @@ class QuickActionButton extends ConsumerWidget {
           final isNarrow = constraints.maxWidth < 350;
           final isLargeText = MediaQuery.textScalerOf(context).scale(14) > 18;
 
-          if (isLargeText || isNarrow) {
+          if (isLargeText || isNarrow || !isWide) {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -81,6 +83,7 @@ class QuickActionButton extends ConsumerWidget {
                       ),
                     ),
                     spacing: spacing,
+                    isTight: !isWide,
                   ),
                 ),
               ],
@@ -110,12 +113,14 @@ class _DashboardActionButton extends StatelessWidget {
   final _ActionData data;
   final BorderRadius borderRadius;
   final bool isRow;
+  final bool isTight;
   final AppSpacing spacing;
 
   const _DashboardActionButton({
     required this.data,
     required this.borderRadius,
     this.isRow = false,
+    this.isTight = false,
     required this.spacing,
   });
 
@@ -136,7 +141,7 @@ class _DashboardActionButton extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: isRow ? spacing.elementGap + 4 : spacing.elementGap + 8,
-            horizontal: isRow ? spacing.cardInner : spacing.elementGap,
+            horizontal: isTight ? spacing.cardHorizontal : spacing.cardInner,
           ),
           child: isRow
               ? Row(

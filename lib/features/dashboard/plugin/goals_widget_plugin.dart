@@ -15,7 +15,7 @@ class GoalsWidgetPlugin extends DashboardWidgetPlugin {
   IconData get icon => LucideIcons.flag;
 
   @override
-  int get defaultOrder => 4;
+  int get defaultOrder => 5; // Sixth
 
   @override
   WidgetCategory get category => WidgetCategory.finance;

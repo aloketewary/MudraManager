@@ -8,6 +8,8 @@ import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/analytics/data/net_worth_service.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/animated_balance.dart';
+import 'package:mudra_manager/shared/widgets/amount_glow.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
@@ -115,22 +117,18 @@ class NetWorthCard extends ConsumerWidget {
                           ),
                           const SizedBox(height: 16),
 
-                          // Net Worth Amount
-                          TweenAnimationBuilder<double>(
-                            duration: const Duration(milliseconds: 1500),
-                            curve: Curves.easeOutCubic,
-                            tween: Tween(begin: 0.0, end: totalBalance),
-                            builder: (context, value, child) {
-                              return CurrencyText(
-                                amount: value,
-                                style: textTheme.displaySmall?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  color: color.onPrimaryContainer,
-                                  fontSize: 36,
-                                ),
-                                showSign: false,
-                              );
-                            },
+                          // Net Worth Amount — the number the user came here for
+                          AmountGlow(
+                            color: color.primary,
+                            child: AnimatedBalance(
+                              value: totalBalance,
+                              duration: const Duration(milliseconds: 1500),
+                              style: textTheme.displaySmall?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: color.onPrimaryContainer,
+                                fontSize: 36,
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 12),
 

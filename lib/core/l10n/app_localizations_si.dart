@@ -7045,4 +7045,72 @@ class AppLocalizationsSi extends AppLocalizations {
   String goal_basedOnAvg(Object amount) {
     return 'Based on $amount/month average';
   }
+
+  @override
+  String profile_dayStreakLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '$count day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get txnList_spentThisMonth => 'Spent this month';
+
+  @override
+  String get tax_plannerTitle => 'Tax Planner';
+
+  @override
+  String get tax_startPlanning => 'Start Planning';
+
+  @override
+  String get tax_planningMode => 'Planning Mode';
+
+  @override
+  String get tax_plannedDeductions => 'Planned Deductions';
+
+  @override
+  String get tax_potentialSavings => 'Potential Savings';
+
+  @override
+  String get tax_addDeductionsPrompt =>
+      'Add deductions below to see potential tax savings';
+
+  @override
+  String get tax_plannerDeductions => 'Deduction Planner';
+
+  @override
+  String get tax_planningImpact => 'Planning Impact';
+
+  @override
+  String get tax_currentTax => 'Current Tax';
+
+  @override
+  String get tax_projectedTax => 'Projected Tax';
+
+  @override
+  String get tax_totalSavings => 'Total Savings: ';
+
+  @override
+  String get tax_nps80CCD1B => 'NPS (80CCD1B)';
+
+  @override
+  String get tax_section80C => 'Section 80C';
+
+  @override
+  String get tax_section80D => 'Section 80D';
+
+  @override
+  String get tax_hraExemption => 'HRA Exemption';
+
+  @override
+  String get tax_homeLoanInterest => 'Home Loan Interest';
+
+  @override
+  String tax_upTo(int amount) {
+    return 'Up to $amount';
+  }
 }

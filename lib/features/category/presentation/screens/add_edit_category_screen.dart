@@ -14,6 +14,10 @@ import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/icon_picker_bottom_sheet.dart';
+import 'package:mudra_manager/shared/widgets/category_color_picker.dart';
+import 'package:mudra_manager/shared/widgets/glass_text_field.dart';
+import 'package:mudra_manager/shared/widgets/parent_category_picker.dart';
+import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
@@ -37,13 +41,14 @@ class AddEditCategoryScreen extends ConsumerStatefulWidget {
 class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  late TextEditingController _nameController;
-  late TextEditingController _keywordsController;
+  late final TextEditingController _nameController;
+  late final TextEditingController _keywordsController;
   CategoryType _selectedType = CategoryType.expense;
   String? _selectedIcon;
-  late Color _selectedColor;
+  late Color _accentColor;
   Category? _selectedParent;
   bool _saving = false;
+  bool _themeResolved = false;
 
   bool get _isEditing => widget.existing != null;
 
@@ -67,16 +72,26 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     _keywordsController = TextEditingController(
       text: widget.existing?.keywords?.join(', ') ?? '',
     );
-    _selectedType = widget.existing?.categoryType ?? CategoryType.expense;
-    _selectedIcon = widget.existing?.iconName;
-    _selectedColor = widget.existing?.colorValue != null
-        ? Color(widget.existing!.colorValue!)
-        : const Color(0xFF2196F3);
     _selectedType = widget.existing?.categoryType ??
         widget.initialType ??
         CategoryType.expense;
+    _selectedIcon = widget.existing?.iconName;
+    _accentColor = widget.existing?.colorValue != null
+        ? Color(widget.existing!.colorValue!)
+        : Colors.grey; // Placeholder, will be resolved in didChangeDependencies
     _selectedParent = widget.initialParent;
     _loadParentCategory();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_themeResolved) {
+      _accentColor = widget.existing?.colorValue != null
+          ? Color(widget.existing!.colorValue!)
+          : Theme.of(context).colorScheme.primary;
+      _themeResolved = true;
+    }
   }
 
   @override
@@ -101,92 +116,63 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
 
-    return ScreenShell(
-      config: ScreenShellConfig(
-        title: _isEditing ? ctxt.category_editTitle : ctxt.category_addTitle,
-        appBarMode: AppBarMode.standard,
-        enableRefresh: false,
-      ),
-      leading: IconButton(
-        icon: const Icon(LucideIcons.x),
-        onPressed: () {
-          HapticFeedback.mediumImpact();
-          context.pop();
-        },
-      ),
-      actions: ScreenActions.build(
-        trailing: ScreenTextAction(
-          id: 'save_category',
-          label: _isEditing ? ctxt.common_update : ctxt.category_save,
-          onTap: _saving ? null : _save,
-          isLoading: _saving,
-        ),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.symmetric(
-            horizontal: spacing.cardHorizontal,
-            vertical: spacing.cardVertical,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final horizontalPadding =
+            constraints.maxWidth > 600 ? spacing.cardHorizontalMax : spacing.cardHorizontal;
+
+        return ScreenShell(
+          config: ScreenShellConfig(
+            title: _isEditing ? ctxt.category_editTitle : ctxt.category_addTitle,
+            appBarMode: AppBarMode.standard,
+            enableRefresh: false,
           ),
-          children: [
-            // ── HERO PREVIEW ──
-            _buildHeroPreview(
-              color,
-              textTheme,
-              spacing,
-              ctxt,
+          leading: IconButton(
+            icon: const Icon(LucideIcons.x),
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              context.pop();
+            },
+          ),
+          actions: ScreenActions.build(
+            trailing: ScreenTextAction(
+              id: 'save_category',
+              label: _isEditing ? ctxt.common_update : ctxt.category_save,
+              onTap: _saving ? null : _save,
+              isLoading: _saving,
             ),
-            SizedBox(height: spacing.sectionGap),
-
-            // ── TYPE ──
-            _sectionLabel(ctxt.category_typeLabel, textTheme),
-            SizedBox(height: spacing.sectionGap),
-            SegmentedButton<CategoryType>(
-              segments: [
-                ButtonSegment(
-                  value: CategoryType.expense,
-                  label: Text(ctxt.category_expenseLabel),
-                  icon: const Icon(LucideIcons.arrowUpRight, size: 18),
+          ),
+          body: Form(
+            key: _formKey,
+            child: ListView(
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: spacing.cardVertical,
+              ),
+              children: [
+                _buildHeroPreview(
+                  color,
+                  textTheme,
+                  spacing,
+                  ctxt,
+                  reduceMotion,
                 ),
-                ButtonSegment(
-                  value: CategoryType.income,
-                  label: Text(ctxt.category_incomeLabel),
-                  icon: const Icon(LucideIcons.arrowDownLeft, size: 18),
-                ),
+                SizedBox(height: spacing.sectionGap),
+                _buildTypeSection(color, textTheme, spacing, ctxt),
+                SizedBox(height: spacing.sectionGap),
+                _buildDetailsSection(color, textTheme, spacing, ctxt),
+                SizedBox(height: spacing.sectionGap),
+                _buildParentSection(color, textTheme, spacing, ctxt),
+                SizedBox(height: spacing.sectionGap),
+                _buildColorSection(color, textTheme, spacing, ctxt),
+                SizedBox(height: spacing.sectionGap),
               ],
-              selected: {_selectedType},
-              onSelectionChanged: (selected) {
-                HapticFeedback.lightImpact();
-                setState(() {
-                  _selectedType = selected.first;
-                  _selectedParent = null;
-                });
-              },
             ),
-            SizedBox(height: spacing.sectionGap),
-
-            // ── DETAILS ──
-            _sectionLabel(ctxt.category_detailsLabel, textTheme),
-            SizedBox(height: spacing.sectionGap),
-            _buildDetailsFields(color, textTheme, spacing),
-            SizedBox(height: spacing.sectionGap),
-
-            // ── PARENT CATEGORY ──
-            _sectionLabel(ctxt.category_parentLabel, textTheme),
-            SizedBox(height: spacing.sectionGap),
-            _buildParentPicker(color, textTheme),
-            SizedBox(height: spacing.sectionGap),
-
-            // ── COLOR ──
-            _sectionLabel(ctxt.category_colorLabel, textTheme),
-            SizedBox(height: spacing.sectionGap),
-            _buildColorSection(color, textTheme),
-            SizedBox(height: spacing.sectionGap),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -196,79 +182,117 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     TextTheme textTheme,
     AppSpacing spacing,
     AppLocalizations ctxt,
+    bool reduceMotion,
   ) {
     final name = _nameController.text.trim();
     final iconData = _selectedIcon != null
         ? IconHelper.iconFromName(_selectedIcon!)
         : LucideIcons.tag;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        _pickIcon();
-      },
-      child: Container(
-        padding: EdgeInsets.all(spacing.cardInner),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              _selectedColor.withValues(alpha: 0.2),
-              _selectedColor.withValues(alpha: 0.06),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              right: -30,
-              top: -30,
-              child: Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      _selectedColor.withValues(alpha: 0.18),
-                      _selectedColor.withValues(alpha: 0.0),
-                    ],
-                  ),
-                ),
+    return Semantics(
+      label: 'Category preview',
+      container: true,
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          _pickIcon();
+        },
+        child: RepaintBoundary(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(-0.2, -0.2),
+                radius: 1.2,
+                colors: [
+                  _accentColor.withValues(alpha: isDark ? 0.25 : 0.2),
+                  _accentColor.withValues(alpha: isDark ? 0.1 : 0.06),
+                  color.surface.withValues(alpha: 0.0),
+                ],
+                stops: const [0.0, 0.6, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              border: Border.all(
+                color: color.outlineVariant.withValues(alpha: 0.3),
               ),
             ),
-            Row(
+            child: Stack(
               children: [
-                Container(
-                  padding: EdgeInsets.all(spacing.cardInner),
-                  decoration: BoxDecoration(
-                    color: _selectedColor.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _selectedColor.withValues(alpha: 0.3),
-                      width: 1.5,
+                // Ambient glow
+                Positioned(
+                  right: -40,
+                  top: -40,
+                  child: Container(
+                    width: 140,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          _accentColor.withValues(alpha: isDark ? 0.2 : 0.15),
+                          _accentColor.withValues(alpha: 0.0),
+                        ],
+                      ),
                     ),
                   ),
-                  child:
-                      Icon(iconData, size: 28, color: color.onSurfaceVariant),
                 ),
-                SizedBox(width: spacing.sectionGap),
-                Expanded(
+                // Identity block (glass surface like AccountScreen)
+                Padding(
+                  padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        name.isEmpty ? ctxt.category_nameHint : name,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: name.isEmpty
-                              ? color.onSurfaceVariant.withValues(alpha: 0.8)
-                              : color.onSurface,
+                      // Icon container
+                      RepaintBoundary(
+                        child: Container(
+                          padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+                          decoration: BoxDecoration(
+                            color: _accentColor.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _accentColor.withValues(alpha: 0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Icon(
+                            iconData,
+                            size: 32,
+                            color: _accentColor,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: spacing.sectionGap),
+                      // Name display
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: spacing.cardHorizontalMax,
+                          vertical: spacing.elementGap,
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.surface.withValues(alpha: isDark ? 0.1 : 0.15),
+                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                          border: Border.all(
+                            color: color.outlineVariant.withValues(alpha: isDark ? 0.2 : 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                name.isEmpty ? ctxt.category_nameHint : name,
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: spacing.elementGap),
+                      // Type and parent info
                       Row(
                         children: [
                           Container(
@@ -277,14 +301,16 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                               vertical: spacing.elementGapUltraMin,
                             ),
                             decoration: BoxDecoration(
-                              color: _selectedColor.withValues(alpha: 0.1),
-                              borderRadius:
-                                  BorderRadius.circular(spacing.radiusMedium),
+                              color: color.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                              border: Border.all(
+                                color: color.primary.withValues(alpha: 0.2),
+                              ),
                             ),
                             child: Text(
                               _selectedType.name.toUpperCase(),
                               style: textTheme.labelSmall?.copyWith(
-                                color: _selectedColor,
+                                color: color.primary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -296,7 +322,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                               size: 12,
                               color: color.onSurfaceVariant,
                             ),
-                            const SizedBox(width: 4),
+                            SizedBox(width: spacing.elementGapMin),
                             Text(
                               _selectedParent!.name,
                               style: textTheme.labelSmall?.copyWith(
@@ -306,7 +332,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                           ],
                         ],
                       ),
-                      SizedBox(height: spacing.elementGap),
+                      SizedBox(height: spacing.sectionGap),
                       Text(
                         ctxt.category_tapToChangeIcon,
                         style: textTheme.labelSmall?.copyWith(
@@ -319,267 +345,270 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  // ── DETAILS FIELDS ──
-  Widget _buildDetailsFields(
+  // ── TYPE SECTION ──
+  Widget _buildTypeSection(
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
-    final ctxt = AppLocalizations.of(context)!;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextFormField(
-          controller: _nameController,
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            labelText: ctxt.category_nameHint,
-            prefixIcon:
-                Icon(LucideIcons.pencil, size: 18, color: _selectedColor),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              borderSide: BorderSide(color: _selectedColor, width: 2),
-            ),
-          ),
-          style: textTheme.bodyLarge,
-          validator: (v) =>
-              v == null || v.trim().isEmpty ? ctxt.common_required : null,
+        TypeSectionHeader(
+          label: ctxt.category_typeLabel,
+          icon: LucideIcons.tag,
+          accentColor: color.primary,
         ),
         SizedBox(height: spacing.sectionGap),
-        TextFormField(
-          controller: _keywordsController,
-          decoration: InputDecoration(
-            labelText: ctxt.category_keywordsHint,
-            helperText: ctxt.category_keywordsHelper,
-            helperStyle: textTheme.labelSmall?.copyWith(
-              color: color.onSurfaceVariant.withValues(alpha: 0.6),
+        SegmentedButton<CategoryType>(
+          segments: [
+            ButtonSegment(
+              value: CategoryType.expense,
+              label: Text(ctxt.category_expenseLabel),
+              icon: const Icon(LucideIcons.arrowUpRight, size: 18),
             ),
-            prefixIcon: Icon(LucideIcons.tag, size: 18, color: _selectedColor),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ButtonSegment(
+              value: CategoryType.income,
+              label: Text(ctxt.category_incomeLabel),
+              icon: const Icon(LucideIcons.arrowDownLeft, size: 18),
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              borderSide: BorderSide(color: _selectedColor, width: 2),
-            ),
+          ],
+          selected: {_selectedType},
+          onSelectionChanged: (selected) {
+            HapticFeedback.lightImpact();
+            setState(() {
+              _selectedType = selected.first;
+              _selectedParent = null;
+            });
+          },
+          style: SegmentedButton.styleFrom(
+            backgroundColor: color.surfaceContainerLow,
+            selectedBackgroundColor: color.primary.withValues(alpha: 0.15),
+            selectedForegroundColor: color.primary,
+            foregroundColor: color.onSurfaceVariant,
+            side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
           ),
-          style: textTheme.bodyLarge,
         ),
       ],
     );
   }
 
-  // ── PARENT CATEGORY PICKER ──
-  Widget _buildParentPicker(ColorScheme color, TextTheme textTheme) {
-    final spacing = ref.watch(spacingProvider);
-    final ctxt = AppLocalizations.of(context)!;
-    return Card(
-      elevation: 0,
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
+  // ── DETAILS SECTION ──
+  Widget _buildDetailsSection(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final inputDecoration = InputDecoration(
+      filled: true,
+      fillColor: color.surface.withValues(alpha: isDark ? 0.6 : 0.7),
+      border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+        borderSide: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
-      child: InkWell(
+      focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        onTap: () async {
-          HapticFeedback.lightImpact();
-          final categories = await ref.read(categoryListProvider.future);
-          final filtered = categories.where((c) {
-            if (c.categoryType != _selectedType) return false;
-            if (c.id == widget.existing?.id) return false;
-            c.parentCategory.loadSync();
-            return c.parentCategory.value == null;
-          }).toList();
-          if (!context.mounted) return;
-          final selected = await showModalBottomSheet<Category?>(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: color.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
+        borderSide: BorderSide(color: color.primary, width: 2),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        borderSide: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TypeSectionHeader(
+          label: ctxt.category_detailsLabel,
+          icon: LucideIcons.formInput,
+          accentColor: color.primary,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        GlassTextField(
+          controller: _nameController,
+          decoration: inputDecoration.copyWith(
+            labelText: ctxt.category_nameHint,
+            prefixIcon: Icon(LucideIcons.pencil, size: 18, color: color.primary),
+          ),
+          textTheme: textTheme,
+          validator: (v) =>
+              v == null || v.trim().isEmpty ? ctxt.common_required : null,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        GlassTextField(
+          controller: _keywordsController,
+          decoration: inputDecoration.copyWith(
+            labelText: ctxt.category_keywordsHint,
+            helperText: ctxt.category_keywordsHelper,
+            helperStyle: textTheme.labelSmall?.copyWith(
+              color: color.onSurfaceVariant.withValues(alpha: 0.6),
             ),
-            builder: (_) => _ParentCategoryPicker(
-              categories: filtered,
-              selected: _selectedParent,
-            ),
-          );
-          if (selected != null) {
-            setState(() {
-              _selectedParent =
-                  selected.id == Isar.autoIncrement ? null : selected;
-            });
-          }
-        },
-        child: Padding(
-          padding: EdgeInsets.all(spacing.cardInner),
-          child: Row(
-            children: [
-              Icon(LucideIcons.folderOpen, size: 18, color: _selectedColor),
-              SizedBox(width: spacing.elementGap * 1.5),
-              Expanded(
-                child: Text(
-                  _selectedParent?.name ?? ctxt.category_noneTopLevel,
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: _selectedParent != null
-                        ? color.onSurface
-                        : color.onSurfaceVariant.withValues(alpha: 0.6),
-                  ),
+            prefixIcon: Icon(LucideIcons.tag, size: 18, color: color.primary),
+          ),
+          textTheme: textTheme,
+        ),
+      ],
+    );
+  }
+
+  // ── PARENT SECTION ──
+  Widget _buildParentSection(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TypeSectionHeader(
+          label: ctxt.category_parentLabel,
+          icon: LucideIcons.folderOpen,
+          accentColor: color.primary,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              onTap: _pickParent,
+              child: Padding(
+                padding: EdgeInsets.all(spacing.cardInner),
+                child: Row(
+                  children: [
+                    Icon(LucideIcons.folderOpen, size: 18, color: color.primary),
+                    SizedBox(width: spacing.elementGap * 1.5),
+                    Expanded(
+                      child: Text(
+                        _selectedParent?.name ?? ctxt.category_noneTopLevel,
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: _selectedParent != null
+                              ? color.onSurface
+                              : color.onSurfaceVariant.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                    if (_selectedParent != null)
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          setState(() => _selectedParent = null);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            LucideIcons.x,
+                            size: 16,
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                      )
+                    else
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 16,
+                        color: color.onSurfaceVariant,
+                      ),
+                  ],
                 ),
               ),
-              if (_selectedParent != null)
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _selectedParent = null);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(
-                      LucideIcons.x,
-                      size: 16,
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                )
-              else
-                Icon(
-                  LucideIcons.chevronRight,
-                  size: 16,
-                  color: color.onSurfaceVariant,
-                ),
-            ],
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 
   // ── COLOR SECTION ──
-  Widget _buildColorSection(ColorScheme color, TextTheme textTheme) {
-    final spacing = ref.watch(spacingProvider);
-    return Card(
-      elevation: 0,
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.cardInner),
-        child: Row(
-          children: [
-            Expanded(
-              child: Wrap(
-                spacing: spacing.elementGap,
-                runSpacing: spacing.elementGap,
-                children: _quickColors.map((c) {
-                  final isSelected = _selectedColor.toARGB32() == c.toARGB32();
-                  return GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      setState(() => _selectedColor = c);
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: c,
-                        shape: BoxShape.circle,
-                        border: isSelected
-                            ? Border.all(
-                                color: color.onSurface,
-                                width: 2.5,
-                              )
-                            : null,
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: c.withValues(alpha: 0.4),
-                                  blurRadius: 8,
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: isSelected
-                          ? const Icon(
-                              LucideIcons.check,
-                              color: Colors.white,
-                              size: 16,
-                            )
-                          : null,
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            GestureDetector(
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                _pickColor();
-              },
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: color.outlineVariant,
-                    width: 1.5,
-                  ),
-                ),
-                child: Icon(
-                  LucideIcons.ellipsis,
-                  size: 16,
-                  color: color.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ],
+  Widget _buildColorSection(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TypeSectionHeader(
+          label: ctxt.category_colorLabel,
+          icon: LucideIcons.palette,
+          accentColor: color.primary,
         ),
-      ),
+        SizedBox(height: spacing.sectionGap),
+        CategoryColorPicker(
+          selectedColor: _accentColor,
+          onColorChanged: (c) => setState(() => _accentColor = c),
+          onCustomPick: _pickColor,
+          quickColors: _quickColors,
+        ),
+      ],
     );
   }
 
   // ── HELPERS ──
-
-  Widget _sectionLabel(String text, TextTheme textTheme) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        text,
-        style: textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.3,
-        ),
-      ),
-    );
-  }
-
   void _pickIcon() async {
     final result = await showModalBottomSheet<String>(
       context: context,
-      builder: (_) => IconPickerBottomSheet(backgroundColor: _selectedColor),
+      builder: (_) => IconPickerBottomSheet(backgroundColor: _accentColor),
     );
-    if (result != null) setState(() => _selectedIcon = result);
+    if (result != null) {
+      setState(() => _selectedIcon = result);
+    }
   }
 
   void _pickColor() async {
     final c = await showDialog<Color>(
       context: context,
-      builder: (_) => SimpleColorPickerDialog(initialColor: _selectedColor),
+      builder: (_) => SimpleColorPickerDialog(initialColor: _accentColor),
     );
-    if (c != null) setState(() => _selectedColor = c);
+    if (c != null && mounted) {
+      setState(() => _accentColor = c);
+    }
+  }
+
+  void _pickParent() async {
+    final categories = await ref.read(categoryListProvider.future);
+    final filtered = categories.where((c) {
+      if (c.categoryType != _selectedType) return false;
+      if (c.id == widget.existing?.id) return false;
+      c.parentCategory.loadSync();
+      return c.parentCategory.value == null;
+    }).toList();
+
+    if (!context.mounted) return;
+
+    final selected = await showModalBottomSheet<Category?>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (_) => ParentCategoryPicker(
+        categories: filtered,
+        selected: _selectedParent,
+      ),
+    );
+
+    if (selected != null && mounted) {
+      setState(() {
+        _selectedParent =
+            selected.id == Isar.autoIncrement ? null : selected;
+      });
+    }
   }
 
   Future<void> _save() async {
@@ -594,7 +623,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
       category.name = _nameController.text.trim();
       category.categoryType = _selectedType;
       category.iconName = _selectedIcon;
-      category.colorValue = _selectedColor.toARGB32();
+      category.colorValue = _accentColor.toARGB32();
       category.parentCategory.value = _selectedParent;
 
       final keywordsText = _keywordsController.text.trim();
@@ -610,7 +639,9 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
         await isar.categorys.put(category);
         await category.parentCategory.save();
       });
+
       ref.invalidate(categoryListProvider);
+
       if (!_isEditing) {
         ref
             .read(gamificationServiceProvider)
@@ -621,101 +652,5 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
-  }
-}
-
-// ── PARENT CATEGORY PICKER ──
-class _ParentCategoryPicker extends ConsumerWidget {
-  final List<Category> categories;
-  final Category? selected;
-
-  const _ParentCategoryPicker({required this.categories, this.selected});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final textTheme = Theme.of(context).textTheme;
-    final color = Theme.of(context).colorScheme;
-    final ctxt = AppLocalizations.of(context)!;
-    final spacing = ref.watch(spacingProvider);
-
-    return DraggableScrollableSheet(
-      initialChildSize: 0.5,
-      minChildSize: 0.3,
-      maxChildSize: 0.8,
-      expand: false,
-      builder: (context, scrollController) => Column(
-        children: [
-          const SizedBox(height: 12),
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: color.onSurfaceVariant.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              AppLocalizations.of(context)!.category_selectParent,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Divider(
-            height: 1,
-            color: color.outlineVariant.withValues(alpha: 0.3),
-          ),
-          Expanded(
-            child: ListView(
-              controller: scrollController,
-              children: [
-                ListTile(
-                  leading: Icon(LucideIcons.minus, color: color.primary),
-                  title: Text(ctxt.category_noneTopLevel),
-                  selected: selected == null,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.pop(context, Category());
-                  },
-                ),
-                ...categories.map((c) {
-                  final catColor =
-                      Color(c.colorValue ?? Colors.grey.toARGB32());
-                  return ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: catColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                      ),
-                      child: Icon(
-                        IconHelper.getIconData(c.iconName),
-                        color: catColor,
-                        size: 20,
-                      ),
-                    ),
-                    title: Text(c.name),
-                    selected: selected?.id == c.id,
-                    trailing: selected?.id == c.id
-                        ? Icon(
-                            LucideIcons.check,
-                            size: 18,
-                            color: color.primary,
-                          )
-                        : null,
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context, c);
-                    },
-                  );
-                }),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

@@ -30,140 +30,142 @@ class AmbientBrandSection extends ConsumerWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        child: SizedBox(
-          width: double.infinity,
-          height: 140 +
-              (absorbBottomInset
-                  ? MediaQuery.of(context).padding.bottom +
-                      kBottomNavigationBarHeight +
-                      16
-                  : 0),
+      child: SizedBox(
+        width: double.infinity,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
           child: Stack(
+            key: ValueKey('ambient_${moment.tag}'),
             children: [
-              // Icon doodle pattern background
-              Positioned.fill(
-                child: _DoodleIconPattern(
-                  color: patternColor,
-                  seed: DateTime.now().day,
-                ),
-              ),
-
-              // Vertical fade — top and bottom edges
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        color.surface,
-                        color.surface.withValues(alpha: 0.0),
-                        color.surface.withValues(alpha: 0.0),
-                        color.surface,
-                      ],
-                      stops: const [0.0, 0.2, 0.8, 1.0],
-                    ),
+                // Icon doodle pattern background
+                Positioned.fill(
+                  child: _DoodleIconPattern(
+                    color: patternColor,
+                    seed: DateTime.now().day,
                   ),
                 ),
-              ),
 
-              // Soft gradient overlay for text readability
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        color.surface.withValues(alpha: 0.7),
-                        color.surface.withValues(alpha: 0.3),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Content
-              Container(
-                margin: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal + 4,
-                  vertical: spacing.cardVerticalMax * 4,
-                ),
-               
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    // Tag — graffiti style
-                    Text(
-                      moment.tag.toUpperCase(),
-                      style: textTheme.labelLarge?.copyWith(
-                        letterSpacing: 1.5,
-                        fontWeight: FontWeight.w700,
-                        color: color.primary.withValues(alpha: 0.45),
+                // Vertical fade — top and bottom edges
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          color.surface,
+                          color.surface.withValues(alpha: 0.0),
+                          color.surface.withValues(alpha: 0.0),
+                          color.surface,
+                        ],
+                        stops: const [0.0, 0.2, 0.8, 1.0],
                       ),
-                    ).animate().fadeIn(duration: 400.ms).slideX(
-                          begin: -0.02,
-                          end: 0,
-                          duration: 400.ms,
-                          curve: Curves.easeOut,
+                    ),
+                  ),
+                ),
+
+                // Soft gradient overlay for text readability
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          color.surface.withValues(alpha: 0.7),
+                          color.surface.withValues(alpha: 0.3),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Content
+                Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal + 4,
+                    vertical: spacing.cardInner,
+                  ),
+                  child: Column(
+                    key: ValueKey('ambient_content_${moment.tag}'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      // Tag — graffiti style
+                      Text(
+                        moment.tag.toUpperCase(),
+                        key: ValueKey('tag_${moment.tag}'),
+                        style: textTheme.labelLarge?.copyWith(
+                          letterSpacing: 1.5,
+                          fontWeight: FontWeight.w700,
+                          color: color.primary.withValues(alpha: 0.45),
                         ),
+                      ).animate().fadeIn(duration: 400.ms).slideX(
+                            begin: -0.02,
+                            end: 0,
+                            duration: 400.ms,
+                            curve: Curves.easeOut,
+                          ),
 
-                    SizedBox(height: spacing.elementGap),
+                      SizedBox(height: spacing.elementGapMin),
 
-                    // Title
-                    Text(
-                      moment.title,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: color.onSurfaceVariant.withValues(alpha: 0.6),
-                        height: 1.3,
-                      ),
-                    ).animate().fadeIn(duration: 400.ms, delay: 100.ms),
+                      // Title
+                      Text(
+                        moment.title,
+                        key: ValueKey('title_${moment.title}'),
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                          height: 1.3,
+                        ),
+                      ).animate().fadeIn(duration: 400.ms, delay: 100.ms),
 
-                    SizedBox(height: spacing.elementGapUltraMin),
+                      SizedBox(height: spacing.elementGapUltraMin),
 
-                    // Subtitle
-                    Text(
-                      moment.subtitle,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onSurfaceVariant.withValues(alpha: 0.35),
-                        letterSpacing: 0.5,
-                      ),
-                    ).animate().fadeIn(duration: 400.ms, delay: 200.ms),
+                      // Subtitle
+                      Text(
+                        moment.subtitle,
+                        key: ValueKey('subtitle_${moment.subtitle}'),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant.withValues(alpha: 0.35),
+                          letterSpacing: 0.5,
+                        ),
+                      ).animate().fadeIn(duration: 400.ms, delay: 200.ms),
 
-                    const SizedBox(height: 10),
-
-                    if (showSignature)
-                      FutureBuilder<PackageInfo>(
-                        future: PackageInfo.fromPlatform(),
-                        builder: (context, snapshot) {
-                          final info = snapshot.data;
-                          final parts = <String>[
-                            if (info?.version != null) 'v${info!.version}',
-                            if (info?.buildNumber != null &&
-                                info!.buildNumber.isNotEmpty)
-                              'build ${info.buildNumber}',
-                            'Made with ❤️ in India',
-                          ];
-                          return Text(
-                            parts.join(' · '),
-                            style: textTheme.labelSmall?.copyWith(
-                              color: color.onSurfaceVariant
-                                  .withValues(alpha: 0.25),
-                              letterSpacing: 0.3,
-                            ),
-                          );
-                        },
-                      ).animate().fadeIn(duration: 300.ms, delay: 300.ms),
-                  ],
+                      if (showSignature)
+                        FutureBuilder<PackageInfo>(
+                          future: PackageInfo.fromPlatform(),
+                          builder: (context, snapshot) {
+                            final info = snapshot.data;
+                            final parts = <String>[
+                              if (info?.version != null) 'v${info!.version}',
+                              if (info?.buildNumber != null &&
+                                  info!.buildNumber.isNotEmpty)
+                                'build ${info.buildNumber}',
+                              'Made with ❤️ in India',
+                            ];
+                            return Padding(
+                              padding:
+                                  EdgeInsets.only(top: spacing.elementGapMin),
+                              child: Text(
+                                parts.join(' · '),
+                                key: const ValueKey('signature'),
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: color.onSurfaceVariant
+                                      .withValues(alpha: 0.25),
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            );
+                          },
+                        ).animate().fadeIn(duration: 300.ms, delay: 300.ms),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
     );
   }
 

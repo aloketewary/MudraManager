@@ -15,7 +15,7 @@ class AccountsWidgetPlugin extends DashboardWidgetPlugin {
   IconData get icon => LucideIcons.wallet;
 
   @override
-  int get defaultOrder => 1;
+  int get defaultOrder => 1; // Second
 
   @override
   WidgetCategory get category => WidgetCategory.essential;

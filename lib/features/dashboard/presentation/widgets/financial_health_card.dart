@@ -8,9 +8,8 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/progress_ring.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
-import 'package:visibility_detector/visibility_detector.dart';
-import 'dart:math' as math;
 
 class FinancialHealthCard extends ConsumerWidget {
   final double globalPadding;
@@ -59,11 +58,20 @@ class FinancialHealthCard extends ConsumerWidget {
                     // Row 1: Ring + Score + Verdict
                     Row(
                       children: [
-                        _AnimatedMiniRing(
-                          score: health.score / 100,
-                          scoreColor: scoreColor,
-                          textTheme: textTheme,
-                          spacing: spacing,
+                        ProgressRing(
+                          progress: health.score / 100,
+                          color: scoreColor,
+                          size: spacing.sectionGap * 2,
+                          strokeWidth: 5,
+                          insetPadding: spacing.cardVerticalMin,
+                          duration: const Duration(milliseconds: 1200),
+                          labelBuilder: (value) => Text(
+                            '${(value * 100).toInt()}',
+                            style: textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: scoreColor,
+                            ),
+                          ),
                         ),
                         SizedBox(width: spacing.elementGap * 1.5),
                         Expanded(
@@ -178,144 +186,4 @@ class FinancialHealthCard extends ConsumerWidget {
     if (score >= 40) return FinanceColors.statusWarning;
     return FinanceColors.statusDanger;
   }
-}
-
-// ── Visibility-aware mini score ring ──
-
-class _AnimatedMiniRing extends StatefulWidget {
-  final double score;
-  final Color scoreColor;
-  final TextTheme textTheme;
-  final AppSpacing spacing;
-
-  const _AnimatedMiniRing({
-    required this.score,
-    required this.scoreColor,
-    required this.textTheme,
-    required this.spacing,
-  });
-
-  @override
-  State<_AnimatedMiniRing> createState() => _AnimatedMiniRingState();
-}
-
-class _AnimatedMiniRingState extends State<_AnimatedMiniRing>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
-  late Animation<double> _anim;
-  bool _started = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return VisibilityDetector(
-      key: const ValueKey('health_mini_ring'),
-      onVisibilityChanged: (info) {
-        if (info.visibleFraction > 0.3 && !_started) {
-          _started = true;
-          _ctrl.forward();
-        }
-      },
-      child: AnimatedBuilder(
-        animation: _anim,
-        builder: (_, __) {
-          final value = _anim.value * widget.score;
-          return SizedBox(
-            width: widget.spacing.sectionGap * 2,
-            height: widget.spacing.sectionGap * 2,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CustomPaint(
-                  size: Size(
-                    widget.spacing.sectionGap * 2,
-                    widget.spacing.sectionGap * 2,
-                  ),
-                  painter: _CompactRingPainter(
-                    progress: value,
-                    color: widget.scoreColor,
-                    spacing: widget.spacing,
-                  ),
-                ),
-                Text(
-                  '${(value * 100).toInt()}',
-                  style: widget.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: widget.scoreColor,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _CompactRingPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-  final AppSpacing spacing;
-
-  _CompactRingPainter({
-    required this.progress,
-    required this.color,
-    required this.spacing,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - spacing.cardVerticalMin;
-    const strokeWidth = 5.0;
-
-    final bgPaint = Paint()
-      ..color = color.withValues(alpha: 0.15)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawCircle(center, radius, bgPaint);
-
-    final rect = Rect.fromCircle(center: center, radius: radius);
-    final gradient = SweepGradient(
-      colors: [color, color.withValues(alpha: 0.6), color],
-      stops: const [0.0, 0.5, 1.0],
-      transform: const GradientRotation(-math.pi / 2),
-    );
-
-    final progressPaint = Paint()
-      ..shader = gradient.createShader(rect)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(
-      rect,
-      -math.pi / 2,
-      2 * math.pi * progress,
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_CompactRingPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.color != color;
 }

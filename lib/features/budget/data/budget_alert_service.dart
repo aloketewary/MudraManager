@@ -2,13 +2,68 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/providers/singleton_providers.dart';
 import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final budgetAlertServiceProvider = Provider<BudgetAlertService>((ref) {
+  final isarService = ref.watch(isarServiceProvider);
+  final notificationService = ref.watch(smartNotificationServiceProvider);
+  return BudgetAlertService(isarService, notificationService);
+});
 
 class BudgetAlertService {
   final IsarService isarService;
   final SmartNotificationService _notificationService;
 
   BudgetAlertService(this.isarService, this._notificationService);
+
+  Future<List<BudgetAlert>> checkBudgetsOnDashboardLoad() async {
+    final isar = await isarService.getInstance();
+    final now = DateTime.now();
+    final alerts = <BudgetAlert>[];
+
+    final budgets = await isar.budgets
+        .filter()
+        .isArchivedEqualTo(false)
+        .findAll();
+
+    for (final budget in budgets) {
+      await budget.categories.load();
+      await budget.allocations.load();
+
+      final (start, end) = budget.getCurrentPeriodRange(now);
+      final spent = await _calculateSpent(isar, budget, start, end);
+      final percentage = (spent / budget.amount) * 100;
+
+      // Check if alert thresholds exceeded
+      if (percentage >= 100 && !budget.notifiedAt100) {
+        alerts.add(BudgetAlert(
+          budget: budget, spent: spent,
+          percentage: percentage, threshold: 100,
+        ),);
+        budget.notifiedAt100 = true;
+        await isar.writeTxn(() => isar.budgets.put(budget));
+      } else if (percentage >= 90 && !budget.notifiedAt90 && !budget.notifiedAt100) {
+        alerts.add(BudgetAlert(
+          budget: budget, spent: spent,
+          percentage: percentage, threshold: 90,
+        ),);
+        budget.notifiedAt90 = true;
+        await isar.writeTxn(() => isar.budgets.put(budget));
+      } else if (percentage >= 80 && !budget.notifiedAt80 && !budget.notifiedAt90) {
+        alerts.add(BudgetAlert(
+          budget: budget, spent: spent,
+          percentage: percentage, threshold: 80,
+        ),);
+        budget.notifiedAt80 = true;
+        await isar.writeTxn(() => isar.budgets.put(budget));
+      }
+    }
+
+    return alerts;
+  }
 
   Future<List<BudgetAlert>> checkBudgetsAfterTransaction(
     Transaction transaction,

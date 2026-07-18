@@ -1,13 +1,13 @@
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 import 'package:mudra_manager/core/tone/tone_pack.dart';
@@ -17,7 +17,12 @@ import 'package:mudra_manager/features/dashboard/presentation/providers/account_
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
+import 'package:mudra_manager/shared/widgets/section_header.dart';
+import 'package:mudra_manager/shared/widgets/settings_group_card.dart';
+import 'package:mudra_manager/shared/widgets/setting_item.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 final _guestModePluginProvider = FutureProvider.autoDispose((ref) async {
   return await MarketplaceService().isPluginEnabled('com.mudra.guest_mode');
@@ -31,9 +36,9 @@ class AppearanceScreen extends ConsumerStatefulWidget {
 }
 
 class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
-  AppLocalizations get ctxt => AppLocalizations.of(context)!;
   @override
   Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
@@ -43,6 +48,13 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
     final guestPluginAsync = ref.watch(_guestModePluginProvider);
     final isGuestMode = ref.watch(guestModeProvider);
     final activeTone = ref.watch(tonePackProvider);
+    final currentColorTheme = ref.watch(themeNotifierProvider);
+    final accountStyle = ref.watch(accountDisplayStyleProvider);
+
+    final guestPluginEnabled = guestPluginAsync.maybeWhen(
+        data: (v) => v, orElse: () => false);
+    final loaded = guestPluginAsync.maybeWhen(
+        data: (_) => true, orElse: () => false);
 
     return ScreenShell(
       config: ScreenShellConfig(
@@ -51,595 +63,623 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
         enableRefresh: false,
       ),
       actions: ScreenActions.empty,
-      body: ListView(
-        padding: EdgeInsets.symmetric(
-          horizontal: spacing.cardHorizontal,
-          vertical: spacing.cardVertical,
-        ),
-        children: [
-          // ── HERO STATUS CARD ──
-          _buildHeroCard(
-            color,
-            textTheme,
-            spacing,
-            isDark,
-            currentTheme,
-            activeTone,
-          ),
-          const SizedBox(height: 24),
-
-          // ── THEME MODE ──
-          _buildSectionHeader(AppLocalizations.of(context)!.appearance_themeMode, color, textTheme),
-          const SizedBox(height: 10),
-          _buildThemeModeCard(color, textTheme, spacing, currentTheme),
-          const SizedBox(height: 24),
-          // ── COLOR THEME ──
-          _buildSectionHeader(ctxt.appearance_colorTheme, color, textTheme),
-          const SizedBox(height: 10),
-          _buildColorThemeCard(color, textTheme, spacing),
-          const SizedBox(height: 24),
-          _buildAccountStyleRow(color, textTheme),
-          Divider(
-            height: 1,
-            indent: 58,
-            color: color.outlineVariant.withValues(alpha: 0.4),
-          ),
-          // ── DISPLAY ──
-          _buildSectionHeader(AppLocalizations.of(context)!.appearance_display, color, textTheme),
-          const SizedBox(height: 10),
-          _buildDisplayCard(
-            color,
-            textTheme,
-            spacing,
-            highContrast,
-            guestPluginEnabled: guestPluginAsync.value == true,
-            isGuestMode: isGuestMode,
-          ),
-          const SizedBox(height: 24),
-
-          // ── TONE & VOICE ──
-          _buildSectionHeader(AppLocalizations.of(context)!.appearance_toneVoice, color, textTheme),
-          const SizedBox(height: 10),
-          _buildToneCard(color, textTheme, spacing, activeTone, ref),
-          const SizedBox(height: 24),
-
-          // ── INFO CARD ──
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              color: color.primary.withValues(alpha: 0.06),
-              border: Border.all(
-                color: color.primary.withValues(alpha: 0.15),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth > 600 ? 600.0 : double.infinity;
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: AnimatedSwitcher(
+                duration:
+                    reduceMotion ? Duration.zero : const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (child, animation) =>
+                    FadeTransition(opacity: animation, child: child),
+                key: ValueKey(loaded),
+                child: loaded
+                    ? _AppearanceContent(
+                        reduceMotion: reduceMotion,
+                        isDark: isDark,
+                        currentTheme: currentTheme,
+                        highContrast: highContrast,
+                        guestPluginEnabled: guestPluginEnabled,
+                        isGuestMode: isGuestMode,
+                        activeTone: activeTone,
+                        currentColorTheme: currentColorTheme,
+                        accountStyle: accountStyle,
+                      )
+                    : const _AppearanceLoading(),
               ),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(LucideIcons.info, color: color.primary, size: 18),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    AppLocalizations.of(context)!.appearance_changesApplyInstantly,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── HERO STATUS CARD ──
-  Widget _buildHeroCard(
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-    bool isDark,
-    AppThemeMode currentTheme,
-    TonePack activeTone,
-  ) {
-    final accent = color.primary;
-    return Container(
-      padding: EdgeInsets.all(spacing.cardInner),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            accent.withValues(alpha: isDark ? 0.2 : 0.12),
-            accent.withValues(alpha: isDark ? 0.08 : 0.04),
-          ],
-        ),
-        border: Border.all(color: accent.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeOutBack,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (context, value, child) =>
-                Transform.scale(scale: value, child: child),
-            child: Container(
-              padding: EdgeInsets.all(spacing.cardInner),
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(LucideIcons.palette, color: accent, size: 28),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _themeModeLabel(currentTheme),
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: accent,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${activeTone.name} tone • '
-                  '${isDark ? ctxt.appearance_darkAppearance : ctxt.appearance_lightAppearance}',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: color.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAccountStyleRow(ColorScheme color, TextTheme textTheme) {
-    final current = ref.watch(accountDisplayStyleProvider);
-    final spacing = ref.watch(spacingProvider);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(spacing.radiusSmall),
-            ),
-            child: Icon(
-              LucideIcons.layoutDashboard,
-              color: color.primary,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.appearance_accountStyle,
-                  style: textTheme.bodyLarge
-                      ?.copyWith(fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 8),
-                SegmentedButton<AccountDisplayStyle>(
-                  segments: [
-                    ButtonSegment(
-                      value: AccountDisplayStyle.carousel,
-                      icon: const Icon(LucideIcons.galleryHorizontalEnd, size: 16),
-                      label: Text(AppLocalizations.of(context)!.appearance_cards),
-                    ),
-                    ButtonSegment(
-                      value: AccountDisplayStyle.stack,
-                      icon: const Icon(LucideIcons.layers, size: 16),
-                      label: Text(AppLocalizations.of(context)!.appearance_stack),
-                    ),
-                    ButtonSegment(
-                      value: AccountDisplayStyle.bento,
-                      icon: const Icon(LucideIcons.layoutGrid, size: 16),
-                      label: Text(AppLocalizations.of(context)!.appearance_bento),
-                    ),
-                  ],
-                  selected: {current},
-                  onSelectionChanged: (s) {
-                    HapticFeedback.mediumImpact();
-                    ref.read(accountDisplayStyleProvider.notifier).set(s.first);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildColorThemeCard(
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-  ) {
-    final currentColorTheme = ref.watch(themeNotifierProvider);
-
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          context.push(AppRoutes.skinPicker);
+          );
         },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: currentColorTheme.seedColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                ),
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: currentColorTheme.seedColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          currentColorTheme.label,
-                          style: textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (currentColorTheme.isPro) const ProBadge(),
-                      ],
-                    ),
-                    Text(
-                      currentColorTheme.subtitle,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                LucideIcons.chevronRight,
-                color: color.onSurfaceVariant,
-                size: 20,
-              ),
+      ),
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          APPEARANCE CONTENT                                ║
+// ════════════════════════════════════════════════════════════════════════════
+
+class _AppearanceContent extends ConsumerWidget {
+  final bool reduceMotion;
+  final bool isDark;
+  final AppThemeMode currentTheme;
+  final bool highContrast;
+  final bool guestPluginEnabled;
+  final bool isGuestMode;
+  final TonePack activeTone;
+  final AppColorTheme currentColorTheme;
+  final AccountDisplayStyle accountStyle;
+
+  const _AppearanceContent({
+    required this.reduceMotion,
+    required this.isDark,
+    required this.currentTheme,
+    required this.highContrast,
+    required this.guestPluginEnabled,
+    required this.isGuestMode,
+    required this.activeTone,
+    required this.currentColorTheme,
+    required this.accountStyle,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
+
+    return ListView(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      children: [
+        _HeroCard(
+          reduceMotion: reduceMotion,
+          isDark: isDark,
+          currentTheme: currentTheme,
+          activeTone: activeTone,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        _ThemeModeSection(
+          reduceMotion: reduceMotion,
+          currentTheme: currentTheme,
+          color: color,
+          textTheme: textTheme,
+          spacing: spacing,
+          ctxt: ctxt,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        _ColorThemeSection(
+          currentColorTheme: currentColorTheme,
+          color: color,
+          textTheme: textTheme,
+          spacing: spacing,
+          ctxt: ctxt,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        _AccountStyleSection(
+          accountStyle: accountStyle,
+          color: color,
+          textTheme: textTheme,
+          spacing: spacing,
+          ctxt: ctxt,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        _DisplaySection(
+          highContrast: highContrast,
+          guestPluginEnabled: guestPluginEnabled,
+          isGuestMode: isGuestMode,
+          color: color,
+          textTheme: textTheme,
+          spacing: spacing,
+          ctxt: ctxt,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        _ToneSection(
+          activeTone: activeTone,
+          color: color,
+          textTheme: textTheme,
+          spacing: spacing,
+          ctxt: ctxt,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        const AmbientBrandSection(showSignature: false, absorbBottomInset: false),
+      ],
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          LOADING STATE                                     ║
+// ════════════════════════════════════════════════════════════════════════════
+
+class _AppearanceLoading extends ConsumerWidget {
+  const _AppearanceLoading();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
+
+    return ListView(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      children: [
+        _HeroSkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.sectionGap),
+        _ThemeModeSkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.sectionGap),
+        _ColorThemeSkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.sectionGap),
+        _DisplaySkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.sectionGap),
+        _ToneSkeleton(spacing: spacing, color: color),
+      ],
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          HERO CARD                                         ║
+// ════════════════════════════════════════════════════════════════════════════
+
+class _HeroCard extends ConsumerWidget {
+  final bool reduceMotion;
+  final bool isDark;
+  final AppThemeMode currentTheme;
+  final TonePack activeTone;
+
+  const _HeroCard({
+    required this.reduceMotion,
+    required this.isDark,
+    required this.currentTheme,
+    required this.activeTone,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
+    final accent = color.primary;
+
+    return Semantics(
+      label: '${_themeModeLabel(ctxt, currentTheme)} theme, ${activeTone.name} tone',
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              accent.withValues(alpha: isDark ? 0.2 : 0.12),
+              accent.withValues(alpha: isDark ? 0.08 : 0.04),
             ],
           ),
+          border: Border.all(color: accent.withValues(alpha: 0.3)),
+        ),
+        child: TweenAnimationBuilder<double>(
+          duration:
+              reduceMotion ? Duration.zero : const Duration(milliseconds: 800),
+          curve: Curves.easeOutBack,
+          tween: Tween(begin: 0.0, end: 1.0),
+          builder: (context, value, child) =>
+              Transform.scale(scale: value, child: child),
+          child: Padding(
+            padding: EdgeInsets.all(spacing.cardInner),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(spacing.cardInner),
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(LucideIcons.palette, color: accent, size: 28),
+                ),
+                SizedBox(width: spacing.cardInner),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _themeModeLabel(ctxt, currentTheme),
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: accent,
+                        ),
+                      ),
+                      Text(
+                        '${activeTone.name} tone • '
+                        '${isDark ? ctxt.appearance_darkAppearance : ctxt.appearance_lightAppearance}',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  // ── THEME MODE CARD ──
-  Widget _buildThemeModeCard(
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-    AppThemeMode currentTheme,
-  ) {
+  String _themeModeLabel(AppLocalizations ctxt, AppThemeMode mode) {
+    return switch (mode) {
+      AppThemeMode.light => ctxt.appearance_lightMode,
+      AppThemeMode.dark => ctxt.appearance_darkMode,
+      AppThemeMode.amoled => ctxt.appearance_amoledMode,
+      AppThemeMode.system => ctxt.appearance_systemDefault,
+    };
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          THEME MODE SECTION                                ║
+// ════════════════════════════════════════════════════════════════════════════
+
+class _ThemeModeSection extends ConsumerWidget {
+  final bool reduceMotion;
+  final AppThemeMode currentTheme;
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+  final AppLocalizations ctxt;
+
+  const _ThemeModeSection({
+    required this.reduceMotion,
+    required this.currentTheme,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+    required this.ctxt,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final modes = [
-      (AppThemeMode.system, LucideIcons.smartphone, AppLocalizations.of(context)!.appearance_systemDefault),
+      (AppThemeMode.system, LucideIcons.smartphone, ctxt.appearance_systemDefault),
       (AppThemeMode.light, LucideIcons.sun, ctxt.appearance_lightMode),
       (AppThemeMode.dark, LucideIcons.moon, ctxt.appearance_darkMode),
       (AppThemeMode.amoled, LucideIcons.eclipse, 'AMOLED'),
     ];
 
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.5),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(ctxt.appearance_themeMode),
+        SizedBox(height: spacing.elementGap),
+        SettingsGroupCard(
+          items: modes.map((modeData) {
+            final (mode, icon, label) = modeData;
+            final isSelected = currentTheme == mode;
+            return SettingItem(
+              icon: icon,
+              title: label,
+              subtitle: '',
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                ref.read(themeModeProvider.notifier).setTheme(mode);
+              },
+              selected: isSelected,
+            );
+          }).toList(),
         ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: modes.asMap().entries.map((entry) {
-          final (mode, icon, label) = entry.value;
-          final isLast = entry.key == modes.length - 1;
-          final isSelected = currentTheme == mode;
+      ],
+    );
+  }
+}
 
-          return Column(
+// ════════════════════════════��════════════════════════════════════════════════
+// ║                          COLOR THEME SECTION                               ║
+// ════════════════════════════════════════════════════════════════════════════
+
+class _ColorThemeSection extends ConsumerWidget {
+  final AppColorTheme currentColorTheme;
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+  final AppLocalizations ctxt;
+
+  const _ColorThemeSection({
+    required this.currentColorTheme,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+    required this.ctxt,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(ctxt.appearance_colorTheme),
+        SizedBox(height: spacing.elementGap),
+        SettingsGroupCard(
+          items: [
+            SettingItem(
+              icon: LucideIcons.palette,
+              title: currentColorTheme.label,
+              subtitle: currentColorTheme.subtitle,
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                context.push(AppRoutes.skinPicker);
+              },
+              selected: true,
+              trailing: currentColorTheme.isPro
+                  ? const ProBadge()
+                  : Icon(
+                      LucideIcons.chevronRight,
+                      color: color.onSurfaceVariant,
+                      size: 20,
+                    ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          ACCOUNT STYLE SECTION                             ║
+// ════════════════════════════════════════════════════════════════════════════
+
+class _AccountStyleSection extends ConsumerWidget {
+  final AccountDisplayStyle accountStyle;
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+  final AppLocalizations ctxt;
+
+  const _AccountStyleSection({
+    required this.accountStyle,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+    required this.ctxt,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(ctxt.appearance_accountStyle),
+        SizedBox(height: spacing.elementGap),
+        Container(
+          padding: EdgeInsets.all(spacing.cardInner),
+          decoration: BoxDecoration(
+            color: color.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+          ),
+          child: Row(
             children: [
-              InkWell(
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  ref.read(themeModeProvider.notifier).setTheme(mode);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: (isSelected ? color.primary : color.onSurface)
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                        ),
-                        child: Icon(
-                          icon,
-                          color: isSelected
-                              ? color.primary
-                              : color.onSurfaceVariant,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Text(
-                          label,
-                          style: textTheme.bodyLarge?.copyWith(
-                            fontWeight:
-                                isSelected ? FontWeight.w600 : FontWeight.w400,
-                            color: isSelected ? color.primary : color.onSurface,
-                          ),
-                        ),
-                      ),
-                      if (isSelected)
-                        Icon(
-                          LucideIcons.check,
-                          color: color.primary,
-                          size: 20,
-                        ),
-                    ],
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+                child: Icon(
+                  LucideIcons.layoutDashboard,
+                  color: color.primary,
+                  size: 20,
+                ),
+              ),
+              SizedBox(width: spacing.cardInner),
+              Expanded(
+                child: SegmentedButton<AccountDisplayStyle>(
+                  segments: [
+                    ButtonSegment(
+                      value: AccountDisplayStyle.carousel,
+                      icon: const Icon(LucideIcons.galleryHorizontalEnd, size: 16),
+                      label: Text(ctxt.appearance_cards),
+                    ),
+                    ButtonSegment(
+                      value: AccountDisplayStyle.stack,
+                      icon: const Icon(LucideIcons.layers, size: 16),
+                      label: Text(ctxt.appearance_stack),
+                    ),
+                    ButtonSegment(
+                      value: AccountDisplayStyle.bento,
+                      icon: const Icon(LucideIcons.layoutGrid, size: 16),
+                      label: Text(ctxt.appearance_bento),
+                    ),
+                  ],
+                  selected: {accountStyle},
+                  onSelectionChanged: (s) {
+                    HapticFeedback.mediumImpact();
+                    ref.read(accountDisplayStyleProvider.notifier).set(s.first);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          DISPLAY SECTION                                   ║
+// ════════════════════════════════════════════════════════════════════════════
+
+class _DisplaySection extends ConsumerWidget {
+  final bool highContrast;
+  final bool guestPluginEnabled;
+  final bool isGuestMode;
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+  final AppLocalizations ctxt;
+
+  const _DisplaySection({
+    required this.highContrast,
+    required this.guestPluginEnabled,
+    required this.isGuestMode,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+    required this.ctxt,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = <SettingItem>[
+      SettingItem(
+        icon: LucideIcons.contrast,
+        title: ctxt.appearance_highContrast,
+        subtitle: ctxt.appearance_highContrastDesc,
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          final newValue = !highContrast;
+          SharedPrefsUtil.instance.setHighContrastMode(newValue);
+          ref.read(highContrastModeProvider.notifier).set(newValue);
+        },
+        selected: true,
+      ),
+    ];
+
+    if (guestPluginEnabled) {
+      items.add(
+        SettingItem(
+          icon: LucideIcons.eyeOff,
+          title: ctxt.appearance_guestMode,
+          subtitle:
+              isGuestMode ? ctxt.appearance_guestModeOnDesc : ctxt.appearance_guestModeOffDesc,
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            ref.read(guestModeProvider.notifier).setGuestMode(!isGuestMode);
+          },
+          selected: true,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(ctxt.appearance_display),
+        SizedBox(height: spacing.elementGap),
+        SettingsGroupCard(items: items),
+        SizedBox(height: spacing.sectionGap),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            color: color.primary.withValues(alpha: 0.06),
+            border: Border.all(color: color.primary.withValues(alpha: 0.15)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(LucideIcons.info, color: color.primary, size: 18),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Text(
+                  ctxt.appearance_changesApplyInstantly,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                    height: 1.4,
                   ),
                 ),
               ),
-              if (!isLast)
-                Divider(
-                  height: 1,
-                  indent: 58,
-                  color: color.outlineVariant.withValues(alpha: 0.4),
-                ),
             ],
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  // ── DISPLAY CARD ──
-  Widget _buildDisplayCard(
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-    bool highContrast, {
-    required bool guestPluginEnabled,
-    required bool isGuestMode,
-  }) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          _buildToggleRow(
-            icon: LucideIcons.contrast,
-            title: ctxt.appearance_highContrast,
-            subtitle: ctxt.appearance_highContrastDesc,
-            value: highContrast,
-            onChanged: (val) {
-              HapticFeedback.mediumImpact();
-              SharedPrefsUtil.instance.setHighContrastMode(val);
-              ref.read(highContrastModeProvider.notifier).set(val);
-            },
-            color: color,
-            textTheme: textTheme,
-            spacing: spacing,
           ),
-          if (guestPluginEnabled) ...[
-            Divider(
-              height: 1,
-              indent: 58,
-              color: color.outlineVariant.withValues(alpha: 0.4),
-            ),
-            _buildToggleRow(
-              icon: LucideIcons.eyeOff,
-              title: ctxt.appearance_guestMode,
-              subtitle: isGuestMode
-                  ? ctxt.appearance_guestModeOnDesc
-                  : ctxt.appearance_guestModeOffDesc,
-              value: isGuestMode,
-              onChanged: (val) {
-                HapticFeedback.mediumImpact();
-                ref.read(guestModeProvider.notifier).setGuestMode(val);
-              },
-              color: color,
-              textTheme: textTheme,
-              spacing: spacing,
-            ),
-          ],
-        ],
-      ),
+        ),
+      ],
     );
   }
+}
 
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          TONE SECTION                                      ║
+// ═════════════════════════════���══════════════════════════════════════════════
 
-  // ── TONE & VOICE CARD ──
-  Widget _buildToneCard(
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-    TonePack activeTone,
-    WidgetRef ref,
-  ) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          ...allTonePacks.asMap().entries.map((entry) {
-            final tone = entry.value;
-            final isLast = entry.key == allTonePacks.length - 1;
+class _ToneSection extends ConsumerWidget {
+  final TonePack activeTone;
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+  final AppLocalizations ctxt;
+
+  const _ToneSection({
+    required this.activeTone,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+    required this.ctxt,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(ctxt.appearance_toneVoice),
+        SizedBox(height: spacing.elementGap),
+        SettingsGroupCard(
+          items: allTonePacks.map((tone) {
             final isSelected = activeTone.id == tone.id;
             final icon = _toneIcon(tone.id);
-
-            return Column(
-              children: [
-                InkWell(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    ref.read(tonePackProvider.notifier).select(tone);
-                    SnackbarService.success(
-                      ctxt.appearance_toneActivated(tone.name),
-                      spacing
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: (isSelected
-                                    ? color.tertiary
-                                    : color.onSurface)
-                                .withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                          ),
-                          child: Icon(
-                            icon,
-                            color: isSelected
-                                ? color.tertiary
-                                : color.onSurfaceVariant,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                tone.name,
-                                style: textTheme.bodyLarge?.copyWith(
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                  color: isSelected
-                                      ? color.tertiary
-                                      : color.onSurface,
-                                ),
-                              ),
-                              Text(
-                                tone.description,
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (isSelected)
-                          Icon(
-                            LucideIcons.check,
-                            color: color.tertiary,
-                            size: 20,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (!isLast)
-                  Divider(
-                    height: 1,
-                    indent: 58,
-                    color: color.outlineVariant.withValues(alpha: 0.4),
-                  ),
-              ],
+            return SettingItem(
+              icon: icon,
+              title: tone.name,
+              subtitle: tone.description,
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                ref.read(tonePackProvider.notifier).select(tone);
+                SnackbarService.success(
+                  ctxt.appearance_toneActivated(tone.name),
+                  spacing,
+                );
+              },
+              selected: isSelected,
             );
-          }),
-          // Preview
-          Divider(
-            height: 1,
-            color: color.outlineVariant.withValues(alpha: 0.4),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Icon(
-                  LucideIcons.messageSquareQuote,
-                  size: 16,
-                  color: color.onSurfaceVariant.withValues(alpha: 0.6),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    '"${activeTone.txnAdded}"',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+          }).toList(),
+        ),
+        SizedBox(height: spacing.elementGap),
+        Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: Row(
+            children: [
+              Icon(
+                LucideIcons.messageSquareQuote,
+                size: 16,
+                color: color.onSurfaceVariant.withValues(alpha: 0.6),
+              ),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Text(
+                  '"${activeTone.txnAdded}"',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -652,83 +692,265 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
       _ => LucideIcons.messageCircle,
     };
   }
+}
 
-  // ── SHARED BUILDERS ──
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          SKELETON LOADERS                                  ║
+// ════════════════════════════════════════════════════════════════════════════
 
-  Widget _buildSectionHeader(
-    String title,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        title,
-        style: textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: color.primary,
-          letterSpacing: 0.5,
-        ),
+class _HeroSkeleton extends StatelessWidget {
+  final AppSpacing spacing;
+  final ColorScheme color;
+
+  const _HeroSkeleton({required this.spacing, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        color: color.surfaceContainerLow,
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
-    );
-  }
-
-  Widget _buildToggleRow({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-    required ColorScheme color,
-    required TextTheme textTheme,
-    required AppSpacing spacing,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(spacing.radiusSmall),
-            ),
-            child: Icon(icon, color: color.primary, size: 20),
+          SkeletonLoader(
+            width: 56,
+            height: 56,
+            borderRadius: BorderRadius.circular(28),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: spacing.cardInner),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: textTheme.bodyLarge
-                      ?.copyWith(fontWeight: FontWeight.w500),
-                ),
-                Text(
-                  subtitle,
-                  style: textTheme.bodySmall
-                      ?.copyWith(color: color.onSurfaceVariant),
-                ),
+                const SkeletonLoader(width: 120, height: 20),
+                SizedBox(height: spacing.elementGapMin),
+                const SkeletonLoader(width: 180, height: 14),
               ],
             ),
           ),
-          Switch(value: value, onChanged: onChanged),
         ],
       ),
     );
   }
+}
 
-  String _themeModeLabel(AppThemeMode mode) {
-    switch (mode) {
-      case AppThemeMode.light:
-        return AppLocalizations.of(context)!.appearance_lightMode;
-      case AppThemeMode.dark:
-        return AppLocalizations.of(context)!.appearance_darkMode;
-      case AppThemeMode.amoled:
-        return ctxt.appearance_amoledMode;
-      case AppThemeMode.system:
-        return ctxt.appearance_systemDefault;
-    }
+class _ThemeModeSkeleton extends StatelessWidget {
+  final AppSpacing spacing;
+  final ColorScheme color;
+
+  const _ThemeModeSkeleton({required this.spacing, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SkeletonLoader(width: 120, height: 20),
+        SizedBox(height: spacing.elementGap),
+        Container(
+          decoration: BoxDecoration(
+            color: color.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            children: List.generate(4, (index) {
+              final isLast = index == 3;
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: spacing.cardInner,
+                  right: spacing.cardInner,
+                  top: spacing.cardInner,
+                  bottom: isLast ? spacing.cardInner : spacing.elementGapMin,
+                ),
+                child: Row(
+                  children: [
+                    SkeletonLoader(
+                      width: 40,
+                      height: 40,
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                    ),
+                    SizedBox(width: spacing.cardInner),
+                    const Expanded(
+                      child: SkeletonLoader(width: 100, height: 16),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ColorThemeSkeleton extends StatelessWidget {
+  final AppSpacing spacing;
+  final ColorScheme color;
+
+  const _ColorThemeSkeleton({required this.spacing, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SkeletonLoader(width: 100, height: 20),
+        SizedBox(height: spacing.elementGap),
+        Container(
+          decoration: BoxDecoration(
+            color: color.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              SkeletonLoader(
+                width: 36,
+                height: 36,
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
+              ),
+              SizedBox(width: spacing.cardInner),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SkeletonLoader(width: 80, height: 16),
+                    SizedBox(height: spacing.elementGapMin),
+                    const SkeletonLoader(width: 120, height: 12),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DisplaySkeleton extends StatelessWidget {
+  final AppSpacing spacing;
+  final ColorScheme color;
+
+  const _DisplaySkeleton({required this.spacing, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SkeletonLoader(width: 80, height: 20),
+        SizedBox(height: spacing.elementGap),
+        Container(
+          decoration: BoxDecoration(
+            color: color.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            children: List.generate(2, (index) {
+              final isLast = index == 1;
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: spacing.cardInner,
+                  right: spacing.cardInner,
+                  top: spacing.cardInner,
+                  bottom: isLast ? spacing.cardInner : spacing.elementGapMin,
+                ),
+                child: Row(
+                  children: [
+                    SkeletonLoader(
+                      width: 40,
+                      height: 40,
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                    ),
+                    SizedBox(width: spacing.cardInner),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SkeletonLoader(width: 100, height: 16),
+                          SizedBox(height: spacing.elementGapMin),
+                          const SkeletonLoader(width: 150, height: 12),
+                        ],
+                      ),
+                    ),
+                    SkeletonLoader(
+                      width: 52,
+                      height: 32,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ToneSkeleton extends StatelessWidget {
+  final AppSpacing spacing;
+  final ColorScheme color;
+
+  const _ToneSkeleton({required this.spacing, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SkeletonLoader(width: 100, height: 20),
+        SizedBox(height: spacing.elementGap),
+        Container(
+          decoration: BoxDecoration(
+            color: color.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            children: List.generate(4, (index) {
+              final isLast = index == 3;
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: spacing.cardInner,
+                  right: spacing.cardInner,
+                  top: spacing.cardInner,
+                  bottom: isLast ? spacing.cardInner : spacing.elementGapMin,
+                ),
+                child: Row(
+                  children: [
+                    SkeletonLoader(
+                      width: 40,
+                      height: 40,
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                    ),
+                    SizedBox(width: spacing.cardInner),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SkeletonLoader(width: 80, height: 16),
+                          SizedBox(height: spacing.elementGapMin),
+                          const SkeletonLoader(width: 150, height: 12),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
   }
 }

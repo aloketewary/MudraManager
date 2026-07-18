@@ -142,162 +142,171 @@ class _SimpleColorPickerDialogState
     final spacing = ref.watch(spacingProvider);
     final ctxt = AppLocalizations.of(context)!;
 
-    return Dialog(
-      backgroundColor: color.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusSmall),
-      ),
-      child: Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.75,
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          Navigator.pop(context, _selected);
+        }
+      },
+      child: Dialog(
+        backgroundColor: color.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                spacing.cardHorizontalMax,
-                spacing.cardHorizontal,
-                spacing.cardHorizontalMax,
-                0,
-              ),
-              child: Row(
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: EdgeInsets.all(spacing.elementGap),
-                    decoration: BoxDecoration(
-                      color: _selected.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: _selected.withValues(alpha: 0.3),
-                        width: 1.5,
-                      ),
-                    ),
-                    child:
-                        Icon(LucideIcons.palette, color: _selected, size: 22),
-                  ),
-                  SizedBox(width: spacing.elementGap),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          ctxt.colorPicker_title,
-                          style: textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '#${_selected.toARGB32().toRadixString(16).substring(2).toUpperCase()}',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
-                      Navigator.pop(context, _selected);
-                    },
-                    child: Text(
-                      ctxt.common_done,
-                      style: textTheme.titleSmall?.copyWith(
-                        color: color.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: spacing.elementGap),
-            Divider(
-              height: 1,
-              color: color.outlineVariant.withValues(alpha: 0.3),
-            ),
-
-            // Color grid
-            Flexible(
-              child: ListView.builder(
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.75,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Padding(
                 padding: EdgeInsets.fromLTRB(
                   spacing.cardHorizontalMax,
-                  spacing.elementGap,
-                  spacing.cardHorizontalMax,
                   spacing.cardHorizontal,
+                  spacing.cardHorizontalMax,
+                  0,
                 ),
-                itemCount: _palette.length,
-                itemBuilder: (context, index) {
-                  final group = _palette[index];
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: spacing.elementGap * 1.5),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _groupLabel(group.key, ctxt),
-                          style: textTheme.labelSmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
-                          ),
+                child: Row(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: EdgeInsets.all(spacing.elementGap),
+                      decoration: BoxDecoration(
+                        color: _selected.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: _selected.withValues(alpha: 0.3),
+                          width: 1.5,
                         ),
-                        SizedBox(height: spacing.elementGap),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: group.colors.map((c) {
-                            final isSelected =
-                                _selected.toARGB32() == c.toARGB32();
-                            return GestureDetector(
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                                setState(() => _selected = c);
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: c,
-                                  shape: BoxShape.circle,
-                                  border: isSelected
-                                      ? Border.all(
-                                          color: color.onSurface,
-                                          width: 2.5,
+                      ),
+                      child:
+                          Icon(LucideIcons.palette, color: _selected, size: 22),
+                    ),
+                    SizedBox(width: spacing.elementGap),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            ctxt.colorPicker_title,
+                            style: textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '#${_selected.toARGB32().toRadixString(16).substring(2).toUpperCase()}',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: color.onSurfaceVariant,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        Navigator.pop(context, _selected);
+                      },
+                      child: Text(
+                        ctxt.common_done,
+                        style: textTheme.titleSmall?.copyWith(
+                          color: color.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: spacing.elementGap),
+              Divider(
+                height: 1,
+                color: color.outlineVariant.withValues(alpha: 0.3),
+              ),
+
+              // Color grid
+              Flexible(
+                child: ListView.builder(
+                  padding: EdgeInsets.fromLTRB(
+                    spacing.cardHorizontalMax,
+                    spacing.elementGap,
+                    spacing.cardHorizontalMax,
+                    spacing.cardHorizontal,
+                  ),
+                  itemCount: _palette.length,
+                  itemBuilder: (context, index) {
+                    final group = _palette[index];
+                    return Padding(
+                      padding:
+                          EdgeInsets.only(bottom: spacing.elementGap * 1.5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _groupLabel(group.key, ctxt),
+                            style: textTheme.labelSmall?.copyWith(
+                              color: color.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          SizedBox(height: spacing.elementGap),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: group.colors.map((c) {
+                              final isSelected =
+                                  _selected.toARGB32() == c.toARGB32();
+                              return GestureDetector(
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  setState(() => _selected = c);
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: c,
+                                    shape: BoxShape.circle,
+                                    border: isSelected
+                                        ? Border.all(
+                                            color: color.onSurface,
+                                            width: 2.5,
+                                          )
+                                        : null,
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color: c.withValues(alpha: 0.4),
+                                              blurRadius: 8,
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: isSelected
+                                      ? Icon(
+                                          LucideIcons.check,
+                                          color: c.computeLuminance() > 0.5
+                                              ? Colors.black
+                                              : Colors.white,
+                                          size: 16,
                                         )
                                       : null,
-                                  boxShadow: isSelected
-                                      ? [
-                                          BoxShadow(
-                                            color: c.withValues(alpha: 0.4),
-                                            blurRadius: 8,
-                                          ),
-                                        ]
-                                      : null,
                                 ),
-                                child: isSelected
-                                    ? Icon(
-                                        LucideIcons.check,
-                                        color: c.computeLuminance() > 0.5
-                                            ? Colors.black
-                                            : Colors.white,
-                                        size: 16,
-                                      )
-                                    : null,
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

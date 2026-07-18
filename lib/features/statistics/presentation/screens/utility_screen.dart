@@ -138,6 +138,17 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     }
   }
 
+  // For reduced motion support - cached for build performance
+  bool _cachedReducedMotion = false;
+
+  bool get _isReducedMotion {
+    try {
+      return MediaQuery.of(context).disableAnimations;
+    } catch (_) {
+      return _cachedReducedMotion;
+    }
+  }
+
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final hidden = prefs.getStringList('hidden_utilities') ?? [];
@@ -155,7 +166,9 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('hidden_utilities', _hiddenUtilities);
     await prefs.setStringList(
-        'dismissed_attention_items', _dismissedAttentionItems,);
+      'dismissed_attention_items',
+      _dismissedAttentionItems,
+    );
   }
 
   void _dismissAttentionItem(String itemId) {
@@ -181,7 +194,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2),),
+          top: Radius.circular(spacing.radiusSmall * 2),
+        ),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) => Container(
@@ -221,7 +235,10 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                             setModalState(() => _hiddenUtilities = []);
                             setState(() {});
                             _savePreferences();
-                            SnackbarService.info(BuddyMessages.settingsSaved, spacing);
+                            SnackbarService.info(
+                              BuddyMessages.settingsSaved,
+                              spacing,
+                            );
                           },
                           child:
                               Text(AppLocalizations.of(context)!.common_reset),
@@ -349,30 +366,32 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
               staggerIndex: 0,
             ),
             SizedBox(height: spacing.elementGap),
-            Wrap(
-              spacing: spacing.elementGap,
-              runSpacing: spacing.elementGap,
-              children: activeVisible
-                  .asMap()
-                  .entries
-                  .map(
-                    (e) => SizedBox(
-                      width: (MediaQuery.of(context).size.width -
-                              spacing.cardHorizontal * 2 -
-                              spacing.elementGap) /
-                          2,
-                      height: 130,
-                      child: _buildCard(
-                        e.value,
-                        color,
-                        textTheme,
-                        spacing,
-                        e.key,
-                        l10n,
-                      ),
-                    ),
-                  )
-                  .toList(),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final itemWidth =
+                    (constraints.maxWidth - spacing.elementGap) / 2;
+                return Wrap(
+                  spacing: spacing.elementGap,
+                  runSpacing: spacing.elementGap,
+                  children: activeVisible
+                      .asMap()
+                      .entries
+                      .map(
+                        (e) => SizedBox(
+                          width: itemWidth,
+                          child: _buildCard(
+                            e.value,
+                            color,
+                            textTheme,
+                            spacing,
+                            e.key,
+                            l10n,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              },
             ),
             SizedBox(height: spacing.sectionGap),
           ],
@@ -388,33 +407,35 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
               staggerIndex: 2,
             ),
             SizedBox(height: spacing.elementGap),
-            SizedBox(
-              height: 130,
-              child: Row(
-                children: planningVisible
-                    .asMap()
-                    .entries
-                    .map(
-                      (e) => Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            right: e.key != planningVisible.length - 1
-                                ? spacing.elementGap
-                                : 0,
-                          ),
-                          child: _buildCard(
-                            e.value,
-                            color,
-                            textTheme,
-                            spacing,
-                            e.key + 2,
-                            l10n,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: planningVisible
+                      .asMap()
+                      .entries
+                      .map(
+                        (e) => Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: e.key != planningVisible.length - 1
+                                  ? spacing.elementGap
+                                  : 0,
+                            ),
+                            child: _buildCard(
+                              e.value,
+                              color,
+                              textTheme,
+                              spacing,
+                              e.key + 2,
+                              l10n,
+                            ),
                           ),
                         ),
-                      ),
-                    )
-                    .toList(),
-              ),
+                      )
+                      .toList(),
+                );
+              },
             ),
             SizedBox(height: spacing.sectionGap),
           ],
@@ -430,19 +451,33 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
               staggerIndex: 4,
             ),
             SizedBox(height: spacing.elementGap),
-            ...insightsVisible.asMap().entries.map(
-                  (e) => Padding(
-                    padding: EdgeInsets.only(bottom: spacing.elementGap),
-                    child: _buildListCard(
-                      e.value,
-                      color,
-                      textTheme,
-                      spacing,
-                      e.key + 4,
-                      l10n,
-                    ),
-                  ),
-                ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final itemWidth =
+                    (constraints.maxWidth - spacing.elementGap) / 2;
+                return Wrap(
+                  spacing: spacing.elementGap,
+                  runSpacing: spacing.elementGap,
+                  children: insightsVisible
+                      .asMap()
+                      .entries
+                      .map(
+                        (e) => SizedBox(
+                          width: itemWidth,
+                          child: _buildCard(
+                            e.value,
+                            color,
+                            textTheme,
+                            spacing,
+                            e.key + 4,
+                            l10n,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              },
+            ),
           ],
 
           SizedBox(
@@ -492,58 +527,68 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                 child: Column(
                   children: [
                     // Advisory Header
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          _showingAdvisoryExpanded = !_showingAdvisoryExpanded;
-                        });
-                      },
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                      child: Padding(
-                        padding: EdgeInsets.all(spacing.cardInner),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(spacing.elementGap),
-                              decoration: BoxDecoration(
-                                color: color.primary.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
+                    Semantics(
+                      label: _showingAdvisoryExpanded
+                          ? 'Financial Advisory, ${attentionItems.length} items, tap to collapse'
+                          : 'Financial Advisory, ${attentionItems.length} ${attentionItems.length == 1 ? 'item' : 'items'} may need attention, tap to expand',
+                      button: true,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            _showingAdvisoryExpanded =
+                                !_showingAdvisoryExpanded;
+                          });
+                        },
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
+                        child: Padding(
+                          padding: EdgeInsets.all(spacing.cardInner),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(spacing.elementGap),
+                                decoration: BoxDecoration(
+                                  color: color.primary.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  LucideIcons.lightbulb,
+                                  color: color.primary,
+                                  size: 18,
+                                ),
                               ),
-                              child: Icon(
-                                LucideIcons.lightbulb,
-                                color: color.primary,
-                                size: 18,
-                              ),
-                            ),
-                            SizedBox(width: spacing.elementGap * 1.5),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Financial Advisory (Beta)',
-                                    style: textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: color.primary,
+                              SizedBox(width: spacing.elementGap * 1.5),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Financial Advisory (Beta)',
+                                      style: textTheme.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: color.primary,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    '${attentionItems.length} ${attentionItems.length == 1 ? 'item' : 'items'} may need attention',
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: color.onSurfaceVariant,
+                                    Text(
+                                      '${attentionItems.length} ${attentionItems.length == 1 ? 'item' : 'items'} may need attention',
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: color.onSurfaceVariant,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            Icon(
-                              _showingAdvisoryExpanded
-                                  ? LucideIcons.chevronUp
-                                  : LucideIcons.chevronDown,
-                              size: 16,
-                              color: color.onSurfaceVariant,
-                            ),
-                          ],
+                              AnimatedRotation(
+                                duration: spacing.animFast,
+                                turns: _showingAdvisoryExpanded ? 0.5 : 0,
+                                child: Icon(
+                                  LucideIcons.chevronDown,
+                                  size: 16,
+                                  color: color.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -556,7 +601,11 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                       ),
                       ...attentionItems.take(3).map(
                             (item) => _buildAdvisoryItem(
-                                item, color, textTheme, spacing,),
+                              item,
+                              color,
+                              textTheme,
+                              spacing,
+                            ),
                           ),
                       if (attentionItems.length > 3)
                         Padding(
@@ -707,11 +756,17 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
           ),
         ),
       ],
-    ).animate().fadeIn(duration: 200.ms, delay: (50 * staggerIndex).ms).slideX(
+    )
+        .animate()
+        .fadeIn(
+          duration: _isReducedMotion ? Duration.zero : 200.ms,
+          delay: _isReducedMotion ? Duration.zero : (50 * staggerIndex).ms,
+        )
+        .slideX(
           begin: -0.15,
           end: 0,
-          duration: 200.ms,
-          delay: (50 * staggerIndex).ms,
+          duration: _isReducedMotion ? Duration.zero : 200.ms,
+          delay: _isReducedMotion ? Duration.zero : (50 * staggerIndex).ms,
           curve: Curves.easeOutCubic,
         );
   }
@@ -824,189 +879,105 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     int index,
     AppLocalizations l10n,
   ) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          // Track usage for adaptive learning
-          ref.read(utilityTrackerProvider).trackUtilityOpen(item.id);
-          context.push(item.route);
-        },
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        child: Stack(
-          children: [
-            // Large background icon — slow float
-            Positioned(
-              right: -8,
-              bottom: -14,
-              child: AnimatedBuilder(
-                animation: _bgIconController,
-                builder: (_, __) {
-                  final t = _bgIconController.value;
-                  return Transform.translate(
-                    offset: Offset(t * 6 - 3, -t * 5 + 2.5),
-                    child: Transform.rotate(
-                      angle: (t - 0.5) * 0.12,
-                      child: Icon(
-                        item.icon,
-                        size: 80,
-                        color: color.primary.withValues(alpha: 0.08 + t * 0.04),
+    return Semantics(
+      label:
+          '${l10n.translate(item.titleKey)}, ${l10n.translate(item.subtitleKey)}',
+      button: true,
+      child: Material(
+        color: Colors.transparent,
+        child: Card(
+          elevation: 0,
+          margin: EdgeInsets.zero,
+          color: color.surfaceContainerLow,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            side: BorderSide(
+              color: color.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              ref.read(utilityTrackerProvider).trackUtilityOpen(item.id);
+              context.push(item.route);
+            },
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            child: Stack(
+              children: [
+                // Large background icon — slow float
+                Positioned(
+                  right: -8,
+                  bottom: -14,
+                  child: AnimatedBuilder(
+                    animation: _bgIconController,
+                    builder: (_, __) {
+                      final t =
+                          _isReducedMotion ? 0.5 : _bgIconController.value;
+                      return Transform.translate(
+                        offset: Offset(t * 6 - 3, -t * 5 + 2.5),
+                        child: Transform.rotate(
+                          angle: _isReducedMotion ? 0 : (t - 0.5) * 0.12,
+                          child: Icon(
+                            item.icon,
+                            size: 80,
+                            color: color.primary.withValues(
+                              alpha: _isReducedMotion ? 0.12 : 0.08 + t * 0.04,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                // Content
+                Padding(
+                  padding: EdgeInsets.all(spacing.cardInner),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(spacing.elementGap),
+                        decoration: BoxDecoration(
+                          color: color.primary.withValues(alpha: 0.1),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
+                        ),
+                        child: Icon(item.icon, size: 20, color: color.primary),
                       ),
-                    ),
-                  );
-                },
-              ),
+                      SizedBox(height: spacing.cardInner),
+                      Text(
+                        l10n.translate(item.titleKey),
+                        style: textTheme.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: spacing.elementGapUltraMin),
+                      Text(
+                        l10n.translate(item.subtitleKey),
+                        style: textTheme.bodySmall
+                            ?.copyWith(color: color.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            // Content
-            Padding(
-              padding: EdgeInsets.all(spacing.cardInner),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(spacing.elementGap),
-                    decoration: BoxDecoration(
-                      color: color.primary.withValues(alpha: 0.1),
-                      borderRadius:
-                          BorderRadius.circular(spacing.radiusSmall),
-                    ),
-                    child: Icon(item.icon, size: 20, color: color.primary),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.translate(item.titleKey),
-                    style: textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: spacing.elementGapUltraMin),
-                  Text(
-                    l10n.translate(item.subtitleKey),
-                    style: textTheme.bodySmall
-                        ?.copyWith(color: color.onSurfaceVariant),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
-    ).animate().fadeIn(duration: 250.ms, delay: (50 * index).ms).slideY(
+    )
+        .animate()
+        .fadeIn(
+          duration: _isReducedMotion ? Duration.zero : 250.ms,
+          delay: _isReducedMotion ? Duration.zero : (50 * index).ms,
+        )
+        .slideY(
           begin: 0.3,
           end: 0,
-          duration: 250.ms,
-          delay: (50 * index).ms,
-          curve: Curves.easeOutCubic,
-        );
-  }
-
-  // List card with animated background icon
-  Widget _buildListCard(
-    _UtilityDef item,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-    int index,
-    AppLocalizations l10n,
-  ) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          // Track usage for adaptive learning
-          ref.read(utilityTrackerProvider).trackUtilityOpen(item.id);
-          context.push(item.route);
-        },
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        child: Stack(
-          children: [
-            Positioned(
-              right: 30,
-              top: -6,
-              bottom: -6,
-              child: AnimatedBuilder(
-                animation: _bgIconController,
-                builder: (_, __) {
-                  final t = _bgIconController.value;
-                  return Transform.translate(
-                    offset: Offset(-t * 4 + 2, t * 3 - 1.5),
-                    child: Icon(
-                      item.icon,
-                      size: 56,
-                      color: color.secondary.withValues(alpha: 0.07 + t * 0.04),
-                    ),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(spacing.cardInner),
-              child: Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(spacing.elementGap),
-                    decoration: BoxDecoration(
-                      color: color.secondary.withValues(alpha: 0.1),
-                      borderRadius:
-                          BorderRadius.circular(spacing.radiusSmall),
-                    ),
-                    child: Icon(item.icon, size: 18, color: color.secondary),
-                  ),
-                  SizedBox(width: spacing.elementGap * 1.5),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.translate(item.titleKey),
-                          style: textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          l10n.translate(item.subtitleKey),
-                          style: textTheme.bodySmall
-                              ?.copyWith(color: color.onSurfaceVariant),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    LucideIcons.chevronRight,
-                    size: 16,
-                    color: color.onSurfaceVariant.withValues(alpha: 0.4),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    ).animate().fadeIn(duration: 250.ms, delay: (50 * index).ms).slideY(
-          begin: 0.3,
-          end: 0,
-          duration: 250.ms,
-          delay: (50 * index).ms,
+          duration: _isReducedMotion ? Duration.zero : 250.ms,
+          delay: _isReducedMotion ? Duration.zero : (50 * index).ms,
           curve: Curves.easeOutCubic,
         );
   }

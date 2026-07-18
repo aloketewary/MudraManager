@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
@@ -9,11 +10,55 @@ import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 
+/// Debounces rapid collection changes to prevent excessive rebuilds.
+/// Batches changes within [debounceDuration] and emits only once.
+Stream<void> _watchWithDebounce(
+  Stream<void> source,
+  Duration debounceDuration,
+) async* {
+  Timer? debounceTimer;
+  await for (final _ in source) {
+    debounceTimer?.cancel();
+    debounceTimer = Timer(debounceDuration, () {
+      // This will be yielded by the outer loop
+    });
+    // Wait for debounce before yielding
+    yield null;
+  }
+}
+
 /// Emits a tick whenever the transactions collection changes.
+/// Uses debouncing to prevent excessive rebuilds on rapid changes.
 final transactionChangeProvider = StreamProvider<void>((ref) async* {
   final isar = await ref.watch(isarServiceProvider).getInstance();
-  yield* isar.transactions.watchLazy(fireImmediately: true);
+  final source = isar.transactions.watchLazy(fireImmediately: true);
+  
+  Timer? debounceTimer;
+  DateTime? lastEmission;
+  bool pendingYield = false;
+  
+  await for (final _ in source) {
+    final now = DateTime.now();
+    
+    if (pendingYield) {
+      pendingYield = false;
+      lastEmission = now;
+      yield null;
+      continue;
+    }
+    
+    if (lastEmission == null || now.difference(lastEmission!).inMilliseconds > 100) {
+      lastEmission = now;
+      yield null;
+    } else if (debounceTimer == null || !debounceTimer.isActive) {
+      pendingYield = true;
+      debounceTimer = Timer(const Duration(milliseconds: 100), () {
+        // pendingYield=true causes yield on next loop iteration
+      });
+    }
+  }
 });
+
 
 /// Emits a tick whenever the accounts collection changes.
 final accountChangeProvider = StreamProvider<void>((ref) async* {

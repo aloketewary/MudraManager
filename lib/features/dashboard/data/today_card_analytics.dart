@@ -270,7 +270,6 @@ class TodayCardAnalytics {
 }
 
 /// Riverpod provider for accessing analytics in dev menu.
-final todayCardAnalyticsProvider =
-    Provider<List<Map<String, dynamic>>>((ref) {
+final todayCardAnalyticsProvider = Provider<List<Map<String, dynamic>>>((ref) {
   return TodayCardAnalytics.getEvents();
 });

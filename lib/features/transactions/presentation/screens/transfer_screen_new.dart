@@ -24,6 +24,9 @@ import 'package:mudra_manager/features/transactions/data/transaction_query_provi
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class TransferScreenNew extends ConsumerStatefulWidget {
   final String? initialAmount;
@@ -66,6 +69,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
   bool _initialized = false;
 
   late AnimationController _flowController;
+  bool _flowControllerInitialized = false;
 
   @override
   void initState() {
@@ -73,7 +77,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
     _flowController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
-    )..repeat();
+    );
 
     // ── Pre-fill for edit mode ──
     if (widget.initialAmount != null) {
@@ -96,6 +100,18 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    // Initialize flow controller with reduced motion detection
+    if (!_flowControllerInitialized) {
+      _flowControllerInitialized = true;
+      final isReducedMotion = MediaQuery.of(context).disableAnimations;
+      _flowController.duration = isReducedMotion
+          ? const Duration(milliseconds: 2000)
+          : const Duration(milliseconds: 1500);
+      _flowController.repeat();
+    }
+
+    // Load account balances
     if (!_initialized) {
       _initialized = true;
       ref.read(accountServiceProvider).getAccountBalanceMap().then((val) {
@@ -191,7 +207,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         ref.invalidate(transactionQueryProvider);
 
         SnackbarService.success(
-          _isEditing ? 'Transfer updated' : 'Transfer completed', spacing
+          _isEditing ? 'Transfer updated' : 'Transfer completed',
+          spacing,
         );
 
         context.pop(true); // return true so list screen knows to refresh
@@ -209,20 +226,29 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
     final spacing = ref.watch(spacingProvider);
     final isGuestMode = ref.watch(guestModeProvider);
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        leading: IconButton(
-          tooltip: 'Close',
-          icon: const Icon(LucideIcons.x),
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            context.pop();
-          },
-        ),
-        title: Text(
-          _isEditing ? 'Edit Transfer' : 'Transfer',
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+    final ctxt = AppLocalizations.of(context)!;
+
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: _isEditing
+            ? ctxt.transaction_editTransactionTitle
+            : ctxt.transfer_screenTitle,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      leading: IconButton(
+        icon: const Icon(LucideIcons.x),
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          context.pop();
+        },
+      ),
+      actions: ScreenActions.build(
+        trailing: ScreenTextAction(
+          id: 'transfer',
+          label: _isEditing ? ctxt.common_update : ctxt.common_done,
+          onTap: _canTransfer ? () => _executeTransfer(spacing) : null,
+          isLoading: _saving,
         ),
       ),
       body: accountsAsync.when(
@@ -311,29 +337,24 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                                         ref.watch(quickAmountsProvider);
                                     final chips = amounts.value ??
                                         [100, 500, 1000, 2000, 5000];
-                                    return Wrap(
-                                      alignment: WrapAlignment.center,
-                                      spacing: 8,
+                                    final currentAmount = double.tryParse(
+                                            _amountController.text,) ??
+                                        0.0;
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: chips.map((amt) {
-                                        return ActionChip(
-                                          label: Text(
-                                            formatCurrency(amt.toDouble(),
-                                                decimals: 0,),
-                                            style:
-                                                textTheme.labelSmall?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                        final isSelected =
+                                            currentAmount == amt.toDouble();
+                                        return Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: spacing.elementGapMin,),
+                                          child: _buildQuickAmountChip(
+                                            amt: amt,
+                                            isSelected: isSelected,
+                                            color: color,
+                                            textTheme: textTheme,
+                                            spacing: spacing,
                                           ),
-                                          onPressed: () {
-                                            HapticFeedback.selectionClick();
-                                            _amountController.text =
-                                                amt.toString();
-                                            setState(() {});
-                                          },
-                                          visualDensity: VisualDensity.compact,
-                                          side: BorderSide.none,
-                                          backgroundColor: color.primary
-                                              .withValues(alpha: 0.08),
                                         );
                                       }).toList(),
                                     );
@@ -373,12 +394,14 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                           AnimatedBuilder(
                             animation: _flowController,
                             builder: (_, __) {
+                              final isReducedMotion = MediaQuery.of(context).disableAnimations;
                               return CustomPaint(
                                 size: const Size(2, 32),
                                 painter: _FlowLinePainter(
                                   color: color.primary,
                                   progress: _flowController.value,
                                   enabled: _canTransfer,
+                                  isReducedMotion: isReducedMotion,
                                 ),
                               );
                             },
@@ -444,7 +467,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                     TextField(
                       controller: _noteController,
                       decoration: InputDecoration(
-                        hintText: 'Add a note (optional)',
+                        hintText: ctxt.transfer_noteLabel,
                         prefixIcon: Icon(
                           LucideIcons.pencilLine,
                           size: 18,
@@ -474,62 +497,92 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                     SizedBox(height: spacing.elementGap + 4),
 
                     // ── DATE ──
-                    InkWell(
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: _date,
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime.now(),
-                        );
-                        if (picked != null) {
-                          HapticFeedback.lightImpact();
-                          setState(() => _date = picked);
-                        }
-                      },
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                        decoration: BoxDecoration(
+                    Semantics(
+                      label: 'Transfer date: ${DateFormat('MMMM dd, yyyy').format(_date)}, tap to change',
+                      button: true,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _date,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime.now(),
+                            );
+                            if (picked != null) {
+                              HapticFeedback.lightImpact();
+                              setState(() => _date = picked);
+                            }
+                          },
                           borderRadius:
                               BorderRadius.circular(spacing.radiusMedium),
-                          border: Border.all(
-                            color: color.outlineVariant.withValues(alpha: 0.3),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.circular(spacing.radiusMedium),
+                              border: Border.all(
+                                color:
+                                    color.outlineVariant.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(spacing.elementGap),
+                                  decoration: BoxDecoration(
+                                    color: color.primary.withValues(alpha: 0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    LucideIcons.calendar,
+                                    size: spacing.iconSM,
+                                    color: color.primary,
+                                  ),
+                                ),
+                                SizedBox(width: spacing.elementGap * 2),
+                                Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Date',
+                                      style: textTheme.labelSmall?.copyWith(
+                                        color: color.onSurfaceVariant,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        height: spacing.elementGapUltraMin,),
+                                    Text(
+                                      DateFormat('MMM dd, yyyy')
+                                          .format(_date),
+                                      style: textTheme.bodyLarge,
+                                    ),
+                                  ],
+                                ),
+                                const Spacer(),
+                                AnimatedRotation(
+                                  duration: spacing.animFast,
+                                  turns: 0,
+                                  child: Icon(
+                                    LucideIcons.chevronRight,
+                                    size: spacing.iconMD,
+                                    color: color.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              LucideIcons.calendar,
-                              size: 18,
-                              color: color.onSurfaceVariant,
-                            ),
-                            SizedBox(width: spacing.radiusMedium),
-                            Text(
-                              DateFormat('MMM dd, yyyy').format(_date),
-                              style: textTheme.bodyLarge,
-                            ),
-                            const Spacer(),
-                            Icon(
-                              LucideIcons.chevronRight,
-                              size: 16,
-                              color: color.onSurfaceVariant,
-                            ),
-                          ],
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-
-              // ── SLIDE TO TRANSFER ──
-              _SlideToTransferButton(
-                enabled: _canTransfer,
-                onSlideComplete: () => _executeTransfer(spacing),
               ),
             ],
           );
@@ -602,6 +655,47 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
     );
   }
 
+  // ── QUICK AMOUNT CHIP BUILDER ──
+  Widget _buildQuickAmountChip({
+    required int amt,
+    required bool isSelected,
+    required ColorScheme color,
+    required TextTheme textTheme,
+    required AppSpacing spacing,
+  }) {
+    return AnimatedContainer(
+      duration: spacing.animFast,
+      decoration: BoxDecoration(
+        color: isSelected ? color.primary : color.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+          onTap: () {
+            HapticFeedback.selectionClick();
+            _amountController.text = amt.toString();
+            setState(() {});
+          },
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.elementGap + 2,
+              vertical: spacing.elementGapMin,
+            ),
+            child: Text(
+              formatCurrency(amt.toDouble(), decimals: 0),
+              style: textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isSelected ? color.onPrimary : color.primary,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   // ── ACCOUNT CARD ──
   Widget _buildAccountCard({
     required String label,
@@ -621,108 +715,115 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
     final balance = account != null ? _balanceMap[account.id] ?? 0.0 : 0.0;
     final displayBalance = GuestModeUtil.applyGuestMode(balance, isGuestMode);
 
-    return InkWell(
-      onTap: () => _showAccountPicker(context, accounts, onSelect),
-      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-      child: Container(
-        padding: EdgeInsets.all(spacing.cardInner),
-        decoration: BoxDecoration(
-          color: account != null
-              ? accountColor.withValues(alpha: 0.06)
-              : color.surfaceContainerHighest,
+    return Semantics(
+      label: '${account?.name ?? 'Select $label account'} account, balance ${account != null ? formatCurrency(displayBalance, code: account.currencyCode) : 'not selected'}',
+      button: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showAccountPicker(context, accounts, onSelect),
           borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          border: Border.all(
-            color: account != null
-                ? accountColor.withValues(alpha: 0.3)
-                : color.outlineVariant.withValues(alpha: 0.3),
-          ),
-        ),
-        child: account != null
-            ? Row(
-                children: [
-                  // Direction icon
-                  Container(
-                    padding: EdgeInsets.all(spacing.elementGap),
-                    decoration: BoxDecoration(
-                      color: iconColor.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(icon, size: 16, color: iconColor),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          label,
-                          style: textTheme.labelSmall?.copyWith(
-                            color: iconColor,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        SizedBox(height: spacing.elementGapUltraMin),
-                        Text(
-                          account.name,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+          child: Container(
+            padding: EdgeInsets.all(spacing.cardInner),
+            decoration: BoxDecoration(
+              color: account != null
+                  ? accountColor.withValues(alpha: 0.06)
+                  : color.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              border: Border.all(
+                color: account != null
+                    ? accountColor.withValues(alpha: 0.3)
+                    : color.outlineVariant.withValues(alpha: 0.3),
+              ),
+            ),
+            child: account != null
+                ? Row(
                     children: [
-                      Icon(
-                        account.accountType.icon,
-                        size: 18,
-                        color: accountColor,
-                      ),
-                      SizedBox(height: spacing.elementGapMin),
-                      CurrencyText(
-                        amount: displayBalance,
-                        currencyCode: account.currencyCode,
-                        compact: true,
-                        style: textTheme.labelMedium?.copyWith(
-                          color: color.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
+                      // Direction icon
+                      Container(
+                        padding: EdgeInsets.all(spacing.elementGap),
+                        decoration: BoxDecoration(
+                          color: iconColor.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
                         ),
+                        child: Icon(icon, size: spacing.iconSM, color: iconColor),
+                      ),
+                      SizedBox(width: spacing.elementGap * 2),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              label,
+                              style: textTheme.labelSmall?.copyWith(
+                                color: iconColor,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                            SizedBox(height: spacing.elementGapUltraMin),
+                            Text(
+                              account.name,
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Icon(
+                            account.accountType.icon,
+                            size: spacing.iconMD,
+                            color: accountColor,
+                          ),
+                          SizedBox(height: spacing.elementGapMin),
+                          CurrencyText(
+                            amount: displayBalance,
+                            currencyCode: account.currencyCode,
+                            compact: true,
+                            style: textTheme.labelMedium?.copyWith(
+                              color: color.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(spacing.elementGap),
+                        decoration: BoxDecoration(
+                          color: color.onSurfaceVariant.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          icon,
+                          size: spacing.iconSM,
+                          color: iconColor.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGap * 2),
+                      Text(
+                        'Select $label account',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: color.onSurfaceVariant,
+                        ),
+                      ),
+                      const Spacer(),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: spacing.iconSM,
+                        color: color.onSurfaceVariant,
                       ),
                     ],
                   ),
-                ],
-              )
-            : Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(spacing.elementGap),
-                    decoration: BoxDecoration(
-                      color: color.onSurfaceVariant.withValues(alpha: 0.08),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      icon,
-                      size: 16,
-                      color: iconColor.withValues(alpha: 0.4),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Text(
-                    'Select $label account',
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    LucideIcons.chevronRight,
-                    size: 16,
-                    color: color.onSurfaceVariant,
-                  ),
-                ],
-              ),
+          ),
+        ),
       ),
     );
   }
@@ -818,11 +919,13 @@ class _FlowLinePainter extends CustomPainter {
   final Color color;
   final double progress;
   final bool enabled;
+  final bool isReducedMotion;
 
   _FlowLinePainter({
     required this.color,
     required this.progress,
     required this.enabled,
+    required this.isReducedMotion,
   });
 
   @override
@@ -844,275 +947,15 @@ class _FlowLinePainter extends CustomPainter {
       ..color = color.withValues(alpha: 0.8)
       ..style = PaintingStyle.fill;
 
-    final y = progress * size.height;
+    final y = isReducedMotion
+        ? size.height / 2
+        : progress * size.height;
     canvas.drawCircle(Offset(size.width / 2, y), 3, dotPaint);
   }
 
   @override
   bool shouldRepaint(covariant _FlowLinePainter old) =>
-      old.progress != progress || old.enabled != enabled;
-}
-
-// ── SLIDE TO TRANSFER ──
-class _SlideToTransferButton extends StatefulWidget {
-  final bool enabled;
-  final VoidCallback onSlideComplete;
-
-  const _SlideToTransferButton({
-    required this.enabled,
-    required this.onSlideComplete,
-  });
-
-  @override
-  State<_SlideToTransferButton> createState() => _SlideToTransferButtonState();
-}
-
-class _SlideToTransferButtonState extends State<_SlideToTransferButton>
-    with TickerProviderStateMixin {
-  double _dragPosition = 0.0;
-  bool _isCompleted = false;
-  double _maxDrag = 0.0;
-
-  late final AnimationController _shimmerController;
-  late final AnimationController _snapBackController;
-  late final Animation<double> _snapBackAnimation;
-
-  // Haptic milestone tracking
-  final _hapticThresholds = {0.25, 0.50, 0.75};
-  final _triggeredThresholds = <double>{};
-
-  static const _thumbSize = 60.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _shimmerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    )..repeat();
-
-    _snapBackController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _snapBackAnimation = CurvedAnimation(
-      parent: _snapBackController,
-      curve: Curves.elasticOut,
-    );
-    _snapBackController.addListener(() {
-      setState(() {
-        _dragPosition = _dragPosition * (1 - _snapBackAnimation.value);
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _shimmerController.dispose();
-    _snapBackController.dispose();
-    super.dispose();
-  }
-
-  double get _progress =>
-      _maxDrag > 0 ? (_dragPosition / _maxDrag).clamp(0.0, 1.0) : 0.0;
-
-  void _onDragUpdate(DragUpdateDetails details) {
-    if (!widget.enabled || _isCompleted) return;
-    setState(() {
-      _dragPosition = (_dragPosition + details.delta.dx).clamp(0.0, _maxDrag);
-    });
-
-    // Milestone haptics
-    for (final t in _hapticThresholds) {
-      if (_progress >= t && !_triggeredThresholds.contains(t)) {
-        _triggeredThresholds.add(t);
-        HapticFeedback.lightImpact();
-      }
-    }
-  }
-
-  void _onDragEnd(DragEndDetails details) {
-    if (!widget.enabled || _isCompleted) return;
-
-    if (_progress >= 0.85) {
-      setState(() => _isCompleted = true);
-      HapticFeedback.heavyImpact();
-      widget.onSlideComplete();
-    } else {
-      // Spring snap-back
-      _triggeredThresholds.clear();
-      final startPos = _dragPosition;
-      _snapBackController.reset();
-      _snapBackController.forward();
-      // Store start position for interpolation
-      _dragPosition = startPos;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final maxWidth = constraints.maxWidth;
-          _maxDrag = maxWidth - _thumbSize - 8;
-
-          return Container(
-            height: 68,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(34),
-              border: Border.all(
-                color: widget.enabled
-                    ? color.primary.withValues(alpha: 0.2)
-                    : color.outlineVariant.withValues(alpha: 0.2),
-              ),
-            ),
-            child: Stack(
-              children: [
-                // ── Background track ──
-                Container(
-                  decoration: BoxDecoration(
-                    color: widget.enabled
-                        ? color.primaryContainer.withValues(alpha: 0.4)
-                        : color.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(34),
-                  ),
-                ),
-
-                // ── Progress fill ──
-                if (widget.enabled)
-                  AnimatedContainer(
-                    duration: _dragPosition == 0
-                        ? const Duration(milliseconds: 300)
-                        : Duration.zero,
-                    width: _dragPosition + _thumbSize + 8,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(34),
-                      gradient: LinearGradient(
-                        colors: [
-                          color.primary.withValues(alpha: 0.25),
-                          color.primary.withValues(alpha: 0.08),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                // ── Shimmer hint text ──
-                Center(
-                  child: AnimatedBuilder(
-                    animation: _shimmerController,
-                    builder: (_, child) {
-                      if (!widget.enabled || _isCompleted || _progress > 0.3) {
-                        return Text(
-                          _isCompleted
-                              ? 'Transferring...'
-                              : 'Slide to Transfer',
-                          style: textTheme.titleSmall?.copyWith(
-                            color: widget.enabled
-                                ? color.onPrimaryContainer
-                                    .withValues(alpha: 0.5)
-                                : color.onSurfaceVariant.withValues(alpha: 0.3),
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                          ),
-                        );
-                      }
-
-                      return ShaderMask(
-                        shaderCallback: (bounds) {
-                          final dx = _shimmerController.value * 2 - 0.5;
-                          return LinearGradient(
-                            begin: Alignment(dx - 0.3, 0),
-                            end: Alignment(dx + 0.3, 0),
-                            colors: [
-                              color.onPrimaryContainer.withValues(alpha: 0.4),
-                              color.primary,
-                              color.onPrimaryContainer.withValues(alpha: 0.4),
-                            ],
-                            stops: const [0.0, 0.5, 1.0],
-                          ).createShader(bounds);
-                        },
-                        child: Text(
-                          'Slide to Transfer',
-                          style: textTheme.titleSmall?.copyWith(
-                            color: Colors.white, // ShaderMask needs opaque base
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                // ── Draggable thumb ──
-                AnimatedPositioned(
-                  duration:
-                      _snapBackController.isAnimating || _dragPosition == 0
-                          ? Duration.zero
-                          : Duration.zero,
-                  left: _dragPosition + 4,
-                  top: 4,
-                  bottom: 4,
-                  child: GestureDetector(
-                    onHorizontalDragUpdate: _onDragUpdate,
-                    onHorizontalDragEnd: _onDragEnd,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: _thumbSize,
-                      height: _thumbSize,
-                      decoration: BoxDecoration(
-                        color: widget.enabled
-                            ? Color.lerp(
-                                color.primary,
-                                const Color(0xFF4CAF50),
-                                _progress,
-                              )
-                            : color.surfaceContainerHigh,
-                        shape: BoxShape.circle,
-                        boxShadow: widget.enabled
-                            ? [
-                                BoxShadow(
-                                  color: Color.lerp(
-                                    color.primary,
-                                    const Color(0xFF4CAF50),
-                                    _progress,
-                                  )!
-                                      .withValues(alpha: 0.3),
-                                  blurRadius: 12 + (_progress * 8),
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: _isCompleted
-                          ? Icon(
-                              LucideIcons.check,
-                              color: color.onPrimary,
-                              size: 22,
-                            )
-                          : Icon(
-                              _progress > 0.7
-                                  ? LucideIcons.checkCheck
-                                  : LucideIcons.arrowRight,
-                              color: widget.enabled
-                                  ? color.onPrimary
-                                  : color.onSurfaceVariant
-                                      .withValues(alpha: 0.3),
-                              size: 22,
-                            ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
+      old.progress != progress ||
+      old.enabled != enabled ||
+      old.isReducedMotion != isReducedMotion;
 }

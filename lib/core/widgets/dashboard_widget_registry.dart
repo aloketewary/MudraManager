@@ -22,23 +22,31 @@ import 'package:mudra_manager/features/dashboard/plugin/recurring_expenses_widge
 /// 8. Recent Transactions (7) - Latest activity
 class DashboardWidgetRegistry {
   static final List<DashboardWidgetPlugin> _widgets = [
-    // Unified Briefing — the primary experience
-    DailyBriefingWidgetPlugin(),
-
     // Health Strip — attention orientation
     HealthStripWidgetPlugin(),
 
-    // Essential widgets
+    // Accounts — current balance
     AccountsWidgetPlugin(),
+
+    // Unified Briefing — the primary experience
+    DailyBriefingWidgetPlugin(),
+
+    // Quick access to common tasks
     QuickActionsWidgetPlugin(),
+
+    // Cash Flow — income/expense overview
     CashFlowWidgetPlugin(),
 
-    // Finance tracking widgets
-    BudgetOverviewWidgetPlugin(),
+    // Goals Progress — savings motivation
     GoalsWidgetPlugin(),
+
+    // Budget Overview — budget health check
+    BudgetOverviewWidgetPlugin(),
+
+    // Recurring Expenses — bill reminders
     RecurringExpensesWidgetPlugin(),
 
-    // Activity widgets
+    // Recent Transactions — latest activity
     RecentTransactionsWidgetPlugin(),
   ];
 

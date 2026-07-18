@@ -227,6 +227,7 @@ class SmsActivityService {
           relevantCategories: relevantCategories,
           amount: activity.amount,
           isIncome: activity.isIncome,
+          merchant: activity.merchant, // Pass merchant for priority matching
         );
 
         activity.category = matchResult.category?.name;
@@ -855,6 +856,7 @@ class _PendingTransactionAdapter implements PendingTransactionData {
   final String? transactionRef;
   final String? category;
   final String smsHash;
+  @override
   final String? toAccount;
   @override
   final String? fromBank;

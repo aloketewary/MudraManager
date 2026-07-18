@@ -1,4 +1,5 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
@@ -16,6 +17,7 @@ import 'package:mudra_manager/features/dashboard/presentation/providers/account_
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/shared/widgets/amount_glow.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
@@ -127,36 +129,40 @@ class _AnimatedSwipeableAccountCardsState
       isGuestMode, // new
     );
 
-    return RepaintBoundary(
-      child: switch (displayStyle) {
-        AccountDisplayStyle.carousel => _buildCarouselSection(
-            header,
-            accounts,
-            balanceMap,
-            isGuestMode,
-            spacing,
-            textTheme,
-            color,
-          ),
-        AccountDisplayStyle.stack => _buildStackSection(
-            header,
-            accounts,
-            balanceMap,
-            isGuestMode,
-            spacing,
-            textTheme,
-            color,
-          ),
-        AccountDisplayStyle.bento => _buildBentoSection(
-            header,
-            accounts,
-            balanceMap,
-            isGuestMode,
-            spacing,
-            textTheme,
-            color,
-          ),
-      },
+    return Semantics(
+      container: true,
+      label: 'Account balances',
+      child: RepaintBoundary(
+        child: switch (displayStyle) {
+          AccountDisplayStyle.carousel => _buildCarouselSection(
+              header,
+              accounts,
+              balanceMap,
+              isGuestMode,
+              spacing,
+              textTheme,
+              color,
+            ),
+          AccountDisplayStyle.stack => _buildStackSection(
+              header,
+              accounts,
+              balanceMap,
+              isGuestMode,
+              spacing,
+              textTheme,
+              color,
+            ),
+          AccountDisplayStyle.bento => _buildBentoSection(
+              header,
+              accounts,
+              balanceMap,
+              isGuestMode,
+              spacing,
+              textTheme,
+              color,
+            ),
+        },
+      ),
     );
   }
 
@@ -183,55 +189,59 @@ class _AnimatedSwipeableAccountCardsState
           );
 
     return [
-      Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: spacing.cardHorizontal,
-          vertical: spacing.cardVertical,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              displayLabel,
-              style: textTheme.titleMedium?.copyWith(
-                color: color.onSurface,
-                letterSpacing: 0.8,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            InkWell(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                TodayCardAnalytics.recordAccountsOpened();
-                context.push(AppRoutes.netWorth);
-              },
-              borderRadius: spacing.borderRadiusSmall,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.elementGap,
-                  vertical: spacing.elementGap / 2,
+      Semantics(
+        container: true,
+        label: 'Account balances',
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.cardHorizontal,
+            vertical: spacing.cardVertical,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                displayLabel,
+                style: textTheme.titleMedium?.copyWith(
+                  color: color.onSurface,
+                  letterSpacing: 0.8,
+                  fontWeight: FontWeight.w500,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      ctxt.dashboard_netWorthLink,
-                      style: textTheme.labelMedium?.copyWith(
-                        color: color.primary,
-                        fontWeight: FontWeight.w600,
+              ),
+              InkWell(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  TodayCardAnalytics.recordAccountsOpened();
+                  context.push(AppRoutes.netWorth);
+                },
+                borderRadius: spacing.borderRadiusSmall,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.elementGap,
+                    vertical: spacing.elementGap / 2,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        ctxt.dashboard_netWorthLink,
+                        style: textTheme.labelMedium?.copyWith(
+                          color: color.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    SizedBox(width: spacing.elementGap / 2),
-                    Icon(
-                      LucideIcons.chevronRight,
-                      size: 12,
-                      color: color.primary,
-                    ),
-                  ],
+                      SizedBox(width: spacing.elementGap / 2),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 12,
+                        color: color.primary,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       SizedBox(height: spacing.cardVertical),
@@ -241,74 +251,86 @@ class _AnimatedSwipeableAccountCardsState
           child: Row(
             children: [
               Expanded(
-                child: AnimatedBalance(
-                  value: displayBalance,
-                  currencyCode:
-                      isTotal ? null : accounts[balanceViewIndex].currencyCode,
-                  style: textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: color.onSurface,
+                child: AmountGlow(
+                  color: color.primary,
+                  child: AnimatedBalance(
+                    value: displayBalance,
+                    currencyCode:
+                        isTotal ? null : accounts[balanceViewIndex].currencyCode,
+                    style: textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: color.onSurface,
+                    ),
+                    compact: false,
+                    fixedStringLength: 0,
                   ),
-                  compact: false,
-                  fixedStringLength: 0,
                 ),
               ),
               if (accounts.length > 1) ...[
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() {
-                      balanceViewIndex++;
-                      if (balanceViewIndex >= accounts.length) {
-                        balanceViewIndex = -1;
-                      }
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(spacing.elementGap),
-                    decoration: BoxDecoration(
-                      color: color.surfaceContainerHighest,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      LucideIcons.chevronRight,
-                      size: 18,
-                      color: color.onSurfaceVariant,
+                Semantics(
+                  button: true,
+                  label: 'View next account balance',
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        balanceViewIndex++;
+                        if (balanceViewIndex >= accounts.length) {
+                          balanceViewIndex = -1;
+                        }
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(math.max(spacing.elementGap, 24)),
+                      decoration: BoxDecoration(
+                        color: color.surfaceContainerHighest,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        LucideIcons.chevronRight,
+                        size: 18,
+                        color: color.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ),
                 SizedBox(width: spacing.elementGap),
               ],
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal,
-                  vertical: spacing.cardVertical,
-                ),
-                decoration: BoxDecoration(
-                  color: netCashFlow >= 0
-                      ? color.primaryContainer
-                      : color.errorContainer,
-                  borderRadius: spacing.borderRadiusLarge,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      netCashFlow >= 0
-                          ? LucideIcons.trendingUp
-                          : LucideIcons.trendingDown,
-                      size: 16,
-                      color: netCashFlow >= 0 ? color.primary : color.error,
-                    ),
-                    SizedBox(width: spacing.elementGap / 2),
-                    AnimatedBalance(
-                      value: netCashFlow,
-                      style: textTheme.labelMedium?.copyWith(
+              Semantics(
+                label: netCashFlow >= 0
+                    ? 'Net income ${formatCurrency(netCashFlow)}'
+                    : 'Net expense ${formatCurrency(netCashFlow.abs())}',
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                    vertical: spacing.cardVertical,
+                  ),
+                  decoration: BoxDecoration(
+                    color: netCashFlow >= 0
+                        ? color.primaryContainer
+                        : color.errorContainer,
+                    borderRadius: spacing.borderRadiusLarge,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        netCashFlow >= 0
+                            ? LucideIcons.trendingUp
+                            : LucideIcons.trendingDown,
+                        size: 16,
                         color: netCashFlow >= 0 ? color.primary : color.error,
-                        fontWeight: FontWeight.bold,
                       ),
-                    ),
-                  ],
+                      SizedBox(width: spacing.elementGap / 2),
+                      AnimatedBalance(
+                        value: netCashFlow,
+                        style: textTheme.labelMedium?.copyWith(
+                          color: netCashFlow >= 0 ? color.primary : color.error,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -322,44 +344,51 @@ class _AnimatedSwipeableAccountCardsState
         },
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal,
-                  vertical: spacing.elementGap / 2,
-                ),
-                decoration: BoxDecoration(
-                  color: color.surfaceContainerHighest.withValues(alpha: 0.6),
-                  borderRadius: spacing.borderRadiusSmall,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _accountsExpanded
-                          ? ctxt.dashboard_hideAccounts
-                          : ctxt.dashboard_showAccounts,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: color.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
+          child: Semantics(
+            button: true,
+            label: _accountsExpanded
+                ? 'Hide ${accounts.length} accounts'
+                : 'Show ${accounts.length} accounts',
+            expanded: _accountsExpanded,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                    vertical: spacing.elementGap / 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.surfaceContainerHighest.withValues(alpha: 0.6),
+                    borderRadius: spacing.borderRadiusSmall,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _accountsExpanded
+                            ? ctxt.dashboard_hideAccounts
+                            : ctxt.dashboard_showAccounts,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                    SizedBox(width: spacing.elementGap / 2),
-                    AnimatedRotation(
-                      turns: _accountsExpanded ? 0.5 : 0.0,
-                      duration: const Duration(milliseconds: 250),
-                      child: Icon(
-                        LucideIcons.chevronDown,
-                        size: 16,
-                        color: color.onSurfaceVariant,
+                      SizedBox(width: spacing.elementGap / 2),
+                      AnimatedRotation(
+                        turns: _accountsExpanded ? 0.5 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        child: Icon(
+                          LucideIcons.chevronDown,
+                          size: 16,
+                          color: color.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -381,46 +410,48 @@ class _AnimatedSwipeableAccountCardsState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...header,
-        AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child: _accountsExpanded
-              ? Column(
-                  children: [
-                    SizedBox(
-                      height: spacing == const AppSpacing() ? 100.0 : 140.0,
-                      child: _buildCarousel(
-                        accounts,
-                        balanceMap,
-                        isGuestMode,
-                        spacing,
-                        textTheme,
+        RepaintBoundary(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: _accountsExpanded
+                ? Column(
+                    children: [
+                      SizedBox(
+                        height: spacing.sectionGap * 4,
+                        child: _buildCarousel(
+                          accounts,
+                          balanceMap,
+                          isGuestMode,
+                          spacing,
+                          textTheme,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: spacing.cardVertical),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        accounts.length,
-                        (index) => AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: _currentPage == index ? 24 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: _currentPage == index
-                                ? color.primary
-                                : color.onSurface.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
+                      SizedBox(height: spacing.cardVertical),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          accounts.length,
+                          (index) => AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            margin: EdgeInsets.symmetric(horizontal: spacing.elementGapMin),
+                            width: _currentPage == index ? 24 : 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: _currentPage == index
+                                  ? color.primary
+                                  : color.onSurface.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: spacing.cardVertical),
-                  ],
-                )
-              : const SizedBox.shrink(),
+                      SizedBox(height: spacing.cardVertical),
+                    ],
+                  )
+                : const SizedBox.shrink(),
+          ),
         ),
       ],
     );
@@ -447,164 +478,170 @@ class _AnimatedSwipeableAccountCardsState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...header,
-        AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child: _accountsExpanded
-              ? AnimatedBuilder(
-                  animation: _stackAnimation,
-                  builder: (context, _) {
-                    final t = _stackAnimation.value;
-                    final currentHeight = collapsedHeight +
-                        (expandedHeight - collapsedHeight) * t;
+        RepaintBoundary(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: _accountsExpanded
+                ? AnimatedBuilder(
+                    animation: _stackAnimation,
+                    builder: (context, _) {
+                      final t = _stackAnimation.value;
+                      final currentHeight = collapsedHeight +
+                          (expandedHeight - collapsedHeight) * t;
 
-                    return Column(
-                      children: [
-                        GestureDetector(
-                          onTap: _toggleStack,
-                          child: SizedBox(
-                            height: currentHeight,
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: spacing.cardHorizontal,
-                              ),
-                              child: Stack(
-                                clipBehavior: Clip.none,
-                                children:
-                                    List.generate(accounts.length, (index) {
-                                  final account = accounts[index];
-                                  final accentColor =
-                                      Color(account.colorValue ?? 0xFF6B4CE6);
-                                  final balance = GuestModeUtil.applyGuestMode(
-                                    balanceMap[account.id] ?? 0,
-                                    isGuestMode,
-                                  );
-                                  final collapsedTop = index < maxPeekCards
-                                      ? index * stackPeek
-                                      : (maxPeekCards - 1) * stackPeek;
-                                  final expandedTop =
-                                      index * (collapsedCardHeight + 8.0);
-                                  final top = collapsedTop +
-                                      (expandedTop - collapsedTop) * t;
-                                  final collapsedScale = 1.0 -
-                                      (math.min(index, maxPeekCards - 1) *
-                                          0.02);
-                                  final scale = collapsedScale +
-                                      (1.0 - collapsedScale) * t;
-                                  final opacity = index == 0
-                                      ? 1.0
-                                      : (0.4 + 0.6 * t).clamp(0.0, 1.0);
+                      return Column(
+                        children: [
+                          GestureDetector(
+                            onTap: _toggleStack,
+                            child: SizedBox(
+                              height: currentHeight,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: spacing.cardHorizontal,
+                                ),
+                                child: RepaintBoundary(
+                                  child: Stack(
+                                    clipBehavior: Clip.none,
+                                    children: List.generate(
+                                      accounts.length,
+                                      (index) {
+                                        final account = accounts[index];
+                                        final accentColor =
+                                            Color(account.colorValue ?? 0xFF6B4CE6);
+                                        final balance = GuestModeUtil.applyGuestMode(
+                                          balanceMap[account.id] ?? 0,
+                                          isGuestMode,
+                                        );
+                                        final collapsedTop = index < maxPeekCards
+                                            ? index * stackPeek
+                                            : (maxPeekCards - 1) * stackPeek;
+                                        final expandedTop =
+                                            index * (collapsedCardHeight + 8.0);
+                                        final top = collapsedTop +
+                                            (expandedTop - collapsedTop) * t;
+                                        final collapsedScale = 1.0 -
+                                            (math.min(index, maxPeekCards - 1) *
+                                                0.02);
+                                        final scale = collapsedScale +
+                                            (1.0 - collapsedScale) * t;
+                                        final opacity = index == 0
+                                            ? 1.0
+                                            : (0.4 + 0.6 * t).clamp(0.0, 1.0);
 
-                                  return Positioned(
-                                    top: top,
-                                    left: 0,
-                                    right: 0,
-                                    child: Transform.scale(
-                                      scale: scale,
-                                      alignment: Alignment.topCenter,
-                                      child: Opacity(
-                                        opacity: opacity,
-                                        child: Container(
-                                          height: collapsedCardHeight,
-                                          decoration: BoxDecoration(
-                                            color: accentColor,
-                                            borderRadius: BorderRadius.circular(
-                                              spacing.radiusMedium,
-                                            ),
-                                          ),
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal:
-                                                spacing.cardHorizontalMax,
-                                            vertical: spacing.cardVertical,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
+                                        return Positioned(
+                                          top: top,
+                                          left: 0,
+                                          right: 0,
+                                          child: Transform.scale(
+                                            scale: scale,
+                                            alignment: Alignment.topCenter,
+                                            child: Opacity(
+                                              opacity: opacity,
+                                              child: Container(
+                                                height: collapsedCardHeight,
+                                                decoration: BoxDecoration(
+                                                  color: accentColor,
+                                                  borderRadius: BorderRadius.circular(
+                                                    spacing.radiusMedium,
+                                                  ),
+                                                ),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal:
+                                                      spacing.cardHorizontalMax,
+                                                  vertical: spacing.cardVertical,
+                                                ),
+                                                child: Row(
                                                   children: [
-                                                    Text(
-                                                      account.name,
-                                                      style: textTheme
-                                                          .titleSmall
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment.start,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment.center,
+                                                        children: [
+                                                          Text(
+                                                            account.name,
+                                                            style: textTheme
+                                                                .titleSmall
+                                                                ?.copyWith(
+                                                              color: Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight.w600,
+                                                            ),
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow.ellipsis,
+                                                          ),
+                                                          SizedBox(
+                                                              height:
+                                                                  spacing.elementGap /
+                                                                      4,),
+                                                          Text(
+                                                            account.accountType.label,
+                                                            style: textTheme
+                                                                .labelSmall
+                                                                ?.copyWith(
+                                                              color: Colors.white
+                                                                  .withValues(
+                                                                alpha: 0.7,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    AnimatedBalance(
+                                                      currencyCode:
+                                                          account.currencyCode,
+                                                      value: balance,
+                                                      compact: false,
+                                                      fixedStringLength: 0,
+                                                      style: textTheme.titleMedium
                                                           ?.copyWith(
                                                         color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    SizedBox(
-                                                        height:
-                                                            spacing.elementGap /
-                                                                4,),
-                                                    Text(
-                                                      account.accountType.label,
-                                                      style: textTheme
-                                                          .labelSmall
-                                                          ?.copyWith(
-                                                        color: Colors.white
-                                                            .withValues(
-                                                          alpha: 0.7,
-                                                        ),
+                                                        fontWeight: FontWeight.w700,
+                                                        fontFamily:
+                                                            AppTheme.monoFontFamily,
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
-                                              AnimatedBalance(
-                                                currencyCode:
-                                                    account.currencyCode,
-                                                value: balance,
-                                                compact: false,
-                                                fixedStringLength: 0,
-                                                style: textTheme.titleMedium
-                                                    ?.copyWith(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontFamily:
-                                                      AppTheme.monoFontFamily,
-                                                ),
-                                              ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }).reversed.toList(),
-                              ),
-                            ),
-                          ),
-                        ),
-                        AnimatedOpacity(
-                          duration: const Duration(milliseconds: 200),
-                          opacity: _stackExpanded ? 0.0 : 1.0,
-                          child: Padding(
-                            padding: EdgeInsets.only(top: spacing.cardVertical),
-                            child: Center(
-                              child: Text(
-                                AppLocalizations.of(context)!
-                                    .dashboard_accountsTapExpand(
-                                        accounts.length,),
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: color.onSurfaceVariant,
+                                        );
+                                      },
+                                    ).reversed.toList(),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
-                )
-              : const SizedBox.shrink(),
+                          AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: _stackExpanded ? 0.0 : 1.0,
+                            child: Padding(
+                              padding: EdgeInsets.only(top: spacing.cardVertical),
+                              child: Center(
+                                child: Text(
+                                  AppLocalizations.of(context)!
+                                      .dashboard_accountsTapExpand(
+                                          accounts.length,),
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: color.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  )
+                : const SizedBox.shrink(),
+          ),
         ),
         SizedBox(height: spacing.cardVertical),
       ],
@@ -629,76 +666,49 @@ class _AnimatedSwipeableAccountCardsState
             .compareTo((balanceMap[a.id] ?? 0).abs()),
       );
 
+    // Account for spacing.cardInner padding (28px each side = 56px total)
+    // Small tile: 112px - 56px padding = 56px content height (enough for icon + text + balance)
+    // Large tile: 168px - 56px padding = 112px content height (enough for icon row + label + balance)
+    const double smallTileHeight = 112.0;
+    const double largeTileHeight = 168.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...header,
-        AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child: _accountsExpanded
-              ? Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final gridWidth = constraints.maxWidth;
-                      final gap = spacing.elementGap;
-                      final halfWidth = (gridWidth - gap) / 2;
-                      const smallTileHeight = 88.0;
-                      const largeTileHeight =
-                          88.0 * 2 + 8.0; // two small tiles + gap
+        RepaintBoundary(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: _accountsExpanded
+                ? Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final gridWidth = constraints.maxWidth;
+                        final gap = spacing.elementGap;
+                        final halfWidth = (gridWidth - gap) / 2;
 
-                      final tiles = <Widget>[];
+                        final tiles = <Widget>[];
 
-                      if (sorted.length == 1) {
-                        tiles.add(
-                          _buildBentoTile(
-                            sorted[0],
-                            balanceMap,
-                            isGuestMode,
-                            spacing,
-                            textTheme,
-                            width: gridWidth,
-                            height: smallTileHeight,
-                            isLarge: false,
-                          ),
-                        );
-                      } else if (sorted.length == 2) {
-                        tiles.add(
-                          Row(
-                            children: [
-                              _buildBentoTile(
-                                sorted[0],
-                                balanceMap,
-                                isGuestMode,
-                                spacing,
-                                textTheme,
-                                width: halfWidth,
-                                height: smallTileHeight + 40,
-                                isLarge: false,
-                              ),
-                              SizedBox(width: gap),
-                              _buildBentoTile(
-                                sorted[1],
-                                balanceMap,
-                                isGuestMode,
-                                spacing,
-                                textTheme,
-                                width: halfWidth,
-                                height: smallTileHeight + 40,
-                                isLarge: false,
-                              ),
-                            ],
-                          ),
-                        );
-                      } else if (sorted.length == 3) {
-                        // Hero left (tall) + two stacked right
-                        tiles.add(
-                          SizedBox(
-                            height: largeTileHeight,
-                            child: Row(
+                        if (sorted.length == 1) {
+                          tiles.add(
+                            _buildBentoTile(
+                              sorted[0],
+                              balanceMap,
+                              isGuestMode,
+                              spacing,
+                              textTheme,
+                              width: gridWidth,
+                              height: smallTileHeight,
+                              isLarge: false,
+                            ),
+                          );
+                        } else if (sorted.length == 2) {
+                          tiles.add(
+                            Row(
                               children: [
                                 _buildBentoTile(
                                   sorted[0],
@@ -707,118 +717,150 @@ class _AnimatedSwipeableAccountCardsState
                                   spacing,
                                   textTheme,
                                   width: halfWidth,
-                                  height: largeTileHeight,
-                                  isLarge: true,
+                                  height: smallTileHeight,
+                                  isLarge: false,
                                 ),
                                 SizedBox(width: gap),
-                                SizedBox(
+                                _buildBentoTile(
+                                  sorted[1],
+                                  balanceMap,
+                                  isGuestMode,
+                                  spacing,
+                                  textTheme,
                                   width: halfWidth,
-                                  child: Column(
-                                    children: [
-                                      _buildBentoTile(
-                                        sorted[1],
-                                        balanceMap,
-                                        isGuestMode,
-                                        spacing,
-                                        textTheme,
-                                        width: halfWidth,
-                                        height: smallTileHeight,
-                                        isLarge: false,
-                                      ),
-                                      SizedBox(height: gap),
-                                      _buildBentoTile(
-                                        sorted[2],
-                                        balanceMap,
-                                        isGuestMode,
-                                        spacing,
-                                        textTheme,
-                                        width: halfWidth,
-                                        height: smallTileHeight,
-                                        isLarge: false,
-                                      ),
-                                    ],
-                                  ),
+                                  height: smallTileHeight,
+                                  isLarge: false,
                                 ),
                               ],
                             ),
-                          ),
-                        );
-                      } else {
-                        // 4+ accounts: hero tile on top, rest in 2-col grid
-                        // Hero = full width
-                        tiles.add(
-                          _buildBentoTile(
-                            sorted[0],
-                            balanceMap,
-                            isGuestMode,
-                            spacing,
-                            textTheme,
-                            width: gridWidth,
-                            height: smallTileHeight + 20,
-                            isLarge: true,
-                          ),
-                        );
-                        tiles.add(SizedBox(height: gap));
-
-                        // Remaining in pairs
-                        final rest = sorted.sublist(1);
-                        for (int i = 0; i < rest.length; i += 2) {
-                          if (i + 1 < rest.length) {
-                            tiles.add(
-                              Row(
+                          );
+                        } else if (sorted.length == 3) {
+                          // Hero left (tall) + two stacked right
+                          tiles.add(
+                            SizedBox(
+                              height: largeTileHeight,
+                              child: Row(
                                 children: [
                                   _buildBentoTile(
-                                    rest[i],
+                                    sorted[0],
                                     balanceMap,
                                     isGuestMode,
                                     spacing,
                                     textTheme,
                                     width: halfWidth,
-                                    height: smallTileHeight,
-                                    isLarge: false,
+                                    height: largeTileHeight,
+                                    isLarge: true,
                                   ),
                                   SizedBox(width: gap),
-                                  _buildBentoTile(
-                                    rest[i + 1],
-                                    balanceMap,
-                                    isGuestMode,
-                                    spacing,
-                                    textTheme,
+                                  SizedBox(
                                     width: halfWidth,
-                                    height: smallTileHeight,
-                                    isLarge: false,
+                                    child: Column(
+                                      children: [
+                                        _buildBentoTile(
+                                          sorted[1],
+                                          balanceMap,
+                                          isGuestMode,
+                                          spacing,
+                                          textTheme,
+                                          width: halfWidth,
+                                          height: smallTileHeight,
+                                          isLarge: false,
+                                        ),
+                                        SizedBox(height: gap),
+                                        _buildBentoTile(
+                                          sorted[2],
+                                          balanceMap,
+                                          isGuestMode,
+                                          spacing,
+                                          textTheme,
+                                          width: halfWidth,
+                                          height: smallTileHeight,
+                                          isLarge: false,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
-                            );
-                          } else {
-                            // Odd one out — full width
-                            tiles.add(
-                              _buildBentoTile(
-                                rest[i],
-                                balanceMap,
-                                isGuestMode,
-                                spacing,
-                                textTheme,
-                                width: gridWidth,
-                                height: smallTileHeight,
-                                isLarge: false,
-                              ),
-                            );
-                          }
-                          if (i + 2 < rest.length) {
-                            tiles.add(SizedBox(height: gap));
+                            ),
+                          );
+                        } else {
+                          // 4+ accounts: hero tile on top, rest in 2-col grid
+                          // Hero = full width
+                          tiles.add(
+                            _buildBentoTile(
+                              sorted[0],
+                              balanceMap,
+                              isGuestMode,
+                              spacing,
+                              textTheme,
+                              width: gridWidth,
+                              height: smallTileHeight + 24,
+                              isLarge: true,
+                            ),
+                          );
+                          tiles.add(SizedBox(height: gap));
+
+                          // Remaining in pairs
+                          final rest = sorted.sublist(1);
+                          for (int i = 0; i < rest.length; i += 2) {
+                            if (i + 1 < rest.length) {
+                              tiles.add(
+                                Row(
+                                  children: [
+                                    _buildBentoTile(
+                                      rest[i],
+                                      balanceMap,
+                                      isGuestMode,
+                                      spacing,
+                                      textTheme,
+                                      width: halfWidth,
+                                      height: smallTileHeight,
+                                      isLarge: false,
+                                    ),
+                                    SizedBox(width: gap),
+                                    _buildBentoTile(
+                                      rest[i + 1],
+                                      balanceMap,
+                                      isGuestMode,
+                                      spacing,
+                                      textTheme,
+                                      width: halfWidth,
+                                      height: smallTileHeight,
+                                      isLarge: false,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else {
+                              // Odd one out — full width
+                              tiles.add(
+                                _buildBentoTile(
+                                  rest[i],
+                                  balanceMap,
+                                  isGuestMode,
+                                  spacing,
+                                  textTheme,
+                                  width: gridWidth,
+                                  height: smallTileHeight,
+                                  isLarge: false,
+                                ),
+                              );
+                            }
+                            if (i + 2 < rest.length) {
+                              tiles.add(SizedBox(height: gap));
+                            }
                           }
                         }
-                      }
 
-                      return Column(children: tiles);
-                    },
-                  ),
-                )
-              : const SizedBox.shrink(),
+                        return Column(children: tiles);
+                      },
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
         ),
-        SizedBox(height: spacing.cardVertical),
+        SizedBox(height: spacing.cardVerticalMax),
       ],
     );
   }
@@ -839,98 +881,108 @@ class _AnimatedSwipeableAccountCardsState
       isGuestMode,
     );
 
-    return SizedBox(
-      width: width,
-      height: height,
-      child: Container(
-        decoration: BoxDecoration(
-          color: accentColor,
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        ),
-        padding: EdgeInsets.all(spacing.cardInner),
-        child: isLarge
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
+    return Semantics(
+      label: '${account.name} ${account.accountType.label}, balance ${formatCurrency(balance)}',
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: Container(
+          decoration: BoxDecoration(
+            color: accentColor,
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          ),
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            child: isLarge
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        account.accountType.icon,
-                        color: Colors.white.withValues(alpha: 0.8),
-                        size: 22,
+                      Row(
+                        children: [
+                          Icon(
+                            account.accountType.icon,
+                            color: Colors.white.withValues(alpha: 0.8),
+                            size: 22,
+                          ),
+                          SizedBox(width: spacing.elementGap),
+                          Expanded(
+                            child: Text(
+                              account.name,
+                              style: textTheme.titleMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: spacing.elementGap),
-                      Expanded(
-                        child: Text(
-                          account.name,
+                      Text(
+                        account.accountType.label,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      Flexible(
+                        child: AnimatedBalance(
+                          currencyCode: account.currencyCode,
+                          value: balance,
+                          compact: false,
+                          fixedStringLength: 0,
+                          style: textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: AppTheme.monoFontFamily,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            account.accountType.icon,
+                            color: Colors.white.withValues(alpha: 0.7),
+                            size: 18,
+                          ),
+                          SizedBox(width: spacing.elementGap),
+                          Expanded(
+                            child: Text(
+                              account.name,
+                              style: textTheme.titleSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Flexible(
+                        child: AnimatedBalance(
+                          currencyCode: account.currencyCode,
+                          value: balance,
+                          compact: true,
+                          fixedStringLength: 0,
                           style: textTheme.titleMedium?.copyWith(
                             color: Colors.white,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: AppTheme.monoFontFamily,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
-                  Text(
-                    account.accountType.label,
-                    style: textTheme.labelSmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  AnimatedBalance(
-                    currencyCode: account.currencyCode,
-                    value: balance,
-                    compact: false,
-                    fixedStringLength: 0,
-                    style: textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: AppTheme.monoFontFamily,
-                    ),
-                  ),
-                ],
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        account.accountType.icon,
-                        color: Colors.white.withValues(alpha: 0.7),
-                        size: 18,
-                      ),
-                      SizedBox(width: spacing.elementGap),
-                      Expanded(
-                        child: Text(
-                          account.name,
-                          style: textTheme.titleSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  AnimatedBalance(
-                    currencyCode: account.currencyCode,
-                    value: balance,
-                    compact: true,
-                    fixedStringLength: 0,
-                    style: textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: AppTheme.monoFontFamily,
-                    ),
-                  ),
-                ],
-              ),
+          ),
+        ),
       ),
     );
   }
@@ -959,95 +1011,98 @@ class _AnimatedSwipeableAccountCardsState
           isGuestMode,
         );
 
-        return RepaintBoundary(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: isFirst ? 0 : spacing.cardHorizontal,
-              right: isLast ? 0 : spacing.cardHorizontal,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(account.colorValue ?? 0xFF6B4CE6),
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(spacing.radiusSmall),
+        return Semantics(
+          label: '${account.name} account, balance ${formatCurrency(currentBalance)}',
+          child: RepaintBoundary(
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: isFirst ? 0 : spacing.cardHorizontal,
+                right: isLast ? 0 : spacing.cardHorizontal,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Color(account.colorValue ?? 0xFF6B4CE6),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(spacing.radiusSmall),
+                  ),
                 ),
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: spacing.cardHorizontalMax,
-                vertical: spacing.cardVertical,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            account.name,
-                            style: textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.cardHorizontalMax,
+                  vertical: spacing.cardVertical,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              account.name,
+                              style: textTheme.titleMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            ' - ${account.accountType.label.toUpperCase()}',
-                            style: textTheme.labelSmall?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontWeight: FontWeight.w500,
+                            Text(
+                              ' - ${account.accountType.label.toUpperCase()}',
+                              style: textTheme.labelSmall?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: spacing.cardVertical),
-                      AnimatedBalance(
-                        currencyCode: account.currencyCode,
-                        value: currentBalance,
-                        compact: false,
-                        fixedStringLength: 0,
-                        duration: const Duration(milliseconds: 300),
-                        style: textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
-                          letterSpacing: 2,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: AppTheme.monoFontFamily,
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        account.accountNumber?.substring(
-                              account.accountNumber!.length >= 4
-                                  ? account.accountNumber!.length - 4
-                                  : 0,
-                            ) ??
-                            '0000',
-                        style: textTheme.titleSmall?.copyWith(
+                        SizedBox(height: spacing.cardVertical),
+                        AnimatedBalance(
+                          currencyCode: account.currencyCode,
+                          value: currentBalance,
+                          compact: false,
+                          fixedStringLength: 0,
+                          duration: const Duration(milliseconds: 300),
+                          style: textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: AppTheme.monoFontFamily,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          account.accountNumber?.substring(
+                                account.accountNumber!.length >= 4
+                                    ? account.accountNumber!.length - 4
+                                    : 0,
+                              ) ??
+                              '0000',
+                          style: textTheme.titleSmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Icon(
+                          account.accountType.icon,
                           color: Colors.white.withValues(alpha: 0.5),
-                          fontWeight: FontWeight.w500,
+                          size: 40,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Icon(
-                        account.accountType.icon,
-                        color: Colors.white.withValues(alpha: 0.5),
-                        size: 40,
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

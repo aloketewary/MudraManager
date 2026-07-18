@@ -1,14 +1,18 @@
+import 'dart:ui';
+
+import 'package:flutter/services.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
-import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
+import 'package:mudra_manager/shared/widgets/section_header.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -178,12 +182,11 @@ class _NotificationSettingsScreenState
             const SizedBox(height: 16),
             Text(
               AppLocalizations.of(context)!.notifSettings_selectDay,
-              style:
-                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             ...List.generate(7, (i) {
-              final d = i + 1; // Monday=1 .. Sunday=7
+              final d = i + 1;
               final selected = d == _weeklyDay;
               return ListTile(
                 dense: true,
@@ -195,16 +198,13 @@ class _NotificationSettingsScreenState
                 leading: Icon(
                   selected ? LucideIcons.circleCheck : LucideIcons.circle,
                   size: 20,
-                  color: selected
-                      ? color.onPrimaryContainer
-                      : color.onSurfaceVariant,
+                  color: selected ? color.onPrimaryContainer : color.onSurfaceVariant,
                 ),
                 title: Text(
                   _getDayName(d),
                   style: textTheme.bodyLarge?.copyWith(
                     fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-                    color:
-                        selected ? color.onPrimaryContainer : color.onSurface,
+                    color: selected ? color.onPrimaryContainer : color.onSurface,
                   ),
                 ),
                 onTap: () => Navigator.pop(ctx, d),
@@ -249,10 +249,6 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final spacing = ref.watch(spacingProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final ctxt = AppLocalizations.of(context)!;
 
     return ScreenShell(
@@ -262,350 +258,247 @@ class _NotificationSettingsScreenState
         enableRefresh: false,
       ),
       actions: ScreenActions.empty,
-      body: !_loaded
-          ? Padding(padding: EdgeInsets.all(spacing.cardHorizontal), child: Column(children: [const DashboardCardSkeleton(), SizedBox(height: spacing.elementGap), const DashboardCardSkeleton()]))
-          : ListView(
-              padding: EdgeInsets.symmetric(
-                horizontal: spacing.cardHorizontal,
-                vertical: spacing.cardVertical,
-              ),
-              children: [
-                // ── HERO STATUS ──
-                Container(
-                  padding: EdgeInsets.all(spacing.cardInner),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        color.primary.withValues(
-                          alpha: isDark ? 0.2 : 0.12,
-                        ),
-                        color.primary.withValues(alpha: isDark ? 0.08 : 0.04),
-                      ],
-                    ),
-                    border: Border.all(
-                      color: color.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      TweenAnimationBuilder<double>(
-                        duration: const Duration(milliseconds: 800),
-                        curve: Curves.easeOutBack,
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        builder: (context, value, child) =>
-                            Transform.scale(scale: value, child: child),
-                        child: Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: color.primary.withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            _activeCount > 0
-                                ? LucideIcons.bellRing
-                                : LucideIcons.bellOff,
-                            color: color.primary,
-                            size: 28,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: spacing.sectionGap),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              ctxt.notifSettings_activeCount(_activeCount),
-                              style: textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: color.primary,
-                              ),
-                            ),
-                            SizedBox(height: spacing.elementGapMin),
-                            Text(
-                              ctxt.notifSettings_summaryDesc,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: color.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // ── DAILY SUMMARY ──
-                _buildSectionHeader(ctxt.notifSettings_dailySummary, color, textTheme),
-                const SizedBox(height: 10),
-                _buildGroupedCard(
-                  color: color,
-                  textTheme: textTheme,
-                  spacing: spacing,
-                  children: [
-                    _buildToggleRow(
-                      icon: LucideIcons.calendarDays,
-                      title: ctxt.notifSettings_dailySummary,
-                      subtitle: ctxt.notifSettings_dailySummaryDesc,
-                      value: _dailySummaryEnabled,
-                      onChanged: (value) => _toggleDailySummary(value, spacing),
-                      color: color,
-                      textTheme: textTheme,
-                      spacing: spacing,
-                    ),
-                    if (_dailySummaryEnabled) ...[
-                      _divider(color),
-                      _buildTapRow(
-                        icon: LucideIcons.clock,
-                        title: ctxt.notifSettings_reminderTime,
-                        trailing: _reminderTime.format(context),
-                        onTap: () => _selectTime(spacing),
-                        color: color,
-                        textTheme: textTheme,
-                        spacing: spacing,
-                      ),
-                      _divider(color),
-                      _buildTapRow(
-                        icon: LucideIcons.send,
-                        title: ctxt.notifSettings_sendTestNotif,
-                        onTap: () async {
-                          final msg = ctxt.notifSettings_testNotifSent;
-                          HapticFeedback.mediumImpact();
-                          await NotificationService.showLocalNotification(
-                            id: DateTime.now().microsecondsSinceEpoch % 100000000,
-                            title: ctxt.notif_heresYesterdayTitle,
-                            body: ctxt.notifSettings_dailySummaryDesc,
-                            bypassThrottle: true,
-                          );
-                          SnackbarService.success(msg, spacing);
-                        },
-                        color: color,
-                        textTheme: textTheme,
-                        spacing: spacing,
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // ── STREAK REMINDER ──
-                _buildSectionHeader(
-                  ctxt.notifSettings_streakReminder,
-                  color,
-                  textTheme,
-                ),
-                const SizedBox(height: 10),
-                _buildGroupedCard(
-                  color: color,
-                  textTheme: textTheme,
-                  spacing: spacing,
-                  children: [
-                    _buildToggleRow(
-                      icon: LucideIcons.flame,
-                      title: ctxt.notifSettings_streakReminder,
-                      subtitle: ctxt.notifSettings_dailyNudgeStreak,
-                      value: _streakReminderEnabled,
-                      onChanged: (value) => _toggleStreakReminder(value, spacing),
-                      color: color,
-                      textTheme: textTheme,
-                      iconColor: color.tertiary,
-                      spacing: spacing,
-                    ),
-                    if (_streakReminderEnabled) ...[
-                      _divider(color),
-                      _buildTapRow(
-                        icon: LucideIcons.clock,
-                        title: ctxt.notifSettings_reminderTime,
-                        trailing: _streakReminderTime.format(context),
-                        onTap: () => _selectStreakReminderTime(spacing),
-                        color: color,
-                        textTheme: textTheme,
-                        spacing: spacing,
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // ── WEEKLY SUMMARY ──
-                _buildSectionHeader(
-                  ctxt.notifSettings_weeklySummary,
-                  color,
-                  textTheme,
-                ),
-                const SizedBox(height: 10),
-                _buildGroupedCard(
-                  color: color,
-                  textTheme: textTheme,
-                  spacing: spacing,
-                  children: [
-                    _buildToggleRow(
-                      icon: LucideIcons.calendarRange,
-                      title: ctxt.notifSettings_weeklySummary,
-                      subtitle: ctxt.notifSettings_weeklySchedule(_getDayName(_weeklyDay)),
-                      value: _weeklySummaryEnabled,
-                      onChanged: (value) => _toggleWeeklySummary(value, spacing),
-                      color: color,
-                      textTheme: textTheme,
-                      spacing: spacing,
-                    ),
-                    if (_weeklySummaryEnabled) ...[
-                      _divider(color),
-                      _buildTapRow(
-                        icon: LucideIcons.calendarCheck,
-                        title: ctxt.notifSettings_summaryDay,
-                        trailing: _getDayName(_weeklyDay),
-                        onTap: () => _selectWeeklyDay(spacing),
-                        color: color,
-                        textTheme: textTheme,
-                        spacing: spacing,
-                      ),
-                      _divider(color),
-                      _buildTapRow(
-                        icon: LucideIcons.send,
-                        title: ctxt.notifSettings_sendTestNotif,
-                        onTap: () async {
-                          final msg = ctxt.notifSettings_testNotifSent;
-                          HapticFeedback.mediumImpact();
-                          await NotificationService.showLocalNotification(
-                            id: DateTime.now().microsecondsSinceEpoch % 100000000,
-                            title: ctxt.notif_yourWeekInReviewTitle,
-                            body: ctxt.notifSettings_summaryDesc,
-                            bypassThrottle: true,
-                          );
-                          SnackbarService.success(msg, spacing);
-                        },
-                        color: color,
-                        textTheme: textTheme,
-                        spacing: spacing,
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                _buildGroupedCard(
-                  color: color,
-                  textTheme: textTheme,
-                  spacing: spacing,
-                  children: [
-                    _buildToggleRow(
-                      icon: LucideIcons.userCheck,
-                      title: ctxt.notifSettings_comeBackNudges,
-                      subtitle:
-                          ctxt.notifSettings_gentleReminders,
-                      value: _reEngagementEnabled,
-                      onChanged: (value) => _toggleReEngagement(value, spacing),
-                      color: color,
-                      textTheme: textTheme,
-                      spacing: spacing
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                _buildGroupedCard(
-                  color: color,
-                  textTheme: textTheme,
-                  spacing: spacing,
-                  children: [
-                    _buildToggleRow(
-                      icon: LucideIcons.brain,
-                      title: ctxt.notifSettings_smartAlerts,
-                      subtitle:
-                          ctxt.notifSettings_budgetWarningsDesc,
-                      value: _smartAlertsEnabled,
-                      onChanged: (value) => _toggleSmartAlerts(value, spacing),
-                      color: color,
-                      textTheme: textTheme,
-                      spacing: spacing
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // ── INFO ──
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    color: color.primary.withValues(alpha: 0.06),
-                    border: Border.all(
-                      color: color.primary.withValues(alpha: 0.15),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        LucideIcons.info,
-                        color: color.primary,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          ctxt.notifSettings_localNotifDisclaimer,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-              ],
-            ),
+      body: _buildBody(context),
     );
   }
 
-  // ── SHARED BUILDERS ──
+  Widget _buildBody(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
+    final ctxt = AppLocalizations.of(context)!;
 
-  Widget _buildSectionHeader(
-    String title,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth > 600 ? 600.0 : double.infinity;
+
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: AnimatedSwitcher(
+              duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 300),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              key: ValueKey(_loaded),
+              child: _loaded
+                  ? _buildContent(context, color, textTheme, spacing, isDark, ctxt)
+                  : _buildLoading(spacing, color),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildContent(
+    BuildContext context,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
+    bool isDark,
+    AppLocalizations ctxt,
   ) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        title,
-        style: textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: color.primary,
-          letterSpacing: 0.5,
-        ),
+    return ListView(
+      padding: EdgeInsets.only(
+        left: spacing.cardHorizontal,
+        right: spacing.cardHorizontal,
+        top: spacing.cardVertical,
+        bottom: 0,
       ),
+      children: [
+        NotificationHeroCard(
+          activeCount: _activeCount,
+          isDark: isDark,
+          reduceMotion: MediaQuery.of(context).disableAnimations,
+        ),
+        SizedBox(height: spacing.sectionGap),
+
+        SectionHeader(ctxt.notifSettings_dailySummary),
+        SizedBox(height: spacing.elementGap),
+        _buildDailySummaryGroup(color, textTheme, spacing, ctxt),
+        SizedBox(height: spacing.elementGap * 2),
+
+        SectionHeader(ctxt.notifSettings_streakReminder),
+        SizedBox(height: spacing.elementGap),
+        _buildStreakReminderGroup(color, textTheme, spacing, ctxt),
+        SizedBox(height: spacing.elementGap * 2),
+
+        SectionHeader(ctxt.notifSettings_weeklySummary),
+        SizedBox(height: spacing.elementGap),
+        _buildWeeklySummaryGroup(color, textTheme, spacing, ctxt),
+        SizedBox(height: spacing.elementGap * 2),
+
+        const SectionHeader('Other Settings'),
+        SizedBox(height: spacing.elementGap),
+        _buildOtherSettingsGroup(color, textTheme, spacing, ctxt),
+        SizedBox(height: spacing.sectionGap),
+
+        NotificationInfoCard(color: color, textTheme: textTheme, spacing: spacing, ctxt: ctxt),
+        SizedBox(height: spacing.sectionGap),
+
+        const AmbientBrandSection(showSignature: true, absorbBottomInset: false),
+        SizedBox(height: spacing.sectionGap),
+      ],
     );
   }
 
-  Widget _buildGroupedCard({
-    required ColorScheme color,
-    required TextTheme textTheme,
-    required AppSpacing spacing,
-    required List<Widget> children,
-  }) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.5),
+  Widget _buildDailySummaryGroup(ColorScheme color, TextTheme textTheme, AppSpacing spacing, AppLocalizations ctxt) {
+    return _NotificationGroupCard(
+      children: [
+        _NotificationToggleRow(
+          icon: LucideIcons.calendarDays,
+          title: ctxt.notifSettings_dailySummary,
+          subtitle: ctxt.notifSettings_dailySummaryDesc,
+          value: _dailySummaryEnabled,
+          onChanged: (value) => _toggleDailySummary(value, spacing),
+          color: color,
         ),
+        if (_dailySummaryEnabled) ...[
+          _divider(color),
+          _NotificationTapRow(
+            icon: LucideIcons.clock,
+            title: ctxt.notifSettings_reminderTime,
+            trailing: _reminderTime.format(context),
+            onTap: () => _selectTime(spacing),
+            color: color,
+          ),
+          _divider(color),
+          _NotificationTapRow(
+            icon: LucideIcons.send,
+            title: ctxt.notifSettings_sendTestNotif,
+            onTap: () async {
+              HapticFeedback.mediumImpact();
+              await NotificationService.showLocalNotification(
+                id: DateTime.now().microsecondsSinceEpoch % 100000000,
+                title: ctxt.notif_heresYesterdayTitle,
+                body: ctxt.notifSettings_dailySummaryDesc,
+                bypassThrottle: true,
+              );
+              SnackbarService.success(ctxt.notifSettings_testNotifSent, spacing);
+            },
+            color: color,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildStreakReminderGroup(ColorScheme color, TextTheme textTheme, AppSpacing spacing, AppLocalizations ctxt) {
+    return _NotificationGroupCard(
+      children: [
+        _NotificationToggleRow(
+          icon: LucideIcons.flame,
+          title: ctxt.notifSettings_streakReminder,
+          subtitle: ctxt.notifSettings_dailyNudgeStreak,
+          value: _streakReminderEnabled,
+          onChanged: (value) => _toggleStreakReminder(value, spacing),
+          color: color,
+          iconColor: color.tertiary,
+        ),
+        if (_streakReminderEnabled) ...[
+          _divider(color),
+          _NotificationTapRow(
+            icon: LucideIcons.clock,
+            title: ctxt.notifSettings_reminderTime,
+            trailing: _streakReminderTime.format(context),
+            onTap: () => _selectStreakReminderTime(spacing),
+            color: color,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildWeeklySummaryGroup(ColorScheme color, TextTheme textTheme, AppSpacing spacing, AppLocalizations ctxt) {
+    return _NotificationGroupCard(
+      children: [
+        _NotificationToggleRow(
+          icon: LucideIcons.calendarRange,
+          title: ctxt.notifSettings_weeklySummary,
+          subtitle: ctxt.notifSettings_weeklySchedule(_getDayName(_weeklyDay)),
+          value: _weeklySummaryEnabled,
+          onChanged: (value) => _toggleWeeklySummary(value, spacing),
+          color: color,
+        ),
+        if (_weeklySummaryEnabled) ...[
+          _divider(color),
+          _NotificationTapRow(
+            icon: LucideIcons.calendarCheck,
+            title: ctxt.notifSettings_summaryDay,
+            trailing: _getDayName(_weeklyDay),
+            onTap: () => _selectWeeklyDay(spacing),
+            color: color,
+          ),
+          _divider(color),
+          _NotificationTapRow(
+            icon: LucideIcons.send,
+            title: ctxt.notifSettings_sendTestNotif,
+            onTap: () async {
+              HapticFeedback.mediumImpact();
+              await NotificationService.showLocalNotification(
+                id: DateTime.now().microsecondsSinceEpoch % 100000000,
+                title: ctxt.notif_yourWeekInReviewTitle,
+                body: ctxt.notifSettings_summaryDesc,
+                bypassThrottle: true,
+              );
+              SnackbarService.success(ctxt.notifSettings_testNotifSent, spacing);
+            },
+            color: color,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildOtherSettingsGroup(ColorScheme color, TextTheme textTheme, AppSpacing spacing, AppLocalizations ctxt) {
+    return _NotificationGroupCard(
+      children: [
+        _NotificationToggleRow(
+          icon: LucideIcons.userCheck,
+          title: ctxt.notifSettings_comeBackNudges,
+          subtitle: ctxt.notifSettings_gentleReminders,
+          value: _reEngagementEnabled,
+          onChanged: (value) => _toggleReEngagement(value, spacing),
+          color: color,
+        ),
+        _divider(color),
+        _NotificationToggleRow(
+          icon: LucideIcons.brain,
+          title: ctxt.notifSettings_smartAlerts,
+          subtitle: ctxt.notifSettings_budgetWarningsDesc,
+          value: _smartAlertsEnabled,
+          onChanged: (value) => _toggleSmartAlerts(value, spacing),
+          color: color,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoading(AppSpacing spacing, ColorScheme color) {
+    return ListView(
+      padding: EdgeInsets.only(
+        left: spacing.cardHorizontal,
+        right: spacing.cardHorizontal,
+        top: spacing.cardVertical,
+        bottom: 0,
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(children: children),
+      children: [
+        _NotificationHeroSkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.sectionGap),
+        _NotificationGroupSkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.elementGap * 2),
+        _NotificationGroupSkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.elementGap * 2),
+        _NotificationGroupSkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.sectionGap),
+        SizedBox(height: spacing.sectionGap),
+        const AmbientBrandSection(showSignature: true, absorbBottomInset: false),
+      ],
     );
   }
 
@@ -616,64 +509,251 @@ class _NotificationSettingsScreenState
       color: color.outlineVariant.withValues(alpha: 0.4),
     );
   }
+}
 
-  Widget _buildToggleRow({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-    required ColorScheme color,
-    required TextTheme textTheme,
-    required AppSpacing spacing,
-    Color? iconColor,
-  }) {
-    final ic = iconColor ?? color.primary;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: ic.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(spacing.radiusSmall),
-            ),
-            child: Icon(icon, color: ic, size: 20),
+class NotificationHeroCard extends ConsumerWidget {
+  final int activeCount;
+  final bool isDark;
+  final bool reduceMotion;
+
+  const NotificationHeroCard({
+    super.key,
+    required this.activeCount,
+    required this.isDark,
+    required this.reduceMotion,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
+
+    return Semantics(
+      label: 'Active notifications: $activeCount',
+      child: AnimatedContainer(
+        duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 300),
+        padding: EdgeInsets.all(spacing.cardInner),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.primary.withValues(alpha: isDark ? 0.2 : 0.12),
+              color.primary.withValues(alpha: isDark ? 0.08 : 0.04),
+            ],
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: textTheme.bodyLarge
-                      ?.copyWith(fontWeight: FontWeight.w500),
-                ),
-                Text(
-                  subtitle,
-                  style: textTheme.bodySmall
-                      ?.copyWith(color: color.onSurfaceVariant),
-                ),
-              ],
+          border: Border.all(color: color.primary.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 56,
+              height: 56,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: color.primary.withValues(alpha: isDark ? 0.15 : 0.1),
+                    ),
+                  ),
+                  ClipOval(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(width: 56, height: 56),
+                    ),
+                  ),
+                  TweenAnimationBuilder<double>(
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.easeOutBack,
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    builder: (context, value, child) => Transform.scale(
+                      scale: value,
+                      child: child,
+                    ),
+                    child: Container(
+                      padding: EdgeInsets.all(spacing.elementGap * 1.5),
+                      decoration: BoxDecoration(
+                        color: color.primary.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        activeCount > 0 ? LucideIcons.bellRing : LucideIcons.bellOff,
+                        color: color.primary,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Switch(value: value, onChanged: onChanged),
-        ],
+            SizedBox(width: spacing.sectionGap),
+            Expanded(
+              child: AnimatedDefaultTextStyle(
+                duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: color.primary,
+                ) ?? const TextStyle(fontWeight: FontWeight.w700),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(ctxt.notifSettings_activeCount(activeCount)),
+                    SizedBox(height: spacing.elementGapUltraMin),
+                    Text(
+                      ctxt.notifSettings_summaryDesc,
+                      style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildTapRow({
-    required IconData icon,
-    required String title,
-    String? trailing,
-    required VoidCallback onTap,
-    required ColorScheme color,
-    required TextTheme textTheme,
-    required AppSpacing spacing,
-  }) {
+class _NotificationGroupCard extends ConsumerWidget {
+  final List<Widget> children;
+
+  const _NotificationGroupCard({required this.children});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
+
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(children: children),
+    );
+  }
+}
+
+class _NotificationToggleRow extends ConsumerWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final ColorScheme color;
+  final Color? iconColor;
+
+  const _NotificationToggleRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+    required this.color,
+    this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.read<AppSpacing>(spacingProvider);
+    final textTheme = Theme.of(context).textTheme;
+    final ic = iconColor ?? color.primary;
+
+    return Semantics(
+      label: '$title. ${value ? 'Enabled' : 'Disabled'}. $subtitle',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: ic.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
+              ),
+              child: Icon(icon, color: ic, size: 20),
+            ),
+            SizedBox(width: spacing.elementGap * 1.5),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(fontWeight: FontWeight.w500, color: color.onSurface),
+                        ),
+                        Text(
+                          subtitle,
+                          style: TextStyle(color: color.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: spacing.elementGap, top: 2),
+                    child: Icon(
+                      value ? LucideIcons.check : LucideIcons.x,
+                      size: 16,
+                      color: value ? color.primary : color.error.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  SizedBox(width: spacing.elementGap),
+                  SizedBox(
+                    height: 24,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Switch(
+                        value: value,
+                        onChanged: onChanged,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NotificationTapRow extends ConsumerWidget {
+  final IconData icon;
+  final String title;
+  final String? trailing;
+  final VoidCallback onTap;
+  final ColorScheme color;
+
+  const _NotificationTapRow({
+    required this.icon,
+    required this.title,
+    this.trailing,
+    required this.onTap,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.read<AppSpacing>(spacingProvider);
+    final textTheme = Theme.of(context).textTheme;
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -688,30 +768,173 @@ class _NotificationSettingsScreenState
               ),
               child: Icon(icon, color: color.primary, size: 20),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: spacing.elementGap * 1.5),
             Expanded(
               child: Text(
                 title,
-                style:
-                    textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+                style: TextStyle(fontWeight: FontWeight.w500, color: color.onSurface),
               ),
             ),
             if (trailing != null)
               Text(
-                trailing,
+                trailing!,
                 style: textTheme.bodyMedium?.copyWith(
                   color: color.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-            const SizedBox(width: 8),
-            Icon(
-              LucideIcons.chevronRight,
-              color: color.onSurfaceVariant,
-              size: 20,
+            SizedBox(width: spacing.elementGap),
+            Icon(LucideIcons.chevronRight, color: color.onSurfaceVariant, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class NotificationInfoCard extends StatelessWidget {
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+  final AppLocalizations ctxt;
+
+  const NotificationInfoCard({
+    super.key,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+    required this.ctxt,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Information about local notifications',
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: EdgeInsets.all(spacing.cardInner),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          gradient: LinearGradient(
+            colors: [
+              color.primary.withValues(alpha: 0.06),
+              color.primary.withValues(alpha: 0.02),
+            ],
+          ),
+          border: Border.all(color: color.primary.withValues(alpha: 0.15)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.all(spacing.elementGapMin + 2),
+              decoration: BoxDecoration(
+                color: color.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
+              ),
+              child: Icon(LucideIcons.info, color: color.primary, size: 16),
+            ),
+            SizedBox(width: spacing.elementGap),
+            Expanded(
+              child: Text(
+                ctxt.notifSettings_localNotifDisclaimer,
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                  height: 1.4,
+                ),
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _NotificationHeroSkeleton extends StatelessWidget {
+  final AppSpacing spacing;
+  final ColorScheme color;
+
+  const _NotificationHeroSkeleton({required this.spacing, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        color: color.surfaceContainerLow,
+      ),
+      child: Row(
+        children: [
+          SkeletonLoader(
+            width: 56,
+            height: 56,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          SizedBox(width: spacing.sectionGap),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SkeletonLoader(width: 120, height: 18),
+                SizedBox(height: 8),
+                SkeletonLoader(width: 160, height: 14),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NotificationGroupSkeleton extends StatelessWidget {
+  final AppSpacing spacing;
+  final ColorScheme color;
+
+  const _NotificationGroupSkeleton({required this.spacing, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.surface.withValues(alpha: 0.75),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: List.generate(3, (index) {
+          final isLast = index == 2;
+          return Padding(
+            padding: EdgeInsets.only(
+              left: spacing.cardInner,
+              right: spacing.cardInner,
+              top: spacing.cardInner,
+              bottom: isLast ? spacing.cardInner : spacing.elementGapMin,
+            ),
+            child: Row(
+              children: [
+                SkeletonLoader(
+                  width: 40,
+                  height: 40,
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+                SizedBox(width: spacing.cardInner),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SkeletonLoader(width: 140, height: 16),
+                      SizedBox(height: 6),
+                      SkeletonLoader(width: 100, height: 12),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }

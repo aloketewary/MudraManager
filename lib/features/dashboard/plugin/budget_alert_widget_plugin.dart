@@ -28,7 +28,7 @@ class BudgetAlertWidgetPlugin extends DashboardWidgetPlugin {
   bool isVisible(WidgetRef ref) {
     // Only show when there are budget alerts
     final alerts = ref.watch(budgetAlertsProvider);
-    return alerts.isNotEmpty;
+    return alerts.value?.isNotEmpty ?? false;
   }
 
   @override
@@ -36,9 +36,9 @@ class BudgetAlertWidgetPlugin extends DashboardWidgetPlugin {
     final alerts = ref.watch(budgetAlertsProvider);
 
     return BudgetAlertBanner(
-      alerts: alerts,
+      alerts: alerts.value ?? [],
       onDismiss: () {
-        ref.read(budgetAlertsProvider.notifier).dismissAlert(alerts.first);
+        ref.read(budgetAlertsNotifierProvider.notifier).dismissAlert(alerts.value!.first);
       },
     );
   }

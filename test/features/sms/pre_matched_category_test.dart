@@ -15,6 +15,8 @@ class _TestPending implements PendingTransactionData {
   final String body;
   @override
   final String? fromBank;
+  @override
+  final String toAccount;
 
   _TestPending({
     this.account,
@@ -22,6 +24,7 @@ class _TestPending implements PendingTransactionData {
     this.isIncome,
     required this.body,
     this.fromBank,
+    required this.toAccount,
   });
 }
 
@@ -56,6 +59,7 @@ void main() {
           isIncome: false,
           body: 'Rs.500 debited from A/c XX6988',
           amount: 500.0,
+          toAccount: '',
         ),
         accounts: [testAccount],
         categories: [foodCategory, othersCategory],
@@ -74,6 +78,7 @@ void main() {
           body: 'Rs.500 debited from A/c XX6988',
           amount: 500.0,
           fromBank: '',
+          toAccount: '',
         ),
         accounts: [testAccount],
         categories: [foodCategory, othersCategory],
@@ -94,6 +99,7 @@ void main() {
           isIncome: false,
           body: 'Rs.500 debited at Swiggy from A/c XX6988',
           amount: 500.0,
+          toAccount: '',
         ),
         accounts: [testAccount],
         categories: [foodCategory, othersCategory],
@@ -111,6 +117,7 @@ void main() {
           isIncome: false,
           body: 'Rs.500 debited',
           amount: 500.0,
+          toAccount: '',
         ),
         accounts: [testAccount],
         categories: [foodCategory, othersCategory],

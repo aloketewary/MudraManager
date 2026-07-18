@@ -3899,5 +3899,57 @@
   "goal_archive": "Archive Goal",
   "goal_markComplete": "Mark Complete",
   "goal_basedOnAvg": "Based on {amount}/month average",
-  "@goal_basedOnAvg": { "placeholders": { "amount": {} } }
+  "@goal_basedOnAvg": { "placeholders": { "amount": {} } },
+  "profile_dayStreakLabel": "{count, plural, =1{{count} day} other{{count} days}}",
+  "@profile_dayStreakLabel": {
+    "description": "Label showing the user's current day streak",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnList_spentThisMonth": "Spent this month",
+  "@txnList_spentThisMonth": {
+    "description": "Label showing total spent in current month"
+  },
+  "tax_title": "Tax Estimation",
+  "@tax_title": { "description": "Tax estimation screen title" },
+  "tax_plannerTitle": "Tax Planner",
+  "@tax_plannerTitle": { "description": "Tax planner screen title" },
+  "tax_startPlanning": "Start Planning",
+  "@tax_startPlanning": { "description": "Start tax planning button" },
+  "tax_planningMode": "Planning Mode",
+  "@tax_planningMode": { "description": "Planning mode indicator" },
+  "tax_plannedDeductions": "Planned Deductions",
+  "@tax_plannedDeductions": { "description": "Planned deductions label" },
+  "tax_potentialSavings": "Potential Savings",
+  "@tax_potentialSavings": { "description": "Potential savings label" },
+  "tax_addDeductionsPrompt": "Add deductions below to see potential tax savings",
+  "@tax_addDeductionsPrompt": { "description": "Prompt to add deductions" },
+  "tax_plannerDeductions": "Deduction Planner",
+  "@tax_plannerDeductions": { "description": "Deduction planner card title" },
+  "tax_planningImpact": "Planning Impact",
+  "@tax_planningImpact": { "description": "Planning impact card title" },
+  "tax_currentTax": "Current Tax",
+  "@tax_currentTax": { "description": "Current tax label" },
+  "tax_projectedTax": "Projected Tax",
+  "@tax_projectedTax": { "description": "Projected tax label" },
+  "tax_totalSavings": "Total Savings: ",
+  "@tax_totalSavings": { "description": "Total savings label" },
+  "tax_nps80CCD1B": "NPS (80CCD1B)",
+  "@tax_nps80CCD1B": { "description": "NPS 80CCD1B deduction" },
+  "tax_section80C": "Section 80C",
+  "@tax_section80C": { "description": "Section 80C deduction" },
+  "tax_section80D": "Section 80D",
+  "@tax_section80D": { "description": "Section 80D deduction" },
+  "tax_hraExemption": "HRA Exemption",
+  "@tax_hraExemption": { "description": "HRA exemption" },
+  "tax_homeLoanInterest": "Home Loan Interest",
+  "@tax_homeLoanInterest": { "description": "Home loan interest deduction" },
+  "tax_upTo": "Up to {amount}",
+  "@tax_upTo": {
+    "description": "Up to amount label",
+    "placeholders": { "amount": { "type": "int" } }
+  }
 }

@@ -163,21 +163,50 @@ class FinancialContextService {
   }
 
   DateTime _lastSalary(List<Transaction> txns) {
-    final salaries = txns
+    // First, try to find salary-like transactions
+    final salaryLike = txns
         .where((t) => !t.isExpense && _isSalaryLike(t))
         .toList()
       ..sort((a, b) => b.date.compareTo(a.date));
 
-    return salaries.isNotEmpty
-        ? salaries.first.date
+    if (salaryLike.isNotEmpty) {
+      return salaryLike.first.date;
+    }
+
+    // Fallback: use most recent non-expense transaction (any income)
+    final income = txns
+        .where((t) => !t.isExpense && t.amount >= 5000)
+        .toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+
+    return income.isNotEmpty
+        ? income.first.date
         : DateTime.now().subtract(const Duration(days: 60));
   }
 
   bool _isSalaryLike(Transaction t) {
+    if (t.isExpense) return false;
+
+    // Check category type - if it's income category, it's likely salary
+    if (t.categoryId != null) {
+      // We'd need to query the category, but that's expensive here
+      // So we rely on amount + description for now
+    }
+
     final desc = t.description?.toLowerCase() ?? '';
-    const keywords = ['salary', 'sal', 'wage', 'payroll', 'neft', 'imps'];
-    return keywords.any(desc.contains) &&
-        t.amount >= 15000 &&
-        t.amount <= 500000;
+    const keywords = [
+      'salary', 'sal', 'wage', 'payroll', 'neft', 'imps',
+      'credit', 'deposit', 'upi transfer', 'bank transfer',
+      'salary credit', 'salary deposit', 'net banking',
+      'fund transfer', ' inward', 'received',
+    ];
+    // Also check for bank-specific credit messages
+    final bankKeywords = ['hdfc', 'icici', 'sbi', 'axis', 'kotak', 'yes bank'];
+    final isBankCredit = bankKeywords.any((b) => desc.contains(b)) &&
+        (desc.contains('cr') || desc.contains('credit') || desc.contains('a/c'));
+
+    return (keywords.any(desc.contains) || isBankCredit) &&
+        t.amount >= 10000 &&
+        t.amount <= 1000000;
   }
 }

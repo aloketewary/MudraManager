@@ -1,16 +1,20 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
-
-/// Skeleton loading component for displaying placeholder content
-/// while data is being loaded
+/// Base skeleton loader widget with shimmer animation.
+///
+/// Features:
+/// - Reusable shimmer effect
+/// - Accessibility with reduced motion support
+/// - Theming via AppSpacing
 class SkeletonLoader extends ConsumerWidget {
   final double? width;
   final double? height;
   final BorderRadius? borderRadius;
   final EdgeInsets? margin;
+  final Widget? child;
 
   const SkeletonLoader({
     super.key,
@@ -18,184 +22,278 @@ class SkeletonLoader extends ConsumerWidget {
     this.height = 16,
     this.borderRadius,
     this.margin,
+    this.child,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final color = Theme.of(context).colorScheme;
     final spacing = ref.watch(spacingProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isReducedMotion = MediaQuery.of(context).disableAnimations;
 
-    return Container(
+    final effectiveBorderRadius =
+        borderRadius ?? BorderRadius.circular(spacing.radiusSmall);
+
+    final content = Container(
       width: width,
       height: height,
       margin: margin,
       decoration: BoxDecoration(
-        color: color.surfaceContainerHighest,
-        borderRadius: borderRadius ?? BorderRadius.circular(spacing.radiusSmall),
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: effectiveBorderRadius,
       ),
-    )
+      child: child,
+    );
+
+    if (isReducedMotion) {
+      return content;
+    }
+
+    return content
         .animate(onComplete: (controller) => controller.repeat())
         .shimmer(
-          duration: 1500.ms,
-          color: color.surface.withValues(alpha: 0.5),
+          duration: spacing.animSlow,
+          color: colorScheme.surface.withValues(alpha: 0.4),
         );
   }
 }
 
-/// Skeleton loader for transaction card
+/// Wraps any widget with skeleton shimmer effect.
+class SkeletonWrapper extends ConsumerWidget {
+  final Widget child;
+  final double? width;
+  final double? height;
+  final BorderRadius? borderRadius;
+
+  const SkeletonWrapper({
+    super.key,
+    required this.child,
+    this.width,
+    this.height,
+    this.borderRadius,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isReducedMotion = MediaQuery.of(context).disableAnimations;
+
+    final effectiveBorderRadius =
+        borderRadius ?? BorderRadius.circular(spacing.radiusSmall);
+
+    final wrapper = Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: effectiveBorderRadius,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(1),
+        child: child,
+      ),
+    );
+
+    if (isReducedMotion) {
+      return wrapper;
+    }
+
+    return wrapper
+        .animate(onComplete: (controller) => controller.repeat())
+        .shimmer(
+          duration: spacing.animSlow,
+          color: colorScheme.surface.withValues(alpha: 0.4),
+        );
+  }
+}
+
+// ── TRANSACTION CARD SKELETON ─────────────────────────────────────────────
+
+/// Skeleton loader for transaction card.
 class TransactionCardSkeleton extends ConsumerWidget {
   const TransactionCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final color = Theme.of(context).colorScheme;
     final spacing = ref.watch(spacingProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isReducedMotion = MediaQuery.of(context).disableAnimations;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8.0,
+    final cardContent = Card(
+      margin: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.elementGap,
       ),
       elevation: 0,
-      color: color.surfaceContainerLow,
+      color: colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(spacing.cardInner),
         child: Row(
           children: [
             SkeletonLoader(
-              width: 48,
-              height: 48,
+              width: spacing.iconXL * 1.5,
+              height: spacing.iconXL * 1.5,
               borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
-            const SizedBox(width: 16.0),
-            const Expanded(
+            SizedBox(width: spacing.elementGap * 2),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SkeletonLoader(
                     width: double.infinity,
-                    height: 16,
-                    margin: EdgeInsets.only(bottom: 8.0),
+                    height: spacing.iconSM,
+                    margin: EdgeInsets.only(bottom: spacing.elementGap),
                   ),
-                  SkeletonLoader(width: 120, height: 14),
+                  SkeletonLoader(
+                    width: spacing.sectionGap,
+                    height: spacing.iconXS,
+                  ),
                 ],
               ),
             ),
-            const SizedBox(width: 16.0),
-            const Column(
+            SizedBox(width: spacing.elementGap * 2),
+            Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 SkeletonLoader(
-                  width: 80,
-                  height: 20,
-                  margin: EdgeInsets.only(bottom: 4.0),
+                  width: spacing.sectionGap,
+                  height: spacing.iconMD,
+                  margin: EdgeInsets.only(bottom: spacing.elementGapMin),
                 ),
-                SkeletonLoader(width: 60, height: 12),
+                SkeletonLoader(
+                  width: spacing.cardHorizontalMax,
+                  height: spacing.iconXS,
+                ),
               ],
             ),
           ],
         ),
       ),
-    )
+    );
+
+    if (isReducedMotion) return cardContent;
+
+    return cardContent
         .animate(onComplete: (controller) => controller.repeat())
         .shimmer(
-          duration: 1500.ms,
-          color: color.surface.withValues(alpha: 0.5),
+          duration: spacing.animSlow,
+          color: colorScheme.surface.withValues(alpha: 0.4),
         );
   }
 }
 
-/// Skeleton loader for dashboard account card
+// ── ACCOUNT CARD SKELETON ─────────────────────────────────────────────────
+
+/// Skeleton loader for dashboard account card.
 class AccountCardSkeleton extends ConsumerWidget {
   const AccountCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final color = Theme.of(context).colorScheme;
     final spacing = ref.watch(spacingProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isReducedMotion = MediaQuery.of(context).disableAnimations;
 
-    return Container(
-          height: 250,
-          margin: const EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical: 8.0,
+    final cardContent = Container(
+      height: spacing.radiusLarge * 15.6,
+      margin: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.elementGap,
+      ),
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SkeletonLoader(width: spacing.sectionGap, height: spacing.iconLG),
+          SkeletonLoader(
+            width: spacing.sectionGap * 1.25,
+            height: spacing.iconXL + 4,
           ),
-          padding: const EdgeInsets.all(24.0),
-          decoration: BoxDecoration(
-            color: color.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
-          ),
-          child: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SkeletonLoader(width: 150, height: 24),
-              SkeletonLoader(width: 200, height: 40),
-              SkeletonLoader(width: 180, height: 16),
-            ],
-          ),
-        )
+          SkeletonLoader(width: spacing.sectionGap * 1.1, height: spacing.iconSM),
+        ],
+      ),
+    );
+
+    if (isReducedMotion) return cardContent;
+
+    return cardContent
         .animate(onComplete: (controller) => controller.repeat())
         .shimmer(
-          duration: 1500.ms,
-          color: color.surface.withValues(alpha: 0.5),
+          duration: spacing.animSlow,
+          color: colorScheme.surface.withValues(alpha: 0.4),
         );
   }
 }
 
-/// Skeleton loader for budget card
+// ── BUDGET CARD SKELETON ──────────────────────────────────────────────────
+
+/// Skeleton loader for budget card.
 class BudgetCardSkeleton extends ConsumerWidget {
   const BudgetCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final color = Theme.of(context).colorScheme;
     final spacing = ref.watch(spacingProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isReducedMotion = MediaQuery.of(context).disableAnimations;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8.0,
+    final cardContent = Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.elementGap,
       ),
       child: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(spacing.cardInner),
         decoration: BoxDecoration(
-          color: color.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
+          color: colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
         ),
         child: Row(
           children: [
             SkeletonLoader(
-              width: 60,
-              height: 60,
-              borderRadius: BorderRadius.circular(30),
+              width: spacing.iconXL * 1.5,
+              height: spacing.iconXL * 1.5,
+              borderRadius: BorderRadius.circular(spacing.iconXL * 1.5 / 2),
             ),
-            const SizedBox(width: 16.0),
-            const Expanded(
+            SizedBox(width: spacing.elementGap * 2),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SkeletonLoader(
-                    width: 120,
-                    height: 16,
-                    margin: EdgeInsets.only(bottom: 12.0),
+                    width: spacing.sectionGap,
+                    height: spacing.iconSM,
+                    margin: EdgeInsets.only(bottom: spacing.elementGap + 4),
                   ),
                   SkeletonLoader(
                     width: double.infinity,
-                    height: 10,
-                    margin: EdgeInsets.only(bottom: 8.0),
+                    height: spacing.strokeThick,
+                    margin: EdgeInsets.only(bottom: spacing.elementGap),
                   ),
                   Row(
                     children: [
                       Expanded(
-                        child: SkeletonLoader(width: 80, height: 14),
+                        child: SkeletonLoader(
+                          width: spacing.cardHorizontalMax,
+                          height: spacing.iconXS,
+                        ),
                       ),
-                      SizedBox(width: 12),
+                      SizedBox(width: spacing.elementGap),
                       Expanded(
-                        child: SkeletonLoader(width: 80, height: 14),
+                        child: SkeletonLoader(
+                          width: spacing.cardHorizontalMax,
+                          height: spacing.iconXS,
+                        ),
                       ),
                     ],
                   ),
@@ -204,64 +302,77 @@ class BudgetCardSkeleton extends ConsumerWidget {
             ),
           ],
         ),
-      )
-          .animate(onComplete: (controller) => controller.repeat())
-          .shimmer(
-            duration: 1500.ms,
-            color: color.surface.withValues(alpha: 0.5),
-          ),
+      ),
     );
+
+    if (isReducedMotion) return cardContent;
+
+    return cardContent
+        .animate(onComplete: (controller) => controller.repeat())
+        .shimmer(
+          duration: spacing.animSlow,
+          color: colorScheme.surface.withValues(alpha: 0.4),
+        );
   }
 }
 
-/// Skeleton loader for goal/net worth cards
+// ── DASHBOARD CARD SKELETON ───────────────────────────────────────────────
+
+/// Skeleton loader for goal/net worth cards.
 class DashboardCardSkeleton extends ConsumerWidget {
   const DashboardCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final color = Theme.of(context).colorScheme;
     final spacing = ref.watch(spacingProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isReducedMotion = MediaQuery.of(context).disableAnimations;
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
+    final cardContent = Padding(
+      padding: EdgeInsets.only(top: spacing.cardVertical),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        padding: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(horizontal: spacing.elementGap),
+        padding: EdgeInsets.all(spacing.cardInner),
         decoration: BoxDecoration(
-          color: color.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
+          color: colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
         ),
         child: Row(
           children: [
             SkeletonLoader(
-              width: 60,
-              height: 60,
-              borderRadius: BorderRadius.circular(30),
+              width: spacing.iconXL * 1.5,
+              height: spacing.iconXL * 1.5,
+              borderRadius: BorderRadius.circular(spacing.iconXL * 1.5 / 2),
             ),
-            const SizedBox(width: 16),
-            const Expanded(
+            SizedBox(width: spacing.elementGap * 2),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SkeletonLoader(
-                    width: 100,
-                    height: 16,
-                    margin: EdgeInsets.only(bottom: 12),
+                    width: spacing.cardHorizontalMax * 1.75,
+                    height: spacing.iconSM,
+                    margin: EdgeInsets.only(bottom: spacing.elementGap + 4),
                   ),
                   SkeletonLoader(
                     width: double.infinity,
-                    height: 10,
-                    margin: EdgeInsets.only(bottom: 8),
+                    height: spacing.strokeThick,
+                    margin: EdgeInsets.only(bottom: spacing.elementGap),
                   ),
                   Row(
                     children: [
                       Expanded(
-                        child: SkeletonLoader(width: 70, height: 14),
+                        child: SkeletonLoader(
+                          width: spacing.cardHorizontal,
+                          height: spacing.iconXS,
+                        ),
                       ),
-                      SizedBox(width: 12),
+                      SizedBox(width: spacing.elementGap),
                       Expanded(
-                        child: SkeletonLoader(width: 70, height: 14),
+                        child: SkeletonLoader(
+                          width: spacing.cardHorizontal,
+                          height: spacing.iconXS,
+                        ),
                       ),
                     ],
                   ),
@@ -270,66 +381,149 @@ class DashboardCardSkeleton extends ConsumerWidget {
             ),
           ],
         ),
-      )
-          .animate(onComplete: (controller) => controller.repeat())
-          .shimmer(
-            duration: 1500.ms,
-            color: color.surface.withValues(alpha: 0.5),
-          ),
+      ),
     );
+
+    if (isReducedMotion) return cardContent;
+
+    return cardContent
+        .animate(onComplete: (controller) => controller.repeat())
+        .shimmer(
+          duration: spacing.animSlow,
+          color: colorScheme.surface.withValues(alpha: 0.4),
+        );
   }
 }
 
-/// Skeleton loader for spending personality card
+// ── PERSONALITY CARD SKELETON ─────────────────────────────────────────────
+
+/// Skeleton loader for spending personality card.
 class PersonalityCardSkeleton extends ConsumerWidget {
   const PersonalityCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final color = Theme.of(context).colorScheme;
     final spacing = ref.watch(spacingProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isReducedMotion = MediaQuery.of(context).disableAnimations;
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
+    final cardContent = Padding(
+      padding: EdgeInsets.only(top: spacing.cardVertical),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        padding: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(horizontal: spacing.elementGap),
+        padding: EdgeInsets.all(spacing.cardInner),
         decoration: BoxDecoration(
-          color: color.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(spacing.radiusSmall * 2),
+          color: colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
         ),
         child: Row(
           children: [
             SkeletonLoader(
-              width: 64,
-              height: 64,
+              width: spacing.iconXL * 1.6,
+              height: spacing.iconXL * 1.6,
               borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
-            const SizedBox(width: 16),
-            const Expanded(
+            SizedBox(width: spacing.elementGap * 2),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SkeletonLoader(
-                    width: 140,
-                    height: 16,
-                    margin: EdgeInsets.only(bottom: 8),
+                    width: spacing.sectionGap + 20,
+                    height: spacing.iconSM,
+                    margin: EdgeInsets.only(bottom: spacing.elementGap),
                   ),
                   SkeletonLoader(
                     width: double.infinity,
-                    height: 14,
+                    height: spacing.iconXS,
                   ),
                 ],
               ),
             ),
           ],
         ),
-      )
-          .animate(onComplete: (controller) => controller.repeat())
-          .shimmer(
-            duration: 1500.ms,
-            color: color.surface.withValues(alpha: 0.5),
-          ),
+      ),
     );
+
+    if (isReducedMotion) return cardContent;
+
+    return cardContent
+        .animate(onComplete: (controller) => controller.repeat())
+        .shimmer(
+          duration: spacing.animSlow,
+          color: colorScheme.surface.withValues(alpha: 0.4),
+        );
+  }
+}
+
+// ── LIST TILE SKELETON ─────────────────────────────────────────────────────
+
+/// Skeleton loader for list tile items.
+class ListTileSkeleton extends ConsumerWidget {
+  final bool withLeading;
+  final bool withTrailing;
+
+  const ListTileSkeleton({
+    super.key,
+    this.withLeading = true,
+    this.withTrailing = true,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isReducedMotion = MediaQuery.of(context).disableAnimations;
+
+    final content = Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.elementGap,
+      ),
+      child: Row(
+        children: [
+          if (withLeading) ...[
+            SkeletonLoader(
+              width: spacing.iconXL,
+              height: spacing.iconXL,
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
+            ),
+            SizedBox(width: spacing.elementGap * 2),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SkeletonLoader(
+                  width: double.infinity,
+                  height: spacing.iconSM,
+                  margin: EdgeInsets.only(bottom: spacing.elementGapMin),
+                ),
+                SkeletonLoader(
+                  width: spacing.cardHorizontalMax,
+                  height: spacing.iconXS,
+                ),
+              ],
+            ),
+          ),
+          if (withTrailing) ...[
+            SizedBox(width: spacing.elementGap * 2),
+            SkeletonLoader(
+              width: spacing.sectionGap,
+              height: spacing.iconSM,
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (isReducedMotion) return content;
+
+    return content
+        .animate(onComplete: (controller) => controller.repeat())
+        .shimmer(
+          duration: spacing.animSlow,
+          color: colorScheme.surface.withValues(alpha: 0.4),
+        );
   }
 }

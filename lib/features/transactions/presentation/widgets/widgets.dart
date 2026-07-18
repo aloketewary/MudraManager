@@ -8,3 +8,11 @@ export 'transaction_filter_chips.dart';
 export 'transaction_search_bar.dart';
 export 'transaction_tag_chip.dart';
 export 'utility_calculator_button.dart';
+
+// New production widgets
+export 'spend_metric.dart';
+export 'category_filter_tabs.dart';
+export 'insight_banner.dart';
+export 'styled_date_header.dart';
+export 'transaction_row.dart';
+export 'animated_search_bar.dart';

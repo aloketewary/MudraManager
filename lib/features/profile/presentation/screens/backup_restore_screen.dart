@@ -1,28 +1,35 @@
-import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
-import 'package:mudra_manager/core/utils/safe_date_format.dart';
-import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
+
 import 'package:encrypt/encrypt.dart' as encrypt;
-import 'package:mudra_manager/core/services/google_drive_service.dart';
-import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/backup_metadata.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/services/backup_restore_service.dart';
 import 'package:mudra_manager/core/services/auto_backup_service.dart';
-import 'package:mudra_manager/shared/widgets/pro_gate.dart';
+import 'package:mudra_manager/core/services/backup_restore_service.dart';
+import 'package:mudra_manager/core/services/google_drive_service.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
-import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
+import 'package:mudra_manager/shared/widgets/pro_gate.dart';
+import 'package:mudra_manager/shared/widgets/section_header.dart';
+import 'package:mudra_manager/shared/widgets/settings_group_card.dart';
+import 'package:mudra_manager/shared/widgets/setting_item.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 final _backupHistoryProvider = FutureProvider.autoDispose((ref) {
   return BackupService.getBackupHistory();
@@ -33,16 +40,12 @@ class BackupRestoreScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final spacing = ref.watch(spacingProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final ctxt = AppLocalizations.of(context)!;
-    final historyAsync = ref.watch(_backupHistoryProvider);
-
-    final lastBackup = historyAsync.value?.isNotEmpty == true
-        ? historyAsync.value!.first
-        : null;
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
+    final loaded = ref.watch(_backupHistoryProvider).maybeWhen(
+          data: (_) => true,
+          orElse: () => false,
+        );
 
     return ScreenShell(
       config: ScreenShellConfig(
@@ -51,349 +54,284 @@ class BackupRestoreScreen extends ConsumerWidget {
         enableRefresh: false,
       ),
       actions: ScreenActions.empty,
-      body: ListView(
-        padding: EdgeInsets.symmetric(
-          horizontal: spacing.cardHorizontal,
-          vertical: spacing.cardVertical,
-        ),
-        children: [
-          // ── HERO STATUS CARD ──
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  color.primary.withValues(alpha: isDark ? 0.2 : 0.12),
-                  color.primary.withValues(alpha: isDark ? 0.08 : 0.04),
-                ],
-              ),
-              border: Border.all(
-                color: color.primary.withValues(alpha: 0.2),
-              ),
-            ),
-            child: Row(
-              children: [
-                TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 800),
-                  curve: Curves.easeOutBack,
-                  tween: Tween(begin: 0.0, end: 1.0),
-                  builder: (context, value, child) =>
-                      Transform.scale(scale: value, child: child),
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: color.primary.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      lastBackup != null
-                          ? LucideIcons.shieldCheck
-                          : LucideIcons.shieldAlert,
-                      color: color.primary,
-                      size: 28,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        lastBackup != null ? ctxt.backup_lastBackup : ctxt.backup_noBackups,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: color.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        lastBackup != null
-                            ? _formatRelativeDate(lastBackup.backupDate, ctxt)
-                            : ctxt.backup_createFirst,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // ── ACTIONS ──
-          _buildSectionHeader(ctxt.backup_actions, color, textTheme),
-          const SizedBox(height: 10),
-          Card(
-            elevation: 0,
-            margin: EdgeInsets.zero,
-            color: color.surfaceContainerLow,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              side: BorderSide(
-                color: color.outlineVariant.withValues(alpha: 0.5),
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                _buildActionRow(
-                  icon: LucideIcons.cloudUpload,
-                  title: ctxt.backup_backupDataTitle,
-                  subtitle: ctxt.backup_backupDataSubtitle,
-                  color: color,
-                  textTheme: textTheme,
-                  onTap: () => _performBackup(context, ref, ctxt, spacing),
-                  spacing: spacing,
-                ),
-                Divider(
-                  height: 1,
-                  indent: 58,
-                  color: color.outlineVariant.withValues(alpha: 0.4),
-                ),
-                _buildActionRow(
-                  icon: LucideIcons.cloudDownload,
-                  title: ctxt.backup_restoreBackupTitle,
-                  subtitle: ctxt.backup_restoreBackupSubtitle,
-                  color: color,
-                  textTheme: textTheme,
-                  onTap: () => _performRestore(context, ref, ctxt, spacing),
-                  spacing: spacing,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // ── CLOUD BACKUP (Pro) ──
-          _buildSectionHeader(ctxt.backup_cloudBackup, color, textTheme, isPro: true),
-          const SizedBox(height: 10),
-          ProGate(
-            feature: ProFeature.cloudBackup,
-            child: _CloudBackupSection(color: color, textTheme: textTheme, spacing: spacing),
-          ),
-          const SizedBox(height: 24),
-
-          // ── AUTO BACKUP (Pro) ──
-          _buildSectionHeader(ctxt.backup_autoBackup, color, textTheme, isPro: true),
-          const SizedBox(height: 10),
-          ProGate(
-            feature: ProFeature.autoBackup,
-            child: _AutoBackupSection(color: color, textTheme: textTheme, spacing: spacing),
-          ),
-          const SizedBox(height: 24),
-
-          // ── BACKUP HISTORY ──
-          _buildSectionHeader(ctxt.backup_history, color, textTheme),
-          const SizedBox(height: 10),
-          historyAsync.when(
-            data: (history) {
-              if (history.isEmpty) {
-                return Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    color: color.surfaceContainerLow,
-                    border: Border.all(
-                      color: color.outlineVariant.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        LucideIcons.archiveX,
-                        size: 36,
-                        color: color.onSurfaceVariant.withValues(alpha: 0.4),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        ctxt.backup_noHistory,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: color.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return Card(
-                elevation: 0,
-                margin: EdgeInsets.zero,
-                color: color.surfaceContainerLow,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  side: BorderSide(
-                    color: color.outlineVariant.withValues(alpha: 0.5),
-                  ),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Column(
-                  children:
-                      history.take(5).toList().asMap().entries.map((entry) {
-                    final backup = entry.value;
-                    final isLast = entry.key ==
-                        (history.length > 5 ? 4 : history.length - 1);
-                    return Column(
-                      children: [
-                        _buildHistoryRow(ctxt: ctxt, 
-                          backup: backup,
-                          color: color,
-                          textTheme: textTheme,
-                          spacing: spacing
-                        ),
-                        if (!isLast)
-                          Divider(
-                            height: 1,
-                            indent: 58,
-                            color: color.outlineVariant.withValues(alpha: 0.4),
-                          ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              );
-            },
-            loading: () => const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: CircularProgressIndicator(),
-              ),
-            ),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-          const SizedBox(height: 24),
-
-          // ── INFO ──
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              color: color.primary.withValues(alpha: 0.06),
-              border: Border.all(
-                color: color.primary.withValues(alpha: 0.15),
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(LucideIcons.info, color: color.primary, size: 18),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    ctxt.backup_infoText,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      body: _BuildBody(
+        reduceMotion: reduceMotion,
+        loaded: loaded,
       ),
     );
   }
+}
 
-  // ── BUILDERS ──
+class _BuildBody extends ConsumerWidget {
+  final bool reduceMotion;
+  final bool loaded;
 
-  Widget _buildSectionHeader(
-    String title,
-    ColorScheme color,
-    TextTheme textTheme, {
-    bool isPro = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color.primary,
-              letterSpacing: 0.5,
+  const _BuildBody({required this.reduceMotion, required this.loaded});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final historyAsync = ref.watch(_backupHistoryProvider);
+    final lastBackup = historyAsync.value?.isNotEmpty == true
+        ? historyAsync.value!.first
+        : null;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth > 600 ? 600.0 : double.infinity;
+
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: AnimatedSwitcher(
+              duration: reduceMotion
+                  ? Duration.zero
+                  : const Duration(milliseconds: 300),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) =>
+                  FadeTransition(opacity: animation, child: child),
+              key: ValueKey(loaded),
+              child: loaded
+                  ? _ContentView(
+                      lastBackup: lastBackup,
+                      historyAsync: historyAsync,
+                      color: color,
+                      textTheme: textTheme,
+                      spacing: spacing,
+                      reduceMotion: reduceMotion,
+                    )
+                  : _LoadingView(spacing: spacing, color: color),
             ),
           ),
-          if (isPro) ...[
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
-                ),
-              ),
-              child: Text(
-                'PRO',
-                style: textTheme.labelSmall?.copyWith(
-                  color: const Color(0xFFD4AF37),
-                  fontWeight: FontWeight.w800,
-                  fontSize: 9,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionRow({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required ColorScheme color,
-    required TextTheme textTheme,
-    required VoidCallback onTap,
-    required AppSpacing spacing,
-  }) {
-    return InkWell(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        onTap();
+        );
       },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
+}
+
+class _ContentView extends ConsumerWidget {
+  final BackupMetadata? lastBackup;
+  final AsyncValue<List<BackupMetadata>> historyAsync;
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+  final bool reduceMotion;
+
+  const _ContentView({
+    required this.lastBackup,
+    required this.historyAsync,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+    required this.reduceMotion,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return ListView(
+      padding: EdgeInsets.only(
+        left: spacing.cardHorizontal,
+        right: spacing.cardHorizontal,
+        top: spacing.cardVertical,
+        bottom: 0,
+      ),
+      children: [
+        BackupHeroCard(
+            lastBackup: lastBackup,
+            isDark: isDark,
+            reduceMotion: reduceMotion,
+            ctxt: ctxt,),
+        SizedBox(height: spacing.sectionGap),
+        SectionHeader(ctxt.backup_actions),
+        SizedBox(height: spacing.elementGap),
+        const _ActionsSection(),
+        SizedBox(height: spacing.sectionGap),
+        SectionHeader(ctxt.backup_cloudBackup, isPro: true),
+        SizedBox(height: spacing.elementGap),
+        const ProGate(
+          feature: ProFeature.cloudBackup,
+          child: _CloudBackupSection(),
+        ),
+        SizedBox(height: spacing.sectionGap),
+        SectionHeader(ctxt.backup_autoBackup, isPro: true),
+        SizedBox(height: spacing.elementGap),
+        const ProGate(
+          feature: ProFeature.autoBackup,
+          child: _AutoBackupSection(),
+        ),
+        SizedBox(height: spacing.sectionGap),
+        SectionHeader(ctxt.backup_history),
+        SizedBox(height: spacing.elementGap),
+        _HistorySection(historyAsync: historyAsync),
+        SizedBox(height: spacing.sectionGap),
+        const _InfoCard(),
+        SizedBox(height: spacing.sectionGap),
+        const AmbientBrandSection(
+            showSignature: true, absorbBottomInset: false,),
+      ],
+    );
+  }
+}
+
+class _LoadingView extends ConsumerWidget {
+  final AppSpacing spacing;
+  final ColorScheme color;
+
+  const _LoadingView({required this.spacing, required this.color});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListView(
+      padding: EdgeInsets.only(
+        left: spacing.cardHorizontal,
+        right: spacing.cardHorizontal,
+        top: spacing.cardVertical,
+        bottom: 0,
+      ),
+      children: [
+        _BackupHeroSkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.sectionGap),
+        _SettingsGroupSkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.sectionGap),
+        _SettingsGroupSkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.sectionGap),
+        _HistorySkeleton(spacing: spacing, color: color),
+        SizedBox(height: spacing.sectionGap),
+        const AmbientBrandSection(
+            showSignature: true, absorbBottomInset: false,),
+      ],
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          BACKUP HERO CARD                                  ║
+// ════════════════════════════════════════════════════════════════════════════
+
+class BackupHeroCard extends ConsumerWidget {
+  final BackupMetadata? lastBackup;
+  final bool isDark;
+  final bool reduceMotion;
+  final AppLocalizations ctxt;
+
+  const BackupHeroCard({
+    super.key,
+    required this.lastBackup,
+    required this.isDark,
+    required this.reduceMotion,
+    required this.ctxt,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final hasBackup = lastBackup != null;
+
+    return Semantics(
+      label: hasBackup
+          ? 'Last backup: ${_formatRelativeDate(lastBackup!.backupDate, ctxt)}'
+          : 'No backups created yet',
+      child: AnimatedContainer(
+        duration:
+            reduceMotion ? Duration.zero : const Duration(milliseconds: 300),
+        padding: EdgeInsets.all(spacing.cardInner),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.primary.withValues(alpha: isDark ? 0.2 : 0.12),
+              color.primary.withValues(alpha: isDark ? 0.08 : 0.04),
+            ],
+          ),
+          border: Border.all(color: color.primary.withValues(alpha: 0.3)),
+        ),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(spacing.radiusSmall),
-              ),
-              child: Icon(icon, color: color.primary, size: 20),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            SizedBox(
+              width: 56,
+              height: 56,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Text(
-                    title,
-                    style: textTheme.bodyLarge
-                        ?.copyWith(fontWeight: FontWeight.w500),
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color:
+                          color.primary.withValues(alpha: isDark ? 0.15 : 0.1),
+                    ),
                   ),
-                  Text(
-                    subtitle,
-                    style: textTheme.bodySmall
-                        ?.copyWith(color: color.onSurfaceVariant),
+                  ClipOval(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: const SizedBox(width: 56, height: 56),
+                    ),
+                  ),
+                  TweenAnimationBuilder<double>(
+                    duration: reduceMotion
+                        ? Duration.zero
+                        : const Duration(milliseconds: 800),
+                    curve: Curves.easeOutBack,
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    builder: (context, value, child) =>
+                        Transform.scale(scale: value, child: child),
+                    child: Container(
+                      padding: EdgeInsets.all(spacing.elementGap * 1.5),
+                      decoration: BoxDecoration(
+                        color: color.primary.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        hasBackup
+                            ? LucideIcons.shieldCheck
+                            : LucideIcons.shieldAlert,
+                        color: color.primary,
+                        size: 24,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            Icon(
-              LucideIcons.chevronRight,
-              color: color.onSurfaceVariant,
-              size: 20,
+            SizedBox(width: spacing.sectionGap),
+            Expanded(
+              child: AnimatedDefaultTextStyle(
+                duration: reduceMotion
+                    ? Duration.zero
+                    : const Duration(milliseconds: 200),
+                style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: color.primary,
+                    ) ??
+                    const TextStyle(fontWeight: FontWeight.w700),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(hasBackup
+                        ? ctxt.backup_lastBackup
+                        : ctxt.backup_noBackups,),
+                    SizedBox(height: spacing.elementGapUltraMin),
+                    Text(
+                      hasBackup
+                          ? _formatRelativeDate(lastBackup!.backupDate, ctxt)
+                          : ctxt.backup_createFirst,
+                      style: textTheme.bodySmall
+                          ?.copyWith(color: color.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -401,98 +339,125 @@ class BackupRestoreScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHistoryRow({
-    required AppLocalizations ctxt, required BackupMetadata backup,
-    required ColorScheme color,
-    required TextTheme textTheme,
-    required AppSpacing spacing,
-  }) {
-    final dateStr = safeDateFormat('yMMMd',).add_jm().format(backup.backupDate);
-    final sizeStr = _formatFileSize(backup.fileSize);
+  String _formatRelativeDate(DateTime date, AppLocalizations ctxt) {
+    final diff = DateTime.now().difference(date);
+    if (diff.inMinutes < 1) return ctxt.backup_justNow;
+    if (diff.inHours < 1) return ctxt.backup_minutesAgo(diff.inMinutes);
+    if (diff.inDays < 1) return ctxt.backup_hoursAgo(diff.inHours);
+    if (diff.inDays < 7) return ctxt.backup_daysAgo(diff.inDays);
+    return safeDateFormat('yMMMd', ctxt.localeName).format(date);
+  }
+}
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          HISTORY SECTION                                   ║
+// ════════════════════════════════════════════════════════════════════════════
+
+class _HistorySection extends ConsumerWidget {
+  final AsyncValue<List<BackupMetadata>> historyAsync;
+
+  const _HistorySection({required this.historyAsync});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ctxt = AppLocalizations.of(context)!;
+
+    return historyAsync.when(
+      data: (history) {
+        if (history.isEmpty) {
+          return const _EmptyHistoryCard();
+        }
+        return SettingsGroupCard(
+          items: history.take(5).map((backup) {
+            final dateStr = safeDateFormat('yMMMd').add_jm().format(backup.backupDate);
+            final sizeStr = _formatFileSize(backup.fileSize);
+            return SettingItem(
+              icon: LucideIcons.archive,
+              title: dateStr,
+              subtitle: '${ctxt.backup_recordCount(backup.recordCount)} • $sizeStr${backup.includesAttachments ? ' • with attachments' : ''}',
+              onTap: () {},
+              selected: true,
+            );
+          }).toList(),
+        );
+      },
+      loading: () => const SizedBox(height: 150, child: Center(child: CircularProgressIndicator())),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+}
+
+class _EmptyHistoryCard extends ConsumerWidget {
+  const _EmptyHistoryCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
+
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner * 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        color: color.surfaceContainerLow,
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.tertiary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(spacing.radiusSmall),
-            ),
-            child: Icon(LucideIcons.archive, color: color.tertiary, size: 20),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  dateStr,
-                  style: textTheme.bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Text(
-                      ctxt.backup_recordCount(backup.recordCount),
-                      style: textTheme.bodySmall
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 6),
-                      width: 3,
-                      height: 3,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: color.onSurfaceVariant.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    Text(
-                      sizeStr,
-                      style: textTheme.bodySmall
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                    if (backup.includesAttachments) ...[
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                        width: 3,
-                        height: 3,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: color.onSurfaceVariant.withValues(alpha: 0.5),
-                        ),
-                      ),
-                      Icon(
-                        LucideIcons.paperclip,
-                        size: 12,
-                        color: color.onSurfaceVariant,
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
+          Icon(LucideIcons.archiveX, size: 36, color: color.onSurfaceVariant.withValues(alpha: 0.4)),
+          SizedBox(height: spacing.elementGap * 1.5),
+          Text(ctxt.backup_noHistory, style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant)),
         ],
       ),
     );
   }
+}
 
-  // ── ACTIONS ──
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          ACTIONS SECTION                                   ║
+// ════════════════════════════════════════════════════════════════════════════
+
+class _ActionsSection extends ConsumerWidget {
+  const _ActionsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
+    return SettingsGroupCard(
+      items: [
+        SettingItem(
+          icon: LucideIcons.cloudUpload,
+          title: ctxt.backup_backupDataTitle,
+          subtitle: ctxt.backup_backupDataSubtitle,
+          onTap: () => _performBackup(context, ref, spacing),
+          selected: false,
+        ),
+        SettingItem(
+          icon: LucideIcons.cloudDownload,
+          title: ctxt.backup_restoreBackupTitle,
+          subtitle: ctxt.backup_restoreBackupSubtitle,
+          onTap: () => _performRestore(context, ref, spacing),
+          selected: false,
+        ),
+      ],
+    );
+  }
 
   Future<void> _performBackup(
-    BuildContext context,
-    WidgetRef ref,
-    AppLocalizations ctxt,
-    AppSpacing spacing,
-  ) async {
-    final password = await DialogUtils.showPasswordDialog(
-      context,
-      spacing,
-      isRestore: false,
-    );
+      BuildContext context, WidgetRef ref, AppSpacing spacing,) async {
+    final ctxt = AppLocalizations.of(context)!;
+    final password = await DialogUtils.showPasswordDialog(context, spacing,
+        isRestore: false,);
     if (password == null || !context.mounted) return;
 
     final includeAttachments = await DialogUtils.showConfirmation(
@@ -506,10 +471,8 @@ class BackupRestoreScreen extends ConsumerWidget {
     );
 
     final filePath = await BackupService.createEncryptedBackup(
-      password,
-      spacing,
-      includeAttachments: includeAttachments ?? false,
-    );
+        password, spacing,
+        includeAttachments: includeAttachments ?? false,);
     if (filePath != null) {
       SnackbarService.success(BuddyMessages.backupSuccess, spacing);
       ref.invalidate(_backupHistoryProvider);
@@ -520,60 +483,183 @@ class BackupRestoreScreen extends ConsumerWidget {
   }
 
   Future<void> _performRestore(
-    BuildContext context,
-    WidgetRef ref,
-    AppLocalizations ctxt,
-    AppSpacing spacing,
-  ) async {
-    final password = await DialogUtils.showPasswordDialog(
-      context,
-      spacing,
-      isRestore: true,
-    );
+      BuildContext context, WidgetRef ref, AppSpacing spacing,) async {
+    final password =
+        await DialogUtils.showPasswordDialog(context, spacing, isRestore: true);
     if (password == null) return;
 
     final isar = await ref.read(isarServiceProvider).getInstance();
     if (!context.mounted) return;
     final data = await BackupService.restoreEncryptedBackup(
-      context,
-      spacing,
-      isar,
-      password,
-    );
+        context, spacing, isar, password,);
     if (data != null) {
       SnackbarService.success(BuddyMessages.restoreSuccess, spacing);
       ref.invalidate(_backupHistoryProvider);
     }
   }
+}
 
-  // ── HELPERS ──
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                            INFO CARD                                       ║
+// ════════════════════════════════════════════════════════════════════════════
 
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+class _InfoCard extends ConsumerWidget {
+  const _InfoCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
+
+    return Semantics(
+      label: 'Backup information',
+      child: Container(
+        padding: EdgeInsets.all(spacing.cardInner),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          color: color.primary.withValues(alpha: 0.06),
+          border: Border.all(color: color.primary.withValues(alpha: 0.15)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(LucideIcons.info, color: color.primary, size: 18),
+            SizedBox(width: spacing.elementGap),
+            Expanded(
+              child: Text(
+                ctxt.backup_infoText,
+                style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant, height: 1.4),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
+}
 
-  String _formatRelativeDate(DateTime date, AppLocalizations ctxt) {
-    final diff = DateTime.now().difference(date);
-    if (diff.inMinutes < 1) return ctxt.backup_justNow;
-    if (diff.inHours < 1) return ctxt.backup_minutesAgo(diff.inMinutes);
-    if (diff.inDays < 1) return ctxt.backup_hoursAgo(diff.inHours);
-    if (diff.inDays < 7) return ctxt.backup_daysAgo(diff.inDays);
-    return safeDateFormat('yMMMd', ctxt.localeName).format(date);
+// ═════════════════════════════════════════════════════════════════════════════
+// ║                          SKELETON LOADERS                                  ║
+// ════════════════════════════════════════════════════════════════════════════
+
+class _BackupHeroSkeleton extends StatelessWidget {
+  final AppSpacing spacing;
+  final ColorScheme color;
+
+  const _BackupHeroSkeleton({required this.spacing, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        color: color.surfaceContainerLow,
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          SkeletonLoader(
+              width: 56, height: 56, borderRadius: BorderRadius.circular(28),),
+          SizedBox(width: spacing.sectionGap),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SkeletonLoader(width: 100, height: 18),
+                SizedBox(height: 8),
+                SkeletonLoader(width: 150, height: 14),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsGroupSkeleton extends StatelessWidget {
+  final AppSpacing spacing;
+  final ColorScheme color;
+
+  const _SettingsGroupSkeleton({required this.spacing, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.surface.withValues(alpha: 0.75),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: List.generate(2, (index) {
+          final isLast = index == 1;
+          return Padding(
+            padding: EdgeInsets.only(
+              left: spacing.cardInner,
+              right: spacing.cardInner,
+              top: spacing.cardInner,
+              bottom: isLast ? spacing.cardInner : spacing.elementGapMin,
+            ),
+            child: Row(
+              children: [
+                SkeletonLoader(
+                    width: 40,
+                    height: 40,
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),),
+                SizedBox(width: spacing.cardInner),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SkeletonLoader(width: 120, height: 16),
+                      SizedBox(height: 6),
+                      SkeletonLoader(width: 80, height: 12),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _HistorySkeleton extends StatelessWidget {
+  final AppSpacing spacing;
+  final ColorScheme color;
+
+  const _HistorySkeleton({required this.spacing, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner * 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        color: color.surfaceContainerLow,
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SkeletonLoader(
+              width: 36, height: 36, borderRadius: BorderRadius.circular(18),),
+          SizedBox(height: spacing.elementGap * 1.5),
+          const SkeletonLoader(width: 120, height: 16),
+        ],
+      ),
+    );
   }
 }
 
 class _CloudBackupSection extends ConsumerStatefulWidget {
-  final ColorScheme color;
-  final TextTheme textTheme;
-  final AppSpacing spacing;
-
-  const _CloudBackupSection({
-    required this.color,
-    required this.textTheme,
-    required this.spacing,
-  });
+  const _CloudBackupSection();
 
   @override
   ConsumerState<_CloudBackupSection> createState() =>
@@ -585,18 +671,17 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.color;
-    final textTheme = widget.textTheme;
-    final spacing = widget.spacing;
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
     final ctxt = AppLocalizations.of(context)!;
     final isSignedIn = ref.watch(driveSignedInProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (!isSignedIn) {
-      return _buildSignInCard(color, textTheme, spacing, ctxt, isDark);
+      return _buildSignInCard(color, textTheme, spacing, ctxt);
     }
 
-    return _buildCloudActions(color, textTheme, spacing, ctxt, isDark);
+    return _buildCloudActions(color, textTheme, spacing, ctxt);
   }
 
   Widget _buildSignInCard(
@@ -604,7 +689,6 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
     TextTheme textTheme,
     AppSpacing spacing,
     AppLocalizations ctxt,
-    bool isDark,
   ) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -651,7 +735,6 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
     TextTheme textTheme,
     AppSpacing spacing,
     AppLocalizations ctxt,
-    bool isDark,
   ) {
     final driveBackups = ref.watch(driveBackupsProvider);
     final email = ref.watch(driveEmailProvider);
@@ -679,8 +762,11 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.circleCheck,
-                          size: 16, color: color.primary,),
+                      Icon(
+                        LucideIcons.circleCheck,
+                        size: 16,
+                        color: color.primary,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -715,7 +801,8 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: _isLoading
                             ? SizedBox(
@@ -726,8 +813,11 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                                   color: color.primary,
                                 ),
                               )
-                            : Icon(LucideIcons.cloudUpload,
-                                color: color.primary, size: 20,),
+                            : Icon(
+                                LucideIcons.cloudUpload,
+                                color: color.primary,
+                                size: 20,
+                              ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -749,8 +839,11 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                           ],
                         ),
                       ),
-                      Icon(LucideIcons.chevronRight,
-                          color: color.onSurfaceVariant, size: 20,),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        color: color.onSurfaceVariant,
+                        size: 20,
+                      ),
                     ],
                   ),
                 ),
@@ -762,7 +855,9 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
               ),
               // Restore from Drive
               InkWell(
-                onTap: _isLoading ? null : () => _showCloudRestoreSheet(ctxt, spacing),
+                onTap: _isLoading
+                    ? null
+                    : () => _showCloudRestoreSheet(ctxt, spacing),
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -772,10 +867,14 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: color.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
                         ),
-                        child: Icon(LucideIcons.cloudDownload,
-                            color: color.primary, size: 20,),
+                        child: Icon(
+                          LucideIcons.cloudDownload,
+                          color: color.primary,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -802,10 +901,13 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                         data: (backups) => backups.isNotEmpty
                             ? Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 2,),
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: color.primary.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                                  borderRadius: BorderRadius.circular(
+                                      spacing.radiusSmall,),
                                 ),
                                 child: Text(
                                   '${backups.length}',
@@ -819,8 +921,11 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                         orElse: () => const SizedBox.shrink(),
                       ),
                       const SizedBox(width: 8),
-                      Icon(LucideIcons.chevronRight,
-                          color: color.onSurfaceVariant, size: 20,),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        color: color.onSurfaceVariant,
+                        size: 20,
+                      ),
                     ],
                   ),
                 ),
@@ -839,8 +944,8 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
       if (success) {
         ref.read(driveSignedInProvider.notifier).set(true);
         ref.read(driveEmailProvider.notifier).set(
-            GoogleDriveService.userEmail,
-        );
+              GoogleDriveService.userEmail,
+            );
         ref.invalidate(driveBackupsProvider);
       }
     } finally {
@@ -895,7 +1000,8 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (ctx) => DraggableScrollableSheet(
         initialChildSize: 0.5,
@@ -954,10 +1060,14 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: color.tertiary.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                              borderRadius:
+                                  BorderRadius.circular(spacing.radiusSmall),
                             ),
-                            child: Icon(LucideIcons.cloud,
-                                color: color.tertiary, size: 20,),
+                            child: Icon(
+                              LucideIcons.cloud,
+                              color: color.tertiary,
+                              size: 20,
+                            ),
                           ),
                           title: Text(
                             backup.name,
@@ -971,8 +1081,11 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                               color: color.onSurfaceVariant,
                             ),
                           ),
-                          trailing: Icon(LucideIcons.download,
-                              color: color.primary, size: 20,),
+                          trailing: Icon(
+                            LucideIcons.download,
+                            color: color.primary,
+                            size: 20,
+                          ),
                           onTap: () {
                             Navigator.pop(context);
                             _restoreFromDrive(backup, spacing);
@@ -1000,7 +1113,8 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
     );
   }
 
-  Future<void> _restoreFromDrive(DriveBackupInfo backup, AppSpacing spacing) async {
+  Future<void> _restoreFromDrive(
+      DriveBackupInfo backup, AppSpacing spacing,) async {
     final ctxt = AppLocalizations.of(context)!;
     final password = await DialogUtils.showPasswordDialog(
       context,
@@ -1028,7 +1142,8 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
       final encrypt.Key key;
       if (backupData['kdf'] == 'pbkdf2' && backupData['salt'] != null) {
         final salt = base64Decode(backupData['salt'] as String);
-        final (derivedKey, _) = BackupService.deriveKeyWithSalt(password, Uint8List.fromList(salt));
+        final (derivedKey, _) =
+            BackupService.deriveKeyWithSalt(password, Uint8List.fromList(salt));
         key = derivedKey;
       } else {
         // ignore: deprecated_member_use_from_same_package
@@ -1051,9 +1166,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
       ref.invalidate(_backupHistoryProvider);
     } catch (e) {
       SnackbarService.error(
-        'Restore failed: Invalid password or corrupted file',
-        spacing
-      );
+          'Restore failed: Invalid password or corrupted file', spacing,);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -1067,15 +1180,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
 }
 
 class _AutoBackupSection extends ConsumerStatefulWidget {
-  final ColorScheme color;
-  final TextTheme textTheme;
-  final AppSpacing spacing;
-
-  const _AutoBackupSection({
-    required this.color,
-    required this.textTheme,
-    required this.spacing,
-  });
+  const _AutoBackupSection();
 
   @override
   ConsumerState<_AutoBackupSection> createState() => _AutoBackupSectionState();
@@ -1105,9 +1210,9 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.color;
-    final textTheme = widget.textTheme;
-    final spacing = widget.spacing;
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
     final ctxt = AppLocalizations.of(context)!;
 
     return Card(
@@ -1125,7 +1230,8 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
         children: [
           // Description
           Padding(
-            padding: EdgeInsets.fromLTRB(spacing.cardInner, spacing.cardInner - 2, spacing.cardInner, 0),
+            padding: EdgeInsets.fromLTRB(
+                spacing.cardInner, spacing.cardInner - 2, spacing.cardInner, 0,),
             child: Row(
               children: [
                 Container(
@@ -1134,7 +1240,8 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
                     color: color.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
-                  child: Icon(LucideIcons.timer, color: color.primary, size: 20),
+                  child:
+                      Icon(LucideIcons.timer, color: color.primary, size: 20),
                 ),
                 SizedBox(width: spacing.cardInner - 2),
                 Expanded(
@@ -1191,11 +1298,13 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
                     ),
                   ],
                   selected: {_frequency},
-                  onSelectionChanged: (selected) => _setFrequency(selected.first, spacing),
+                  onSelectionChanged: (selected) =>
+                      _setFrequency(selected.first, spacing),
                   style: ButtonStyle(
                     visualDensity: VisualDensity.compact,
                     textStyle: WidgetStatePropertyAll(
-                      textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+                      textTheme.labelSmall
+                          ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -1232,7 +1341,8 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
                           ),
                         ),
                       ),
-                      Icon(LucideIcons.chevronRight, size: 16, color: color.error),
+                      Icon(LucideIcons.chevronRight,
+                          size: 16, color: color.error,),
                     ],
                   ),
                 ),
@@ -1248,14 +1358,18 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
               color: color.outlineVariant.withValues(alpha: 0.4),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(spacing.cardInner, spacing.elementGap + 2, spacing.cardInner, 0),
+              padding: EdgeInsets.fromLTRB(spacing.cardInner,
+                  spacing.elementGap + 2, spacing.cardInner, 0,),
               child: Row(
                 children: [
-                  Icon(LucideIcons.history, size: 14, color: color.onSurfaceVariant),
+                  Icon(LucideIcons.history,
+                      size: 14, color: color.onSurfaceVariant,),
                   SizedBox(width: spacing.elementGap),
                   Text(
                     ctxt.backup_autoLastRun(
-                      safeDateFormat('yMMMd').add_jm().format(_recentBackups.first.date),
+                      safeDateFormat('yMMMd')
+                          .add_jm()
+                          .format(_recentBackups.first.date),
                     ),
                     style: textTheme.bodySmall?.copyWith(
                       color: color.onSurfaceVariant,

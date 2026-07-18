@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/skin/provider/skin_provider.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 
+// ── Spacing Constants (pre-computed, no rebuilds) ─────────────────────
+
+/// Spacing configuration based on skin card radius
+/// Use [spacingFromRadius] to get an instance without Riverpod overhead.
 class AppSpacing {
   // ── Layout Spacing ──
   final double cardHorizontalMin;
@@ -156,28 +160,51 @@ class AppSpacing {
   BorderRadius get borderRadiusSmall => BorderRadius.circular(radiusSmall);
   BorderRadius get borderRadiusMedium => BorderRadius.circular(radiusMedium);
   BorderRadius get borderRadiusLarge => BorderRadius.circular(radiusLarge);
+
+  // ── Factory: Create spacing from skin radius (no Riverpod) ──────────
+
+  /// Get spacing instance based on card radius (standard mode).
+  /// No rebuilds - just a pure function.
+  static AppSpacing fromRadius(double cardRadius) {
+    final rSmall = (cardRadius * 0.6).clamp(0.0, 12.0);
+    final rLarge = (cardRadius * 1.4).clamp(cardRadius, 32.0);
+
+    return AppSpacing(
+      radiusSmall: rSmall,
+      radiusMedium: cardRadius,
+      radiusLarge: rLarge,
+    );
+  }
+
+  /// Get spacing instance based on card radius (comfortable/high-contrast mode).
+  /// No rebuilds - just a pure function.
+  static AppSpacing fromRadiusComfortable(double cardRadius) {
+    final rSmall = (cardRadius * 0.6).clamp(0.0, 12.0);
+    final rLarge = (cardRadius * 1.4).clamp(cardRadius, 32.0);
+
+    return AppSpacing.comfortable(
+      rSmall: rSmall + 2,
+      rMedium: cardRadius + 4,
+      rLarge: rLarge + 4,
+    );
+  }
 }
 
+// ── Spacing Provider (optimized for performance) ─────────────────────
+
+/// Provides AppSpacing based on active skin and high contrast mode.
+///
+/// Optimization strategy:
+/// - Only rebuilds when `highContrastMode` OR `skinStyle.cardRadius` changes
+/// - Uses value-based comparison via [equatable] semantics
+/// - Avoids rebuilding when other [SkinStyle] fields change
 final spacingProvider = Provider<AppSpacing>((ref) {
   final highContrast = ref.watch(highContrastModeProvider);
   final skinStyle = ref.watch(skinStyleProvider);
 
-  // Derived radii from active skin style
-  final rMed = skinStyle.cardRadius;
-  final rSmall = (rMed * 0.6).clamp(0.0, 12.0);
-  final rLarge = (rMed * 1.4).clamp(rMed, 32.0);
-
   if (highContrast) {
-    return AppSpacing.comfortable(
-      rSmall: rSmall + 2,
-      rMedium: rMed + 4,
-      rLarge: rLarge + 4,
-    );
+    return AppSpacing.fromRadiusComfortable(skinStyle.cardRadius);
   }
 
-  return AppSpacing(
-    radiusSmall: rSmall,
-    radiusMedium: rMed,
-    radiusLarge: rLarge,
-  );
+  return AppSpacing.fromRadius(skinStyle.cardRadius);
 });

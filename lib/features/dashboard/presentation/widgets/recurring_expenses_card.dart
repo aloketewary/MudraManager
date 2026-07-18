@@ -46,7 +46,7 @@ class RecurringExpensesCard extends ConsumerWidget {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(spacing.elementGap + 4),
                   decoration: BoxDecoration(
                     color: color.errorContainer,
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),

@@ -24,6 +24,16 @@ import 'package:mudra_manager/features/gamification/providers/achievement_regist
 /// - AchievementEngine (series, progress, unlock)
 /// - XpEngine (add, level-up, formula)
 /// GamificationService becomes a thin facade.
+/// Structured result of a daily check-in, replacing the former
+/// magic-string return ("Day 3 streak! +10 XP") that callers had
+/// to regex-parse to extract the streak count.
+class DailyCheckInResult {
+  final int streakCount;
+  final int xpEarned;
+
+  const DailyCheckInResult({required this.streakCount, required this.xpEarned});
+}
+
 class GamificationService {
   final Isar isar;
   final AppLog log;
@@ -684,7 +694,7 @@ class GamificationService {
     return allInSeries.fold<int>(0, (sum, ach) => sum + ach.progress);
   }
 
-  Future<String?> updateDailyCheckIn() async {
+  Future<DailyCheckInResult?> updateDailyCheckIn() async {
     final now = DateTime.now();
     log.i('🔍 Daily check-in called at: $now');
 
@@ -778,7 +788,7 @@ class GamificationService {
     await _handleUnderBudgetStreak();
 
     log.i('🎉 Check-in complete: Day $newStreak, +$xp XP');
-    return 'Day $newStreak streak! +$xp XP';
+    return DailyCheckInResult(streakCount: newStreak, xpEarned: xp);
   }
 
   Future<void> _checkBudgetAdherence() async {

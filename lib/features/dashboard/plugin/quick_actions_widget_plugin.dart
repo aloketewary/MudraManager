@@ -15,19 +15,28 @@ class QuickActionsWidgetPlugin extends DashboardWidgetPlugin {
   IconData get icon => LucideIcons.pointer;
 
   @override
-  int get defaultOrder => 2;
+  int get defaultOrder => 1; // First widget - quick access is priority
 
   @override
   WidgetCategory get category => WidgetCategory.actions;
 
   @override
-  WidgetSize get defaultSize => WidgetSize.small;
+  WidgetSize get defaultSize => WidgetSize.medium; // 2x height for better visibility
 
   @override
-  String get description => 'Quick access to add expenses and transfers';
+  bool get isResizable => true; // Let user scale to full width if needed
+
+  @override
+  String get description => 'Quick access to add expenses, income, and transfers';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const QuickActionButton();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Use small height for narrow screens, medium for wider
+        final isWide = constraints.maxWidth >= 400;
+        return QuickActionButton(isWide: isWide);
+      },
+    );
   }
 }

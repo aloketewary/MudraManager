@@ -1,4 +1,5 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:async';
 
@@ -20,6 +21,7 @@ import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/transactions/data/filter_state_provider.dart';
+import 'package:mudra_manager/features/transactions/data/monthly_spend_provider.dart';
 import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_query_provider.dart';
@@ -28,6 +30,9 @@ import 'package:mudra_manager/features/transactions/domain/filter_state.dart';
 import 'package:mudra_manager/features/transactions/domain/transaction_view_mode.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_card.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
+import 'package:mudra_manager/features/transactions/presentation/widgets/spend_metric.dart';
+import 'package:mudra_manager/features/transactions/presentation/widgets/category_filter_tabs.dart';
+import 'package:mudra_manager/features/transactions/presentation/widgets/insight_banner.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -317,7 +322,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     actions: [
                       if (_selectedTxnIds.length == 2)
                         TextButton.icon(
-                          onPressed: () => _mergeAsTransfer(ctxt, spacing,),
+                          onPressed: () => _mergeAsTransfer(
+                            ctxt,
+                            spacing,
+                          ),
                           icon:
                               const Icon(LucideIcons.arrowLeftRight, size: 18),
                           label: Text(ctxt.txnList_convertToTransfer),
@@ -433,7 +441,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               _invalidateTransactionProviders();
             }),
             child: sectionedAsync.when(
-              data: (sectioned) => _buildTransactionList(
+              data: (sectioned) => _buildTransactionListWithHeaders(
                 sectioned,
                 color,
                 textTheme,
@@ -1184,6 +1192,274 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     );
   }
 
+  // ── TRANSACTION LIST WITH HEADERS ──
+  Widget _buildTransactionListWithHeaders(
+    List<TxListEntry> sectioned,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppLocalizations ctxt,
+    AppSpacing spacing,
+  ) {
+    final spendingSummary = ref.watch(monthlySpendProvider);
+    final filterTabs = ['ALL', 'SPENDS', 'INCOME', 'TRANSFERS'];
+    final selectedIndex = switch (_filter) {
+      'expense' => 1,
+      'income' => 2,
+      'transfer' => 3,
+      _ => 0,
+    };
+    
+    final items = <Widget>[
+      // Spent Tracking Metric
+      Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal + 4,
+          vertical: spacing.cardVertical,
+        ),
+        child: SpendMetric(
+          label: ctxt.txnList_spentThisMonth,
+          amount: formatCurrency(spendingSummary.totalSpent),
+          changePercent: spendingSummary.changePercent,
+          isPositiveChange: spendingSummary.previousMonthSpent != null &&
+              spendingSummary.totalSpent >=
+                  (spendingSummary.previousMonthSpent ?? 0),
+        ),
+      ),
+      // Horizontal Filter Tabs Row
+      Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical * 0.5,
+        ),
+        child: CategoryFilterTabs(
+          tabs: filterTabs,
+          selectedIndex: selectedIndex,
+          onTabSelected: (index) {
+            final value = switch (index) {
+              1 => 'expense',
+              2 => 'income',
+              3 => 'transfer',
+              _ => 'all',
+            };
+            setState(() => _filter = value);
+          },
+        ),
+      ),
+      // ── BUDGET INSIGHT BANNER ──
+      _buildBudgetInsightBanner(color, textTheme, spacing, ctxt),
+    ];
+
+    return _buildTransactionListWithItems(
+        sectioned, color, textTheme, ctxt, spacing, items);
+  }
+
+  // ── BUDGET INSIGHT BANNER WIDGET ──
+  Widget _buildBudgetInsightBanner(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final budgetsAsync = ref.watch(budgetsWithProgressProvider);
+
+    return budgetsAsync.when(
+      data: (budgets) {
+        // Find the first budget that's close to or over limit
+        BudgetWithProgress? criticalBudget;
+        try {
+          criticalBudget = budgets.firstWhere((bwp) {
+            return bwp.spent >= (bwp.budget.amount * 0.8);
+          });
+        } catch (_) {
+          // No matching budget found
+        }
+
+        if (criticalBudget == null) {
+          return const SizedBox.shrink();
+        }
+
+        final budget = criticalBudget.budget;
+        final spent = criticalBudget.spent;
+        final budgetAmount = budget.amount;
+        final categoryName = budget.categories.isNotEmpty
+            ? budget.categories.first.name
+            : 'Budget';
+
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.cardHorizontal,
+            vertical: spacing.cardVertical,
+          ),
+          child: InsightBanner.budget(
+            title: '$categoryName Budget Update',
+            subtitle: spent >= budgetAmount
+                ? 'You\'ve exceeded your $categoryName budget'
+                : 'You\'ve spent ${formatCurrency(spent)} on $categoryName this period',
+            budgetInfo: BudgetInfo(
+              spent: spent,
+              budgetAmount: budgetAmount,
+              categoryName: categoryName,
+            ),
+            actions: [
+              InsightAction(
+                label: ctxt.budget_dashboardPageTitle,
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  context.push(AppRoutes.budgetDetails, extra: budget.id);
+                },
+                isPrimary: true,
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical,
+        ),
+        child: const SizedBox(height: 100),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildTransactionListWithItems(
+    List<TxListEntry> sectioned,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppLocalizations ctxt,
+    AppSpacing spacing,
+    List<Widget> headerItems,
+  ) {
+    // Get transaction items
+    final filtered = sectioned;
+
+    if (filtered.isEmpty) {
+      return ListView(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          ...headerItems,
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: NoDataFound(
+              message: _searchQuery.isNotEmpty ||
+                      _selectedCategoryId != null ||
+                      _filterStartDate != null
+                  ? BuddyMessages.noFilterResults('filter')
+                  : BuddyMessages.noTransactions,
+              iconData: LucideIcons.receipt,
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Hide pending delete from UI
+    final visible = _pendingDeletes.isNotEmpty
+        ? filtered.where((e) {
+            if (e is! TxItem) return true;
+            return !_pendingDeletes.containsKey(e.txn.id);
+          }).toList()
+        : filtered;
+
+    final displayItems = visible.take(_displayLimit).toList();
+    final hasMore = visible.length > _displayLimit;
+
+    final transactionIds =
+        displayItems.whereType<TxItem>().map((e) => e.txn.id).toList();
+
+    // Cache trip names future
+    if (_lastTxIds == null ||
+        _lastTxIds!.length != transactionIds.length ||
+        !_listEquals(_lastTxIds!, transactionIds)) {
+      _lastTxIds = List.of(transactionIds);
+      _tripNamesFuture = ref
+          .read(tripServiceProvider)
+          .getTripNamesByTransactionIds(transactionIds);
+    }
+
+    return FutureBuilder<Map<int, String>>(
+      future: _tripNamesFuture,
+      builder: (context, tripNamesSnapshot) {
+        final tripNames = tripNamesSnapshot.data ?? {};
+
+        return ListView.builder(
+          key: const PageStorageKey('transactionList'),
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).padding.bottom +
+                kBottomNavigationBarHeight +
+                16,
+          ),
+          itemCount:
+              headerItems.length + displayItems.length + (hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            // Header items
+            if (index < headerItems.length) return headerItems[index];
+
+            final txIndex = index - headerItems.length;
+
+            if (txIndex == displayItems.length) {
+              return Padding(
+                padding: EdgeInsets.all(spacing.cardInner),
+                child: const TransactionCardSkeleton(),
+              );
+            }
+
+            final entry = displayItems[txIndex];
+            if (entry is TxHeader) {
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: spacing.cardVertical,
+                  horizontal: spacing.cardHorizontal,
+                ),
+                child: Text(
+                  formatDateHeader(entry.group, ctxt.localeName).toUpperCase(),
+                  style: textTheme.labelMedium?.copyWith(
+                    color: color.onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              );
+            }
+
+            final transaction = (entry as TxItem).txn;
+            final tags = transaction.tags.toList();
+            final isRecurring =
+                transaction.recurringTransactionSource.value != null;
+            final tripName = tripNames[transaction.id];
+
+            return TransactionCard(
+              category: transaction.category.value,
+              description: transaction.description,
+              account: transaction.account.value,
+              amount: transaction.amount.toStringAsFixed(2),
+              currencyCode: transaction.currencyCode,
+              convertedAmount: transaction.convertedAmount,
+              date: transaction.date,
+              isExpense: transaction.isExpense,
+              isTransfer: transaction.isTransfer,
+              tags: tags,
+              related: transaction.related.value,
+              tripName: tripName,
+              isRecurring: isRecurring,
+              onEdit: () => _onEditTransaction(transaction, spacing),
+              onRemove: () => _onRemoveTransaction(transaction, ctxt, spacing),
+              onUnlinkRecurring: isRecurring
+                  ? () => _onUnlinkRecurring(transaction, spacing)
+                  : null,
+              enablePeek: index == headerItems.length && widget.isTabActive,
+            );
+          },
+        );
+      },
+    );
+  }
+
   // ── TRANSACTION LIST ──
   Widget _buildTransactionList(
     List<TxListEntry> sectioned,
@@ -1313,10 +1589,20 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     related: transaction.related.value,
                     tripName: tripName,
                     isRecurring: isRecurring,
-                    onEdit: () => _onEditTransaction(transaction, spacing,),
-                    onRemove: () => _onRemoveTransaction(transaction, ctxt, spacing,),
+                    onEdit: () => _onEditTransaction(
+                      transaction,
+                      spacing,
+                    ),
+                    onRemove: () => _onRemoveTransaction(
+                      transaction,
+                      ctxt,
+                      spacing,
+                    ),
                     onUnlinkRecurring: isRecurring
-                        ? () => _onUnlinkRecurring(transaction, spacing,)
+                        ? () => _onUnlinkRecurring(
+                              transaction,
+                              spacing,
+                            )
                         : null,
                     enablePeek: index == firstTxIndex && widget.isTabActive,
                   );
@@ -1447,7 +1733,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   // ── MERGE AS TRANSFER ──
-  Future<void> _mergeAsTransfer(AppLocalizations ctxt, AppSpacing spacing) async {
+  Future<void> _mergeAsTransfer(
+      AppLocalizations ctxt, AppSpacing spacing) async {
     if (_selectedTxnIds.length != 2) return;
 
     final isar = await ref.read(isarServiceProvider).getInstance();
@@ -1461,7 +1748,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     }
 
     if (txns.length != 2) {
-      SnackbarService.error(BuddyMessages.genericError, spacing,);
+      SnackbarService.error(
+        BuddyMessages.genericError,
+        spacing,
+      );
       return;
     }
 
@@ -1469,19 +1759,28 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final expense = txns.where((t) => t.isExpense).firstOrNull;
     final income = txns.where((t) => !t.isExpense).firstOrNull;
     if (expense == null || income == null) {
-      SnackbarService.error('Select one expense and one income transaction', spacing,);
+      SnackbarService.error(
+        'Select one expense and one income transaction',
+        spacing,
+      );
       return;
     }
 
     // Validate: same amount (±1% tolerance)
     if ((expense.amount - income.amount).abs() > expense.amount * 0.01) {
-      SnackbarService.error('Amounts must match (within 1%)', spacing,);
+      SnackbarService.error(
+        'Amounts must match (within 1%)',
+        spacing,
+      );
       return;
     }
 
     // Validate: within 24 hours
     if (expense.date.difference(income.date).inHours.abs() > 24) {
-      SnackbarService.error('Transactions must be within 24 hours', spacing,);
+      SnackbarService.error(
+        'Transactions must be within 24 hours',
+        spacing,
+      );
       return;
     }
 
@@ -1490,7 +1789,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
     // Validate: different accounts
     if (fromAccount?.id == toAccount?.id) {
-      SnackbarService.error('Cannot transfer between the same account', spacing,);
+      SnackbarService.error(
+        'Cannot transfer between the same account',
+        spacing,
+      );
       return;
     }
 
@@ -1520,13 +1822,19 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       });
 
       if (context.mounted) {
-        SnackbarService.success(ctxt.txnList_convertedToTransfer, spacing,);
+        SnackbarService.success(
+          ctxt.txnList_convertedToTransfer,
+          spacing,
+        );
       }
     }
   }
 
   // ── EDIT HANDLER ──
-  Future<void> _onEditTransaction(transaction, AppSpacing spacing,) async {
+  Future<void> _onEditTransaction(
+    transaction,
+    AppSpacing spacing,
+  ) async {
     final bool? result;
     if (transaction.isTransfer) {
       await transaction.related.load();
@@ -1565,7 +1873,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   // ── DELETE HANDLER ──
-  Future<void> _onUnlinkRecurring(Transaction transaction, AppSpacing spacing,) async {
+  Future<void> _onUnlinkRecurring(
+    Transaction transaction,
+    AppSpacing spacing,
+  ) async {
     final isar = await ref.read(isarServiceProvider).getInstance();
     await isar.writeTxn(() async {
       transaction.recurringTransactionSource.value = null;
@@ -1582,7 +1893,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   Future<void> _onRemoveTransaction(
-      transaction, AppLocalizations ctxt, AppSpacing spacing,) async {
+    transaction,
+    AppLocalizations ctxt,
+    AppSpacing spacing,
+  ) async {
     final confirm = await DialogUtils.showDeleteConfirmation(
       context,
       spacing,

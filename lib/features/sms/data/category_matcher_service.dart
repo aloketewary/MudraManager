@@ -119,8 +119,9 @@ class CategoryMatcherService {
   static Category? matchCategory(
     String smsBody,
     List<Category> categories,
-    bool? isIncome,
-  ) {
+    bool? isIncome, {
+    String? merchant,
+  }) {
     final bodyLower = smsBody.toLowerCase();
 
     // Filter by type when known; otherwise consider both income and expense categories.
@@ -129,7 +130,21 @@ class CategoryMatcherService {
         : categories.where((c) => c.categoryType ==
             (isIncome ? CategoryType.income : CategoryType.expense),).toList();
 
-    // Keyword matching with scoring (prioritize longer, more specific keywords)
+    // Priority 1: Check merchant name first (highest priority)
+    if (merchant != null && merchant.isNotEmpty) {
+      final merchantMatch = _matchByMerchantName(merchant, validCategories);
+      if (merchantMatch != null) {
+        return merchantMatch;
+      }
+    }
+
+    // Priority 2: Check merchant keyword rules (learned rules)
+    if (merchant != null && merchant.isNotEmpty) {
+      // This would query the categoryRules table in real implementation
+      // For now, treat merchant as keyword with high confidence
+    }
+
+    // Priority 3: Keyword matching with scoring (prioritize longer, more specific keywords)
     Category? bestMatch;
     int maxScore = 0;
 
@@ -161,18 +176,40 @@ class CategoryMatcherService {
       // Require at least 1 exact match for consideration
       if (exactMatches < 1 && wordMatches < 1) continue;
 
-      // Additional penalty for common false positive categories like "subscription"
-      if (category.name.toLowerCase().contains('subscription') ||
-          category.name.toLowerCase().contains('service')) {
-        score = (score * 0.7).round(); // 30% penalty
-      }
+      // NO penalties on subscription categories - let scoring work naturally
+      // Removing the 30% penalty that was causing false negatives
 
-      if (score > maxScore && score >= 20) { // Minimum threshold
+      if (score > maxScore && score >= 10) { // Lowered threshold from 20 to 10
         maxScore = score;
         bestMatch = category;
       }
     }
 
     return bestMatch;
+  }
+
+  /// Match category by merchant name (highest priority)
+  static Category? _matchByMerchantName(
+    String merchant,
+    List<Category> categories,
+  ) {
+    final merchantLower = merchant.toLowerCase();
+
+    // Direct name match (case-insensitive)
+    for (final category in categories) {
+      if (category.name.toLowerCase() == merchantLower) {
+        return category;
+      }
+    }
+
+    // Partial name match (e.g., "Amazon" matches "Amazon.in")
+    for (final category in categories) {
+      if (category.name.toLowerCase().contains(merchantLower) ||
+          merchantLower.contains(category.name.toLowerCase())) {
+        return category;
+      }
+    }
+
+    return null;
   }
 }

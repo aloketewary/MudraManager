@@ -11190,7 +11190,7 @@ abstract class AppLocalizations {
   /// **'Transactions'**
   String get common_transactions;
 
-  /// No description provided for @tax_title.
+  /// Tax estimation screen title
   ///
   /// In en, this message translates to:
   /// **'Tax Estimation'**
@@ -12623,6 +12623,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Based on {amount}/month average'**
   String goal_basedOnAvg(Object amount);
+
+  /// Label showing the user's current day streak
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} day} other{{count} days}}'**
+  String profile_dayStreakLabel(int count);
+
+  /// Label showing total spent in current month
+  ///
+  /// In en, this message translates to:
+  /// **'Spent this month'**
+  String get txnList_spentThisMonth;
+
+  /// Tax planner screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Planner'**
+  String get tax_plannerTitle;
+
+  /// Start tax planning button
+  ///
+  /// In en, this message translates to:
+  /// **'Start Planning'**
+  String get tax_startPlanning;
+
+  /// Planning mode indicator
+  ///
+  /// In en, this message translates to:
+  /// **'Planning Mode'**
+  String get tax_planningMode;
+
+  /// Planned deductions label
+  ///
+  /// In en, this message translates to:
+  /// **'Planned Deductions'**
+  String get tax_plannedDeductions;
+
+  /// Potential savings label
+  ///
+  /// In en, this message translates to:
+  /// **'Potential Savings'**
+  String get tax_potentialSavings;
+
+  /// Prompt to add deductions
+  ///
+  /// In en, this message translates to:
+  /// **'Add deductions below to see potential tax savings'**
+  String get tax_addDeductionsPrompt;
+
+  /// Deduction planner card title
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction Planner'**
+  String get tax_plannerDeductions;
+
+  /// Planning impact card title
+  ///
+  /// In en, this message translates to:
+  /// **'Planning Impact'**
+  String get tax_planningImpact;
+
+  /// Current tax label
+  ///
+  /// In en, this message translates to:
+  /// **'Current Tax'**
+  String get tax_currentTax;
+
+  /// Projected tax label
+  ///
+  /// In en, this message translates to:
+  /// **'Projected Tax'**
+  String get tax_projectedTax;
+
+  /// Total savings label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Savings: '**
+  String get tax_totalSavings;
+
+  /// NPS 80CCD1B deduction
+  ///
+  /// In en, this message translates to:
+  /// **'NPS (80CCD1B)'**
+  String get tax_nps80CCD1B;
+
+  /// Section 80C deduction
+  ///
+  /// In en, this message translates to:
+  /// **'Section 80C'**
+  String get tax_section80C;
+
+  /// Section 80D deduction
+  ///
+  /// In en, this message translates to:
+  /// **'Section 80D'**
+  String get tax_section80D;
+
+  /// HRA exemption
+  ///
+  /// In en, this message translates to:
+  /// **'HRA Exemption'**
+  String get tax_hraExemption;
+
+  /// Home loan interest deduction
+  ///
+  /// In en, this message translates to:
+  /// **'Home Loan Interest'**
+  String get tax_homeLoanInterest;
+
+  /// Up to amount label
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {amount}'**
+  String tax_upTo(int amount);
 }
 
 class _AppLocalizationsDelegate

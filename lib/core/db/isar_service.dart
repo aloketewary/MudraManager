@@ -96,21 +96,21 @@ class IsarService {
           TaxDeductionProfileSchema,
         ],
         directory: dir.path,
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 15));
 
       _initCompleter!.complete(_instance!);
     } catch (e) {
       _log.w('Isar.open() failed or timed out: $e');
+      final completer = _initCompleter;
       _initCompleter = null;
       // Fallback: try getInstance one more time
       final fallback = Isar.getInstance();
       if (fallback != null && fallback.isOpen) {
         _instance = fallback;
-        _initCompleter!.complete(_instance!);
+        completer?.complete(_instance!);
       } else {
         // Last resort: try opening with a different name or re-throw
-        _initCompleter!.completeError(e);
-        _initCompleter = null;
+        completer?.completeError(e);
         rethrow;
       }
     }

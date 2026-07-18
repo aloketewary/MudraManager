@@ -8,6 +8,9 @@ import 'package:mudra_manager/core/providers/l10n_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
+import 'package:mudra_manager/shared/widgets/section_header.dart';
+import 'package:mudra_manager/shared/widgets/settings_group_card.dart';
+import 'package:mudra_manager/shared/widgets/setting_item.dart';
 
 class ChooseLanguageScreen extends ConsumerStatefulWidget {
   const ChooseLanguageScreen({super.key});
@@ -29,8 +32,8 @@ class _ChooseLanguageScreenState extends ConsumerState<ChooseLanguageScreen> {
   @override
   Widget build(BuildContext context) {
     final currentLocale = ref.read(localeProvider);
-    final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
     final ctxt = AppLocalizations.of(context)!;
 
@@ -41,50 +44,109 @@ class _ChooseLanguageScreenState extends ConsumerState<ChooseLanguageScreen> {
         enableRefresh: false,
       ),
       actions: ScreenActions.empty,
-      body: ListView(
-        padding: EdgeInsets.symmetric(vertical: spacing.cardVertical),
-        children: [
-          ...AppLocalizations.supportedLocales.map(
-            (locale) {
-              final isSelected = currentLocale.languageCode == locale.languageCode;
-              final isBeta = betaLanguage.contains(locale.languageCode);
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth > 600 ? 600.0 : double.infinity;
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: ListView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.cardHorizontal,
+                  vertical: spacing.cardVertical,
+                ),
+                children: [
+                  SectionHeader(ctxt.language_settings_appbar_title),
+                  SizedBox(height: spacing.elementGap),
+                  _LanguageList(
+                    currentLocale: currentLocale,
+                    betaLanguage: betaLanguage,
+                    color: color,
+                    textTheme: textTheme,
+                    spacing: spacing,
+                    ctxt: ctxt,
+                  ),
+                  SizedBox(height: spacing.sectionGap),
+                  const _InfoCard(),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
 
-              return ListTile(
-                leading: Icon(
-                  isSelected ? LucideIcons.languages : LucideIcons.globe,
-                  color: isSelected ? color.primary : color.onSurfaceVariant,
-                ),
-                title: Row(
-                  children: [
-                    Text(locale.displayName()),
-                    if (isBeta) ...[
-                      SizedBox(width: spacing.elementGap),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: spacing.elementGap,
-                          vertical: spacing.elementGapUltraMin,
-                        ),
-                        decoration: BoxDecoration(
-                          color: color.primary,
-                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                        ),
-                        child: Text(
-                          'beta',
-                          style: textTheme.labelSmall?.copyWith(color: color.onPrimary),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                trailing: isSelected
-                    ? Icon(LucideIcons.check, color: color.primary)
-                    : null,
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  LanguageService.changeLanguage(context, ref, locale);
-                },
-              );
-            },
+class _LanguageList extends ConsumerWidget {
+  final Locale currentLocale;
+  final List<String> betaLanguage;
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+  final AppLocalizations ctxt;
+
+  const _LanguageList({
+    required this.currentLocale,
+    required this.betaLanguage,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+    required this.ctxt,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SettingsGroupCard(
+      items: AppLocalizations.supportedLocales.map((locale) {
+        final isSelected = currentLocale.languageCode == locale.languageCode;
+        final isBeta = betaLanguage.contains(locale.languageCode);
+
+        return SettingItem(
+          icon: LucideIcons.globe,
+          title: locale.displayName(),
+          subtitle: isBeta ? 'beta' : '',
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            LanguageService.changeLanguage(context, ref, locale);
+          },
+          selected: isSelected,
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _InfoCard extends ConsumerWidget {
+  const _InfoCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        color: color.primary.withValues(alpha: 0.06),
+        border: Border.all(color: color.primary.withValues(alpha: 0.15)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(LucideIcons.info, color: color.primary, size: 18),
+          SizedBox(width: spacing.elementGap),
+          Expanded(
+            child: Text(
+              ctxt.language_settings_appbar_title,
+              style: textTheme.bodySmall?.copyWith(
+                color: color.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
           ),
         ],
       ),

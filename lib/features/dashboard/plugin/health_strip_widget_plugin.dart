@@ -15,7 +15,7 @@ class HealthStripWidgetPlugin extends DashboardWidgetPlugin {
   IconData get icon => LucideIcons.activity;
 
   @override
-  int get defaultOrder => 0; // After Today Card (-1), before Accounts (1)
+  int get defaultOrder => 0; // First widget
 
   @override
   WidgetCategory get category => WidgetCategory.essential;

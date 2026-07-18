@@ -8,7 +8,7 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
-import 'dart:math' as math;
+import 'package:mudra_manager/shared/widgets/progress_ring.dart';
 
 class GoalCard extends ConsumerWidget {
   const GoalCard({super.key});
@@ -48,35 +48,18 @@ class GoalCard extends ConsumerWidget {
             padding: EdgeInsets.all(spacing.cardInner),
             child: Row(
               children: [
-                TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 1500),
-                  curve: Curves.easeOutCubic,
-                  tween: Tween(begin: 0.0, end: progress),
-                  builder: (context, value, child) {
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SizedBox(
-                          width: spacing.sectionGap * 2,
-                          height: spacing.sectionGap * 2,
-                          child: CustomPaint(
-                            painter: _CompactRingPainter(
-                              progress: value,
-                              color: color.primary,
-                              spacing: spacing,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          '${(value * 100).toInt()}%',
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: color.primary,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                ProgressRing(
+                  progress: progress,
+                  color: color.primary,
+                  size: spacing.sectionGap * 2,
+                  insetPadding: spacing.cardVerticalMin,
+                  labelBuilder: (value) => Text(
+                    '${(value * 100).toInt()}%',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: color.primary,
+                    ),
+                  ),
                 ),
                 SizedBox(width: spacing.sectionGap),
                 Expanded(
@@ -90,7 +73,7 @@ class GoalCard extends ConsumerWidget {
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: spacing.elementGap),
                       Container(
                         height: 10,
                         decoration: BoxDecoration(
@@ -139,8 +122,10 @@ class GoalCard extends ConsumerWidget {
                           Expanded(
                             child: _buildMetricItem(
                               AppLocalizations.of(context)!.budget_remaining,
-                              formatCurrency((totalTarget - totalSaved),
-                                  decimals: 0,),
+                              formatCurrency(
+                                (totalTarget - totalSaved),
+                                decimals: 0,
+                              ),
                               LucideIcons.trendingUp,
                               color.tertiary,
                               color,
@@ -204,56 +189,4 @@ class GoalCard extends ConsumerWidget {
       ],
     );
   }
-}
-
-class _CompactRingPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-  final AppSpacing spacing;
-
-  _CompactRingPainter({
-    required this.progress,
-    required this.color,
-    required this.spacing,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - spacing.cardVerticalMin;
-    const strokeWidth = 6.0;
-
-    final bgPaint = Paint()
-      ..color = color.withValues(alpha: 0.15)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawCircle(center, radius, bgPaint);
-
-    final rect = Rect.fromCircle(center: center, radius: radius);
-    final gradient = SweepGradient(
-      colors: [color, color.withValues(alpha: 0.6), color],
-      stops: const [0.0, 0.5, 1.0],
-      transform: const GradientRotation(-math.pi / 2),
-    );
-
-    final progressPaint = Paint()
-      ..shader = gradient.createShader(rect)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(
-      rect,
-      -math.pi / 2,
-      2 * math.pi * progress,
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_CompactRingPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.color != color;
 }

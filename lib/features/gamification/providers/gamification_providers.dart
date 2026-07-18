@@ -32,7 +32,7 @@ final userLevelProvider = StreamProvider.autoDispose<UserLevel?>((ref) async* {
   yield* service.watchUserLevel();
 });
 
-final dailyCheckInProvider = FutureProvider.autoDispose<String?>((ref) async {
+final dailyCheckInProvider = FutureProvider.autoDispose<DailyCheckInResult?>((ref) async {
   final service = await ref.watch(gamificationServiceInitProvider.future);
   return await service.updateDailyCheckIn();
 });

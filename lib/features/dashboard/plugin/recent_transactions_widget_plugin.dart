@@ -1,11 +1,9 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/recent_transactions_card.dart';
-import 'package:mudra_manager/core/router/app_routes.dart';
 
 class RecentTransactionsWidgetPlugin extends DashboardWidgetPlugin {
   @override
@@ -18,7 +16,7 @@ class RecentTransactionsWidgetPlugin extends DashboardWidgetPlugin {
   IconData get icon => LucideIcons.receipt;
 
   @override
-  int get defaultOrder => 6;
+  int get defaultOrder => 8; // Ninth
 
   @override
   WidgetCategory get category => WidgetCategory.essential;
@@ -40,9 +38,7 @@ class RecentTransactionsWidgetPlugin extends DashboardWidgetPlugin {
   }
 
   @override
-  void onTap(BuildContext context, WidgetRef ref) {
-    context.push(AppRoutes.transactions);
-  }
+  void onTap(BuildContext context, WidgetRef ref) {}
 
   @override
   Future<void> refresh(WidgetRef ref) async {

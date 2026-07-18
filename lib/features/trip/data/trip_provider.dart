@@ -50,3 +50,11 @@ final tripSummaryProvider = FutureProvider.autoDispose
   }
   return await service.getTripSummary(trip);
 });
+/// Provider for fetching trip names by transaction IDs.
+/// Caches results to avoid repeated queries during list rebuilds.
+final tripNamesByTransactionIdsProvider =
+    FutureProvider.family<Map<int, String>, List<int>>((ref, transactionIds) async {
+  if (transactionIds.isEmpty) return {};
+  final service = ref.watch(tripServiceProvider);
+  return await service.getTripNamesByTransactionIds(transactionIds);
+});

@@ -142,7 +142,7 @@ void main() {
         totalIncome: income,
         totalExpense: expense,
         totalBalance: balance,
-        netWorth: netWorth,
+        netWorth: netWorth, pendingSmsCount: 0,
       );
     }
 

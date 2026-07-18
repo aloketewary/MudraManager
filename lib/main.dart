@@ -10,6 +10,7 @@ import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
+import 'package:mudra_manager/core/widgets/error_boundary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,6 +50,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 void main() async {
   final log = AppLog(getLogger(), 'Main');
   WidgetsFlutterBinding.ensureInitialized();
+  ErrorBoundary.install();
   OverflowDetector.init();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

@@ -9,11 +9,11 @@ import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
+import 'package:mudra_manager/core/providers/singleton_providers.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 
-// Dashboard data model
 class DashboardData {
   final List<Transaction> transactions;
   final List<Account> accounts;
@@ -25,6 +25,7 @@ class DashboardData {
   final double totalExpense;
   final double totalBalance;
   final double netWorth;
+  final int pendingSmsCount;
 
   const DashboardData({
     required this.transactions,
@@ -37,6 +38,7 @@ class DashboardData {
     required this.totalExpense,
     required this.totalBalance,
     required this.netWorth,
+    required this.pendingSmsCount,
   });
 
   @override
@@ -50,7 +52,8 @@ class DashboardData {
           transactions.length == other.transactions.length &&
           accounts.length == other.accounts.length &&
           budgets.length == other.budgets.length &&
-          goals.length == other.goals.length;
+          goals.length == other.goals.length &&
+          pendingSmsCount == other.pendingSmsCount;
 
   @override
   int get hashCode =>
@@ -161,6 +164,8 @@ final dashboardDataProvider =
         return sum + balance;
       });
 
+      final pendingSmsCount = await ref.read(smsActivityServiceProvider).getPendingCount();
+
       return DashboardData(
         transactions: transactions,
         accounts: accounts,
@@ -172,6 +177,7 @@ final dashboardDataProvider =
         totalExpense: totalExpense,
         totalBalance: totalBalance,
         netWorth: netWorth,
+        pendingSmsCount: pendingSmsCount,
       );
     } catch (e) {
       rethrow;

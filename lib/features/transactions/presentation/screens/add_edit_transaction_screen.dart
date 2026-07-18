@@ -243,7 +243,6 @@ class _AddEditTransactionScreenState
   }
 
   @override
-  @override
   void dispose() {
     _tripSubscription?.close();
     _amountController.dispose();
@@ -469,52 +468,74 @@ class _AddEditTransactionScreenState
 
             // ── Trip banner (top, outside ListView) ──
             if (_selectedTrip != null)
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal,
-                ),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: color.primaryContainer.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    border: Border.all(
-                      color: color.primary.withValues(alpha: 0.3),
+              Semantics(
+                label: 'Trip: ${_selectedTrip!.name}, ${_selectedParticipants.length} participants',
+                button: true,
+                child: GestureDetector(
+                  onTap: () => _showSplitCustomizer(spacing),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardHorizontal,
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(LucideIcons.luggage, size: 18, color: color.primary),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _selectedTrip!.name,
-                          style: textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: color.onPrimaryContainer,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardInner,
+                        vertical: spacing.elementGap + 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.primaryContainer.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        border: Border.all(
+                          color: color.primary.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(spacing.elementGap),
+                            decoration: BoxDecoration(
+                              color: color.primary.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              LucideIcons.luggage,
+                              size: spacing.iconMD,
+                              color: color.primary,
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                          SizedBox(width: spacing.elementGap * 2),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _selectedTrip!.name,
+                                  style: textTheme.labelLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: color.onPrimaryContainer,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(height: spacing.elementGapUltraMin),
+                                Text(
+                                  '${_selectedParticipants.length} participants',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color:
+                                        color.onPrimaryContainer.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            LucideIcons.chevronRight,
+                            size: spacing.iconSM,
+                            color: color.primary,
+                          ),
+                        ],
                       ),
-                      Text(
-                        '${_selectedParticipants.length} people',
-                        style: textTheme.labelSmall?.copyWith(
-                          color:
-                              color.onPrimaryContainer.withValues(alpha: 0.7),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: () => _showSplitCustomizer(spacing),
-                        child: Icon(
-                          LucideIcons.pencil,
-                          size: 16,
-                          color: color.primary,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -716,66 +737,93 @@ class _AddEditTransactionScreenState
                       // Date chip
                       Expanded(
                         flex: 3,
-                        child: InkWell(
-                          onTap: () async {
-                            final now = DateTime.now();
-                            final safeInitial = _selectedDate.isAfter(now)
-                                ? now
-                                : _selectedDate;
-                            final pick = await showDatePicker(
-                              context: context,
-                              initialDate: safeInitial,
-                              firstDate: DateTime(2000),
-                              lastDate: now,
-                            );
-                            if (pick != null) {
-                              HapticFeedback.lightImpact();
-                              setState(() {
-                                _selectedDate = DateTime(
-                                  pick.year,
-                                  pick.month,
-                                  pick.day,
-                                  _selectedDate.hour,
-                                  _selectedDate.minute,
+                        child: Semantics(
+                          label: 'Transaction date: ${DateFormat('MMMM dd, yyyy').format(_selectedDate)}, tap to change',
+                          button: true,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () async {
+                                final now = DateTime.now();
+                                final safeInitial = _selectedDate.isAfter(now)
+                                    ? now
+                                    : _selectedDate;
+                                final pick = await showDatePicker(
+                                  context: context,
+                                  initialDate: safeInitial,
+                                  firstDate: DateTime(2000),
+                                  lastDate: now,
                                 );
-                              });
-                            }
-                          },
-                          borderRadius:
-                              BorderRadius.circular(spacing.radiusMedium),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color: color.surfaceContainerHighest,
+                                if (pick != null) {
+                                  HapticFeedback.lightImpact();
+                                  setState(() {
+                                    _selectedDate = DateTime(
+                                      pick.year,
+                                      pick.month,
+                                      pick.day,
+                                      _selectedDate.hour,
+                                      _selectedDate.minute,
+                                    );
+                                  });
+                                }
+                              },
                               borderRadius:
                                   BorderRadius.circular(spacing.radiusMedium),
-                              border: Border.all(
-                                color:
-                                    color.outlineVariant.withValues(alpha: 0.2),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  LucideIcons.calendar,
-                                  size: 16,
-                                  color: color.onSurfaceVariant,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 14,
                                 ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    DateFormat('MMM dd, yyyy')
-                                        .format(_selectedDate),
-                                    style: textTheme.bodyMedium
-                                        ?.copyWith(fontWeight: FontWeight.w500),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                decoration: BoxDecoration(
+                                  color: color.surfaceContainerHighest,
+                                  borderRadius:
+                                      BorderRadius.circular(spacing.radiusMedium),
+                                  border: Border.all(
+                                    color:
+                                        color.outlineVariant.withValues(alpha: 0.2),
                                   ),
                                 ),
-                              ],
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(spacing.elementGap),
+                                      decoration: BoxDecoration(
+                                        color: color.primary.withValues(alpha: 0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        LucideIcons.calendar,
+                                        size: spacing.iconSM,
+                                        color: color.primary,
+                                      ),
+                                    ),
+                                    SizedBox(width: spacing.elementGap + 2),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Date',
+                                            style: textTheme.labelSmall?.copyWith(
+                                              color: color.onSurfaceVariant,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                          SizedBox(height: spacing.elementGapUltraMin),
+                                          Text(
+                                            DateFormat('MMM dd, yyyy')
+                                                .format(_selectedDate),
+                                            style: textTheme.bodyMedium
+                                                ?.copyWith(fontWeight: FontWeight.w500),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -784,56 +832,70 @@ class _AddEditTransactionScreenState
                       // Time chip
                       Expanded(
                         flex: 2,
-                        child: InkWell(
-                          onTap: () async {
-                            final picked = await showTimePicker(
-                              context: context,
-                              initialTime:
-                                  TimeOfDay.fromDateTime(_selectedDate),
-                            );
-                            if (picked != null) {
-                              HapticFeedback.lightImpact();
-                              setState(() {
-                                _selectedDate = DateTime(
-                                  _selectedDate.year,
-                                  _selectedDate.month,
-                                  _selectedDate.day,
-                                  picked.hour,
-                                  picked.minute,
+                        child: Semantics(
+                          label: 'Transaction time: ${DateFormat('hh:mm a').format(_selectedDate)}, tap to change',
+                          button: true,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () async {
+                                final picked = await showTimePicker(
+                                  context: context,
+                                  initialTime:
+                                      TimeOfDay.fromDateTime(_selectedDate),
                                 );
-                              });
-                            }
-                          },
-                          borderRadius:
-                              BorderRadius.circular(spacing.radiusMedium),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color: color.surfaceContainerHighest,
+                                if (picked != null) {
+                                  HapticFeedback.lightImpact();
+                                  setState(() {
+                                    _selectedDate = DateTime(
+                                      _selectedDate.year,
+                                      _selectedDate.month,
+                                      _selectedDate.day,
+                                      picked.hour,
+                                      picked.minute,
+                                    );
+                                  });
+                                }
+                              },
                               borderRadius:
                                   BorderRadius.circular(spacing.radiusMedium),
-                              border: Border.all(
-                                color:
-                                    color.outlineVariant.withValues(alpha: 0.2),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: color.surfaceContainerHighest,
+                                  borderRadius:
+                                      BorderRadius.circular(spacing.radiusMedium),
+                                  border: Border.all(
+                                    color:
+                                        color.outlineVariant.withValues(alpha: 0.2),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(spacing.elementGap),
+                                      decoration: BoxDecoration(
+                                        color: color.primary.withValues(alpha: 0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        LucideIcons.clock,
+                                        size: spacing.iconSM,
+                                        color: color.primary,
+                                      ),
+                                    ),
+                                    SizedBox(width: spacing.elementGap + 2),
+                                    Text(
+                                      DateFormat('hh:mm a').format(_selectedDate),
+                                      style: textTheme.bodyMedium
+                                          ?.copyWith(fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  LucideIcons.clock,
-                                  size: 16,
-                                  color: color.onSurfaceVariant,
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  DateFormat('hh:mm a').format(_selectedDate),
-                                  style: textTheme.bodyMedium
-                                      ?.copyWith(fontWeight: FontWeight.w500),
-                                ),
-                              ],
                             ),
                           ),
                         ),
@@ -1628,7 +1690,7 @@ class _AddEditTransactionScreenState
 
     final alerts = await alertService.checkBudgetsAfterTransaction(txn);
     if (alerts.isNotEmpty) {
-      ref.read(budgetAlertsProvider.notifier).addAlerts(alerts);
+      ref.read(budgetAlertsNotifierProvider.notifier).addAlerts(alerts);
     }
   }
 

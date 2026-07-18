@@ -16,6 +16,8 @@ class TestPendingData implements PendingTransactionData {
   final String body;
   @override
   final String? fromBank;
+  @override
+  final String? toAccount;
 
   TestPendingData({
     this.account,
@@ -23,6 +25,7 @@ class TestPendingData implements PendingTransactionData {
     this.isIncome,
     required this.body,
     this.fromBank,
+    this.toAccount
   });
 }
 
