@@ -211,7 +211,7 @@ class AccountsService {
     final rates = await isar.exchangeRates.where().findAll();
     final rateMap = {for (final r in rates) r.currencyCode: r.rateToBase};
     // Populate the shared cache so other code benefits
-    CurrencyService.cachedRates.addAll(rateMap);
+    CurrencyService.mergeCachedRates(rateMap);
 
     final futures = accounts.map((acc) async {
       final results = await Future.wait([

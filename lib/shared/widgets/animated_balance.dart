@@ -33,23 +33,25 @@ class AnimatedBalance extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(balanceVisibilityProvider);
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: value),
-      duration: duration,
-      builder: (context, animatedValue, _) {
-        return CurrencyText(
-          amount: animatedValue,
-          currencyCode: currencyCode,
-          style: style ?? Theme.of(context).textTheme.headlineMedium,
-          textAlign: textAlign,
-          compact: compact,
-          fixedLength: fixedStringLength,
-          prefixText: prefix,
-          suffixText: suffix,
-          showSign: true,
-          showPositiveSign: false,
-        );
-      },
+    return RepaintBoundary(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0, end: value),
+        duration: duration,
+        builder: (context, animatedValue, _) {
+          return CurrencyText(
+            amount: animatedValue,
+            currencyCode: currencyCode,
+            style: style ?? Theme.of(context).textTheme.headlineMedium,
+            textAlign: textAlign,
+            compact: compact,
+            fixedLength: fixedStringLength,
+            prefixText: prefix,
+            suffixText: suffix,
+            showSign: true,
+            showPositiveSign: false,
+          );
+        },
+      ),
     );
   }
 }

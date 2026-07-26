@@ -1,5 +1,5 @@
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/features/gamification/models/achievement.dart';
+import 'package:mudra_manager/features/gamification/domain/achievement.dart';
 
 class AppConfigService {
   final Isar isar;

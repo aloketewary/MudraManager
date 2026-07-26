@@ -10,7 +10,7 @@ import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
-import 'package:mudra_manager/features/gamification/models/achievement.dart';
+import 'package:mudra_manager/features/gamification/domain/achievement.dart';
 
 final entitlementServiceProvider = Provider<EntitlementService>((ref) {
   return EntitlementService(ref.watch(isarServiceProvider));

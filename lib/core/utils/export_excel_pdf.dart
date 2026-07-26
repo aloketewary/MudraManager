@@ -6,11 +6,11 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/analytics/data/advanced_analytics_service.dart';
 import 'package:mudra_manager/core/utils/file_utils.dart';
-import 'package:mudra_manager/plugins/export_plugin_manager.dart';
-import 'package:mudra_manager/plugins/export_plugin.dart';
+import 'package:mudra_manager/features/import_export/data/export_plugin_manager.dart';
+import 'package:mudra_manager/features/import_export/data/export_plugin.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/export_options_screen.dart';
-import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
 
 String formatExportCurrency(double amount) {
   return formatCurrency(amount, code: BaseCurrency.code, decimals: 2);

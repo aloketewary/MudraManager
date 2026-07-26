@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
-import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_service.dart';
 
 

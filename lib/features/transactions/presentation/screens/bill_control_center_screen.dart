@@ -1,8 +1,10 @@
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/services/background_task_manager.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -23,6 +25,7 @@ import 'package:mudra_manager/features/transactions/data/recurring_transaction_p
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
+import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 import 'package:mudra_manager/shared/widgets/widgets.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:go_router/go_router.dart';
@@ -60,13 +63,13 @@ class _BillControlCenterScreenState
       config: ScreenShellConfig(
         title: ctxt.title_billControlCenter,
         appBarMode: AppBarMode.standard,
-        enableRefresh: false,
+        enableRefresh: true,
       ),
       actions: ScreenActions.build(
         appBar: [
           ScreenAction(
             id: 'add_recurring',
-            label: 'Add',
+            label: ctxt.common_add,
             icon: LucideIcons.plus,
             onTap: () {
               HapticFeedback.mediumImpact();
@@ -75,16 +78,30 @@ class _BillControlCenterScreenState
           ),
         ],
       ),
+      onRefresh: () => RefreshHelper.withMinDuration(() async {
+        ref.invalidate(billControlCenterProvider);
+        await ref.read(billControlCenterProvider.future);
+      }),
       body: dataAsync.when(
         data: (data) {
           if (data.activeCount == 0) {
             return NoDataFound(
               message: BuddyMessages.noBills,
+              description: ctxt.billCenter_addBill,
               iconData: LucideIcons.receiptText,
+              action: ElevatedButton.icon(
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  context.push(AppRoutes.addRecurring);
+                },
+                icon: const Icon(LucideIcons.plus),
+                label: Text(ctxt.common_add),
+              ),
             );
           }
 
           return ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.symmetric(
               horizontal: spacing.cardHorizontal,
               vertical: spacing.cardVertical,
@@ -197,9 +214,20 @@ class _BillControlCenterScreenState
           );
         },
         loading: () => ListView(
-          children: List.generate(3, (_) => const BudgetCardSkeleton()),
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.cardHorizontal,
+            vertical: spacing.cardVertical,
+          ),
+          children: List.generate(
+            4,
+            (_) => Padding(
+              padding: EdgeInsets.only(bottom: spacing.elementGap),
+              child: const BudgetCardSkeleton(),
+            ),
+          ),
         ),
-        error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
+        error: (err, _) =>
+            Center(child: Text(BuddyMessages.errorWith('$err'))),
       ),
     );
   }
@@ -233,13 +261,32 @@ class _BillControlCenterScreenState
         statusLabel = ctxt.billCenter_safe;
     }
 
-    return Card(
-      elevation: 0,
-      color: accentColor.withValues(alpha: 0.08),
-      margin: const EdgeInsets.only(),
-      shape: RoundedRectangleBorder(
+    final isDark = brightness == Brightness.dark;
+
+    // This is the screen's one hero/glow card — the number the user came
+    // to check ("what's left after upcoming bills"). Everything else below
+    // (upcoming list, monthly insight, groups) stays flat/glass per the
+    // one-glow-per-screen rule.
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accentColor.withValues(alpha: isDark ? 0.20 : 0.12),
+            color.surface,
+          ],
+        ),
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(color: accentColor.withValues(alpha: 0.25)),
+        border: Border.all(color: accentColor.withValues(alpha: 0.25)),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Padding(
         padding: EdgeInsets.all(spacing.cardInner),
@@ -509,7 +556,7 @@ class _BillControlCenterScreenState
               Padding(
                 padding: EdgeInsets.only(top: spacing.elementGapMin),
                 child: Text(
-                  '+${upcoming.length - 4} more',
+                  ctxt.billCenter_moreCount(upcoming.length - 4),
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onPrimaryContainer.withValues(alpha: 0.6),
                   ),
@@ -554,6 +601,7 @@ class _BillControlCenterScreenState
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
+    final ctxt = AppLocalizations.of(context)!;
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: spacing.cardInner,
@@ -575,7 +623,7 @@ class _BillControlCenterScreenState
               TextSpan(
                 children: [
                   TextSpan(
-                    text: '$count active',
+                    text: ctxt.billCenter_activeBills(count),
                     style: textTheme.bodySmall?.copyWith(
                       color: color.onSurfaceVariant,
                     ),
@@ -587,6 +635,9 @@ class _BillControlCenterScreenState
                     ),
                   ),
                   TextSpan(
+                    // monthlyTotal is already converted to base currency by
+                    // the provider, so formatCurrency's default base-code
+                    // formatting is correct here (no per-bill currencyCode).
                     text: '${formatCurrency(monthlyTotal, decimals: 0)}/mo',
                     style: textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.bold,
@@ -601,8 +652,11 @@ class _BillControlCenterScreenState
                       ),
                     ),
                     TextSpan(
+                      // Show in the bill's own account currency (not
+                      // base-converted) since this is a per-bill reference
+                      // amount, not part of an aggregate total.
                       text:
-                          '${largest.category.value?.name ?? "Bill"} ${formatCurrency(largest.amount, decimals: 0)}',
+                          '${largest.category.value?.name ?? 'Bill'} ${formatCurrency(largest.amount, code: largest.account.value?.currencyCode, decimals: 0)}',
                       style: textTheme.bodySmall?.copyWith(
                         color: color.onSurfaceVariant,
                       ),
@@ -630,7 +684,15 @@ class _BillControlCenterScreenState
     AppSpacing spacing,
     Brightness brightness,
   ) {
-    final groupTotal = bills.fold(0.0, (s, b) => s + b.amount);
+    // Bills can be linked to accounts in different currencies — summing raw
+    // `amount` mixes currencies. CurrencyText with no currencyCode renders
+    // in base currency, so convert each bill's amount first (rates were
+    // already merged into the cache by billControlCenterProvider).
+    final groupTotal = bills.fold(0.0, (s, b) {
+      final code = b.account.value?.currencyCode;
+      final rate = code != null ? (CurrencyService.getCachedRate(code) ?? 1.0) : 1.0;
+      return s + b.amount * rate;
+    });
 
     return Padding(
       padding: EdgeInsets.only(bottom: spacing.sectionGap),
@@ -639,13 +701,11 @@ class _BillControlCenterScreenState
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: accent),
-              SizedBox(width: spacing.elementGap),
-              Text(
-                title,
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: accent,
+              Expanded(
+                child: TypeSectionHeader(
+                  label: title,
+                  icon: icon,
+                  accentColor: accent,
                 ),
               ),
               SizedBox(width: spacing.elementGap),
@@ -714,21 +774,22 @@ class _BillControlCenterScreenState
     final String statusText;
     final IconData statusIcon;
 
+    final ctxt = AppLocalizations.of(context)!;
     if (isPaid) {
       statusColor = FinanceColors.incomeColor(brightness);
-      statusText = AppLocalizations.of(context)!.billCenter_paid;
+      statusText = ctxt.billCenter_paid;
       statusIcon = LucideIcons.circleCheck;
     } else if (isOverdue) {
       statusColor = FinanceColors.expenseColor(brightness);
-      statusText = '${days.abs()}d overdue';
+      statusText = ctxt.billCenter_daysOverdue(days.abs());
       statusIcon = LucideIcons.circleAlert;
     } else if (isDueSoon) {
       statusColor = color.tertiary;
       statusText = days == 0
-          ? AppLocalizations.of(context)!.billCenter_dueToday
+          ? ctxt.billCenter_dueToday
           : days == 1
-              ? AppLocalizations.of(context)!.billCenter_tomorrow
-              : 'In $days days';
+              ? ctxt.billCenter_tomorrow
+              : ctxt.billCenter_inDays(days);
       statusIcon = LucideIcons.clock;
     } else {
       statusColor = color.primary;
@@ -875,7 +936,7 @@ class _BillControlCenterScreenState
                               BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: Text(
-                          'PAID',
+                          AppLocalizations.of(context)!.billCenter_paid.toUpperCase(),
                           style: textTheme.labelSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: statusColor,
@@ -901,19 +962,23 @@ class _BillControlCenterScreenState
   // ── Helpers ──
 
   String _dueLabel(RecurringTransaction b) {
+    final ctxt = AppLocalizations.of(context)!;
     final days = b.nextDueDate.difference(DateTime.now()).inDays;
-    if (days < 0) return '${days.abs()}d ago';
-    if (days == 0) return 'Today';
-    if (days == 1) return 'Tomorrow';
-    return '$days days';
+    if (days < 0) return ctxt.billCenter_daysAgo(days.abs());
+    if (days == 0) return ctxt.billCenter_today;
+    if (days == 1) return ctxt.billCenter_tomorrow;
+    return ctxt.billCenter_inDays(days);
   }
 
-  String _frequencyLabel(Frequency f) => switch (f) {
-        Frequency.daily => 'Daily',
-        Frequency.weekly => 'Weekly',
-        Frequency.monthly => 'Monthly',
-        Frequency.yearly => 'Yearly',
-      };
+  String _frequencyLabel(Frequency f) {
+    final ctxt = AppLocalizations.of(context)!;
+    return switch (f) {
+      Frequency.daily => ctxt.frequency_daily,
+      Frequency.weekly => ctxt.frequency_weekly,
+      Frequency.monthly => ctxt.frequency_monthly,
+      Frequency.yearly => ctxt.frequency_yearly,
+    };
+  }
 
   // ── Mark As Paid (preserved from original) ──
 

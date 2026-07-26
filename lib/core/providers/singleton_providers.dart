@@ -4,8 +4,8 @@ import 'package:mudra_manager/features/notifications/data/smart_notification_ser
 import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
-import 'package:mudra_manager/plugins/sms_parser_manager.dart';
-import 'package:mudra_manager/plugins/export_plugin_manager.dart';
+import 'package:mudra_manager/features/sms/data/sms_parser_manager.dart';
+import 'package:mudra_manager/features/import_export/data/export_plugin_manager.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
 
 /// Wraps SmartNotificationService singleton for UI code.

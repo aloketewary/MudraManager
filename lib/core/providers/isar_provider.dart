@@ -10,7 +10,7 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
-import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
 
 final _isarService = IsarService();
 final isarServiceProvider = Provider<IsarService>((ref) => _isarService);

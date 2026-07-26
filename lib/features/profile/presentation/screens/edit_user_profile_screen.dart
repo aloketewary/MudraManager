@@ -10,7 +10,7 @@ import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
-import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';

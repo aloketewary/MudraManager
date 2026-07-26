@@ -15,6 +15,7 @@ import 'package:mudra_manager/features/analytics/domain/narrative_fact.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class StatisticsChartSection extends ConsumerStatefulWidget {
@@ -40,15 +41,19 @@ class _StatisticsChartSectionState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.stats_trends,
-          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        TypeSectionHeader(
+          label: l10n.stats_trends,
+          icon: LucideIcons.chartLine,
+          accentColor: color.primary,
         ),
         SizedBox(height: spacing.sectionGap),
         Container(
           decoration: BoxDecoration(
             color: color.surfaceContainerLow,
             borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(
+              color: color.outlineVariant.withValues(alpha: 0.4),
+            ),
           ),
           child: Column(
             children: [
@@ -60,6 +65,7 @@ class _StatisticsChartSectionState
                     Expanded(
                       child: _buildTabButton(
                         l10n.stats_12MonthTrend,
+                        LucideIcons.chartLine,
                         0,
                         color,
                         textTheme,
@@ -70,6 +76,7 @@ class _StatisticsChartSectionState
                     Expanded(
                       child: _buildTabButton(
                         l10n.stats_spendingByDay,
+                        LucideIcons.calendarDays,
                         1,
                         color,
                         textTheme,
@@ -79,12 +86,19 @@ class _StatisticsChartSectionState
                   ],
                 ),
               ),
+              Divider(
+                height: 1,
+                color: color.outlineVariant.withValues(alpha: 0.3),
+              ),
               // Tab Content
               Padding(
                 padding: EdgeInsets.all(spacing.sectionGap),
-                child: _selectedTab == 0
-                    ? _build12MonthChart(color, textTheme, spacing)
-                    : _buildSpendingByDayChart(color, textTheme, spacing),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: _selectedTab == 0
+                      ? _build12MonthChart(color, textTheme, spacing)
+                      : _buildSpendingByDayChart(color, textTheme, spacing),
+                ),
               ),
             ],
           ),
@@ -95,6 +109,7 @@ class _StatisticsChartSectionState
 
   Widget _buildTabButton(
     String label,
+    IconData icon,
     int index,
     ColorScheme color,
     TextTheme textTheme,
@@ -102,25 +117,44 @@ class _StatisticsChartSectionState
   ) {
     final isSelected = _selectedTab == index;
     return GestureDetector(
-      onTap: () => setState(() => _selectedTab = index),
-      child: Container(
+      onTap: () {
+        if (_selectedTab == index) return;
+        HapticFeedback.selectionClick();
+        setState(() => _selectedTab = index);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(vertical: spacing.cardVertical),
         decoration: BoxDecoration(
-          color: isSelected ? color.primaryContainer : Colors.transparent,
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          color: isSelected
+              ? color.primary.withValues(alpha: 0.12)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
           border: Border.all(
-            color: isSelected ? Colors.transparent : color.outlineVariant,
+            color: isSelected
+                ? color.primary.withValues(alpha: 0.3)
+                : color.outlineVariant.withValues(alpha: 0.4),
             width: 1,
           ),
         ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: textTheme.labelLarge?.copyWith(
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color:
-                isSelected ? color.onPrimaryContainer : color.onSurfaceVariant,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? color.primary : color.onSurfaceVariant,
+            ),
+            SizedBox(width: spacing.elementGapMin),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: textTheme.labelLarge?.copyWith(
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? color.primary : color.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -179,25 +213,40 @@ class _StatisticsChartSectionState
               spacing: spacing.elementGap,
               runSpacing: spacing.elementGapMin,
               children: topCats.asMap().entries.map((entry) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: chartColors[entry.key % chartColors.length],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                final legendColor = chartColors[entry.key % chartColors.length];
+                return Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.elementGap,
+                    vertical: spacing.elementGapMin,
+                  ),
+                  decoration: BoxDecoration(
+                    color: legendColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                    border: Border.all(
+                      color: legendColor.withValues(alpha: 0.2),
                     ),
-                    SizedBox(width: spacing.elementGapMin),
-                    Text(
-                      entry.value.key,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: color.onSurfaceVariant,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: legendColor,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                  ],
+                      SizedBox(width: spacing.elementGapMin),
+                      Text(
+                        entry.value.key,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: color.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               }).toList(),
             ),
@@ -539,28 +588,49 @@ class _StatisticsChartSectionState
     AppSpacing spacing,
   ) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardInner,
-        vertical: spacing.elementGap,
-      ),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(spacing.radiusSmall),
+        border: Border.all(color: accent.withValues(alpha: 0.15)),
       ),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: accent),
-          SizedBox(width: spacing.elementGap),
-          Expanded(
-            child: Text(
-              text,
-              style: textTheme.bodySmall?.copyWith(
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              width: 3,
+              decoration: BoxDecoration(
                 color: accent,
-                fontWeight: FontWeight.w600,
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(3),
+                ),
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.elementGap,
+                  vertical: spacing.elementGap,
+                ),
+                child: Row(
+                  children: [
+                    Icon(icon, size: 16, color: accent),
+                    SizedBox(width: spacing.elementGap),
+                    Expanded(
+                      child: Text(
+                        text,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: accent,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -817,7 +887,7 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
       backgroundColor: color.surface,
       appBar: AppBar(
         leading: IconButton(
-          tooltip: 'Close',
+          tooltip: AppLocalizations.of(context)!.common_close,
           icon: const Icon(LucideIcons.x),
           onPressed: widget.onClose,
         ),
@@ -832,7 +902,7 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
         actions: [
           if (_selectedMonthIndex != null)
             IconButton(
-              tooltip: 'Back',
+              tooltip: AppLocalizations.of(context)!.common_back,
               icon: const Icon(LucideIcons.arrowLeft),
               onPressed: () => setState(() => _selectedMonthIndex = null),
             ),

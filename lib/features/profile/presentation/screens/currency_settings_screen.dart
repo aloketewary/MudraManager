@@ -126,7 +126,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
         SizedBox(height: spacing.sectionGap),
 
         // Currency Info
-        SectionHeader('Currency Settings'),
+        const SectionHeader('Currency Settings'),
         SettingsGroupCard(
           items: [
             SettingItem(
@@ -146,7 +146,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
         SizedBox(height: spacing.elementGap * 2),
 
         // Actions
-        SectionHeader('Actions'),
+        const SectionHeader('Actions'),
         SettingsGroupCard(
           items: [
             SettingItem(
@@ -162,7 +162,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
                 spacing,
               ),
               trailing: Icon(LucideIcons.chevronRight,
-                  color: color.onSurfaceVariant, size: 18),
+                  color: color.onSurfaceVariant, size: 18,),
             ),
             SettingItem(
               icon: LucideIcons.percent,
@@ -170,7 +170,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
               subtitle: ctxt.currency_exchangeRatesDesc,
               onTap: () => context.push(AppRoutes.exchangeRates),
               trailing: Icon(LucideIcons.chevronRight,
-                  color: color.onSurfaceVariant, size: 18),
+                  color: color.onSurfaceVariant, size: 18,),
             ),
             SettingItem(
               icon: LucideIcons.archive,
@@ -178,7 +178,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
               subtitle: ctxt.currency_archivedDesc,
               onTap: () => context.push(AppRoutes.archivedTransactions),
               trailing: Icon(LucideIcons.chevronRight,
-                  color: color.onSurfaceVariant, size: 18),
+                  color: color.onSurfaceVariant, size: 18,),
             ),
           ],
         ),
@@ -225,7 +225,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(LucideIcons.circleAlert,
-                size: spacing.iconXL, color: color.error),
+                size: spacing.iconXL, color: color.error,),
             SizedBox(height: spacing.elementGap),
             Text(
               BuddyMessages.errorWith('$e'),
@@ -316,7 +316,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
           child: Card(
             margin: EdgeInsets.symmetric(horizontal: spacing.sectionGap * 2),
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(spacing.radiusMedium)),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),),
             child: Padding(
               padding: EdgeInsets.all(spacing.sectionGap),
               child: Column(
@@ -406,7 +406,7 @@ class CurrencyHeroCard extends ConsumerWidget {
                   ClipOval(
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                      child: Container(width: 60, height: 60),
+                      child: const SizedBox(width: 60, height: 60),
                     ),
                   ),
                   Hero(
@@ -418,7 +418,7 @@ class CurrencyHeroCard extends ConsumerWidget {
                         color: color.primary.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                         border: Border.all(
-                            color: color.primary.withValues(alpha: 0.3)),
+                            color: color.primary.withValues(alpha: 0.3),),
                       ),
                       child: Center(
                         child: Text(
@@ -722,12 +722,12 @@ class _CurrencyChangeConfirmSheet extends ConsumerWidget {
   }
 
   Widget _buildCurrencySwap(
-      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
     return Hero(
       tag: 'currency_swap',
       child: Container(
         padding: EdgeInsets.symmetric(
-            horizontal: spacing.cardInner, vertical: spacing.elementGap),
+            horizontal: spacing.cardInner, vertical: spacing.elementGap,),
         decoration: BoxDecoration(
           color: color.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -740,7 +740,7 @@ class _CurrencyChangeConfirmSheet extends ConsumerWidget {
                 symbol: currentSymbol,
                 color: color,
                 textTheme: textTheme,
-                spacing: spacing),
+                spacing: spacing,),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: spacing.elementGap),
               child: Icon(LucideIcons.arrowRight, size: 20, color: color.error),
@@ -750,7 +750,7 @@ class _CurrencyChangeConfirmSheet extends ConsumerWidget {
                 symbol: newSymbol,
                 color: color,
                 textTheme: textTheme,
-                spacing: spacing),
+                spacing: spacing,),
           ],
         ),
       ),
@@ -785,13 +785,13 @@ class _CurrencyChangeConfirmSheet extends ConsumerWidget {
         SizedBox(height: spacing.elementGapMin),
         Text(code,
             style:
-                textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600)),
+                textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),),
       ],
     );
   }
 
   Widget _buildWarningBlock(
-      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(spacing.cardInner),
@@ -804,7 +804,7 @@ class _CurrencyChangeConfirmSheet extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _WarningRow(
-              BuddyMessages.currencyChangeWarning, color, textTheme, spacing),
+              BuddyMessages.currencyChangeWarning, color, textTheme, spacing,),
           SizedBox(height: spacing.elementGap),
           Text(
             BuddyMessages.currencyChangeIrreversible,
@@ -819,7 +819,7 @@ class _CurrencyChangeConfirmSheet extends ConsumerWidget {
   }
 
   Widget _buildActions(
-      BuildContext context, ColorScheme color, AppSpacing spacing) {
+      BuildContext context, ColorScheme color, AppSpacing spacing,) {
     return Row(
       children: [
         Expanded(
@@ -828,7 +828,7 @@ class _CurrencyChangeConfirmSheet extends ConsumerWidget {
             style: OutlinedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: spacing.elementGap * 1.5),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium)),
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),),
             ),
             child: Text(BuddyMessages.currencyChangeCancel),
           ),
@@ -841,10 +841,10 @@ class _CurrencyChangeConfirmSheet extends ConsumerWidget {
               backgroundColor: color.error,
               padding: EdgeInsets.symmetric(vertical: spacing.elementGap * 1.5),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium)),
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),),
             ),
             child: Text(BuddyMessages.currencyChangeConfirm,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontWeight: FontWeight.bold),),
           ),
         ),
       ],

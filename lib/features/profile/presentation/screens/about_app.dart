@@ -78,7 +78,6 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    final spacing = ref.watch(spacingProvider);
     final prefsAsync = ref.watch(hasFullAccessProvider);
 
     return Scaffold(

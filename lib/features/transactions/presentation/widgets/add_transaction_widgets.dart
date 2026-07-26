@@ -46,9 +46,8 @@ class AccountSelectorSkeleton extends ConsumerWidget {
           ),
         ),
       ),
-    )
-        .animate(onComplete: (c) => c.repeat())
-        .shimmer(duration: 1500.ms, color: color.surface.withValues(alpha: 0.5));
+    ).animate(onComplete: (c) => c.repeat()).shimmer(
+        duration: 1500.ms, color: color.surface.withValues(alpha: 0.5),);
   }
 }
 
@@ -73,9 +72,8 @@ class CategorySelectorSkeleton extends ConsumerWidget {
           ),
         ),
       ),
-    )
-        .animate(onComplete: (c) => c.repeat())
-        .shimmer(duration: 1500.ms, color: color.surface.withValues(alpha: 0.5));
+    ).animate(onComplete: (c) => c.repeat()).shimmer(
+        duration: 1500.ms, color: color.surface.withValues(alpha: 0.5),);
   }
 }
 
@@ -100,9 +98,8 @@ class TagSelectorSkeleton extends ConsumerWidget {
           ),
         ),
       ),
-    )
-        .animate(onComplete: (c) => c.repeat())
-        .shimmer(duration: 1500.ms, color: color.surface.withValues(alpha: 0.5));
+    ).animate(onComplete: (c) => c.repeat()).shimmer(
+        duration: 1500.ms, color: color.surface.withValues(alpha: 0.5),);
   }
 }
 
@@ -147,8 +144,7 @@ class AccountSelector extends ConsumerWidget {
 
     return accountsAsync.when(
       data: (accounts) {
-        final unlockedIds =
-            ref.watch(unlockedAccountIdsProvider).value ?? {};
+        final unlockedIds = ref.watch(unlockedAccountIdsProvider).value ?? {};
 
         if (selectedAccount != null && !alreadyScrolled) {
           final idx = accounts.indexWhere((a) => a.id == selectedAccount!.id);
@@ -177,8 +173,7 @@ class AccountSelector extends ConsumerWidget {
                       LucideIcons.circleCheck,
                       size: 20,
                       color: Color(
-                        selectedAccount!.colorValue ??
-                            color.primary.toARGB32(),
+                        selectedAccount!.colorValue ?? color.primary.toARGB32(),
                       ),
                     ),
                     SizedBox(width: spacing.elementGap),
@@ -346,8 +341,8 @@ class AccountSelector extends ConsumerWidget {
                             Icon(
                               LucideIcons.lock,
                               size: 14,
-                              color: color.onSurfaceVariant
-                                  .withValues(alpha: 0.4),
+                              color:
+                                  color.onSurfaceVariant.withValues(alpha: 0.4),
                             ),
                           ],
                         ],
@@ -476,8 +471,8 @@ class CategorySelector extends ConsumerWidget {
             : <Category>[];
 
         if (selectedCategory != null && !alreadyScrolled) {
-          final parentId =
-              selectedCategory!.parentCategory.value?.id ?? selectedCategory!.id;
+          final parentId = selectedCategory!.parentCategory.value?.id ??
+              selectedCategory!.id;
           final idx = parents.indexWhere((c) => c.id == parentId);
           if (idx > 0) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -536,7 +531,8 @@ class CategorySelector extends ConsumerWidget {
                     Icon(LucideIcons.circleAlert, size: 16, color: color.error),
                     SizedBox(width: spacing.elementGapMin),
                     Text(
-                      AppLocalizations.of(context)!.transaction_categoryRequired,
+                      AppLocalizations.of(context)!
+                          .transaction_categoryRequired,
                       style: textTheme.labelSmall?.copyWith(
                         color: color.error,
                         fontWeight: FontWeight.w600,
@@ -715,9 +711,9 @@ class CategorySelector extends ConsumerWidget {
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
-                                        'Add',
-                                        style:
-                                            textTheme.labelMedium?.copyWith(
+                                        AppLocalizations.of(context)!
+                                            .common_addLabel,
+                                        style: textTheme.labelMedium?.copyWith(
                                           color: color.onSurfaceVariant,
                                         ),
                                       ),
@@ -944,12 +940,16 @@ class SmartDefaultsBanner extends ConsumerWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(LucideIcons.sparkles, size: 14, color: color.primary),
+                      Icon(LucideIcons.sparkles,
+                          size: 14, color: color.primary,),
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
                           value.reason ??
-                              'Suggested: ${value.suggestedCategory!.name}',
+                              AppLocalizations.of(context)!
+                                  .transaction_suggestedCategory(
+                                value.suggestedCategory!.name,
+                              ),
                           style: textTheme.labelSmall?.copyWith(
                             color: color.primary,
                             fontWeight: FontWeight.w600,
@@ -960,7 +960,7 @@ class SmartDefaultsBanner extends ConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Tap to apply',
+                        AppLocalizations.of(context)!.transaction_tapToApply,
                         style: textTheme.labelSmall?.copyWith(
                           color: color.primary.withValues(alpha: 0.6),
                         ),

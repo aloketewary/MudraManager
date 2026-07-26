@@ -5,8 +5,8 @@ import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
-import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
 
 class TripService {
   final IsarService isarService;
@@ -110,6 +110,12 @@ class TripService {
     trip?.decryptFields();
     await trip?.participants.load();
     await trip?.transactions.load();
+    // Participant names are encrypted at rest — without decrypting here,
+    // every screen fed by this method (expense lists, settlement cards,
+    // "split with" pickers) shows raw "ENC:..." ciphertext instead of names.
+    for (final p in trip?.participants ?? <TripParticipant>[]) {
+      p.decryptFields();
+    }
     for (final tripTxn in trip?.transactions ?? <TripTransaction>[]) {
       await tripTxn.transaction.load();
       await tripTxn.splitExpense.load();
@@ -271,6 +277,59 @@ class TripService {
     });
   }
 
+  /// Persists an edited split (participants/type/amounts) for an existing
+  /// trip expense. Previously `edit_split_sheet.dart` only mutated local
+  /// state and popped — no method existed to save changes, so edits were
+  /// silently lost on the next data reload.
+  ///
+  /// [splitAmounts] must always be in currency units (not raw percentages)
+  /// — mirrors the convention `AddTripTransactionScreen._computeSplitAmounts`
+  /// already uses, and what `resolvedAmountIn`/detail screens assume when
+  /// reading `TripTransaction.splitAmounts` directly.
+  Future<void> updateTripTransactionSplit({
+    required int tripTransactionId,
+    required SplitType splitType,
+    required List<int> participantIds,
+    required List<double> splitAmounts,
+  }) async {
+    final isar = await isarService.getInstance();
+    final tripTxn = await isar.tripTransactions.get(tripTransactionId);
+    if (tripTxn == null) return;
+
+    await tripTxn.transaction.load();
+    await tripTxn.paidBy.load();
+
+    tripTxn.splitType = splitType;
+    tripTxn.participantIds = participantIds;
+    tripTxn.splitAmounts = splitAmounts;
+
+    // Recompute the owner's ledger-visible share (myShare) so dashboard
+    // stats stay consistent with the edited split.
+    final ledgerTxn = tripTxn.transaction.value;
+    if (ledgerTxn != null) {
+      final allParticipants = await Future.wait(
+        participantIds.map((id) => isar.tripParticipants.get(id)),
+      );
+      final owner =
+          allParticipants.where((p) => p != null && p.isOwner).firstOrNull;
+      final ownerId = owner?.id;
+      if (ownerId != null) {
+        final idx = participantIds.indexOf(ownerId);
+        ledgerTxn.myShare = (idx >= 0 && idx < splitAmounts.length)
+            ? splitAmounts[idx]
+            : null;
+        ledgerTxn.encryptFields();
+      }
+    }
+
+    await isar.writeTxn(() async {
+      await isar.tripTransactions.put(tripTxn);
+      if (ledgerTxn != null) {
+        await isar.transactions.put(ledgerTxn);
+      }
+    });
+  }
+
   Future<Map<String, Map<String, double>>> calculateSettlements(
     int tripId,
   ) async {
@@ -280,6 +339,11 @@ class TripService {
 
     await trip.transactions.load();
     await trip.participants.load();
+    // Decrypt before building the name map — otherwise every settlement
+    // ("X owes Y") shows raw ciphertext instead of participant names.
+    for (final p in trip.participants) {
+      p.decryptFields();
+    }
 
     final balances = <int, double>{};
     final participantMap = {for (var p in trip.participants) p.id: p.name};
@@ -348,6 +412,12 @@ class TripService {
 
     final fromP = await isar.tripParticipants.get(fromId);
     final toP = await isar.tripParticipants.get(toId);
+    // Decrypt before embedding names into the description string below —
+    // FieldEncryptionService only detects encryption via a leading 'ENC:'
+    // prefix, so embedding a still-encrypted name mid-string and then
+    // encrypting the whole description produces unrecoverable garbled text.
+    fromP?.decryptFields();
+    toP?.decryptFields();
 
     final expense = SplitExpense.create(
       amount: amount,
@@ -461,23 +531,6 @@ class TripService {
 
       await isar.tripTransactions.delete(tripTransactionId);
     });
-  }
-
-  Future<String?> getTripNameByTransactionId(int transactionId) async {
-    final isar = await isarService.getInstance();
-    final tripTxn = await isar.tripTransactions
-        .filter()
-        .transaction((q) => q.idEqualTo(transactionId))
-        .findFirst();
-
-    if (tripTxn == null) return null;
-
-    final trip = await isar.trips
-        .filter()
-        .transactions((q) => q.idEqualTo(tripTxn.id))
-        .findFirst();
-
-    return trip?.name;
   }
 
   Future<Map<int, String>> getTripNamesByTransactionIds(List<int> transactionIds) async {

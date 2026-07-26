@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/core/skin/model/skin.dart';
-import 'package:mudra_manager/core/skin/converter/skin_to_theme.dart';
+import 'package:mudra_manager/features/skin/domain/skin.dart';
+import 'package:mudra_manager/features/skin/data/skin_to_theme.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 
 class SkinPreviewCard extends ConsumerWidget {

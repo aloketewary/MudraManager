@@ -20,6 +20,7 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/dashboard/presentation/providers/permission_provider.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 class BudgetDetailsScreen extends ConsumerWidget {
   final int budgetId;
@@ -42,11 +43,14 @@ class BudgetDetailsScreen extends ConsumerWidget {
           },
           loading: () => Scaffold(
             appBar: AppBar(title: Text(ctxt.budget_dashboardPageTitle)),
-            body: const Center(child: CircularProgressIndicator()),
+            body: ListView(
+              padding: const EdgeInsets.all(16),
+              children: List.generate(3, (_) => const BudgetCardSkeleton()),
+            ),
           ),
           error: (e, _) => Scaffold(
             appBar: AppBar(),
-            body: Center(child: Text('$e')),
+            body: Center(child: Text(BuddyMessages.errorWith('$e'))),
           ),
         );
   }
@@ -131,21 +135,11 @@ class _BudgetDetailBody extends ConsumerWidget {
         vertical: spacing.cardVertical,
       ),
       children: [
-        // 1. Period context
-        _buildPeriod(textTheme, color, ctxt),
-        SizedBox(height: spacing.sectionGap),
+        // 1. Hero card (one glow per screen): period + remaining + spent
+        _buildHeroCard(textTheme, color, accent, spacing, ctxt),
+        SizedBox(height: spacing.elementGap * 2),
 
-        // 2. Hero: remaining (amplified on breach)
-        _buildHero(textTheme, accent, ctxt),
-        SizedBox(height: spacing.elementGap),
-
-        // 3. Spent context
-        if (!snapshot.isUnknown) ...[
-          _buildSpentContext(textTheme, color, ctxt),
-          SizedBox(height: spacing.sectionGap),
-        ],
-
-        // 4. Remaining daily allowance
+        // 2. Remaining daily allowance
         if (!snapshot.isUnknown &&
             !snapshot.isBreached &&
             snapshot.daysLeft > 0) ...[
@@ -153,19 +147,19 @@ class _BudgetDetailBody extends ConsumerWidget {
           SizedBox(height: spacing.elementGap),
         ],
 
-        // 5. Forecast (conditional)
+        // 3. Forecast (conditional)
         if (snapshot.isForecastVisible) ...[
           _buildForecast(textTheme, color, spacing, ctxt),
           SizedBox(height: spacing.elementGap),
         ],
 
-        // 6. Pace block
+        // 4. Pace block
         if (!snapshot.isUnknown) ...[
           _buildPaceCard(textTheme, color, spacing, accent, ctxt),
           SizedBox(height: spacing.elementGap),
         ],
 
-        // 7. Recovery signal
+        // 5. Recovery signal
         if (snapshot.recoverySignal != null) ...[
           _buildRecovery(textTheme, color, spacing, accent, ctxt),
           SizedBox(height: spacing.sectionGap),
@@ -173,13 +167,13 @@ class _BudgetDetailBody extends ConsumerWidget {
 
         // Unknown state
         if (snapshot.isUnknown) ...[
-          SizedBox(height: spacing.sectionGap),
+          SizedBox(height: spacing.elementGap),
           Container(
             padding: EdgeInsets.all(spacing.cardInner),
             decoration: BoxDecoration(
               color: color.surfaceContainerLow,
               borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              border: Border.all(color: color.outlineVariant),
+              border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
             ),
             child: Text(
               ctxt.budget_insufficientData,
@@ -192,27 +186,72 @@ class _BudgetDetailBody extends ConsumerWidget {
           SizedBox(height: spacing.sectionGap),
         ],
 
-        // 8. Progress bar
-        if (!snapshot.isUnknown) ...[
-          _buildProgressBar(spacing, color, accent, textTheme),
-          SizedBox(height: spacing.sectionGap),
-        ],
-
-        // 9. Dual CTA (capability-driven)
+        // 6. Dual CTA (capability-driven)
         _buildActions(context, ref, spacing, color, ctxt),
         SizedBox(height: spacing.sectionGap),
 
-        // 10. Time remaining context
+        // 7. Time remaining context
         if (!snapshot.isUnknown && snapshot.daysLeft > 0) ...[
-          Text(
-            ctxt.budget_daysRemaining(snapshot.daysLeft),
-            style: textTheme.bodySmall?.copyWith(
-              color: color.onSurfaceVariant,
+          Center(
+            child: Text(
+              ctxt.budget_daysRemaining(snapshot.daysLeft),
+              style: textTheme.bodySmall?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
             ),
           ),
           SizedBox(height: spacing.sectionGap),
         ],
       ],
+    );
+  }
+
+  // ── HERO CARD (glow, period + amount + spent + progress) ──
+  Widget _buildHeroCard(
+    TextTheme textTheme,
+    ColorScheme color,
+    Color accent,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final isDark = color.brightness == Brightness.dark;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accent.withValues(alpha: isDark ? 0.20 : 0.12),
+            color.surface,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: accent.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPeriod(textTheme, color, ctxt),
+          SizedBox(height: spacing.elementGap),
+          _buildHero(textTheme, accent, ctxt),
+          SizedBox(height: spacing.elementGapMin),
+          if (!snapshot.isUnknown) _buildSpentContext(textTheme, color, ctxt),
+          if (!snapshot.isUnknown) ...[
+            SizedBox(height: spacing.elementGap * 1.5),
+            _buildProgressBar(spacing, color, accent, textTheme),
+          ],
+        ],
+      ),
     );
   }
 
@@ -311,14 +350,18 @@ class _BudgetDetailBody extends ConsumerWidget {
     AppLocalizations ctxt,
   ) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardInner,
-        vertical: spacing.elementGap,
-      ),
+      padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.onSurface.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -346,13 +389,11 @@ class _BudgetDetailBody extends ConsumerWidget {
     AppLocalizations ctxt,
   ) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardInner,
-        vertical: spacing.elementGap,
-      ),
+      padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
         color: Colors.amber.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -384,7 +425,14 @@ class _BudgetDetailBody extends ConsumerWidget {
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.onSurface.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

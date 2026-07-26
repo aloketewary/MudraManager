@@ -16,9 +16,11 @@ import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/features/goal/domain/goal_enums.dart';
+import 'package:mudra_manager/features/goal/domain/goal_health.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 
 class EditGoalScreen extends ConsumerStatefulWidget {
   final Goal goal;
@@ -69,18 +71,21 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     return _remaining / (daysLeft / 30).clamp(0.1, double.infinity);
   }
 
-  double get _avgMonthlyPace {
-    final contributions = widget.goal.contributions;
-    if (contributions.isEmpty) return 0;
-    final total = contributions.fold(0.0, (sum, c) => sum + c.amount);
-    final first =
-        contributions.reduce((a, b) => a.date.isBefore(b.date) ? a : b).date;
-    final months = DateTime.now().difference(first).inDays / 30;
-    if (months < 1) return total;
-    return total / months;
-  }
+  /// Recent pace (90-day rolling, lifetime fallback) — same calculation
+  /// used by GoalDetailsScreen and GoalScreen, so the number shown here
+  /// matches everywhere else in the app.
+  double get _avgMonthlyPace => GoalHealth.recentMonthlyPace(widget.goal);
 
+  /// Predicted completion date, live-reactive to the in-progress target
+  /// edit (so previewing a higher target pushes the date out immediately).
+  /// Uses the same confidence gate as GoalStateMachine.predictedCompletion
+  /// (3+ contributions, 30+ days elapsed) so this screen doesn't show a
+  /// confident forecast off a single early deposit while other screens
+  /// correctly withhold it.
   DateTime? get _projectedCompletion {
+    final elapsed = DateTime.now().difference(widget.goal.creationDate).inDays;
+    if (widget.goal.contributions.length < 3 || elapsed < 30) return null;
+
     final pace = _avgMonthlyPace;
     if (pace <= 0 || _remaining <= 0) return null;
     final monthsNeeded = _remaining / pace;
@@ -128,6 +133,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
 
   Future<void> _deleteGoal(AppSpacing spacing) async {
     final ctxt = AppLocalizations.of(context)!;
+    HapticFeedback.mediumImpact();
     final confirmed = await DialogUtils.showDeleteConfirmation(
       context,
       spacing,
@@ -141,6 +147,17 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
   }
 
   Future<void> _markCompleted(AppSpacing spacing) async {
+    final ctxt = AppLocalizations.of(context)!;
+    HapticFeedback.mediumImpact();
+    final confirmed = await DialogUtils.showConfirmation(
+      context,
+      spacing,
+      title: ctxt.goal_markComplete,
+      message: ctxt.goal_markCompleteConfirmMessage,
+      icon: LucideIcons.circleCheck,
+    );
+    if (confirmed != true || !mounted) return;
+
     final goal = widget.goal
       ..currentAmount = widget.goal.targetAmount
       ..isActive = false;
@@ -151,6 +168,17 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
   }
 
   Future<void> _archiveGoal(AppSpacing spacing) async {
+    final ctxt = AppLocalizations.of(context)!;
+    HapticFeedback.mediumImpact();
+    final confirmed = await DialogUtils.showConfirmation(
+      context,
+      spacing,
+      title: ctxt.goal_archive,
+      message: ctxt.goal_archiveConfirmMessage,
+      icon: LucideIcons.archive,
+    );
+    if (confirmed != true || !mounted) return;
+
     final goal = widget.goal..isActive = false;
     await ref.read(goalServiceProvider).updateGoal(goal);
     goal.decryptFields();
@@ -186,7 +214,11 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
         ),
         children: [
           // ═══ SECTION A: GOAL IDENTITY ═══
-          _sectionHeader(ctxt.goal_sectionIdentity, textTheme),
+          _sectionHeader(
+            ctxt.goal_sectionIdentity,
+            LucideIcons.info,
+            color.primary,
+          ),
           SizedBox(height: spacing.elementGap),
 
           TextFormField(
@@ -222,7 +254,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
           SizedBox(height: spacing.sectionGap * 1.5),
 
           // ═══ SECTION B: TARGET ═══
-          _sectionHeader(ctxt.goal_target, textTheme),
+          _sectionHeader(ctxt.goal_target, LucideIcons.target, color.primary),
           SizedBox(height: spacing.elementGap),
 
           // Target amount with "Adjust" pattern
@@ -235,14 +267,22 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
           SizedBox(height: spacing.sectionGap * 1.5),
 
           // ═══ SECTION C: CURRENT STATE (read-only) ═══
-          _sectionHeader(ctxt.goal_sectionCurrentState, textTheme),
+          _sectionHeader(
+            ctxt.goal_sectionCurrentState,
+            LucideIcons.wallet,
+            color.primary,
+          ),
           SizedBox(height: spacing.elementGap),
           _buildCurrentState(color, textTheme, spacing, ctxt),
 
           SizedBox(height: spacing.sectionGap * 1.5),
 
           // ═══ SECTION D: PROJECTION (read-only) ═══
-          _sectionHeader(ctxt.goal_sectionProjection, textTheme),
+          _sectionHeader(
+            ctxt.goal_sectionProjection,
+            LucideIcons.trendingUp,
+            color.primary,
+          ),
           SizedBox(height: spacing.elementGap),
           _buildProjection(color, textTheme, spacing, ctxt),
 
@@ -257,11 +297,8 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     );
   }
 
-  Widget _sectionHeader(String text, TextTheme textTheme) {
-    return Text(
-      text,
-      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-    );
+  Widget _sectionHeader(String text, IconData icon, Color accentColor) {
+    return TypeSectionHeader(label: text, icon: icon, accentColor: accentColor);
   }
 
   Widget _buildGoalTypeRow(

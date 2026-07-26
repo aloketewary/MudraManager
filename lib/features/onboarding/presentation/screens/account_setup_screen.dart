@@ -27,7 +27,7 @@ import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/category/data/category_management_service.dart';
-import 'package:mudra_manager/plugins/category_packs/category_pack.dart';
+import 'package:mudra_manager/features/category/data/category_packs/category_pack.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
 class AccountSetupScreen extends ConsumerStatefulWidget {

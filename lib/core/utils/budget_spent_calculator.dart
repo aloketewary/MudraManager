@@ -19,9 +19,15 @@ class BudgetSpentCalculator {
     DateTime start,
     DateTime end,
   ) async {
+    // Only count transactions that affect spending stats — transfers move
+    // money between the user's own accounts and settlements are debt
+    // reconciliation, neither is "spending" against a budget.
+    // (Mirrors Transaction.affectsStats.)
     final txns = await isar.transactions
         .filter()
         .isExpenseEqualTo(true)
+        .isTransferEqualTo(false)
+        .isSettlementEqualTo(false)
         .dateBetween(start, end)
         .findAll();
 
@@ -50,7 +56,7 @@ class BudgetSpentCalculator {
     for (final t in txns) {
       await t.tags.load();
       if (t.tags.any((tag) => tagIds.contains(tag.id))) {
-        spent += t.baseAmount;
+        spent += t.effectiveAmount;
       }
     }
     return spent;
@@ -64,7 +70,7 @@ class BudgetSpentCalculator {
     final categoryIds = budget.categories.map((c) => c.id).toSet();
 
     if (categoryIds.isEmpty) {
-      return txns.fold<double>(0.0, (sum, t) => sum + t.baseAmount);
+      return txns.fold<double>(0.0, (sum, t) => sum + t.effectiveAmount);
     }
 
     double spent = 0;
@@ -74,14 +80,14 @@ class BudgetSpentCalculator {
       if (cat == null) continue;
 
       if (categoryIds.contains(cat.id)) {
-        spent += t.baseAmount;
+        spent += t.effectiveAmount;
         continue;
       }
 
       await cat.parentCategory.load();
       final parentId = cat.parentCategory.value?.id;
       if (parentId != null && categoryIds.contains(parentId)) {
-        spent += t.baseAmount;
+        spent += t.effectiveAmount;
       }
     }
     return spent;
@@ -103,7 +109,7 @@ class BudgetSpentCalculator {
 
       // Direct match
       if (categoryIds.contains(cat.id)) {
-        spent += t.baseAmount;
+        spent += t.effectiveAmount;
         continue;
       }
 
@@ -111,7 +117,7 @@ class BudgetSpentCalculator {
       await cat.parentCategory.load();
       final parentId = cat.parentCategory.value?.id;
       if (parentId != null && categoryIds.contains(parentId)) {
-        spent += t.baseAmount;
+        spent += t.effectiveAmount;
       }
     }
     return spent;

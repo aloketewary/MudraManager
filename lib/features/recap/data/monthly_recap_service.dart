@@ -6,7 +6,7 @@ import 'package:mudra_manager/core/db/extensions/transaction_links.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
-import 'package:mudra_manager/features/gamification/models/achievement.dart';
+import 'package:mudra_manager/features/gamification/domain/achievement.dart';
 
 // ── Data Models ──
 
@@ -251,7 +251,10 @@ class MonthlyRecapService {
     // ── Top 5 biggest expenses ──
     expenseTxns.sort((a, b) => b.amount.compareTo(a.amount));
     final topTxns = expenseTxns.take(5).map((txn) => TransactionSummary(
-          txn.description ?? '',
+          // SMS-imported transactions store the raw SMS body in
+          // `description` (used for tag matching / recurring detection),
+          // not a user-facing label — never show that as a title.
+          txn.isFromSms == true ? '' : (txn.description ?? ''),
           txn.category.value?.name ?? 'Uncategorized',
           txn.baseAmount,
           txn.date,

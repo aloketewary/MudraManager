@@ -4,7 +4,7 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
-import 'package:mudra_manager/plugins/category_packs/category_pack.dart';
+import 'package:mudra_manager/features/category/data/category_packs/category_pack.dart';
 
 class CategoryManagementService {
   final IsarService _isarService;

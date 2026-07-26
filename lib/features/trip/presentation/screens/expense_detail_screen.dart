@@ -242,11 +242,14 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     if (ownerId != null) {
       final idx = tripTxn.participantIds.indexOf(ownerId);
       if (idx >= 0 && idx < tripTxn.splitAmounts.length) {
-        ownerShare = tripTxn.splitType == SplitType.percentage
-            ? totalAmount * tripTxn.splitAmounts[idx] / 100
-            : tripTxn.splitType == SplitType.equal
-                ? totalAmount / tripTxn.participantIds.length
-                : tripTxn.splitAmounts[idx];
+        // `splitAmounts` always stores currency amounts, even for
+        // SplitType.percentage — AddTripTransactionScreen._computeSplitAmounts
+        // already converts percentage input (0-100) into currency
+        // (amount * pct / 100) before saving. Re-dividing by 100 here
+        // produced shares ~100x too small.
+        ownerShare = tripTxn.splitType == SplitType.equal
+            ? totalAmount / tripTxn.participantIds.length
+            : tripTxn.splitAmounts[idx];
       }
     }
     final isPaidByOwner = paidBy?.id == ownerId;
@@ -400,6 +403,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                   TextButton.icon(
                     onPressed: () => showEditSplitSheet(
                       context: context,
+                      ref: ref,
                       trip: trip,
                       tripTxn: tripTxn,
                       selectedParticipants: _selectedParticipants,
@@ -422,13 +426,14 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
               final p = entry.value;
               final isOwnerRow = p.isOwner;
               final pIdx = tripTxn.participantIds.indexOf(p.id);
+              // `splitAmounts` always stores currency amounts (see note in
+              // _buildInfoCard) — don't re-divide by 100 for percentage
+              // splits, that produced shares ~100x too small.
               double share;
               if (_splitType == SplitType.equal) {
                 share = totalAmount / _selectedParticipants.length;
               } else if (pIdx >= 0 && pIdx < tripTxn.splitAmounts.length) {
-                share = _splitType == SplitType.percentage
-                    ? totalAmount * tripTxn.splitAmounts[pIdx] / 100
-                    : tripTxn.splitAmounts[pIdx];
+                share = tripTxn.splitAmounts[pIdx];
               } else {
                 share = perPerson;
               }
@@ -525,12 +530,12 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
   }
 
   Future<void> _deleteExpense(AppSpacing spacing,) async {
-    final confirm = await DialogUtils.showConfirmation(
+    final ctxt = AppLocalizations.of(context)!;
+    final confirm = await DialogUtils.showDeleteConfirmation(
       context, spacing,
-      title: 'Delete Expense',
-      message: 'This will adjust everyone\'s balance. Continue?',
-      confirmText: 'Delete',
-      icon: LucideIcons.trash2,
+      title: ctxt.expense_deleteExpense,
+      message: ctxt.expense_deleteExpenseMsg,
+      deleteText: ctxt.common_delete,
     );
     if (confirm != true) return;
     if (!context.mounted) return;

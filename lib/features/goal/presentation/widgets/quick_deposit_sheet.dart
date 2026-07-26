@@ -23,12 +23,17 @@ void showQuickDepositSheet({
 }) {
   final spacing = ref.read(spacingProvider);
   final ctxt = AppLocalizations.of(context)!;
+  final color = Theme.of(context).colorScheme;
   final textTheme = Theme.of(context).textTheme;
   final amountController = TextEditingController();
 
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    backgroundColor: color.surface,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusMedium)),
+    ),
     builder: (context) => Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + spacing.sectionGap,
@@ -40,6 +45,17 @@ void showQuickDepositSheet({
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: EdgeInsets.only(bottom: spacing.sectionGap),
+              decoration: BoxDecoration(
+                color: color.primary,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
           Text(
             ctxt.goal_quickDeposit,
             style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -64,13 +80,19 @@ void showQuickDepositSheet({
               if (amount != null && amount > 0) {
                 HapticFeedback.mediumImpact();
                 final wasComplete = goal.progressPercent >= 1.0;
-                goal.currentAmount += amount;
-                goal.contributions = [
-                  ...goal.contributions,
-                  GoalContribution.create(amount),
-                ];
-                final isNowComplete = goal.progressPercent >= 1.0;
-                await ref.read(goalServiceProvider).updateGoal(goal);
+                // Compute the post-deposit completion state without mutating
+                // the shared `goal` reference — GoalService.addContribution
+                // operates on its own freshly-fetched, decrypted DB copy.
+                // Mutating `goal` here directly (then calling updateGoal)
+                // would trigger goal.encryptFields() in place on this
+                // shared object without decrypting it back, corrupting
+                // name/description for every other screen still holding
+                // this same Goal instance (e.g. Edit Goal navigated to next).
+                final isNowComplete = goal.targetAmount > 0 &&
+                    (goal.currentAmount + amount) >= goal.targetAmount;
+                await ref
+                    .read(goalServiceProvider)
+                    .addContribution(goal.id, amount);
                 ref.invalidate(goalsProvider);
                 if (context.mounted) {
                   Navigator.pop(context);

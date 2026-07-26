@@ -9,9 +9,12 @@ import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 /// Budget management screen — read-first, action-second.
 /// Shows current constraint status and allows adjustments.
@@ -42,18 +45,11 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
 
     final progressAsync = ref.watch(budgetsWithProgressProvider);
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(LucideIcons.arrowLeft, color: color.onSurfaceVariant),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          _budget.name,
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
+    return ScreenShell(
+      config: ScreenShellConfig(
+        title: _budget.name,
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
       ),
       body: progressAsync.when(
         data: (budgets) {
@@ -65,8 +61,14 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
           }
           return _buildBody(match, spacing, color, textTheme, l10n);
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        loading: () => ListView(
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.cardHorizontal,
+            vertical: spacing.cardVertical,
+          ),
+          children: List.generate(3, (_) => const BudgetCardSkeleton()),
+        ),
+        error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
   }
@@ -91,12 +93,37 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
         : pct > 0.8
             ? color.error.withValues(alpha: 0.8)
             : color.onSurface;
+    final isDark = color.brightness == Brightness.dark;
 
     return ListView(
-      padding: EdgeInsets.all(spacing.sectionGap),
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
       children: [
-        // ── HERO: REMAINING ──
-        Center(
+        // ── HERO CARD: REMAINING + SPENT + PROGRESS (one glow per screen) ──
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.all(spacing.cardInner),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                heroColor.withValues(alpha: isDark ? 0.20 : 0.12),
+                color.surface,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(color: heroColor.withValues(alpha: 0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: heroColor.withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
           child: Column(
             children: [
               CurrencyText(
@@ -114,57 +141,51 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              SizedBox(height: spacing.elementGap),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${l10n.budget_spent} ',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                  CurrencyText(
+                    amount: spent,
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    ' of ',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                  CurrencyText(
+                    amount: limit,
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: spacing.elementGap * 1.5),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: LinearProgressIndicator(
+                  semanticsLabel: 'Budget progress',
+                  value: pct.clamp(0.0, 1.0),
+                  minHeight: 6,
+                  backgroundColor: color.outlineVariant.withValues(alpha: 0.2),
+                  valueColor: AlwaysStoppedAnimation(heroColor),
+                ),
+              ),
             ],
           ),
         ),
-        SizedBox(height: spacing.sectionGap),
-
-        // ── SPENT CONTEXT ──
-        Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${l10n.budget_spent} ',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: color.onSurfaceVariant,
-                ),
-              ),
-              CurrencyText(
-                amount: spent,
-                style: textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                ' of ',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: color.onSurfaceVariant,
-                ),
-              ),
-              CurrencyText(
-                amount: limit,
-                style: textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: spacing.sectionGap),
-
-        // ── PROGRESS BAR ──
-        ClipRRect(
-          borderRadius: BorderRadius.circular(3),
-          child: LinearProgressIndicator(
-            semanticsLabel: 'Budget progress',
-            value: pct.clamp(0.0, 1.0),
-            minHeight: 6,
-            backgroundColor: color.outlineVariant.withValues(alpha: 0.3),
-            valueColor: AlwaysStoppedAnimation(heroColor),
-          ),
-        ),
-        SizedBox(height: spacing.sectionGap * 1.5),
+        SizedBox(height: spacing.elementGap * 2),
 
         // ── ADJUST LIMIT ──
         _buildSection(
@@ -282,7 +303,14 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.onSurface.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -447,7 +475,7 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
               SizedBox(width: spacing.elementGap),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => _deleteBudget(l10n),
+                  onPressed: () => _deleteBudget(l10n, spacing),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: color.error,
                     side: BorderSide(color: color.error.withValues(alpha: 0.5)),
@@ -463,22 +491,15 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
   }
 
   Future<void> _archiveBudget(AppLocalizations l10n, AppSpacing spacing) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.budget_archive),
-        content: Text(l10n.budget_archiveConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.budget_buttonCancelActionText),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.budget_archive),
-          ),
-        ],
-      ),
+    HapticFeedback.mediumImpact();
+    final confirmed = await DialogUtils.showConfirmation(
+      context,
+      spacing,
+      title: l10n.budget_archive,
+      message: l10n.budget_archiveConfirm,
+      confirmText: l10n.budget_archive,
+      cancelText: l10n.budget_buttonCancelActionText,
+      icon: LucideIcons.archive,
     );
 
     if (confirmed == true) {
@@ -492,26 +513,15 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     }
   }
 
-  Future<void> _deleteBudget(AppLocalizations l10n) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.budget_buttonDeleteTitleText),
-        content: Text(l10n.budget_buttonDeleteBodyText),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.budget_buttonCancelActionText),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: Text(l10n.budget_buttonDeleteActionText),
-          ),
-        ],
-      ),
+  Future<void> _deleteBudget(AppLocalizations l10n, AppSpacing spacing) async {
+    HapticFeedback.mediumImpact();
+    final confirmed = await DialogUtils.showDeleteConfirmation(
+      context,
+      spacing,
+      title: l10n.budget_buttonDeleteTitleText,
+      message: l10n.budget_buttonDeleteBodyText,
+      cancelText: l10n.budget_buttonCancelActionText,
+      deleteText: l10n.budget_buttonDeleteActionText,
     );
 
     if (confirmed == true) {

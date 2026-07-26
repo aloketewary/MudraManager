@@ -4,9 +4,10 @@ import 'package:mudra_manager/features/analytics/data/advanced_analytics_service
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
-import 'package:mudra_manager/features/analytics/data/tax_estimation_service.dart';
-import 'package:mudra_manager/features/analytics/data/tax_opportunity_service.dart';
-import 'package:mudra_manager/features/analytics/data/tax_deduction_provider.dart';
+import 'package:mudra_manager/features/tax_planning/data/tax_estimation_service.dart';
+import 'package:mudra_manager/features/tax_planning/data/tax_opportunity_service.dart';
+import 'package:mudra_manager/features/tax_planning/data/tax_deduction_provider.dart';
+import 'package:mudra_manager/features/tax_planning/domain/index.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_aggregation_service.dart';
 import 'package:mudra_manager/features/analytics/domain/analytics_period.dart';

@@ -9,7 +9,7 @@ import 'package:mudra_manager/core/utils/error_tracker.dart';
 import 'package:mudra_manager/features/account/data/balance_history_service.dart';
 import 'package:mudra_manager/features/budget/data/bill_service.dart';
 import 'package:mudra_manager/features/dashboard/data/summary_scheduler.dart';
-import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
 import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
 import 'package:mudra_manager/features/memory/data/snapshot_generator.dart';
 import 'package:mudra_manager/features/sms/data/sms_cleanup_service.dart';

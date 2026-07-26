@@ -919,6 +919,210 @@ abstract class AppLocalizations {
   /// **'Save Transaction'**
   String get transaction_saveTransactionButtonLabel;
 
+  /// Hint shown when the transaction currency differs from the trip currency
+  ///
+  /// In en, this message translates to:
+  /// **'Trip is in {currency} — amount will be converted'**
+  String transaction_tripCurrencyMismatch(String currency);
+
+  /// Title of the split customizer bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Customize Split'**
+  String get transaction_customizeSplit;
+
+  /// Button label to switch the selected trip in the split customizer
+  ///
+  /// In en, this message translates to:
+  /// **'Change Trip'**
+  String get transaction_changeTrip;
+
+  /// Remaining percentage to allocate in a percentage split
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining: {percent}%'**
+  String transaction_remainingPercent(String percent);
+
+  /// Remaining amount to allocate in a custom split
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining: {amount}'**
+  String transaction_remainingAmount(String amount);
+
+  /// Segmented button label for equal split
+  ///
+  /// In en, this message translates to:
+  /// **'Equal'**
+  String get transaction_splitEqual;
+
+  /// Segmented button label for custom split
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get transaction_splitCustom;
+
+  /// Section title listing trip participants in the split customizer
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get transaction_participants;
+
+  /// Title of the trip selector bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Select Trip'**
+  String get transaction_selectTrip;
+
+  /// Option to clear the selected trip
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get transaction_noneTripOption;
+
+  /// Placeholder example text for the new tag name field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Travel, Food, Shopping'**
+  String get transaction_tagNameHint;
+
+  /// Smart default suggestion reason fallback text
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested: {category}'**
+  String transaction_suggestedCategory(String category);
+
+  /// Hint text on the smart defaults suggestion banner
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to apply'**
+  String get transaction_tapToApply;
+
+  /// Compact transaction count on the spending-by-tag section
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} txn} other{{count} txns}}'**
+  String stats_nTransactions(int count);
+
+  /// Placeholder shown when no custom date range has been picked yet
+  ///
+  /// In en, this message translates to:
+  /// **'Select Range'**
+  String get stats_selectRange;
+
+  /// Title of the period picker bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Select Period'**
+  String get stats_selectPeriod;
+
+  /// No description provided for @stats_thisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get stats_thisWeek;
+
+  /// No description provided for @stats_thisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get stats_thisMonth;
+
+  /// No description provided for @stats_thisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This Year'**
+  String get stats_thisYear;
+
+  /// No description provided for @stats_customRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Range'**
+  String get stats_customRange;
+
+  /// Empty state title on the export options screen
+  ///
+  /// In en, this message translates to:
+  /// **'No export templates enabled'**
+  String get export_noTemplatesTitle;
+
+  /// Empty state description on the export options screen
+  ///
+  /// In en, this message translates to:
+  /// **'Enable templates in Settings → Plugins'**
+  String get export_noTemplatesDesc;
+
+  /// Subtitle showing how many templates exist for an export format
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 template available} other{{count} templates available}}'**
+  String export_nTemplatesAvailable(int count);
+
+  /// Snackbar confirming a successful export
+  ///
+  /// In en, this message translates to:
+  /// **'{format} export completed'**
+  String export_completed(String format);
+
+  /// Generic refresh action label
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get common_refresh;
+
+  /// Title of the advisory card on the utility/insights hub screen
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Advisory (Beta)'**
+  String get utility_financialAdvisory;
+
+  /// Subtitle showing how many advisory items need attention
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item may need attention} other{{count} items may need attention}}'**
+  String utility_nItemsNeedAttention(int count);
+
+  /// Semantics label for the advisory card header when expanded
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Advisory, {count} items, tap to collapse'**
+  String utility_advisoryCollapseSemantic(int count);
+
+  /// Semantics label for the advisory card header when collapsed
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Advisory, {count, plural, =1{1 item} other{{count} items}} may need attention, tap to expand'**
+  String utility_advisoryExpandSemantic(int count);
+
+  /// Overflow indicator when there are more advisory items than shown
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more items…'**
+  String utility_nMoreItems(int count);
+
+  /// Semantics label for the trip banner button
+  ///
+  /// In en, this message translates to:
+  /// **'Trip: {name}, {count} participants'**
+  String transaction_tripParticipantsSemantic(String name, int count);
+
+  /// Semantics label for the date chip
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction date: {date}, tap to change'**
+  String transaction_dateSemantic(String date);
+
+  /// Semantics label for the time chip
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction time: {time}, tap to change'**
+  String transaction_timeSemantic(String time);
+
+  /// Participant count subtitle on the trip banner
+  ///
+  /// In en, this message translates to:
+  /// **'{count} participants'**
+  String transaction_nParticipants(int count);
+
   /// This is text of Select one Account
   ///
   /// In en, this message translates to:
@@ -1926,6 +2130,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get common_close;
+
+  /// No description provided for @common_inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get common_inactive;
 
   /// No description provided for @common_confirm.
   ///
@@ -6708,6 +6918,96 @@ abstract class AppLocalizations {
   /// **'Converted to transfer'**
   String get txnList_convertedToTransfer;
 
+  /// App bar title in merge-as-transfer select mode
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String txnList_selectedCount(int count);
+
+  /// Hint shown when one transaction is selected for merge-as-transfer
+  ///
+  /// In en, this message translates to:
+  /// **'Select the matching transaction'**
+  String get txnList_mergeSelectHint;
+
+  /// Hint shown when two transactions are selected and ready to merge
+  ///
+  /// In en, this message translates to:
+  /// **'Tap merge in the app bar'**
+  String get txnList_mergeReadyHint;
+
+  /// Validation error for merge-as-transfer
+  ///
+  /// In en, this message translates to:
+  /// **'Select one expense and one income transaction'**
+  String get txnList_expenseRequired;
+
+  /// Validation error for merge-as-transfer
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts must match (within 1%)'**
+  String get txnList_matchingAmounts;
+
+  /// Validation error for merge-as-transfer
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions must be within 24 hours'**
+  String get txnList_within24Hours;
+
+  /// Validation error for merge-as-transfer
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot transfer between the same account'**
+  String get txnList_differentAccounts;
+
+  /// Button label to apply filters in the filter bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Filters'**
+  String get txnList_applyFilters;
+
+  /// No description provided for @txnList_filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'ALL'**
+  String get txnList_filterAll;
+
+  /// No description provided for @txnList_filterSpends.
+  ///
+  /// In en, this message translates to:
+  /// **'SPENDS'**
+  String get txnList_filterSpends;
+
+  /// No description provided for @txnList_filterIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'INCOME'**
+  String get txnList_filterIncome;
+
+  /// No description provided for @txnList_filterTransfers.
+  ///
+  /// In en, this message translates to:
+  /// **'TRANSFERS'**
+  String get txnList_filterTransfers;
+
+  /// Title of the budget insight banner on the transaction list
+  ///
+  /// In en, this message translates to:
+  /// **'{category} Budget Update'**
+  String txnList_budgetUpdateTitle(String category);
+
+  /// Subtitle of the budget insight banner when over budget
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve exceeded your {category} budget'**
+  String txnList_budgetExceededSubtitle(String category);
+
+  /// Subtitle of the budget insight banner when under budget
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve spent {amount} on {category} this period'**
+  String txnList_budgetSpentSubtitle(String amount, String category);
+
   /// No description provided for @stats_today.
   ///
   /// In en, this message translates to:
@@ -6977,6 +7277,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'On track to finish below {period}.'**
   String stats_forecastLower(Object period);
+
+  /// No description provided for @stats_howItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How Statistics Work'**
+  String get stats_howItWorks;
+
+  /// No description provided for @stats_howItWorksDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Track income, spending, and trends for the selected period. Tap the date range at the top to switch between day, week, month, year, or a custom range.'**
+  String get stats_howItWorksDesc;
+
+  /// No description provided for @stats_netFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Flow'**
+  String get stats_netFlow;
 
   /// No description provided for @recap_belowAvg.
   ///
@@ -7397,6 +7715,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Free plan includes {max} accounts. Upgrade to Pro to use all your accounts.'**
   String upgrade_accountsFreePlanLimit(int max);
+
+  /// No description provided for @upgrade_seeProPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'See Pro Plans'**
+  String get upgrade_seeProPlans;
 
   /// No description provided for @day_monday.
   ///
@@ -8628,6 +8952,18 @@ abstract class AppLocalizations {
   /// **'This will adjust everyones balance. Continue?'**
   String get expense_deleteExpenseMsg;
 
+  /// No description provided for @expense_splitUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Split updated'**
+  String get expense_splitUpdated;
+
+  /// No description provided for @expense_remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get expense_remaining;
+
   /// No description provided for @billCenter_overdue.
   ///
   /// In en, this message translates to:
@@ -8765,6 +9101,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} marked as paid'**
   String billCenter_markedPaid(String name);
+
+  /// No description provided for @billCenter_inDays.
+  ///
+  /// In en, this message translates to:
+  /// **'In {days} days'**
+  String billCenter_inDays(int days);
+
+  /// No description provided for @billCenter_daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d ago'**
+  String billCenter_daysAgo(int days);
+
+  /// No description provided for @billCenter_daysOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d overdue'**
+  String billCenter_daysOverdue(int days);
+
+  /// No description provided for @billCenter_moreCount.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String billCenter_moreCount(int count);
+
+  /// No description provided for @billCenter_addBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a recurring bill to see it here'**
+  String get billCenter_addBill;
+
+  /// No description provided for @frequency_daily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get frequency_daily;
+
+  /// No description provided for @frequency_weekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get frequency_weekly;
+
+  /// No description provided for @frequency_monthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get frequency_monthly;
+
+  /// No description provided for @frequency_yearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get frequency_yearly;
 
   /// No description provided for @comparison_steady.
   ///
@@ -9185,6 +9575,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'For SMS auto-detection (e.g. swiggy, zomato)'**
   String get category_keywordsHelper;
+
+  /// No description provided for @category_suggestedKeywords.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested keywords'**
+  String get category_suggestedKeywords;
 
   /// No description provided for @currency_title.
   ///
@@ -11196,6 +11592,222 @@ abstract class AppLocalizations {
   /// **'Tax Estimation'**
   String get tax_title;
 
+  /// No description provided for @debt_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt Planner'**
+  String get debt_title;
+
+  /// No description provided for @debt_utilitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Snowball & Avalanche strategies'**
+  String get debt_utilitySubtitle;
+
+  /// No description provided for @debt_snowball.
+  ///
+  /// In en, this message translates to:
+  /// **'Snowball'**
+  String get debt_snowball;
+
+  /// No description provided for @debt_avalanche.
+  ///
+  /// In en, this message translates to:
+  /// **'Avalanche'**
+  String get debt_avalanche;
+
+  /// No description provided for @debt_totalDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Debt'**
+  String get debt_totalDebt;
+
+  /// No description provided for @debt_monthsToFreedom.
+  ///
+  /// In en, this message translates to:
+  /// **'Months to Freedom'**
+  String get debt_monthsToFreedom;
+
+  /// No description provided for @debt_interestPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest to Pay'**
+  String get debt_interestPaid;
+
+  /// No description provided for @debt_minPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Min Payment'**
+  String get debt_minPayment;
+
+  /// No description provided for @debt_extraPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra Payment'**
+  String get debt_extraPayment;
+
+  /// No description provided for @debt_addDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Debt'**
+  String get debt_addDebt;
+
+  /// No description provided for @debt_editDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Debt'**
+  String get debt_editDebt;
+
+  /// No description provided for @debt_noDebts.
+  ///
+  /// In en, this message translates to:
+  /// **'No debts added'**
+  String get debt_noDebts;
+
+  /// No description provided for @debt_noDebtsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your loans and credit cards to build a payoff plan.'**
+  String get debt_noDebtsDesc;
+
+  /// No description provided for @debt_activeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{debt} other{debts}}'**
+  String debt_activeCount(int count);
+
+  /// No description provided for @debt_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt Name'**
+  String get debt_name;
+
+  /// No description provided for @debt_nameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., HDFC Credit Card'**
+  String get debt_nameHint;
+
+  /// No description provided for @debt_nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name for this debt'**
+  String get debt_nameRequired;
+
+  /// No description provided for @debt_balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Balance'**
+  String get debt_balance;
+
+  /// No description provided for @debt_balanceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid balance'**
+  String get debt_balanceRequired;
+
+  /// No description provided for @debt_interestRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest Rate (APR %)'**
+  String get debt_interestRate;
+
+  /// No description provided for @debt_interestRateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid interest rate'**
+  String get debt_interestRateRequired;
+
+  /// No description provided for @debt_minimumPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum Payment'**
+  String get debt_minimumPayment;
+
+  /// No description provided for @debt_minimumPaymentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid minimum payment'**
+  String get debt_minimumPaymentRequired;
+
+  /// No description provided for @debt_extraPaymentOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra Payment (optional)'**
+  String get debt_extraPaymentOptional;
+
+  /// No description provided for @debt_extraPaymentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional amount you can pay monthly'**
+  String get debt_extraPaymentHint;
+
+  /// No description provided for @debt_payoffOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Payoff Order'**
+  String get debt_payoffOrder;
+
+  /// No description provided for @debt_payoffOrderDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This debt will be paid off in position {position} using the {strategy} strategy.'**
+  String debt_payoffOrderDesc(int position, String strategy);
+
+  /// No description provided for @debt_archive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get debt_archive;
+
+  /// No description provided for @debt_archiveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide from active payoff plan'**
+  String get debt_archiveDesc;
+
+  /// No description provided for @debt_unarchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get debt_unarchive;
+
+  /// No description provided for @debt_unarchiveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring back into active payoff plan'**
+  String get debt_unarchiveDesc;
+
+  /// No description provided for @debt_paidOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid Off'**
+  String get debt_paidOff;
+
+  /// No description provided for @debt_archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get debt_archived;
+
+  /// No description provided for @debt_deleteDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently remove this debt entry'**
+  String get debt_deleteDesc;
+
+  /// No description provided for @debt_infoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How debt payoff works'**
+  String get debt_infoTitle;
+
+  /// No description provided for @debt_infoDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Snowball pays off your smallest balance first for quick wins. Avalanche targets the highest interest rate first to save the most money. Add extra payment to speed up either plan.'**
+  String get debt_infoDesc;
+
   /// No description provided for @tax_projected.
   ///
   /// In en, this message translates to:
@@ -12228,6 +12840,12 @@ abstract class AppLocalizations {
   /// **'All payments current'**
   String get cc_allPaymentsCurrent;
 
+  /// No description provided for @cc_yourCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Cards'**
+  String get cc_yourCards;
+
   /// No description provided for @plugins_remindMeBefore.
   ///
   /// In en, this message translates to:
@@ -12612,11 +13230,23 @@ abstract class AppLocalizations {
   /// **'Archive Goal'**
   String get goal_archive;
 
+  /// No description provided for @goal_archiveConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive this goal? It will be hidden from your active goals list.'**
+  String get goal_archiveConfirmMessage;
+
   /// No description provided for @goal_markComplete.
   ///
   /// In en, this message translates to:
   /// **'Mark Complete'**
   String get goal_markComplete;
+
+  /// No description provided for @goal_markCompleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark this goal as fully funded? This sets the saved amount to your target and archives it.'**
+  String get goal_markCompleteConfirmMessage;
 
   /// No description provided for @goal_basedOnAvg.
   ///
@@ -12737,6 +13367,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Up to {amount}'**
   String tax_upTo(int amount);
+
+  /// Remaining deduction amount
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} remaining'**
+  String tax_remaining(int amount);
+
+  /// Accessibility hint for slider
+  ///
+  /// In en, this message translates to:
+  /// **'Double tap to set maximum value'**
+  String get accessibility_doubleTapToSetMax;
+
+  /// Currency format for accessibility
+  ///
+  /// In en, this message translates to:
+  /// **'{amount}'**
+  String currencyFormat(double amount);
+
+  /// Deep Dive Analytics section header
+  ///
+  /// In en, this message translates to:
+  /// **'Deep Dive'**
+  String get insights_deepDive;
+
+  /// Empty state title when no analytics data is available
+  ///
+  /// In en, this message translates to:
+  /// **'No Data Yet'**
+  String get insights_noDataYet;
+
+  /// Prompt to add transactions for analytics
+  ///
+  /// In en, this message translates to:
+  /// **'Add transactions to see your analytics'**
+  String get insights_addTransactionsPrompt;
+
+  /// Link to view full analytics screen
+  ///
+  /// In en, this message translates to:
+  /// **'View All Analytics'**
+  String get insights_viewAllAnalytics;
+
+  /// Title of the coach info bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Your Financial Coach'**
+  String get insights_yourFinancialCoach;
+
+  /// Description of the financial coach feature
+  ///
+  /// In en, this message translates to:
+  /// **'Get personalized insights, predictions, and actionable recommendations to improve your financial health.'**
+  String get insights_coachDescription;
+
+  /// How It Works info button label
+  ///
+  /// In en, this message translates to:
+  /// **'How It Works'**
+  String get insights_howItWorks;
+
+  /// AI Summary feature title
+  ///
+  /// In en, this message translates to:
+  /// **'AI Summary'**
+  String get insights_aiSummary;
+
+  /// AI Summary feature description
+  ///
+  /// In en, this message translates to:
+  /// **'Your personalized financial overview and highlights'**
+  String get insights_aiSummaryDesc;
+
+  /// Quick Wins feature title
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Wins'**
+  String get insights_quickWins;
+
+  /// Quick Wins feature description
+  ///
+  /// In en, this message translates to:
+  /// **'Actionable recommendations to improve your finances'**
+  String get insights_quickWinsDesc;
+
+  /// Predictions feature title
+  ///
+  /// In en, this message translates to:
+  /// **'Predictions'**
+  String get insights_predictions;
+
+  /// Predictions feature description
+  ///
+  /// In en, this message translates to:
+  /// **'Cash flow forecast and risk alerts'**
+  String get insights_predictionsDesc;
 }
 
 class _AppLocalizationsDelegate

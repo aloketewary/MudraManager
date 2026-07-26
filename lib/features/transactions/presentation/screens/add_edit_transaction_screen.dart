@@ -31,8 +31,8 @@ import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
 import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
-import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/core/providers/singleton_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -469,7 +469,10 @@ class _AddEditTransactionScreenState
             // ── Trip banner (top, outside ListView) ──
             if (_selectedTrip != null)
               Semantics(
-                label: 'Trip: ${_selectedTrip!.name}, ${_selectedParticipants.length} participants',
+                label: ctxt.transaction_tripParticipantsSemantic(
+                  _selectedTrip!.name,
+                  _selectedParticipants.length,
+                ),
                 button: true,
                 child: GestureDetector(
                   onTap: () => _showSplitCustomizer(spacing),
@@ -484,7 +487,8 @@ class _AddEditTransactionScreenState
                       ),
                       decoration: BoxDecoration(
                         color: color.primaryContainer.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                         border: Border.all(
                           color: color.primary.withValues(alpha: 0.3),
                         ),
@@ -519,10 +523,12 @@ class _AddEditTransactionScreenState
                                 ),
                                 SizedBox(height: spacing.elementGapUltraMin),
                                 Text(
-                                  '${_selectedParticipants.length} participants',
+                                  ctxt.transaction_nParticipants(
+                                    _selectedParticipants.length,
+                                  ),
                                   style: textTheme.labelSmall?.copyWith(
-                                    color:
-                                        color.onPrimaryContainer.withValues(alpha: 0.7),
+                                    color: color.onPrimaryContainer
+                                        .withValues(alpha: 0.7),
                                   ),
                                 ),
                               ],
@@ -560,7 +566,9 @@ class _AddEditTransactionScreenState
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        'Trip is in ${_selectedTrip!.currencyCode} — amount will be converted',
+                        ctxt.transaction_tripCurrencyMismatch(
+                          _selectedTrip!.currencyCode!,
+                        ),
                         style: textTheme.bodySmall?.copyWith(
                           color: color.tertiary,
                           fontSize: 11,
@@ -579,17 +587,36 @@ class _AddEditTransactionScreenState
                   vertical: spacing.cardVertical,
                 ),
                 children: [
-                  // ── Hero Amount ──
+                  // ── Hero Amount — this screen's one hero/glow card ──
                   RepaintBoundary(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: spacing.cardHorizontal,
-                        vertical: spacing.cardVertical,
-                      ),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: EdgeInsets.all(spacing.cardInner),
                       decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.06),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            accentColor.withValues(
+                              alpha: theme.brightness == Brightness.dark
+                                  ? 0.20
+                                  : 0.12,
+                            ),
+                            color.surface,
+                          ],
+                        ),
                         borderRadius:
                             BorderRadius.circular(spacing.radiusMedium),
+                        border: Border.all(
+                          color: accentColor.withValues(alpha: 0.2),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: accentColor.withValues(alpha: 0.08),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
                       child: Column(
                         children: [
@@ -702,7 +729,8 @@ class _AddEditTransactionScreenState
                           if (mounted) setState(() => _balanceMap = val);
                         });
                       },
-                      onShowUnlockPrompt: (count) => _showUnlockPrompt(count, spacing),
+                      onShowUnlockPrompt: (count) =>
+                          _showUnlockPrompt(count, spacing),
                     ),
                   ),
 
@@ -738,7 +766,9 @@ class _AddEditTransactionScreenState
                       Expanded(
                         flex: 3,
                         child: Semantics(
-                          label: 'Transaction date: ${DateFormat('MMMM dd, yyyy').format(_selectedDate)}, tap to change',
+                          label: ctxt.transaction_dateSemantic(
+                            DateFormat('MMMM dd, yyyy').format(_selectedDate),
+                          ),
                           button: true,
                           child: Material(
                             color: Colors.transparent,
@@ -776,19 +806,22 @@ class _AddEditTransactionScreenState
                                 ),
                                 decoration: BoxDecoration(
                                   color: color.surfaceContainerHighest,
-                                  borderRadius:
-                                      BorderRadius.circular(spacing.radiusMedium),
+                                  borderRadius: BorderRadius.circular(
+                                    spacing.radiusMedium,
+                                  ),
                                   border: Border.all(
-                                    color:
-                                        color.outlineVariant.withValues(alpha: 0.2),
+                                    color: color.outlineVariant
+                                        .withValues(alpha: 0.2),
                                   ),
                                 ),
                                 child: Row(
                                   children: [
                                     Container(
-                                      padding: EdgeInsets.all(spacing.elementGap),
+                                      padding:
+                                          EdgeInsets.all(spacing.elementGap),
                                       decoration: BoxDecoration(
-                                        color: color.primary.withValues(alpha: 0.1),
+                                        color: color.primary
+                                            .withValues(alpha: 0.1),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
@@ -800,21 +833,27 @@ class _AddEditTransactionScreenState
                                     SizedBox(width: spacing.elementGap + 2),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'Date',
-                                            style: textTheme.labelSmall?.copyWith(
+                                            ctxt.label_date,
+                                            style:
+                                                textTheme.labelSmall?.copyWith(
                                               color: color.onSurfaceVariant,
                                               letterSpacing: 0.5,
                                             ),
                                           ),
-                                          SizedBox(height: spacing.elementGapUltraMin),
+                                          SizedBox(
+                                            height: spacing.elementGapUltraMin,
+                                          ),
                                           Text(
                                             DateFormat('MMM dd, yyyy')
                                                 .format(_selectedDate),
-                                            style: textTheme.bodyMedium
-                                                ?.copyWith(fontWeight: FontWeight.w500),
+                                            style:
+                                                textTheme.bodyMedium?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -833,7 +872,9 @@ class _AddEditTransactionScreenState
                       Expanded(
                         flex: 2,
                         child: Semantics(
-                          label: 'Transaction time: ${DateFormat('hh:mm a').format(_selectedDate)}, tap to change',
+                          label: ctxt.transaction_timeSemantic(
+                            DateFormat('hh:mm a').format(_selectedDate),
+                          ),
                           button: true,
                           child: Material(
                             color: Colors.transparent,
@@ -866,19 +907,22 @@ class _AddEditTransactionScreenState
                                 ),
                                 decoration: BoxDecoration(
                                   color: color.surfaceContainerHighest,
-                                  borderRadius:
-                                      BorderRadius.circular(spacing.radiusMedium),
+                                  borderRadius: BorderRadius.circular(
+                                    spacing.radiusMedium,
+                                  ),
                                   border: Border.all(
-                                    color:
-                                        color.outlineVariant.withValues(alpha: 0.2),
+                                    color: color.outlineVariant
+                                        .withValues(alpha: 0.2),
                                   ),
                                 ),
                                 child: Row(
                                   children: [
                                     Container(
-                                      padding: EdgeInsets.all(spacing.elementGap),
+                                      padding:
+                                          EdgeInsets.all(spacing.elementGap),
                                       decoration: BoxDecoration(
-                                        color: color.primary.withValues(alpha: 0.1),
+                                        color: color.primary
+                                            .withValues(alpha: 0.1),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
@@ -889,9 +933,11 @@ class _AddEditTransactionScreenState
                                     ),
                                     SizedBox(width: spacing.elementGap + 2),
                                     Text(
-                                      DateFormat('hh:mm a').format(_selectedDate),
-                                      style: textTheme.bodyMedium
-                                          ?.copyWith(fontWeight: FontWeight.w500),
+                                      DateFormat('hh:mm a')
+                                          .format(_selectedDate),
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1129,8 +1175,9 @@ class _AddEditTransactionScreenState
 
         context.pop(true);
         SnackbarService.success(
-            _isEditing ? BuddyMessages.txnUpdated : BuddyMessages.txnAdded,
-            spacing,);
+          _isEditing ? BuddyMessages.txnUpdated : BuddyMessages.txnAdded,
+          spacing,
+        );
       }
 
       // Fire-and-forget side effects after pop
@@ -1138,7 +1185,7 @@ class _AddEditTransactionScreenState
       _checkBudgetAlerts(txn);
       WidgetService.updateWidget(ref);
     } catch (e) {
-      SnackbarService.error(BuddyMessages.txnAdded, spacing); // fallback error
+      SnackbarService.error(BuddyMessages.genericError, spacing);
       debugPrint('Save transaction error: $e');
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -1156,7 +1203,8 @@ class _AddEditTransactionScreenState
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2),),
+          top: Radius.circular(spacing.radiusSmall * 2),
+        ),
       ),
       builder: (sheetContext) {
         return Padding(
@@ -1180,7 +1228,7 @@ class _AddEditTransactionScreenState
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
                   labelText: ctxt.transaction_tagNameControllerText,
-                  hintText: 'e.g., Travel, Food, Shopping',
+                  hintText: ctxt.transaction_tagNameHint,
                   prefixIcon: const Icon(LucideIcons.tag),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(spacing.radiusSmall),
@@ -1238,7 +1286,8 @@ class _AddEditTransactionScreenState
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2),),
+          top: Radius.circular(spacing.radiusSmall * 2),
+        ),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
@@ -1272,7 +1321,7 @@ class _AddEditTransactionScreenState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Customize Split',
+                      AppLocalizations.of(context)!.transaction_customizeSplit,
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -1282,7 +1331,9 @@ class _AddEditTransactionScreenState
                         ctx.pop();
                         _showTripSelector(spacing);
                       },
-                      child: const Text('Change Trip'),
+                      child: Text(
+                        AppLocalizations.of(context)!.transaction_changeTrip,
+                      ),
                     ),
                   ],
                 ),
@@ -1290,14 +1341,23 @@ class _AddEditTransactionScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Split Type', style: textTheme.titleSmall),
+                    Text(
+                      AppLocalizations.of(context)!.trip_splitType,
+                      style: textTheme.titleSmall,
+                    ),
                     if ((_splitType == SplitType.custom ||
                             _splitType == SplitType.percentage) &&
                         amount > 0)
                       Text(
                         isPercentage
-                            ? 'Remaining: ${remaining.toStringAsFixed(1)}%'
-                            : 'Remaining: ${formatCurrency(remaining, decimals: 2)}',
+                            ? AppLocalizations.of(context)!
+                                .transaction_remainingPercent(
+                                remaining.toStringAsFixed(1),
+                              )
+                            : AppLocalizations.of(context)!
+                                .transaction_remainingAmount(
+                                formatCurrency(remaining, decimals: 2),
+                              ),
                         style: textTheme.labelLarge?.copyWith(
                           color: remaining.abs() < 0.1
                               ? color.primary
@@ -1309,21 +1369,25 @@ class _AddEditTransactionScreenState
                 ),
                 const SizedBox(height: 8),
                 SegmentedButton<SplitType>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: SplitType.equal,
-                      label: Text('Equal'),
-                      icon: Icon(LucideIcons.chartPie, size: 16),
+                      label: Text(
+                        AppLocalizations.of(context)!.transaction_splitEqual,
+                      ),
+                      icon: const Icon(LucideIcons.chartPie, size: 16),
                     ),
-                    ButtonSegment(
+                    const ButtonSegment(
                       value: SplitType.percentage,
                       label: Text('%'),
                       icon: Icon(LucideIcons.percent, size: 16),
                     ),
                     ButtonSegment(
                       value: SplitType.custom,
-                      label: Text('Custom'),
-                      icon: Icon(LucideIcons.calculator, size: 16),
+                      label: Text(
+                        AppLocalizations.of(context)!.transaction_splitCustom,
+                      ),
+                      icon: const Icon(LucideIcons.calculator, size: 16),
                     ),
                   ],
                   selected: {_splitType},
@@ -1333,7 +1397,10 @@ class _AddEditTransactionScreenState
                   },
                 ),
                 const SizedBox(height: 16),
-                Text('Participants', style: textTheme.titleSmall),
+                Text(
+                  AppLocalizations.of(context)!.transaction_participants,
+                  style: textTheme.titleSmall,
+                ),
                 const SizedBox(height: 12),
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 300),
@@ -1444,11 +1511,12 @@ class _AddEditTransactionScreenState
                                                             const EdgeInsets
                                                                 .only(right: 4),
                                                         child: CurrencyBadge(
-                                                            code:
-                                                                _effectiveCurrency ??
-                                                                    BaseCurrency
-                                                                        .code,
-                                                            size: 12,),
+                                                          code:
+                                                              _effectiveCurrency ??
+                                                                  BaseCurrency
+                                                                      .code,
+                                                          size: 12,
+                                                        ),
                                                       )
                                                     : null,
                                                 suffixText: _splitType ==
@@ -1471,8 +1539,10 @@ class _AddEditTransactionScreenState
                                                     size: 18,
                                                     color: color.primary,
                                                   ),
-                                                  tooltip:
-                                                      'Auto-fill remaining',
+                                                  tooltip: AppLocalizations.of(
+                                                    context,
+                                                  )!
+                                                      .trip_autoFillRemaining,
                                                   padding: EdgeInsets.zero,
                                                   constraints:
                                                       const BoxConstraints(),
@@ -1543,7 +1613,10 @@ class _AddEditTransactionScreenState
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Paid By', style: textTheme.titleSmall),
+                Text(
+                  AppLocalizations.of(context)!.trip_paidBy,
+                  style: textTheme.titleSmall,
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -1596,7 +1669,8 @@ class _AddEditTransactionScreenState
         context: context,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-              top: Radius.circular(spacing.radiusSmall * 2),),
+            top: Radius.circular(spacing.radiusSmall * 2),
+          ),
         ),
         builder: (ctx) => Padding(
           padding: const EdgeInsets.all(24),
@@ -1605,7 +1679,7 @@ class _AddEditTransactionScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Select Trip',
+                AppLocalizations.of(context)!.transaction_selectTrip,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -1613,7 +1687,9 @@ class _AddEditTransactionScreenState
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(LucideIcons.x),
-                title: const Text('None'),
+                title: Text(
+                  AppLocalizations.of(context)!.transaction_noneTripOption,
+                ),
                 onTap: () {
                   setState(() {
                     _selectedTrip = null;
@@ -1631,7 +1707,9 @@ class _AddEditTransactionScreenState
                   ),
                   title: Text(trip.name),
                   subtitle: Text(
-                    trip.isActive ? 'Active' : 'Inactive',
+                    trip.isActive
+                        ? AppLocalizations.of(context)!.section_active
+                        : AppLocalizations.of(context)!.common_inactive,
                   ),
                   selected: _selectedTrip?.id == trip.id,
                   onTap: () {
@@ -1668,14 +1746,18 @@ class _AddEditTransactionScreenState
       await notificationService.logNotification(
         title: ctxt.notif_lowBalanceTitle,
         body: ctxt.notif_lowBalanceBody(
-            account.name, formatCurrency(currentBalance, decimals: 2),),
+          account.name,
+          formatCurrency(currentBalance, decimals: 2),
+        ),
         type: 'low_balance',
       );
       await NotificationService.showLocalNotification(
         id: 1000 + account.id,
         title: ctxt.notif_lowBalanceTitle,
         body: ctxt.notif_lowBalanceBody(
-            account.name, formatCurrency(currentBalance, decimals: 2),),
+          account.name,
+          formatCurrency(currentBalance, decimals: 2),
+        ),
         dedupKey: 'low_balance_${account.id}',
       );
     }
@@ -1702,7 +1784,8 @@ class _AddEditTransactionScreenState
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2),),
+          top: Radius.circular(spacing.radiusSmall * 2),
+        ),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
@@ -1712,14 +1795,16 @@ class _AddEditTransactionScreenState
             Icon(LucideIcons.lock, size: 32, color: color.primary),
             const SizedBox(height: 12),
             Text(
-              'Unlock all $lockedCount accounts with Pro',
+              AppLocalizations.of(context)!
+                  .upgrade_unlockAccountsTitle(lockedCount),
               style:
                   textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              'Free plan includes ${FreeTierLimits.maxAccounts} accounts. Upgrade to use all your accounts.',
+              AppLocalizations.of(context)!
+                  .upgrade_accountsFreePlanLimit(FreeTierLimits.maxAccounts),
               style:
                   textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
               textAlign: TextAlign.center,
@@ -1736,9 +1821,9 @@ class _AddEditTransactionScreenState
                   borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
               ),
-              child: const Text(
-                'See Pro Plans',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              child: Text(
+                AppLocalizations.of(context)!.upgrade_seeProPlans,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],

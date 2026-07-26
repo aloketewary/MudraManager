@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/domain/financial_states.dart';
 import 'package:mudra_manager/core/engine/dashboard_engine.dart';
-import 'package:mudra_manager/core/logic/generators/bill_insight_generator.dart';
-import 'package:mudra_manager/core/logic/generators/budget_insight_generator.dart';
-import 'package:mudra_manager/core/logic/generators/cashflow_insight_generator.dart';
+import 'package:mudra_manager/features/insights/data/bill_insight_generator.dart';
+import 'package:mudra_manager/features/insights/data/budget_insight_generator.dart';
+import 'package:mudra_manager/features/insights/data/cashflow_insight_generator.dart';
 import 'package:mudra_manager/core/logic/insight_generator.dart';
 
 void main() {

@@ -1,10 +1,12 @@
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -15,7 +17,8 @@ import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/recap/data/monthly_recap_service.dart';
 import 'package:mudra_manager/features/recap/data/monthly_recap_pdf.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
-import 'package:mudra_manager/shared/templates/screen_shell.dart';
+import 'package:mudra_manager/shared/widgets/progress_ring.dart';
+import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 
 class MonthlyRecapScreen extends ConsumerStatefulWidget {
   final DateTime? month;
@@ -86,7 +89,10 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return ListView(
-              padding: EdgeInsets.all(spacing.cardHorizontal),
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.cardHorizontal,
+                vertical: spacing.cardVertical,
+              ),
               children:
                   List.generate(4, (_) => const DashboardCardSkeleton()),
             );
@@ -105,19 +111,35 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
 
               // ── 2. AI INSIGHT CARD ──
               if (!data.insight.isEmpty) ...[
+                TypeSectionHeader(
+                  label: 'Summary',
+                  icon: LucideIcons.sparkles,
+                  accentColor: color.primary,
+                ),
+                SizedBox(height: spacing.elementGap),
                 _buildInsightCard(data.insight, color, textTheme, spacing),
                 SizedBox(height: spacing.sectionGap),
               ],
 
               // ── 3. ACHIEVEMENT/WARNING ──
               if (data.achievements.isNotEmpty) ...[
+                TypeSectionHeader(
+                  label: 'Achievements',
+                  icon: LucideIcons.trophy,
+                  accentColor: color.primary,
+                ),
+                SizedBox(height: spacing.elementGap),
                 _buildAchievements(data.achievements, color, textTheme, spacing),
                 SizedBox(height: spacing.sectionGap),
               ],
 
               // ── 4. CATEGORY CHANGE LEADERS ──
               if (data.categoryChanges.isNotEmpty) ...[
-                _sectionHeader(l10n.recap_topCategories, LucideIcons.arrowLeftRight, color, textTheme),
+                TypeSectionHeader(
+                  label: l10n.recap_topCategories,
+                  icon: LucideIcons.chartPie,
+                  accentColor: color.primary,
+                ),
                 SizedBox(height: spacing.elementGap),
                 _buildCategoryChanges(data.categoryChanges, color, textTheme, spacing),
                 SizedBox(height: spacing.sectionGap),
@@ -125,7 +147,11 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
 
               // ── 5. BUDGET UTILIZATION ──
               if (data.budgetDetails.isNotEmpty) ...[
-                _sectionHeader(l10n.recap_budgetHealth, LucideIcons.target, color, textTheme),
+                TypeSectionHeader(
+                  label: l10n.recap_budgetHealth,
+                  icon: LucideIcons.gauge,
+                  accentColor: color.primary,
+                ),
                 SizedBox(height: spacing.elementGap),
                 _buildBudgetUtilization(data.budgetDetails, color, textTheme, spacing),
                 SizedBox(height: spacing.sectionGap),
@@ -133,7 +159,11 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
 
               // ── 6. BIGGEST EXPENSES ──
               if (data.topTransactions.isNotEmpty) ...[
-                _sectionHeader(l10n.recap_biggestExpenses, LucideIcons.arrowUpDown, color, textTheme),
+                TypeSectionHeader(
+                  label: l10n.recap_biggestExpenses,
+                  icon: LucideIcons.trendingDown,
+                  accentColor: color.primary,
+                ),
                 SizedBox(height: spacing.elementGap),
                 _buildTopExpenses(data.topTransactions, color, textTheme, spacing, l10n),
                 SizedBox(height: spacing.sectionGap),
@@ -141,7 +171,12 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
 
               // ── DOWNLOAD PDF ──
               FilledButton.icon(
-                onPressed: _downloading ? null : () => _downloadPdf(data, spacing),
+                onPressed: _downloading
+                    ? null
+                    : () {
+                        HapticFeedback.mediumImpact();
+                        _downloadPdf(data, spacing);
+                      },
                 icon: _downloading
                     ? const SizedBox(
                         width: 18,
@@ -180,7 +215,10 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
     AppLocalizations l10n,
   ) {
     return Container(
-      padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardInner,
+        vertical: spacing.cardInner,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -225,7 +263,12 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(LucideIcons.download),
-                onPressed: _downloading ? null : () {},
+                onPressed: _downloading
+                    ? null
+                    : () {
+                        HapticFeedback.mediumImpact();
+                        _downloadPdf(data, spacing);
+                      },
                 tooltip: l10n.stats_downloadPdf,
               ),
             ],
@@ -250,45 +293,79 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
 
           // Financial Score
           Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.cardInner,
-              vertical: spacing.elementGap,
-            ),
+            padding: EdgeInsets.all(spacing.cardInner),
             decoration: BoxDecoration(
               color: color.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(spacing.radiusSmall),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
               border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
-                Icon(LucideIcons.gauge, size: spacing.iconSM, color: color.primary),
+                ProgressRing(
+                  progress: data.financialScore / 100,
+                  color: _scoreColor(data.financialScore, color),
+                  size: 44,
+                  strokeWidth: 5,
+                  labelBuilder: (_) => Text(
+                    '${data.financialScore}',
+                    style: textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: _scoreColor(data.financialScore, color),
+                    ),
+                  ),
+                ),
                 SizedBox(width: spacing.elementGap),
                 Expanded(
                   child: Text(
                     'Financial Score',
-                    style: textTheme.bodyMedium
-                        ?.copyWith(color: color.onSurfaceVariant),
-                  ),
-                ),
-                Text(
-                  '${data.financialScore}/100',
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: _scoreColor(data.financialScore, color),
-                  ),
-                ),
-                if (data.financialScoreDelta != 0) ...[
-                  const SizedBox(width: 6),
-                  Text(
-                    '${data.financialScoreDelta > 0 ? "↑" : "↓"}${data.financialScoreDelta.abs()}',
-                    style: textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: data.financialScoreDelta > 0
-                          ? FinanceColors.incomeColor(Theme.of(context).brightness)
-                          : FinanceColors.expenseColor(Theme.of(context).brightness),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: color.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
+                ),
+                if (data.financialScoreDelta != 0)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: (data.financialScoreDelta > 0
+                              ? FinanceColors.incomeColor(
+                                  Theme.of(context).brightness,)
+                              : FinanceColors.expenseColor(
+                                  Theme.of(context).brightness,))
+                          .withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          data.financialScoreDelta > 0
+                              ? LucideIcons.arrowUp
+                              : LucideIcons.arrowDown,
+                          size: 12,
+                          color: data.financialScoreDelta > 0
+                              ? FinanceColors.incomeColor(
+                                  Theme.of(context).brightness,)
+                              : FinanceColors.expenseColor(
+                                  Theme.of(context).brightness,),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          '${data.financialScoreDelta.abs()}',
+                          style: textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: data.financialScoreDelta > 0
+                                ? FinanceColors.incomeColor(
+                                    Theme.of(context).brightness,)
+                                : FinanceColors.expenseColor(
+                                    Theme.of(context).brightness,),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
@@ -313,7 +390,10 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
   ) {
     return Expanded(
       child: Container(
-        padding: EdgeInsets.all(spacing.cardInner),
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.elementGap,
+          vertical: spacing.elementGap * 1.5,
+        ),
         decoration: BoxDecoration(
           color: accent.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -355,25 +435,18 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.onSurface.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(LucideIcons.sparkles, size: spacing.iconSM, color: color.primary),
-              SizedBox(width: spacing.elementGap),
-              Text(
-                'Summary',
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: color.primary,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: spacing.elementGap),
           ...insight.lines.map((line) => Padding(
                 padding: EdgeInsets.only(bottom: spacing.elementGapMin),
                 child: Row(
@@ -435,13 +508,10 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
         final accent = a.isWarning ? color.error : color.primary;
         final bg = accent.withValues(alpha: 0.08);
         return Padding(
-          padding: EdgeInsets.only(bottom: spacing.elementGapMin),
+          padding: EdgeInsets.only(bottom: spacing.elementGap),
           child: Container(
             width: double.infinity,
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.cardInner,
-              vertical: spacing.elementGap,
-            ),
+            padding: EdgeInsets.all(spacing.cardInner),
             decoration: BoxDecoration(
               color: bg,
               borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -449,10 +519,19 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
             ),
             child: Row(
               children: [
-                Icon(
-                  a.isWarning ? LucideIcons.alertTriangle : LucideIcons.trophy,
-                  size: spacing.iconSM,
-                  color: accent,
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                  ),
+                  child: Icon(
+                    a.isWarning
+                        ? LucideIcons.alertTriangle
+                        : LucideIcons.trophy,
+                    size: spacing.iconSM,
+                    color: accent,
+                  ),
                 ),
                 SizedBox(width: spacing.elementGap),
                 Expanded(
@@ -484,7 +563,14 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.onSurface.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -500,7 +586,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: spacing.cardInner,
-                  vertical: spacing.elementGap + 2,
+                  vertical: spacing.cardVertical,
                 ),
                 child: Row(
                   children: [
@@ -509,10 +595,20 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                         c.name,
                         style: textTheme.bodyMedium
                             ?.copyWith(fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    Icon(
+                      c.increased
+                          ? LucideIcons.arrowUp
+                          : LucideIcons.arrowDown,
+                      size: 12,
+                      color: deltaColor,
+                    ),
+                    const SizedBox(width: 2),
                     Text(
-                      '${c.increased ? "+" : "-"}${_fmt(c.delta.abs())}',
+                      _fmt(c.delta.abs()),
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: deltaColor,
@@ -525,7 +621,8 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                 Divider(
                   height: 1,
                   indent: spacing.cardInner,
-                  color: color.outlineVariant.withValues(alpha: 0.4),
+                  endIndent: spacing.cardInner,
+                  color: color.outlineVariant.withValues(alpha: 0.3),
                 ),
             ],
           );
@@ -545,7 +642,14 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.onSurface.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -559,7 +663,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: spacing.cardInner,
-                  vertical: spacing.elementGap + 2,
+                  vertical: spacing.cardVertical,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -571,19 +675,32 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                             b.name,
                             style: textTheme.bodyMedium
                                 ?.copyWith(fontWeight: FontWeight.w500),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        if (b.overBudget) ...[
+                          Icon(
+                            LucideIcons.alertTriangle,
+                            size: 12,
+                            color: color.error,
+                          ),
+                          const SizedBox(width: 4),
+                        ],
                         Text(
                           '${_fmt(b.spent)} / ${_fmt(b.allocated)}',
                           style: textTheme.labelSmall?.copyWith(
                             color: b.overBudget
                                 ? color.error
                                 : color.onSurfaceVariant,
+                            fontWeight: b.overBudget
+                                ? FontWeight.w700
+                                : FontWeight.w400,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(3),
                       child: LinearProgressIndicator(
@@ -601,7 +718,8 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                 Divider(
                   height: 1,
                   indent: spacing.cardInner,
-                  color: color.outlineVariant.withValues(alpha: 0.4),
+                  endIndent: spacing.cardInner,
+                  color: color.outlineVariant.withValues(alpha: 0.3),
                 ),
             ],
           );
@@ -622,7 +740,14 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.onSurface.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -635,7 +760,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: spacing.cardInner,
-                  vertical: spacing.elementGap + 2,
+                  vertical: spacing.cardVertical,
                 ),
                 child: Row(
                   children: [
@@ -692,33 +817,14 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
               if (!isLast)
                 Divider(
                   height: 1,
-                  indent: 56,
-                  color: color.outlineVariant.withValues(alpha: 0.4),
+                  indent: spacing.cardInner + 40,
+                  endIndent: spacing.cardInner,
+                  color: color.outlineVariant.withValues(alpha: 0.3),
                 ),
             ],
           );
         }).toList(),
       ),
-    );
-  }
-
-  // ── SECTION HEADER ──
-  Widget _sectionHeader(
-    String title,
-    IconData icon,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: color.primary),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.w700, color: color.primary),
-        ),
-      ],
     );
   }
 }

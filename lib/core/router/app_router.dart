@@ -15,7 +15,11 @@ import 'package:mudra_manager/features/analytics/presentation/screens/analytics_
 import 'package:mudra_manager/features/analytics/presentation/financial_health_screen.dart';
 import 'package:mudra_manager/features/analytics/presentation/spending_personality_screen.dart';
 import 'package:mudra_manager/features/analytics/presentation/net_worth_screen.dart';
-import 'package:mudra_manager/features/analytics/presentation/tax_estimation_screen.dart';
+import 'package:mudra_manager/features/monthly_comparison/presentation/index.dart';
+import 'package:mudra_manager/features/tax_planning/presentation/screens/tax_estimation_screen.dart';
+import 'package:mudra_manager/features/debt_snowball/presentation/screens/debt_snowball_screen.dart';
+import 'package:mudra_manager/features/debt_snowball/presentation/screens/add_edit_debt_screen.dart';
+import 'package:mudra_manager/core/db/models/debt.dart';
 import 'package:mudra_manager/features/analytics/presentation/cash_flow_forecast_screen.dart';
 import 'package:mudra_manager/features/analytics/presentation/spending_trends_screen.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
@@ -56,7 +60,6 @@ import 'package:mudra_manager/features/account/presentation/screens/add_edit_acc
 import 'package:mudra_manager/features/recap/presentation/screens/monthly_recap_screen.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
-import 'package:mudra_manager/features/statistics/presentation/screens/monthly_comparison_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/add_edit_transaction_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/add_recurring_transaction_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/bill_control_center_screen.dart';
@@ -70,10 +73,10 @@ import 'package:mudra_manager/features/upgrade/presentation/screens/upgrade_scre
 import 'package:mudra_manager/features/import_export/presentation/screens/import_export_screen.dart';
 import 'package:mudra_manager/features/import_export/presentation/screens/import_preview_screen.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/widget_analytics_screen.dart';
-import 'package:mudra_manager/features/account/presentation/screens/credit_card_bills_screen.dart';
-import 'package:mudra_manager/plugins/credit_card_reminder_settings.dart';
+import 'package:mudra_manager/features/credit_card/presentation/screens/credit_card_bills_screen.dart';
+import 'package:mudra_manager/features/credit_card/data/credit_card_reminder_settings.dart';
 import 'package:mudra_manager/shared/screens/notification_page_screen.dart';
-import 'package:mudra_manager/features/gamification/screens/achievements_screen.dart';
+import 'package:mudra_manager/features/gamification/presentation/screens/achievements_screen.dart';
 import 'package:mudra_manager/features/marketplace/screens/plugin_groups_screen.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 
@@ -573,6 +576,20 @@ class AppRouter {
                   feature: ProFeature.advancedAnalytics,
                   child: TaxEstimationScreen(),
                 ),
+              ),
+              GoRoute(
+                path: AppRoutes.debtSnowball,
+                builder: (context, state) => const ProGate(
+                  feature: ProFeature.advancedAnalytics,
+                  child: DebtSnowballScreen(),
+                ),
+              ),
+              GoRoute(
+                path: AppRoutes.addDebt,
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return AddEditDebtScreen(debt: extra?['debt'] as Debt?);
+                },
               ),
               GoRoute(
                 path: AppRoutes.cashFlowForecast,

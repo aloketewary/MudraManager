@@ -12,8 +12,8 @@ import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
-import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
 class TransactionService {
   final IsarService isarService;
   final AppLog log;

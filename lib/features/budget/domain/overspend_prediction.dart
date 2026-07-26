@@ -32,5 +32,6 @@ class OverspendPrediction {
     return 'At this rate, you will exceed $budgetName budget in $daysUntilOverspend ${daysUntilOverspend == 1 ? 'day' : 'days'}';
   }
 
-  double get percentageOfBudget => (currentSpent / budgetAmount) * 100;
+  double get percentageOfBudget =>
+      budgetAmount > 0 ? (currentSpent / budgetAmount) * 100 : 0;
 }

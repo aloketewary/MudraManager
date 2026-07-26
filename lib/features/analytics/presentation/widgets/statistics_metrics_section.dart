@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/analytics/data/net_worth_service.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
@@ -10,6 +11,7 @@ import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/inline_error.dart';
+import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class StatisticsMetricsSection extends ConsumerWidget {
@@ -24,7 +26,7 @@ class StatisticsMetricsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final brightness = Theme.of(context).brightness;
     final isGuestMode = ref.watch(guestModeProvider);
     final l10n = AppLocalizations.of(context)!;
 
@@ -34,10 +36,10 @@ class StatisticsMetricsSection extends ConsumerWidget {
       data: (data) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.stats_overview,
-            style:
-                textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          TypeSectionHeader(
+            label: l10n.stats_overview,
+            icon: LucideIcons.layoutGrid,
+            accentColor: color.primary,
           ),
           SizedBox(height: spacing.sectionGap),
           Row(
@@ -46,7 +48,7 @@ class StatisticsMetricsSection extends ConsumerWidget {
                 child: _PulseCard(
                   label: l10n.stats_income,
                   value: data.totalIncome,
-                  cardColor: color.primary,
+                  cardColor: FinanceColors.incomeColor(brightness),
                   icon: LucideIcons.arrowUp,
                   sparkline: data.incomeSpots,
                   isGuestMode: isGuestMode,
@@ -58,7 +60,7 @@ class StatisticsMetricsSection extends ConsumerWidget {
                 child: _PulseCard(
                   label: l10n.stats_expense,
                   value: data.totalExpense,
-                  cardColor: color.error,
+                  cardColor: FinanceColors.expenseColor(brightness),
                   icon: LucideIcons.arrowDown,
                   sparkline: data.expenseSpots,
                   isGuestMode: isGuestMode,

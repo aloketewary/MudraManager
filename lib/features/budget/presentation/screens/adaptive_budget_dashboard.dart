@@ -12,12 +12,14 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/features/budget/data/budget_constraint_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/today_card_analytics.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 
 class AdaptiveBudgetDashboard extends ConsumerStatefulWidget {
   const AdaptiveBudgetDashboard({super.key});
@@ -53,6 +55,7 @@ class _AdaptiveBudgetDashboardState
   @override
   Widget build(BuildContext context) {
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     return ScreenShell(
       config: ScreenShellConfig(
@@ -64,7 +67,7 @@ class _AdaptiveBudgetDashboardState
         appBar: [
           ScreenAction(
             id: 'add_budget',
-            label: 'Add',
+            label: ctxt.common_add,
             icon: LucideIcons.plus,
             onTap: () {
               HapticFeedback.mediumImpact();
@@ -79,11 +82,20 @@ class _AdaptiveBudgetDashboardState
                 return NoDataFound(
                   message: BuddyMessages.noBudgets,
                   iconData: LucideIcons.shieldAlert,
+                  action: ElevatedButton.icon(
+                    onPressed: () => context.push(AppRoutes.addBudget),
+                    icon: const Icon(LucideIcons.plus),
+                    label: Text(ctxt.common_add),
+                  ),
                 );
               }
               return _BudgetConstraintList(snapshots: snapshots);
             },
             loading: () => ListView(
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.cardHorizontal,
+                vertical: spacing.cardVertical,
+              ),
               children: List.generate(4, (_) => const BudgetCardSkeleton()),
             ),
             error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
@@ -100,105 +112,202 @@ class _BudgetConstraintList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+    final ctxt = AppLocalizations.of(context)!;
 
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
+    final needsAttention = snapshots
+        .where((s) => s.urgency != BudgetConstraintUrgency.withinLimit)
+        .toList();
+    final healthy = snapshots
+        .where((s) => s.urgency == BudgetConstraintUrgency.withinLimit)
+        .toList();
+
+    return RefreshIndicator(
+      onRefresh: () => RefreshHelper.withMinDuration(() async {
+        ref.invalidate(budgetConstraintsProvider);
+      }),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical,
+        ),
+        children: [
+          const _PortfolioHeroCard(),
+          SizedBox(height: spacing.elementGap * 2),
+
+          if (needsAttention.isNotEmpty) ...[
+            TypeSectionHeader(
+              label: ctxt.budget_highlightLabel,
+              icon: LucideIcons.triangleAlert,
+              accentColor: Colors.amber.shade700,
+            ),
+            SizedBox(height: spacing.elementGap),
+            ...needsAttention.map(
+              (s) => Padding(
+                padding: EdgeInsets.only(bottom: spacing.elementGap),
+                child: _BudgetConstraintCard(snapshot: s),
+              ),
+            ),
+            SizedBox(height: spacing.elementGap),
+          ],
+
+          if (healthy.isNotEmpty) ...[
+            TypeSectionHeader(
+              label: ctxt.budget_onTrackSection,
+              icon: LucideIcons.shieldCheck,
+              accentColor: color.primary,
+            ),
+            SizedBox(height: spacing.elementGap),
+            ...healthy.map(
+              (s) => Padding(
+                padding: EdgeInsets.only(bottom: spacing.elementGap),
+                child: _BudgetConstraintCard(snapshot: s),
+              ),
+            ),
+          ],
+        ],
       ),
-      itemCount: snapshots.length + 1, // +1 for portfolio strip
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return _PortfolioStrip();
-        }
-        return Padding(
-          padding: EdgeInsets.only(bottom: spacing.elementGap),
-          child: _BudgetConstraintCard(snapshot: snapshots[index - 1]),
-        );
-      },
     );
   }
 }
 
-// ── PORTFOLIO STRIP ──
+// ── PORTFOLIO HERO CARD (one glow per screen) ──
 
-class _PortfolioStrip extends ConsumerWidget {
+class _PortfolioHeroCard extends ConsumerWidget {
+  const _PortfolioHeroCard();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
+    final isDark = color.brightness == Brightness.dark;
 
     return ref.watch(budgetPortfolioProvider).when(
           data: (portfolio) {
-            final parts = <TextSpan>[
-              TextSpan(
-                text: '${portfolio.totalBudgets} Budgets',
-                style: textTheme.bodySmall?.copyWith(
-                  color: color.onSurfaceVariant,
-                ),
-              ),
-              TextSpan(
-                text: ' · ',
-                style: textTheme.bodySmall?.copyWith(
-                  color: color.outlineVariant,
-                ),
-              ),
-              TextSpan(
-                text: '${formatCurrency(portfolio.totalRemaining, code: BaseCurrency.code)} remaining',
-                style: textTheme.bodySmall?.copyWith(
-                  color: color.onSurfaceVariant,
-                ),
-              ),
-            ];
+            final hasBreaches = portfolio.breachedCount > 0;
+            final accent = hasBreaches ? color.error : color.primary;
 
-            if (portfolio.breachedCount > 0) {
-              parts.addAll([
-                TextSpan(
-                  text: ' · ',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: color.outlineVariant,
-                  ),
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: EdgeInsets.all(spacing.cardInner),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    accent.withValues(alpha: isDark ? 0.20 : 0.12),
+                    color.surface,
+                  ],
                 ),
-                TextSpan(
-                  text: '${portfolio.breachedCount} breached',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: portfolio.breachedCount >= 2
-                        ? color.error
-                        : color.onSurfaceVariant,
-                    fontWeight: portfolio.breachedCount >= 2
-                        ? FontWeight.w600
-                        : FontWeight.normal,
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                border: Border.all(color: accent.withValues(alpha: 0.2)),
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.withValues(alpha: 0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
                   ),
-                ),
-              ]);
-            }
-
-            if (portfolio.paceRiskCount > 0) {
-              parts.addAll([
-                TextSpan(
-                  text: ' · ',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: color.outlineVariant,
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(LucideIcons.wallet, size: 14, color: accent),
+                      SizedBox(width: spacing.elementGapMin),
+                      Text(
+                        ctxt.budget_totalBudget,
+                        style: textTheme.labelLarge?.copyWith(color: accent),
+                      ),
+                    ],
                   ),
-                ),
-                TextSpan(
-                  text: '${portfolio.paceRiskCount} pace risk',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: color.onSurfaceVariant,
+                  SizedBox(height: spacing.elementGap),
+                  CurrencyText(
+                    amount: portfolio.totalRemaining,
+                    fixedLength: 0,
+                    suffixText: ctxt.budget_remaining.toLowerCase(),
+                    style: textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: color.onSurface,
+                    ),
                   ),
-                ),
-              ]);
-            }
-
-            return Padding(
-              padding: EdgeInsets.only(bottom: spacing.sectionGap),
-              child: RichText(text: TextSpan(children: parts)),
+                  SizedBox(height: spacing.elementGap * 1.5),
+                  Row(
+                    children: [
+                      _statPill(
+                        icon: LucideIcons.layoutGrid,
+                        label: '${portfolio.totalBudgets} ${ctxt.budget_activeBudgets}',
+                        color: accent,
+                        spacing: spacing,
+                        textTheme: textTheme,
+                      ),
+                      if (portfolio.breachedCount > 0) ...[
+                        SizedBox(width: spacing.elementGap),
+                        _statPill(
+                          icon: LucideIcons.circleAlert,
+                          label: '${portfolio.breachedCount} breached',
+                          color: color.error,
+                          spacing: spacing,
+                          textTheme: textTheme,
+                        ),
+                      ],
+                      if (portfolio.paceRiskCount > 0) ...[
+                        SizedBox(width: spacing.elementGap),
+                        _statPill(
+                          icon: LucideIcons.clock,
+                          label: '${portfolio.paceRiskCount} pace risk',
+                          color: Colors.amber.shade700,
+                          spacing: spacing,
+                          textTheme: textTheme,
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
             );
           },
           loading: () => const SizedBox.shrink(),
           error: (_, __) => const SizedBox.shrink(),
         );
+  }
+
+  Widget _statPill({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required AppSpacing spacing,
+    required TextTheme textTheme,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.elementGap,
+        vertical: spacing.elementGapMin,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          SizedBox(width: spacing.elementGapMin),
+          Text(
+            label,
+            style: textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -221,80 +330,111 @@ class _BudgetConstraintCard extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        color: color.surface.withValues(alpha: 0.75),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
         border: Border.all(
           color: snapshot.isBreached
               ? accent.withValues(alpha: 0.4)
-              : color.outlineVariant,
+              : color.outlineVariant.withValues(alpha: 0.3),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: color.onSurface.withValues(alpha: 0.03),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        onTap: () {
-          HapticFeedback.lightImpact();
-          context.push(AppRoutes.budgetDetails, extra: snapshot.budgetId);
-        },
-        child: Padding(
-          padding: EdgeInsets.all(spacing.cardInner),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Budget name
-              Text(
-                snapshot.budgetName,
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            context.push(AppRoutes.budgetDetails, extra: snapshot.budgetId);
+          },
+          child: Padding(
+            padding: EdgeInsets.all(spacing.cardInner),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Budget name
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(spacing.elementGap),
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                      ),
+                      child: Icon(
+                        snapshot.isBreached
+                            ? LucideIcons.triangleAlert
+                            : LucideIcons.wallet,
+                        size: 16,
+                        color: accent,
+                      ),
+                    ),
+                    SizedBox(width: spacing.elementGap),
+                    Expanded(
+                      child: Text(
+                        snapshot.budgetName,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              SizedBox(height: spacing.elementGap),
-
-              // 2. Hero: remaining/over amount
-              _buildHero(textTheme, accent, ctxt),
-              SizedBox(height: spacing.elementGapMin),
-
-              // 3. Spent context
-              if (!snapshot.isUnknown) ...[
-                _buildSpentContext(textTheme, color, ctxt),
                 SizedBox(height: spacing.elementGap),
-              ],
 
-              // 4. Forecast (single line — evidence)
-              if (!snapshot.isUnknown) ...[
-                _buildForecast(textTheme, color, accent, ctxt),
+                // 2. Hero: remaining/over amount
+                _buildHero(textTheme, accent, ctxt),
                 SizedBox(height: spacing.elementGapMin),
-              ],
 
-              // 5. Recovery signal (single line — action)
-              if (snapshot.recoverySignal != null) ...[
-                _buildRecovery(textTheme, accent, ctxt),
-                SizedBox(height: spacing.elementGap),
-              ],
+                // 3. Spent context
+                if (!snapshot.isUnknown) ...[
+                  _buildSpentContext(textTheme, color, ctxt),
+                  SizedBox(height: spacing.elementGap),
+                ],
 
-              // Unknown state
-              if (snapshot.isUnknown) ...[
-                SizedBox(height: spacing.elementGap),
-                Text(
-                  ctxt.budget_insufficientData,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: color.onSurfaceVariant,
-                    fontStyle: FontStyle.italic,
+                // 4. Forecast (single line — evidence)
+                if (!snapshot.isUnknown) ...[
+                  _buildForecast(textTheme, color, accent, ctxt),
+                  SizedBox(height: spacing.elementGapMin),
+                ],
+
+                // 5. Recovery signal (single line — action)
+                if (snapshot.recoverySignal != null) ...[
+                  _buildRecovery(textTheme, accent, ctxt),
+                  SizedBox(height: spacing.elementGap),
+                ],
+
+                // Unknown state
+                if (snapshot.isUnknown) ...[
+                  SizedBox(height: spacing.elementGap),
+                  Text(
+                    ctxt.budget_insufficientData,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
-                ),
+                  SizedBox(height: spacing.elementGap),
+                ],
+
+                // 6. Progress bar (thin, subordinate)
+                if (!snapshot.isUnknown) ...[
+                  _buildProgressBar(spacing, color, accent),
+                ],
+
+                // 7. Action
                 SizedBox(height: spacing.elementGap),
+                _buildAction(context, ref, spacing, color, textTheme, ctxt),
               ],
-
-              // 6. Progress bar (thin, subordinate)
-              if (!snapshot.isUnknown) ...[
-                _buildProgressBar(spacing, color, accent),
-              ],
-
-              // 7. Action
-              SizedBox(height: spacing.elementGap),
-              _buildAction(context, ref, spacing, color, textTheme, ctxt),
-            ],
+            ),
           ),
         ),
       ),

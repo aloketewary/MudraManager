@@ -1,5 +1,9 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/trip/data/group_detail_provider.dart';
+import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -10,8 +14,19 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 
 /// Shows a bottom sheet to edit how an expense is split among participants.
+///
+/// [splitAmounts] must be keyed by participant id and hold **currency**
+/// values, matching `TripTransaction.splitAmounts` storage convention (used
+/// consistently even for `SplitType.percentage` — see
+/// `AddTripTransactionScreen._computeSplitAmounts`). The sheet converts to
+/// percentage points only for display/input when that split type is active.
+///
+/// On "Done", persists the edit via `TripService.updateTripTransactionSplit`
+/// and invalidates the relevant providers — previously this sheet only
+/// mutated local widget state and popped, silently discarding edits.
 void showEditSplitSheet({
   required BuildContext context,
+  required WidgetRef ref,
   required Trip trip,
   required TripTransaction tripTxn,
   required List<TripParticipant> selectedParticipants,
@@ -21,14 +36,41 @@ void showEditSplitSheet({
   required AppSpacing spacing,
 }) {
   final amount = tripTxn.resolvedAmount ?? 0.0;
-  final controllers = <int, TextEditingController>{};
-  for (var p in selectedParticipants) {
-    controllers[p.id] = TextEditingController(
-      text: (splitAmounts[p.id] ?? 0).toString(),
-    );
+  final ctxt = AppLocalizations.of(context)!;
+
+  // Working copies — currency units always, regardless of display mode.
+  final workingParticipants = List<TripParticipant>.from(selectedParticipants);
+  final workingAmounts = Map<int, double>.from(splitAmounts);
+  var currentSplitType = splitType;
+  var saving = false;
+
+  /// Value shown in the text field for [id] given the active split type.
+  double displayValue(int id) {
+    final currencyValue = workingAmounts[id] ?? 0;
+    if (currentSplitType == SplitType.percentage && amount > 0) {
+      return currencyValue / amount * 100;
+    }
+    return currencyValue;
   }
 
-  var currentSplitType = splitType;
+  /// Converts a raw text-field input (already in display units) back to
+  /// currency and stores it.
+  void setFromDisplayValue(int id, double displayInput) {
+    if (currentSplitType == SplitType.percentage) {
+      workingAmounts[id] = amount * displayInput / 100;
+    } else {
+      workingAmounts[id] = displayInput;
+    }
+  }
+
+  final controllers = <int, TextEditingController>{};
+  for (final p in workingParticipants) {
+    controllers[p.id] = TextEditingController(
+      text: displayValue(p.id).toStringAsFixed(
+        currentSplitType == SplitType.percentage ? 1 : 2,
+      ),
+    );
+  }
 
   showModalBottomSheet(
     context: context,
@@ -43,13 +85,53 @@ void showEditSplitSheet({
         final color = Theme.of(context).colorScheme;
         final textTheme = Theme.of(context).textTheme;
 
-        double currentSum = 0;
-        for (var id in selectedParticipants.map((p) => p.id)) {
-          currentSum += splitAmounts[id] ?? 0;
-        }
         final isPercentage = currentSplitType == SplitType.percentage;
+        final displaySum = workingParticipants.fold<double>(
+          0,
+          (sum, p) => sum + displayValue(p.id),
+        );
         final target = isPercentage ? 100.0 : amount;
-        final remaining = target - currentSum;
+        final remaining = target - displaySum;
+
+        Future<void> save() async {
+          if (workingParticipants.isEmpty || saving) return;
+          setModalState(() => saving = true);
+          HapticFeedback.mediumImpact();
+          try {
+            // For an equal split, always derive fresh equal shares rather
+            // than persisting whatever custom/percentage amounts happen to
+            // still be sitting in workingAmounts from a previous mode.
+            final finalAmounts = currentSplitType == SplitType.equal
+                ? List<double>.filled(
+                    workingParticipants.length,
+                    amount / workingParticipants.length,
+                  )
+                : workingParticipants.map((p) => workingAmounts[p.id] ?? 0).toList();
+
+            await ref.read(tripServiceProvider).updateTripTransactionSplit(
+                  tripTransactionId: tripTxn.id,
+                  splitType: currentSplitType,
+                  participantIds: workingParticipants.map((p) => p.id).toList(),
+                  splitAmounts: finalAmounts,
+                );
+            ref.invalidate(tripByIdProvider(trip.id));
+            ref.invalidate(groupDetailProvider(trip.id));
+            for (final c in controllers.values) {
+              c.dispose();
+            }
+            if (ctx.mounted) ctx.pop();
+            onChanged();
+            if (context.mounted) {
+              SnackbarService.success(ctxt.expense_splitUpdated, spacing);
+            }
+          } catch (e) {
+            if (context.mounted) {
+              SnackbarService.error('${ctxt.common_error}: $e', spacing);
+            }
+          } finally {
+            setModalState(() => saving = false);
+          }
+        }
 
         return Padding(
           padding: EdgeInsets.only(
@@ -63,7 +145,7 @@ void showEditSplitSheet({
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                AppLocalizations.of(context)!.expense_editSplit,
+                ctxt.expense_editSplit,
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -72,14 +154,13 @@ void showEditSplitSheet({
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Split Type', style: textTheme.titleSmall),
-                  if ((currentSplitType == SplitType.custom ||
-                          currentSplitType == SplitType.percentage) &&
+                  Text(ctxt.trip_splitType, style: textTheme.titleSmall),
+                  if ((currentSplitType == SplitType.custom || isPercentage) &&
                       amount > 0)
                     Text(
                       isPercentage
-                          ? 'Remaining: ${remaining.toStringAsFixed(1)}%'
-                          : 'Remaining: ${formatCurrency(remaining, decimals: 2)}',
+                          ? '${ctxt.expense_remaining}: ${remaining.toStringAsFixed(1)}%'
+                          : '${ctxt.expense_remaining}: ${formatCurrency(remaining, code: trip.currencyCode, decimals: 2)}',
                       style: textTheme.labelLarge?.copyWith(
                         color: remaining.abs() < 0.1
                             ? color.primary
@@ -91,32 +172,38 @@ void showEditSplitSheet({
               ),
               const SizedBox(height: 8),
               SegmentedButton<SplitType>(
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: SplitType.equal,
-                    label: Text('Equal'),
-                    icon: Icon(LucideIcons.chartPie, size: 16),
+                    label: Text(ctxt.trip_equally),
+                    icon: const Icon(LucideIcons.chartPie, size: 16),
                   ),
-                  ButtonSegment(
+                  const ButtonSegment(
                     value: SplitType.percentage,
                     label: Text('%'),
                     icon: Icon(LucideIcons.percent, size: 16),
                   ),
                   ButtonSegment(
                     value: SplitType.custom,
-                    label: Text('Custom'),
-                    icon: Icon(LucideIcons.calculator, size: 16),
+                    label: Text(ctxt.trip_custom),
+                    icon: const Icon(LucideIcons.calculator, size: 16),
                   ),
                 ],
                 selected: {currentSplitType},
                 onSelectionChanged: (Set<SplitType> selected) {
+                  HapticFeedback.selectionClick();
                   currentSplitType = selected.first;
-                  onChanged();
+                  // Refresh every controller's text to the new display unit.
+                  for (final p in workingParticipants) {
+                    controllers[p.id]?.text = displayValue(p.id).toStringAsFixed(
+                      currentSplitType == SplitType.percentage ? 1 : 2,
+                    );
+                  }
                   setModalState(() {});
                 },
               ),
               const SizedBox(height: 16),
-              Text('Participants', style: textTheme.titleSmall),
+              Text(ctxt.trip_splitWith, style: textTheme.titleSmall),
               const SizedBox(height: 12),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 300),
@@ -127,28 +214,23 @@ void showEditSplitSheet({
                   itemBuilder: (context, index) {
                     final p = trip.participants.toList()[index];
                     final isSelected =
-                        selectedParticipants.any((sp) => sp.id == p.id);
+                        workingParticipants.any((sp) => sp.id == p.id);
 
                     return InkWell(
                       onTap: () {
                         HapticFeedback.lightImpact();
                         if (isSelected) {
-                          selectedParticipants
-                              .removeWhere((sp) => sp.id == p.id);
-                          splitAmounts.remove(p.id);
+                          workingParticipants.removeWhere((sp) => sp.id == p.id);
+                          workingAmounts.remove(p.id);
+                          controllers.remove(p.id)?.dispose();
                         } else {
-                          selectedParticipants.add(p);
-                          if (currentSplitType != SplitType.equal) {
-                            splitAmounts[p.id] = 0.0;
-                            controllers[p.id] =
-                                TextEditingController(text: '0');
-                          }
+                          workingParticipants.add(p);
+                          workingAmounts[p.id] = 0.0;
+                          controllers[p.id] = TextEditingController(text: '0');
                         }
-                        onChanged();
                         setModalState(() {});
                       },
-                      borderRadius:
-                          BorderRadius.circular(spacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -170,7 +252,7 @@ void showEditSplitSheet({
                                   ? color.primary
                                   : color.surfaceContainerHighest,
                               child: Text(
-                                p.name[0].toUpperCase(),
+                                p.name.isNotEmpty ? p.name[0].toUpperCase() : '?',
                                 style: TextStyle(
                                   color: isSelected
                                       ? color.onPrimary
@@ -182,8 +264,7 @@ void showEditSplitSheet({
                             const SizedBox(width: 16),
                             Expanded(
                               child: (currentSplitType == SplitType.custom ||
-                                          currentSplitType ==
-                                              SplitType.percentage) &&
+                                          isPercentage) &&
                                       isSelected
                                   ? Row(
                                       children: [
@@ -195,11 +276,9 @@ void showEditSplitSheet({
                                           ),
                                         ),
                                         const Spacer(),
-                                        if (currentSplitType ==
-                                                SplitType.percentage &&
-                                            amount > 0)
+                                        if (isPercentage && amount > 0)
                                           Text(
-                                            '${formatCurrency((amount * (splitAmounts[p.id] ?? 0) / 100), decimals: 0)}  ',
+                                            '${formatCurrency(workingAmounts[p.id] ?? 0, code: trip.currencyCode, decimals: 0)}  ',
                                             style:
                                                 textTheme.bodySmall?.copyWith(
                                               color: color.primary,
@@ -215,27 +294,20 @@ void showEditSplitSheet({
                                               decimal: true,
                                             ),
                                             decoration: InputDecoration(
-                                              prefixText: currentSplitType ==
-                                                      SplitType.percentage
-                                                  ? ''
-                                                  : null,
-                                              prefix: currentSplitType !=
-                                                      SplitType.percentage
+                                              prefix: !isPercentage
                                                   ? Padding(
                                                       padding:
                                                           const EdgeInsets.only(
                                                         right: 4,
                                                       ),
                                                       child: CurrencyBadge(
-                                                        code: BaseCurrency.code,
+                                                        code: trip.currencyCode ??
+                                                            BaseCurrency.code,
                                                         size: 12,
                                                       ),
                                                     )
                                                   : null,
-                                              suffixText: currentSplitType ==
-                                                      SplitType.percentage
-                                                  ? '%'
-                                                  : null,
+                                              suffixText: isPercentage ? '%' : null,
                                               isDense: true,
                                               contentPadding:
                                                   const EdgeInsets.symmetric(
@@ -252,35 +324,33 @@ void showEditSplitSheet({
                                                   size: 18,
                                                   color: color.primary,
                                                 ),
-                                                tooltip: 'Auto-fill remaining',
+                                                tooltip:
+                                                    ctxt.trip_autoFillRemaining,
                                                 padding: EdgeInsets.zero,
                                                 constraints:
                                                     const BoxConstraints(),
                                                 onPressed: () {
                                                   double othersSum = 0;
-                                                  for (var sp
-                                                      in selectedParticipants) {
+                                                  for (final sp
+                                                      in workingParticipants) {
                                                     if (sp.id == p.id) continue;
-                                                    othersSum +=
-                                                        splitAmounts[sp.id] ??
-                                                            0;
+                                                    othersSum += displayValue(sp.id);
                                                   }
-                                                  final rem =
-                                                      target - othersSum;
-                                                  splitAmounts[p.id] = rem;
+                                                  final rem = target - othersSum;
+                                                  setFromDisplayValue(p.id, rem);
                                                   controllers[p.id]!.text =
                                                       rem.toStringAsFixed(
                                                     isPercentage ? 1 : 2,
                                                   );
-                                                  onChanged();
                                                   setModalState(() {});
                                                 },
                                               ),
                                             ),
                                             onChanged: (value) {
-                                              splitAmounts[p.id] =
-                                                  double.tryParse(value) ?? 0.0;
-                                              onChanged();
+                                              setFromDisplayValue(
+                                                p.id,
+                                                double.tryParse(value) ?? 0.0,
+                                              );
                                               setModalState(() {});
                                             },
                                           ),
@@ -316,16 +386,17 @@ void showEditSplitSheet({
               ),
               const SizedBox(height: 16),
               FilledButton(
-                onPressed: () {
-                  for (var c in controllers.values) {
-                    c.dispose();
-                  }
-                  ctx.pop();
-                },
+                onPressed: saving ? null : save,
                 style: FilledButton.styleFrom(
                   minimumSize: const Size(double.infinity, 48),
                 ),
-                child: Text(AppLocalizations.of(context)!.common_done),
+                child: saving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(ctxt.common_done),
               ),
             ],
           ),

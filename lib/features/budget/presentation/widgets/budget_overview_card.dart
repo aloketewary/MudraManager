@@ -57,7 +57,10 @@ class BudgetOverviewCard extends ConsumerWidget {
           },
           borderRadius: BorderRadius.circular(spacing.radiusSmall),
           child: Padding(
-            padding: EdgeInsets.all(spacing.cardInner),
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal,
+              vertical: spacing.cardVertical,
+            ),
             child: Row(
               children: [
                 ProgressRing(

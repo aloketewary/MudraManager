@@ -8,9 +8,9 @@ import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
-import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
-import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
 import 'package:mudra_manager/features/category/data/category_merge_service.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 

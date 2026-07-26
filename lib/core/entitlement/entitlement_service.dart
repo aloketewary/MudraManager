@@ -11,7 +11,7 @@ import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
-import 'package:mudra_manager/features/gamification/models/achievement.dart';
+import 'package:mudra_manager/features/gamification/domain/achievement.dart';
 
 /// Keys used in [AppConfig] to persist entitlement state.
 abstract class _Keys {

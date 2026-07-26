@@ -15,8 +15,8 @@ import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
-import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/transaction_form/transaction_form_widgets.dart';
 

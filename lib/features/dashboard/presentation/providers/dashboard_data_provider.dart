@@ -70,6 +70,7 @@ class DashboardData {
 final dashboardDataProvider =
     StreamProvider.autoDispose<DashboardData>((ref) async* {
   final isar = await ref.watch(isarServiceProvider).getInstance();
+  if (!ref.mounted) return;
   final budgetService = ref.watch(budgetServiceProvider);
   final accountService = ref.watch(accountServiceProvider);
 
@@ -96,7 +97,10 @@ final dashboardDataProvider =
     return txns;
   }
 
-  Future<DashboardData> fetchData() async {
+  // Returns null if the provider was disposed mid-fetch (e.g. user
+  // navigated away while a fetch was in flight). Callers must check for
+  // null and bail out without touching `ref` again.
+  Future<DashboardData?> fetchData() async {
     try {
       // Fetch all data in parallel
       final results = await Future.wait([
@@ -114,6 +118,8 @@ final dashboardDataProvider =
         isar.goals.where().findAll(),
         accountService.getAccountBalanceMapInBase(),
       ]);
+
+      if (!ref.mounted) return null;
 
       final transactions = results[0] as List<Transaction>;
       final accounts = results[1] as List<Account>;
@@ -164,6 +170,7 @@ final dashboardDataProvider =
         return sum + balance;
       });
 
+      if (!ref.mounted) return null;
       final pendingSmsCount = await ref.read(smsActivityServiceProvider).getPendingCount();
 
       return DashboardData(
@@ -186,6 +193,7 @@ final dashboardDataProvider =
 
   // Emit initial data immediately
   final initialData = await fetchData();
+  if (!ref.mounted || initialData == null) return;
   lastEmittedData = initialData;
   yield initialData;
 
@@ -203,8 +211,10 @@ final dashboardDataProvider =
   final subscription = mergedStream.listen((_) {
     debounceTimer?.cancel();
     debounceTimer = Timer(const Duration(milliseconds: 300), () async {
+      if (!ref.mounted) return;
       try {
         final newData = await fetchData();
+        if (!ref.mounted || newData == null) return;
         // Only emit if data actually changed
         if (lastEmittedData != newData) {
           lastEmittedData = newData;
@@ -213,6 +223,7 @@ final dashboardDataProvider =
           }
         }
       } catch (e) {
+        if (!ref.mounted) return;
         if (!controller.isClosed) {
           controller.addError(e);
         }

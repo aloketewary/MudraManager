@@ -19,6 +19,7 @@ import 'package:mudra_manager/features/goal/presentation/widgets/contribution_hi
 import 'package:mudra_manager/features/goal/presentation/widgets/quick_deposit_sheet.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:confetti/confetti.dart';
@@ -129,14 +130,19 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
             id: 'edit_goal',
             label: ctxt.goal_editGoal,
             icon: LucideIcons.pen,
-            onTap: () =>
-                context.push(AppRoutes.editGoal, extra: {'goal': widget.goal}),
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              context.push(AppRoutes.editGoal, extra: {'goal': widget.goal});
+            },
           ),
           ScreenAction(
             id: 'delete_goal',
             label: ctxt.goal_deleteGoal,
             icon: LucideIcons.trash2,
-            onTap: () => _deleteGoal(spacing),
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              _deleteGoal(spacing);
+            },
           ),
         ],
       ),
@@ -148,95 +154,20 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
               vertical: spacing.cardVertical,
             ),
             children: [
-              // ── 1. Identity ──
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(spacing.elementGapMin),
-                    decoration: BoxDecoration(
-                      color: goalColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                    ),
-                    child: Icon(
-                      IconHelper.getIconData(widget.goal.iconName),
-                      color: goalColor,
-                      size: spacing.iconSM,
-                    ),
-                  ),
-                  SizedBox(width: spacing.elementGap),
-                  Expanded(
-                    child: Text(
-                      widget.goal.name.safe(),
-                      style: textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (widget.goal.targetDate != null)
-                    Text(
-                      safeDateFormat('MMM yyyy', ctxt.localeName)
-                          .format(widget.goal.targetDate!),
-                      style: textTheme.bodySmall
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                ],
+              // ── 1-3. Hero card (one glow per screen): identity + amount + progress ──
+              _buildHeroCard(
+                progress,
+                remaining,
+                isCompleted,
+                isGuestMode,
+                goalColor,
+                color,
+                textTheme,
+                spacing,
+                ctxt,
               ),
 
-              SizedBox(height: spacing.sectionGap * 1.5),
-
-              // ── 2. Hero Number ──
-              CurrencyText(
-                currencyCode: widget.goal.currencyCode,
-                amount: GuestModeUtil.applyGuestMode(
-                  widget.goal.currentAmount,
-                  isGuestMode,
-                ),
-                fixedLength: 0,
-                compact: false,
-                style: textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 44,
-                  color: color.onSurface,
-                  height: 1.1,
-                ),
-              ),
-
-              SizedBox(height: spacing.elementGap),
-
-              // ── 3. Completion Context ──
-              if (isCompleted)
-                Text(
-                  ctxt.goal_completedSection,
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: FinanceColors.statusGood,
-                    fontWeight: FontWeight.w600,
-                  ),
-                )
-              else
-                Row(
-                  children: [
-                    CurrencyText(
-                      currencyCode: widget.goal.currencyCode,
-                      amount: GuestModeUtil.applyGuestMode(
-                        remaining,
-                        isGuestMode,
-                      ),
-                      fixedLength: 0,
-                      compact: true,
-                      suffixText: ctxt.goal_suffixLeft,
-                      style: textTheme.bodyLarge
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                    Text(
-                      '  ·  ${(progress * 100).toStringAsFixed(0)}%',
-                      style: textTheme.bodyLarge
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                  ],
-                ),
-
-              SizedBox(height: spacing.sectionGap * 1.5),
+              SizedBox(height: spacing.elementGap * 2),
 
               // ── 4. Pace Assessment ──
               if (!isCompleted && neededPerMonth > 0)
@@ -390,10 +321,10 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
 
               // ── 10. Contribution History ──
               if (sortedContribs.isNotEmpty) ...[
-                Text(
-                  ctxt.goal_recentActivity,
-                  style: textTheme.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                TypeSectionHeader(
+                  label: ctxt.goal_recentActivity,
+                  icon: LucideIcons.history,
+                  accentColor: goalColor,
                 ),
                 SizedBox(height: spacing.elementGap),
                 Container(
@@ -473,6 +404,134 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  // ── Hero card (one glow per screen) ──
+  Widget _buildHeroCard(
+    double progress,
+    double remaining,
+    bool isCompleted,
+    bool isGuestMode,
+    Color goalColor,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final isDark = color.brightness == Brightness.dark;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            goalColor.withValues(alpha: isDark ? 0.20 : 0.12),
+            color.surface,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: goalColor.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: goalColor.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Identity row
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(spacing.elementGapMin),
+                decoration: BoxDecoration(
+                  color: goalColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+                child: Icon(
+                  IconHelper.getIconData(widget.goal.iconName),
+                  color: goalColor,
+                  size: spacing.iconSM,
+                ),
+              ),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Text(
+                  widget.goal.name.safe(),
+                  style: textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (widget.goal.targetDate != null)
+                Text(
+                  safeDateFormat('MMM yyyy', ctxt.localeName)
+                      .format(widget.goal.targetDate!),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+            ],
+          ),
+
+          SizedBox(height: spacing.sectionGap * 1.5),
+
+          // Hero number
+          CurrencyText(
+            currencyCode: widget.goal.currencyCode,
+            amount: GuestModeUtil.applyGuestMode(
+              widget.goal.currentAmount,
+              isGuestMode,
+            ),
+            fixedLength: 0,
+            compact: false,
+            style: textTheme.headlineLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+              fontSize: 44,
+              color: color.onSurface,
+              height: 1.1,
+            ),
+          ),
+
+          SizedBox(height: spacing.elementGap),
+
+          // Completion context
+          if (isCompleted)
+            Text(
+              ctxt.goal_completedSection,
+              style: textTheme.bodyLarge?.copyWith(
+                color: FinanceColors.statusGood,
+                fontWeight: FontWeight.w600,
+              ),
+            )
+          else
+            Row(
+              children: [
+                CurrencyText(
+                  currencyCode: widget.goal.currencyCode,
+                  amount: GuestModeUtil.applyGuestMode(remaining, isGuestMode),
+                  fixedLength: 0,
+                  compact: true,
+                  suffixText: ctxt.goal_suffixLeft,
+                  style: textTheme.bodyLarge
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+                Text(
+                  '  ·  ${(progress * 100).toStringAsFixed(0)}%',
+                  style: textTheme.bodyLarge
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -614,12 +673,13 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
               setState(() => _milestonesExpanded = !_milestonesExpanded),
           child: Row(
             children: [
-              Text(
-                ctxt.goal_milestones,
-                style:
-                    textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              Expanded(
+                child: TypeSectionHeader(
+                  label: ctxt.goal_milestones,
+                  icon: LucideIcons.award,
+                  accentColor: goalColor,
+                ),
               ),
-              const Spacer(),
               Text(
                 '$reached / 5',
                 style: textTheme.labelSmall?.copyWith(

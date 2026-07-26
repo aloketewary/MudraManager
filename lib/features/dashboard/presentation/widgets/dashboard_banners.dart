@@ -10,7 +10,7 @@ import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/services/background_task_manager.dart';
-import 'package:mudra_manager/core/attention/attention_mapper.dart';
+import 'package:mudra_manager/features/insights/data/attention_mapper.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
 import 'package:mudra_manager/features/dashboard/data/background_health_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/permission_provider.dart';

@@ -46,6 +46,7 @@ class AnalyticsViewTemplate extends ConsumerWidget {
     }
 
     return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         // Time window
         SliverToBoxAdapter(
@@ -78,17 +79,23 @@ class AnalyticsViewTemplate extends ConsumerWidget {
             ),
           ),
 
-        // Additional content
+        // Additional content — each section owns its own headline, so
+        // sections need `sectionGap` between them to read as distinct
+        // blocks rather than running together.
         if (content.isNotEmpty)
           SliverList(
             delegate: SliverChildListDelegate(
-              content.map((w) => Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.cardHorizontal,
-                      vertical: spacing.elementGapMin,
+              content
+                  .map(
+                    (w) => Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardHorizontal,
+                        vertical: spacing.sectionGap / 2,
+                      ),
+                      child: w,
                     ),
-                    child: w,
-                  ),).toList(),
+                  )
+                  .toList(),
             ),
           ),
       ],

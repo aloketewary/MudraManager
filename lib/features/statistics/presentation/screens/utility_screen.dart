@@ -105,6 +105,14 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       route: AppRoutes.taxEstimation,
       section: _Section.insights,
     ),
+    _UtilityDef(
+      id: 'debt_snowball',
+      titleKey: 'debt_title',
+      subtitleKey: 'debt_utilitySubtitle',
+      icon: LucideIcons.snowflake,
+      route: AppRoutes.debtSnowball,
+      section: _Section.insights,
+    ),
   ];
 
   List<_UtilityDef> get _allUtilities =>
@@ -232,6 +240,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                         const Spacer(),
                         TextButton(
                           onPressed: () {
+                            HapticFeedback.mediumImpact();
                             setModalState(() => _hiddenUtilities = []);
                             setState(() {});
                             _savePreferences();
@@ -529,11 +538,16 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                     // Advisory Header
                     Semantics(
                       label: _showingAdvisoryExpanded
-                          ? 'Financial Advisory, ${attentionItems.length} items, tap to collapse'
-                          : 'Financial Advisory, ${attentionItems.length} ${attentionItems.length == 1 ? 'item' : 'items'} may need attention, tap to expand',
+                          ? l10n.utility_advisoryCollapseSemantic(
+                              attentionItems.length,
+                            )
+                          : l10n.utility_advisoryExpandSemantic(
+                              attentionItems.length,
+                            ),
                       button: true,
                       child: InkWell(
                         onTap: () {
+                          HapticFeedback.selectionClick();
                           setState(() {
                             _showingAdvisoryExpanded =
                                 !_showingAdvisoryExpanded;
@@ -563,14 +577,16 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Financial Advisory (Beta)',
+                                      l10n.utility_financialAdvisory,
                                       style: textTheme.titleSmall?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: color.primary,
                                       ),
                                     ),
                                     Text(
-                                      '${attentionItems.length} ${attentionItems.length == 1 ? 'item' : 'items'} may need attention',
+                                      l10n.utility_nItemsNeedAttention(
+                                        attentionItems.length,
+                                      ),
                                       style: textTheme.bodySmall?.copyWith(
                                         color: color.onSurfaceVariant,
                                       ),
@@ -611,7 +627,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                         Padding(
                           padding: EdgeInsets.all(spacing.cardInner),
                           child: Text(
-                            '${attentionItems.length - 3} more items...',
+                            l10n.utility_nMoreItems(attentionItems.length - 3),
                             style: textTheme.bodySmall?.copyWith(
                               color: color.onSurfaceVariant,
                               fontStyle: FontStyle.italic,
@@ -687,7 +703,10 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
             ),
             if (item.type != AttentionType.critical)
               IconButton(
-                onPressed: () => _dismissAttentionItem(item.id),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  _dismissAttentionItem(item.id);
+                },
                 icon: Icon(
                   LucideIcons.x,
                   size: 16,

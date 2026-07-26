@@ -21,15 +21,12 @@ import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/dashboard/data/greeting_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/dashboard_home.dart';
-import 'package:mudra_manager/features/gamification/providers/achievement_unlock_listener.dart';
-import 'package:mudra_manager/features/gamification/widgets/streak_indicator.dart';
+import 'package:mudra_manager/features/gamification/data/achievement_unlock_listener.dart';
+import 'package:mudra_manager/features/gamification/presentation/widgets/streak_indicator.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/profile_screen.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/statistics_screen.dart';
-import 'package:mudra_manager/features/statistics/presentation/screens/export_options_screen.dart';
-import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/transaction_list_screen.dart';
-import 'package:mudra_manager/plugins/export_plugin.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/utility_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
@@ -668,20 +665,7 @@ class HomePageState extends ConsumerState<HomePage>
           ],
         );
       case 3:
-        return AppBar(
-          automaticallyImplyLeading: false,
-          title: Text(
-            ctxt.nav_insights,
-            style: textTheme.titleLarge,
-          ),
-          actions: [
-            IconButton(
-              tooltip: ctxt.common_download,
-              icon: const Icon(LucideIcons.download),
-              onPressed: () => _showExportDialog(context),
-            ),
-          ],
-        );
+        return null;
       case 4:
         return null;
     }
@@ -691,35 +675,5 @@ class HomePageState extends ConsumerState<HomePage>
   void initNotification() async {
     final savedTime = await NotificationService.getSavedReminderTime();
     ref.read(reminderTimeProvider.notifier).set(savedTime);
-  }
-
-  void _showExportDialog(BuildContext context) {
-    final stats = ref.read(statsProvider('Month'));
-    final profile = ref.read(userProfileProvider).value;
-
-    stats.maybeWhen(
-      data: (data) {
-        showDialog(
-          context: context,
-          builder: (_) => Dialog.fullscreen(
-            child: ExportOptionsScreen(
-              exportData: ExportData(
-                income: data.income,
-                expense: data.expense,
-                savingsRate: data.savingsRate,
-                avgDailySpend: data.avgDailySpend,
-                transactions: data.recent,
-                categoryData: data.categoryData,
-                categoryDataMap: data.categoryDataMap,
-                startDate: DateTime.now().subtract(const Duration(days: 30)),
-                endDate: DateTime.now(),
-                userName: FieldEncryptionService.safeDisplay(profile?.name),
-              ),
-            ),
-          ),
-        );
-      },
-      orElse: () {},
-    );
   }
 }

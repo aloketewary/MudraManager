@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,11 +9,12 @@ import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/category_keyword_suggestions.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/simple_color_picker.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
-import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/icon_picker_bottom_sheet.dart';
 import 'package:mudra_manager/shared/widgets/category_color_picker.dart';
 import 'package:mudra_manager/shared/widgets/glass_text_field.dart';
@@ -50,6 +52,11 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
   bool _saving = false;
   bool _themeResolved = false;
 
+  /// Suggested keywords for the current name, minus ones already added
+  /// or explicitly dismissed by the user this session.
+  List<String> _keywordSuggestions = const [];
+  final Set<String> _dismissedSuggestions = {};
+
   bool get _isEditing => widget.existing != null;
 
   static const _quickColors = [
@@ -81,6 +88,41 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
         : Colors.grey; // Placeholder, will be resolved in didChangeDependencies
     _selectedParent = widget.initialParent;
     _loadParentCategory();
+    _updateKeywordSuggestions();
+    _nameController.addListener(_updateKeywordSuggestions);
+  }
+
+  void _updateKeywordSuggestions() {
+    final suggestions = CategoryKeywordSuggestions.suggest(_nameController.text)
+        .where((k) => !_dismissedSuggestions.contains(k))
+        .where((k) => !_currentKeywords.contains(k))
+        .toList();
+    if (!listEquals(suggestions, _keywordSuggestions)) {
+      setState(() => _keywordSuggestions = suggestions);
+    }
+  }
+
+  List<String> get _currentKeywords => _keywordsController.text
+      .split(',')
+      .map((k) => k.trim().toLowerCase())
+      .where((k) => k.isNotEmpty)
+      .toList();
+
+  void _addSuggestedKeyword(String keyword) {
+    HapticFeedback.lightImpact();
+    final current = _keywordsController.text.trim();
+    _keywordsController.text = current.isEmpty ? keyword : '$current, $keyword';
+    setState(() {
+      _keywordSuggestions = _keywordSuggestions.where((k) => k != keyword).toList();
+    });
+  }
+
+  void _dismissSuggestion(String keyword) {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _dismissedSuggestions.add(keyword);
+      _keywordSuggestions = _keywordSuggestions.where((k) => k != keyword).toList();
+    });
   }
 
   @override
@@ -96,6 +138,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 
   @override
   void dispose() {
+    _nameController.removeListener(_updateKeywordSuggestions);
     _nameController.dispose();
     _keywordsController.dispose();
     super.dispose();
@@ -457,6 +500,55 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             prefixIcon: Icon(LucideIcons.tag, size: 18, color: color.primary),
           ),
           textTheme: textTheme,
+          onChanged: (_) => _updateKeywordSuggestions(),
+        ),
+        if (_keywordSuggestions.isNotEmpty) ...[
+          SizedBox(height: spacing.elementGap),
+          _buildKeywordSuggestions(color, textTheme, spacing, ctxt),
+        ],
+      ],
+    );
+  }
+
+  // ── KEYWORD SUGGESTIONS ──
+  Widget _buildKeywordSuggestions(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(left: spacing.elementGapMin),
+          child: Text(
+            ctxt.category_suggestedKeywords,
+            style: textTheme.labelSmall?.copyWith(
+              color: color.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        SizedBox(height: spacing.elementGapMin),
+        Wrap(
+          spacing: spacing.elementGap,
+          runSpacing: spacing.elementGapMin,
+          children: _keywordSuggestions.map((keyword) {
+            return InputChip(
+              label: Text(
+                keyword,
+                style: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              avatar: Icon(LucideIcons.plus, size: 14, color: color.primary),
+              onPressed: () => _addSuggestedKeyword(keyword),
+              onDeleted: () => _dismissSuggestion(keyword),
+              deleteIcon: Icon(LucideIcons.x, size: 14, color: color.onSurfaceVariant),
+              visualDensity: VisualDensity.compact,
+              side: BorderSide.none,
+              backgroundColor: color.primary.withValues(alpha: 0.08),
+            );
+          }).toList(),
         ),
       ],
     );

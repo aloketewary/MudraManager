@@ -5,7 +5,7 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/ai_insight_provider.dart';
 import 'package:mudra_manager/features/memory/data/insight_exposure.dart';
-import 'package:mudra_manager/features/memory/data/spending_drift_detector.dart';
+import 'package:mudra_manager/features/memory/data/memory_drift_analyzer.dart';
 
 /// Provides drift insights for the dashboard AI carousel.
 /// Does NOT log displayedAt — that's the widget's responsibility.

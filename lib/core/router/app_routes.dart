@@ -44,6 +44,8 @@ abstract class AppRoutes {
   static const spendingPersonality = '/spending-personality';
   static const netWorth = '/net-worth';
   static const taxEstimation = '/tax-estimation';
+  static const debtSnowball = '/debt-snowball';
+  static const addDebt = '/add-debt';
   static const cashFlowForecast = '/cash-flow-forecast';
   static const spendingTrends = '/spending-trends';
   static const monthlyComparison = '/monthly-comparison';

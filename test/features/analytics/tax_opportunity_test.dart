@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mudra_manager/features/analytics/data/tax_estimation_service.dart';
-import 'package:mudra_manager/features/analytics/data/tax_opportunity_service.dart';
+import 'package:mudra_manager/features/tax_planning/data/tax_opportunity_service.dart';
+import 'package:mudra_manager/features/tax_planning/domain/index.dart';
 
 void main() {
   const service = TaxOpportunityService();
@@ -100,12 +100,11 @@ TaxOpportunityContext _makeContext({
 }) {
   final estimate = TaxEstimate(
     financialYear: 'FY 2025-26',
-    totalIncome: 1500000,
     projectedAnnualIncome: 1500000,
     isProjected: false,
     standardDeduction: 75000,
     taxableIncome: 1425000,
-    slabBreakdown: [],
+    slabBreakdown: const [],
     baseTax: totalTax,
     rebate: 0,
     cess: 0,
@@ -113,15 +112,15 @@ TaxOpportunityContext _makeContext({
     monthlyTax: totalTax / 12,
     effectiveRate: totalTax / 1500000 * 100,
     totalExpense: 800000,
-    incomeByCategory: {'Salary': 1500000},
-    expenseByCategory: {},
+    incomeByCategory: const {'Salary': 1500000},
+    expenseByCategory: const {},
     daysElapsed: 365,
     totalDays: 365,
     oldRegimeEstimate: hasOldRegime
         ? OldRegimeEstimate(
             standardDeduction: 50000,
             taxableIncome: 1450000,
-            slabBreakdown: [],
+            slabBreakdown: const [],
             baseTax: totalTax + regimeSavings,
             rebate: 0,
             cess: 0,
@@ -135,7 +134,10 @@ TaxOpportunityContext _makeContext({
       transactionVolume: 12,
     ),
     assumptions: const [],
-    warnings: const [],
+    warnings: const [], 
+    oldRegimeBetter: true, 
+    regimeSavings: regimeSavings, 
+    totalIncome: 0,
   );
   return TaxOpportunityContext(estimate: estimate);
 }

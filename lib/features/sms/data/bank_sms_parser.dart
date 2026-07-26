@@ -1,7 +1,7 @@
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
-import 'package:mudra_manager/plugins/sms_parser_manager.dart';
-import 'package:mudra_manager/plugins/sms_parser_plugin.dart';
+import 'package:mudra_manager/features/sms/data/sms_parser_manager.dart';
+import 'package:mudra_manager/features/sms/data/sms_parser_plugin.dart';
 
 class BankSmsParser {
   static final _log = AppLog(getLogger(), 'BankSmsParser');

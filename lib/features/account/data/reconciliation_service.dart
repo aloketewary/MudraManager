@@ -8,9 +8,9 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
-import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
-import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
 
 final reconciliationServiceProvider = Provider<ReconciliationService>((ref) {
   final isarService = ref.watch(isarServiceProvider);

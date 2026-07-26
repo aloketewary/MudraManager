@@ -21,6 +21,10 @@ void showContributionHistorySheet({
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    backgroundColor: color.surface,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusMedium)),
+    ),
     builder: (context) => DraggableScrollableSheet(
       initialChildSize: 0.6,
       maxChildSize: 0.9,
@@ -28,6 +32,15 @@ void showContributionHistorySheet({
       expand: false,
       builder: (_, controller) => Column(
         children: [
+          Container(
+            width: 40,
+            height: 4,
+            margin: EdgeInsets.only(top: spacing.elementGap),
+            decoration: BoxDecoration(
+              color: color.primary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
           Padding(
             padding: EdgeInsets.all(spacing.sectionGap),
             child: Text(

@@ -3,7 +3,7 @@ import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
-import 'package:mudra_manager/features/gamification/models/achievement.dart';
+import 'package:mudra_manager/features/gamification/domain/achievement.dart';
 import 'package:mudra_manager/features/notifications/data/smart_check.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

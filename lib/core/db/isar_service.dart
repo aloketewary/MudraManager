@@ -13,6 +13,7 @@ import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/category_rule.dart';
+import 'package:mudra_manager/core/db/models/debt.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/pending_notifications.dart';
@@ -28,7 +29,7 @@ import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
-import 'package:mudra_manager/features/gamification/models/achievement.dart';
+import 'package:mudra_manager/features/gamification/domain/achievement.dart';
 import 'package:path_provider/path_provider.dart';
 
 class IsarService {
@@ -94,6 +95,7 @@ class IsarService {
           FinancialSnapshotSchema,
           InsightExposureSchema,
           TaxDeductionProfileSchema,
+          DebtSchema,
         ],
         directory: dir.path,
       ).timeout(const Duration(seconds: 15));

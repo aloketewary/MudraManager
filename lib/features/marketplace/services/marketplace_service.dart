@@ -4,7 +4,7 @@ import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/plugin_metadata.dart';
 import 'package:mudra_manager/features/category/data/category_management_service.dart';
-import 'package:mudra_manager/plugins/category_packs/category_pack.dart';
+import 'package:mudra_manager/features/category/data/category_packs/category_pack.dart';
 
 class MarketplaceService {
   static final MarketplaceService _instance = MarketplaceService._();

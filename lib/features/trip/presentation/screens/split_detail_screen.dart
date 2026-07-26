@@ -13,6 +13,7 @@ import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/trip/data/group_detail_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
@@ -243,6 +244,9 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
       ref.invalidate(allTripsProvider);
       ref.invalidate(activeTripsProvider);
       ref.invalidate(groupDetailProvider(widget.tripId));
+      if (context.mounted) {
+        SnackbarService.success(BuddyMessages.tripFinalized(false), spacing);
+      }
       router.pop();
     }
   }
@@ -807,6 +811,9 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                           );
                       ref.invalidate(groupDetailProvider(widget.tripId));
                       ref.invalidate(transactionProvider);
+                      if (context.mounted) {
+                        SnackbarService.success(BuddyMessages.billPaid, spacing);
+                      }
                     }
                   : null,
               spacing: spacing,

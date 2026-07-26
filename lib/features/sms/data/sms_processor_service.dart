@@ -1,7 +1,7 @@
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
-import 'package:mudra_manager/plugins/sms_parser_manager.dart';
-import 'package:mudra_manager/plugins/sms_parser_plugin.dart';
+import 'package:mudra_manager/features/sms/data/sms_parser_manager.dart';
+import 'package:mudra_manager/features/sms/data/sms_parser_plugin.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';

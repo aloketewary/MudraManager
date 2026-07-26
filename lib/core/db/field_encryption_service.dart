@@ -88,8 +88,41 @@ class FieldEncryptionService {
       final encrypter = enc.Encrypter(enc.AES(_cachedKey!));
       return encrypter.decrypt64(parts[1], iv: iv);
     } catch (e) {
+      // Legacy corruption recovery: an older bug could glue plaintext
+      // suffixes (e.g. " (🔄 Monthly)") onto ciphertext before it was
+      // stored, producing "ENC:iv:base64cipher extra text". Strip any
+      // trailing non-base64 content and retry once before giving up.
+      final recovered = _tryRecoverTruncated(ciphertext);
+      if (recovered != null) return recovered;
       _log.w('Decrypt failed, returning raw value', e);
       return ciphertext;
+    }
+  }
+
+  /// Attempts to recover a ciphertext string that has extra plaintext
+  /// appended after the base64 ciphertext segment (legacy corruption).
+  /// Returns the decrypted plaintext (with the stray suffix re-appended)
+  /// on success, or null if recovery isn't possible.
+  static String? _tryRecoverTruncated(String ciphertext) {
+    try {
+      final payload = ciphertext.substring(_prefix.length);
+      final parts = payload.split(':');
+      if (parts.length != 2) return null;
+      final ivPart = parts[0];
+      final cipherPart = parts[1];
+
+      // Base64 alphabet only, trim at first invalid char.
+      final match = RegExp(r'^[A-Za-z0-9+/]*={0,2}').firstMatch(cipherPart);
+      final cleanCipher = match?.group(0) ?? '';
+      if (cleanCipher.isEmpty || cleanCipher == cipherPart) return null;
+
+      final suffix = cipherPart.substring(cleanCipher.length);
+      final iv = enc.IV.fromBase64(ivPart);
+      final encrypter = enc.Encrypter(enc.AES(_cachedKey!));
+      final plaintext = encrypter.decrypt64(cleanCipher, iv: iv);
+      return suffix.isEmpty ? plaintext : '$plaintext$suffix';
+    } catch (_) {
+      return null;
     }
   }
 

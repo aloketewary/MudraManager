@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mudra_manager/features/analytics/data/tax_estimation_service.dart';
+import 'package:mudra_manager/features/tax_planning/data/tax_estimation_service.dart';
+import 'package:mudra_manager/features/tax_planning/domain/index.dart';
 
 void main() {
   group('TaxEstimate model', () {
@@ -39,21 +40,23 @@ void main() {
 
   group('TaxSlab model', () {
     test('slab with 0% rate has 0 tax', () {
-      final slab = TaxSlab(
+      final slab = const TaxSlab(
         label: '0 - 4L',
         rate: 0,
         taxableAmount: 400000,
         tax: 0,
+        minIncome: 0,
       );
       expect(slab.tax, equals(0));
     });
 
     test('slab tax calculation', () {
-      final slab = TaxSlab(
+      final slab = const TaxSlab(
         label: '4L - 8L',
         rate: 5,
         taxableAmount: 400000,
         tax: 20000,
+        minIncome: 0,
       );
       expect(slab.tax, equals(20000));
       expect(slab.rate, equals(5));
@@ -194,12 +197,15 @@ List<TaxSlab> _calculateSlabs(double taxableIncome) {
     if (remaining <= 0) break;
     final taxable = remaining.clamp(0, bracket.limit);
     final tax = taxable * bracket.rate;
-    slabs.add(TaxSlab(
-      label: bracket.label,
-      rate: bracket.rate * 100,
-      taxableAmount: taxable.toDouble(),
-      tax: tax,
-    ),);
+    slabs.add(
+      TaxSlab(
+        label: bracket.label,
+        rate: bracket.rate * 100,
+        taxableAmount: taxable.toDouble(),
+        tax: tax,
+        minIncome: 0,
+      ),
+    );
     remaining -= taxable;
   }
 
@@ -241,5 +247,7 @@ TaxEstimate _makeTaxEstimate({
     ),
     assumptions: const [],
     warnings: const [],
+    oldRegimeBetter: true,
+    regimeSavings: 0,
   );
 }

@@ -500,6 +500,208 @@
   "@transaction_saveTransactionButtonLabel": {
     "description": "This is text of Save Transaction"
   },
+  "transaction_tripCurrencyMismatch": "Trip is in {currency} — amount will be converted",
+  "@transaction_tripCurrencyMismatch": {
+    "description": "Hint shown when the transaction currency differs from the trip currency",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "transaction_customizeSplit": "Customize Split",
+  "@transaction_customizeSplit": {
+    "description": "Title of the split customizer bottom sheet"
+  },
+  "transaction_changeTrip": "Change Trip",
+  "@transaction_changeTrip": {
+    "description": "Button label to switch the selected trip in the split customizer"
+  },
+  "transaction_remainingPercent": "Remaining: {percent}%",
+  "@transaction_remainingPercent": {
+    "description": "Remaining percentage to allocate in a percentage split",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "transaction_remainingAmount": "Remaining: {amount}",
+  "@transaction_remainingAmount": {
+    "description": "Remaining amount to allocate in a custom split",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "transaction_splitEqual": "Equal",
+  "@transaction_splitEqual": {
+    "description": "Segmented button label for equal split"
+  },
+  "transaction_splitCustom": "Custom",
+  "@transaction_splitCustom": {
+    "description": "Segmented button label for custom split"
+  },
+  "transaction_participants": "Participants",
+  "@transaction_participants": {
+    "description": "Section title listing trip participants in the split customizer"
+  },
+  "transaction_selectTrip": "Select Trip",
+  "@transaction_selectTrip": {
+    "description": "Title of the trip selector bottom sheet"
+  },
+  "transaction_noneTripOption": "None",
+  "@transaction_noneTripOption": {
+    "description": "Option to clear the selected trip"
+  },
+  "transaction_tagNameHint": "e.g., Travel, Food, Shopping",
+  "@transaction_tagNameHint": {
+    "description": "Placeholder example text for the new tag name field"
+  },
+  "transaction_suggestedCategory": "Suggested: {category}",
+  "@transaction_suggestedCategory": {
+    "description": "Smart default suggestion reason fallback text",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "transaction_tapToApply": "Tap to apply",
+  "@transaction_tapToApply": {
+    "description": "Hint text on the smart defaults suggestion banner"
+  },
+  "stats_nTransactions": "{count, plural, =1{{count} txn} other{{count} txns}}",
+  "@stats_nTransactions": {
+    "description": "Compact transaction count on the spending-by-tag section",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stats_selectRange": "Select Range",
+  "@stats_selectRange": {
+    "description": "Placeholder shown when no custom date range has been picked yet"
+  },
+  "stats_selectPeriod": "Select Period",
+  "@stats_selectPeriod": {
+    "description": "Title of the period picker bottom sheet"
+  },
+  "stats_thisWeek": "This Week",
+  "stats_thisMonth": "This Month",
+  "stats_thisYear": "This Year",
+  "stats_customRange": "Custom Range",
+  "export_noTemplatesTitle": "No export templates enabled",
+  "@export_noTemplatesTitle": {
+    "description": "Empty state title on the export options screen"
+  },
+  "export_noTemplatesDesc": "Enable templates in Settings → Plugins",
+  "@export_noTemplatesDesc": {
+    "description": "Empty state description on the export options screen"
+  },
+  "export_nTemplatesAvailable": "{count, plural, =1{1 template available} other{{count} templates available}}",
+  "@export_nTemplatesAvailable": {
+    "description": "Subtitle showing how many templates exist for an export format",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "export_completed": "{format} export completed",
+  "@export_completed": {
+    "description": "Snackbar confirming a successful export",
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "common_refresh": "Refresh",
+  "@common_refresh": {
+    "description": "Generic refresh action label"
+  },
+  "utility_financialAdvisory": "Financial Advisory (Beta)",
+  "@utility_financialAdvisory": {
+    "description": "Title of the advisory card on the utility/insights hub screen"
+  },
+  "utility_nItemsNeedAttention": "{count, plural, =1{1 item may need attention} other{{count} items may need attention}}",
+  "@utility_nItemsNeedAttention": {
+    "description": "Subtitle showing how many advisory items need attention",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "utility_advisoryCollapseSemantic": "Financial Advisory, {count} items, tap to collapse",
+  "@utility_advisoryCollapseSemantic": {
+    "description": "Semantics label for the advisory card header when expanded",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "utility_advisoryExpandSemantic": "Financial Advisory, {count, plural, =1{1 item} other{{count} items}} may need attention, tap to expand",
+  "@utility_advisoryExpandSemantic": {
+    "description": "Semantics label for the advisory card header when collapsed",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "utility_nMoreItems": "{count} more items…",
+  "@utility_nMoreItems": {
+    "description": "Overflow indicator when there are more advisory items than shown",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "transaction_tripParticipantsSemantic": "Trip: {name}, {count} participants",
+  "@transaction_tripParticipantsSemantic": {
+    "description": "Semantics label for the trip banner button",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "transaction_dateSemantic": "Transaction date: {date}, tap to change",
+  "@transaction_dateSemantic": {
+    "description": "Semantics label for the date chip",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "transaction_timeSemantic": "Transaction time: {time}, tap to change",
+  "@transaction_timeSemantic": {
+    "description": "Semantics label for the time chip",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "transaction_nParticipants": "{count} participants",
+  "@transaction_nParticipants": {
+    "description": "Participant count subtitle on the trip banner",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "transaction_selectOneAccountErrorText": "Select at least one Account",
   "@transaction_selectOneAccountErrorText": {
     "description": "This is text of Select one Account"
@@ -1121,6 +1323,7 @@
   "common_add": "Add",
   "common_done": "Done",
   "common_close": "Close",
+  "common_inactive": "Inactive",
   "common_confirm": "Confirm",
   "common_archive": "Archive",
   "common_remove": "Remove",
@@ -2419,6 +2622,77 @@
   "txnList_convertToTransfer": "Convert to Transfer",
   "txnList_convertToTransferDesc": "This was actually a transfer between your accounts",
   "txnList_convertedToTransfer": "Converted to transfer",
+  "txnList_selectedCount": "{count} selected",
+  "@txnList_selectedCount": {
+    "description": "App bar title in merge-as-transfer select mode",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "txnList_mergeSelectHint": "Select the matching transaction",
+  "@txnList_mergeSelectHint": {
+    "description": "Hint shown when one transaction is selected for merge-as-transfer"
+  },
+  "txnList_mergeReadyHint": "Tap merge in the app bar",
+  "@txnList_mergeReadyHint": {
+    "description": "Hint shown when two transactions are selected and ready to merge"
+  },
+  "txnList_expenseRequired": "Select one expense and one income transaction",
+  "@txnList_expenseRequired": {
+    "description": "Validation error for merge-as-transfer"
+  },
+  "txnList_matchingAmounts": "Amounts must match (within 1%)",
+  "@txnList_matchingAmounts": {
+    "description": "Validation error for merge-as-transfer"
+  },
+  "txnList_within24Hours": "Transactions must be within 24 hours",
+  "@txnList_within24Hours": {
+    "description": "Validation error for merge-as-transfer"
+  },
+  "txnList_differentAccounts": "Cannot transfer between the same account",
+  "@txnList_differentAccounts": {
+    "description": "Validation error for merge-as-transfer"
+  },
+  "txnList_applyFilters": "Apply Filters",
+  "@txnList_applyFilters": {
+    "description": "Button label to apply filters in the filter bottom sheet"
+  },
+  "txnList_filterAll": "ALL",
+  "txnList_filterSpends": "SPENDS",
+  "txnList_filterIncome": "INCOME",
+  "txnList_filterTransfers": "TRANSFERS",
+  "txnList_budgetUpdateTitle": "{category} Budget Update",
+  "@txnList_budgetUpdateTitle": {
+    "description": "Title of the budget insight banner on the transaction list",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "txnList_budgetExceededSubtitle": "You've exceeded your {category} budget",
+  "@txnList_budgetExceededSubtitle": {
+    "description": "Subtitle of the budget insight banner when over budget",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "txnList_budgetSpentSubtitle": "You've spent {amount} on {category} this period",
+  "@txnList_budgetSpentSubtitle": {
+    "description": "Subtitle of the budget insight banner when under budget",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
   "stats_today": "Today",
   "stats_week": "Week",
   "stats_month": "Month",
@@ -2477,6 +2751,9 @@
   "@stats_forecastHigher": { "placeholders": { "period": {} } },
   "stats_forecastLower": "On track to finish below {period}.",
   "@stats_forecastLower": { "placeholders": { "period": {} } },
+  "stats_howItWorks": "How Statistics Work",
+  "stats_howItWorksDesc": "Track income, spending, and trends for the selected period. Tap the date range at the top to switch between day, week, month, year, or a custom range.",
+  "stats_netFlow": "Net Flow",
   "recap_belowAvg": "Below avg",
   "recap_aboveAvg": "Above avg",
   "recap_recurring": "Recurring",
@@ -2582,6 +2859,7 @@
       }
     }
   },
+  "upgrade_seeProPlans": "See Pro Plans",
   "day_monday": "Monday",
   "day_tuesday": "Tuesday",
   "day_wednesday": "Wednesday",
@@ -2792,6 +3070,8 @@
   "expense_autoFillRemaining": "Auto-fill remaining",
   "expense_deleteExpense": "Delete Expense",
   "expense_deleteExpenseMsg": "This will adjust everyones balance. Continue?",
+  "expense_splitUpdated": "Split updated",
+  "expense_remaining": "Remaining",
   "billCenter_overdue": "Overdue",
   "billCenter_thisWeek": "This Week",
   "billCenter_thisMonth": "This Month",
@@ -2818,6 +3098,19 @@
   "@billCenter_upcomingIn": { "placeholders": { "days": { "type": "int" } } },
   "billCenter_cannotPayFuture": "Cannot mark future bills as paid",
   "billCenter_markedPaid": "{name} marked as paid",
+  "billCenter_inDays": "In {days} days",
+  "@billCenter_inDays": { "placeholders": { "days": { "type": "int" } } },
+  "billCenter_daysAgo": "{days}d ago",
+  "@billCenter_daysAgo": { "placeholders": { "days": { "type": "int" } } },
+  "billCenter_daysOverdue": "{days}d overdue",
+  "@billCenter_daysOverdue": { "placeholders": { "days": { "type": "int" } } },
+  "billCenter_moreCount": "+{count} more",
+  "@billCenter_moreCount": { "placeholders": { "count": { "type": "int" } } },
+  "billCenter_addBill": "Add a recurring bill to see it here",
+  "frequency_daily": "Daily",
+  "frequency_weekly": "Weekly",
+  "frequency_monthly": "Monthly",
+  "frequency_yearly": "Yearly",
   "@billCenter_markedPaid": { "placeholders": { "name": { "type": "String" } } },
   "comparison_steady": "Steady as she goes",
   "comparison_steadyDesc": "Your spending is consistent — that is discipline.",
@@ -2913,6 +3206,7 @@
   "category_nameHint": "Category Name",
   "category_keywordsHint": "Keywords (comma-separated)",
   "category_keywordsHelper": "For SMS auto-detection (e.g. swiggy, zomato)",
+  "category_suggestedKeywords": "Suggested keywords",
   "currency_title": "Currency",
   "currency_baseCurrency": "Base Currency",
   "currency_baseDescription": "All totals, budgets, and analytics use this currency.",
@@ -3450,6 +3744,44 @@
   "common_transactions": "Transactions",
 
   "tax_title": "Tax Estimation",
+  "debt_title": "Debt Planner",
+  "debt_utilitySubtitle": "Snowball & Avalanche strategies",
+  "debt_snowball": "Snowball",
+  "debt_avalanche": "Avalanche",
+  "debt_totalDebt": "Total Debt",
+  "debt_monthsToFreedom": "Months to Freedom",
+  "debt_interestPaid": "Interest to Pay",
+  "debt_minPayment": "Min Payment",
+  "debt_extraPayment": "Extra Payment",
+  "debt_addDebt": "Add Debt",
+  "debt_editDebt": "Edit Debt",
+  "debt_noDebts": "No debts added",
+  "debt_noDebtsDesc": "Add your loans and credit cards to build a payoff plan.",
+  "debt_activeCount": "{count} {count, plural, =1{debt} other{debts}}",
+  "@debt_activeCount": { "placeholders": { "count": { "type": "int" } } },
+  "debt_name": "Debt Name",
+  "debt_nameHint": "e.g., HDFC Credit Card",
+  "debt_nameRequired": "Enter a name for this debt",
+  "debt_balance": "Current Balance",
+  "debt_balanceRequired": "Enter a valid balance",
+  "debt_interestRate": "Interest Rate (APR %)",
+  "debt_interestRateRequired": "Enter a valid interest rate",
+  "debt_minimumPayment": "Minimum Payment",
+  "debt_minimumPaymentRequired": "Enter a valid minimum payment",
+  "debt_extraPaymentOptional": "Extra Payment (optional)",
+  "debt_extraPaymentHint": "Additional amount you can pay monthly",
+  "debt_payoffOrder": "Payoff Order",
+  "debt_payoffOrderDesc": "This debt will be paid off in position {position} using the {strategy} strategy.",
+  "@debt_payoffOrderDesc": { "placeholders": { "position": { "type": "int" }, "strategy": { "type": "String" } } },
+  "debt_archive": "Archive",
+  "debt_archiveDesc": "Hide from active payoff plan",
+  "debt_unarchive": "Restore",
+  "debt_unarchiveDesc": "Bring back into active payoff plan",
+  "debt_paidOff": "Paid Off",
+  "debt_archived": "Archived",
+  "debt_deleteDesc": "Permanently remove this debt entry",
+  "debt_infoTitle": "How debt payoff works",
+  "debt_infoDesc": "Snowball pays off your smallest balance first for quick wins. Avalanche targets the highest interest rate first to save the most money. Add extra payment to speed up either plan.",
   "tax_projected": "Projected (year in progress)",
   "tax_estimatedTax": "Estimated Tax",
   "tax_effectiveRate": "Effective Rate",
@@ -3662,6 +3994,7 @@
   "cc_highUtilCount": "{count, plural, =1{1 above 80%} other{{count} above 80%}}",
   "@cc_highUtilCount": { "placeholders": { "count": { "type": "int" } } },
   "cc_allPaymentsCurrent": "All payments current",
+  "cc_yourCards": "Your Cards",
   "plugins_remindMeBefore": "Remind me before",
   "plugins_daysCount": "{count, plural, =1{1 day} other{{count} days}}",
   "@plugins_daysCount": {
@@ -3897,7 +4230,9 @@
   "goal_lastContribution": "Last contribution",
   "goal_viewHistory": "View History →",
   "goal_archive": "Archive Goal",
+  "goal_archiveConfirmMessage": "Archive this goal? It will be hidden from your active goals list.",
   "goal_markComplete": "Mark Complete",
+  "goal_markCompleteConfirmMessage": "Mark this goal as fully funded? This sets the saved amount to your target and archives it.",
   "goal_basedOnAvg": "Based on {amount}/month average",
   "@goal_basedOnAvg": { "placeholders": { "amount": {} } },
   "profile_dayStreakLabel": "{count, plural, =1{{count} day} other{{count} days}}",
@@ -3951,5 +4286,71 @@
   "@tax_upTo": {
     "description": "Up to amount label",
     "placeholders": { "amount": { "type": "int" } }
+  },
+  "tax_remaining": "{amount} remaining",
+  "@tax_remaining": {
+    "description": "Remaining deduction amount",
+    "placeholders": { "amount": { "type": "int" } }
+  },
+  "accessibility_doubleTapToSetMax": "Double tap to set maximum value",
+  "@accessibility_doubleTapToSetMax": {
+    "description": "Accessibility hint for slider"
+  },
+  "currencyFormat": "{amount}",
+  "@currencyFormat": {
+    "description": "Currency format for accessibility",
+    "placeholders": { "amount": { "type": "double" } }
+  },
+  "insights_deepDive": "Deep Dive",
+  "@insights_deepDive": {
+    "description": "Deep Dive Analytics section header"
+  },
+  "insights_noDataYet": "No Data Yet",
+  "@insights_noDataYet": {
+    "description": "Empty state title when no analytics data is available"
+  },
+  "insights_addTransactionsPrompt": "Add transactions to see your analytics",
+  "@insights_addTransactionsPrompt": {
+    "description": "Prompt to add transactions for analytics"
+  },
+  "insights_viewAllAnalytics": "View All Analytics",
+  "@insights_viewAllAnalytics": {
+    "description": "Link to view full analytics screen"
+  },
+  "insights_yourFinancialCoach": "Your Financial Coach",
+  "@insights_yourFinancialCoach": {
+    "description": "Title of the coach info bottom sheet"
+  },
+  "insights_coachDescription": "Get personalized insights, predictions, and actionable recommendations to improve your financial health.",
+  "@insights_coachDescription": {
+    "description": "Description of the financial coach feature"
+  },
+  "insights_howItWorks": "How It Works",
+  "@insights_howItWorks": {
+    "description": "How It Works info button label"
+  },
+  "insights_aiSummary": "AI Summary",
+  "@insights_aiSummary": {
+    "description": "AI Summary feature title"
+  },
+  "insights_aiSummaryDesc": "Your personalized financial overview and highlights",
+  "@insights_aiSummaryDesc": {
+    "description": "AI Summary feature description"
+  },
+  "insights_quickWins": "Quick Wins",
+  "@insights_quickWins": {
+    "description": "Quick Wins feature title"
+  },
+  "insights_quickWinsDesc": "Actionable recommendations to improve your finances",
+  "@insights_quickWinsDesc": {
+    "description": "Quick Wins feature description"
+  },
+  "insights_predictions": "Predictions",
+  "@insights_predictions": {
+    "description": "Predictions feature title"
+  },
+  "insights_predictionsDesc": "Cash flow forecast and risk alerts",
+  "@insights_predictionsDesc": {
+    "description": "Predictions feature description"
   }
 }

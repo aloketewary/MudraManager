@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/skin/model/skin.dart';
-import 'package:mudra_manager/core/skin/provider/skin_provider.dart';
-import 'package:mudra_manager/core/skin/converter/skin_to_theme.dart';
+import 'package:mudra_manager/features/skin/domain/skin.dart';
+import 'package:mudra_manager/features/skin/data/skin_provider.dart';
+import 'package:mudra_manager/features/skin/data/skin_to_theme.dart';
 
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 

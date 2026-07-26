@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -72,6 +74,17 @@ final billControlCenterProvider =
   final accountService = ref.watch(accountServiceProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
 
+  // Exchange rates for converting bill amounts to base currency — accounts
+  // (and their linked recurring bills) can be in different currencies, so
+  // summing raw `amount` values across bills/accounts without conversion
+  // silently mixes currencies (mirrors the fix in
+  // `getAccountBalanceMapInBase`).
+  final rates = await isar.exchangeRates.where().findAll();
+  final rateMap = {for (final r in rates) r.currencyCode: r.rateToBase};
+  CurrencyService.mergeCachedRates(rateMap);
+  double toBase(double amount, String? currencyCode) =>
+      currencyCode != null ? amount * (rateMap[currencyCode] ?? 1.0) : amount;
+
   final active = bills.where((b) => b.isActive).toList();
   final now = DateTime.now();
 
@@ -131,10 +144,13 @@ final billControlCenterProvider =
   }
 
   // ── Affordability ──
-  final balanceMap = await accountService.getAccountBalanceMap();
+  final balanceMap = await accountService.getAccountBalanceMapInBase();
   final totalBalance =
       accounts.fold(0.0, (sum, a) => sum + (balanceMap[a.id] ?? 0));
-  final upcomingTotal = upcoming.fold(0.0, (s, b) => s + b.amount);
+  final upcomingTotal = upcoming.fold(
+    0.0,
+    (s, b) => s + toBase(b.amount, b.account.value?.currencyCode),
+  );
   final remainingBalance = totalBalance - upcomingTotal;
 
   // Buffer threshold: > 30% = safe, 0-30% = low, negative = negative
@@ -162,8 +178,9 @@ final billControlCenterProvider =
       funded++;
       continue;
     }
-    if (depleting >= bill.amount) {
-      depleting -= bill.amount;
+    final billAmountBase = toBase(bill.amount, bill.account.value?.currencyCode);
+    if (depleting >= billAmountBase) {
+      depleting -= billAmountBase;
       funded++;
     } else {
       unfunded++;
@@ -171,18 +188,28 @@ final billControlCenterProvider =
   }
 
   // ── Monthly total ──
-  final monthlyTotal =
-      active.fold(0.0, (sum, b) => sum + _monthlyEquivalent(b));
+  final monthlyTotal = active.fold(
+    0.0,
+    (sum, b) => sum + toBase(_monthlyEquivalent(b), b.account.value?.currencyCode),
+  );
 
   // ── This week required ──
   final thisWeekBills = upcoming.where((b) => !paidBillIds.contains(b.id));
-  final thisWeekTotal = thisWeekBills.fold(0.0, (s, b) => s + b.amount);
+  final thisWeekTotal = thisWeekBills.fold(
+    0.0,
+    (s, b) => s + toBase(b.amount, b.account.value?.currencyCode),
+  );
   final thisWeekCount = thisWeekBills.length;
 
-  // ── Largest bill ──
+  // ── Largest bill ── (compare in base currency, not raw amount, so a
+  // small-value bill in a strong currency isn't mistaken for the smallest)
   RecurringTransaction? largest;
   if (active.isNotEmpty) {
-    largest = active.reduce((a, b) => a.amount > b.amount ? a : b);
+    largest = active.reduce((a, b) {
+      final aBase = toBase(a.amount, a.account.value?.currencyCode);
+      final bBase = toBase(b.amount, b.account.value?.currencyCode);
+      return aBase > bBase ? a : b;
+    });
   }
 
   return BillControlCenterData(

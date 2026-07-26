@@ -118,21 +118,40 @@ class RobustCategoryMatcher {
     );
   }
 
-  /// Strategy 1: Exact category name match
+  /// Strategy 1: Exact category name match.
+  /// Uses word-boundary matching (not plain `.contains`) — otherwise short
+  /// category names like "Rent" false-positive on substrings inside common
+  /// SMS boilerplate (e.g. "cuRENT balance", "diffeRENT account").
   static CategoryMatchResult _tryExactNameMatch(
     String text,
     List<Category> categories,
   ) {
     final textLower = text.toLowerCase();
+
+    // Skip very short names (<=3 chars) entirely — too prone to false
+    // positives even with word boundaries (e.g. "Toy", "Gas", "Car").
+    // Let keyword matching (which the seeder populates for these) handle it.
+    Category? bestMatch;
+    int bestLength = 0;
     for (final category in categories) {
-      if (textLower.contains(category.name.toLowerCase())) {
-        return CategoryMatchResult(
-          category: category,
-          confidenceScore: 95, // Very high confidence
-          matchStrategy: 'exact_name_match',
-        );
+      final nameLower = category.name.toLowerCase();
+      if (nameLower.length <= 3) continue;
+      if (kCategoryNoiseWords.contains(nameLower)) continue;
+      if (_hasWordBoundaryMatch(textLower, nameLower) &&
+          nameLower.length > bestLength) {
+        bestMatch = category;
+        bestLength = nameLower.length;
       }
     }
+
+    if (bestMatch != null) {
+      return CategoryMatchResult(
+        category: bestMatch,
+        confidenceScore: 95, // Very high confidence
+        matchStrategy: 'exact_name_match',
+      );
+    }
+
     return CategoryMatchResult(
       category: null,
       confidenceScore: 0,

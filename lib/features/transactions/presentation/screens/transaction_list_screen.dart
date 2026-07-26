@@ -15,10 +15,8 @@ import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/utils/dialog_utils.dart';
-import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
-import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/core/utils/utils.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/transactions/data/filter_state_provider.dart';
 import 'package:mudra_manager/features/transactions/data/monthly_spend_provider.dart';
@@ -318,7 +316,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                       },
                       icon: const Icon(LucideIcons.x),
                     ),
-                    title: Text('${_selectedTxnIds.length} selected'),
+                    title: Text(
+                      ctxt.txnList_selectedCount(_selectedTxnIds.length),
+                    ),
                     actions: [
                       if (_selectedTxnIds.length == 2)
                         TextButton.icon(
@@ -448,10 +448,41 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 ctxt,
                 spacing,
               ),
-              loading: () => ListView.builder(
+              loading: () => ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: 5,
-                itemBuilder: (_, __) => const TransactionCardSkeleton(),
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardHorizontal,
+                      vertical: spacing.cardVertical,
+                    ),
+                    child: Container(
+                      height: 110,
+                      decoration: BoxDecoration(
+                        color: color.surfaceContainerHighest,
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardHorizontal,
+                      vertical: spacing.cardVertical * 0.5,
+                    ),
+                    child: SizedBox(
+                      height: 38,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: color.surfaceContainerHighest,
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall + 4),
+                        ),
+                      ),
+                    ),
+                  ),
+                  for (var i = 0; i < 5; i++) const TransactionCardSkeleton(),
+                ],
               ),
               error: (e, _) => ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -549,7 +580,19 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final parts = <String>[];
     if (filters.categoryId != null) parts.add(ctxt.txnList_category);
     if (mode is DateRangeView) parts.add(ctxt.txnList_dateRange);
-    if (filters.tagId != null) parts.add(ctxt.txnList_tag);
+    if (filters.tagId != null) {
+      final tagsAsync = ref.watch(tagListProvider);
+      String? tagName;
+      tagsAsync.whenData((tags) {
+        for (final tag in tags) {
+          if (tag.id == filters.tagId) {
+            tagName = tag.name;
+            break;
+          }
+        }
+      });
+      parts.add(tagName ?? ctxt.txnList_tag);
+    }
 
     // Check if a budget exists for the selected category
     BudgetWithProgress? matchingBudget;
@@ -1200,29 +1243,73 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     AppLocalizations ctxt,
     AppSpacing spacing,
   ) {
+    final brightness = Theme.of(context).brightness;
     final spendingSummary = ref.watch(monthlySpendProvider);
-    final filterTabs = ['ALL', 'SPENDS', 'INCOME', 'TRANSFERS'];
+    final filterTabs = [
+      ctxt.txnList_filterAll,
+      ctxt.txnList_filterSpends,
+      ctxt.txnList_filterIncome,
+      ctxt.txnList_filterTransfers,
+    ];
+    final isTransferView = _filter == 'transfer';
     final selectedIndex = switch (_filter) {
       'expense' => 1,
       'income' => 2,
       'transfer' => 3,
       _ => 0,
     };
-    
+
+    // The query layer only knows about all/income/expense — the
+    // "transfers" tab is filtered client-side over the already-fetched
+    // sectioned list, dropping any date headers left with no items.
+    final visibleSectioned =
+        isTransferView ? _filterTransfersOnly(sectioned) : sectioned;
+
+    final heroGlowColor = spendingSummary.totalSpent > 0
+        ? ((spendingSummary.changePercent?.toInt() ?? 0) >= 0
+            ? const Color(0xFF4CAF50)
+            : const Color(0xFFF44336))
+        : color.primary;
+
     final items = <Widget>[
-      // Spent Tracking Metric
+      // Spent Tracking Metric — this screen's one hero/glow card.
       Padding(
         padding: EdgeInsets.symmetric(
-          horizontal: spacing.cardHorizontal + 4,
+          horizontal: spacing.cardHorizontal,
           vertical: spacing.cardVertical,
         ),
-        child: SpendMetric(
-          label: ctxt.txnList_spentThisMonth,
-          amount: formatCurrency(spendingSummary.totalSpent),
-          changePercent: spendingSummary.changePercent,
-          isPositiveChange: spendingSummary.previousMonthSpent != null &&
-              spendingSummary.totalSpent >=
-                  (spendingSummary.previousMonthSpent ?? 0),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.all(spacing.cardInner),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                heroGlowColor.withValues(
+                  alpha: brightness == Brightness.dark ? 0.20 : 0.12,
+                ),
+                color.surface,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(color: heroGlowColor.withValues(alpha: 0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: heroGlowColor.withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: SpendMetric(
+            label: ctxt.txnList_spentThisMonth,
+            amount: formatCurrency(spendingSummary.totalSpent),
+            changePercent: spendingSummary.changePercent,
+            isPositiveChange: spendingSummary.previousMonthSpent != null &&
+                spendingSummary.totalSpent >=
+                    (spendingSummary.previousMonthSpent ?? 0),
+          ),
         ),
       ),
       // Horizontal Filter Tabs Row
@@ -1246,11 +1333,39 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         ),
       ),
       // ── BUDGET INSIGHT BANNER ──
-      _buildBudgetInsightBanner(color, textTheme, spacing, ctxt),
+      if (!isTransferView)
+        _buildBudgetInsightBanner(color, textTheme, spacing, ctxt),
     ];
 
     return _buildTransactionListWithItems(
-        sectioned, color, textTheme, ctxt, spacing, items);
+      visibleSectioned,
+      color,
+      textTheme,
+      ctxt,
+      spacing,
+      items,
+    );
+  }
+
+  /// Keeps only transfer transactions, dropping date headers that end up
+  /// with no items underneath them.
+  List<TxListEntry> _filterTransfersOnly(List<TxListEntry> entries) {
+    final result = <TxListEntry>[];
+    TxHeader? pendingHeader;
+    for (final entry in entries) {
+      if (entry is TxHeader) {
+        pendingHeader = entry;
+        continue;
+      }
+      if (entry is TxItem && entry.txn.isTransfer) {
+        if (pendingHeader != null) {
+          result.add(pendingHeader);
+          pendingHeader = null;
+        }
+        result.add(entry);
+      }
+    }
+    return result;
   }
 
   // ── BUDGET INSIGHT BANNER WIDGET ──
@@ -1283,7 +1398,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         final budgetAmount = budget.amount;
         final categoryName = budget.categories.isNotEmpty
             ? budget.categories.first.name
-            : 'Budget';
+            : ctxt.title_budgets;
 
         return Padding(
           padding: EdgeInsets.symmetric(
@@ -1291,10 +1406,13 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             vertical: spacing.cardVertical,
           ),
           child: InsightBanner.budget(
-            title: '$categoryName Budget Update',
+            title: ctxt.txnList_budgetUpdateTitle(categoryName),
             subtitle: spent >= budgetAmount
-                ? 'You\'ve exceeded your $categoryName budget'
-                : 'You\'ve spent ${formatCurrency(spent)} on $categoryName this period',
+                ? ctxt.txnList_budgetExceededSubtitle(categoryName)
+                : ctxt.txnList_budgetSpentSubtitle(
+                    formatCurrency(spent),
+                    categoryName,
+                  ),
             budgetInfo: BudgetInfo(
               spent: spent,
               budgetAmount: budgetAmount,
@@ -1433,6 +1551,18 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 transaction.recurringTransactionSource.value != null;
             final tripName = tripNames[transaction.id];
 
+            if (_selectMode) {
+              return _buildSelectableCard(
+                transaction,
+                tags,
+                isRecurring,
+                tripName,
+                ctxt,
+                color,
+                spacing,
+              );
+            }
+
             return TransactionCard(
               category: transaction.category.value,
               description: transaction.description,
@@ -1460,167 +1590,16 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     );
   }
 
-  // ── TRANSACTION LIST ──
-  Widget _buildTransactionList(
-    List<TxListEntry> sectioned,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppLocalizations ctxt,
-    AppSpacing spacing,
-  ) {
-    final filtered = sectioned;
-
-    if (filtered.isEmpty) {
-      return ListView(
-        controller: _scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.5,
-            child: NoDataFound(
-              message: _searchQuery.isNotEmpty ||
-                      _selectedCategoryId != null ||
-                      _filterStartDate != null
-                  ? BuddyMessages.noFilterResults('filter')
-                  : BuddyMessages.noTransactions,
-              iconData: LucideIcons.receipt,
-            ),
-          ),
-        ],
-      );
-    }
-
-    // Hide pending delete from UI
-    final visible = _pendingDeletes.isNotEmpty
-        ? filtered.where((e) {
-            if (e is! TxItem) return true;
-            return !_pendingDeletes.containsKey(e.txn.id);
-          }).toList()
-        : filtered;
-
-    final displayItems = visible.take(_displayLimit).toList();
-    final hasMore = visible.length > _displayLimit;
-
-    final transactionIds =
-        displayItems.whereType<TxItem>().map((e) => e.txn.id).toList();
-
-    // Cache trip names future — only re-fetch when IDs change
-    if (_lastTxIds == null ||
-        _lastTxIds!.length != transactionIds.length ||
-        !_listEquals(_lastTxIds!, transactionIds)) {
-      _lastTxIds = List.of(transactionIds);
-      _tripNamesFuture = ref
-          .read(tripServiceProvider)
-          .getTripNamesByTransactionIds(transactionIds);
-    }
-
-    return FutureBuilder<Map<int, String>>(
-      future: _tripNamesFuture,
-      builder: (context, tripNamesSnapshot) {
-        final tripNames = tripNamesSnapshot.data ?? {};
-        bool peekShown = false;
-
-        return ListView.builder(
-          key: const PageStorageKey('transactionList'),
-          controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom +
-                kBottomNavigationBarHeight +
-                16,
-          ),
-          itemCount: displayItems.length + (hasMore ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index == displayItems.length) {
-              return Padding(
-                padding: EdgeInsets.all(spacing.cardInner),
-                child: const TransactionCardSkeleton(),
-              );
-            }
-            final entry = displayItems[index];
-            if (entry is TxHeader) {
-              return Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: spacing.cardVertical,
-                  horizontal: spacing.cardHorizontal,
-                ),
-                child: Text(
-                  formatDateHeader(entry.group, ctxt.localeName).toUpperCase(),
-                  style: textTheme.labelMedium?.copyWith(
-                    color: color.onSurfaceVariant,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-              );
-            }
-
-            final transaction = (entry as TxItem).txn;
-            final tags = transaction.tags.toList();
-            final isRecurring =
-                transaction.recurringTransactionSource.value != null;
-            final tripName = tripNames[transaction.id];
-            final isFirstTransaction = !peekShown;
-            if (isFirstTransaction) peekShown = true;
-            final int firstTxIndex =
-                displayItems.indexWhere((e) => e is TxItem);
-
-            return _selectMode
-                ? _buildSelectableCard(
-                    transaction,
-                    tags,
-                    isRecurring,
-                    tripName,
-                    ctxt,
-                    color,
-                    spacing,
-                  )
-                : TransactionCard(
-                    category: transaction.category.value,
-                    description: transaction.description,
-                    account: transaction.account.value,
-                    amount: transaction.amount.toStringAsFixed(2),
-                    currencyCode: transaction.currencyCode,
-                    convertedAmount: transaction.convertedAmount,
-                    date: transaction.date,
-                    isExpense: transaction.isExpense,
-                    isTransfer: transaction.isTransfer,
-                    tags: tags,
-                    related: transaction.related.value,
-                    tripName: tripName,
-                    isRecurring: isRecurring,
-                    onEdit: () => _onEditTransaction(
-                      transaction,
-                      spacing,
-                    ),
-                    onRemove: () => _onRemoveTransaction(
-                      transaction,
-                      ctxt,
-                      spacing,
-                    ),
-                    onUnlinkRecurring: isRecurring
-                        ? () => _onUnlinkRecurring(
-                              transaction,
-                              spacing,
-                            )
-                        : null,
-                    enablePeek: index == firstTxIndex && widget.isTabActive,
-                  );
-          },
-        );
-      },
-    );
-  }
-
   // ── SELECT MODE HINT BAR ──
   Widget _buildSelectModeHint(
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
+    final ctxt = AppLocalizations.of(context)!;
     final hint = _selectedTxnIds.length == 1
-        ? 'Select the matching transaction'
-        : 'Tap merge in the app bar';
+        ? ctxt.txnList_mergeSelectHint
+        : ctxt.txnList_mergeReadyHint;
 
     return Positioned(
       bottom: MediaQuery.of(context).padding.bottom +
@@ -1734,7 +1713,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
   // ── MERGE AS TRANSFER ──
   Future<void> _mergeAsTransfer(
-      AppLocalizations ctxt, AppSpacing spacing) async {
+      AppLocalizations ctxt, AppSpacing spacing,) async {
     if (_selectedTxnIds.length != 2) return;
 
     final isar = await ref.read(isarServiceProvider).getInstance();
@@ -1760,7 +1739,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final income = txns.where((t) => !t.isExpense).firstOrNull;
     if (expense == null || income == null) {
       SnackbarService.error(
-        'Select one expense and one income transaction',
+        ctxt.txnList_expenseRequired,
         spacing,
       );
       return;
@@ -1769,7 +1748,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     // Validate: same amount (±1% tolerance)
     if ((expense.amount - income.amount).abs() > expense.amount * 0.01) {
       SnackbarService.error(
-        'Amounts must match (within 1%)',
+        ctxt.txnList_matchingAmounts,
         spacing,
       );
       return;
@@ -1778,7 +1757,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     // Validate: within 24 hours
     if (expense.date.difference(income.date).inHours.abs() > 24) {
       SnackbarService.error(
-        'Transactions must be within 24 hours',
+        ctxt.txnList_within24Hours,
         spacing,
       );
       return;
@@ -1790,7 +1769,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     // Validate: different accounts
     if (fromAccount?.id == toAccount?.id) {
       SnackbarService.error(
-        'Cannot transfer between the same account',
+        ctxt.txnList_differentAccounts,
         spacing,
       );
       return;
@@ -1832,7 +1811,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
   // ── EDIT HANDLER ──
   Future<void> _onEditTransaction(
-    transaction,
+    Transaction transaction,
     AppSpacing spacing,
   ) async {
     final bool? result;
@@ -1893,7 +1872,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   Future<void> _onRemoveTransaction(
-    transaction,
+    Transaction transaction,
     AppLocalizations ctxt,
     AppSpacing spacing,
   ) async {
@@ -1908,7 +1887,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
     if (confirm != true) return;
 
-    final txnId = transaction.id as int;
+    final txnId = transaction.id;
 
     // Hide from UI immediately
     setState(() => _clearCache());
@@ -2341,7 +2320,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                               BorderRadius.circular(spacing.radiusMedium),
                         ),
                       ),
-                      child: const Text('APPLY FILTERS'),
+                      child: Text(ctxt.txnList_applyFilters.toUpperCase()),
                     ),
                   ),
                   SizedBox(width: spacing.sectionGap),

@@ -36,6 +36,14 @@ class CurrencyService {
   /// Call [loadRateCache] at startup to populate.
   static Map<String, double> get cachedRates => _rateCache ?? const {};
 
+  /// Merges [rates] into the shared in-memory cache. Safe to call even
+  /// before [loadRateCache] has run — initializes the cache if needed.
+  /// Use this instead of mutating [cachedRates] directly, since the
+  /// getter can return an unmodifiable empty map before first load.
+  static void mergeCachedRates(Map<String, double> rates) {
+    _rateCache = {..._rateCache ?? {}, ...rates};
+  }
+
   /// Load all rates into memory. Call once at startup (deferred tier).
   Future<void> loadRateCache() async {
     _rateCache = await getAllRates();

@@ -18,6 +18,7 @@ import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/debt.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 
@@ -33,6 +34,7 @@ import 'package:mudra_manager/features/backup/data/account_backup.dart';
 import 'package:mudra_manager/features/backup/data/budget_backup.dart';
 import 'package:mudra_manager/features/backup/data/budget_category_allocation_backup.dart';
 import 'package:mudra_manager/features/backup/data/category_backup.dart';
+import 'package:mudra_manager/features/backup/data/debt_backup.dart';
 import 'package:mudra_manager/features/backup/data/goal_backup.dart';
 import 'package:mudra_manager/features/backup/data/notification_backup.dart';
 
@@ -41,7 +43,7 @@ import 'package:mudra_manager/features/backup/data/tag_backup.dart';
 import 'package:mudra_manager/features/backup/data/transaction_backup.dart';
 import 'package:mudra_manager/features/backup/data/gamification_backup.dart';
 import 'package:mudra_manager/features/backup/data/user_profile_backup.dart';
-import 'package:mudra_manager/features/gamification/models/achievement.dart';
+import 'package:mudra_manager/features/gamification/domain/achievement.dart';
 import 'package:path_provider/path_provider.dart';
 
 class BackupService {
@@ -363,6 +365,11 @@ class BackupService {
     backupData['Goal'] =
         goals.map((goal) => GoalBackup.fromGoal(goal).toBackupJson()).toList();
 
+    // Backup Debts
+    final debts = await isar.debts.where().findAll();
+    backupData['Debt'] =
+        debts.map((debt) => DebtBackup.fromDebt(debt).toBackupJson()).toList();
+
     // Backup Budgets
     final budgets = await isar.budgets.where().findAll();
     backupData['Budget'] = budgets
@@ -493,6 +500,12 @@ class BackupService {
               {},
             );
             break;
+          case 'Debt':
+            model = DebtBackup().fromBackupJson(
+              Map<String, dynamic>.from(itemJson),
+              {},
+            );
+            break;
           case 'Budget':
             model = BudgetBackup().fromBackupJson(
               Map<String, dynamic>.from(itemJson),
@@ -606,6 +619,13 @@ class BackupService {
                 await isar.goals.put(goal);
                 await goal.linkedAccount.save();
                 fullyLinkedModel = goal;
+                break;
+              case 'Debt':
+                fullyLinkedModel = DebtBackup().fromBackupJson(
+                  Map<String, dynamic>.from(itemJson),
+                  restoredObjects,
+                );
+                await isar.debts.put(fullyLinkedModel);
                 break;
               case 'Budget':
                 final budget = BudgetBackup().fromBackupJson(

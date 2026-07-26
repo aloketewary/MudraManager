@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mudra_manager/core/skin/provider/skin_provider.dart';
+import 'package:mudra_manager/features/skin/data/skin_provider.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 
 // ── Spacing Constants (pre-computed, no rebuilds) ─────────────────────

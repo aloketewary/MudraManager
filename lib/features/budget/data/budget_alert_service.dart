@@ -1,9 +1,11 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
+import 'package:mudra_manager/core/db/models/budget_type.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/singleton_providers.dart';
+import 'package:mudra_manager/core/utils/budget_spent_calculator.dart';
 import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,36 +32,8 @@ class BudgetAlertService {
         .findAll();
 
     for (final budget in budgets) {
-      await budget.categories.load();
-      await budget.allocations.load();
-
-      final (start, end) = budget.getCurrentPeriodRange(now);
-      final spent = await _calculateSpent(isar, budget, start, end);
-      final percentage = (spent / budget.amount) * 100;
-
-      // Check if alert thresholds exceeded
-      if (percentage >= 100 && !budget.notifiedAt100) {
-        alerts.add(BudgetAlert(
-          budget: budget, spent: spent,
-          percentage: percentage, threshold: 100,
-        ),);
-        budget.notifiedAt100 = true;
-        await isar.writeTxn(() => isar.budgets.put(budget));
-      } else if (percentage >= 90 && !budget.notifiedAt90 && !budget.notifiedAt100) {
-        alerts.add(BudgetAlert(
-          budget: budget, spent: spent,
-          percentage: percentage, threshold: 90,
-        ),);
-        budget.notifiedAt90 = true;
-        await isar.writeTxn(() => isar.budgets.put(budget));
-      } else if (percentage >= 80 && !budget.notifiedAt80 && !budget.notifiedAt90) {
-        alerts.add(BudgetAlert(
-          budget: budget, spent: spent,
-          percentage: percentage, threshold: 80,
-        ),);
-        budget.notifiedAt80 = true;
-        await isar.writeTxn(() => isar.budgets.put(budget));
-      }
+      final alert = await _evaluateBudget(isar, budget, now);
+      if (alert != null) alerts.add(alert);
     }
 
     return alerts;
@@ -68,7 +42,7 @@ class BudgetAlertService {
   Future<List<BudgetAlert>> checkBudgetsAfterTransaction(
     Transaction transaction,
   ) async {
-    if (!transaction.isExpense || transaction.isTransfer) return [];
+    if (!transaction.affectsStats || !transaction.isExpense) return [];
 
     final isar = await isarService.getInstance();
     final now = DateTime.now();
@@ -81,40 +55,27 @@ class BudgetAlertService {
 
     for (final budget in budgets) {
       await budget.categories.load();
-      await budget.allocations.load();
 
-      final categoryIds = budget.categories.map((c) => c.id).toList();
-      if (transaction.category.value == null ||
-          !categoryIds.contains(transaction.category.value!.id)) {
-        continue;
+      // Only re-check budgets this transaction could plausibly affect —
+      // skip category-wise budgets that clearly don't include this
+      // transaction's category (tag/day/festival/travel budgets are always
+      // re-checked since matching requires loading tags/period anyway).
+      if (budget.budgetType == BudgetType.categoryWise) {
+        final categoryIds = budget.categories.map((c) => c.id).toSet();
+        final catId = transaction.category.value?.id;
+        if (catId == null || !categoryIds.contains(catId)) {
+          // Could still match via parent category — check that before skipping.
+          await transaction.category.value?.parentCategory.load();
+          final parentId =
+              transaction.category.value?.parentCategory.value?.id;
+          if (parentId == null || !categoryIds.contains(parentId)) {
+            continue;
+          }
+        }
       }
 
-      final (start, end) = budget.getCurrentPeriodRange(now);
-      final spent = await _calculateSpent(isar, budget, start, end);
-      final percentage = (spent / budget.amount) * 100;
-
-      if (percentage >= 100 && !budget.notifiedAt100) {
-        alerts.add(BudgetAlert(
-          budget: budget, spent: spent,
-          percentage: percentage, threshold: 100,
-        ),);
-        budget.notifiedAt100 = true;
-        await isar.writeTxn(() => isar.budgets.put(budget));
-      } else if (percentage >= 90 && !budget.notifiedAt90 && !budget.notifiedAt100) {
-        alerts.add(BudgetAlert(
-          budget: budget, spent: spent,
-          percentage: percentage, threshold: 90,
-        ),);
-        budget.notifiedAt90 = true;
-        await isar.writeTxn(() => isar.budgets.put(budget));
-      } else if (percentage >= 80 && !budget.notifiedAt80 && !budget.notifiedAt90) {
-        alerts.add(BudgetAlert(
-          budget: budget, spent: spent,
-          percentage: percentage, threshold: 80,
-        ),);
-        budget.notifiedAt80 = true;
-        await isar.writeTxn(() => isar.budgets.put(budget));
-      }
+      final alert = await _evaluateBudget(isar, budget, now);
+      if (alert != null) alerts.add(alert);
     }
 
     if (alerts.isNotEmpty) {
@@ -124,25 +85,63 @@ class BudgetAlertService {
     return alerts;
   }
 
-  Future<double> _calculateSpent(
-    Isar isar, Budget budget, DateTime start, DateTime end,
+  /// Evaluates a single budget's spend against alert thresholds, persists
+  /// the notified-flag transitions (including resetting them once spend
+  /// drops back under 80%, so recurring budgets can alert again next
+  /// period), and returns an alert if a new threshold was just crossed.
+  Future<BudgetAlert?> _evaluateBudget(
+    Isar isar,
+    Budget budget,
+    DateTime now,
   ) async {
-    final categoryIds = budget.categories.map((c) => c.id).toList();
-    final transactions = await isar.transactions
-        .filter()
-        .isExpenseEqualTo(true)
-        .dateBetween(start, end)
-        .findAll();
+    if (budget.amount <= 0) return null;
 
-    for (final t in transactions) {
-      await t.category.load();
+    // Skip non-recurring budgets whose period has already ended.
+    if (budget.recurrence == BudgetRecurrence.none &&
+        budget.endDate
+            .isBefore(DateTime(now.year, now.month, now.day, 23, 59, 59))) {
+      return null;
     }
 
-    return transactions
-        .where((t) =>
-            t.category.value != null &&
-            categoryIds.contains(t.category.value!.id),)
-        .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
+    final (start, end) = budget.getCurrentPeriodRange(now);
+    final spent = await BudgetSpentCalculator.calculate(isar, budget, start, end);
+    final percentage = (spent / budget.amount) * 100;
+
+    // Reset flags once spend drops back below the lowest threshold — lets
+    // a recurring budget alert again in a fresh period (or after a
+    // limit increase).
+    if (percentage < 80 &&
+        (budget.notifiedAt80 || budget.notifiedAt90 || budget.notifiedAt100)) {
+      budget.notifiedAt80 = false;
+      budget.notifiedAt90 = false;
+      budget.notifiedAt100 = false;
+      await isar.writeTxn(() => isar.budgets.put(budget));
+    }
+
+    BudgetAlert? alert;
+    int? threshold;
+    if (percentage >= 100 && !budget.notifiedAt100) {
+      threshold = 100;
+      budget.notifiedAt100 = true;
+    } else if (percentage >= 90 && !budget.notifiedAt90 && !budget.notifiedAt100) {
+      threshold = 90;
+      budget.notifiedAt90 = true;
+    } else if (percentage >= 80 && !budget.notifiedAt80 && !budget.notifiedAt90) {
+      threshold = 80;
+      budget.notifiedAt80 = true;
+    }
+
+    if (threshold != null) {
+      alert = BudgetAlert(
+        budget: budget,
+        spent: spent,
+        percentage: percentage,
+        threshold: threshold,
+      );
+      await isar.writeTxn(() => isar.budgets.put(budget));
+    }
+
+    return alert;
   }
 
   /// Routes through SmartNotificationService for in-app record + OS notification.

@@ -90,7 +90,7 @@ void main() {
 
     test('4b: same-account check exists', () {
       expect(listScreen, contains('fromAccount?.id == toAccount?.id'));
-      expect(listScreen, contains('Cannot transfer between the same account'));
+      expect(listScreen, contains('txnList_differentAccounts'));
     });
 
     test('4c: deleteTransactionPair exists in TransactionService', () {

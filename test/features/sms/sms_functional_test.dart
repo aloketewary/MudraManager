@@ -18,8 +18,8 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 import 'package:mudra_manager/features/sms/data/bank_sms_parser.dart';
-import 'package:mudra_manager/plugins/sms_parser_manager.dart';
-import 'package:mudra_manager/plugins/sms_parser_plugin.dart';
+import 'package:mudra_manager/features/sms/data/sms_parser_manager.dart';
+import 'package:mudra_manager/features/sms/data/sms_parser_plugin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Full functional test with real Isar DB and plugin parsers.

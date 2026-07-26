@@ -62,6 +62,8 @@ final categorySpendingHistoryProvider = FutureProvider.autoDispose
   final expenses = await isar.transactions
       .filter()
       .isExpenseEqualTo(true)
+      .isTransferEqualTo(false)
+      .isSettlementEqualTo(false)
       .dateGreaterThan(threeMonthsAgo)
       .findAll();
 
@@ -96,8 +98,13 @@ final categorySpendingHistoryProvider = FutureProvider.autoDispose
     }
   }
 
-  monthsWithSpending = monthSet.length.clamp(1, 3);
-  final threeMonthAvg = threeMonthTotal / monthsWithSpending;
+  // Guard: monthSet can be empty when there's no spending history at all —
+  // don't force a minimum of 1, or hasHistory/daysWithData will falsely
+  // report enough data when there's actually zero transactions.
+  final monthsCounted = monthSet.length;
+  monthsWithSpending = monthsCounted.clamp(0, 3);
+  final threeMonthAvg =
+      monthsWithSpending > 0 ? threeMonthTotal / monthsWithSpending : 0.0;
 
   return CategorySpendingHistory(
     lastMonthSpent: lastMonth,

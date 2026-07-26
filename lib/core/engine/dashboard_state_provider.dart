@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/engine/dashboard_engine.dart';
-import 'package:mudra_manager/core/logic/generators/bill_insight_generator.dart';
-import 'package:mudra_manager/core/logic/generators/budget_insight_generator.dart';
-import 'package:mudra_manager/core/logic/generators/cashflow_insight_generator.dart';
-import 'package:mudra_manager/core/logic/generators/comparison_insight_generator.dart';
+import 'package:mudra_manager/features/insights/data/bill_insight_generator.dart';
+import 'package:mudra_manager/features/insights/data/budget_insight_generator.dart';
+import 'package:mudra_manager/features/insights/data/cashflow_insight_generator.dart';
+import 'package:mudra_manager/features/insights/data/comparison_insight_generator.dart';
 import 'package:mudra_manager/core/logic/suppression_engine.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/state/dashboard_state.dart';

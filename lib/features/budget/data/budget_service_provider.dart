@@ -13,9 +13,9 @@ import 'package:mudra_manager/core/providers/date_change_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/utils/budget_spent_calculator.dart';
-import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
-import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
 
 final budgetServiceProvider = Provider<BudgetService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
@@ -142,9 +142,12 @@ class BudgetService {
     }
 
     // ── 3. Single query: all expenses in the widest range ──
+    // Exclude transfers/settlements — they don't count as budget spend.
     final allExpenses = await isar.transactions
         .filter()
         .isExpenseEqualTo(true)
+        .isTransferEqualTo(false)
+        .isSettlementEqualTo(false)
         .dateBetween(earliest, latest)
         .findAll();
 
@@ -180,7 +183,7 @@ class BudgetService {
             if (t.date.isBefore(s) || t.date.isAfter(e)) continue;
             await t.tags.load();
             if (t.tags.any((tag) => tagIds.contains(tag.id))) {
-              totalSpent += t.baseAmount;
+              totalSpent += t.effectiveAmount;
             }
           }
         }
@@ -207,7 +210,7 @@ class BudgetService {
           final catTxns = expensesByCat[cat.id] ?? [];
           final spent = catTxns
               .where((t) => !t.date.isBefore(s) && !t.date.isAfter(e))
-              .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
+              .fold<double>(0.0, (sum, t) => sum + t.effectiveAmount);
           totalSpent += spent;
           catSpendings.add(CategorySpending(
             category: cat,
@@ -224,8 +227,8 @@ class BudgetService {
           final cat = t.category.value;
           if (cat == null) continue;
           final existing = catMap[cat.id];
-          catMap[cat.id] = (cat, (existing?.$2 ?? 0) + t.baseAmount);
-          totalSpent += t.baseAmount;
+          catMap[cat.id] = (cat, (existing?.$2 ?? 0) + t.effectiveAmount);
+          totalSpent += t.effectiveAmount;
         }
         for (final entry in catMap.entries) {
           catSpendings.add(CategorySpending(

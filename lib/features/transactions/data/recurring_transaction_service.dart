@@ -7,8 +7,8 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
-import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
 import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
 
 class RecurringTransactionService {
@@ -28,7 +28,8 @@ class RecurringTransactionService {
     final dueRecurring = await isar.recurringTransactions
         .filter()
         .isActiveEqualTo(true)
-        .findAll();
+        .findAll()
+        .withDecryption();
 
     log.i('Checking ${dueRecurring.length} recurring transactions');
 

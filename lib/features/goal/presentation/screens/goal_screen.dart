@@ -19,6 +19,7 @@ import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/safe_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
@@ -189,12 +190,11 @@ class GoalScreen extends ConsumerWidget {
                       spacing.cardHorizontal,
                       spacing.elementGap,
                     ),
-                    child: Text(
-                      '${ctxt.goal_completedSection} (${completedGoals.length})',
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: color.onSurfaceVariant,
-                      ),
+                    child: TypeSectionHeader(
+                      label:
+                          '${ctxt.goal_completedSection} (${completedGoals.length})',
+                      icon: LucideIcons.check,
+                      accentColor: FinanceColors.statusGood,
                     ),
                   ),
                 ),
@@ -231,31 +231,19 @@ class GoalScreen extends ConsumerWidget {
             ],
           );
         },
-        loading: () => Padding(
-          padding: EdgeInsets.all(spacing.sectionGap),
-          child: Column(
-            children: [
-              SizedBox(height: spacing.sectionGap),
-              ...List.generate(
-                5,
-                (i) => Padding(
-                  padding: EdgeInsets.only(bottom: spacing.elementGap),
-                  child: SkeletonLoader(
-                    width: double.infinity,
-                    height: 140,
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  ),
-                ),
-              ),
-            ],
+        loading: () => ListView(
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.cardHorizontal,
+            vertical: spacing.cardVertical,
           ),
+          children: List.generate(4, (_) => const DashboardCardSkeleton()),
         ),
         error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
       ),
     );
   }
 
-  // ── Portfolio Status Strip ──
+  // ── Portfolio Hero Card (one glow per screen) ──
   Widget _buildStatusStrip(
     int goalCount,
     double totalSaved,
@@ -265,72 +253,88 @@ class GoalScreen extends ConsumerWidget {
     AppSpacing spacing,
     AppLocalizations ctxt,
   ) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardInner,
-        vertical: spacing.elementGap,
-      ),
+    final isDark = color.brightness == Brightness.dark;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.primary.withValues(alpha: isDark ? 0.20 : 0.12),
+            color.surface,
+          ],
+        ),
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        children: [
-          _stripItem(
-            ctxt.goal_goalsInProgress(goalCount),
-            null,
-            textTheme,
-            color,
+        border: Border.all(color: color.primary.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: color.primary.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
-          _stripDot(color),
-          Expanded(
-            child: CurrencyText(
-              amount: totalSaved,
-              fixedLength: 0,
-              compact: true,
-              suffixText: ctxt.goal_suffixSaved,
-              style: textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.goal, size: 14, color: color.primary),
+              SizedBox(width: spacing.elementGapMin),
+              Text(
+                ctxt.goal_goalsInProgress(goalCount),
+                style: textTheme.labelLarge?.copyWith(color: color.primary),
               ),
+            ],
+          ),
+          SizedBox(height: spacing.elementGap),
+          CurrencyText(
+            amount: totalSaved,
+            fixedLength: 0,
+            suffixText: ctxt.goal_suffixSaved,
+            style: textTheme.headlineLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: color.onSurface,
             ),
           ),
           if (attentionCount > 0) ...[
-            _stripDot(color),
-            Text(
-              ctxt.goal_needAttention(attentionCount),
-              style: textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: FinanceColors.statusWarning,
+            SizedBox(height: spacing.elementGap * 1.5),
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.elementGap,
+                vertical: spacing.elementGapMin,
+              ),
+              decoration: BoxDecoration(
+                color: FinanceColors.statusWarning.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                border: Border.all(
+                  color: FinanceColors.statusWarning.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    LucideIcons.triangleAlert,
+                    size: 12,
+                    color: FinanceColors.statusWarning,
+                  ),
+                  SizedBox(width: spacing.elementGapMin),
+                  Text(
+                    ctxt.goal_needAttention(attentionCount),
+                    style: textTheme.labelSmall?.copyWith(
+                      color: FinanceColors.statusWarning,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ],
-      ),
-    );
-  }
-
-  Widget _stripItem(
-    String text,
-    Color? textColor,
-    TextTheme textTheme,
-    ColorScheme color,
-  ) {
-    return Text(
-      text,
-      style: textTheme.labelMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-        color: textColor ?? color.onSurface,
-      ),
-    );
-  }
-
-  Widget _stripDot(ColorScheme color) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Text(
-        '·',
-        style: TextStyle(color: color.onSurfaceVariant),
       ),
     );
   }

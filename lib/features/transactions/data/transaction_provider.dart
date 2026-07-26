@@ -7,7 +7,7 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
-import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
 
 final transactionProvider = Provider<TransactionService>((ref) {

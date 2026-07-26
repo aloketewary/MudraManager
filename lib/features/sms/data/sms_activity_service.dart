@@ -156,7 +156,11 @@ class SmsActivityService {
     String? currencyCode,
   }) async {
     final isar = await _getIsar();
-    final categories = await isar.categorys.where().findAll();
+    // System categories (Shared Expense, Trip Expense, Settlement...) are
+    // reserved for the trip/split-bill flow and must never be candidates
+    // for general SMS auto-categorization.
+    final categories =
+        (await isar.categorys.where().findAll()).where((c) => !c.isSystem).toList();
 
     // Use bank parser for better extraction
     final parsed = await BankSmsParser.parse(sender, body);

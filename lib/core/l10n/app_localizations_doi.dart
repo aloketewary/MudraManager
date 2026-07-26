@@ -414,6 +414,162 @@ class AppLocalizationsDoi extends AppLocalizations {
   String get transaction_saveTransactionButtonLabel => 'Save Transaction';
 
   @override
+  String transaction_tripCurrencyMismatch(String currency) {
+    return 'Trip is in $currency — amount will be converted';
+  }
+
+  @override
+  String get transaction_customizeSplit => 'Customize Split';
+
+  @override
+  String get transaction_changeTrip => 'Change Trip';
+
+  @override
+  String transaction_remainingPercent(String percent) {
+    return 'Remaining: $percent%';
+  }
+
+  @override
+  String transaction_remainingAmount(String amount) {
+    return 'Remaining: $amount';
+  }
+
+  @override
+  String get transaction_splitEqual => 'Equal';
+
+  @override
+  String get transaction_splitCustom => 'Custom';
+
+  @override
+  String get transaction_participants => 'Participants';
+
+  @override
+  String get transaction_selectTrip => 'Select Trip';
+
+  @override
+  String get transaction_noneTripOption => 'None';
+
+  @override
+  String get transaction_tagNameHint => 'e.g., Travel, Food, Shopping';
+
+  @override
+  String transaction_suggestedCategory(String category) {
+    return 'Suggested: $category';
+  }
+
+  @override
+  String get transaction_tapToApply => 'Tap to apply';
+
+  @override
+  String stats_nTransactions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count txns',
+      one: '$count txn',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stats_selectRange => 'Select Range';
+
+  @override
+  String get stats_selectPeriod => 'Select Period';
+
+  @override
+  String get stats_thisWeek => 'This Week';
+
+  @override
+  String get stats_thisMonth => 'This Month';
+
+  @override
+  String get stats_thisYear => 'This Year';
+
+  @override
+  String get stats_customRange => 'Custom Range';
+
+  @override
+  String get export_noTemplatesTitle => 'No export templates enabled';
+
+  @override
+  String get export_noTemplatesDesc => 'Enable templates in Settings → Plugins';
+
+  @override
+  String export_nTemplatesAvailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count templates available',
+      one: '1 template available',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String export_completed(String format) {
+    return '$format export completed';
+  }
+
+  @override
+  String get common_refresh => 'Refresh';
+
+  @override
+  String get utility_financialAdvisory => 'Financial Advisory (Beta)';
+
+  @override
+  String utility_nItemsNeedAttention(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items may need attention',
+      one: '1 item may need attention',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String utility_advisoryCollapseSemantic(int count) {
+    return 'Financial Advisory, $count items, tap to collapse';
+  }
+
+  @override
+  String utility_advisoryExpandSemantic(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return 'Financial Advisory, $_temp0 may need attention, tap to expand';
+  }
+
+  @override
+  String utility_nMoreItems(int count) {
+    return '$count more items…';
+  }
+
+  @override
+  String transaction_tripParticipantsSemantic(String name, int count) {
+    return 'Trip: $name, $count participants';
+  }
+
+  @override
+  String transaction_dateSemantic(String date) {
+    return 'Transaction date: $date, tap to change';
+  }
+
+  @override
+  String transaction_timeSemantic(String time) {
+    return 'Transaction time: $time, tap to change';
+  }
+
+  @override
+  String transaction_nParticipants(int count) {
+    return '$count participants';
+  }
+
+  @override
   String get transaction_selectOneAccountErrorText =>
       'Select at least one Account';
 
@@ -948,6 +1104,9 @@ class AppLocalizationsDoi extends AppLocalizations {
 
   @override
   String get common_close => 'Close';
+
+  @override
+  String get common_inactive => 'Inactive';
 
   @override
   String get common_confirm => 'Confirm';
@@ -3685,6 +3844,61 @@ class AppLocalizationsDoi extends AppLocalizations {
   String get txnList_convertedToTransfer => 'Converted to transfer';
 
   @override
+  String txnList_selectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get txnList_mergeSelectHint => 'Select the matching transaction';
+
+  @override
+  String get txnList_mergeReadyHint => 'Tap merge in the app bar';
+
+  @override
+  String get txnList_expenseRequired =>
+      'Select one expense and one income transaction';
+
+  @override
+  String get txnList_matchingAmounts => 'Amounts must match (within 1%)';
+
+  @override
+  String get txnList_within24Hours => 'Transactions must be within 24 hours';
+
+  @override
+  String get txnList_differentAccounts =>
+      'Cannot transfer between the same account';
+
+  @override
+  String get txnList_applyFilters => 'Apply Filters';
+
+  @override
+  String get txnList_filterAll => 'ALL';
+
+  @override
+  String get txnList_filterSpends => 'SPENDS';
+
+  @override
+  String get txnList_filterIncome => 'INCOME';
+
+  @override
+  String get txnList_filterTransfers => 'TRANSFERS';
+
+  @override
+  String txnList_budgetUpdateTitle(String category) {
+    return '$category Budget Update';
+  }
+
+  @override
+  String txnList_budgetExceededSubtitle(String category) {
+    return 'You\'ve exceeded your $category budget';
+  }
+
+  @override
+  String txnList_budgetSpentSubtitle(String amount, String category) {
+    return 'You\'ve spent $amount on $category this period';
+  }
+
+  @override
   String get stats_today => 'Today';
 
   @override
@@ -3845,6 +4059,16 @@ class AppLocalizationsDoi extends AppLocalizations {
   String stats_forecastLower(Object period) {
     return 'On track to finish below $period.';
   }
+
+  @override
+  String get stats_howItWorks => 'How Statistics Work';
+
+  @override
+  String get stats_howItWorksDesc =>
+      'Track income, spending, and trends for the selected period. Tap the date range at the top to switch between day, week, month, year, or a custom range.';
+
+  @override
+  String get stats_netFlow => 'Net Flow';
 
   @override
   String get recap_belowAvg => 'Below avg';
@@ -4074,6 +4298,9 @@ class AppLocalizationsDoi extends AppLocalizations {
   String upgrade_accountsFreePlanLimit(int max) {
     return 'Free plan includes $max accounts. Upgrade to Pro to use all your accounts.';
   }
+
+  @override
+  String get upgrade_seeProPlans => 'See Pro Plans';
 
   @override
   String get day_monday => 'Monday';
@@ -4731,6 +4958,12 @@ class AppLocalizationsDoi extends AppLocalizations {
       'This will adjust everyones balance. Continue?';
 
   @override
+  String get expense_splitUpdated => 'Split updated';
+
+  @override
+  String get expense_remaining => 'Remaining';
+
+  @override
   String get billCenter_overdue => 'Overdue';
 
   @override
@@ -4812,6 +5045,41 @@ class AppLocalizationsDoi extends AppLocalizations {
   String billCenter_markedPaid(String name) {
     return '$name marked as paid';
   }
+
+  @override
+  String billCenter_inDays(int days) {
+    return 'In $days days';
+  }
+
+  @override
+  String billCenter_daysAgo(int days) {
+    return '${days}d ago';
+  }
+
+  @override
+  String billCenter_daysOverdue(int days) {
+    return '${days}d overdue';
+  }
+
+  @override
+  String billCenter_moreCount(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get billCenter_addBill => 'Add a recurring bill to see it here';
+
+  @override
+  String get frequency_daily => 'Daily';
+
+  @override
+  String get frequency_weekly => 'Weekly';
+
+  @override
+  String get frequency_monthly => 'Monthly';
+
+  @override
+  String get frequency_yearly => 'Yearly';
 
   @override
   String get comparison_steady => 'Steady as she goes';
@@ -5033,6 +5301,9 @@ class AppLocalizationsDoi extends AppLocalizations {
   @override
   String get category_keywordsHelper =>
       'For SMS auto-detection (e.g. swiggy, zomato)';
+
+  @override
+  String get category_suggestedKeywords => 'Suggested keywords';
 
   @override
   String get currency_title => 'Currency';
@@ -6187,6 +6458,126 @@ class AppLocalizationsDoi extends AppLocalizations {
   String get tax_title => 'Tax Estimation';
 
   @override
+  String get debt_title => 'Debt Planner';
+
+  @override
+  String get debt_utilitySubtitle => 'Snowball & Avalanche strategies';
+
+  @override
+  String get debt_snowball => 'Snowball';
+
+  @override
+  String get debt_avalanche => 'Avalanche';
+
+  @override
+  String get debt_totalDebt => 'Total Debt';
+
+  @override
+  String get debt_monthsToFreedom => 'Months to Freedom';
+
+  @override
+  String get debt_interestPaid => 'Interest to Pay';
+
+  @override
+  String get debt_minPayment => 'Min Payment';
+
+  @override
+  String get debt_extraPayment => 'Extra Payment';
+
+  @override
+  String get debt_addDebt => 'Add Debt';
+
+  @override
+  String get debt_editDebt => 'Edit Debt';
+
+  @override
+  String get debt_noDebts => 'No debts added';
+
+  @override
+  String get debt_noDebtsDesc =>
+      'Add your loans and credit cards to build a payoff plan.';
+
+  @override
+  String debt_activeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'debts',
+      one: 'debt',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get debt_name => 'Debt Name';
+
+  @override
+  String get debt_nameHint => 'e.g., HDFC Credit Card';
+
+  @override
+  String get debt_nameRequired => 'Enter a name for this debt';
+
+  @override
+  String get debt_balance => 'Current Balance';
+
+  @override
+  String get debt_balanceRequired => 'Enter a valid balance';
+
+  @override
+  String get debt_interestRate => 'Interest Rate (APR %)';
+
+  @override
+  String get debt_interestRateRequired => 'Enter a valid interest rate';
+
+  @override
+  String get debt_minimumPayment => 'Minimum Payment';
+
+  @override
+  String get debt_minimumPaymentRequired => 'Enter a valid minimum payment';
+
+  @override
+  String get debt_extraPaymentOptional => 'Extra Payment (optional)';
+
+  @override
+  String get debt_extraPaymentHint => 'Additional amount you can pay monthly';
+
+  @override
+  String get debt_payoffOrder => 'Payoff Order';
+
+  @override
+  String debt_payoffOrderDesc(int position, String strategy) {
+    return 'This debt will be paid off in position $position using the $strategy strategy.';
+  }
+
+  @override
+  String get debt_archive => 'Archive';
+
+  @override
+  String get debt_archiveDesc => 'Hide from active payoff plan';
+
+  @override
+  String get debt_unarchive => 'Restore';
+
+  @override
+  String get debt_unarchiveDesc => 'Bring back into active payoff plan';
+
+  @override
+  String get debt_paidOff => 'Paid Off';
+
+  @override
+  String get debt_archived => 'Archived';
+
+  @override
+  String get debt_deleteDesc => 'Permanently remove this debt entry';
+
+  @override
+  String get debt_infoTitle => 'How debt payoff works';
+
+  @override
+  String get debt_infoDesc =>
+      'Snowball pays off your smallest balance first for quick wins. Avalanche targets the highest interest rate first to save the most money. Add extra payment to speed up either plan.';
+
+  @override
   String get tax_projected => 'Projected (year in progress)';
 
   @override
@@ -6797,6 +7188,9 @@ class AppLocalizationsDoi extends AppLocalizations {
   String get cc_allPaymentsCurrent => 'All payments current';
 
   @override
+  String get cc_yourCards => 'Your Cards';
+
+  @override
   String get plugins_remindMeBefore => 'Remind me before';
 
   @override
@@ -7039,7 +7433,15 @@ class AppLocalizationsDoi extends AppLocalizations {
   String get goal_archive => 'Archive Goal';
 
   @override
+  String get goal_archiveConfirmMessage =>
+      'Archive this goal? It will be hidden from your active goals list.';
+
+  @override
   String get goal_markComplete => 'Mark Complete';
+
+  @override
+  String get goal_markCompleteConfirmMessage =>
+      'Mark this goal as fully funded? This sets the saved amount to your target and archives it.';
 
   @override
   String goal_basedOnAvg(Object amount) {
@@ -7113,4 +7515,61 @@ class AppLocalizationsDoi extends AppLocalizations {
   String tax_upTo(int amount) {
     return 'Up to $amount';
   }
+
+  @override
+  String tax_remaining(int amount) {
+    return '$amount remaining';
+  }
+
+  @override
+  String get accessibility_doubleTapToSetMax =>
+      'Double tap to set maximum value';
+
+  @override
+  String currencyFormat(double amount) {
+    return '$amount';
+  }
+
+  @override
+  String get insights_deepDive => 'Deep Dive';
+
+  @override
+  String get insights_noDataYet => 'No Data Yet';
+
+  @override
+  String get insights_addTransactionsPrompt =>
+      'Add transactions to see your analytics';
+
+  @override
+  String get insights_viewAllAnalytics => 'View All Analytics';
+
+  @override
+  String get insights_yourFinancialCoach => 'Your Financial Coach';
+
+  @override
+  String get insights_coachDescription =>
+      'Get personalized insights, predictions, and actionable recommendations to improve your financial health.';
+
+  @override
+  String get insights_howItWorks => 'How It Works';
+
+  @override
+  String get insights_aiSummary => 'AI Summary';
+
+  @override
+  String get insights_aiSummaryDesc =>
+      'Your personalized financial overview and highlights';
+
+  @override
+  String get insights_quickWins => 'Quick Wins';
+
+  @override
+  String get insights_quickWinsDesc =>
+      'Actionable recommendations to improve your finances';
+
+  @override
+  String get insights_predictions => 'Predictions';
+
+  @override
+  String get insights_predictionsDesc => 'Cash flow forecast and risk alerts';
 }

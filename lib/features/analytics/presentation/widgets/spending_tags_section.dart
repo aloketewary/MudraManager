@@ -89,7 +89,7 @@ class SpendingTagsSection extends ConsumerWidget {
                                   ),
                                   SizedBox(width: spacing.elementGap),
                                   Text(
-                                    '${ts.count} txn',
+                                    l10n.stats_nTransactions(ts.count),
                                     style: textTheme.bodySmall?.copyWith(
                                       color: color.onSurfaceVariant,
                                     ),

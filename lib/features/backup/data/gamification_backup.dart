@@ -1,5 +1,5 @@
 import 'package:mudra_manager/features/backup/data/backable_model.dart';
-import 'package:mudra_manager/features/gamification/models/achievement.dart';
+import 'package:mudra_manager/features/gamification/domain/achievement.dart';
 
 class AchievementBackup implements BackupAdapter<Achievement> {
   late final int id;
