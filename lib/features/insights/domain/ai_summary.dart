@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 
 /// AI-generated conversational financial summary for the Insights page.
 ///

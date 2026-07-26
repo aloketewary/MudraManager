@@ -860,7 +860,6 @@ class _PendingTransactionAdapter implements PendingTransactionData {
   final String? transactionRef;
   final String? category;
   final String smsHash;
-  @override
   final String? toAccount;
   @override
   final String? fromBank;

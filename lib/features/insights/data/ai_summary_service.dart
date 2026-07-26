@@ -1,22 +1,18 @@
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_aggregation_service.dart';
 import 'package:mudra_manager/features/analytics/data/advanced_analytics_service.dart';
-import 'package:mudra_manager/features/analytics/domain/analytics_aggregates.dart';
-import 'package:mudra_manager/features/analytics/domain/analytics_period.dart';
 import 'package:mudra_manager/features/insights/domain/ai_summary.dart';
 
 /// Service that generates AI-style conversational financial summaries.
 ///
 /// Combines data from multiple analytics sources to create a coaching experience.
 class AiSummaryService {
-  final AdvancedAnalyticsService _analyticsService;
   final AnalyticsAggregationService _aggregationService;
 
   const AiSummaryService({
     required AdvancedAnalyticsService analyticsService,
     required AnalyticsAggregationService aggregationService,
-  })  : _analyticsService = analyticsService,
-        _aggregationService = aggregationService;
+  })  : _aggregationService = aggregationService;
 
   /// Generate a conversational financial summary
   AiSummary generateSummary({

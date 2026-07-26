@@ -214,7 +214,7 @@ class BackupService {
     } catch (e, stackTrace) {
       _log.e('Restore failed', e, stackTrace);
       SnackbarService.error(
-        'Restore failed: Invalid password or corrupted file', spacing
+        'Restore failed: Invalid password or corrupted file', spacing,
       );
       return null;
     }

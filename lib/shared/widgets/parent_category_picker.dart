@@ -38,7 +38,6 @@ class ParentCategoryPicker extends ConsumerWidget {
     final ctxt = AppLocalizations.of(context)!;
     final spacing = ref.watch(spacingProvider);
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       decoration: BoxDecoration(
@@ -167,7 +166,6 @@ class ParentCategoryPicker extends ConsumerWidget {
   }) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnimatedContainer(
       duration:

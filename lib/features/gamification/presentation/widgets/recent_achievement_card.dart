@@ -1,5 +1,4 @@
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +17,6 @@ class RecentAchievementCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final color = theme.colorScheme;
-    final spacing = ref.watch(spacingProvider);
 
     final achievements = ref.watch(achievementsProvider);
 

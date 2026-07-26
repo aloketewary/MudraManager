@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
 /// Glass-styled dropdown for day selection (statement day / due day).
 ///
@@ -34,7 +33,6 @@ class GlassDayPicker extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
-    final spacing = ref.watch<AppSpacing>(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(

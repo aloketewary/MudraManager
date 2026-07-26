@@ -1,5 +1,4 @@
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';

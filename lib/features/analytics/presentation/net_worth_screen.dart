@@ -82,8 +82,8 @@ class NetWorthScreen extends ConsumerWidget {
                     accentColor: color.primary,
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: const SizedBox(height: 10),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 10),
                 ),
                 SliverToBoxAdapter(
                   child: _buildTrendCard(
@@ -118,8 +118,8 @@ class NetWorthScreen extends ConsumerWidget {
                     accentColor: color.primary,
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: const SizedBox(height: 10),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 10),
                 ),
                 SliverToBoxAdapter(
                   child: _buildCompositionCard(
@@ -143,8 +143,8 @@ class NetWorthScreen extends ConsumerWidget {
                     ),
                   ),
                 if (data.assets.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: const SizedBox(height: 10),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 10),
                   ),
                 if (data.assets.isNotEmpty)
                   SliverToBoxAdapter(
@@ -172,8 +172,8 @@ class NetWorthScreen extends ConsumerWidget {
                     ),
                   ),
                 if (data.liabilities.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: const SizedBox(height: 10),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 10),
                   ),
                 if (data.liabilities.isNotEmpty)
                   SliverToBoxAdapter(

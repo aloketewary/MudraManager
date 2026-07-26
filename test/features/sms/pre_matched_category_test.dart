@@ -15,7 +15,7 @@ class _TestPending implements PendingTransactionData {
   final String body;
   @override
   final String? fromBank;
-  @override
+  
   final String toAccount;
 
   _TestPending({

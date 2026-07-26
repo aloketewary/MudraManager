@@ -68,7 +68,6 @@ class _PrioritizedBannerState extends ConsumerState<PrioritizedBanner> {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = ref.watch(spacingProvider);
 
     // Background health blocks everything (critical)
     final unhealthy = ref.watch(backgroundTaskUnhealthyProvider).value ?? false;

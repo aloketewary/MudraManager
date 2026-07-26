@@ -1,6 +1,5 @@
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,8 +17,6 @@ import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/section_header.dart';
-import 'package:mudra_manager/shared/widgets/settings_group_card.dart';
-import 'package:mudra_manager/shared/widgets/setting_item.dart';
 
 class ImportExportScreen extends ConsumerStatefulWidget {
   const ImportExportScreen({super.key});
@@ -37,8 +34,6 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
 
     return ScreenShell(
@@ -94,7 +89,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
         isarService: ref.read(isarServiceProvider),
         startDate: _exportStart,
         endDate: DateTime(
-            _exportEnd.year, _exportEnd.month, _exportEnd.day, 23, 59, 59),
+            _exportEnd.year, _exportEnd.month, _exportEnd.day, 23, 59, 59,),
       );
       final fileName =
           'Mudra_${safeDateFormat('yyyyMMdd').format(_exportStart)}_${safeDateFormat('yyyyMMdd').format(_exportEnd)}.xlsx';
@@ -230,7 +225,7 @@ class _ExportSection extends ConsumerWidget {
                     child: Row(
                       children: [
                         Icon(LucideIcons.calendarRange,
-                            size: 18, color: color.primary),
+                            size: 18, color: color.primary,),
                         SizedBox(width: spacing.elementGap),
                         Text(
                           '${dateFmt.format(exportStart)} — ${dateFmt.format(exportEnd)}',
@@ -265,7 +260,7 @@ class _ExportSection extends ConsumerWidget {
                         : const Icon(LucideIcons.fileSpreadsheet, size: 18),
                     label: Text(exporting
                         ? ctxt.importExport_exporting
-                        : ctxt.importExport_exportAsExcel),
+                        : ctxt.importExport_exportAsExcel,),
                     style: FilledButton.styleFrom(
                       padding:
                           EdgeInsets.symmetric(vertical: spacing.elementGap * 1.5),
@@ -394,7 +389,7 @@ class _ImportSection extends ConsumerWidget {
   ) {
     return Container(
       padding: EdgeInsets.symmetric(
-          horizontal: spacing.elementGap, vertical: spacing.elementGapMin),
+          horizontal: spacing.elementGap, vertical: spacing.elementGapMin,),
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(spacing.radiusSmall),

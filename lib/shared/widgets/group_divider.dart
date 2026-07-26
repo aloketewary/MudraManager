@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
 /// Divider for grouped cards with configurable color and indent.
 class GroupDivider extends ConsumerWidget {

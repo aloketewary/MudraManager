@@ -39,9 +39,6 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final spacing = ref.watch(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentTheme = ref.watch(themeModeProvider);
     final highContrast = ref.watch(highContrastModeProvider);

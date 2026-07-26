@@ -717,8 +717,6 @@ class _StreaksSection extends ConsumerWidget {
             final label = streak.type == 'daily_checkin'
                 ? ctxt.achieve_dailyCheckIn
                 : ctxt.achieve_budgetAdherence;
-            final accent =
-                streak.type == 'daily_checkin' ? color.tertiary : color.primary;
             return SettingItem(
               icon: icon,
               title: streak.currentCount.toString(),

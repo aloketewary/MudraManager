@@ -1,5 +1,4 @@
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:go_router/go_router.dart';
@@ -574,7 +573,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           await isar.accounts.filter().nameEqualTo(accountName).findFirst();
       if (existingName != null && existingName.id != id) {
         SnackbarService.warning(
-          'Account with name "$accountName" already exists', spacing
+          'Account with name "$accountName" already exists', spacing,
         );
         return;
       }
@@ -586,7 +585,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             .findFirst();
         if (existingNum != null && existingNum.id != id) {
           SnackbarService.warning(
-            'Account with number "$accountNumber" already exists', spacing
+            'Account with number "$accountNumber" already exists', spacing,
           );
           return;
         }

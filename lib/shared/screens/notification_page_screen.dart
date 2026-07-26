@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

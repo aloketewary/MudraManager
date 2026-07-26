@@ -161,7 +161,6 @@ class _FakePending implements PendingTransactionData {
   final double? amount;
   @override
   final String? fromBank;
-  @override
   final String? toAccount;
 
   _FakePending({
@@ -170,8 +169,7 @@ class _FakePending implements PendingTransactionData {
     required this.body,
     this.amount,
     this.fromBank,
-    this.toAccount,
-  });
+  }) : toAccount = null;
   
 
 }

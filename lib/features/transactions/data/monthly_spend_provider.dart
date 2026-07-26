@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/features/transactions/data/transaction_service.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 
 /// Monthly spending summary with trend.
@@ -31,7 +30,6 @@ final monthlySpendProvider = StateNotifierProvider<MonthlySpendNotifier, Monthly
 
 class MonthlySpendNotifier extends StateNotifier<MonthlySpend> {
   final Ref _ref;
-  DateTime _lastUpdated = DateTime.now();
 
   MonthlySpendNotifier(this._ref) : super(const MonthlySpend()) {
     _load();
@@ -77,7 +75,7 @@ class MonthlySpendNotifier extends StateNotifier<MonthlySpend> {
           .isTransferEqualTo(false)
           .findAll();
 
-      double prevSpent = prevMonth.fold(0, (sum, txn) => sum + (txn.convertedAmount ?? txn.amount));
+      final double prevSpent = prevMonth.fold(0, (sum, txn) => sum + (txn.convertedAmount ?? txn.amount));
 
       String? changePercent;
       if (prevSpent > 0) {
@@ -92,7 +90,6 @@ class MonthlySpendNotifier extends StateNotifier<MonthlySpend> {
         changePercent: changePercent,
         isLoading: false,
       );
-      _lastUpdated = DateTime.now();
     } catch (e) {
       state = MonthlySpend(
         totalSpent: state.totalSpent,

@@ -2,7 +2,6 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -71,9 +70,6 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final spacing = ref.watch(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ctxt = AppLocalizations.of(context)!;
 

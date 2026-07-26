@@ -566,7 +566,7 @@ class NotificationHeroCard extends ConsumerWidget {
                   ClipOval(
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(width: 56, height: 56),
+                      child: const SizedBox(width: 56, height: 56),
                     ),
                   ),
                   TweenAnimationBuilder<double>(
@@ -667,7 +667,6 @@ class _NotificationToggleRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.read<AppSpacing>(spacingProvider);
-    final textTheme = Theme.of(context).textTheme;
     final ic = iconColor ?? color.primary;
 
     return Semantics(

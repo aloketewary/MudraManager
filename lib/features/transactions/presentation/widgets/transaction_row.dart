@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Standard transaction row with icon, metadata, and amount.
 /// Used in transaction lists.

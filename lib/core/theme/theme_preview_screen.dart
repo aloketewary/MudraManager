@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
-import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
-import 'package:mudra_manager/shared/widgets/section_header.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 class ThemePreviewCard extends ConsumerWidget {
@@ -112,7 +110,7 @@ class ThemePreviewCard extends ConsumerWidget {
                                   decoration: BoxDecoration(
                                     color: colorScheme.primaryContainer,
                                     borderRadius: BorderRadius.circular(
-                                        spacing.radiusSmall),
+                                        spacing.radiusSmall,),
                                   ),
                                   padding: const EdgeInsets.all(6),
                                   child: Row(
@@ -197,7 +195,7 @@ class ThemePreviewCard extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          child: Icon(
+                          child: const Icon(
                             LucideIcons.check,
                             color: Colors.white,
                             size: 10,
@@ -295,7 +293,7 @@ class ThemePreviewSkeleton extends ConsumerWidget {
             color: color.surfaceContainerLow,
             borderRadius: BorderRadius.circular(spacing.radiusMedium),
             border: Border.all(
-                color: color.outlineVariant.withValues(alpha: 0.3)),
+                color: color.outlineVariant.withValues(alpha: 0.3),),
           ),
           child: Column(
             children: [
@@ -318,7 +316,7 @@ class ThemePreviewSkeleton extends ConsumerWidget {
                       SkeletonLoader(
                         height: 44,
                         borderRadius: BorderRadius.circular(
-                            spacing.radiusSmall),
+                            spacing.radiusSmall,),
                       ),
                       const Spacer(),
                       Align(

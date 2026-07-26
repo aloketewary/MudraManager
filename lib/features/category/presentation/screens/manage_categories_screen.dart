@@ -441,7 +441,6 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
               firstChild: const SizedBox.shrink(),
               secondChild: Column(
                 children: widget.subcategories.map((sub) {
-                  final subColor = Color(sub.colorValue ?? Colors.grey.toARGB32());
                   final subCount = widget.transactionCounts.when(
                     data: (map) => map[sub.id] ?? 0,
                     loading: () => 0,
