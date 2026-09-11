@@ -36,6 +36,7 @@ class RecurringExpensesCard extends ConsumerWidget {
         accent: color.primary,
         child: AutoSkeleton(
           enabled: !MediaQuery.of(context).disableAnimations,
+          debugShowBones: false,
           child: _buildLoadingContent(
             spacing,
             color,

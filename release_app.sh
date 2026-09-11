@@ -52,6 +52,40 @@ ensure_gradle_wrapper() {
   fi
 }
 
+verify_signed_bundle() {
+  bundle_path="$1"
+
+  if [ ! -f "$bundle_path" ]; then
+    echo "❌ Signed bundle not found: $bundle_path"
+    return 1
+  fi
+  if ! command -v jarsigner >/dev/null 2>&1; then
+    echo "❌ jarsigner is required to verify app-bundle signing."
+    return 1
+  fi
+  # Android app release certificates are self-signed by design. `-strict`
+  # treats the missing public PKIX chain as a signature error, even when the
+  # bundle's cryptographic signature is valid.
+  if ! jarsigner -verify "$bundle_path" >/dev/null 2>&1; then
+    echo "❌ App bundle is not signed or has an invalid signature: $bundle_path"
+    return 1
+  fi
+
+  # Require both the signature manifest and certificate block. This prevents
+  # an unsigned archive from passing validation when strict certificate-chain
+  # validation is intentionally disabled.
+  if ! unzip -l "$bundle_path" | grep -Eq 'META-INF/[^/]+\.SF$'; then
+    echo "❌ App bundle is missing its signature manifest: $bundle_path"
+    return 1
+  fi
+  if ! unzip -l "$bundle_path" | grep -Eq 'META-INF/[^/]+\.(RSA|DSA|EC)$'; then
+    echo "❌ App bundle is missing its signing certificate block: $bundle_path"
+    return 1
+  fi
+
+  echo "✅ App bundle signature verified"
+}
+
 cd "$project_dir"
 
 # Check if argument is passed
@@ -144,6 +178,9 @@ flutter build appbundle \
   --release \
   --build-name "$new_version" \
   --build-number "$new_build_number"
+
+bundle_path="$project_dir/build/app/outputs/bundle/prodRelease/app-prod-release.aab"
+verify_signed_bundle "$bundle_path"
 
 # Step 9: Verify generated Android version before committing.
 manifest_metadata="$project_dir/build/app/intermediates/merged_manifests/prodRelease/processProdReleaseManifest/output-metadata.json"

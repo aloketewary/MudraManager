@@ -317,6 +317,7 @@ class _WidgetAnalyticsSkeleton extends ConsumerWidget {
 
     return AutoSkeleton(
       enabled: enabled,
+      debugShowBones: false,
       child: ListView(
         padding: EdgeInsets.all(spacing.cardHorizontal),
         children: [
@@ -386,12 +387,14 @@ class _WidgetAnalyticsSkeleton extends ConsumerWidget {
   }
 
   Widget _bone(ColorScheme color, {required double height}) {
-    return Container(
-      height: height,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: BoxDecoration(
-        color: color.onSurface.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(6),
+    return PlaceholderLeaf(
+      child: Container(
+        height: height,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          color: color.onSurface.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(6),
+        ),
       ),
     );
   }

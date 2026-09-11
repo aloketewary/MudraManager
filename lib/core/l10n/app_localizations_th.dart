@@ -774,6 +774,10 @@ class AppLocalizationsTh extends AppLocalizations {
   String get category_nameRequired => 'Required';
 
   @override
+  String get category_nameAlreadyExists =>
+      'A category with this name already exists.';
+
+  @override
   String get category_typeLabel => 'Category Type';
 
   @override

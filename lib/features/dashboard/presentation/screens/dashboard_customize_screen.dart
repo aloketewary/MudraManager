@@ -409,6 +409,7 @@ class _DashboardCustomizeSkeleton extends ConsumerWidget {
 
     return AutoSkeleton(
       enabled: enabled,
+      debugShowBones: false,
       child: ListView(
         padding: EdgeInsets.symmetric(
           horizontal: spacing.cardHorizontal,
@@ -442,13 +443,15 @@ class _DashboardCustomizeSkeleton extends ConsumerWidget {
     required double height,
     required double radius,
   }) {
-    return Container(
-      height: height,
-      decoration: BoxDecoration(
-        color: color.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(
-          color: color.outlineVariant.withValues(alpha: 0.3),
+    return PlaceholderLeaf(
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: color.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: color.outlineVariant.withValues(alpha: 0.3),
+          ),
         ),
       ),
     );

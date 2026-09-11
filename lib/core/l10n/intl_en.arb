@@ -962,6 +962,10 @@
   "@category_nameRequired": {
     "description": "This is validation message for required field"
   },
+  "category_nameAlreadyExists": "A category with this name already exists.",
+  "@category_nameAlreadyExists": {
+    "description": "This is shown when saving a category with a duplicate name"
+  },
   "category_typeLabel": "Category Type",
   "@category_typeLabel": {
     "description": "This is label for category type"

@@ -85,6 +85,12 @@ jobs:
             --verbose
         continue-on-error: false
 
+      - name: Verify App Bundle Signature
+        run: |
+          bundle_path="build/app/outputs/bundle/prodRelease/app-prod-release.aab"
+          test -f "$bundle_path"
+          jarsigner -verify -strict "$bundle_path"
+
       - name: Verify Android version code
         run: |
           manifest_metadata="build/app/intermediates/merged_manifests/prodRelease/processProdReleaseManifest/output-metadata.json"

@@ -792,6 +792,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get category_nameRequired => 'Requis';
 
   @override
+  String get category_nameAlreadyExists =>
+      'A category with this name already exists.';
+
+  @override
   String get category_typeLabel => 'Type de catégorie';
 
   @override

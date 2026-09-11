@@ -776,6 +776,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get category_nameRequired => 'Diperlukan';
 
   @override
+  String get category_nameAlreadyExists =>
+      'A category with this name already exists.';
+
+  @override
   String get category_typeLabel => 'Tipe Kategori';
 
   @override

@@ -15,12 +15,14 @@ class _Bone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: color.onSurface.withValues(alpha: 0.06),
-        borderRadius: borderRadius ?? BorderRadius.circular(6),
+    return PlaceholderLeaf(
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: color.onSurface.withValues(alpha: 0.06),
+          borderRadius: borderRadius ?? BorderRadius.circular(6),
+        ),
       ),
     );
   }
@@ -36,6 +38,7 @@ class _ShimmerWrap extends StatelessWidget {
     final isReducedMotion = MediaQuery.of(context).disableAnimations;
     return AutoSkeleton(
       enabled: !isReducedMotion,
+      debugShowBones: false,
       child: child,
     );
   }

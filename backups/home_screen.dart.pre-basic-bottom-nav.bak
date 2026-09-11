@@ -43,6 +43,33 @@ import 'package:mudra_manager/shared/widgets/speed_dial_fab.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
 
+class _BottomBarNotchClipper extends CustomClipper<Path> {
+  const _BottomBarNotchClipper();
+
+  @override
+  Path getClip(Size size) {
+    final barPath = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Offset.zero & size,
+          const Radius.circular(28),
+        ),
+      );
+    final notchPath = Path()
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(size.width / 2, 0),
+          radius: 36,
+        ),
+      );
+
+    return Path.combine(PathOperation.difference, barPath, notchPath);
+  }
+
+  @override
+  bool shouldReclip(covariant _BottomBarNotchClipper oldClipper) => false;
+}
+
 class HomePage extends ConsumerStatefulWidget {
   final int initialIndex;
   const HomePage({super.key, this.initialIndex = 0});
@@ -124,7 +151,8 @@ class HomePageState extends ConsumerState<HomePage> {
     if (isSimple) {
       return switch (index) {
         0 => 0,
-        1 => 1,
+        1 => null,
+        2 => 1,
         _ => null,
       };
     }
@@ -132,8 +160,9 @@ class HomePageState extends ConsumerState<HomePage> {
     return switch (index) {
       0 => 0,
       1 => 1,
-      2 => 2,
-      3 => 3,
+      2 => null,
+      3 => 2,
+      4 => 3,
       _ => null,
     };
   }
@@ -142,7 +171,7 @@ class HomePageState extends ConsumerState<HomePage> {
     if (isSimple) {
       return switch (index) {
         0 => 0,
-        1 => 1,
+        1 => 2,
         _ => null,
       };
     }
@@ -150,8 +179,8 @@ class HomePageState extends ConsumerState<HomePage> {
     return switch (index) {
       0 => 0,
       1 => 1,
-      2 => 2,
-      3 => 3,
+      2 => 3,
+      3 => 4,
       _ => null,
     };
   }
@@ -183,8 +212,8 @@ class HomePageState extends ConsumerState<HomePage> {
     final isSimple = ref.watch(isSimpleModeProvider);
     final color = Theme.of(context).colorScheme;
     final shellBackground = isDark ? color.surfaceContainerHigh : color.surface;
-    // Full mode: Home(0), Activity(1), Manage(2), Insights(3).
-    // Simple mode: Home(0), Activity(1), with add action separated to the right.
+    // Full mode: Home(0), Activity(1), Add, Manage(2), Insights(3).
+    // Simple mode: Home(0), Add, Activity(1).
     final effectiveStackIndex = _selectedIndex.clamp(0, 4).toInt();
     final selectedNavigationIndex =
         _navigationIndexForStackIndex(effectiveStackIndex, isSimple) ?? 0;
@@ -197,260 +226,271 @@ class HomePageState extends ConsumerState<HomePage> {
           _onTabSelected(0);
         }
       },
-      child: Stack(
-        children: [
-          Scaffold(
-            backgroundColor: shellBackground,
-            appBar: buildTopBar(profileAsync, stackIndex),
-            // Reference-matched floating navigation dock.
-            extendBody: true,
-            bottomNavigationBar: _buildFloatingBottomNav(
-              color: color,
-              ctxt: ctxt,
-              isSimple: isSimple,
-              selectedNavigationIndex: selectedNavigationIndex,
-            ),
-            body: Stack(
+      child: Scaffold(
+        backgroundColor: shellBackground,
+        appBar: buildTopBar(profileAsync, stackIndex),
+        extendBody: false,
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Stack(
+              clipBehavior: Clip.none,
               children: [
-                PageTransitionSwitcher(
-                  duration: const Duration(milliseconds: 400),
-                  transitionBuilder:
-                      (child, primaryAnimation, secondaryAnimation) {
-                    return FadeThroughTransition(
-                      animation: primaryAnimation,
-                      secondaryAnimation: secondaryAnimation,
-                      child: child,
-                    );
-                  },
-                  child: IndexedStack(
-                    index: stackIndex,
-                    children: [
-                      const DashboardHome(),
-                      TransactionListScreen(
-                        key: transactionListKey,
-                        isTabActive: stackIndex == 1,
+                PhysicalShape(
+                  clipper: const _BottomBarNotchClipper(),
+                  color: shellBackground,
+                  elevation: 4,
+                  shadowColor: color.shadow.withValues(alpha: 0.16),
+                  clipBehavior: Clip.antiAlias,
+                  child: NavigationBar(
+                    height: 72,
+                    backgroundColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    indicatorColor: color.primaryContainer,
+                    indicatorShape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    labelBehavior:
+                        NavigationDestinationLabelBehavior.alwaysHide,
+                    selectedIndex: selectedNavigationIndex,
+                    onDestinationSelected: _onTabSelected,
+                    elevation: 0,
+                    animationDuration: const Duration(milliseconds: 300),
+                    destinations: [
+                      NavigationDestination(
+                        icon: SvgPicture.asset(
+                          'assets/logo/nav/outline/home.svg',
+                          colorFilter: ColorFilter.mode(
+                            isDark ? Colors.white : Colors.black,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        selectedIcon: SvgPicture.asset(
+                          'assets/logo/nav/solid/home.svg',
+                          colorFilter: ColorFilter.mode(
+                            isDark ? Colors.white : Colors.black,
+                            BlendMode.srcIn,
+                          ),
+                        )
+                            .animate(
+                              target: selectedNavigationIndex == 0 ? 1 : 0,
+                            )
+                            .scale(
+                              begin: const Offset(0.9, 0.9),
+                              end: const Offset(1, 1),
+                              curve: Curves.easeOutCubic,
+                              duration: 250.ms,
+                            ),
+                        label: ctxt.home_screen_title,
                       ),
-                      UtilityScreen(
-                        key: utilityKey,
-                        isTabActive: stackIndex == 2,
+                      if (isSimple)
+                        const NavigationDestination(
+                          icon: SizedBox.shrink(),
+                          selectedIcon: SizedBox.shrink(),
+                          label: '',
+                        ),
+                      NavigationDestination(
+                        icon: SvgPicture.asset(
+                          'assets/logo/nav/outline/activity.svg',
+                          colorFilter: ColorFilter.mode(
+                            isDark ? Colors.white : Colors.black,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        selectedIcon: SvgPicture.asset(
+                          'assets/logo/nav/solid/activity.svg',
+                          colorFilter: ColorFilter.mode(
+                            isDark ? Colors.white : Colors.black,
+                            BlendMode.srcIn,
+                          ),
+                        )
+                            .animate(target: effectiveStackIndex == 1 ? 1 : 0)
+                            .scale(
+                              begin: const Offset(0.9, 0.9),
+                              end: const Offset(1, 1),
+                              curve: Curves.easeOutCubic,
+                              duration: 250.ms,
+                            ),
+                        label: ctxt.nav_activity,
                       ),
-                      const StatisticsScreen(),
-                      const ProfileScreen(),
+                      if (!isSimple)
+                        const NavigationDestination(
+                          icon: SizedBox.shrink(),
+                          selectedIcon: SizedBox.shrink(),
+                          label: '',
+                        ),
+                      if (!isSimple)
+                        NavigationDestination(
+                          icon: Consumer(
+                            builder: (context, ref, _) {
+                              final activeTrips =
+                                  ref.watch(activeTripsProvider);
+                              final hasActiveTrip = activeTrips.maybeWhen(
+                                data: (trips) {
+                                  final now = DateTime.now();
+                                  final today =
+                                      DateTime(now.year, now.month, now.day);
+                                  return trips.any((t) {
+                                    if (!t.isTrip) return false;
+                                    final start = DateTime(
+                                      t.startDate.year,
+                                      t.startDate.month,
+                                      t.startDate.day,
+                                    );
+                                    return t.isActive && !today.isBefore(start);
+                                  });
+                                },
+                                orElse: () => false,
+                              );
+                              return SvgPicture.asset(
+                                hasActiveTrip
+                                    ? 'assets/logo/nav/outline/trip.svg'
+                                    : 'assets/logo/nav/outline/utility.svg',
+                                colorFilter: ColorFilter.mode(
+                                  hasActiveTrip
+                                      ? Theme.of(context).colorScheme.primary
+                                      : (isDark ? Colors.white : Colors.black),
+                                  BlendMode.srcIn,
+                                ),
+                              );
+                            },
+                          ),
+                          selectedIcon: Consumer(
+                            builder: (context, ref, _) {
+                              final activeTrips =
+                                  ref.watch(activeTripsProvider);
+                              final hasActiveTrip = activeTrips.maybeWhen(
+                                data: (trips) {
+                                  final now = DateTime.now();
+                                  final today =
+                                      DateTime(now.year, now.month, now.day);
+                                  return trips.any((t) {
+                                    if (!t.isTrip) return false;
+                                    final start = DateTime(
+                                      t.startDate.year,
+                                      t.startDate.month,
+                                      t.startDate.day,
+                                    );
+                                    return t.isActive && !today.isBefore(start);
+                                  });
+                                },
+                                orElse: () => false,
+                              );
+                              return SvgPicture.asset(
+                                hasActiveTrip
+                                    ? 'assets/logo/nav/solid/trip.svg'
+                                    : 'assets/logo/nav/solid/utility.svg',
+                                colorFilter: ColorFilter.mode(
+                                  hasActiveTrip
+                                      ? Theme.of(context).colorScheme.primary
+                                      : (isDark ? Colors.white : Colors.black),
+                                  BlendMode.srcIn,
+                                ),
+                              )
+                                  .animate(
+                                    target: effectiveStackIndex == 2 ? 1 : 0,
+                                  )
+                                  .scale(
+                                    begin: const Offset(0.9, 0.9),
+                                    end: const Offset(1, 1),
+                                    curve: Curves.easeOutCubic,
+                                    duration: 250.ms,
+                                  );
+                            },
+                          ),
+                          label: ctxt.nav_manage,
+                        ),
+                      if (!isSimple)
+                        NavigationDestination(
+                          icon: SvgPicture.asset(
+                            'assets/logo/nav/outline/statistics.svg',
+                            colorFilter: ColorFilter.mode(
+                              isDark ? Colors.white : Colors.black,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          selectedIcon: SvgPicture.asset(
+                            'assets/logo/nav/solid/statistics.svg',
+                            colorFilter: ColorFilter.mode(
+                              isDark ? Colors.white : Colors.black,
+                              BlendMode.srcIn,
+                            ),
+                          )
+                              .animate(target: effectiveStackIndex == 3 ? 1 : 0)
+                              .scale(
+                                begin: const Offset(0.9, 0.9),
+                                end: const Offset(1, 1),
+                                curve: Curves.easeOutCubic,
+                                duration: 250.ms,
+                              ),
+                          label: ctxt.nav_insights,
+                        ),
                     ],
+                  ),
+                ),
+                Positioned(
+                  top: -28,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: _buildCenterAddButton(color),
                   ),
                 ),
               ],
             ),
           ),
-          ExpandableFab(
-            key: _speedDialKey,
-            collapsedAsCircle: true,
-            showCollapsedButton: false,
-            padding: const EdgeInsets.only(bottom: 84),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFloatingBottomNav({
-    required ColorScheme color,
-    required AppLocalizations ctxt,
-    required bool isSimple,
-    required int selectedNavigationIndex,
-  }) {
-    final destinations = <_FloatingNavDestination>[
-      _FloatingNavDestination(
-        outlineAsset: 'assets/logo/nav/outline/home.svg',
-        solidAsset: 'assets/logo/nav/solid/home.svg',
-        label: ctxt.home_screen_title,
-      ),
-      _FloatingNavDestination(
-        outlineAsset: 'assets/logo/nav/outline/activity.svg',
-        solidAsset: 'assets/logo/nav/solid/activity.svg',
-        label: ctxt.nav_activity,
-        iconScale: 1.25,
-      ),
-      _FloatingNavDestination(
-        outlineAsset: 'assets/logo/nav/outline/utility.svg',
-        solidAsset: 'assets/logo/nav/solid/utility.svg',
-        label: ctxt.nav_manage,
-        usesTripIcon: true,
-      ),
-      _FloatingNavDestination(
-        outlineAsset: 'assets/logo/nav/outline/statistics.svg',
-        solidAsset: 'assets/logo/nav/solid/statistics.svg',
-        label: ctxt.nav_insights,
-      ),
-    ];
-
-    if (isSimple) destinations.removeRange(2, destinations.length);
-
-    return SafeArea(
-      top: false,
-      minimum: const EdgeInsets.fromLTRB(48, 6, 48, 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Material(
-              color: color.surface,
-              borderRadius: BorderRadius.circular(24),
-              shadowColor: color.shadow.withValues(alpha: 0.2),
-              child: Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.shadow.withValues(alpha: 0.13),
-                      blurRadius: 18,
-                      offset: const Offset(0, 7),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    for (var index = 0; index < destinations.length; index++)
-                      _buildFloatingNavItem(
-                        destination: destinations[index],
-                        selected: selectedNavigationIndex == index,
-                        color: color,
-                        onTap: () => _onTabSelected(index),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          _buildCenterAddButton(color),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFloatingNavItem({
-    required _FloatingNavDestination destination,
-    required bool selected,
-    required ColorScheme color,
-    required VoidCallback onTap,
-  }) {
-    final iconColor = selected ? color.onSurface : color.onSurfaceVariant;
-    var outlineAsset = destination.outlineAsset;
-    var solidAsset = destination.solidAsset;
-
-    if (destination.usesTripIcon) {
-      final activeTrips = ref.watch(activeTripsProvider);
-      final hasActiveTrip = activeTrips.maybeWhen(
-        data: (trips) {
-          final now = DateTime.now();
-          final today = DateTime(now.year, now.month, now.day);
-          return trips.any((trip) {
-            if (!trip.isTrip) return false;
-            final start = DateTime(
-              trip.startDate.year,
-              trip.startDate.month,
-              trip.startDate.day,
-            );
-            return trip.isActive && !today.isBefore(start);
-          });
-        },
-        orElse: () => false,
-      );
-      if (hasActiveTrip) {
-        outlineAsset = 'assets/logo/nav/outline/trip.svg';
-        solidAsset = 'assets/logo/nav/solid/trip.svg';
-      }
-    }
-
-    return Expanded(
-      child: Semantics(
-        button: true,
-        selected: selected,
-        label: destination.label,
-        child: Tooltip(
-          message: destination.label,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              customBorder: const CircleBorder(),
-              child: Center(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOutCubic,
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: selected ? color.surface : Colors.transparent,
-                    shape: BoxShape.circle,
-                    boxShadow: selected
-                        ? [
-                            BoxShadow(
-                              color: color.shadow.withValues(alpha: 0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: _buildNormalizedNavIcon(
-                    asset: selected ? solidAsset : outlineAsset,
-                    color: iconColor,
-                    scale: destination.iconScale,
-                  ).animate(target: selected ? 1 : 0).scale(
-                        begin: const Offset(0.9, 0.9),
-                        end: const Offset(1, 1),
-                        curve: Curves.easeOutCubic,
-                        duration: 250.ms,
-                      ),
-                ),
-              ),
-            ),
-          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildNormalizedNavIcon({
-    required String asset,
-    required Color color,
-    required double scale,
-  }) {
-    return SizedBox.square(
-      dimension: 24,
-      child: Center(
-        child: Transform.scale(
-          scale: scale,
-          child: SvgPicture.asset(
-            asset,
-            width: 22,
-            height: 22,
-            fit: BoxFit.contain,
-            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-          ),
+        body: Stack(
+          children: [
+            PageTransitionSwitcher(
+              duration: const Duration(milliseconds: 400),
+              transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
+                return FadeThroughTransition(
+                  animation: primaryAnimation,
+                  secondaryAnimation: secondaryAnimation,
+                  child: child,
+                );
+              },
+              child: IndexedStack(
+                index: stackIndex,
+                children: [
+                  const DashboardHome(),
+                  TransactionListScreen(
+                    key: transactionListKey,
+                    isTabActive: stackIndex == 1,
+                  ),
+                  UtilityScreen(key: utilityKey, isTabActive: stackIndex == 2),
+                  const StatisticsScreen(),
+                  const ProfileScreen(),
+                ],
+              ),
+            ),
+            ExpandableFab(
+              key: _speedDialKey,
+              collapsedAsCircle: true,
+              showCollapsedButton: false,
+              padding: const EdgeInsets.only(bottom: 84),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildCenterAddButton(ColorScheme color) {
-    return SizedBox.square(
-      dimension: 52,
-      child: FloatingActionButton(
-        onPressed: () {
-          HapticFeedback.mediumImpact();
-          _speedDialKey.currentState?.toggle();
-        },
-        tooltip: 'Add transaction',
-        backgroundColor: color.inverseSurface,
-        foregroundColor: color.onInverseSurface,
-        elevation: 3,
-        shape: const CircleBorder(),
-        child: const Icon(LucideIcons.plus, size: 24),
-      ),
+    return FloatingActionButton(
+      onPressed: () {
+        HapticFeedback.mediumImpact();
+        _speedDialKey.currentState?.toggle();
+      },
+      tooltip: 'Add transaction',
+      backgroundColor: color.primaryContainer,
+      foregroundColor: color.onPrimaryContainer,
+      elevation: 8,
+      shape: const CircleBorder(),
+      child: const Icon(LucideIcons.plus, size: 28),
     );
   }
 
@@ -1060,20 +1100,4 @@ class HomePageState extends ConsumerState<HomePage> {
     final savedTime = await NotificationService.getSavedReminderTime();
     ref.read(reminderTimeProvider.notifier).set(savedTime);
   }
-}
-
-class _FloatingNavDestination {
-  final String outlineAsset;
-  final String solidAsset;
-  final String label;
-  final bool usesTripIcon;
-  final double iconScale;
-
-  const _FloatingNavDestination({
-    required this.outlineAsset,
-    required this.solidAsset,
-    required this.label,
-    this.usesTripIcon = false,
-    this.iconScale = 1,
-  });
 }

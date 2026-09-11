@@ -891,12 +891,14 @@ class _FinancialAdviceScreenState extends ConsumerState<FinancialAdviceScreen> {
     final enabled = !MediaQuery.of(context).disableAnimations;
 
     Widget bone({double? width, required double height}) {
-      return Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: color.surfaceContainerHighest,
-          borderRadius: spacing.borderRadiusSmall,
+      return PlaceholderLeaf(
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: color.surfaceContainerHighest,
+            borderRadius: spacing.borderRadiusSmall,
+          ),
         ),
       );
     }
@@ -955,6 +957,7 @@ class _FinancialAdviceScreenState extends ConsumerState<FinancialAdviceScreen> {
 
     return AutoSkeleton(
       enabled: enabled,
+      debugShowBones: false,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.only(

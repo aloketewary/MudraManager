@@ -303,6 +303,7 @@ class TodayBriefingSkeleton extends ConsumerWidget {
       ),
       child: AutoSkeleton(
         enabled: true,
+        debugShowBones: false,
         child: Container(
           decoration: BoxDecoration(
             color: insightBackground,

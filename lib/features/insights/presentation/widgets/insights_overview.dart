@@ -793,12 +793,13 @@ class _ExploreAnalytics extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
+    return Material(
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
+      clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
         tilePadding: EdgeInsets.symmetric(horizontal: spacing.cardInner),
         childrenPadding: EdgeInsets.fromLTRB(

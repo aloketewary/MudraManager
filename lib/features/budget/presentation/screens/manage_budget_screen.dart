@@ -18,8 +18,7 @@ import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
-/// Budget management screen — read-first, action-second.
-/// Shows current constraint status and allows adjustments.
+/// Budget management screen. Read-first, action-second.
 class ManageBudgetScreen extends ConsumerStatefulWidget {
   final Budget budget;
 
@@ -44,7 +43,6 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
-
     final progressAsync = ref.watch(budgetsWithProgressProvider);
 
     return ScreenShell(
@@ -108,17 +106,16 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     final limit = snapshot.limit;
     final remaining = snapshot.remaining;
     final isOver = snapshot.status == BudgetPeriodStatus.exceeded;
-    final pct = snapshot.percentage;
+    final percentage = snapshot.percentage;
     final days =
         snapshot.periodEnd.difference(snapshot.evaluationDate).inDays + 1;
     final dailyAllowance = days > 0 && remaining > 0 ? remaining / days : 0.0;
-
-    final heroColor = isOver
+    final isNearLimit = !isOver && percentage >= 0.8;
+    final accent = isOver
         ? color.error
-        : pct > 0.8
-            ? color.error.withValues(alpha: 0.8)
-            : color.onSurface;
-    final isDark = color.brightness == Brightness.dark;
+        : isNearLimit
+            ? color.error.withValues(alpha: 0.88)
+            : color.primary;
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -127,239 +124,615 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
         vertical: spacing.cardVertical,
       ),
       children: [
-        // ── HERO CARD: REMAINING + SPENT + PROGRESS (one glow per screen) ──
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: EdgeInsets.all(spacing.cardInner),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                heroColor.withValues(alpha: isDark ? 0.20 : 0.12),
-                color.surface,
-              ],
-            ),
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            border: Border.all(color: heroColor.withValues(alpha: 0.2)),
-            boxShadow: [
-              BoxShadow(
-                color: heroColor.withValues(alpha: 0.08),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              CurrencyText(
-                amount: remaining.abs(),
-                style: textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: heroColor,
-                ),
-              ),
-              SizedBox(height: spacing.elementGapMin),
-              Text(
-                isOver ? l10n.budget_over : l10n.budget_left,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: heroColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: spacing.elementGap),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '${l10n.budget_spent} ',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                  CurrencyText(
-                    amount: spent,
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    ' of ',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                  CurrencyText(
-                    amount: limit,
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: spacing.elementGap * 1.5),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: LinearProgressIndicator(
-                  semanticsLabel: 'Budget progress',
-                  value: pct.clamp(0.0, 1.0),
-                  minHeight: 6,
-                  backgroundColor: color.outlineVariant.withValues(alpha: 0.2),
-                  valueColor: AlwaysStoppedAnimation(heroColor),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: spacing.elementGap * 2),
-
-        // ── ADJUST LIMIT ──
-        _buildSection(
-          icon: LucideIcons.settings2,
-          title: l10n.budget_limit,
+        _buildPremiumHero(
+          remaining: remaining,
+          spent: spent,
+          limit: limit,
+          percentage: percentage,
+          isOver: isOver,
+          accent: accent,
           spacing: spacing,
           color: color,
           textTheme: textTheme,
-          child: Row(
-            children: [
-              CurrencyText(
-                amount: limit,
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: () => _showAdjustLimitSheet(
-                  limit,
-                  spacing,
-                  color,
-                  textTheme,
-                  l10n,
-                ),
-                icon: const Icon(LucideIcons.pencil, size: 14),
-                label: Text(l10n.budget_adjustLimit),
-              ),
-            ],
-          ),
+          l10n: l10n,
         ),
-        SizedBox(height: spacing.elementGap),
-
-        // ── DAILY ALLOWANCE ──
-        if (!isOver && days > 0)
-          _buildSection(
-            icon: LucideIcons.calendar,
-            title: l10n.budget_remainingAllowance,
-            spacing: spacing,
-            color: color,
-            textTheme: textTheme,
-            child: Row(
-              children: [
-                CurrencyText(
-                  amount: dailyAllowance,
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  '/${l10n.budget_perDay}',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: color.onSurfaceVariant,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '$days ${l10n.budget_days} ${l10n.budget_left}',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: color.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        SizedBox(height: spacing.elementGap),
-
-        // ── PERIOD ──
-        _buildSection(
-          icon: LucideIcons.calendarDays,
-          title: l10n.budget_duration,
+        SizedBox(height: spacing.sectionGap * 1.5),
+        _buildDetailsPanel(
+          limit: limit,
+          dailyAllowance: dailyAllowance,
+          days: days,
+          startDate: progress.startDate,
+          endDate: progress.endDate,
+          isOver: isOver,
           spacing: spacing,
           color: color,
           textTheme: textTheme,
-          child: Text(
-            '${DateFormat.yMMMd(l10n.localeName).format(progress.startDate)} – ${DateFormat.yMMMd(l10n.localeName).format(progress.endDate)}',
-            style: textTheme.bodyMedium,
-          ),
+          l10n: l10n,
         ),
-        SizedBox(height: spacing.elementGap),
-
-        // ── CATEGORIES ──
-        _buildSection(
-          icon: LucideIcons.tags,
-          title: l10n.budget_categoriesTitle,
+        SizedBox(height: spacing.sectionGap * 1.5),
+        _buildCategoriesPanel(
+          progress: progress,
           spacing: spacing,
           color: color,
           textTheme: textTheme,
-          child: Wrap(
-            spacing: spacing.elementGap,
-            runSpacing: spacing.elementGapMin,
-            children: progress.categorySpendings.map((cs) {
-              return Chip(
-                label: Text(cs.category.name),
-                visualDensity: VisualDensity.compact,
-              );
-            }).toList(),
-          ),
+          l10n: l10n,
         ),
         SizedBox(height: spacing.sectionGap * 2),
-
-        // ── DANGER ZONE ──
         _buildDangerZone(spacing, color, textTheme, l10n),
         SizedBox(height: spacing.sectionGap * 2),
       ],
     );
   }
 
-  Widget _buildSection({
-    required IconData icon,
-    required String title,
+  Widget _buildPremiumHero({
+    required double remaining,
+    required double spent,
+    required double limit,
+    required double percentage,
+    required bool isOver,
+    required Color accent,
     required AppSpacing spacing,
     required ColorScheme color,
     required TextTheme textTheme,
-    required Widget child,
+    required AppLocalizations l10n,
+  }) {
+    final isDark = color.brightness == Brightness.dark;
+    final heroBackground =
+        isDark ? color.surfaceContainerHighest : color.onSurface;
+    final heroForeground = isDark ? color.onSurface : color.surface;
+    final heroMuted =
+        isDark ? color.onSurfaceVariant : color.surface.withValues(alpha: 0.68);
+    final progress = percentage.clamp(0.0, 1.0);
+
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: heroBackground,
+        borderRadius: BorderRadius.circular(spacing.radiusMedium + 8),
+        boxShadow: [
+          BoxShadow(
+            color: heroBackground.withValues(alpha: isDark ? 0.24 : 0.18),
+            blurRadius: 28,
+            offset: const Offset(0, 14),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -74,
+            top: -82,
+            child: Container(
+              width: 220,
+              height: 220,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: accent.withValues(alpha: 0.18),
+                  width: 30,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 24,
+            bottom: -84,
+            child: Container(
+              width: 170,
+              height: 170,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: accent.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(spacing.cardInner + 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(spacing.elementGapMin + 2),
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: 0.16),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
+                      ),
+                      child: Icon(
+                        isOver ? LucideIcons.triangleAlert : LucideIcons.wallet,
+                        size: 18,
+                        color: accent,
+                      ),
+                    ),
+                    SizedBox(width: spacing.elementGap),
+                    Expanded(
+                      child: Text(
+                        isOver ? l10n.budget_over : l10n.budget_left,
+                        style: textTheme.labelLarge?.copyWith(
+                          color: heroForeground,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    _buildHeroPill(
+                      label: isOver ? l10n.budget_over : l10n.budget_left,
+                      accent: accent,
+                      spacing: spacing,
+                      textTheme: textTheme,
+                    ),
+                  ],
+                ),
+                SizedBox(height: spacing.sectionGap * 1.5),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CurrencyText(
+                            amount: remaining.abs(),
+                            style: textTheme.displayMedium?.copyWith(
+                              color: heroForeground,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -1.8,
+                              height: 1.0,
+                            ),
+                          ),
+                          SizedBox(height: spacing.elementGapMin),
+                          Text(
+                            isOver
+                                ? l10n.budget_over
+                                : l10n.budget_remainingAllowance,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: heroMuted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: spacing.sectionGap),
+                          Row(
+                            children: [
+                              _buildHeroInlineMetric(
+                                label: l10n.budget_spent,
+                                amount: spent,
+                                color: heroForeground,
+                                muted: heroMuted,
+                                textTheme: textTheme,
+                              ),
+                              Container(
+                                width: 1,
+                                height: 28,
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: spacing.elementGap,
+                                ),
+                                color: heroMuted.withValues(alpha: 0.35),
+                              ),
+                              _buildHeroInlineMetric(
+                                label: l10n.budget_limit,
+                                amount: limit,
+                                color: heroForeground,
+                                muted: heroMuted,
+                                textTheme: textTheme,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: spacing.sectionGap),
+                    SizedBox(
+                      width: 98,
+                      height: 98,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox.expand(
+                            child: CircularProgressIndicator(
+                              value: progress,
+                              strokeWidth: 8,
+                              backgroundColor:
+                                  heroMuted.withValues(alpha: 0.18),
+                              valueColor: AlwaysStoppedAnimation(accent),
+                            ),
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${(percentage * 100).toStringAsFixed(0)}%',
+                                style: textTheme.titleLarge?.copyWith(
+                                  color: heroForeground,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              Text(
+                                l10n.budget_spent,
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: heroMuted,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: spacing.sectionGap * 1.25),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
+                  child: LinearProgressIndicator(
+                    semanticsLabel: 'Budget progress',
+                    value: progress,
+                    minHeight: 7,
+                    backgroundColor: heroMuted.withValues(alpha: 0.18),
+                    valueColor: AlwaysStoppedAnimation(accent),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroInlineMetric({
+    required String label,
+    required double amount,
+    required Color color,
+    required Color muted,
+    required TextTheme textTheme,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: textTheme.labelSmall?.copyWith(
+            color: muted,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 3),
+        CurrencyText(
+          amount: amount,
+          fixedLength: 0,
+          style: textTheme.titleMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeroPill({
+    required String label,
+    required Color accent,
+    required AppSpacing spacing,
+    required TextTheme textTheme,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.elementGap,
+        vertical: spacing.elementGapMin,
+      ),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: accent.withValues(alpha: 0.28)),
+      ),
+      child: Text(
+        label,
+        style: textTheme.labelSmall?.copyWith(
+          color: accent,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailsPanel({
+    required double limit,
+    required double dailyAllowance,
+    required int days,
+    required DateTime startDate,
+    required DateTime endDate,
+    required bool isOver,
+    required AppSpacing spacing,
+    required ColorScheme color,
+    required TextTheme textTheme,
+    required AppLocalizations l10n,
   }) {
     return Container(
       padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
-        boxShadow: [
-          BoxShadow(
-            color: color.onSurface.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.28)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _buildDetailCell(
+                  icon: LucideIcons.settings2,
+                  label: l10n.budget_limit,
+                  color: color,
+                  spacing: spacing,
+                  textTheme: textTheme,
+                  value: CurrencyText(
+                    amount: limit,
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                  action: TextButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      _showAdjustLimitSheet(
+                        limit,
+                        spacing,
+                        color,
+                        textTheme,
+                        l10n,
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      minimumSize: Size.zero,
+                      padding: EdgeInsets.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(l10n.budget_adjustLimit),
+                  ),
+                ),
+              ),
+              SizedBox(width: spacing.sectionGap),
+              Expanded(
+                child: _buildDetailCell(
+                  icon: LucideIcons.calendar,
+                  label: l10n.budget_remainingAllowance,
+                  color: color,
+                  spacing: spacing,
+                  textTheme: textTheme,
+                  value: isOver
+                      ? Text(
+                          l10n.budget_over,
+                          style: textTheme.titleMedium?.copyWith(
+                            color: color.error,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        )
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Flexible(
+                              child: CurrencyText(
+                                amount: dailyAllowance,
+                                style: textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.4,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              '/${l10n.budget_perDay}',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                  action: !isOver
+                      ? _buildQuietLabel(
+                          '$days ${l10n.budget_days} ${l10n.budget_left}',
+                          color,
+                          textTheme,
+                        )
+                      : null,
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: spacing.sectionGap),
+            child: Divider(
+              height: 1,
+              color: color.outlineVariant.withValues(alpha: 0.38),
+            ),
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                LucideIcons.calendarDays,
+                size: 17,
+                color: color.primary,
+              ),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.budget_duration,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: spacing.elementGapMin),
+                    Text(
+                      '${DateFormat.yMMMd(l10n.localeName).format(startDate)} - '
+                      '${DateFormat.yMMMd(l10n.localeName).format(endDate)}',
+                      style: textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDetailCell({
+    required IconData icon,
+    required String label,
+    required ColorScheme color,
+    required AppSpacing spacing,
+    required TextTheme textTheme,
+    required Widget value,
+    Widget? action,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 16, color: color.primary),
+            SizedBox(width: spacing.elementGapMin),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: textTheme.labelSmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: spacing.elementGap),
+        value,
+        if (action != null) ...[
+          SizedBox(height: spacing.elementGapMin),
+          action,
+        ],
+      ],
+    );
+  }
+
+  Widget _buildQuietLabel(
+    String label,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
+    return Text(
+      label,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: textTheme.labelSmall?.copyWith(
+        color: color.onSurfaceVariant,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+  }
+
+  Widget _buildCategoriesPanel({
+    required BudgetWithProgress progress,
+    required AppSpacing spacing,
+    required ColorScheme color,
+    required TextTheme textTheme,
+    required AppLocalizations l10n,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.28)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 14, color: color.onSurfaceVariant),
-              SizedBox(width: spacing.elementGapMin),
+              Icon(LucideIcons.tags, size: 17, color: color.primary),
+              SizedBox(width: spacing.elementGap),
               Text(
-                title,
-                style: textTheme.labelMedium?.copyWith(
-                  color: color.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
+                l10n.budget_categoriesTitle,
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ],
           ),
-          SizedBox(height: spacing.elementGap),
-          child,
+          SizedBox(height: spacing.sectionGap),
+          if (progress.categorySpendings.isEmpty)
+            Text(
+              l10n.budget_categoriesTitle,
+              style: textTheme.bodyMedium?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
+            )
+          else
+            Wrap(
+              spacing: spacing.elementGapMin,
+              runSpacing: spacing.elementGapMin,
+              children: progress.categorySpendings.map((cs) {
+                return _buildCategoryTag(
+                  cs.category.name,
+                  color,
+                  spacing,
+                  textTheme,
+                );
+              }).toList(),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryTag(
+    String label,
+    ColorScheme color,
+    AppSpacing spacing,
+    TextTheme textTheme,
+  ) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.elementGap,
+        vertical: spacing.elementGapMin + 1,
+      ),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.34)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.primary,
+            ),
+          ),
+          SizedBox(width: spacing.elementGapMin),
+          Text(
+            label,
+            style: textTheme.labelMedium?.copyWith(
+              color: color.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -375,95 +748,129 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     final controller =
         TextEditingController(text: currentLimit.toInt().toString());
 
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: color.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(spacing.radiusSmall),
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: color.surfaceContainerHigh,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(spacing.radiusMedium + 4),
+          ),
         ),
-      ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          left: spacing.sectionGap,
-          right: spacing.sectionGap,
-          top: spacing.sectionGap,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + spacing.sectionGap,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.budget_adjustLimit,
-              style:
-                  textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: spacing.sectionGap),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              style: textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-              decoration: InputDecoration(
-                prefixText: '${BaseCurrency.symbol} ',
-                prefixStyle: textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: color.onSurfaceVariant,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: spacing.sectionGap,
+            right: spacing.sectionGap,
+            top: spacing.elementGap,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + spacing.sectionGap,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: color.primary.withValues(alpha: 0.55),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: spacing.sectionGap),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () async {
-                  final newAmount = double.tryParse(
-                    controller.text.trim().replaceAll(',', ''),
-                  );
-                  if (newAmount == null || newAmount <= 0) return;
+              SizedBox(height: spacing.sectionGap),
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(spacing.elementGap),
+                    decoration: BoxDecoration(
+                      color: color.primary.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                    ),
+                    child: Icon(
+                      LucideIcons.settings2,
+                      size: 18,
+                      color: color.primary,
+                    ),
+                  ),
+                  SizedBox(width: spacing.elementGap),
+                  Expanded(
+                    child: Text(
+                      l10n.budget_adjustLimit,
+                      style: textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: spacing.sectionGap),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                style: textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+                decoration: InputDecoration(
+                  labelText: l10n.budget_limit,
+                  prefixText: '${BaseCurrency.symbol} ',
+                  prefixStyle: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              SizedBox(height: spacing.sectionGap),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () async {
+                    final newAmount = double.tryParse(
+                      controller.text.trim().replaceAll(',', ''),
+                    );
+                    if (newAmount == null || newAmount <= 0) return;
 
-                  _budget.amount = newAmount;
-                  final service = ref.read(budgetServiceProvider);
-                  await service.save(_budget);
-                  ref.read(budgetRefreshProvider.notifier).refresh(
-                        BudgetRefreshReason.budgetCrud,
+                    _budget.amount = newAmount;
+                    final service = ref.read(budgetServiceProvider);
+                    await service.save(_budget);
+                    ref.read(budgetRefreshProvider.notifier).refresh(
+                          BudgetRefreshReason.budgetCrud,
+                        );
+
+                    if (mounted) {
+                      Navigator.pop(ctx);
+                      HapticFeedback.mediumImpact();
+                      SnackbarService.success(
+                        BuddyMessages.budgetUpdated,
+                        spacing,
                       );
-
-                  if (mounted) {
-                    Navigator.pop(ctx);
-                    HapticFeedback.mediumImpact();
-                    SnackbarService.success(
-                        BuddyMessages.budgetUpdated, spacing,);
-                    setState(() {});
-                  }
-                },
-                style: FilledButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: spacing.cardInner),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      setState(() {});
+                    }
+                  },
+                  style: FilledButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: spacing.cardInner),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    ),
                   ),
-                ),
-                child: Text(
-                  l10n.budget_updateButtonText,
-                  style: textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: color.onPrimary,
+                  child: Text(
+                    l10n.budget_updateButtonText,
+                    style: textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: color.onPrimary,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    );
+    ).whenComplete(controller.dispose);
   }
 
   Widget _buildDangerZone(
@@ -475,48 +882,67 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     return Container(
       padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
-        color: color.errorContainer.withValues(alpha: 0.1),
+        color: color.errorContainer.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.error.withValues(alpha: 0.3)),
+        border: Border.all(color: color.error.withValues(alpha: 0.24)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(LucideIcons.triangleAlert, size: 14, color: color.error),
-              SizedBox(width: spacing.elementGapMin),
+              Container(
+                padding: EdgeInsets.all(spacing.elementGapMin),
+                decoration: BoxDecoration(
+                  color: color.error.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+                child: Icon(
+                  LucideIcons.triangleAlert,
+                  size: 16,
+                  color: color.error,
+                ),
+              ),
+              SizedBox(width: spacing.elementGap),
               Text(
                 l10n.budget_dangerZone,
-                style: textTheme.labelMedium?.copyWith(
+                style: textTheme.titleSmall?.copyWith(
                   color: color.error,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ],
           ),
-          SizedBox(height: spacing.elementGap),
+          SizedBox(height: spacing.sectionGap),
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
+                child: OutlinedButton.icon(
                   onPressed: () => _archiveBudget(l10n, spacing),
+                  icon: const Icon(LucideIcons.archive, size: 16),
+                  label: Text(l10n.budget_archive),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: color.onSurfaceVariant,
                     side: BorderSide(color: color.outlineVariant),
+                    padding: EdgeInsets.symmetric(
+                      vertical: spacing.elementGap + 2,
+                    ),
                   ),
-                  child: Text(l10n.budget_archive),
                 ),
               ),
               SizedBox(width: spacing.elementGap),
               Expanded(
-                child: OutlinedButton(
+                child: OutlinedButton.icon(
                   onPressed: () => _deleteBudget(l10n, spacing),
+                  icon: const Icon(LucideIcons.trash2, size: 16),
+                  label: Text(l10n.budget_buttonDeleteActionText),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: color.error,
                     side: BorderSide(color: color.error.withValues(alpha: 0.5)),
+                    padding: EdgeInsets.symmetric(
+                      vertical: spacing.elementGap + 2,
+                    ),
                   ),
-                  child: Text(l10n.budget_buttonDeleteActionText),
                 ),
               ),
             ],

@@ -13,6 +13,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/category_keyword_suggestions.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/simple_color_picker.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
@@ -295,7 +296,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                       RepaintBoundary(
                         child: Container(
                           padding: EdgeInsets.all(
-                              spacing.cardInner + spacing.elementGap,),
+                            spacing.cardInner + spacing.elementGap,
+                          ),
                           decoration: BoxDecoration(
                             color: _accentColor.withValues(alpha: 0.12),
                             shape: BoxShape.circle,
@@ -602,8 +604,11 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                 padding: EdgeInsets.all(spacing.cardInner),
                 child: Row(
                   children: [
-                    Icon(LucideIcons.folderOpen,
-                        size: 18, color: color.primary,),
+                    Icon(
+                      LucideIcons.folderOpen,
+                      size: 18,
+                      color: color.primary,
+                    ),
                     SizedBox(width: spacing.elementGap * 1.5),
                     Expanded(
                       child: Text(
@@ -726,11 +731,25 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 
     setState(() => _saving = true);
 
+    final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.read(spacingProvider);
+    final name = _nameController.text.trim();
+
     try {
       final isar = await ref.read(isarServiceProvider).getInstance();
+      final duplicate =
+          await isar.categorys.where().nameEqualTo(name).findFirst();
+      final existingId = widget.existing?.id ?? Isar.autoIncrement;
+
+      if (duplicate != null && duplicate.id != existingId) {
+        if (mounted) {
+          SnackbarService.error(ctxt.category_nameAlreadyExists, spacing);
+        }
+        return;
+      }
 
       final category = widget.existing ?? Category();
-      category.name = _nameController.text.trim();
+      category.name = name;
       category.categoryType = _selectedType;
       category.iconName = _selectedIcon;
       category.colorValue = _accentColor.toARGB32();
@@ -762,6 +781,10 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
       }
 
       if (context.mounted) context.pop(true);
+    } on IsarUniqueViolationError {
+      if (mounted) {
+        SnackbarService.error(ctxt.category_nameAlreadyExists, spacing);
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }

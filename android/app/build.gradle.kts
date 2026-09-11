@@ -12,6 +12,28 @@ val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
+
+val keystoreStoreFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+val requiredSigningProperties = listOf(
+    "storePassword",
+    "keyPassword",
+    "keyAlias",
+)
+val releaseSigningReady = keystorePropertiesFile.exists() &&
+    requiredSigningProperties.all { keystoreProperties.getProperty(it)?.isNotBlank() == true } &&
+    keystoreStoreFile?.isFile == true
+
+val releaseTaskRequested = gradle.startParameter.taskNames.any { taskName ->
+    taskName.contains("release", ignoreCase = true) ||
+        taskName.contains("bundle", ignoreCase = true)
+}
+if (releaseTaskRequested && !releaseSigningReady) {
+    throw GradleException(
+        "Release signing is required. Configure android/key.properties " +
+            "with storeFile, storePassword, keyAlias, and keyPassword " +
+            "for a valid JKS before building or uploading an app bundle.",
+    )
+}
 android {
     namespace = "com.mudramanager.app"
 //    compileSdk = flutter.compileSdkVersion
@@ -36,7 +58,7 @@ android {
 //        minSdk = flutter.minSdkVersion
         minSdk = 26
 //        targetSdk = flutter.targetSdkVersion
-        targetSdk = 35
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -56,11 +78,11 @@ android {
 
     signingConfigs {
         create("release") {
-            if (keystorePropertiesFile.exists()) {
-                storeFile = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
+            if (releaseSigningReady) {
+                storeFile = keystoreStoreFile
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
             }
         }
     }
@@ -70,7 +92,7 @@ android {
             versionNameSuffix = "-debug"
         }
         release {
-            if (keystorePropertiesFile.exists()) {
+            if (releaseSigningReady) {
                 signingConfig = signingConfigs.getByName("release")
             }
             isMinifyEnabled = true

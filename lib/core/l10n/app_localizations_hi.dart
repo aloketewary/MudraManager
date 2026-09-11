@@ -774,6 +774,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get category_nameRequired => 'आवश्यक';
 
   @override
+  String get category_nameAlreadyExists =>
+      'A category with this name already exists.';
+
+  @override
   String get category_typeLabel => 'श्रेणी प्रकार';
 
   @override

@@ -775,6 +775,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get category_nameRequired => 'আবশ্যক';
 
   @override
+  String get category_nameAlreadyExists =>
+      'A category with this name already exists.';
+
+  @override
   String get category_typeLabel => 'ক্যাটাগরির ধরন';
 
   @override

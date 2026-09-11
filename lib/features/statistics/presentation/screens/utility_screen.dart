@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -12,8 +13,13 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/dashboard/data/priority_alert_provider.dart';
+import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
+import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mudra_manager/features/transactions/data/bill_control_center_provider.dart';
+import 'package:mudra_manager/features/trip/data/trip_provider.dart';
+import 'package:mudra_manager/features/credit_card/data/credit_card_provider.dart';
 import 'package:mudra_manager/features/statistics/data/adaptive_utility_provider.dart';
 
 class UtilityScreen extends ConsumerStatefulWidget {
@@ -24,12 +30,10 @@ class UtilityScreen extends ConsumerStatefulWidget {
   ConsumerState<UtilityScreen> createState() => UtilityScreenState();
 }
 
-class UtilityScreenState extends ConsumerState<UtilityScreen>
-    with TickerProviderStateMixin {
+class UtilityScreenState extends ConsumerState<UtilityScreen> {
   List<String> _hiddenUtilities = [];
   List<String> _dismissedAttentionItems = [];
   bool _isLoading = true;
-  late final AnimationController _bgIconController;
   Key _animKey = UniqueKey();
   bool _showingAdvisoryExpanded = false;
 
@@ -115,24 +119,16 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     ),
   ];
 
-  List<_UtilityDef> get _allUtilities =>
-      [..._activeMoney, ..._planning, ..._insights];
+  List<_UtilityDef> get _allUtilities => [
+        ..._activeMoney,
+        ..._planning,
+        ..._insights,
+      ];
 
   @override
   void initState() {
     super.initState();
-    _bgIconController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 6),
-    );
-    if (widget.isTabActive) _bgIconController.repeat(reverse: true);
     _loadPreferences();
-  }
-
-  @override
-  void dispose() {
-    _bgIconController.dispose();
-    super.dispose();
   }
 
   @override
@@ -140,9 +136,6 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     super.didUpdateWidget(oldWidget);
     if (widget.isTabActive && !oldWidget.isTabActive) {
       setState(() => _animKey = UniqueKey());
-      _bgIconController.repeat(reverse: true);
-    } else if (!widget.isTabActive && oldWidget.isTabActive) {
-      _bgIconController.stop();
     }
   }
 
@@ -234,8 +227,9 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                         SizedBox(width: spacing.elementGap),
                         Text(
                           l10n.utility_customizeUtilities,
-                          style: textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                          style: textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const Spacer(),
                         TextButton(
@@ -249,8 +243,9 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                               spacing,
                             );
                           },
-                          child:
-                              Text(AppLocalizations.of(context)!.common_reset),
+                          child: Text(
+                            AppLocalizations.of(context)!.common_reset,
+                          ),
                         ),
                       ],
                     ),
@@ -259,14 +254,20 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
               ),
               Expanded(
                 child: ListView(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                  ),
                   children: _allUtilities.map((u) {
                     final visible = _isVisible(u.id);
-                    return Card(
-                      elevation: 0,
-                      margin: EdgeInsets.only(bottom: spacing.elementGap),
-                      color: color.surfaceContainerHighest,
+                    return DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: color.surfaceContainerLow,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: color.outlineVariant.withValues(alpha: 0.22),
+                          ),
+                        ),
+                      ),
                       child: SwitchListTile(
                         value: visible,
                         onChanged: (v) {
@@ -284,13 +285,15 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                         secondary: Icon(u.icon, color: color.primary, size: 22),
                         title: Text(
                           l10n.translate(u.titleKey),
-                          style: textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w600),
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         subtitle: Text(
                           l10n.translate(u.subtitleKey),
-                          style: textTheme.bodySmall
-                              ?.copyWith(color: color.onSurfaceVariant),
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
                         ),
                       ),
                     );
@@ -312,21 +315,36 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     final l10n = AppLocalizations.of(context)!;
 
     if (_isLoading) {
-      return Padding(
-        padding: EdgeInsets.all(spacing.cardHorizontalMax),
-        child: Column(
-          children: List.generate(
-            4,
-            (_) => Padding(
-              padding: EdgeInsets.only(bottom: spacing.elementGap),
-              child: SkeletonLoader(
-                width: double.infinity,
-                height: 80,
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final gap = spacing.elementGap;
+          final columns = constraints.maxWidth >= 360 ? 2 : 1;
+          final width = columns == 2
+              ? (constraints.maxWidth - gap) / 2
+              : constraints.maxWidth;
+
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontalMax,
+              vertical: spacing.cardVerticalMax,
+            ),
+            child: Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: List.generate(
+                6,
+                (_) => SizedBox(
+                  width: width,
+                  child: SkeletonLoader(
+                    width: double.infinity,
+                    height: 176,
+                    borderRadius: BorderRadius.circular(spacing.radiusLarge),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       );
     }
 
@@ -358,54 +376,10 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
           vertical: spacing.cardVertical,
         ),
         children: [
-          // Financial Advisory Layer (Phase 5)
+          // Contextual attention stays above the tool grid.
           _buildAdvisoryLayer(color, textTheme, spacing, l10n),
-
-          // Legacy Priority Alerts
           _buildPriorityAlert(color, textTheme, spacing),
 
-          // 1. Active Money
-          if (activeVisible.isNotEmpty) ...[
-            _sectionHeader(
-              l10n.section_activeMoney,
-              LucideIcons.zap,
-              color.error,
-              textTheme,
-              spacing,
-              staggerIndex: 0,
-            ),
-            SizedBox(height: spacing.elementGap),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final itemWidth =
-                    (constraints.maxWidth - spacing.elementGap) / 2;
-                return Wrap(
-                  spacing: spacing.elementGap,
-                  runSpacing: spacing.elementGap,
-                  children: activeVisible
-                      .asMap()
-                      .entries
-                      .map(
-                        (e) => SizedBox(
-                          width: itemWidth,
-                          child: _buildCard(
-                            e.value,
-                            color,
-                            textTheme,
-                            spacing,
-                            e.key,
-                            l10n,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                );
-              },
-            ),
-            SizedBox(height: spacing.sectionGap),
-          ],
-
-          // 2. Planning
           if (planningVisible.isNotEmpty) ...[
             _sectionHeader(
               l10n.section_planning,
@@ -413,43 +387,33 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
               color.primary,
               textTheme,
               spacing,
-              staggerIndex: 2,
+              count: planningVisible.length,
             ),
             SizedBox(height: spacing.elementGap),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: planningVisible
-                      .asMap()
-                      .entries
-                      .map(
-                        (e) => Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              right: e.key != planningVisible.length - 1
-                                  ? spacing.elementGap
-                                  : 0,
-                            ),
-                            child: _buildCard(
-                              e.value,
-                              color,
-                              textTheme,
-                              spacing,
-                              e.key + 2,
-                              l10n,
-                            ),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                );
-              },
+            _buildPlanningGroup(
+              planningVisible,
+              color,
+              textTheme,
+              spacing,
+              l10n,
             ),
             SizedBox(height: spacing.sectionGap),
           ],
 
-          // 3. Insights
+          if (activeVisible.isNotEmpty) ...[
+            _sectionHeader(
+              l10n.section_activeMoney,
+              LucideIcons.zap,
+              color.error,
+              textTheme,
+              spacing,
+              count: activeVisible.length,
+            ),
+            SizedBox(height: spacing.elementGap),
+            _buildUtilityGroup(activeVisible, color, textTheme, spacing, l10n),
+            SizedBox(height: spacing.sectionGap),
+          ],
+
           if (insightsVisible.isNotEmpty) ...[
             _sectionHeader(
               l10n.section_insights,
@@ -457,35 +421,15 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
               color.secondary,
               textTheme,
               spacing,
-              staggerIndex: 4,
+              count: insightsVisible.length,
             ),
             SizedBox(height: spacing.elementGap),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final itemWidth =
-                    (constraints.maxWidth - spacing.elementGap) / 2;
-                return Wrap(
-                  spacing: spacing.elementGap,
-                  runSpacing: spacing.elementGap,
-                  children: insightsVisible
-                      .asMap()
-                      .entries
-                      .map(
-                        (e) => SizedBox(
-                          width: itemWidth,
-                          child: _buildCard(
-                            e.value,
-                            color,
-                            textTheme,
-                            spacing,
-                            e.key + 4,
-                            l10n,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                );
-              },
+            _buildUtilityGroup(
+              insightsVisible,
+              color,
+              textTheme,
+              spacing,
+              l10n,
             ),
           ],
 
@@ -499,7 +443,66 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     );
   }
 
-  /// Phase 5: Advisory UI Layer - Non-authoritative attention items
+  Widget _buildUtilityHeader({
+    required int totalCount,
+    required ColorScheme color,
+    required TextTheme textTheme,
+    required AppSpacing spacing,
+    required AppLocalizations l10n,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: spacing.elementGap),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 24,
+            decoration: BoxDecoration(
+              color: color.primary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          SizedBox(width: spacing.elementGap),
+          Icon(
+            LucideIcons.layoutGrid,
+            size: spacing.iconSM,
+            color: color.primary,
+          ),
+          SizedBox(width: spacing.elementGap),
+          Expanded(
+            child: Text(
+              l10n.nav_manage,
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.2,
+              ),
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.elementGap,
+              vertical: spacing.elementGap * 0.5,
+            ),
+            decoration: BoxDecoration(
+              color: color.primary.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              border: Border.all(
+                color: color.primary.withValues(alpha: 0.20),
+              ),
+            ),
+            child: Text(
+              '$totalCount/${_allUtilities.length}',
+              style: textTheme.labelSmall?.copyWith(
+                color: color.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAdvisoryLayer(
     ColorScheme color,
     TextTheme textTheme,
@@ -529,9 +532,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                 color: color.surfaceContainerHigh,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  side: BorderSide(
-                    color: color.primary.withValues(alpha: 0.2),
-                  ),
+                  side: BorderSide(color: color.primary.withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   children: [
@@ -553,8 +554,9 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                                 !_showingAdvisoryExpanded;
                           });
                         },
-                        borderRadius:
-                            BorderRadius.circular(spacing.radiusMedium),
+                        borderRadius: BorderRadius.circular(
+                          spacing.radiusMedium,
+                        ),
                         child: Padding(
                           padding: EdgeInsets.all(spacing.cardInner),
                           child: Row(
@@ -579,7 +581,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                                     Text(
                                       l10n.utility_financialAdvisory,
                                       style: textTheme.titleSmall?.copyWith(
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w500,
                                         color: color.primary,
                                       ),
                                     ),
@@ -684,7 +686,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                   Text(
                     item.title,
                     style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -713,10 +715,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                   color: color.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
                 padding: EdgeInsets.all(spacing.elementGap * 0.5),
-                constraints: const BoxConstraints(
-                  minWidth: 24,
-                  minHeight: 24,
-                ),
+                constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
               ),
             Icon(
               LucideIcons.chevronRight,
@@ -762,29 +761,73 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     TextTheme textTheme,
     AppSpacing spacing, {
     int staggerIndex = 0,
+    int? count,
   }) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: accent),
-        SizedBox(width: spacing.elementGap),
-        Text(
-          title,
-          style: textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: accent,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: spacing.elementGap),
+      child: Row(
+        children: [
+          Container(
+            width: spacing.touchTargetSmall,
+            height: spacing.touchTargetSmall,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              border: Border.all(color: accent.withValues(alpha: 0.20)),
+            ),
+            child: Icon(icon, size: spacing.iconSM, color: accent),
           ),
-        ),
-      ],
+          SizedBox(width: spacing.elementGap),
+          Expanded(
+            child: Text(
+              title.toUpperCase(),
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ),
+          if (count != null)
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.elementGap,
+                vertical: spacing.elementGapMin,
+              ),
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(spacing.radiusLarge),
+                border: Border.all(color: accent.withValues(alpha: 0.18)),
+              ),
+              child: Text(
+                '$count',
+                style: textTheme.labelMedium?.copyWith(
+                  color: accent,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          SizedBox(width: spacing.elementGapMin),
+          Icon(
+            LucideIcons.arrowRight,
+            size: spacing.iconSM,
+            color: Theme.of(context)
+                .colorScheme
+                .onSurfaceVariant
+                .withValues(alpha: 0.62),
+          ),
+        ],
+      ),
     )
         .animate()
         .fadeIn(
-          duration: _isReducedMotion ? Duration.zero : 200.ms,
+          duration: _isReducedMotion ? Duration.zero : 180.ms,
           delay: _isReducedMotion ? Duration.zero : (50 * staggerIndex).ms,
         )
         .slideX(
-          begin: -0.15,
+          begin: -0.08,
           end: 0,
-          duration: _isReducedMotion ? Duration.zero : 200.ms,
+          duration: _isReducedMotion ? Duration.zero : 180.ms,
           delay: _isReducedMotion ? Duration.zero : (50 * staggerIndex).ms,
           curve: Curves.easeOutCubic,
         );
@@ -824,8 +867,9 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                         padding: EdgeInsets.all(spacing.cardInner),
                         decoration: BoxDecoration(
                           color: alertColor.withValues(alpha: 0.08),
-                          borderRadius:
-                              BorderRadius.circular(spacing.radiusMedium),
+                          borderRadius: BorderRadius.circular(
+                            spacing.radiusMedium,
+                          ),
                           border: Border.all(
                             color: alertColor.withValues(alpha: 0.25),
                           ),
@@ -871,8 +915,9 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                             Icon(
                               LucideIcons.chevronRight,
                               size: 16,
-                              color:
-                                  color.onSurfaceVariant.withValues(alpha: 0.5),
+                              color: color.onSurfaceVariant.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                           ],
                         ),
@@ -889,116 +934,579 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     );
   }
 
-  // Medium card with animated background icon
-  Widget _buildCard(
+  Widget _buildPlanningGroup(
+    List<_UtilityDef> utilities,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations l10n,
+  ) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final budgetsAsync = ref.watch(budgetsWithProgressProvider);
+        final goalsAsync = ref.watch(goalsProvider);
+        final budgets = budgetsAsync.value;
+        final activeGoals = goalsAsync.value
+            ?.where((goal) => goal.isActive && goal.progressPercent < 1.0)
+            .toList();
+
+        if (budgets == null && activeGoals == null) {
+          return _buildUtilityGroup(utilities, color, textTheme, spacing, l10n);
+        }
+
+        final visibleBudget =
+            utilities.where((u) => u.id == 'budgets').firstOrNull;
+        final visibleGoal = utilities.where((u) => u.id == 'goals').firstOrNull;
+        final children = <Widget>[];
+
+        if (visibleBudget != null) {
+          final totalLimit = budgets?.fold<double>(
+            0,
+            (sum, progress) => sum + progress.snapshot.limit,
+          );
+          final totalSpent = budgets?.fold<double>(
+            0,
+            (sum, progress) => sum + progress.spent,
+          );
+          final budgetProgress = totalLimit != null && totalLimit > 0
+              ? (totalSpent! / totalLimit).clamp(0.0, 1.0)
+              : null;
+
+          children.add(
+            _buildPlanningRow(
+              visibleBudget,
+              color,
+              textTheme,
+              spacing,
+              l10n,
+              progress: budgetProgress,
+              detail: totalLimit != null && totalSpent != null
+                  ? _ProgressDetail(current: totalSpent, target: totalLimit)
+                  : null,
+              semanticValue: budgetProgress == null
+                  ? null
+                  : '${(budgetProgress * 100).round()}%',
+            ),
+          );
+        }
+
+        if (visibleGoal != null) {
+          final topGoal = activeGoals?.isNotEmpty == true
+              ? activeGoals!.reduce(
+                  (a, b) => a.progressPercent > b.progressPercent ? a : b,
+                )
+              : null;
+
+          children.add(
+            _buildPlanningRow(
+              visibleGoal,
+              color,
+              textTheme,
+              spacing,
+              l10n,
+              progress: topGoal?.progressPercent,
+              detail: topGoal == null
+                  ? null
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          topGoal.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: spacing.elementGapMin),
+                        _ProgressDetail(
+                          current: topGoal.currentAmount,
+                          target: topGoal.targetAmount,
+                          currencyCode: topGoal.currencyCode,
+                        ),
+                      ],
+                    ),
+              semanticValue: topGoal == null
+                  ? null
+                  : '${(topGoal.progressPercent * 100).round()}%',
+            ),
+          );
+        }
+
+        return _buildUtilityCardGrid(children, spacing);
+      },
+    );
+  }
+
+  Widget _buildPlanningRow(
     _UtilityDef item,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
-    int index,
+    AppLocalizations l10n, {
+    double? progress,
+    Widget? detail,
+    String? semanticValue,
+  }) {
+    return _buildUtilityCard(
+      item,
+      _accentForUtility(item, color),
+      color,
+      textTheme,
+      spacing,
+      l10n,
+      progress: progress,
+      detail: detail,
+      semanticValue: semanticValue,
+    );
+  }
+
+  Color _accentForUtility(_UtilityDef item, ColorScheme color) {
+    return switch (item.id) {
+      'recurring' => color.tertiary,
+      'trips' => color.secondary,
+      'credit_cards' => color.error,
+      'budgets' => color.primary,
+      'goals' => color.tertiary,
+      'monthly_recap' => color.secondary,
+      'monthly_comparison' => color.primary,
+      'tax_estimation' => color.error,
+      'debt_snowball' => color.tertiary,
+      _ => color.primary,
+    };
+  }
+
+  Widget _buildUtilityGroup(
+    List<_UtilityDef> utilities,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
     AppLocalizations l10n,
   ) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final billData = utilities.any((item) => item.id == 'recurring')
+            ? ref.watch(billControlCenterProvider).value
+            : null;
+        final activeTrips = utilities.any((item) => item.id == 'trips')
+            ? ref.watch(activeTripsProvider).value
+            : null;
+        final creditCards = utilities.any((item) => item.id == 'credit_cards')
+            ? ref.watch(creditCardBillsProvider).value
+            : null;
+
+        return _buildUtilityCardGrid(
+          utilities.map((item) {
+            Widget? topRight;
+            Widget? detail;
+            String? semanticValue;
+
+            switch (item.id) {
+              case 'recurring' when billData != null:
+                topRight = _utilityMetricText(
+                  '${billData.activeExpenseCount}',
+                  color,
+                  textTheme,
+                );
+                detail = _UtilityMetricDetail(
+                  value: CurrencyText(
+                    amount: billData.expenseUpcomingTotal,
+                    compact: true,
+                    fixedLength: 0,
+                    style: textTheme.labelLarge?.copyWith(
+                      color: color.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  label: l10n.translate(item.subtitleKey),
+                  color: color.onSurface,
+                  textTheme: textTheme,
+                  spacing: spacing,
+                );
+                semanticValue =
+                    '${billData.activeExpenseCount} bills, ${billData.expenseUpcomingTotal} upcoming total';
+              case 'trips' when activeTrips != null:
+                topRight = _utilityMetricText(
+                  '${activeTrips.length}',
+                  color,
+                  textTheme,
+                );
+                semanticValue = '${activeTrips.length} active trips';
+              case 'credit_cards' when creditCards != null:
+                topRight = _utilityMetricText(
+                  '${creditCards.summary.cardCount}',
+                  color,
+                  textTheme,
+                );
+                detail = _UtilityMetricDetail(
+                  value: CurrencyText(
+                    amount: creditCards.summary.totalOutstanding,
+                    compact: true,
+                    fixedLength: 0,
+                    style: textTheme.labelLarge?.copyWith(
+                      color: color.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  label: l10n.translate(item.subtitleKey),
+                  color: color.onSurface,
+                  textTheme: textTheme,
+                  spacing: spacing,
+                );
+                semanticValue =
+                    '${creditCards.summary.cardCount} cards, ${creditCards.summary.totalOutstanding} outstanding';
+            }
+
+            return _buildUtilityCard(
+              item,
+              _accentForUtility(item, color),
+              color,
+              textTheme,
+              spacing,
+              l10n,
+              topRight: topRight,
+              detail: detail,
+              semanticValue: semanticValue,
+            );
+          }).toList(),
+          spacing,
+        );
+      },
+    );
+  }
+
+  Widget _utilityMetricText(
+    String value,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
+    return Text(
+      value,
+      style: textTheme.titleMedium?.copyWith(
+        color: color.onSurface,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+  }
+
+  Widget _buildUtilityCardGrid(List<Widget> cards, AppSpacing spacing) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final gap = spacing.sectionGap;
+        final columns = constraints.maxWidth >= 360 ? 2 : 1;
+        final cardWidth = columns == 2
+            ? (constraints.maxWidth - gap) / 2
+            : constraints.maxWidth;
+
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: cards
+              .map(
+                (card) => SizedBox(
+                  width: cardWidth,
+                  child: card,
+                ),
+              )
+              .toList(),
+        );
+      },
+    );
+  }
+
+  Widget _buildUtilityCard(
+    _UtilityDef item,
+    Color accent,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations l10n, {
+    double? progress,
+    Widget? detail,
+    Widget? topRight,
+    String? semanticValue,
+  }) {
+    final isDark = color.brightness == Brightness.dark;
+    const cardAspectRatio = 0.98;
+    final topColor = Color.lerp(
+      color.surfaceContainerHigh,
+      accent,
+      isDark ? 0.64 : 0.22,
+    )!;
+    final midColor = Color.lerp(
+      color.surfaceContainerHigh,
+      accent,
+      isDark ? 0.28 : 0.10,
+    )!;
+    final bottomColor = Color.lerp(
+      color.surface,
+      accent,
+      isDark ? 0.12 : 0.04,
+    )!;
+
     return Semantics(
       label:
           '${l10n.translate(item.titleKey)}, ${l10n.translate(item.subtitleKey)}',
+      value: semanticValue,
       button: true,
       child: Material(
         color: Colors.transparent,
-        child: Card(
-          elevation: 0,
-          margin: EdgeInsets.zero,
-          color: color.surfaceContainerLow,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            side: BorderSide(
-              color: color.outlineVariant.withValues(alpha: 0.5),
+        child: AspectRatio(
+          aspectRatio: cardAspectRatio,
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [topColor, midColor, bottomColor],
+                stops: const [0, 0.52, 1],
+              ),
+              borderRadius: BorderRadius.circular(spacing.radiusLarge),
+              border: Border.all(color: accent.withValues(alpha: 0.24)),
+              boxShadow: [
+                BoxShadow(
+                  color: color.shadow.withValues(alpha: isDark ? 0.22 : 0.06),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              ref.read(utilityTrackerProvider).trackUtilityOpen(item.id);
-              context.push(item.route);
-            },
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            child: Stack(
-              children: [
-                // Large background icon — slow float
-                Positioned(
-                  right: -8,
-                  bottom: -14,
-                  child: AnimatedBuilder(
-                    animation: _bgIconController,
-                    builder: (_, __) {
-                      final t =
-                          _isReducedMotion ? 0.5 : _bgIconController.value;
-                      return Transform.translate(
-                        offset: Offset(t * 6 - 3, -t * 5 + 2.5),
-                        child: Transform.rotate(
-                          angle: _isReducedMotion ? 0 : (t - 0.5) * 0.12,
-                          child: Icon(
-                            item.icon,
-                            size: 80,
-                            color: color.primary.withValues(
-                              alpha: _isReducedMotion ? 0.12 : 0.08 + t * 0.04,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(spacing.radiusLarge),
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                ref.read(utilityTrackerProvider).trackUtilityOpen(item.id);
+                context.push(item.route);
+              },
+              child: Padding(
+                padding: EdgeInsets.all(spacing.cardInner * 0.75),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Transform.translate(
+                          offset: Offset(0, -spacing.elementGap),
+                          child: Container(
+                            width: spacing.touchTargetSmall + 32,
+                            height: spacing.touchTargetSmall + 32,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: color.onSurface.withValues(
+                                alpha: isDark ? 0.10 : 0.14,
+                              ),
+                              borderRadius:
+                                  BorderRadius.circular(spacing.radiusMedium),
+                              border: Border.all(
+                                color: color.onSurface.withValues(alpha: 0.08),
+                              ),
+                            ),
+                            child: Icon(
+                              item.icon,
+                              size: spacing.iconMD + 4,
+                              color: color.onSurface,
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
-                // Content
-                Padding(
-                  padding: EdgeInsets.all(spacing.cardInner),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(spacing.elementGap),
-                        decoration: BoxDecoration(
-                          color: color.primary.withValues(alpha: 0.1),
-                          borderRadius:
-                              BorderRadius.circular(spacing.radiusSmall),
-                        ),
-                        child: Icon(item.icon, size: 20, color: color.primary),
+                        const Spacer(),
+                        if (progress != null)
+                          _PlanningProgress(
+                            value: progress,
+                            color: color.onSurface,
+                            textTheme: textTheme,
+                            spacing: spacing,
+                          )
+                        else if (topRight != null)
+                          topRight
+                        else
+                          _UtilityCardArrow(
+                            color: color.onSurface,
+                            spacing: spacing,
+                          ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Text(
+                      l10n.translate(item.titleKey).toUpperCase(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.titleLarge?.copyWith(
+                        color: color.onSurface,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
+                        height: 1.05,
                       ),
-                      SizedBox(height: spacing.cardInner),
-                      Text(
-                        l10n.translate(item.titleKey),
-                        style: textTheme.titleSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: spacing.elementGapUltraMin),
-                      Text(
-                        l10n.translate(item.subtitleKey),
-                        style: textTheme.bodySmall
-                            ?.copyWith(color: color.onSurfaceVariant),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    ),
+                    if (detail != null) ...[
+                      SizedBox(height: spacing.elementGap),
+                      detail,
                     ],
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
       ),
-    )
-        .animate()
-        .fadeIn(
-          duration: _isReducedMotion ? Duration.zero : 250.ms,
-          delay: _isReducedMotion ? Duration.zero : (50 * index).ms,
-        )
-        .slideY(
-          begin: 0.3,
-          end: 0,
-          duration: _isReducedMotion ? Duration.zero : 250.ms,
-          delay: _isReducedMotion ? Duration.zero : (50 * index).ms,
-          curve: Curves.easeOutCubic,
-        );
+    );
+  }
+}
+
+class _UtilityMetricDetail extends StatelessWidget {
+  final Widget value;
+  final String label;
+  final Color color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+
+  const _UtilityMetricDetail({
+    required this.value,
+    required this.label,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(child: value),
+        SizedBox(width: spacing.elementGapMin),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.labelSmall?.copyWith(
+              color: color.withValues(alpha: 0.72),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _UtilityCardArrow extends StatelessWidget {
+  final Color color;
+  final AppSpacing spacing;
+
+  const _UtilityCardArrow({
+    required this.color,
+    required this.spacing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final size = spacing.touchTargetSmall + 8;
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: color.withValues(alpha: 0.42),
+          width: spacing.strokeThin,
+        ),
+      ),
+      child: Icon(
+        LucideIcons.arrowUpRight,
+        size: spacing.iconSM,
+        color: color.withValues(alpha: 0.86),
+      ),
+    );
+  }
+}
+
+class _ProgressDetail extends StatelessWidget {
+  final double current;
+  final double target;
+  final String? currencyCode;
+
+  const _ProgressDetail({
+    required this.current,
+    required this.target,
+    this.currencyCode,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CurrencyText(
+          amount: current,
+          currencyCode: currencyCode,
+          compact: true,
+          fixedLength: 0,
+          style: textTheme.labelMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: color.onSurface,
+          ),
+        ),
+        Text(
+          ' of ',
+          style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+        ),
+        CurrencyText(
+          amount: target,
+          currencyCode: currencyCode,
+          compact: true,
+          fixedLength: 0,
+          style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+        ),
+      ],
+    );
+  }
+}
+
+class _PlanningProgress extends StatelessWidget {
+  final double value;
+  final Color color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+
+  const _PlanningProgress({
+    required this.value,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: spacing.touchTargetSmall + 8,
+      height: spacing.touchTargetSmall + 8,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CircularProgressIndicator(
+            value: value,
+            strokeWidth: spacing.strokeNormal,
+            backgroundColor: color.withValues(alpha: 0.12),
+            valueColor: AlwaysStoppedAnimation(color),
+          ),
+          Text(
+            '${(value * 100).round()}%',
+            style: textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w800,
+              fontSize: 10,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

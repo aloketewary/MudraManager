@@ -54,6 +54,7 @@ class BillControlCenterData {
   final List<RecurringTransaction> expenseOverdue;
   final List<RecurringTransaction> expenseDueSoon;
   final double expenseMonthlyTotal;
+  final double expenseUpcomingTotal;
   final int activeExpenseCount;
 
   const BillControlCenterData({
@@ -70,6 +71,7 @@ class BillControlCenterData {
     required this.expenseOverdue,
     required this.expenseDueSoon,
     required this.expenseMonthlyTotal,
+    required this.expenseUpcomingTotal,
     required this.activeExpenseCount,
     this.largestBill,
   });
@@ -214,6 +216,11 @@ final billControlCenterProvider =
   );
   final expenseOverdue = overdue.where((b) => b.isExpense).toList();
   final expenseDueSoon = dueSoon.where((b) => b.isExpense).toList();
+  final expenseUpcomingTotal =
+      [...expenseOverdue, ...expenseDueSoon].fold<double>(
+    0,
+    (sum, b) => sum + toBase(b.amount, b.account.value?.currencyCode),
+  );
 
   // ── This week required ──
   final thisWeekBills = upcoming.where((b) => !paidBillIds.contains(b.id));
@@ -256,6 +263,7 @@ final billControlCenterProvider =
     expenseOverdue: expenseOverdue,
     expenseDueSoon: expenseDueSoon,
     expenseMonthlyTotal: expenseMonthlyTotal,
+    expenseUpcomingTotal: expenseUpcomingTotal,
     activeExpenseCount: expenseActive.length,
   );
 });

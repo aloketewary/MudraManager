@@ -1513,6 +1513,12 @@ abstract class AppLocalizations {
   /// **'Required'**
   String get category_nameRequired;
 
+  /// This is shown when saving a category with a duplicate name
+  ///
+  /// In en, this message translates to:
+  /// **'A category with this name already exists.'**
+  String get category_nameAlreadyExists;
+
   /// This is label for category type
   ///
   /// In en, this message translates to:

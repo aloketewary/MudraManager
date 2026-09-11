@@ -744,6 +744,7 @@ class _QuickAddTransactionSheetState
   }) {
     return AutoSkeleton(
       enabled: true,
+      debugShowBones: false,
       child: SizedBox(
         height: height,
         child: Row(
@@ -751,11 +752,13 @@ class _QuickAddTransactionSheetState
             for (var index = 0; index < itemCount; index++) ...[
               if (index > 0) SizedBox(width: spacing.elementGap),
               Expanded(
-                child: Container(
-                  height: spacing.touchTargetSmall,
-                  decoration: BoxDecoration(
-                    color: color.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                child: PlaceholderLeaf(
+                  child: Container(
+                    height: spacing.touchTargetSmall,
+                    decoration: BoxDecoration(
+                      color: color.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    ),
                   ),
                 ),
               ),
@@ -772,6 +775,7 @@ class _QuickAddTransactionSheetState
   ) {
     return AutoSkeleton(
       enabled: true,
+      debugShowBones: false,
       child: Wrap(
         spacing: spacing.elementGap,
         runSpacing: spacing.elementGap,
@@ -780,10 +784,12 @@ class _QuickAddTransactionSheetState
           (index) => SizedBox(
             width: spacing.cardInner * (2.5 + (index % 3) * 0.5),
             height: spacing.touchTargetSmall,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: color.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            child: PlaceholderLeaf(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: color.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                ),
               ),
             ),
           ),
