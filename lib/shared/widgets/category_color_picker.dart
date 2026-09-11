@@ -92,7 +92,7 @@ class CategoryColorPicker extends ConsumerWidget {
     required VoidCallback onTap,
   }) {
     return Semantics(
-      label: 'Color ${c.value.toRadixString(16)}',
+      label: 'Color ${c.toARGB32().toRadixString(16)}',
       button: true,
       child: GestureDetector(
         onTap: onTap,
@@ -119,7 +119,7 @@ class CategoryColorPicker extends ConsumerWidget {
                 : null,
           ),
           child: isSelected
-              ? Icon(
+              ? const Icon(
                   LucideIcons.check,
                   color: Colors.white,
                   size: 18,

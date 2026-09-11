@@ -126,7 +126,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
           extra: bytes,
         );
       }
-    } catch (e, _) {
+    } catch (e) {
       SnackbarService.error(BuddyMessages.errorWith('$e'), spacing);
     }
   }

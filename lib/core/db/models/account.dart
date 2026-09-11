@@ -13,7 +13,7 @@ class Account {
   @Index(
       type: IndexType.value,
       unique: true,
-      caseSensitive: false) // Ensure unique names (case-insensitive)
+      caseSensitive: false,) // Ensure unique names (case-insensitive)
   late String name; // e.g., "Bank ABC", "Wallet", "Credit Card XYZ"
 
   // Consider adding an 'Account Type' enum (e.g., Bank, Cash, Credit, EWallet)

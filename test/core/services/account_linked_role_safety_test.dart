@@ -82,17 +82,17 @@ void main() {
   });
 
   test('captured errors expose account ID and allow-listed category only', () {
-    final error = AccountReadinessException('secret-from-plugin');
-    final backupError = AccountBackupException('raw-account-value');
+    final error = const AccountReadinessException('secret-from-plugin');
+    final backupError = const AccountBackupException('raw-account-value');
     final diagnostic = AccountDataContract.redactedFailure(
       accountId: 42,
       category: 'raw-key-material',
     );
 
     expect(
-        error.toString(), 'Account data unavailable: account_data_unavailable');
+        error.toString(), 'Account data unavailable: account_data_unavailable',);
     expect(backupError.toString(),
-        'Account backup unavailable: account_data_unavailable');
+        'Account backup unavailable: account_data_unavailable',);
     expect(diagnostic, 'accountId=42 category=account_data_unavailable');
     expect(diagnostic, isNot(contains('raw-key-material')));
     expect(diagnostic, isNot(contains('ENC:')));

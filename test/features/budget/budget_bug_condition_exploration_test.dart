@@ -7,6 +7,7 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
+import 'package:mudra_manager/core/db/models/budget_period_ledger_entry.dart';
 import 'package:mudra_manager/core/db/models/budget_type.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
@@ -18,6 +19,7 @@ import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/utils/budget_spent_calculator.dart';
 import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
+import 'package:mudra_manager/features/budget/domain/budget_overview_aggregate.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 
@@ -37,6 +39,7 @@ void main() {
       [
         BudgetSchema,
         BudgetCategoryAllocationSchema,
+        BudgetPeriodLedgerEntrySchema,
         CategorySchema,
         TagSchema,
         TransactionSchema,
@@ -346,23 +349,24 @@ void main() {
       ),
     ];
 
-    final totalRemaining = snapshots.fold<double>(
-      0,
-      (sum, snapshot) => sum + snapshot.budget.amount - snapshot.spent,
+    final aggregate = BudgetOverviewAggregate.fromSnapshots(
+      snapshots.map((entry) => entry.snapshot),
     );
-    final daysInCalendarMonth = DateTime(now.year, now.month + 1, 0).day;
-    final daysLeftInCalendarMonth = daysInCalendarMonth - now.day + 1;
-    final unfixedDaily = totalRemaining / daysLeftInCalendarMonth;
-    final periodAwareDaily = snapshots.fold<double>(0, (sum, snapshot) {
-      final remaining = snapshot.budget.amount - snapshot.spent;
-      final daysLeft = snapshot.endDate.difference(now).inDays + 1;
-      return sum + (remaining > 0 && daysLeft > 0 ? remaining / daysLeft : 0);
+    final expectedDaily = snapshots.fold<double>(0, (sum, entry) {
+      final snapshot = entry.snapshot;
+      if (snapshot.remaining <= 0) return sum;
+      final firstRemainingDay = snapshot.evaluationDate.isBefore(
+        snapshot.periodStart,
+      )
+          ? snapshot.periodStart
+          : snapshot.evaluationDate;
+      final daysLeft =
+          snapshot.periodEnd.difference(firstRemainingDay).inDays + 1;
+      return sum + (daysLeft > 0 ? snapshot.remaining / daysLeft : 0);
     });
 
-    // Unfixed counterexample: card calls this "Monthly Budget" and computes
-    // one calendar-month daily value for daily/weekly/monthly/yearly/custom
-    // periods. Correct aggregate must use each snapshot's period semantics.
-    expect(unfixedDaily, closeTo(periodAwareDaily, 0.0001));
+    expect(aggregate.dailyAllowance, closeTo(expectedDaily, 0.0001));
+    expect(aggregate.isCompatibleMonthly, isFalse);
   });
 
   test(
@@ -379,7 +383,7 @@ void main() {
   });
 
   test(
-      'counterexample: ended one-time budget is removed from current path with no history entry',
+      'ended one-time budget leaves current path and remains reachable in history',
       () async {
     final ended = makeBudget(
       start: DateTime(2020, 1, 1),
@@ -396,10 +400,12 @@ void main() {
     );
     addTearDown(container.dispose);
     final current = await container.read(budgetWithProgressProvider.future);
+    final history = await budgetService.getBudgetHistory(
+      evaluationDate: DateTime(2020, 2, 1),
+    );
 
-    // Unfixed counterexample: current provider filters ended one-time budgets,
-    // while no reachable history UI/provider exposes this final period.
-    expect(current.any((entry) => entry.$1.id == ended.id), isTrue);
+    expect(current.any((entry) => entry.$1.id == ended.id), isFalse);
+    expect(history.where((entry) => entry.budgetId == ended.id), hasLength(1));
   });
 
   test(

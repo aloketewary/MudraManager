@@ -36,7 +36,7 @@ void main() {
         await tester.pumpWidget(_localizedApp(
           localeName,
           DateTimeRow(selectedDate: selectedDate, onDateChanged: (_) {}),
-        ));
+        ),);
         await tester.pumpAndSettle();
 
         final expected = DateFormat(
@@ -63,7 +63,7 @@ void main() {
             onToggleMonthPicker: () {},
             onToggleViewMode: () {},
           ),
-        ));
+        ),);
         await tester.pumpAndSettle();
 
         final expected =
@@ -88,7 +88,7 @@ void main() {
             onToggleView: () {},
             canGoNext: true,
           ),
-        ));
+        ),);
         await tester.pumpAndSettle();
 
         final expected =
@@ -101,7 +101,7 @@ void main() {
         await tester.pumpWidget(_localizedApp(
           localeName,
           DateTimePicker(selectedDate: selectedDate, onDateChanged: (_) {}),
-        ));
+        ),);
         await tester.pumpAndSettle();
 
         final expected = DateFormat.yMMMd(localeName).format(selectedDate);
@@ -112,7 +112,7 @@ void main() {
         await tester.pumpWidget(_localizedApp(
           localeName,
           DateTimeRow(selectedDate: selectedDate, onDateChanged: (_) {}),
-        ));
+        ),);
         final row = tester.widget<DateTimeRow>(find.byType(DateTimeRow));
         expect(row.selectedDate, selectedDate);
       });

@@ -99,7 +99,7 @@ class SubscriptionStatusCard extends ConsumerWidget {
                               decoration: BoxDecoration(
                                 color: color.primary.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(
-                                    spacing.radiusSmall * 0.5),
+                                    spacing.radiusSmall * 0.5,),
                               ),
                               child: Text(
                                 '${info.trialDaysRemaining}d LEFT',
@@ -122,7 +122,7 @@ class SubscriptionStatusCard extends ConsumerWidget {
                               decoration: BoxDecoration(
                                 color: accent.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(
-                                    spacing.radiusSmall * 0.5),
+                                    spacing.radiusSmall * 0.5,),
                               ),
                               child: Text(
                                 'ACTIVE',

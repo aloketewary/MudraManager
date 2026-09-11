@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
+import 'package:mudra_manager/core/db/models/budget_type.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
@@ -111,6 +112,7 @@ void main() {
         ..amount = 5000
         ..startDate = DateTime(2024, 1, 1)
         ..endDate = DateTime(2024, 1, 31)
+        ..budgetType = BudgetType.dayWise
         ..recurrence = BudgetRecurrence.none;
       final data = DashboardData(
         transactions: [],
@@ -133,6 +135,7 @@ void main() {
         ..amount = 10000
         ..startDate = DateTime(2024, 1, 1)
         ..endDate = DateTime(2024, 1, 31)
+        ..budgetType = BudgetType.dayWise
         ..recurrence = BudgetRecurrence.none;
       final data = DashboardData(
         transactions: [],
@@ -156,6 +159,7 @@ void main() {
         ..amount = 10000
         ..startDate = DateTime(2024, 1, 1)
         ..endDate = DateTime(2024, 1, 31)
+        ..budgetType = BudgetType.dayWise
         ..recurrence = BudgetRecurrence.none;
       final data = DashboardData(
         transactions: [],

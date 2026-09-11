@@ -51,7 +51,7 @@ final aiInsightProvider = Provider<List<AiInsight>>((ref) {
 });
 
 List<AiInsight> _generateInsights(
-    DashboardData data, TodayCardState? briefing) {
+    DashboardData data, TodayCardState? briefing,) {
   final candidates = <AiInsight>[];
   final now = DateTime.now();
 

@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/domain/financial_states.dart';
-import 'package:mudra_manager/features/insights/data/derive_attention_items.dart';
 import 'package:mudra_manager/core/logic/cashflow_engine.dart';
 import 'package:mudra_manager/core/state/dashboard_state.dart';
 import 'package:mudra_manager/features/insights/domain/attention.dart';

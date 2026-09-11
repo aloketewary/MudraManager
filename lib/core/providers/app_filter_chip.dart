@@ -275,7 +275,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                     ),
                     Text(
                       formatCurrency(balance,
-                          code: BaseCurrency.code, decimals: 2),
+                          code: BaseCurrency.code, decimals: 2,),
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                         color: _selectedColor,
@@ -293,7 +293,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
   // ── ACCOUNT TYPE GRID (2×3) ──
   Widget _buildTypeGrid(
-      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
     return GridView.count(
       crossAxisCount: 3,
       shrinkWrap: true,
@@ -348,7 +348,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
   // ── DETAILS CARD ──
   Widget _buildDetailsCard(
-      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
     final isCreditCard = _selectedType == AccountType.creditCard;
 
     return Card(
@@ -452,7 +452,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
   // ── COLOR SECTION ──
   Widget _buildColorSection(
-      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
     return Card(
       elevation: 0,
       color: color.surfaceContainerLow,

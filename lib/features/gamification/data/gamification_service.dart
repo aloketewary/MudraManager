@@ -328,9 +328,9 @@ class GamificationService {
       log.i('🏆 Achievement Unlocked: ${achievement.title}');
       SnackbarService.success(
           Tone.appL10n?.notif_achievementBody(
-                  achievement.title, achievement.rewardXP) ??
+                  achievement.title, achievement.rewardXP,) ??
               '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
-          const AppSpacing.comfortable());
+          const AppSpacing.comfortable(),);
       NotificationService.showAchievementUnlocked(
         achievement.title,
         achievement.rewardXP,
@@ -389,9 +389,9 @@ class GamificationService {
       log.i('🏆 Achievement Unlocked: ${achievement.title}');
       SnackbarService.success(
           Tone.appL10n?.notif_achievementBody(
-                  achievement.title, achievement.rewardXP) ??
+                  achievement.title, achievement.rewardXP,) ??
               '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
-          const AppSpacing.comfortable());
+          const AppSpacing.comfortable(),);
 
       NotificationService.showAchievementUnlocked(
         achievement.title,

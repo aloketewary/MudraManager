@@ -524,7 +524,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                               : ctxt.plugins_disabled(
                                                   plugin.name,
                                                 ),
-                                                spacing
+                                                spacing,
                                         );
                                       },
                                     );
@@ -556,7 +556,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                     val
                                         ? ctxt.plugins_enabled(plugin.name)
                                         : ctxt.plugins_disabled(plugin.name),
-                                        spacing
+                                        spacing,
                                   );
                                 },
                               ),
@@ -1027,7 +1027,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                         Navigator.pop(ctx);
                                         SnackbarService.success(
                                           ctxt.plugins_remindersConfigured,
-                                          spacing
+                                          spacing,
                                         );
                                       }
                                     },

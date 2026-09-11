@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/domain/budget_constraint_snapshot.dart';
-import 'package:mudra_manager/core/domain/budget_period_snapshot.dart';
 import 'package:mudra_manager/core/domain/financial_states.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -159,7 +158,7 @@ void main() {
 
     await tester.pumpWidget(
       detailApp(
-        value: AsyncValue.error('detail refresh failed', StackTrace.empty),
+        value: const AsyncValue.error('detail refresh failed', StackTrace.empty),
       ),
     );
     await tester.pump(const Duration(milliseconds: 100));

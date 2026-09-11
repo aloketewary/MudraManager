@@ -74,7 +74,7 @@ class RecurringTransactionService {
             wasSmsMatched: true,
           );
           log.i(
-              'Matched SMS transaction to recurring: ${recurring.description}');
+              'Matched SMS transaction to recurring: ${recurring.description}',);
           matched++;
           continue;
         }

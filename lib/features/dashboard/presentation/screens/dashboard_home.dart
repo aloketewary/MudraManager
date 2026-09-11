@@ -187,7 +187,7 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
             }
           } else {
             SnackbarService.success(
-                '🔥 Day $streakCount streak! +${result.xpEarned} XP', spacing);
+                '🔥 Day $streakCount streak! +${result.xpEarned} XP', spacing,);
           }
           log.i('Daily check-in completed successfully');
         }

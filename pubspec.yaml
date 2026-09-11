@@ -98,6 +98,7 @@ dependencies:
   in_app_purchase_android: ^0.4.0+8
   async: ^2.13.0
   share_plus: ^13.1.0
+  equatable: ^2.1.0
 
 dev_dependencies:
   saropa_lints: ^13.11.7

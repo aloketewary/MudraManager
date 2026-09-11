@@ -334,7 +334,7 @@ void main() {
           reason: '$recurrence: $periodStart..$periodEnd for $now',
         );
         expect(
-            periodEnd.difference(periodStart).inDays, greaterThanOrEqualTo(0));
+            periodEnd.difference(periodStart).inDays, greaterThanOrEqualTo(0),);
       }
     });
 

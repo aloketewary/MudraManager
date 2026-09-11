@@ -104,13 +104,13 @@ void showQuickDepositSheet({
                         decimals: 0,
                       ),
                     ),
-                    spacing
+                    spacing,
                   );
                   if (!wasComplete && isNowComplete) {
                     onCompleted?.call();
                     SnackbarService.success(
                       Tone.current.goalMilestone100(goal.name.safe()),
-                      spacing
+                      spacing,
                     );
                     if (context.mounted) {
                       final l10n = AppLocalizations.of(context)!;

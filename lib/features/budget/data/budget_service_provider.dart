@@ -338,7 +338,7 @@ class BudgetService {
       }
     });
     log.i(
-        'Budget saved: ${bud.name} with ${newAllocations.length} allocations');
+        'Budget saved: ${bud.name} with ${newAllocations.length} allocations',);
     if (isNew) {
       await gamificationService?.track(GamificationEvent.budgetCreated);
     }

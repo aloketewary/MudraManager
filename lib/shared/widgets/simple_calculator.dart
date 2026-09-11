@@ -71,7 +71,7 @@ class _SimpleCalculatorState extends ConsumerState<SimpleCalculator> {
         decoration: BoxDecoration(
           color: color.surface,
           borderRadius: BorderRadius.vertical(
-              top: Radius.circular(spacing.radiusSmall * 2)),
+              top: Radius.circular(spacing.radiusSmall * 2),),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -161,7 +161,7 @@ class _SimpleCalculatorState extends ConsumerState<SimpleCalculator> {
   }
 
   Widget _buildButtonRow(List<String> buttons, ColorScheme color,
-      TextTheme textTheme, AppSpacing spacing) {
+      TextTheme textTheme, AppSpacing spacing,) {
     return Row(
       children: buttons
           .map(
@@ -177,7 +177,7 @@ class _SimpleCalculatorState extends ConsumerState<SimpleCalculator> {
   }
 
   Widget _buildButton(
-      String text, ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+      String text, ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
     final isOperator = ['÷', '×', '-', '+', '='].contains(text);
     final isSpecial = ['AC', '⌫', '✓'].contains(text);
     final isConfirm = text == '✓';

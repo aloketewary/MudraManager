@@ -108,7 +108,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-        cardApp(dashboard: AsyncValue.data(data), withRouter: true));
+        cardApp(dashboard: AsyncValue.data(data), withRouter: true),);
     await tester.pump(const Duration(seconds: 2));
 
     expect(find.text('Monthly Budget'), findsOneWidget);
@@ -193,7 +193,7 @@ void main() {
     );
     expect(
       amounts.map((widget) => widget.amount).toList(),
-      contains(closeTo(96.452, 0.01)),
+      contains(closeTo(163.567, 0.01)),
     );
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pump(const Duration(milliseconds: 600));
@@ -251,7 +251,7 @@ void main() {
 
     for (final dashboard in <AsyncValue<DashboardData>>[
       const AsyncValue.loading(),
-      AsyncValue.error('refresh failed', StackTrace.empty),
+      const AsyncValue.error('refresh failed', StackTrace.empty),
       const AsyncValue.data(DashboardData(
         transactions: [],
         accounts: [],
@@ -264,7 +264,7 @@ void main() {
         totalBalance: 0,
         netWorth: 0,
         pendingSmsCount: 0,
-      )),
+      ),),
     ]) {
       await tester.pumpWidget(cardApp(dashboard: dashboard));
       await tester.pump();

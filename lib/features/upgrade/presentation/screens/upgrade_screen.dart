@@ -59,14 +59,14 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
         break;
       case PurchaseStatus.error:
         SnackbarService.error(
-          error ?? AppLocalizations.of(context)!.upgrade_purchaseFailed, spacing
+          error ?? AppLocalizations.of(context)!.upgrade_purchaseFailed, spacing,
         );
         break;
       case PurchaseStatus.canceled:
         break;
       case PurchaseStatus.pending:
         SnackbarService.info(
-          AppLocalizations.of(context)!.upgrade_purchasePending, spacing
+          AppLocalizations.of(context)!.upgrade_purchasePending, spacing,
         );
         break;
     }

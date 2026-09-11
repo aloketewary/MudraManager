@@ -75,7 +75,7 @@ void main() {
     expect(AccountMatchingBoundary.matches(foreign, '1234'), isFalse);
     expect(
       TransactionMatchingService.matchTransaction(
-        pending: _Pending(account: '1234'),
+        pending: const _Pending(account: '1234'),
         accounts: [foreign],
         categories: [category],
       ),
@@ -90,7 +90,7 @@ void main() {
     expect(AccountMatchingBoundary.matches(legacy, '1234'), isTrue);
     expect(
       TransactionMatchingService.matchTransaction(
-        pending: _Pending(account: '1234'),
+        pending: const _Pending(account: '1234'),
         accounts: [legacy],
         categories: [category],
       )?.account.id,
@@ -111,7 +111,7 @@ void main() {
       suffixHash: accountSuffixHashFor('2222'),
     );
     final match = TransactionMatchingService.matchTransaction(
-      pending: _Pending(account: '2222'),
+      pending: const _Pending(account: '2222'),
       accounts: [first, second],
       categories: [category],
     );
@@ -124,7 +124,7 @@ void main() {
       name: 'Acme Bank Card',
     );
     final fallback = TransactionMatchingService.matchTransaction(
-      pending: _Pending(account: 'unavailable', fromBank: 'Acme Bank'),
+      pending: const _Pending(account: 'unavailable', fromBank: 'Acme Bank'),
       accounts: [card],
       categories: [category],
     );
@@ -149,19 +149,19 @@ void main() {
     final requiredFragments = <String, List<String>>{
       'lib/features/transactions/data/transaction_matching_service.dart': [
         'AccountMatchingBoundary',
-        'accountSuffixHash'
+        'accountSuffixHash',
       ],
       'lib/features/transactions/presentation/providers/smart_defaults_provider.dart':
           ['AccountDataContract.safeAccount'],
       'lib/features/transactions/data/pending_transaction_prodiver.dart': [
         'AccountDataContract.safeAccounts',
-        'TransactionMatchingService'
+        'TransactionMatchingService',
       ],
       'lib/features/transactions/presentation/screens/add_edit_transaction_screen.dart':
           ['AccountMatchingBoundary', 'AccountDataContract.safeAccount'],
       'lib/shared/widgets/account_selector.dart': ['AccountMatchingBoundary'],
       'lib/features/sms/data/sms_activity_service.dart': [
-        'AccountMatchingBoundary'
+        'AccountMatchingBoundary',
       ],
       'lib/features/sms/presentation/screens/sms_activity_screen.dart': [
         'AccountMatchingBoundary',

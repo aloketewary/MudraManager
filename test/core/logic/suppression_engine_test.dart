@@ -6,7 +6,7 @@ import 'package:mudra_manager/core/logic/suppression_engine.dart';
 void main() {
   final now = DateTime(2025, 6, 15, 10, 0);
 
-  Insight _makeInsight(BriefingTrigger trigger, {double magnitude = 0}) {
+  Insight makeInsight(BriefingTrigger trigger, {double magnitude = 0}) {
     return Insight(
       trigger: trigger,
       source: 'test',
@@ -19,7 +19,7 @@ void main() {
     test('does not suppress when history is empty', () {
       expect(
         SuppressionEngine.shouldSuppress(
-          insight: _makeInsight(BriefingTrigger.budgetBreach),
+          insight: makeInsight(BriefingTrigger.budgetBreach),
           history: [],
           now: now,
         ),
@@ -37,7 +37,7 @@ void main() {
       ];
       expect(
         SuppressionEngine.shouldSuppress(
-          insight: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1000),
+          insight: makeInsight(BriefingTrigger.budgetBreach, magnitude: 1000),
           history: history,
           now: now,
         ),
@@ -55,7 +55,7 @@ void main() {
       ];
       expect(
         SuppressionEngine.shouldSuppress(
-          insight: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1020),
+          insight: makeInsight(BriefingTrigger.budgetBreach, magnitude: 1020),
           history: history,
           now: now,
         ),
@@ -73,7 +73,7 @@ void main() {
       ];
       expect(
         SuppressionEngine.shouldSuppress(
-          insight: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1100),
+          insight: makeInsight(BriefingTrigger.budgetBreach, magnitude: 1100),
           history: history,
           now: now,
         ),
@@ -91,7 +91,7 @@ void main() {
       ];
       expect(
         SuppressionEngine.shouldSuppress(
-          insight: _makeInsight(BriefingTrigger.billDueToday, magnitude: 1000),
+          insight: makeInsight(BriefingTrigger.billDueToday, magnitude: 1000),
           history: history,
           now: now,
         ),
@@ -104,7 +104,7 @@ void main() {
     test('adds new record to empty history', () {
       final result = SuppressionEngine.recordFiring(
         history: [],
-        fired: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1500),
+        fired: makeInsight(BriefingTrigger.budgetBreach, magnitude: 1500),
         now: now,
       );
 
@@ -126,7 +126,7 @@ void main() {
 
       final result = SuppressionEngine.recordFiring(
         history: history,
-        fired: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1100),
+        fired: makeInsight(BriefingTrigger.budgetBreach, magnitude: 1100),
         now: now,
       );
 
@@ -145,7 +145,7 @@ void main() {
 
       final result = SuppressionEngine.recordFiring(
         history: history,
-        fired: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1100),
+        fired: makeInsight(BriefingTrigger.budgetBreach, magnitude: 1100),
         now: now,
       );
 
@@ -168,7 +168,7 @@ void main() {
 
       final result = SuppressionEngine.recordFiring(
         history: history,
-        fired: _makeInsight(BriefingTrigger.budgetBreach, magnitude: 1000),
+        fired: makeInsight(BriefingTrigger.budgetBreach, magnitude: 1000),
         now: now,
       );
 

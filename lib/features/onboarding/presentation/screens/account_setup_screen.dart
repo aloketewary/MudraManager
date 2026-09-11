@@ -374,17 +374,17 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                   },
                   child: switch (_step) {
                     0 => _buildNameStep(
-                        color, textTheme, spacing, ctxt, accent, isDark),
+                        color, textTheme, spacing, ctxt, accent, isDark,),
                     1 => _buildCurrencyStep(
-                        color, textTheme, spacing, accent, isDark, ctxt),
+                        color, textTheme, spacing, accent, isDark, ctxt,),
                     2 => _buildAccountStep(
-                        color, textTheme, spacing, ctxt, accent, isDark),
+                        color, textTheme, spacing, ctxt, accent, isDark,),
                     3 => _buildToneStep(
-                        color, textTheme, spacing, isDark, accent, ctxt),
+                        color, textTheme, spacing, isDark, accent, ctxt,),
                     4 => _buildPackPickerStep(
-                        color, textTheme, spacing, isDark, accent, ctxt),
+                        color, textTheme, spacing, isDark, accent, ctxt,),
                     _ => _buildStarterTxnStep(
-                        color, textTheme, spacing, ctxt, accent, isDark),
+                        color, textTheme, spacing, ctxt, accent, isDark,),
                   },
                 ),
               ),
@@ -726,7 +726,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(spacing.radiusSmall * 2)),
+                      top: Radius.circular(spacing.radiusSmall * 2),),
                 ),
                 builder: (_) => _AllCurrenciesSheet(
                   selected: _selectedCurrency,
@@ -857,7 +857,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
               prefixIcon:
                   Icon(LucideIcons.wallet, color: color.primary, size: 20),
               border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium)),
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 borderSide: BorderSide(color: color.primary, width: 2),
@@ -875,9 +875,9 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
               labelText: ctxt.onboard_initialBalance,
               hintText: '0',
               prefixIcon: Icon(currencyIcon(_selectedCurrency),
-                  color: color.primary, size: 20),
+                  color: color.primary, size: 20,),
               border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium)),
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 borderSide: BorderSide(color: color.primary, width: 2),

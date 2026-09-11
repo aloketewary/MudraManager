@@ -116,7 +116,7 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     if (_budgetType == BudgetType.categoryWise && _selectedCategory == null) {
       setState(() => _saving = false);
       SnackbarService.error(
-          l10n.budget_selectAtLeastOneCategoryErrorText, spacing);
+          l10n.budget_selectAtLeastOneCategoryErrorText, spacing,);
       return;
     }
 
@@ -339,7 +339,7 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
                   ),
                 ] else ...[
                   Icon(LucideIcons.tag,
-                      size: 20, color: color.onSurfaceVariant),
+                      size: 20, color: color.onSurfaceVariant,),
                   SizedBox(width: spacing.elementGap),
                   Expanded(
                     child: Text(
@@ -415,7 +415,7 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
                       child: Column(
                         children: subs
                             .map((s) =>
-                                _categoryTile(s, spacing, color, textTheme))
+                                _categoryTile(s, spacing, color, textTheme),)
                             .toList(),
                       ),
                     ),
@@ -1004,7 +1004,7 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
             ),
             SizedBox(width: spacing.elementGapMin),
             Icon(LucideIcons.chevronRight,
-                size: 14, color: color.onSurfaceVariant),
+                size: 14, color: color.onSurfaceVariant,),
           ],
         ),
       ),
@@ -1022,7 +1022,7 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
               title: Text(l10n.translate(r.name)),
               trailing: _recurrence == r
                   ? Icon(LucideIcons.check,
-                      color: Theme.of(context).colorScheme.primary)
+                      color: Theme.of(context).colorScheme.primary,)
                   : null,
               onTap: () {
                 setState(() => _recurrence = r);

@@ -128,7 +128,7 @@ class DateRangeSelector extends ConsumerWidget {
                           IconButton(
                             tooltip: 'Refresh',
                             icon: Icon(LucideIcons.refreshCw,
-                                size: 20, color: color.primary),
+                                size: 20, color: color.primary,),
                             onPressed: onResetToday,
                           ),
                         IconButton(

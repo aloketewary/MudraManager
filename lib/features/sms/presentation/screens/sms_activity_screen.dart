@@ -392,13 +392,13 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
   // ── FILTER SHEET ──
 
   void _showFilterSheet(
-      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2)),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(16),
@@ -719,7 +719,7 @@ class _ActivityCard extends ConsumerWidget {
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2)),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (_) => _ActivityDetailsSheet(activity: activity),
     );
@@ -867,7 +867,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                         const SizedBox(height: 2),
                         Text(
                           safeDateFormat(
-                                  'dd MMM yyyy, hh:mm a', ctxt.localeName)
+                                  'dd MMM yyyy, hh:mm a', ctxt.localeName,)
                               .format(widget.activity.date),
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
@@ -984,7 +984,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                       _detailRow(
                         ctxt.smsActivity_balance,
                         formatCurrency(widget.activity.balance!,
-                            code: BaseCurrency.code, decimals: 0),
+                            code: BaseCurrency.code, decimals: 0,),
                         color,
                         textTheme,
                       ),

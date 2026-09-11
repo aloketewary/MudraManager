@@ -313,7 +313,7 @@ class _SecuritySettingsScreenState
         _SettingsGroupSkeleton(spacing: spacing, color: color),
         SizedBox(height: spacing.sectionGap),
         SizedBox(height: spacing.sectionGap),
-        AmbientBrandSection(showSignature: true, absorbBottomInset: false),
+        const AmbientBrandSection(showSignature: true, absorbBottomInset: false),
       ],
     );
   }
@@ -381,7 +381,7 @@ class SecurityHeroCard extends ConsumerWidget {
                   ClipOval(
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(width: 56, height: 56),
+                      child: const SizedBox(width: 56, height: 56),
                     ),
                   ),
                   TweenAnimationBuilder<double>(

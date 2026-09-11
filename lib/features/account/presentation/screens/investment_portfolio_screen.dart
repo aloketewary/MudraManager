@@ -443,7 +443,7 @@ class _InvestmentPortfolioScreenState
                               }
                             } catch (e) {
                               SnackbarService.error(
-                                BuddyMessages.errorWith('$e'), spacing
+                                BuddyMessages.errorWith('$e'), spacing,
                               );
                             }
                           },

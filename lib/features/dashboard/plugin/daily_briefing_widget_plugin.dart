@@ -33,7 +33,7 @@ class DailyBriefingWidgetPlugin extends DashboardWidgetPlugin {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return TodayBriefingCard();
+    return const TodayBriefingCard();
   }
 
   @override

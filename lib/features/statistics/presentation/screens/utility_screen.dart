@@ -147,13 +147,13 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
   }
 
   // For reduced motion support - cached for build performance
-  bool _cachedReducedMotion = false;
+  bool cachedReducedMotion = false;
 
   bool get _isReducedMotion {
     try {
       return MediaQuery.of(context).disableAnimations;
     } catch (_) {
-      return _cachedReducedMotion;
+      return cachedReducedMotion;
     }
   }
 

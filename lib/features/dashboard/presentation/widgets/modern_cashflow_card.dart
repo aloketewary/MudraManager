@@ -109,9 +109,9 @@ class ModernCashFlowCard extends ConsumerWidget {
                       final rawPrevExpense =
                           prevSummary.value?['expense'] ?? 0.0;
                       final prevIncome = GuestModeUtil.applyGuestMode(
-                          rawPrevIncome, isGuestMode);
+                          rawPrevIncome, isGuestMode,);
                       final prevExpense = GuestModeUtil.applyGuestMode(
-                          rawPrevExpense, isGuestMode);
+                          rawPrevExpense, isGuestMode,);
 
                       final historicalIncome =
                           ref.watch(historicalIncomeProvider).value ?? [];

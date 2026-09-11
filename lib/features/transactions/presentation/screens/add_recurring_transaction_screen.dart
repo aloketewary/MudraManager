@@ -791,7 +791,7 @@ class _AddRecurringTransactionScreenState
 
       if (context.mounted) {
         SnackbarService.success(
-          _isEditing ? BuddyMessages.txnUpdated : BuddyMessages.txnAdded, spacing
+          _isEditing ? BuddyMessages.txnUpdated : BuddyMessages.txnAdded, spacing,
         );
         context.pop();
       }

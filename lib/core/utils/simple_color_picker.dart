@@ -144,6 +144,7 @@ class _SimpleColorPickerDialogState
 
     return PopScope(
       canPop: true,
+      // ignore: deprecated_member_use
       onPopInvoked: (didPop) {
         if (!didPop) {
           Navigator.pop(context, _selected);

@@ -90,10 +90,11 @@ class SpendingAnalyzer {
 
     // OPTIMIZED: Single pass aggregation instead of multiple filtered iterations
     for (final tx in transactions) {
+      // Internal transfers affect account balances, not spending personality.
+      if (tx.isTransfer) continue;
+
       if (!tx.isExpense) {
-        if (!tx.isTransfer) {
-          totalIncome += tx.effectiveAmount;
-        }
+        totalIncome += tx.effectiveAmount;
         continue;
       }
 

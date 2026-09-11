@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:flutter/services.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -735,7 +734,7 @@ class _CurrencyChangeConfirmSheet extends ConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _CurrencyBadge(
+            currencyBadge(
                 code: currentBase,
                 symbol: currentSymbol,
                 color: color,
@@ -745,7 +744,7 @@ class _CurrencyChangeConfirmSheet extends ConsumerWidget {
               padding: EdgeInsets.symmetric(horizontal: spacing.elementGap),
               child: Icon(LucideIcons.arrowRight, size: 20, color: color.error),
             ),
-            _CurrencyBadge(
+            currencyBadge(
                 code: newCurrency,
                 symbol: newSymbol,
                 color: color,
@@ -757,7 +756,7 @@ class _CurrencyChangeConfirmSheet extends ConsumerWidget {
     );
   }
 
-  Widget _CurrencyBadge({
+  Widget currencyBadge({
     required String code,
     required String symbol,
     required ColorScheme color,

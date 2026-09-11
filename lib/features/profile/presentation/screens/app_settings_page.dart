@@ -58,7 +58,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
               HapticFeedback.mediumImpact();
               context.push('/plugins');
             },
-            spacing
+            spacing,
           ),
           const SizedBox(height: 8),
           _buildSettingCard(
@@ -72,7 +72,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
               HapticFeedback.mediumImpact();
               context.push(AppRoutes.dashboardCustomize);
             },
-            spacing
+            spacing,
           ),
           const SizedBox(height: 8),
           _buildSettingCard(
@@ -86,7 +86,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
               HapticFeedback.mediumImpact();
               context.push('/language');
             },
-            spacing
+            spacing,
           ),
           const SizedBox(height: 8),
           FutureBuilder<bool>(
@@ -166,7 +166,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
                 ),
               );
             },
-            spacing
+            spacing,
           ),
         ],
       ),

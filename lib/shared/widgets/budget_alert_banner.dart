@@ -95,7 +95,7 @@ class BudgetAlertBanner extends ConsumerWidget {
                       Row(
                         children: [
                           Text(
-                            '${formatCurrency(alert.spent, decimals: 0)}',
+                            formatCurrency(alert.spent, decimals: 0),
                             style: textTheme.labelMedium?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: accentColor,

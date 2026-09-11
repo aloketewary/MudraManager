@@ -764,7 +764,7 @@ class _BudgetConstraintCard extends ConsumerWidget {
   }
 
   Widget _buildProgressBar(
-      AppSpacing spacing, ColorScheme color, Color accent) {
+      AppSpacing spacing, ColorScheme color, Color accent,) {
     final pct = snapshot.percentage.clamp(0.0, 1.0);
     return Row(
       children: [

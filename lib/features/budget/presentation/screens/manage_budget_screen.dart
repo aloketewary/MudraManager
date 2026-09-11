@@ -441,7 +441,7 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
                     Navigator.pop(ctx);
                     HapticFeedback.mediumImpact();
                     SnackbarService.success(
-                        BuddyMessages.budgetUpdated, spacing);
+                        BuddyMessages.budgetUpdated, spacing,);
                     setState(() {});
                   }
                 },

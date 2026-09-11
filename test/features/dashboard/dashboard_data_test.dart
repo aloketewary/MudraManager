@@ -5,7 +5,6 @@ import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_type.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
-import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/greeting_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/priority_alert_provider.dart';
@@ -204,7 +203,6 @@ void main() {
       bool archived = false,
       BudgetType type = BudgetType.dayWise,
       List<CategorySpending> categorySpendings = const [],
-      List<Tag> tags = const [],
       DateTime? evaluationDate,
       int generation = 0,
     }) {
@@ -219,7 +217,6 @@ void main() {
         ..budgetType = type
         ..recurrence = recurrence
         ..isArchived = archived;
-      tags.forEach(budget.budgetTags.add);
       final snapshot = BudgetPeriodSnapshot.fromBudget(
         budget: budget,
         evaluationDate: evaluationDate ?? periodStart,
@@ -260,9 +257,6 @@ void main() {
       final food = Category()
         ..id = 10
         ..name = 'Food';
-      final tag = Tag()
-        ..id = 20
-        ..name = 'Travel';
 
       final changed = <DashboardData>[
         withBudget(id: 2),
@@ -279,7 +273,6 @@ void main() {
             CategorySpending(category: food, allocated: 500, spent: 50),
           ],
         ),
-        withBudget(tags: [tag]),
         withBudget(evaluationDate: DateTime(2024, 1, 2)),
         withBudget(generation: 1),
       ];
@@ -305,20 +298,15 @@ void main() {
       final category = Category()
         ..id = 10
         ..name = 'Food';
-      final tag = Tag()
-        ..id = 20
-        ..name = 'Travel';
       final a = withBudget(
         categorySpendings: [
           CategorySpending(category: category, allocated: 500, spent: 50),
         ],
-        tags: [tag],
       );
       final b = withBudget(
         categorySpendings: [
           CategorySpending(category: category, allocated: 500, spent: 50),
         ],
-        tags: [tag],
       );
 
       expect(a, equals(b));

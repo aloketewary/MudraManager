@@ -32,7 +32,7 @@ void main() {
     testWidgets('DateTimeRow preserves selected date and time output', (tester) async {
       await tester.pumpWidget(_localizedApp(
         DateTimeRow(selectedDate: selectedDate, onDateChanged: (_) {}),
-      ));
+      ),);
       await tester.pump();
 
       expect(
@@ -65,7 +65,7 @@ void main() {
           onToggleMonthPicker: () {},
           onToggleViewMode: () {},
         ),
-      ));
+      ),);
       await tester.pump();
 
       final expected =
@@ -89,7 +89,7 @@ void main() {
           onToggleView: () {},
           canGoNext: true,
         ),
-      ));
+      ),);
       await tester.pump();
 
       final expected =
@@ -101,7 +101,7 @@ void main() {
     testWidgets('date-time picker preserves selected date output', (tester) async {
       await tester.pumpWidget(_localizedApp(
         DateTimePicker(selectedDate: selectedDate, onDateChanged: (_) {}),
-      ));
+      ),);
       await tester.pump();
 
       expect(
@@ -119,7 +119,7 @@ void main() {
       final deviceOutput = DateFormat('MMM dd, yyyy').format(selectedDate);
       expect(appOutput, deviceOutput);
       expect(DateFormat.yMMMd(localeName).format(selectedDate),
-          DateFormat.yMMMd().format(selectedDate));
+          DateFormat.yMMMd().format(selectedDate),);
     });
 
     test('date callbacks preserve selected values unchanged', () {

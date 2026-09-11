@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
+import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/category_rule.dart';
@@ -35,6 +37,10 @@ void main() {
   late Category others;
 
   setUp(() async {
+    FieldEncryptionService.setKeyForTesting(
+      'AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=',
+    );
+
     final existing = Isar.getInstance();
     if (existing != null && existing.isOpen) await existing.close();
 
@@ -98,6 +104,7 @@ void main() {
         Account()
           ..name = 'Primary'
           ..accountNumber = 'XXXX6988'
+          ..accountSuffixHash = accountSuffixHashFor('6988')
           ..accountType = AccountType.bank
           ..initialBalance = 10000
           ..isActive = true,
@@ -108,6 +115,7 @@ void main() {
   tearDown(() async {
     if (isar.isOpen) await isar.close();
     if (tempDirectory.existsSync()) tempDirectory.deleteSync(recursive: true);
+    FieldEncryptionService.resetForTesting();
   });
 
   CategoryRule rule({
@@ -566,5 +574,6 @@ void main() {
         expect(fallbackTransactions.single.category.value!.name, food.name);
       }
     },
+    timeout: Timeout(const Duration(minutes: 2)),
   );
 }

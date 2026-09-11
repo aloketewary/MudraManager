@@ -117,7 +117,7 @@ class TransactionCalendarHeader extends ConsumerWidget {
                       if (!_isSameMonth(selectedDate, DateTime.now()))
                         IconButton(
                           icon: Icon(LucideIcons.refreshCw,
-                              size: 20, color: color.primary),
+                              size: 20, color: color.primary,),
                           tooltip: 'Reset to Current Month',
                           onPressed: () {
                             HapticFeedback.mediumImpact();
@@ -127,7 +127,7 @@ class TransactionCalendarHeader extends ConsumerWidget {
                       else
                         IconButton(
                           icon: Icon(LucideIcons.calendar,
-                              size: 20, color: color.primary),
+                              size: 20, color: color.primary,),
                           tooltip: 'Select Month',
                           onPressed: () {
                             HapticFeedback.mediumImpact();

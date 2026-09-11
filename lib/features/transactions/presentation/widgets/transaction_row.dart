@@ -35,13 +35,13 @@ class TransactionRow extends StatelessWidget {
               color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(4),
               border: Border.all(
-                color: colorScheme.outlineVariant.withOpacity(0.3),
+                color: colorScheme.outlineVariant.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
             child: Icon(
               icon,
-              color: colorScheme.primary.withOpacity(0.8),
+              color: colorScheme.primary.withValues(alpha: 0.8),
               size: 20,
             ),
           ),

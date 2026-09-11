@@ -791,7 +791,7 @@ class SmsHeroCard extends ConsumerWidget {
                   ClipOval(
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(width: 56, height: 56),
+                      child: const SizedBox(width: 56, height: 56),
                     ),
                   ),
                   TweenAnimationBuilder<double>(

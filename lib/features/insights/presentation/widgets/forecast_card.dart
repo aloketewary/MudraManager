@@ -240,10 +240,10 @@ class ForecastCard extends ConsumerWidget {
       padding: EdgeInsets.all(spacing.cardInner),
       child: LineChart(
         LineChartData(
-          gridData: FlGridData(
+          gridData: const FlGridData(
             show: false,
           ),
-          titlesData: FlTitlesData(
+          titlesData: const FlTitlesData(
             show: false,
           ),
           borderData: FlBorderData(show: false),

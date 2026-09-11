@@ -536,7 +536,7 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2)),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (ctx) => SafeArea(
         child: Column(
@@ -644,7 +644,7 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
         .where((c) =>
             c.id != source.id &&
             c.categoryType == source.categoryType &&
-            !c.isSystem)
+            !c.isSystem,)
         .toList();
 
     if (candidates.isEmpty) {
@@ -657,7 +657,7 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2)),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (ctx) => SafeArea(
         child: Column(

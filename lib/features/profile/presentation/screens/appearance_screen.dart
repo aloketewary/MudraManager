@@ -49,9 +49,9 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
     final accountStyle = ref.watch(accountDisplayStyleProvider);
 
     final guestPluginEnabled = guestPluginAsync.maybeWhen(
-        data: (v) => v, orElse: () => false);
+        data: (v) => v, orElse: () => false,);
     final loaded = guestPluginAsync.maybeWhen(
-        data: (_) => true, orElse: () => false);
+        data: (_) => true, orElse: () => false,);
 
     return ScreenShell(
       config: ScreenShellConfig(

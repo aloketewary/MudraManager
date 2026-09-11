@@ -202,7 +202,7 @@ class _BudgetDetailBody extends ConsumerWidget {
               color: color.surfaceContainerLow,
               borderRadius: BorderRadius.circular(spacing.radiusMedium),
               border: Border.all(
-                  color: color.outlineVariant.withValues(alpha: 0.3)),
+                  color: color.outlineVariant.withValues(alpha: 0.3),),
             ),
             child: Text(
               ctxt.budget_insufficientData,

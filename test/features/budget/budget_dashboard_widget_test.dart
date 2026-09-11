@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/domain/budget_constraint_snapshot.dart';
-import 'package:mudra_manager/core/domain/budget_period_snapshot.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
@@ -242,8 +241,8 @@ void main() {
     await tester.pumpWidget(
       dashboardApp(
         constraints:
-            AsyncValue.error('budget refresh failed', StackTrace.empty),
-        history: AsyncValue.error('history refresh failed', StackTrace.empty),
+            const AsyncValue.error('budget refresh failed', StackTrace.empty),
+        history: const AsyncValue.error('history refresh failed', StackTrace.empty),
       ),
     );
     await tester.pumpAndSettle();

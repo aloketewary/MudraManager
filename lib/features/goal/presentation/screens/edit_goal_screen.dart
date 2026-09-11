@@ -97,7 +97,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     if (_nameController.text.trim().isEmpty) {
       SnackbarService.warning(
         AppLocalizations.of(context)!.goal_giveGoalName,
-        spacing
+        spacing,
       );
       return;
     }
@@ -106,7 +106,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     if (_targetAmount < widget.goal.currentAmount) {
       SnackbarService.warning(
         AppLocalizations.of(context)!.goal_targetBelowSaved,
-        spacing
+        spacing,
       );
       return;
     }

@@ -37,7 +37,7 @@ class _SkinPickerScreenState extends ConsumerState<SkinPickerScreen> {
     ref.read(activeSkinProvider.notifier).setSkin(_tempSelectedId!);
     SnackbarService.success(
       AppLocalizations.of(context)?.theme_themeAppliedMessage ??
-          'Skin applied!', spacing
+          'Skin applied!', spacing,
     );
   }
 

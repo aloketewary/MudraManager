@@ -295,7 +295,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                       RepaintBoundary(
                         child: Container(
                           padding: EdgeInsets.all(
-                              spacing.cardInner + spacing.elementGap),
+                              spacing.cardInner + spacing.elementGap,),
                           decoration: BoxDecoration(
                             color: _accentColor.withValues(alpha: 0.12),
                             shape: BoxShape.circle,
@@ -603,7 +603,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                 child: Row(
                   children: [
                     Icon(LucideIcons.folderOpen,
-                        size: 18, color: color.primary),
+                        size: 18, color: color.primary,),
                     SizedBox(width: spacing.elementGap * 1.5),
                     Expanded(
                       child: Text(

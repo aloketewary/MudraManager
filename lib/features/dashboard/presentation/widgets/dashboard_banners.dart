@@ -655,6 +655,7 @@ class _FinancialAdvisoryBannerState
             horizontal: spacing.cardHorizontal,
             vertical: spacing.cardVertical,
           ),
+          // ignore: deprecated_member_use
           transform: Matrix4.identity()..scale(_isPressed ? 0.98 : 1.0),
           decoration: BoxDecoration(
             color: color.surfaceContainerHigh,

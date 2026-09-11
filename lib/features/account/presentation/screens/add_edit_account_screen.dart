@@ -167,7 +167,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             ),
             SizedBox(height: spacing.sectionGap),
             _buildTypeHeader(ctxt.account_typeLabel, color, textTheme, spacing,
-                _selectedType.icon),
+                _selectedType.icon,),
             SizedBox(
               height: spacing.sectionGap,
             ),
@@ -179,7 +179,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             ),
             SizedBox(height: spacing.sectionGap),
             _buildTypeHeader(ctxt.account_detailsLabel, color, textTheme,
-                spacing, LucideIcons.form),
+                spacing, LucideIcons.form,),
             SizedBox(height: spacing.sectionGap),
             _buildDetailsCard(
               color,
@@ -189,7 +189,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             ),
             SizedBox(height: spacing.sectionGap),
             _buildTypeHeader(ctxt.account_colorLabel, color, textTheme, spacing,
-                LucideIcons.palette),
+                LucideIcons.palette,),
             SizedBox(height: spacing.sectionGap),
             _buildColorSection(
               color,
@@ -199,7 +199,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             ),
             SizedBox(height: spacing.sectionGap),
             _buildTypeHeader(ctxt.account_currencyLabel, color, textTheme,
-                spacing, LucideIcons.wallet),
+                spacing, LucideIcons.wallet,),
             SizedBox(height: spacing.sectionGap),
             _buildCurrencySelector(color, textTheme, spacing),
           ],
@@ -316,12 +316,12 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                                       ),
                                       decoration: BoxDecoration(
                                         color: _selectedColor.withValues(
-                                            alpha: 0.1),
+                                            alpha: 0.1,),
                                         borderRadius: BorderRadius.circular(
-                                            spacing.radiusMedium),
+                                            spacing.radiusMedium,),
                                         border: Border.all(
                                           color: _selectedColor.withValues(
-                                              alpha: 0.2),
+                                              alpha: 0.2,),
                                         ),
                                       ),
                                       child: Text(
@@ -652,7 +652,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               color: color.onSurfaceVariant.withValues(alpha: 0.6),
             ),
             prefixIcon: Icon(currencyIcon(_selectedCurrency),
-                size: 18, color: _selectedColor),
+                size: 18, color: _selectedColor,),
           ),
           textTheme: textTheme,
           validator: (v) => v == null || v.isEmpty ? 'Required' : null,

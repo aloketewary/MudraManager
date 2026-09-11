@@ -93,7 +93,7 @@ class TransactionMatchingService {
     if (preMatchedCategory != null) {
       _log.i('Using pre-matched category: ${preMatchedCategory.name}');
       return MatchingResult(
-          account: selectedAccount, category: preMatchedCategory);
+          account: selectedAccount, category: preMatchedCategory,);
     }
 
     // 3. Filter categories by type (income/expense)
@@ -109,7 +109,7 @@ class TransactionMatchingService {
 
     if (relevantCategories.isEmpty) {
       _log.d(
-          'No relevant categories found for type: ${(isIncome ?? false) ? "income" : "expense"}');
+          'No relevant categories found for type: ${(isIncome ?? false) ? "income" : "expense"}',);
       return null;
     }
 
@@ -127,7 +127,7 @@ class TransactionMatchingService {
     // Log the matching strategy and confidence
     if (matchedCategory != null) {
       _log.i(
-          'Category matched: ${matchedCategory.name} (${matchResult.confidenceScore}% confidence via ${matchResult.matchStrategy})');
+          'Category matched: ${matchedCategory.name} (${matchResult.confidenceScore}% confidence via ${matchResult.matchStrategy})',);
     }
 
     // 5. Fallback with smart logic based on amount
@@ -142,7 +142,7 @@ class TransactionMatchingService {
 
     if (matchedCategory != null) {
       return MatchingResult(
-          account: selectedAccount, category: matchedCategory);
+          account: selectedAccount, category: matchedCategory,);
     }
 
     return null;

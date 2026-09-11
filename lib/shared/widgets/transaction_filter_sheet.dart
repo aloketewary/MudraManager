@@ -57,7 +57,7 @@ class _TransactionFilterSheetState
           decoration: BoxDecoration(
             color: color.surface,
             borderRadius: BorderRadius.vertical(
-                top: Radius.circular(spacing.radiusSmall * 2)),
+                top: Radius.circular(spacing.radiusSmall * 2),),
             border: Border.all(
               color: color.primary.withValues(alpha: 0.3),
               width: 1.5,
@@ -196,7 +196,7 @@ class _TransactionFilterSheetState
                       ),
                       onPressed: () {
                         widget.onApply(
-                            _startDate, _endDate, _filterIncome, _searchQuery);
+                            _startDate, _endDate, _filterIncome, _searchQuery,);
                         Navigator.pop(context);
                       },
                       child: const Text('Apply'),

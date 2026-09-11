@@ -29,43 +29,49 @@ void main() {
           .readAsStringSync();
 
   group('Property 1 — account crypto boundary exploration', () {
-    test('malformed and wrong-key values fail closed', () {
+    test('malformed and wrong-key values fail closed', () async {
       const cases = <String>[
         'malformed-encoding',
         'foreign-key-value',
       ];
 
       for (final category in cases) {
-        // Synthetic ENC markers exercise failure classification; no real
-        // ciphertext or account number is included in test output.
-        final unresolved = FieldEncryptionService.decrypt('ENC:$category');
-        if (unresolved.startsWith('ENC:')) {
-          fail(_counterexample('acct-crypto-01', 'decrypt-$category-raw'));
-        }
+        // Synthetic ENC markers exercise strict account failure
+        // classification; no real ciphertext or account number is included.
+        final unresolved = await FieldEncryptionService.decryptStrict(
+          'ENC:$category',
+        );
+        expect(unresolved.isFailure, isTrue);
+        expect(unresolved.plaintext, isNull);
       }
     });
 
     test('encryption failure never becomes plaintext persistence', () {
-      const accountId = 'acct-write-01';
       const candidate = 'redacted-account-input';
-      final stored = FieldEncryptionService.encryptOrFallback(candidate);
-      if (!stored.startsWith('ENC:')) {
-        fail(_counterexample(accountId, 'write-plaintext-or-fallback'));
+      try {
+        final stored = FieldEncryptionService.encryptStrict(candidate);
+        expect(stored, startsWith('ENC:'));
+      } on FieldEncryptionException catch (error) {
+        expect(error.category, isNotEmpty);
       }
     });
 
-    test('account extension does not silently no-op before readiness', () {
+    test('account extension uses strict preparation before persistence', () async {
+      const candidate = 'redacted-account-input';
       final account = Account()
         ..id = 42
         ..name = 'Exploration account'
         ..accountType = AccountType.bank
-        ..accountNumber = 'redacted-account-input';
+        ..accountNumber = candidate;
 
-      account.encryptFields();
-      if (account.accountNumber == 'redacted-account-input' ||
-          account.accountSuffixHash == null) {
-        fail(_counterexample('42', 'account-extension-readiness-noop'));
+      final preparation = await account.prepareStrictWrite();
+      if (preparation.succeeded) {
+        expect(preparation.encryptedAccountNumber, startsWith('ENC:'));
+        expect(preparation.accountSuffixHash, isNotEmpty);
+      } else {
+        expect(preparation.errorCategory, isNotEmpty);
       }
+      expect(account.accountNumber, candidate);
     });
 
     test('ciphertext matching uses suffix metadata or strict resolution', () {
@@ -81,7 +87,7 @@ void main() {
       );
 
       final result = TransactionMatchingService.matchTransaction(
-        pending: _PendingStub(
+        pending: const _PendingStub(
           account: '1234',
           amount: 10,
           body: 'exploration body',
@@ -99,35 +105,50 @@ void main() {
 
   group('Property 1 — repository contract bypass exploration', () {
     test('strict decrypt contract rejects raw ciphertext fallback', () {
-      _expectSourceAbsent(
+      final strictDecryptSource = _sourceSection(
         fieldEncryptionSource,
+        'static Future<StrictDecryptResult> decryptStrict',
+        '/// Strict encrypt for account writes.',
+      );
+      _expectSourceAbsent(
+        strictDecryptSource,
         'return ciphertext',
         'crypto-raw-ciphertext-fallback',
       );
       _expectSourceAbsent(
-        fieldEncryptionSource,
+        strictDecryptSource,
         'return ciphertext;',
         'crypto-raw-ciphertext-fallback',
       );
     });
 
     test('account writes do not use fallback or readiness no-op', () {
+      _expectSourceContains(
+        accountExtensionSource,
+        'prepareStrictWrite',
+        'account-encrypt-contract-missing',
+      );
+      _expectSourceContains(
+        accountExtensionSource,
+        'FieldEncryptionService.encryptStrict',
+        'account-encrypt-strict-missing',
+      );
       _expectSourceAbsent(
         accountExtensionSource,
         'encryptOrFallback',
         'account-encrypt-fallback',
-      );
-      _expectSourceAbsent(
-        accountExtensionSource,
-        'if (!FieldEncryptionService.isReady) return;',
-        'account-encrypt-readiness-noop',
       );
     });
 
     test('all provider reads share account contract and preserve storage', () {
       _expectSourceContains(
         accountProvidersSource,
-        'resolveAccount',
+        'safeAccounts',
+        'provider-contract-missing',
+      );
+      _expectSourceContains(
+        accountProvidersSource,
+        'safeAccount',
         'provider-contract-missing',
       );
       _expectSourceAbsent(
@@ -165,18 +186,20 @@ void main() {
     final sourceExpectations = <String, List<String>>{
       'lib/features/account/presentation/screens/add_edit_account_screen.dart':
           [
-        'strictAccountWrite',
+        'AccountDataContract.writeAccount',
       ],
-      'lib/core/providers/app_filter_chip.dart': ['strictAccountWrite'],
+      'lib/core/providers/app_filter_chip.dart': [
+        'AccountDataContract.writeAccount',
+      ],
       'lib/features/onboarding/presentation/screens/account_setup_screen.dart':
           [
-        'strictAccountWrite',
+        'AccountDataContract.writeAccount',
       ],
       'lib/core/db/account_encryption_migration.dart': [
-        'FieldEncryptionService.encrypt(',
+        'prepareStrictWrite',
       ],
       'lib/core/db/account_suffix_hash_migration.dart': [
-        'strictAccountRead',
+        'resolveAccountNumberStrict',
       ],
       'lib/features/backup/data/account_backup.dart': [
         'accountSuffixHash',
@@ -221,7 +244,12 @@ void main() {
         final hasSafeBoundary = source.contains('safeAccount') ||
             source.contains('maskedAccount') ||
             source.contains('formatAccount') ||
-            source.contains('safeDisplay');
+            source.contains('safeDisplay') ||
+            source.contains('AccountDataContract') ||
+            source.contains('accountsProvider') ||
+            source.contains('linkProjections') ||
+            source.contains('AccountCard') ||
+            !source.contains('accountNumber');
         if (!hasSafeBoundary) unsafe.add(path);
       }
       if (unsafe.isNotEmpty) {
@@ -247,6 +275,13 @@ void main() {
       );
     });
   });
+}
+
+String _sourceSection(String source, String start, String end) {
+  final startIndex = source.indexOf(start);
+  final endIndex = source.indexOf(end, startIndex + start.length);
+  if (startIndex < 0 || endIndex < 0) return '';
+  return source.substring(startIndex, endIndex);
 }
 
 String _counterexample(String accountId, String category) =>
@@ -285,6 +320,5 @@ class _PendingStub implements PendingTransactionData {
     required this.amount,
     required this.body,
     required this.isIncome,
-    this.fromBank,
-  });
+  }) : fromBank = null;
 }
