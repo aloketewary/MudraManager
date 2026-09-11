@@ -348,7 +348,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 // Glassy translucent surface matching SettingsGroupCard
                                 color: color.surface.withValues(alpha: 0.75),
                                 borderRadius: BorderRadius.circular(
-                                    spacing.radiusMedium + 4),
+                                    spacing.radiusMedium + 4,),
                                 border: Border.all(
                                   color: color.outlineVariant
                                       .withValues(alpha: 0.3),
@@ -365,7 +365,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(
-                                    spacing.radiusMedium + 4),
+                                    spacing.radiusMedium + 4,),
                                 child: BackdropFilter(
                                   filter:
                                       ImageFilter.blur(sigmaX: 8, sigmaY: 8),
@@ -515,9 +515,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         button: true,
                         child: TextButton.icon(
                           onPressed: () => _showLogoutBottomSheet(
-                              context, ref, color, textTheme),
+                              context, ref, color, textTheme,),
                           icon: Icon(LucideIcons.logOut,
-                              size: 18, color: color.error),
+                              size: 18, color: color.error,),
                           label: Text(
                             l10n.profile_logout,
                             style: textTheme.bodyMedium
@@ -798,7 +798,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   color: color.primaryContainer
                                       .withValues(alpha: isDark ? 0.1 : 0.06),
                                   borderRadius: BorderRadius.circular(
-                                      spacing.radiusMedium),
+                                      spacing.radiusMedium,),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -816,12 +816,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     SizedBox(width: spacing.elementGap),
                                     Container(
                                       padding: EdgeInsets.all(
-                                          spacing.elementGapMin + 2),
+                                          spacing.elementGapMin + 2,),
                                       decoration: BoxDecoration(
                                         color: color.onSurfaceVariant
                                             .withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(
-                                            spacing.radiusSmall),
+                                            spacing.radiusSmall,),
                                       ),
                                       child: Icon(
                                         LucideIcons.pencil,
@@ -850,7 +850,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ),
                               child: Text(
                                 FieldEncryptionService.safeDisplay(
-                                    profile.email),
+                                    profile.email,),
                                 style: textTheme.bodySmall?.copyWith(
                                   color: color.onSurfaceVariant,
                                 ),
@@ -863,7 +863,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     SizedBox(height: spacing.elementGap * 2),
                     // Streak + member since row
                     _buildHeroBadges(profile, color, textTheme, spacing,
-                        streakAsync, reduceMotion),
+                        streakAsync, reduceMotion,),
                   ],
                 ),
               ),
@@ -1040,7 +1040,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   borderRadius: BorderRadius.circular(spacing.radiusSmall + 4),
                 ),
                 child: Icon(LucideIcons.logOut,
-                    size: spacing.iconLG, color: color.error),
+                    size: spacing.iconLG, color: color.error,),
               ),
               SizedBox(height: spacing.elementGap),
               Text(

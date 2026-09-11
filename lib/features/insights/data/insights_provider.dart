@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/features/analytics/data/advanced_analytics_service.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_aggregation_service.dart';
@@ -62,14 +63,18 @@ final insightsProvider = FutureProvider.autoDispose<InsightsData>((ref) async {
   final periodDates = period.resolve();
 
   // Calculate days until payday from salary/income transactions
-  final incomeTransactions = transactions.where((tx) => tx.isExpense == false).toList()
+  final incomeTransactions = transactions
+      .where((tx) => tx.isExpense == false)
+      .toList()
     ..sort((a, b) => a.date.compareTo(b.date));
   final today = DateTime.now();
   final nextPayday = incomeTransactions.isNotEmpty
-      ? incomeTransactions.firstWhere(
-          (tx) => tx.date.isAfter(today) || tx.date.isAtSameMomentAs(today),
-          orElse: () => incomeTransactions.last,
-        ).date
+      ? incomeTransactions
+          .firstWhere(
+            (tx) => tx.date.isAfter(today) || tx.date.isAtSameMomentAs(today),
+            orElse: () => incomeTransactions.last,
+          )
+          .date
       : today.add(const Duration(days: 30));
   final daysUntilPayday = nextPayday.difference(today).inDays.clamp(0, 31);
 
@@ -142,7 +147,7 @@ List<Recommendation> _generateQuickWins({
         iconColor: FinanceColors.incomeColor(brightness),
         priority: RecommendationPriority.high,
         potentialSavings: potentialSavings,
-        actionRoute: '/budget/create',
+        actionRoute: AppRoutes.addBudget,
         actionLabel: 'Create Budget',
       ),
     );
@@ -159,7 +164,7 @@ List<Recommendation> _generateQuickWins({
         icon: LucideIcons.alertCircle,
         iconColor: FinanceColors.statusWarning,
         priority: RecommendationPriority.high,
-        actionRoute: '/analytics/trends',
+        actionRoute: AppRoutes.spendingTrends,
         actionLabel: 'See Trends',
       ),
     );
@@ -180,7 +185,7 @@ List<Recommendation> _generateQuickWins({
           icon: LucideIcons.chartPie,
           iconColor: FinanceColors.expenseColor(brightness),
           priority: RecommendationPriority.medium,
-          actionRoute: '/category/${Uri.encodeComponent(topCategory.key)}',
+          actionRoute: AppRoutes.analytics,
           actionLabel: 'View Details',
         ),
       );
@@ -211,7 +216,7 @@ List<Recommendation> _generateRecommendations({
         icon: LucideIcons.trendingUp,
         iconColor: FinanceColors.expenseColor(brightness),
         priority: RecommendationPriority.medium,
-        actionRoute: '/category/${Uri.encodeComponent(category.categoryName)}',
+        actionRoute: AppRoutes.analytics,
         actionLabel: 'Review',
       ),
     );
@@ -227,7 +232,7 @@ List<Recommendation> _generateRecommendations({
       icon: LucideIcons.refreshCw,
       iconColor: FinanceColors.statusWarning,
       priority: RecommendationPriority.low,
-      actionRoute: '/recurring',
+      actionRoute: AppRoutes.recurringExpenses,
       actionLabel: 'View Subscriptions',
     ),
   );

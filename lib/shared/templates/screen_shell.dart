@@ -30,6 +30,9 @@ class ScreenShellConfig {
   /// Optional bottom widget for AppBar (e.g., TabBar).
   final PreferredSizeWidget? bottom;
 
+  /// Optional custom AppBar. When provided, overrides [appBarMode].
+  final PreferredSizeWidget? customAppBar;
+
   const ScreenShellConfig({
     this.title,
     this.titleWidget,
@@ -37,6 +40,7 @@ class ScreenShellConfig {
     this.enableRefresh = true,
     this.toolbarHeight,
     this.bottom,
+    this.customAppBar,
   });
 }
 
@@ -88,6 +92,8 @@ class ScreenShell extends ConsumerWidget {
     ColorScheme color,
     TextTheme textTheme,
   ) {
+    if (config.customAppBar != null) return config.customAppBar;
+
     final actionWidgets = <Widget>[
       ...actions.appBar.map(
         (a) => IconButton(

@@ -24,12 +24,10 @@ import 'package:mudra_manager/features/dashboard/data/today_card_analytics.dart'
 import 'package:mudra_manager/features/dashboard/data/widget_analytics_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/dashboard_banners.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/daily_briefing_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/first_transaction_nudge.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/sms_success_celebration_sheet.dart';
 import 'package:mudra_manager/features/gamification/presentation/widgets/streak_saved_celebration_sheet.dart';
-import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 
 // ─────────────────────────────────────────────────────────────
@@ -252,13 +250,9 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.of(context).disableAnimations;
     final color = Theme.of(context).colorScheme;
-    final dashboardBackground = color.brightness == Brightness.dark
-        ? color.surfaceContainerHigh
-        : color.surface;
+    final dashboardBackground = color.surface;
     final dashboardAsync = ref.watch(dashboardDataProvider);
     final widgets = ref.watch(orderedDashboardWidgetsProvider);
-    final alerts = ref.watch(budgetAlertsNotifierProvider);
-    final hasSeenHelp = ref.watch(hasSeenHelpGuideProvider);
     final animationState = ref.watch(dashboardAnimationProvider);
     final ctxt = AppLocalizations.of(context)!;
 
@@ -283,12 +277,8 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
                   constraints: BoxConstraints(maxWidth: maxWidth),
                   child: _DashboardContent(
                     reduceMotion: reduceMotion,
-                    data: data,
                     widgets: widgets,
-                    alerts: alerts,
-                    hasSeenHelp: hasSeenHelp,
                     animationState: animationState,
-                    pendingSmsCount: data.pendingSmsCount,
                     hasTransactions: hasTransactions,
                     nudgeDismissed:
                         SharedPrefsUtil.instance.getFirstTxnNudgeDismissed(),
@@ -338,12 +328,8 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
 
 class _DashboardContent extends ConsumerWidget {
   final bool reduceMotion;
-  final DashboardData data;
   final List<DashboardWidgetPlugin> widgets;
-  final List<BudgetAlert> alerts;
-  final bool hasSeenHelp;
   final DashboardAnimationState animationState;
-  final int pendingSmsCount;
 
   // Pre-computed values passed as constructor params
   final bool hasTransactions;
@@ -352,12 +338,8 @@ class _DashboardContent extends ConsumerWidget {
 
   const _DashboardContent({
     required this.reduceMotion,
-    required this.data,
     required this.widgets,
-    required this.alerts,
-    required this.hasSeenHelp,
     required this.animationState,
-    required this.pendingSmsCount,
     required this.hasTransactions,
     required this.nudgeDismissed,
     required this.isNewUser,
@@ -405,13 +387,6 @@ class _DashboardContent extends ConsumerWidget {
         key: const PageStorageKey('dashboard_scroll'),
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          SliverToBoxAdapter(
-            child: PrioritizedBanner(
-              hasSeenHelp: hasSeenHelp,
-              alerts: alerts,
-              pendingSmsCount: pendingSmsCount,
-            ),
-          ),
           if (!hasTransactions && !nudgeDismissed)
             SliverToBoxAdapter(
               child: FirstTransactionNudge(

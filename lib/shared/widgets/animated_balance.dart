@@ -31,7 +31,18 @@ class AnimatedBalance extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(balanceVisibilityProvider);
+    final isVisible = ref.watch(balanceVisibilityProvider);
+    final effectiveStyle = style ?? Theme.of(context).textTheme.headlineMedium;
+
+    if (!isVisible) {
+      return RepaintBoundary(
+        child: Semantics(
+          label: 'Balance hidden',
+          excludeSemantics: true,
+          child: Text('••••', style: effectiveStyle),
+        ),
+      );
+    }
 
     return RepaintBoundary(
       child: TweenAnimationBuilder<double>(
@@ -41,7 +52,7 @@ class AnimatedBalance extends ConsumerWidget {
           return CurrencyText(
             amount: animatedValue,
             currencyCode: currencyCode,
-            style: style ?? Theme.of(context).textTheme.headlineMedium,
+            style: effectiveStyle,
             textAlign: textAlign,
             compact: compact,
             fixedLength: fixedStringLength,

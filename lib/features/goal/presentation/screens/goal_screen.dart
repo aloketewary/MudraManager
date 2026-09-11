@@ -7,21 +7,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
-import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
-import 'package:mudra_manager/features/goal/domain/goal_health.dart';
+import 'package:mudra_manager/features/goal/presentation/widgets/quick_deposit_sheet.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/finance_v2/finance_progress_bar.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/safe_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
-import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
 class GoalScreen extends ConsumerWidget {
@@ -32,29 +30,6 @@ class GoalScreen extends ConsumerWidget {
     return goal.contributions
         .map((c) => GoalContributionData(amount: c.amount, date: c.date))
         .toList();
-  }
-
-  /// Whether a goal needs attention (delegates to state machine).
-  bool _needsAttention(Goal goal) {
-    if (goal.progressPercent >= 1.0) return false;
-    final now = DateTime.now();
-    final contribs = _contributions(goal);
-    final pace = GoalStateMachine.recentPace(contribs, now);
-    final needed = GoalStateMachine.neededPerMonth(
-      goal.remainingAmount,
-      goal.targetDate,
-      now,
-    );
-    final gap = GoalStateMachine.paceGap(pace, needed);
-    final daysLeft = GoalStateMachine.daysRemaining(goal.targetDate, now);
-    final health = GoalHealth.compute(goal);
-    return GoalStateMachine.needsAttention(
-      progressPercent: goal.progressPercent,
-      gap: gap,
-      daysRemaining: daysLeft,
-      predictedDate: health.predictedDate,
-      targetDate: goal.targetDate,
-    );
   }
 
   /// Priority sort score (delegates to state machine).
@@ -88,21 +63,16 @@ class GoalScreen extends ConsumerWidget {
     return ScreenShell(
       config: ScreenShellConfig(
         title: ctxt.title_goals,
-        appBarMode: AppBarMode.standard,
+        appBarMode: AppBarMode.none,
         enableRefresh: true,
-      ),
-      actions: ScreenActions.build(
-        appBar: [
-          ScreenAction(
-            id: 'add_goal',
-            label: 'Add',
-            icon: LucideIcons.plus,
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              context.push(AppRoutes.addGoal);
-            },
-          ),
-        ],
+        customAppBar: _GoalHomeStyleAppBar(
+          title: ctxt.title_goals,
+          bottomHeight: spacing.cardInner * 3 + spacing.sectionGap,
+          onAddGoal: () {
+            HapticFeedback.mediumImpact();
+            context.push(AppRoutes.addGoal);
+          },
+        ),
       ),
       onRefresh: () => RefreshHelper.withMinDuration(
         () async {
@@ -123,9 +93,6 @@ class GoalScreen extends ConsumerWidget {
               .toList();
           final completedGoals =
               goals.where((g) => g.progressPercent >= 1.0).toList();
-          final totalSaved =
-              activeGoals.fold(0.0, (sum, g) => sum + g.currentAmount);
-          final attentionCount = activeGoals.where(_needsAttention).length;
 
           // Priority sort
           activeGoals.sort(
@@ -135,23 +102,19 @@ class GoalScreen extends ConsumerWidget {
           return CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              // ── Portfolio Status Strip ──
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(
                     spacing.cardHorizontal,
-                    spacing.elementGap,
+                    spacing.cardVertical,
                     spacing.cardHorizontal,
-                    spacing.sectionGap,
+                    spacing.elementGap,
                   ),
-                  child: _buildStatusStrip(
-                    activeGoals.length,
-                    totalSaved,
-                    attentionCount,
-                    color,
-                    textTheme,
-                    spacing,
-                    ctxt,
+                  child: Text(
+                    'My Goals',
+                    style: textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -172,7 +135,6 @@ class GoalScreen extends ConsumerWidget {
                         spacing,
                         context,
                         ref,
-                        ctxt,
                       ),
                     ),
                     childCount: activeGoals.length,
@@ -206,13 +168,14 @@ class GoalScreen extends ConsumerWidget {
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => Padding(
                         padding: EdgeInsets.only(bottom: spacing.elementGapMin),
-                        child: _buildCompletedCard(
+                        child: _buildGoalCard(
                           completedGoals[index],
                           color,
                           textTheme,
                           spacing,
                           context,
-                          ctxt,
+                          ref,
+                          isCompleted: true,
                         ),
                       ),
                       childCount: completedGoals.length,
@@ -243,329 +206,311 @@ class GoalScreen extends ConsumerWidget {
     );
   }
 
-  // ── Portfolio Hero Card (one glow per screen) ──
-  Widget _buildStatusStrip(
-    int goalCount,
-    double totalSaved,
-    int attentionCount,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-    AppLocalizations ctxt,
-  ) {
-    final isDark = color.brightness == Brightness.dark;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: EdgeInsets.all(spacing.cardInner),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.primary.withValues(alpha: isDark ? 0.20 : 0.12),
-            color.surface,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.primary.withValues(alpha: 0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: color.primary.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(LucideIcons.goal, size: 14, color: color.primary),
-              SizedBox(width: spacing.elementGapMin),
-              Text(
-                ctxt.goal_goalsInProgress(goalCount),
-                style: textTheme.labelLarge?.copyWith(color: color.primary),
-              ),
-            ],
-          ),
-          SizedBox(height: spacing.elementGap),
-          CurrencyText(
-            amount: totalSaved,
-            fixedLength: 0,
-            suffixText: ctxt.goal_suffixSaved,
-            style: textTheme.headlineLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: color.onSurface,
-            ),
-          ),
-          if (attentionCount > 0) ...[
-            SizedBox(height: spacing.elementGap * 1.5),
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: spacing.elementGap,
-                vertical: spacing.elementGapMin,
-              ),
-              decoration: BoxDecoration(
-                color: FinanceColors.statusWarning.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                border: Border.all(
-                  color: FinanceColors.statusWarning.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    LucideIcons.triangleAlert,
-                    size: 12,
-                    color: FinanceColors.statusWarning,
-                  ),
-                  SizedBox(width: spacing.elementGapMin),
-                  Text(
-                    ctxt.goal_needAttention(attentionCount),
-                    style: textTheme.labelSmall?.copyWith(
-                      color: FinanceColors.statusWarning,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  // ── Goal Card (decision-first) ──
+  // ── Goal Card (reference layout) ──
   Widget _buildGoalCard(
     Goal goal,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
     BuildContext context,
-    WidgetRef ref,
-    AppLocalizations ctxt,
-  ) {
-    final goalColor =
-        goal.colorValue != null ? Color(goal.colorValue!) : color.primary;
-    final remaining = goal.remainingAmount;
-    final progress = goal.progressPercent;
-    final hasDeadline = goal.targetDate != null;
-    final contributions = goal.contributions
-        .map((c) => GoalContributionData(amount: c.amount, date: c.date))
-        .toList();
-    final pace = GoalStateMachine.recentPace(contributions, DateTime.now());
-    final needed = GoalStateMachine.neededPerMonth(
-        goal.remainingAmount, goal.targetDate, DateTime.now(),);
-    final gap = GoalStateMachine.paceGap(pace, needed);
-    final deposit = GoalStateMachine.suggestedDeposit(contributions, needed);
-
-    final gapColor = gap >= 0 ? goalColor : FinanceColors.statusWarning;
+    WidgetRef ref, {
+    bool isCompleted = false,
+  }) {
+    final goalColor = isCompleted
+        ? FinanceColors.statusGood
+        : goal.colorValue == null
+            ? color.primary
+            : Color(goal.colorValue!);
+    final progress =
+        (isCompleted ? 1.0 : goal.progressPercent).clamp(0.0, 1.0).toDouble();
+    final percent = (progress * 100).round();
+    final cardRadius = spacing.radiusMedium + spacing.elementGapMin;
 
     return Container(
       decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+        color: color.surface,
+        borderRadius: BorderRadius.circular(cardRadius),
+        border: Border.all(
+          color: color.outlineVariant.withValues(alpha: 0.72),
+        ),
       ),
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
           context.push(AppRoutes.goalDetails, extra: {'goal': goal});
         },
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        borderRadius: BorderRadius.circular(cardRadius),
         child: Padding(
-          padding: EdgeInsets.all(spacing.cardInner),
-          child: Column(
+          padding: EdgeInsets.all(spacing.elementGap),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Name
+              _buildGoalVisual(goal, goalColor, color, spacing),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (goal.description?.trim().isNotEmpty ?? false)
+                                Text(
+                                  goal.description!.trim(),
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: color.onSurfaceVariant,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              if (goal.description?.trim().isNotEmpty ?? false)
+                                SizedBox(height: spacing.elementGapMin),
+                              Text(
+                                goal.name.safe(),
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        _buildGoalActionsButton(
+                          goal,
+                          color,
+                          spacing,
+                          context,
+                          ref,
+                          isCompleted: isCompleted,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: spacing.elementGapMin),
+                    Text(
+                      '$percent%',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: spacing.elementGapMin),
+                    FinanceProgressBar(
+                      value: progress,
+                      fillColor: goalColor,
+                      trackColor: color.surfaceContainerHighest,
+                      showStripeRemainder: false,
+                      height: spacing.progressThin,
+                      semanticLabel: '${goal.name} progress',
+                    ),
+                    SizedBox(height: spacing.elementGapMin),
+                    Row(
+                      children: [
+                        CurrencyText(
+                          amount: goal.currentAmount,
+                          currencyCode: goal.currencyCode,
+                          fixedLength: 0,
+                          compact: true,
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: color.onSurface,
+                          ),
+                        ),
+                        Text(
+                          ' / ',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                        Flexible(
+                          child: CurrencyText(
+                            amount: goal.targetAmount,
+                            currencyCode: goal.currencyCode,
+                            fixedLength: 0,
+                            compact: true,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: color.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGoalVisual(
+    Goal goal,
+    Color goalColor,
+    ColorScheme color,
+    AppSpacing spacing,
+  ) {
+    return Container(
+      width: spacing.cardInner * 5,
+      height: spacing.cardInner * 4,
+      decoration: BoxDecoration(
+        color: goalColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: goalColor.withValues(alpha: 0.18)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            goalColor.withValues(alpha: 0.18),
+            color.surfaceContainerHighest,
+          ],
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        IconHelper.resolveIcon(
+          iconName: goal.iconName,
+          text: '${goal.name} ${goal.description ?? ''}',
+          fallback: goal.goalType.icon,
+        ),
+        color: goalColor,
+        size: spacing.iconXL,
+      ),
+    );
+  }
+
+  Widget _buildGoalActionsButton(
+    Goal goal,
+    ColorScheme color,
+    AppSpacing spacing,
+    BuildContext context,
+    WidgetRef ref, {
+    required bool isCompleted,
+  }) {
+    return IconButton(
+      onPressed: () {
+        HapticFeedback.lightImpact();
+        _showGoalActions(
+          context,
+          ref,
+          goal,
+          spacing,
+          isCompleted: isCompleted,
+        );
+      },
+      tooltip: 'Goal actions',
+      icon: Icon(
+        LucideIcons.ellipsis,
+        size: spacing.iconMD,
+        color: color.onSurfaceVariant,
+      ),
+      padding: EdgeInsets.zero,
+      constraints: BoxConstraints(
+        minWidth: spacing.touchTargetSmall,
+        minHeight: spacing.touchTargetSmall,
+      ),
+      visualDensity: VisualDensity.compact,
+    );
+  }
+
+  Future<void> _showGoalActions(
+    BuildContext context,
+    WidgetRef ref,
+    Goal goal,
+    AppSpacing spacing, {
+    required bool isCompleted,
+  }) async {
+    final ctxt = AppLocalizations.of(context)!;
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => SafeArea(
+        child: Container(
+          padding: EdgeInsets.fromLTRB(
+            spacing.cardInner,
+            spacing.elementGap,
+            spacing.cardInner,
+            spacing.cardInner,
+          ),
+          decoration: BoxDecoration(
+            color: color.surfaceContainerHigh,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(spacing.radiusLarge),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: spacing.cardInner * 2,
+                height: spacing.elementGapMin,
+                decoration: BoxDecoration(
+                  color: color.primary,
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+              ),
+              SizedBox(height: spacing.elementGap),
               Row(
                 children: [
-                  Icon(
-                    IconHelper.getIconData(goal.iconName),
-                    color: goalColor,
-                    size: 18,
-                  ),
-                  SizedBox(width: spacing.elementGapMin),
+                  _buildGoalVisual(goal, color.primary, color, spacing),
+                  SizedBox(width: spacing.elementGap),
                   Expanded(
                     child: Text(
                       goal.name.safe(),
-                      style: textTheme.bodyLarge
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
               ),
-
-              SizedBox(height: spacing.elementGap),
-
-              // Remaining (hero metric on card)
-              CurrencyText(
-                currencyCode: goal.currencyCode,
-                amount: remaining,
-                fixedLength: 0,
-                compact: false,
-                suffixText: ctxt.goal_suffixLeft,
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+              Divider(height: spacing.sectionGap),
+              _goalAction(
+                icon: LucideIcons.goal,
+                label: ctxt.common_viewDetails,
+                color: color,
+                spacing: spacing,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  context.push(AppRoutes.goalDetails, extra: {'goal': goal});
+                },
               ),
-
-              SizedBox(height: spacing.elementGap),
-
-              // Gap signal (neutral: +/-)
-              if (needed > 0) ...[
-                Row(
-                  children: [
-                    Text(
-                      gap >= 0 ? '+' : '',
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: gapColor,
-                      ),
-                    ),
-                    CurrencyText(
-                      currencyCode: goal.currencyCode,
-                      amount: gap,
-                      fixedLength: 0,
-                      compact: true,
-                      suffixText: '/mo',
-                      showSign: gap < 0,
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: gapColor,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: spacing.elementGap),
-              ],
-
-              // One-tap contribution (visible within 2nd glance)
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () {
+              if (!isCompleted)
+                _goalAction(
+                  icon: LucideIcons.plus,
+                  label: ctxt.goal_quickDeposit,
+                  color: color,
+                  spacing: spacing,
+                  onTap: () {
+                    Navigator.pop(sheetContext);
                     HapticFeedback.mediumImpact();
-                    _quickDeposit(context, ref, goal, deposit);
+                    showQuickDepositSheet(
+                      context: context,
+                      ref: ref,
+                      goal: goal,
+                      goalColor: goal.colorValue == null
+                          ? color.primary
+                          : Color(goal.colorValue!),
+                    );
                   },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: goalColor,
-                    side: BorderSide(
-                      color: goalColor.withValues(alpha: 0.3),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      vertical: spacing.elementGapMin,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(LucideIcons.plus, size: 14, color: goalColor),
-                      const SizedBox(width: 4),
-                      CurrencyText(
-                        currencyCode: goal.currencyCode,
-                        amount: deposit,
-                        fixedLength: 0,
-                        compact: true,
-                        style: textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: goalColor,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
-              ),
-
-              SizedBox(height: spacing.elementGap),
-
-              // Evidence: pace vs needed (supporting detail)
-              if (needed > 0) ...[
-                Row(
-                  children: [
-                    Text(
-                      ctxt.goal_currentAvgMonth,
-                      style: textTheme.labelSmall
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                    const SizedBox(width: 4),
-                    CurrencyText(
-                      currencyCode: goal.currencyCode,
-                      amount: pace,
-                      fixedLength: 0,
-                      compact: true,
-                      style: textTheme.labelSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      '  ·  ',
-                      style: textTheme.labelSmall
-                          ?.copyWith(color: color.outlineVariant),
-                    ),
-                    Text(
-                      ctxt.goal_neededPerMonth,
-                      style: textTheme.labelSmall
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                    const SizedBox(width: 4),
-                    CurrencyText(
-                      currencyCode: goal.currencyCode,
-                      amount: needed,
-                      fixedLength: 0,
-                      compact: true,
-                      style: textTheme.labelSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-                SizedBox(height: spacing.elementGapMin),
-              ],
-
-              // Target date
-              if (hasDeadline)
-                Text(
-                  safeDateFormat('MMM yyyy', ctxt.localeName)
-                      .format(goal.targetDate!),
-                  style: textTheme.labelSmall
-                      ?.copyWith(color: color.onSurfaceVariant),
-                ),
-
-              SizedBox(height: spacing.elementGapMin),
-
-              // Progress bar + % (subordinate, last glance)
-              Row(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(3),
-                      child: LinearProgressIndicator(
-                        value: progress.clamp(0.0, 1.0),
-                        backgroundColor: goalColor.withValues(alpha: 0.1),
-                        valueColor: AlwaysStoppedAnimation(goalColor),
-                        minHeight: 4,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: spacing.elementGap),
-                  Text(
-                    '${(progress * 100).toStringAsFixed(0)}%',
-                    style: textTheme.labelSmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+              _goalAction(
+                icon: LucideIcons.pencil,
+                label: ctxt.goal_editGoal,
+                color: color,
+                spacing: spacing,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  context.push(AppRoutes.editGoal, extra: {'goal': goal});
+                },
               ),
             ],
           ),
@@ -574,81 +519,196 @@ class GoalScreen extends ConsumerWidget {
     );
   }
 
-  // ── Completed Card (minimal) ──
-  Widget _buildCompletedCard(
-    Goal goal,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-    BuildContext context,
-    AppLocalizations ctxt,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+  Widget _goalAction({
+    required IconData icon,
+    required String label,
+    required ColorScheme color,
+    required AppSpacing spacing,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Container(
+        width: spacing.touchTargetSmall,
+        height: spacing.touchTargetSmall,
+        decoration: BoxDecoration(
+          color: color.primary.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+        ),
+        alignment: Alignment.center,
+        child: Icon(icon, size: spacing.iconSM, color: color.primary),
       ),
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          context.push(AppRoutes.goalDetails, extra: {'goal': goal});
-        },
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+      title: Text(label),
+      trailing: Icon(
+        LucideIcons.chevronRight,
+        size: spacing.iconSM,
+        color: color.onSurfaceVariant,
+      ),
+      onTap: onTap,
+    );
+  }
+}
+
+class _GoalHomeStyleAppBar extends ConsumerWidget
+    implements PreferredSizeWidget {
+  const _GoalHomeStyleAppBar({
+    required this.title,
+    required this.bottomHeight,
+    required this.onAddGoal,
+  });
+
+  final String title;
+  final double bottomHeight;
+  final VoidCallback onAddGoal;
+
+  @override
+  Size get preferredSize => Size.fromHeight(80 + bottomHeight);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
+    final goals = ref.watch(goalsProvider).asData?.value ?? const <Goal>[];
+    final savedAmount = goals.fold<double>(
+      0,
+      (sum, goal) => sum + goal.currentAmount,
+    );
+    final targetAmount = goals.fold<double>(
+      0,
+      (sum, goal) => sum + goal.targetAmount,
+    );
+
+    return AppBar(
+      automaticallyImplyLeading: true,
+      backgroundColor: color.surfaceContainerHigh,
+      foregroundColor: color.onSurface,
+      surfaceTintColor: Colors.transparent,
+      flexibleSpace: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.surfaceContainerHigh,
+              color.primaryContainer.withValues(alpha: 0.72),
+            ],
+          ),
+        ),
+      ),
+      scrolledUnderElevation: 0,
+      toolbarHeight: 80,
+      titleSpacing: spacing.cardInner,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(spacing.radiusLarge + spacing.elementGap),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      title: Text(
+        title,
+        style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      ),
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(bottomHeight),
         child: Padding(
-          padding: EdgeInsets.all(spacing.cardInner),
-          child: Row(
-            children: [
-              const Icon(
-                LucideIcons.check,
-                color: FinanceColors.statusGood,
-                size: 18,
-              ),
-              SizedBox(width: spacing.elementGap),
-              Expanded(
-                child: Text(
-                  goal.name.safe(),
-                  style: textTheme.bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.w500),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          padding: EdgeInsets.fromLTRB(
+            spacing.cardInner,
+            0,
+            spacing.cardInner,
+            spacing.cardInner,
+          ),
+          child: Container(
+            padding: EdgeInsets.all(spacing.elementGap),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _GoalHeaderAmount(
+                    label: ctxt.goal_suffixSaved,
+                    amount: savedAmount,
+                    color: color,
+                    textTheme: textTheme,
+                    spacing: spacing,
+                  ),
                 ),
-              ),
-              CurrencyText(
-                currencyCode: goal.currencyCode,
-                amount: goal.targetAmount,
-                fixedLength: 0,
-                compact: true,
-                style: textTheme.labelMedium?.copyWith(
-                  color: FinanceColors.statusGood,
-                  fontWeight: FontWeight.w600,
+                SizedBox(width: spacing.elementGap * 2),
+                Expanded(
+                  child: _GoalHeaderAmount(
+                    label: ctxt.goal_target,
+                    amount: targetAmount,
+                    color: color,
+                    textTheme: textTheme,
+                    spacing: spacing,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
+      actions: [
+        Padding(
+          padding: EdgeInsets.only(right: spacing.cardInner),
+          child: IconButton(
+            onPressed: onAddGoal,
+            tooltip: 'Add goal',
+            icon: const Icon(LucideIcons.plus),
+            style: IconButton.styleFrom(
+              foregroundColor: color.onPrimary,
+              backgroundColor: color.primary,
+              minimumSize: Size.square(spacing.touchTargetSmall),
+              maximumSize: Size.square(spacing.touchTargetSmall),
+              padding: EdgeInsets.zero,
+              shape: const CircleBorder(),
+            ),
+          ),
+        ),
+      ],
     );
   }
+}
 
-  // ── Quick Deposit (one-tap) ──
-  void _quickDeposit(
-    BuildContext context,
-    WidgetRef ref,
-    Goal goal,
-    double amount,
-  ) async {
-    await ref.read(goalServiceProvider).addContribution(goal.id, amount);
-    ref.invalidate(goalsProvider);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${formatCurrency(amount, code: goal.currencyCode, decimals: 0)} → ${goal.name.safe()}',
+class _GoalHeaderAmount extends StatelessWidget {
+  const _GoalHeaderAmount({
+    required this.label,
+    required this.amount,
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+  });
+
+  final String label;
+  final double amount;
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: textTheme.bodySmall?.copyWith(
+            color: color.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
           ),
-          behavior: SnackBarBehavior.floating,
         ),
-      );
-    }
+        SizedBox(height: spacing.elementGapMin),
+        CurrencyText(
+          amount: amount,
+          compact: false,
+          fixedLength: 0,
+          style: textTheme.headlineMedium?.copyWith(
+            color: color.onSurface,
+            fontWeight: FontWeight.w500,
+            height: 1,
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:io' show Directory, File;
 import 'dart:typed_data' show Uint8List;
 
 import 'package:file_picker/file_picker.dart';
@@ -19,17 +20,31 @@ Future<Directory> getSaveDirectory({bool askUser = false}) async {
   return fallbackDir!;
 }
 
-Future<void> saveExportedFile(
+Future<bool> saveExportedFile(
   Uint8List data,
   String fileName, {
   bool askUser = false,
 }) async {
-  final directory = await getSaveDirectory(askUser: askUser);
-  final filePath = '${directory.path}/$fileName';
+  if (askUser) {
+    final extension =
+        fileName.contains('.') ? fileName.split('.').last.toLowerCase() : null;
+    final savedPath = await FilePicker.saveFile(
+      fileName: fileName,
+      bytes: data,
+      type: extension == null ? FileType.any : FileType.custom,
+      allowedExtensions: extension == null ? null : [extension],
+    );
 
+    if (savedPath == null) return false;
+
+    await OpenFile.open(savedPath);
+    return true;
+  }
+
+  final directory = await getSaveDirectory();
+  final filePath = '${directory.path}/$fileName';
   final file = File(filePath);
   await file.writeAsBytes(data);
-
-  // Optional: open it after save
-  OpenFile.open(filePath);
+  await OpenFile.open(filePath);
+  return true;
 }

@@ -20,7 +20,7 @@ import 'package:mudra_manager/features/goal/domain/goal_health.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
-import 'package:mudra_manager/shared/widgets/type_section_header.dart';
+import 'package:mudra_manager/shared/widgets/finance_v2/finance_progress_bar.dart';
 
 class EditGoalScreen extends ConsumerStatefulWidget {
   final Goal goal;
@@ -39,6 +39,7 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
 
   bool _saving = false;
   bool _adjustingTarget = false;
+  int _step = 0;
   late TextEditingController _targetController;
 
   @override
@@ -186,6 +187,585 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     if (mounted) context.pop();
   }
 
+  bool _canContinueForStep(int step) {
+    if (step == 0) return _nameController.text.trim().isNotEmpty;
+    if (step == 1) return _targetAmount >= widget.goal.currentAmount;
+    return true;
+  }
+
+  void _nextStep(AppSpacing spacing) {
+    if (!_canContinueForStep(_step)) {
+      if (_step == 0) {
+        SnackbarService.warning(
+          AppLocalizations.of(context)!.goal_giveGoalName,
+          spacing,
+        );
+      } else {
+        SnackbarService.warning(
+          AppLocalizations.of(context)!.goal_targetBelowSaved,
+          spacing,
+        );
+      }
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
+    setState(() => _step = (_step + 1).clamp(0, 2));
+  }
+
+  void _previousStep() {
+    FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
+    setState(() => _step = (_step - 1).clamp(0, 2));
+  }
+
+  String _stepLabel(AppLocalizations ctxt) {
+    return switch (_step) {
+      0 => ctxt.goal_sectionIdentity,
+      1 => ctxt.goal_target,
+      _ => ctxt.goal_sectionCurrentState,
+    };
+  }
+
+  Widget _buildStepContent(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return switch (_step) {
+      0 => _buildIdentityStep(color, textTheme, spacing, ctxt),
+      1 => _buildTargetStep(color, textTheme, spacing, ctxt),
+      _ => _buildReviewStep(color, textTheme, spacing, ctxt),
+    };
+  }
+
+  Widget _buildIdentityStep(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return Column(
+      key: const ValueKey('edit-identity-step'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          ctxt.goal_sectionIdentity,
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        SizedBox(height: spacing.elementGapMin),
+        Text(
+          ctxt.goal_editGoalTitle,
+          style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+        ),
+        SizedBox(height: spacing.sectionGap),
+        TextFormField(
+          controller: _nameController,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          textInputAction: TextInputAction.next,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: ctxt.goal_goalName,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+          ),
+        ),
+        SizedBox(height: spacing.elementGap),
+        TextFormField(
+          controller: _whyController,
+          textCapitalization: TextCapitalization.sentences,
+          maxLength: 80,
+          decoration: InputDecoration(
+            labelText: ctxt.goal_whyOptional,
+            hintText: ctxt.goal_whyHint,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            counterText: '',
+          ),
+        ),
+        SizedBox(height: spacing.sectionGap),
+        _buildGoalTypeRow(color, textTheme, spacing, ctxt),
+      ],
+    );
+  }
+
+  Widget _buildTargetStep(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return Column(
+      key: const ValueKey('edit-target-step'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          ctxt.goal_target,
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        SizedBox(height: spacing.elementGapMin),
+        Text(
+          ctxt.goal_targetAmount,
+          style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+        ),
+        SizedBox(height: spacing.sectionGap),
+        _buildTargetAdjust(color, textTheme, spacing, ctxt),
+        SizedBox(height: spacing.elementGap),
+        _buildTargetDate(color, textTheme, spacing, ctxt),
+        if (_targetAmount >= widget.goal.currentAmount) ...[
+          SizedBox(height: spacing.sectionGap * 1.5),
+          _buildProjection(color, textTheme, spacing, ctxt),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildReviewStep(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return Column(
+      key: const ValueKey('edit-review-step'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          ctxt.goal_sectionCurrentState,
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        SizedBox(height: spacing.elementGapMin),
+        Text(
+          ctxt.goal_sectionProjection,
+          style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+        ),
+        SizedBox(height: spacing.sectionGap),
+        _buildReviewSummary(color, textTheme, spacing, ctxt),
+        SizedBox(height: spacing.sectionGap * 1.5),
+        _buildDangerZone(color, textTheme, spacing, ctxt),
+      ],
+    );
+  }
+
+  Widget _buildReviewSummary(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final progress = _targetAmount <= 0
+        ? 0.0
+        : (widget.goal.currentAmount / _targetAmount)
+            .clamp(0.0, 1.0)
+            .toDouble();
+    final goalColor = widget.goal.colorValue == null
+        ? color.primary
+        : Color(widget.goal.colorValue!);
+    final pace = _avgMonthlyPace;
+    final projected = _projectedCompletion;
+    final sortedContribs = widget.goal.contributions.toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+    final lastContrib = sortedContribs.isNotEmpty ? sortedContribs.first : null;
+
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.8)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ctxt.goal_saved,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                    SizedBox(height: spacing.elementGapMin),
+                    CurrencyText(
+                      currencyCode: widget.goal.currencyCode,
+                      amount: widget.goal.currentAmount,
+                      fixedLength: 0,
+                      compact: false,
+                      style: textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    ctxt.goal_target,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                  SizedBox(height: spacing.elementGapMin),
+                  CurrencyText(
+                    currencyCode: widget.goal.currencyCode,
+                    amount: _targetAmount,
+                    fixedLength: 0,
+                    compact: true,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: goalColor,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: spacing.elementGap),
+          FinanceProgressBar(
+            value: progress,
+            fillColor: goalColor,
+            trackColor: color.surfaceContainerHighest,
+            stripeColor: goalColor.withValues(alpha: 0.2),
+            height: spacing.progressNormal,
+            semanticLabel: '${widget.goal.name} progress',
+          ),
+          SizedBox(height: spacing.sectionGap),
+          Row(
+            children: [
+              Expanded(
+                child: _reviewMetric(
+                  label: ctxt.goal_suffixLeft,
+                  value: CurrencyText(
+                    currencyCode: widget.goal.currencyCode,
+                    amount: _remaining,
+                    fixedLength: 0,
+                    compact: true,
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  textTheme: textTheme,
+                  color: color,
+                ),
+              ),
+              _reviewMetricDivider(color, spacing),
+              Expanded(
+                child: _reviewMetric(
+                  label: ctxt.goal_currentAvgMonth,
+                  value: pace > 0
+                      ? CurrencyText(
+                          currencyCode: widget.goal.currencyCode,
+                          amount: pace,
+                          fixedLength: 0,
+                          compact: true,
+                          suffixText: '/mo',
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        )
+                      : Text(
+                          '-',
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                  textTheme: textTheme,
+                  color: color,
+                ),
+              ),
+              _reviewMetricDivider(color, spacing),
+              Expanded(
+                child: _reviewMetric(
+                  label: ctxt.goal_targetDateLabel,
+                  value: Text(
+                    _targetDate == null
+                        ? ctxt.goal_targetDate
+                        : safeDateFormat('MMM yyyy', ctxt.localeName)
+                            .format(_targetDate!),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  textTheme: textTheme,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+          if (projected != null || lastContrib != null) ...[
+            SizedBox(height: spacing.sectionGap),
+            Divider(
+              height: 1,
+              color: color.outlineVariant.withValues(alpha: 0.55),
+            ),
+            SizedBox(height: spacing.elementGap),
+          ],
+          if (projected != null)
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.trendingUp,
+                  size: spacing.iconSM,
+                  color: goalColor,
+                ),
+                SizedBox(width: spacing.elementGapMin),
+                Expanded(
+                  child: Text(
+                    '${ctxt.goal_forecastLabel}: ${safeDateFormat('MMM yyyy', ctxt.localeName).format(projected)}',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          if (projected != null && lastContrib != null)
+            SizedBox(height: spacing.elementGapMin),
+          if (lastContrib != null)
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.clock3,
+                  size: spacing.iconSM,
+                  color: color.onSurfaceVariant,
+                ),
+                SizedBox(width: spacing.elementGapMin),
+                Expanded(
+                  child: Text(
+                    '${ctxt.goal_lastContribution}: ${formatCurrency(lastContrib.amount, code: widget.goal.currencyCode, decimals: 0)} · ${_timeAgo(lastContrib.date, ctxt)}',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          if (sortedContribs.length > 1) ...[
+            SizedBox(height: spacing.elementGapMin),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  // Navigate to contribution history
+                },
+                child: Text(
+                  ctxt.goal_viewHistory,
+                  style: textTheme.labelSmall?.copyWith(color: color.primary),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _reviewMetric({
+    required String label,
+    required Widget value,
+    required TextTheme textTheme,
+    required ColorScheme color,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+        ),
+        const SizedBox(height: 4),
+        value,
+      ],
+    );
+  }
+
+  Widget _reviewMetricDivider(ColorScheme color, AppSpacing spacing) {
+    return Container(
+      width: 1,
+      height: spacing.touchTargetSmall,
+      margin: EdgeInsets.symmetric(horizontal: spacing.elementGapMin),
+      color: color.outlineVariant.withValues(alpha: 0.55),
+    );
+  }
+
+  Widget _buildEditPreview(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final goalName = _nameController.text.trim();
+
+    return AnimatedContainer(
+      duration: spacing.animFast,
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.primaryContainer.withValues(alpha: 0.72),
+            color.surfaceContainerHigh,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        border: Border.all(color: color.primary.withValues(alpha: 0.22)),
+        boxShadow: [
+          BoxShadow(
+            color: color.primary.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: spacing.touchTargetSmall,
+            height: spacing.touchTargetSmall,
+            decoration: BoxDecoration(
+              color: color.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              _goalType.icon,
+              color: color.primary,
+              size: spacing.iconLG,
+            ),
+          ),
+          SizedBox(width: spacing.elementGap),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  goalName.isEmpty ? ctxt.goal_yourGoal : goalName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: spacing.elementGapMin),
+                Text(
+                  _goalTypeLabel(_goalType, ctxt),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: spacing.elementGap),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                ctxt.goal_target,
+                style: textTheme.labelSmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                ),
+              ),
+              SizedBox(height: spacing.elementGapMin),
+              CurrencyText(
+                currencyCode: widget.goal.currencyCode,
+                amount: _targetAmount,
+                fixedLength: 0,
+                compact: false,
+                style: textTheme.titleMedium?.copyWith(
+                  color: color.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWizardActions(
+    ColorScheme color,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final isLastStep = _step == 2;
+    final canContinue = _canContinueForStep(_step) && !_saving;
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        spacing.cardHorizontal,
+        spacing.elementGap,
+        spacing.cardHorizontal,
+        spacing.elementGap,
+      ),
+      decoration: BoxDecoration(
+        color: color.surface.withValues(alpha: 0.96),
+        border: Border(
+          top: BorderSide(color: color.outlineVariant.withValues(alpha: 0.25)),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            if (_step > 0)
+              TextButton.icon(
+                onPressed: _previousStep,
+                icon: const Icon(LucideIcons.arrowLeft, size: 18),
+                label: Text(ctxt.common_back),
+              )
+            else
+              SizedBox(width: spacing.touchTargetSmall),
+            SizedBox(width: spacing.elementGap),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: canContinue
+                    ? (isLastStep
+                        ? () => _save(spacing)
+                        : () => _nextStep(spacing))
+                    : null,
+                icon: Icon(
+                  isLastStep ? LucideIcons.check : LucideIcons.arrowRight,
+                  size: 18,
+                ),
+                label:
+                    Text(isLastStep ? ctxt.goal_updateGoal : ctxt.common_next),
+                style: FilledButton.styleFrom(
+                  backgroundColor: color.primary,
+                  foregroundColor: color.onPrimary,
+                  minimumSize: Size(double.infinity, spacing.touchTarget),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(spacing.radiusLarge),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final spacing = ref.watch(spacingProvider);
@@ -195,110 +775,46 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
 
     return ScreenShell(
       config: ScreenShellConfig(
-        title: ctxt.goal_editGoalTitle,
-        appBarMode: AppBarMode.standard,
+        appBarMode: AppBarMode.none,
+        customAppBar: _EditGoalAppBar(
+          title: ctxt.goal_editGoalTitle,
+          step: _step,
+          stepLabel: _stepLabel(ctxt),
+          spacing: spacing,
+        ),
         enableRefresh: false,
       ),
-      actions: ScreenActions.build(
-        trailing: ScreenTextAction(
-          id: 'save_goal',
-          label: ctxt.goal_updateGoal,
-          onTap: () => !_saving ? _save(spacing) : null,
-          isLoading: _saving,
-        ),
-      ),
-      body: ListView(
-        padding: EdgeInsets.symmetric(
-          horizontal: spacing.cardHorizontal,
-          vertical: spacing.cardVertical,
-        ),
+      actions: ScreenActions.empty,
+      body: Stack(
         children: [
-          // ═══ SECTION A: GOAL IDENTITY ═══
-          _sectionHeader(
-            ctxt.goal_sectionIdentity,
-            LucideIcons.info,
-            color.primary,
-          ),
-          SizedBox(height: spacing.elementGap),
-
-          TextFormField(
-            controller: _nameController,
-            textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(
-              labelText: ctxt.goal_goalName,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              ),
+          ListView(
+            padding: EdgeInsets.fromLTRB(
+              spacing.cardHorizontal,
+              spacing.cardVertical,
+              spacing.cardHorizontal,
+              spacing.touchTarget + spacing.cardInner * 2,
             ),
-          ),
-          SizedBox(height: spacing.elementGap),
-
-          TextFormField(
-            controller: _whyController,
-            textCapitalization: TextCapitalization.sentences,
-            maxLength: 80,
-            decoration: InputDecoration(
-              labelText: ctxt.goal_whyOptional,
-              hintText: ctxt.goal_whyHint,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            children: [
+              if (_step < 2) ...[
+                _buildEditPreview(color, textTheme, spacing, ctxt),
+                SizedBox(height: spacing.sectionGap * 1.5),
+              ],
+              AnimatedSwitcher(
+                duration: spacing.animNormal,
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: _buildStepContent(color, textTheme, spacing, ctxt),
               ),
-              counterText: '',
-            ),
+              SizedBox(height: spacing.touchTarget + spacing.cardInner),
+            ],
           ),
-          SizedBox(height: spacing.elementGap),
-
-          // Goal Type selector
-          _buildGoalTypeRow(color, textTheme, spacing, ctxt),
-
-          SizedBox(height: spacing.sectionGap * 1.5),
-
-          // ═══ SECTION B: TARGET ═══
-          _sectionHeader(ctxt.goal_target, LucideIcons.target, color.primary),
-          SizedBox(height: spacing.elementGap),
-
-          // Target amount with "Adjust" pattern
-          _buildTargetAdjust(color, textTheme, spacing, ctxt),
-          SizedBox(height: spacing.elementGap),
-
-          // Target date
-          _buildTargetDate(color, textTheme, spacing, ctxt),
-
-          SizedBox(height: spacing.sectionGap * 1.5),
-
-          // ═══ SECTION C: CURRENT STATE (read-only) ═══
-          _sectionHeader(
-            ctxt.goal_sectionCurrentState,
-            LucideIcons.wallet,
-            color.primary,
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: _buildWizardActions(color, spacing, ctxt),
           ),
-          SizedBox(height: spacing.elementGap),
-          _buildCurrentState(color, textTheme, spacing, ctxt),
-
-          SizedBox(height: spacing.sectionGap * 1.5),
-
-          // ═══ SECTION D: PROJECTION (read-only) ═══
-          _sectionHeader(
-            ctxt.goal_sectionProjection,
-            LucideIcons.trendingUp,
-            color.primary,
-          ),
-          SizedBox(height: spacing.elementGap),
-          _buildProjection(color, textTheme, spacing, ctxt),
-
-          SizedBox(height: spacing.sectionGap * 2),
-
-          // ═══ SECTION E: DANGER ZONE ═══
-          _buildDangerZone(color, textTheme, spacing, ctxt),
-
-          SizedBox(height: spacing.sectionGap * 3),
         ],
       ),
     );
-  }
-
-  Widget _sectionHeader(String text, IconData icon, Color accentColor) {
-    return TypeSectionHeader(label: text, icon: icon, accentColor: accentColor);
   }
 
   Widget _buildGoalTypeRow(
@@ -518,93 +1034,6 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     );
   }
 
-  Widget _buildCurrentState(
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-    AppLocalizations ctxt,
-  ) {
-    final sortedContribs = widget.goal.contributions.toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
-    final lastContrib = sortedContribs.isNotEmpty ? sortedContribs.first : null;
-
-    return Container(
-      padding: EdgeInsets.all(spacing.cardInner),
-      decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.outlineVariant),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                ctxt.goal_saved,
-                style: textTheme.labelSmall
-                    ?.copyWith(color: color.onSurfaceVariant),
-              ),
-              CurrencyText(
-                currencyCode: widget.goal.currencyCode,
-                amount: widget.goal.currentAmount,
-                fixedLength: 0,
-                compact: false,
-                style: textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-          if (lastContrib != null) ...[
-            SizedBox(height: spacing.elementGap),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  ctxt.goal_lastContribution,
-                  style: textTheme.labelSmall
-                      ?.copyWith(color: color.onSurfaceVariant),
-                ),
-                Row(
-                  children: [
-                    CurrencyText(
-                      currencyCode: widget.goal.currencyCode,
-                      amount: lastContrib.amount,
-                      fixedLength: 0,
-                      compact: true,
-                      style: textTheme.bodyMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      ' · ${_timeAgo(lastContrib.date, ctxt)}',
-                      style: textTheme.bodySmall
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-          if (sortedContribs.length > 1) ...[
-            SizedBox(height: spacing.elementGap),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  // Navigate to contribution history
-                },
-                child: Text(
-                  ctxt.goal_viewHistory,
-                  style: textTheme.labelSmall?.copyWith(color: color.primary),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   Widget _buildProjection(
     ColorScheme color,
     TextTheme textTheme,
@@ -670,8 +1099,11 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
                     ),
                     Text(
                       ctxt.goal_basedOnAvg(
-                        formatCurrency(pace,
-                            code: widget.goal.currencyCode, decimals: 0,),
+                        formatCurrency(
+                          pace,
+                          code: widget.goal.currencyCode,
+                          decimals: 0,
+                        ),
                       ),
                       style: textTheme.labelSmall?.copyWith(
                         color: color.onSurfaceVariant.withValues(alpha: 0.7),
@@ -721,8 +1153,9 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
   ) {
     return Container(
       decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.error.withValues(alpha: 0.3)),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.7)),
       ),
       child: Column(
         children: [
@@ -734,7 +1167,10 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
             spacing: spacing,
             onTap: () => _archiveGoal(spacing),
           ),
-          Divider(height: 1, color: color.error.withValues(alpha: 0.15)),
+          Divider(
+            height: 1,
+            color: color.outlineVariant.withValues(alpha: 0.55),
+          ),
           _dangerAction(
             icon: LucideIcons.circleCheck,
             label: ctxt.goal_markComplete,
@@ -743,7 +1179,10 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
             spacing: spacing,
             onTap: () => _markCompleted(spacing),
           ),
-          Divider(height: 1, color: color.error.withValues(alpha: 0.15)),
+          Divider(
+            height: 1,
+            color: color.outlineVariant.withValues(alpha: 0.55),
+          ),
           _dangerAction(
             icon: LucideIcons.trash2,
             label: ctxt.goal_deleteGoal,
@@ -806,5 +1245,118 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
     if (diff.inDays == 0) return ctxt.common_today;
     if (diff.inDays == 1) return ctxt.common_yesterday;
     return ctxt.goal_daysAgo(diff.inDays);
+  }
+}
+
+class _EditGoalAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _EditGoalAppBar({
+    required this.title,
+    required this.step,
+    required this.stepLabel,
+    required this.spacing,
+  });
+
+  final String title;
+  final int step;
+  final String stepLabel;
+  final AppSpacing spacing;
+
+  @override
+  Size get preferredSize => Size.fromHeight(80 + spacing.cardInner * 2.5);
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return AppBar(
+      automaticallyImplyLeading: true,
+      backgroundColor: color.surfaceContainerHigh,
+      foregroundColor: color.onSurface,
+      surfaceTintColor: Colors.transparent,
+      flexibleSpace: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.surfaceContainerHigh,
+              color.primaryContainer.withValues(alpha: 0.72),
+            ],
+          ),
+        ),
+      ),
+      scrolledUnderElevation: 0,
+      toolbarHeight: 80,
+      titleSpacing: spacing.cardInner,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(spacing.radiusLarge + spacing.elementGap),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      title: Text(
+        title,
+        style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      ),
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(spacing.cardInner * 2.5),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            spacing.cardInner,
+            0,
+            spacing.cardInner,
+            spacing.cardInner,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    stepLabel,
+                    style: textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${step + 1} / 3',
+                    style: textTheme.labelMedium?.copyWith(
+                      color: color.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: spacing.elementGap),
+              Row(
+                children: List.generate(
+                  3,
+                  (index) => Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: index == 2 ? 0 : spacing.elementGapMin,
+                      ),
+                      child: AnimatedContainer(
+                        duration: spacing.animFast,
+                        height: spacing.progressThin,
+                        decoration: BoxDecoration(
+                          color: index <= step
+                              ? color.primary
+                              : color.surfaceContainerHighest,
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

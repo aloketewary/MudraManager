@@ -25,7 +25,6 @@ class DashboardWidgetRegistry {
     // Unified Briefing - the primary experience
     DailyBriefingWidgetPlugin(),
 
-    // Cash Flow — income/expense overview
     CashFlowWidgetPlugin(),
 
     // Goals Progress — savings motivation

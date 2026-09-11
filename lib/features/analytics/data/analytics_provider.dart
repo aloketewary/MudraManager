@@ -31,6 +31,29 @@ final analyticsTransactionsProvider =
   return await txnService.getAllForDashBoard();
 });
 
+/// Transfer rows for selected analytics period.
+///
+/// TransactionService keeps one leg of each transfer pair in date-range
+/// results, which prevents duplicate transfer rows in the report.
+final analyticsTransferTransactionsProvider =
+    FutureProvider.autoDispose.family<List<Transaction>, String>(
+  (ref, periodKey) async {
+    ref.watch(transactionChangeProvider);
+    final txnService = ref.watch(transactionProvider);
+    final period = AnalyticsPeriodParser.fromKey(periodKey);
+    final (:start, :end) = period.resolve();
+    final transactions = await txnService.getByDateRange(start, end);
+    final transfers =
+        transactions.where((transaction) => transaction.isTransfer).toList();
+
+    for (final transfer in transfers) {
+      transfer.related.loadSync();
+      transfer.related.value?.account.loadSync();
+    }
+    return transfers;
+  },
+);
+
 /// Primary computation root for analytics.
 /// Family key is [AnalyticsPeriod.key] string — typed period resolves dates.
 final analyticsAggregatesProvider =

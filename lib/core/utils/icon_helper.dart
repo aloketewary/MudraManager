@@ -3,11 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class IconHelper {
   static IconData iconFromName(String name) {
-    final icon = iconMap[name];
-    if (icon == null) {
-      return LucideIcons.circleQuestionMark;
-    }
-    return icon;
+    return _lookupIcon(name) ?? LucideIcons.circleQuestionMark;
   }
 
   static final Map<String, Map<String, IconData>> iconGroups = {
@@ -376,15 +372,69 @@ class IconHelper {
     for (final group in iconGroups.values) ...group,
   };
 
+  static const Map<String, IconData> _nameIconAliases = {
+    'airpod': LucideIcons.headphones,
+    'airpods': LucideIcons.headphones,
+    'headphone': LucideIcons.headphones,
+    'sneaker': LucideIcons.footprints,
+    'sneakers': LucideIcons.footprints,
+    'shoe': LucideIcons.footprints,
+    'vehicle': LucideIcons.car,
+    'car': LucideIcons.car,
+    'travel': LucideIcons.plane,
+    'vacation': LucideIcons.plane,
+    'holiday': LucideIcons.plane,
+    'education': LucideIcons.graduationCap,
+    'school': LucideIcons.graduationCap,
+    'wedding': LucideIcons.heart,
+    'savings': LucideIcons.piggyBank,
+    'saving': LucideIcons.piggyBank,
+    'money': LucideIcons.banknote,
+    'cash': LucideIcons.banknote,
+    'home': LucideIcons.house,
+    'house': LucideIcons.house,
+    'goal': LucideIcons.target,
+  };
+
+  static IconData resolveIcon({
+    String? iconName,
+    String? text,
+    IconData? fallback,
+  }) {
+    final directIcon = _lookupIcon(iconName);
+    if (directIcon != null) return directIcon;
+
+    final normalizedText = _normalize(iconName ?? '') == _normalize(text ?? '')
+        ? _normalize(text ?? '')
+        : _normalize('$iconName $text');
+    for (final entry in _nameIconAliases.entries) {
+      if (normalizedText.contains(entry.key)) return entry.value;
+    }
+
+    return fallback ?? LucideIcons.circleQuestionMark;
+  }
+
+  static IconData? _lookupIcon(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    return iconMap[_normalize(value)];
+  }
+
+  static String _normalize(String value) {
+    return value
+        .trim()
+        .replaceAllMapped(
+          RegExp(r'([a-z0-9])([A-Z])'),
+          (match) => '${match[1]}_${match[2]}',
+        )
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
+  }
+
+  /// Resolves an icon by its persisted map key.
   static IconData getIconData(String? iconName) {
-    if (iconName == null || iconName.isEmpty) {
-      return LucideIcons.circleQuestionMark;
-    }
-    final icon = iconMap[iconName];
-    if (icon == null) {
-      return LucideIcons.circleQuestionMark;
-    }
-    return icon;
+    return _lookupIcon(iconName) ?? LucideIcons.circleQuestionMark;
   }
 
   static List<String> getAllIconNames() => iconMap.keys.toList();

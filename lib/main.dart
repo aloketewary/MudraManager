@@ -352,7 +352,6 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
         }
 
         return MaterialApp.router(
-          key: ValueKey(activeSkin?.id ?? 'default'),
           title: 'Mudra Manager',
           theme: appTheme.buildTheme(lightScheme, effectiveTone, spacing),
           darkTheme: appThemeMode == AppThemeMode.amoled

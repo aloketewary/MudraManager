@@ -30,13 +30,20 @@ void showQuickDepositSheet({
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    requestFocus: true,
+    sheetAnimationStyle: const AnimationStyle(
+      duration: Duration(milliseconds: 180),
+      reverseDuration: Duration(milliseconds: 140),
+    ),
     backgroundColor: color.surface,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusMedium)),
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(spacing.radiusMedium)),
     ),
-    builder: (context) => Padding(
+    builder: (context) => SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + spacing.sectionGap,
+        bottom: MediaQuery.viewInsetsOf(context).bottom + spacing.sectionGap,
         left: spacing.sectionGap,
         right: spacing.sectionGap,
         top: spacing.sectionGap,
@@ -64,7 +71,6 @@ void showQuickDepositSheet({
           TextField(
             controller: amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            autofocus: true,
             decoration: InputDecoration(
               labelText: ctxt.common_amount,
               prefixIcon: Icon(ref.read(baseCurrencyIconProvider)),

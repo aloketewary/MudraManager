@@ -28,10 +28,13 @@ class SkinToTheme {
       primaryContainer: colorSet.primaryContainer,
       secondaryContainer: colorSet.secondaryContainer,
       tertiaryContainer: colorSet.tertiaryContainer,
-      surface: colorSet.surface,
-      surfaceContainerLow: colorSet.surfaceContainerLow,
-      surfaceContainerHighest: colorSet.surfaceContainerHigh,
-      onSurface: colorSet.onSurface,
+      surface: colorSet.surface ?? scheme.surface,
+      surfaceContainer: colorSet.surfaceContainer ?? scheme.surfaceContainer,
+      surfaceContainerLow:
+          colorSet.surfaceContainerLow ?? scheme.surfaceContainerLow,
+      surfaceContainerHigh:
+          colorSet.surfaceContainerHigh ?? scheme.surfaceContainerHigh,
+      onSurface: colorSet.onSurface ?? scheme.onSurface,
       onSurfaceVariant: colorSet.onSurfaceVariant,
       outline: colorSet.outline,
       outlineVariant: colorSet.outlineVariant,
@@ -52,7 +55,10 @@ class SkinToTheme {
     return scheme;
   }
 
-  static ColorScheme lightScheme(Skin skin) => colorScheme(skin, AppThemeMode.light);
-  static ColorScheme darkScheme(Skin skin) => colorScheme(skin, AppThemeMode.dark);
-  static ColorScheme amoledScheme(Skin skin) => colorScheme(skin, AppThemeMode.amoled);
+  static ColorScheme lightScheme(Skin skin) =>
+      colorScheme(skin, AppThemeMode.light);
+  static ColorScheme darkScheme(Skin skin) =>
+      colorScheme(skin, AppThemeMode.dark);
+  static ColorScheme amoledScheme(Skin skin) =>
+      colorScheme(skin, AppThemeMode.amoled);
 }

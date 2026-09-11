@@ -168,7 +168,9 @@ class ExportOptionsScreen extends ConsumerWidget {
       final fileName =
           'MudraManager_${template}_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.$extension';
 
-      await saveExportedFile(bytes, fileName, askUser: true);
+      final saved = await saveExportedFile(bytes, fileName, askUser: true);
+
+      if (!saved) return;
 
       if (context.mounted) {
         SnackbarService.success(ctxt.export_completed(format), spacing);

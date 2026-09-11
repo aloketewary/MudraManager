@@ -21,13 +21,14 @@ import 'package:mudra_manager/core/providers/notification_record_service.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/dashboard/data/greeting_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/dashboard_home.dart';
 import 'package:mudra_manager/features/gamification/data/achievement_unlock_listener.dart';
 import 'package:mudra_manager/features/gamification/presentation/widgets/streak_indicator.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
-import 'package:mudra_manager/features/profile/presentation/screens/profile_screen.dart';
+import 'package:mudra_manager/features/profile/presentation/screens/profile_reference_screen.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/statistics_screen.dart';
 import 'package:mudra_manager/features/transactions/data/view_mode_provider.dart';
 import 'package:mudra_manager/features/transactions/domain/transaction_view_mode.dart';
@@ -179,10 +180,9 @@ class HomePageState extends ConsumerState<HomePage> {
     ref.watch(themeEntitlementGuardProvider);
     final profileAsync = ref.watch(userProfileProvider);
     final ctxt = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSimple = ref.watch(isSimpleModeProvider);
     final color = Theme.of(context).colorScheme;
-    final shellBackground = isDark ? color.surfaceContainerHigh : color.surface;
+    final shellBackground = color.surface;
     // Full mode: Home(0), Activity(1), Manage(2), Insights(3).
     // Simple mode: Home(0), Activity(1), with add action separated to the right.
     final effectiveStackIndex = _selectedIndex.clamp(0, 4).toInt();
@@ -235,7 +235,7 @@ class HomePageState extends ConsumerState<HomePage> {
                         isTabActive: stackIndex == 2,
                       ),
                       const StatisticsScreen(),
-                      const ProfileScreen(),
+                      const ProfileReferenceScreen(),
                     ],
                   ),
                 ),
@@ -286,29 +286,41 @@ class HomePageState extends ConsumerState<HomePage> {
 
     if (isSimple) destinations.removeRange(2, destinations.length);
 
+    final isLight = color.brightness == Brightness.light;
+    final dockRadius = BorderRadius.circular(22);
+    final dockColor =
+        isLight ? color.surfaceContainerLow : color.surfaceContainerHigh;
+
     return SafeArea(
       top: false,
-      minimum: const EdgeInsets.fromLTRB(48, 6, 48, 10),
+      minimum: const EdgeInsets.fromLTRB(40, 6, 40, 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: Material(
-              color: color.surface,
-              borderRadius: BorderRadius.circular(24),
-              shadowColor: color.shadow.withValues(alpha: 0.2),
-              child: Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.shadow.withValues(alpha: 0.13),
-                      blurRadius: 18,
-                      offset: const Offset(0, 7),
-                    ),
-                  ],
+            child: Container(
+              height: 56,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: dockColor,
+                borderRadius: dockRadius,
+                border: Border.all(
+                  color: color.outlineVariant.withValues(
+                    alpha: isLight ? 0.72 : 0.42,
+                  ),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.shadow.withValues(alpha: isLight ? 0.18 : 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: dockRadius,
+                clipBehavior: Clip.antiAlias,
                 child: Row(
                   children: [
                     for (var index = 0; index < destinations.length; index++)
@@ -336,7 +348,8 @@ class HomePageState extends ConsumerState<HomePage> {
     required ColorScheme color,
     required VoidCallback onTap,
   }) {
-    final iconColor = selected ? color.onSurface : color.onSurfaceVariant;
+    final iconColor =
+        selected ? color.onPrimaryContainer : color.onSurfaceVariant;
     var outlineAsset = destination.outlineAsset;
     var solidAsset = destination.solidAsset;
 
@@ -375,7 +388,9 @@ class HomePageState extends ConsumerState<HomePage> {
             color: Colors.transparent,
             child: InkWell(
               onTap: onTap,
-              customBorder: const CircleBorder(),
+              customBorder: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Center(
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
@@ -383,12 +398,18 @@ class HomePageState extends ConsumerState<HomePage> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: selected ? color.surface : Colors.transparent,
-                    shape: BoxShape.circle,
+                    color:
+                        selected ? color.primaryContainer : Colors.transparent,
+                    borderRadius: BorderRadius.circular(16),
+                    border: selected
+                        ? Border.all(
+                            color: color.primary.withValues(alpha: 0.14),
+                          )
+                        : null,
                     boxShadow: selected
                         ? [
                             BoxShadow(
-                              color: color.shadow.withValues(alpha: 0.1),
+                              color: color.primary.withValues(alpha: 0.16),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -445,9 +466,11 @@ class HomePageState extends ConsumerState<HomePage> {
           _speedDialKey.currentState?.toggle();
         },
         tooltip: 'Add transaction',
-        backgroundColor: color.inverseSurface,
-        foregroundColor: color.onInverseSurface,
-        elevation: 3,
+        backgroundColor: color.primary,
+        foregroundColor: color.onPrimary,
+        elevation: 4,
+        focusColor: color.primary.withValues(alpha: 0.12),
+        hoverColor: color.primary.withValues(alpha: 0.12),
         shape: const CircleBorder(),
         child: const Icon(LucideIcons.plus, size: 24),
       ),
@@ -606,6 +629,7 @@ class HomePageState extends ConsumerState<HomePage> {
     final notificationService = ref.watch(notificationRecordServiceProvider);
     final ctxt = AppLocalizations.of(context)!;
     final spacing = ref.watch(spacingProvider);
+    final isBalanceVisible = ref.watch(balanceVisibilityProvider);
 
     switch (selectedIndex) {
       case 0:
@@ -786,57 +810,22 @@ class HomePageState extends ConsumerState<HomePage> {
                         ],
                       ),
                     ),
-                    IconButton(
-                      tooltip: ctxt.transaction_addExpenseTitle,
-                      onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        context.push(
-                          AppRoutes.addTransaction,
-                          extra: {'isIncome': false},
-                        );
-                      },
-                      icon: const Icon(LucideIcons.arrowDownLeft),
-                      style: IconButton.styleFrom(
-                        foregroundColor: color.onErrorContainer,
-                        backgroundColor: color.errorContainer,
-                        minimumSize: Size.square(spacing.touchTargetSmall),
-                        shape: const CircleBorder(),
-                      ),
-                    ),
                     SizedBox(width: spacing.elementGapMin),
                     IconButton(
-                      tooltip: ctxt.transaction_addIncomeTitle,
+                      tooltip:
+                          isBalanceVisible ? 'Hide balance' : 'Show balance',
                       onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        context.push(
-                          AppRoutes.addTransaction,
-                          extra: {'isIncome': true},
-                        );
+                        HapticFeedback.lightImpact();
+                        ref
+                            .read(balanceVisibilityProvider.notifier)
+                            .update((visible) => !visible);
                       },
-                      icon: const Icon(LucideIcons.arrowUpRight),
-                      style: IconButton.styleFrom(
-                        foregroundColor: color.onPrimaryContainer,
-                        backgroundColor: color.primaryContainer,
-                        minimumSize: Size.square(spacing.touchTargetSmall),
-                        shape: const CircleBorder(),
+                      icon: Icon(
+                        isBalanceVisible ? LucideIcons.eye : LucideIcons.eyeOff,
                       ),
-                    ),
-                    SizedBox(width: spacing.elementGapMin),
-                    IconButton(
-                      tooltip: ctxt.quickAdd_title,
-                      onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          builder: (_) =>
-                              const QuickAddTransactionSheet(compact: true),
-                        );
-                      },
-                      icon: const Icon(LucideIcons.plus),
                       style: IconButton.styleFrom(
-                        foregroundColor: color.onPrimary,
-                        backgroundColor: color.primary,
+                        foregroundColor: color.onSurfaceVariant,
+                        backgroundColor: color.surfaceContainerHighest,
                         minimumSize: Size.square(spacing.touchTargetSmall),
                         shape: const CircleBorder(),
                       ),

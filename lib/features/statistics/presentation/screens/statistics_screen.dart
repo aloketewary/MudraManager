@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' as services;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/analytics/data/net_worth_service.dart';
 import 'package:mudra_manager/features/analytics/domain/analytics_period.dart';
+import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
+import 'package:mudra_manager/features/dashboard/presentation/widgets/dashboard_banners.dart';
 import 'package:mudra_manager/features/import_export/data/export_plugin.dart';
 import 'package:mudra_manager/features/insights/data/insights_provider.dart';
+import 'package:mudra_manager/features/insights/domain/recommendation.dart';
 import 'package:mudra_manager/features/insights/presentation/widgets/insights_overview.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/export_options_screen.dart';
@@ -71,30 +76,23 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
+    final dashboardAsync = ref.watch(dashboardDataProvider);
+    final alerts = ref.watch(budgetAlertsNotifierProvider);
 
     return ScreenShell(
       config: ScreenShellConfig(
-        title: l10n.nav_insights,
-        appBarMode: AppBarMode.standard,
-        enableRefresh: false,
-      ),
-      actions: ScreenActions.build(
-        appBar: [
-          ScreenAction(
-            id: 'export',
-            label: l10n.common_download,
-            icon: LucideIcons.download,
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              _showExportDialog(spacing, l10n);
-            },
+        appBarMode: AppBarMode.none,
+        customAppBar: _InsightsHomeStyleHeader(
+          title: l10n.nav_insights,
+          periodLabel: periodLabel(
+            l10n,
+            _selectedPeriod,
+            _customStart,
+            _customEnd,
           ),
-        ],
-        trailing: ScreenTextAction(
-          id: 'period_selector',
-          label: periodLabel(l10n, _selectedPeriod, _customStart, _customEnd),
-          onTap: () {
-            HapticFeedback.mediumImpact();
+          exportLabel: l10n.common_download,
+          spacing: spacing,
+          onPeriodTap: () {
             showPeriodPickerSheet(
               context: context,
               spacing: spacing,
@@ -110,11 +108,15 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               },
             );
           },
+          onExport: () => _showExportDialog(spacing),
         ),
+        enableRefresh: false,
       ),
       body: RefreshIndicator(
         onRefresh: () => RefreshHelper.withMinDuration(() async {
+          ref.invalidate(dashboardDataProvider);
           ref.invalidate(analyticsAggregatesProvider(_period.key));
+          ref.invalidate(analyticsTransferTransactionsProvider(_period.key));
           ref.invalidate(analyticsMetricsProvider(_period.key));
           ref.invalidate(analyticsChartProvider(_period.key));
           ref.invalidate(analyticsNarrativeFactsProvider(_period.key));
@@ -139,6 +141,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      PrioritizedBanner(
+                        hasSeenHelp: true,
+                        alerts: alerts,
+                        pendingSmsCount:
+                            dashboardAsync.asData?.value.pendingSmsCount,
+                      ),
                       InsightsOverview(
                         insights: insights,
                         periodKey: _period.key,
@@ -256,7 +264,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                     SizedBox(height: spacing.sectionGap),
                     FilledButton.tonalIcon(
                       onPressed: () {
-                        HapticFeedback.mediumImpact();
+                        services.HapticFeedback.mediumImpact();
                         ref.invalidate(insightsProvider);
                       },
                       icon: const Icon(LucideIcons.refreshCw, size: 16),
@@ -272,53 +280,211 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     );
   }
 
-  void _handleRecommendationTap() {
-    // Navigate to recommendation action
+  void _handleRecommendationTap(Recommendation recommendation) {
+    final target = recommendation.actionRoute;
+    final current = GoRouterState.of(context).matchedLocation;
+
+    if (target == current) {
+      context.push(
+        AppRoutes.financialAdvice,
+        extra: {
+          'source': 'next_move',
+          'focusId': recommendation.id,
+        },
+      );
+      return;
+    }
+
+    context.push(target);
   }
 
   void _handlePatternTap() {
     // Show pattern details
   }
 
-  void _showExportDialog(AppSpacing spacing, AppLocalizations l10n) {
-    // Read aggregates for the *currently selected* period — insightsProvider
-    // is always pinned to 'Month' internally, so it can't be reused here.
-    final aggregates = ref.read(analyticsAggregatesProvider(_period.key)).value;
-    final transactions = ref.read(analyticsTransactionsProvider).value;
-    final categories = ref.read(categoryListProvider).value;
-    final profile = ref.read(userProfileProvider).value;
+  Future<void> _showExportDialog(AppSpacing spacing) async {
+    try {
+      // Read the currently selected period on demand. These providers may not
+      // be cached yet when the user taps export immediately after screen load.
+      final aggregates =
+          await ref.read(analyticsAggregatesProvider(_period.key).future);
+      final transactions = await ref.read(analyticsTransactionsProvider.future);
+      final categories = await ref.read(categoryListProvider.future);
+      final profile = await ref.read(userProfileProvider.future);
 
-    if (aggregates == null || transactions == null || categories == null) {
-      SnackbarService.info(l10n.common_loading, spacing);
-      return;
+      if (!mounted) return;
+
+      final periodDates = _period.resolve();
+      final periodTransactions = transactions.where((tx) {
+        return !tx.date.isBefore(periodDates.start) &&
+            !tx.date.isAfter(periodDates.end);
+      }).toList();
+
+      final categoryDataMap = {for (final c in categories) c.name: c};
+
+      await showDialog<void>(
+        context: context,
+        builder: (_) => Dialog.fullscreen(
+          child: ExportOptionsScreen(
+            exportData: ExportData(
+              income: aggregates.totalIncome,
+              expense: aggregates.totalExpense,
+              savingsRate: aggregates.savingsRate,
+              avgDailySpend: aggregates.avgDailySpend,
+              transactions: periodTransactions,
+              categoryData: aggregates.categoryBreakdown,
+              categoryDataMap: categoryDataMap,
+              startDate: periodDates.start,
+              endDate: periodDates.end,
+              userName: FieldEncryptionService.safeDisplay(profile?.name),
+            ),
+          ),
+        ),
+      );
+    } catch (error) {
+      if (mounted) {
+        SnackbarService.error(BuddyMessages.errorWith('$error'), spacing);
+      }
     }
+  }
+}
 
-    final periodDates = _period.resolve();
-    final periodTransactions = transactions.where((tx) {
-      return !tx.date.isBefore(periodDates.start) &&
-          !tx.date.isAfter(periodDates.end);
-    }).toList();
+class _InsightsHomeStyleHeader extends StatelessWidget
+    implements PreferredSizeWidget {
+  final String title;
+  final String periodLabel;
+  final String exportLabel;
+  final AppSpacing spacing;
+  final VoidCallback onPeriodTap;
+  final VoidCallback onExport;
 
-    final categoryDataMap = {for (final c in categories) c.name: c};
+  const _InsightsHomeStyleHeader({
+    required this.title,
+    required this.periodLabel,
+    required this.exportLabel,
+    required this.spacing,
+    required this.onPeriodTap,
+    required this.onExport,
+  });
 
-    showDialog(
-      context: context,
-      builder: (_) => Dialog.fullscreen(
-        child: ExportOptionsScreen(
-          exportData: ExportData(
-            income: aggregates.totalIncome,
-            expense: aggregates.totalExpense,
-            savingsRate: aggregates.savingsRate,
-            avgDailySpend: aggregates.avgDailySpend,
-            transactions: periodTransactions,
-            categoryData: aggregates.categoryBreakdown,
-            categoryDataMap: categoryDataMap,
-            startDate: periodDates.start,
-            endDate: periodDates.end,
-            userName: FieldEncryptionService.safeDisplay(profile?.name),
+  @override
+  Size get preferredSize => const Size.fromHeight(80);
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: color.surfaceContainerHigh,
+      foregroundColor: color.onSurface,
+      surfaceTintColor: Colors.transparent,
+      flexibleSpace: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.surfaceContainerHigh,
+              color.primaryContainer.withValues(alpha: 0.72),
+            ],
           ),
         ),
       ),
+      scrolledUnderElevation: 0,
+      toolbarHeight: 80,
+      titleSpacing: spacing.cardInner,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(spacing.radiusLarge + spacing.elementGap),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      title: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          SizedBox(height: spacing.elementGapMin),
+          Material(
+            color: color.surface.withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            child: InkWell(
+              onTap: () {
+                services.HapticFeedback.mediumImpact();
+                onPeriodTap();
+              },
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.elementGap,
+                  vertical: spacing.elementGapMin,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.sizeOf(context).width * 0.58,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.calendarDays,
+                        size: spacing.iconXS,
+                        color: color.primary,
+                      ),
+                      SizedBox(width: spacing.elementGapMin),
+                      Flexible(
+                        child: Text(
+                          periodLabel,
+                          style: textTheme.labelMedium?.copyWith(
+                            color: color.onSurface,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGapMin),
+                      Icon(
+                        LucideIcons.chevronDown,
+                        size: spacing.iconXS,
+                        color: color.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        Padding(
+          padding: EdgeInsets.only(right: spacing.cardInner),
+          child: IconButton(
+            tooltip: exportLabel,
+            onPressed: () {
+              services.HapticFeedback.mediumImpact();
+              onExport();
+            },
+            icon: const Icon(LucideIcons.download),
+            style: IconButton.styleFrom(
+              foregroundColor: color.onSurface,
+              backgroundColor: color.surfaceContainerHighest,
+              minimumSize: Size.square(spacing.touchTargetSmall),
+              maximumSize: Size.square(spacing.touchTargetSmall),
+              padding: EdgeInsets.zero,
+              shape: const CircleBorder(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

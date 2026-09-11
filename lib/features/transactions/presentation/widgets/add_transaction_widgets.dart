@@ -25,6 +25,19 @@ import 'package:mudra_manager/core/router/app_routes.dart';
 // Skeleton Loaders
 // ─────────────────────────────────────────────
 
+Widget _loadingSkeletonMotion(
+  BuildContext context,
+  Widget child,
+  Color color,
+) {
+  if (MediaQuery.of(context).disableAnimations) return child;
+
+  return child.animate(onComplete: (controller) => controller.repeat()).shimmer(
+        duration: 1500.ms,
+        color: color.withValues(alpha: 0.5),
+      );
+}
+
 class AccountSelectorSkeleton extends ConsumerWidget {
   const AccountSelectorSkeleton({super.key});
 
@@ -32,7 +45,7 @@ class AccountSelectorSkeleton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final spacing = ref.watch(spacingProvider);
-    return SizedBox(
+    final skeleton = SizedBox(
       height: 64,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
@@ -46,8 +59,9 @@ class AccountSelectorSkeleton extends ConsumerWidget {
           ),
         ),
       ),
-    ).animate(onComplete: (c) => c.repeat()).shimmer(
-        duration: 1500.ms, color: color.surface.withValues(alpha: 0.5),);
+    );
+
+    return _loadingSkeletonMotion(context, skeleton, color.surface);
   }
 }
 
@@ -58,7 +72,7 @@ class CategorySelectorSkeleton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final spacing = ref.watch(spacingProvider);
-    return SizedBox(
+    final skeleton = SizedBox(
       height: 52,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
@@ -72,8 +86,9 @@ class CategorySelectorSkeleton extends ConsumerWidget {
           ),
         ),
       ),
-    ).animate(onComplete: (c) => c.repeat()).shimmer(
-        duration: 1500.ms, color: color.surface.withValues(alpha: 0.5),);
+    );
+
+    return _loadingSkeletonMotion(context, skeleton, color.surface);
   }
 }
 
@@ -84,7 +99,7 @@ class TagSelectorSkeleton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final spacing = ref.watch(spacingProvider);
-    return Wrap(
+    final skeleton = Wrap(
       spacing: 8,
       runSpacing: 8,
       children: List.generate(
@@ -98,8 +113,9 @@ class TagSelectorSkeleton extends ConsumerWidget {
           ),
         ),
       ),
-    ).animate(onComplete: (c) => c.repeat()).shimmer(
-        duration: 1500.ms, color: color.surface.withValues(alpha: 0.5),);
+    );
+
+    return _loadingSkeletonMotion(context, skeleton, color.surface);
   }
 }
 
@@ -940,8 +956,11 @@ class SmartDefaultsBanner extends ConsumerWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(LucideIcons.sparkles,
-                          size: 14, color: color.primary,),
+                      Icon(
+                        LucideIcons.sparkles,
+                        size: 14,
+                        color: color.primary,
+                      ),
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(

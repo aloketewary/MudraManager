@@ -46,7 +46,7 @@ import 'package:mudra_manager/features/profile/presentation/screens/currency_set
 import 'package:mudra_manager/features/profile/presentation/screens/exchange_rate_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/archived_transactions_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/edit_user_profile_screen.dart';
-import 'package:mudra_manager/features/profile/presentation/screens/profile_screen.dart';
+import 'package:mudra_manager/features/profile/presentation/screens/profile_reference_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/help_screen.dart';
 import 'package:mudra_manager/features/account/presentation/screens/manage_account_screen.dart';
 import 'package:mudra_manager/features/category/presentation/screens/manage_categories_screen.dart';
@@ -155,7 +155,7 @@ class AppRouter {
               ),
               GoRoute(
                 path: AppRoutes.profile,
-                builder: (context, state) => const ProfileScreen(),
+                builder: (context, state) => const ProfileReferenceScreen(),
               ),
               GoRoute(
                 path: AppRoutes.addTransaction,

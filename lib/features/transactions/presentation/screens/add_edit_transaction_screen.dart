@@ -108,6 +108,7 @@ class _AddEditTransactionScreenState
   final _categoryScrollController = ScrollController();
   final _subcategoryScrollController = ScrollController();
   bool _smartDefaultsApplied = false;
+  int _smartDefaultsRequestId = 0;
   bool _accountScrolled = false;
   bool _categoryScrolled = false;
   ProviderSubscription? _tripSubscription;
@@ -192,10 +193,31 @@ class _AddEditTransactionScreenState
     }
   }
 
+  void _setTransactionType(bool isExpense) {
+    if (_isExpense == isExpense) return;
+
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _isExpense = isExpense;
+      _selectedCategory = null;
+      _smartDefaultsApplied = false;
+      _smartDefaultsRequestId++;
+    });
+  }
+
   Future<void> _applySmartDefaults() async {
     if (_smartDefaultsApplied || !mounted) return;
-    final d = await ref.read(smartDefaultsProvider(_isExpense).future);
-    if (!mounted) return;
+
+    final requestId = ++_smartDefaultsRequestId;
+    final requestedExpense = _isExpense;
+    final d = await ref.read(smartDefaultsProvider(requestedExpense).future);
+
+    if (!mounted ||
+        requestId != _smartDefaultsRequestId ||
+        requestedExpense != _isExpense) {
+      return;
+    }
+
     _smartDefaultsApplied = true;
     setState(() {
       if (d.suggestedAccount != null && _selectedAccount == null) {
@@ -350,14 +372,7 @@ class _AddEditTransactionScreenState
                       children: [
                         Expanded(
                           child: GestureDetector(
-                            onTap: () {
-                              HapticFeedback.mediumImpact();
-                              setState(() {
-                                _isExpense = true;
-                                _selectedCategory = null;
-                                _smartDefaultsApplied = false;
-                              });
-                            },
+                            onTap: () => _setTransactionType(true),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               curve: Curves.easeOutCubic,
@@ -407,14 +422,7 @@ class _AddEditTransactionScreenState
                         const SizedBox(width: 4),
                         Expanded(
                           child: GestureDetector(
-                            onTap: () {
-                              HapticFeedback.mediumImpact();
-                              setState(() {
-                                _isExpense = false;
-                                _selectedCategory = null;
-                                _smartDefaultsApplied = false;
-                              });
-                            },
+                            onTap: () => _setTransactionType(false),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               curve: Curves.easeOutCubic,
@@ -982,8 +990,8 @@ class _AddEditTransactionScreenState
                       ),
                       isDense: true,
                     ),
-                    maxLines: 5,
-                    minLines: 4,
+                    maxLines: 4,
+                    minLines: 1,
                   ),
 
                   SizedBox(height: spacing.sectionGap),
