@@ -51,7 +51,6 @@ class HomePage extends ConsumerStatefulWidget {
 class HomePageState extends ConsumerState<HomePage>
     with TickerProviderStateMixin {
   late int _selectedIndex;
-  double _dashboardHeaderCollapseProgress = 0;
   final transactionListKey = GlobalKey<TransactionListScreenState>();
   final utilityKey = GlobalKey<UtilityScreenState>();
   late AnimationController _fabController;
@@ -77,18 +76,6 @@ class HomePageState extends ConsumerState<HomePage>
       initNotification();
       ref.read(achievementUnlockListenerProvider).initialize(context);
     });
-  }
-
-  void _onDashboardScrollOffsetChanged(double offset) {
-    final spacing = ref.read(spacingProvider);
-    final collapseRange = spacing.cardInner * 3 + spacing.sectionGap;
-    final progress = (offset / collapseRange).clamp(0.0, 1.0);
-    if ((progress - _dashboardHeaderCollapseProgress).abs() < 0.01) {
-      return;
-    }
-    if (mounted) {
-      setState(() => _dashboardHeaderCollapseProgress = progress);
-    }
   }
 
   @override
@@ -383,10 +370,7 @@ class HomePageState extends ConsumerState<HomePage>
               child: IndexedStack(
                 index: stackIndex,
                 children: [
-                  DashboardHome(
-                    onScrollOffsetChanged: _onDashboardScrollOffsetChanged,
-                    headerCollapseProgress: _dashboardHeaderCollapseProgress,
-                  ),
+                  const DashboardHome(),
                   TransactionListScreen(
                     key: transactionListKey,
                     isTabActive: stackIndex == 1,
@@ -426,9 +410,6 @@ class HomePageState extends ConsumerState<HomePage>
     final notificationService = ref.watch(notificationRecordServiceProvider);
     final ctxt = AppLocalizations.of(context)!;
     final spacing = ref.watch(spacingProvider);
-    final headerTransitionDuration = MediaQuery.of(context).disableAnimations
-        ? Duration.zero
-        : const Duration(milliseconds: 240);
 
     switch (selectedIndex) {
       case 0:
@@ -537,42 +518,14 @@ class HomePageState extends ConsumerState<HomePage>
                         ),
                       ),
                       SizedBox(height: spacing.elementGapMin / 2),
-                      AnimatedSwitcher(
-                        duration: headerTransitionDuration,
-                        switchInCurve: Curves.easeOutCubic,
-                        switchOutCurve: Curves.easeInCubic,
-                        transitionBuilder: (child, animation) => FadeTransition(
-                          opacity: animation,
-                          child: SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(0, 0.15),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          ),
+                      Text(
+                        'Turn dreams into balance',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
                         ),
-                        child: (_dashboardHeaderCollapseProgress >= 0.5)
-                            ? FinanceAmount(
-                                key: const ValueKey('dashboard-header-balance'),
-                                value: totalBalance,
-                                compact: false,
-                                fixedStringLength: 2,
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              )
-                            : Text(
-                                'Turn dreams into balance',
-                                key:
-                                    const ValueKey('dashboard-header-subtitle'),
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -582,112 +535,98 @@ class HomePageState extends ConsumerState<HomePage>
           ),
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(
-              (spacing.cardInner * 3 + spacing.sectionGap) *
-                  (1 - _dashboardHeaderCollapseProgress),
+              spacing.cardInner * 3 + spacing.sectionGap,
             ),
-            child: ClipRect(
-              child: Align(
-                alignment: Alignment.topCenter,
-                heightFactor: (1 - _dashboardHeaderCollapseProgress),
-                child: Opacity(
-                  opacity: (1 - _dashboardHeaderCollapseProgress),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      spacing.cardInner,
-                      0,
-                      spacing.cardInner,
-                      spacing.cardInner,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${ctxt.balanceHistory_currentBalance} (${BaseCurrency.code})',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        SizedBox(height: spacing.elementGapMin),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: FinanceAmount(
-                                value: totalBalance,
-                                compact: false,
-                                fixedStringLength: 2,
-                                style: textTheme.headlineMedium?.copyWith(
-                                  color: color.onSurface,
-                                  fontWeight: FontWeight.w500,
-                                  height: 1,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              tooltip: ctxt.transaction_addExpenseTitle,
-                              onPressed: () {
-                                HapticFeedback.mediumImpact();
-                                context.push(
-                                  AppRoutes.addTransaction,
-                                  extra: {'isIncome': false},
-                                );
-                              },
-                              icon: const Icon(LucideIcons.arrowDownLeft),
-                              style: IconButton.styleFrom(
-                                foregroundColor: color.onSurface,
-                                backgroundColor: color.surfaceContainerHighest,
-                                minimumSize:
-                                    Size.square(spacing.touchTargetSmall),
-                                shape: const CircleBorder(),
-                              ),
-                            ),
-                            SizedBox(width: spacing.elementGapMin),
-                            IconButton(
-                              tooltip: ctxt.transaction_addIncomeTitle,
-                              onPressed: () {
-                                HapticFeedback.mediumImpact();
-                                context.push(
-                                  AppRoutes.addTransaction,
-                                  extra: {'isIncome': true},
-                                );
-                              },
-                              icon: const Icon(LucideIcons.arrowUpRight),
-                              style: IconButton.styleFrom(
-                                foregroundColor: color.onSurface,
-                                backgroundColor: color.surfaceContainerHighest,
-                                minimumSize:
-                                    Size.square(spacing.touchTargetSmall),
-                                shape: const CircleBorder(),
-                              ),
-                            ),
-                            SizedBox(width: spacing.elementGapMin),
-                            IconButton(
-                              tooltip: ctxt.quickAdd_title,
-                              onPressed: () {
-                                HapticFeedback.mediumImpact();
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  builder: (_) =>
-                                      const QuickAddTransactionSheet(
-                                          compact: true),
-                                );
-                              },
-                              icon: const Icon(LucideIcons.plus),
-                              style: IconButton.styleFrom(
-                                foregroundColor: color.onPrimary,
-                                backgroundColor: color.primary,
-                                minimumSize:
-                                    Size.square(spacing.touchTargetSmall),
-                                shape: const CircleBorder(),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                spacing.cardInner,
+                0,
+                spacing.cardInner,
+                spacing.cardInner,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${ctxt.balanceHistory_currentBalance} (${BaseCurrency.code})',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ),
+                  SizedBox(height: spacing.elementGapMin),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FinanceAmount(
+                          value: totalBalance,
+                          compact: false,
+                          fixedStringLength: 2,
+                          style: textTheme.headlineMedium?.copyWith(
+                            color: color.onSurface,
+                            fontWeight: FontWeight.w500,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: ctxt.transaction_addExpenseTitle,
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          context.push(
+                            AppRoutes.addTransaction,
+                            extra: {'isIncome': false},
+                          );
+                        },
+                        icon: const Icon(LucideIcons.arrowDownLeft),
+                        style: IconButton.styleFrom(
+                          foregroundColor: color.onSurface,
+                          backgroundColor: color.surfaceContainerHighest,
+                          minimumSize: Size.square(spacing.touchTargetSmall),
+                          shape: const CircleBorder(),
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGapMin),
+                      IconButton(
+                        tooltip: ctxt.transaction_addIncomeTitle,
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          context.push(
+                            AppRoutes.addTransaction,
+                            extra: {'isIncome': true},
+                          );
+                        },
+                        icon: const Icon(LucideIcons.arrowUpRight),
+                        style: IconButton.styleFrom(
+                          foregroundColor: color.onSurface,
+                          backgroundColor: color.surfaceContainerHighest,
+                          minimumSize: Size.square(spacing.touchTargetSmall),
+                          shape: const CircleBorder(),
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGapMin),
+                      IconButton(
+                        tooltip: ctxt.quickAdd_title,
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (_) =>
+                                const QuickAddTransactionSheet(compact: true),
+                          );
+                        },
+                        icon: const Icon(LucideIcons.plus),
+                        style: IconButton.styleFrom(
+                          foregroundColor: color.onPrimary,
+                          backgroundColor: color.primary,
+                          minimumSize: Size.square(spacing.touchTargetSmall),
+                          shape: const CircleBorder(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),

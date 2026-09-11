@@ -1,9 +1,9 @@
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mudra_manager/core/constants/dashboard_constants.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
@@ -97,44 +97,23 @@ class DashboardAnimationNotifier extends Notifier<DashboardAnimationState> {
 // ─────────────────────────────────────────────────────────────
 
 class DashboardHome extends ConsumerWidget {
-  final ValueChanged<double>? onScrollOffsetChanged;
-  final double headerCollapseProgress;
-
-  const DashboardHome({
-    super.key,
-    this.onScrollOffsetChanged,
-    this.headerCollapseProgress = 0,
-  });
+  const DashboardHome({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.watch(spacingProvider);
-    final headerCollapseOffset =
-        (spacing.cardInner * 3 + spacing.sectionGap) * headerCollapseProgress;
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification.depth == 0) {
-          onScrollOffsetChanged?.call(notification.metrics.pixels);
-        }
-        return false;
-      },
-      child: ClipRRect(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(spacing.radiusLarge + spacing.elementGap),
-        ),
-        child: _DashboardHomeBody(
-          headerCollapseOffset: headerCollapseOffset,
-        ),
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(spacing.radiusLarge + spacing.elementGap),
       ),
+      child: const _DashboardHomeBody(),
     );
   }
 }
 
 class _DashboardHomeBody extends ConsumerStatefulWidget {
-  final double headerCollapseOffset;
-
-  const _DashboardHomeBody({this.headerCollapseOffset = 0});
+  const _DashboardHomeBody();
 
   @override
   ConsumerState<_DashboardHomeBody> createState() => _DashboardHomeBodyState();
@@ -287,46 +266,43 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
       floatingActionButton: FloatingActionButton(
         onPressed: _showQuickAddSheet,
         tooltip: ctxt.quickAdd_title,
-        child: const Icon(LucideIcons.plus),
       ),
-      body: Padding(
-        padding: EdgeInsets.only(top: widget.headerCollapseOffset),
-        child: dashboardAsync.when(
-          loading: () => const _DashboardLoading(),
-          error: (e, _) => _buildErrorState(e, ctxt),
-          data: (data) {
-            // Pre-compute expensive operations once
-            final txns = data.transactions.where((t) => !t.isTransfer).toList();
-            final hasTransactions = txns.isNotEmpty;
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      body: dashboardAsync.when(
+        loading: () => const _DashboardLoading(),
+        error: (e, _) => _buildErrorState(e, ctxt),
+        data: (data) {
+          // Pre-compute expensive operations once
+          final txns = data.transactions.where((t) => !t.isTransfer).toList();
+          final hasTransactions = txns.isNotEmpty;
 
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final maxWidth =
-                    constraints.maxWidth > DashboardConstants.maxWidth
-                        ? DashboardConstants.maxWidth
-                        : double.infinity;
-                return Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: maxWidth),
-                    child: _DashboardContent(
-                      reduceMotion: reduceMotion,
-                      data: data,
-                      widgets: widgets,
-                      alerts: alerts,
-                      hasSeenHelp: hasSeenHelp,
-                      animationState: animationState,
-                      pendingSmsCount: data.pendingSmsCount,
-                      hasTransactions: hasTransactions,
-                      nudgeDismissed:
-                          SharedPrefsUtil.instance.getFirstTxnNudgeDismissed(),
-                      isNewUser: _isNewUser(),
-                    ),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final maxWidth =
+                  constraints.maxWidth > DashboardConstants.maxWidth
+                      ? DashboardConstants.maxWidth
+                      : double.infinity;
+              return Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: _DashboardContent(
+                    reduceMotion: reduceMotion,
+                    data: data,
+                    widgets: widgets,
+                    alerts: alerts,
+                    hasSeenHelp: hasSeenHelp,
+                    animationState: animationState,
+                    pendingSmsCount: data.pendingSmsCount,
+                    hasTransactions: hasTransactions,
+                    nudgeDismissed:
+                        SharedPrefsUtil.instance.getFirstTxnNudgeDismissed(),
+                    isNewUser: _isNewUser(),
                   ),
-                );
-              },
-            );
-          },
-        ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -424,6 +400,12 @@ class _DashboardContent extends ConsumerWidget {
     final hasAnimatedOnce = animationState.hasAnimatedOnce;
 
     return RefreshIndicator(
+      notificationPredicate: (notification) {
+        final metrics = notification.metrics;
+        return notification.depth == 0 &&
+            metrics.axis == Axis.vertical &&
+            metrics.pixels <= metrics.minScrollExtent;
+      },
       onRefresh: () => RefreshHelper.withMinDuration(() async {
         ref.read(budgetRefreshProvider.notifier).refresh(
               BudgetRefreshReason.manual,

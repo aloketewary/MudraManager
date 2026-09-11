@@ -10,13 +10,14 @@ import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart' as db;
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
-import 'package:mudra_manager/core/router/app_routes.dart';
 
 class RecentTransactionsCard extends ConsumerWidget {
   final int maxTransactions;
@@ -37,8 +38,8 @@ class RecentTransactionsCard extends ConsumerWidget {
 
     if (transactions.isEmpty) return const SizedBox.shrink();
 
-    // Get recent transactions (sorted by date, most recent first)
-    // Using toList() to create stable reference for rebuild optimization
+    // Dashboard data is already sorted by date. Keep transfers out of this
+    // compact activity summary, matching the existing dashboard behavior.
     final recentTransactions = List<db.Transaction>.from(
       transactions.where((t) => !t.isTransfer).take(maxTransactions),
     );
@@ -73,6 +74,10 @@ class _RecentTransactionsCardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cardRadius = BorderRadius.circular(
+      spacing.radiusMedium + spacing.elementGapMin,
+    );
+
     return Container(
       margin: EdgeInsets.symmetric(
         horizontal: spacing.cardHorizontal,
@@ -82,21 +87,45 @@ class _RecentTransactionsCardContent extends StatelessWidget {
         elevation: 0,
         margin: EdgeInsets.zero,
         color: color.surfaceContainerLow,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: cardRadius,
+          side: BorderSide(
+            color: color.outlineVariant.withValues(alpha: 0.55),
+            width: spacing.strokeThin,
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(context),
-            Divider(height: 1, color: color.primary.withValues(alpha: 0.12)),
+            _buildHeader(context, cardRadius),
+            Divider(
+              height: spacing.strokeThin,
+              thickness: spacing.strokeThin,
+              color: color.outlineVariant.withValues(alpha: 0.45),
+            ),
             ...List.generate(
               recentTransactions.length,
-              (index) => _TransactionItem(
-                transaction: recentTransactions[index],
-                index: index,
-                isGuestMode: isGuestMode,
-                spacing: spacing,
-                color: color,
-                textTheme: textTheme,
-                ctxt: ctxt,
+              (index) => Column(
+                children: [
+                  if (index > 0)
+                    Divider(
+                      height: spacing.strokeThin,
+                      thickness: spacing.strokeThin,
+                      indent: spacing.cardInner,
+                      endIndent: spacing.cardInner,
+                      color: color.outlineVariant.withValues(alpha: 0.35),
+                    ),
+                  _TransactionItem(
+                    transaction: recentTransactions[index],
+                    index: index,
+                    isGuestMode: isGuestMode,
+                    spacing: spacing,
+                    color: color,
+                    textTheme: textTheme,
+                    ctxt: ctxt,
+                  ),
+                ],
               ),
             ),
           ],
@@ -105,52 +134,63 @@ class _RecentTransactionsCardContent extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        context.push(AppRoutes.transactions);
-      },
-      borderRadius: BorderRadius.circular(spacing.radiusSmall),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.cardInner),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(spacing.elementGapMin + 4),
-              decoration: BoxDecoration(
-                color: color.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(spacing.radiusSmall),
+  Widget _buildHeader(BuildContext context, BorderRadius cardRadius) {
+    return Semantics(
+      label: 'See all transactions',
+      button: true,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push(AppRoutes.transactions);
+        },
+        borderRadius: cardRadius,
+        child: Padding(
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: Row(
+            children: [
+              _buildHeaderIcon(),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: AdaptiveText(
+                  ctxt.statistics_recentTransactionsTitleText,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                ),
               ),
-              child: Icon(
-                LucideIcons.receiptText,
-                color: color.primary,
-                size: spacing.iconMD,
-              ),
-            ),
-            SizedBox(width: spacing.elementGap),
-            AdaptiveText(
-              ctxt.statistics_recentTransactionsTitleText,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color.primary,
-              ),
-            ),
-            const Spacer(),
-            Semantics(
-              label: 'See all transactions',
-              button: true,
-              child: Padding(
-                padding: EdgeInsets.all(spacing.elementGapMin),
+              SizedBox(
+                width: spacing.touchTarget,
+                height: spacing.touchTarget,
                 child: Icon(
                   LucideIcons.chevronRight,
-                  color: color.onSurface,
+                  color: color.onSurfaceVariant,
                   size: spacing.iconMD,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderIcon() {
+    return Container(
+      width: spacing.iconXL + spacing.iconSM,
+      height: spacing.iconXL + spacing.iconSM,
+      decoration: BoxDecoration(
+        color: color.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+        border: Border.all(
+          color: color.primary.withValues(alpha: 0.18),
+          width: spacing.strokeThin,
+        ),
+      ),
+      child: Icon(
+        LucideIcons.receiptText,
+        color: color.primary,
+        size: spacing.iconMD,
       ),
     );
   }
@@ -185,8 +225,9 @@ class _TransactionItem extends ConsumerWidget {
     );
     final isExpense = transaction.isExpense;
 
-    return Semantics(
-      label: '${category?.name ?? 'Uncategorized'}, ${account?.name ?? 'Unknown account'}, '
+    final row = Semantics(
+      label:
+          '${category?.name ?? 'Uncategorized'}, ${account?.name ?? 'Unknown account'}, '
           '$displayAmount ${isExpense ? 'expense' : 'income'}',
       button: true,
       child: RepaintBoundary(
@@ -206,30 +247,48 @@ class _TransactionItem extends ConsumerWidget {
             child: Row(
               children: [
                 _buildCategoryIcon(category),
-                SizedBox(width: spacing.radiusMedium),
+                SizedBox(width: spacing.elementGap),
                 _buildCategoryInfo(category, account),
-                const Spacer(),
+                SizedBox(width: spacing.elementGap),
                 _buildAmountAndDate(),
               ],
             ),
           ),
         ),
       ),
-    ).animate().fadeIn(delay: Duration(milliseconds: index * 50), duration: 300.ms).slideX(
+    );
+
+    if (MediaQuery.of(context).disableAnimations) return row;
+
+    return row
+        .animate()
+        .fadeIn(
+          delay: Duration(milliseconds: index * 50),
+          duration: spacing.animNormal,
+        )
+        .slideX(
           begin: 0.05,
           end: 0,
+          duration: spacing.animNormal,
           curve: Curves.easeOutCubic,
         );
   }
 
   Widget _buildCategoryIcon(Category? category) {
-    final iconColor = Color(category?.colorValue ?? 0xFF6200EE);
+    final iconColor = category == null || category.colorValue == null
+        ? color.primary
+        : Color(category.colorValue!);
+
     return Container(
       width: spacing.iconXL + spacing.iconSM,
       height: spacing.iconXL + spacing.iconSM,
       decoration: BoxDecoration(
-        color: iconColor.withValues(alpha: 0.15),
+        color: iconColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(spacing.radiusSmall),
+        border: Border.all(
+          color: iconColor.withValues(alpha: 0.18),
+          width: spacing.strokeThin,
+        ),
       ),
       child: Icon(
         IconHelper.getIconData(category?.iconName),
@@ -240,19 +299,31 @@ class _TransactionItem extends ConsumerWidget {
   }
 
   Widget _buildCategoryInfo(Category? category, Account? account) {
+    final description = transaction.description?.trim();
+    final title = description != null && description.isNotEmpty
+        ? description
+        : category?.name ?? 'Uncategorized';
+    final metadata =
+        '${account?.name ?? 'Unknown'} · ${_formatDate(transaction.date, withTime: true)}';
+
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AdaptiveText(
-            category?.name ?? 'Uncategorized',
-            style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            title,
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
             maxLines: 1,
           ),
           SizedBox(height: spacing.elementGapUltraMin),
           AdaptiveText(
-            account?.name ?? 'Unknown',
-            style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+            metadata,
+            style: textTheme.bodySmall?.copyWith(
+              color: color.onSurfaceVariant,
+              height: 1.25,
+            ),
             maxLines: 1,
           ),
         ],
@@ -262,6 +333,10 @@ class _TransactionItem extends ConsumerWidget {
 
   Widget _buildAmountAndDate() {
     final isExpense = transaction.isExpense;
+    final amountColor = isExpense
+        ? FinanceColors.expenseColor(color.brightness)
+        : FinanceColors.incomeColor(color.brightness);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -272,36 +347,21 @@ class _TransactionItem extends ConsumerWidget {
           isExpense: isExpense,
           style: textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: isExpense ? color.error : color.primary,
+            color: amountColor,
           ),
           maxLines: 1,
         ),
-        if (transaction.currencyCode != null && transaction.convertedAmount != null)
+        if (transaction.currencyCode != null &&
+            transaction.convertedAmount != null)
           CurrencyText(
             amount: transaction.convertedAmount!,
             compact: true,
             style: textTheme.bodySmall?.copyWith(
-              color: color.onSurfaceVariant.withValues(alpha: 0.6),
+              color: color.onSurfaceVariant.withValues(alpha: 0.7),
               fontSize: 10,
             ),
             prefixText: '≈',
           ),
-        SizedBox(height: spacing.elementGapUltraMin),
-        Text(
-          _formatDate(transaction.date),
-          style: textTheme.bodySmall?.copyWith(
-            color: color.onSurfaceVariant,
-            fontSize: 11,
-          ),
-        ),
-        SizedBox(height: spacing.elementGapUltraMin),
-        Text(
-          _formatTime(),
-          style: textTheme.bodySmall?.copyWith(
-            color: color.onSurfaceVariant,
-            fontSize: 11,
-          ),
-        ),
       ],
     );
   }
@@ -314,17 +374,13 @@ class _TransactionItem extends ConsumerWidget {
     final timeFormatValue = DateFormat('hh:mm a', ctxt.localeName).format(date);
 
     if (transactionDate == today) {
-      return "${ctxt.label_today}${withTime ? ' - $timeFormatValue' : ''}";
+      return '${ctxt.label_today}${withTime ? ', $timeFormatValue' : ''}';
     } else if (transactionDate == yesterday) {
-      return "${ctxt.label_yesterday}${withTime ? ' - $timeFormatValue' : ''}";
+      return '${ctxt.label_yesterday}${withTime ? ', $timeFormatValue' : ''}';
     } else if (now.difference(date).inDays < 7) {
-      return "${DateFormat('EEEE', ctxt.localeName).format(date)}${withTime ? ' - $timeFormatValue' : ''}";
+      return '${DateFormat('EEEE', ctxt.localeName).format(date)}${withTime ? ', $timeFormatValue' : ''}';
     } else {
-      return "${DateFormat('MMM dd', ctxt.localeName).format(date)}${withTime ? ' - $timeFormatValue' : ''}";
+      return '${DateFormat('MMM dd', ctxt.localeName).format(date)}${withTime ? ', $timeFormatValue' : ''}';
     }
-  }
-
-  String _formatTime() {
-    return DateFormat('hh:mm a', ctxt.localeName).format(transaction.date);
   }
 }
