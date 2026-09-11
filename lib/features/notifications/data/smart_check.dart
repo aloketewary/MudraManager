@@ -6,6 +6,7 @@ import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 
 /// Interface for all periodic smart notification checks.
 ///
@@ -40,6 +41,12 @@ class SmartNotificationEmitter {
     String? primaryAction,
     String? actionData,
   }) async {
+    final safeTitle = AccountDataContract.safeOutputText(title);
+    final safeBody = AccountDataContract.safeOutputText(body);
+    final safeActionData = actionData == null
+        ? null
+        : AccountDataContract.safeOutputText(actionData);
+
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
     final existing = await isar.notificationRecords
@@ -50,8 +57,8 @@ class SmartNotificationEmitter {
     if (existing != null) return;
 
     final record = NotificationRecord()
-      ..title = title
-      ..body = body
+      ..title = safeTitle
+      ..body = safeBody
       ..timestamp = DateTime.now()
       ..isRead = false
       ..type = type
@@ -59,24 +66,25 @@ class SmartNotificationEmitter {
       ..category = category
       ..source = NotificationSource.smart
       ..primaryAction = primaryAction
-      ..actionData = actionData;
+      ..actionData = safeActionData;
 
-    record.encryptFields(); // Sentinel: Encrypt smart check result before persisting
+    record
+        .encryptFields(); // Sentinel: Encrypt smart check result before persisting
     await isar.writeTxn(() => isar.notificationRecords.put(record));
 
     // Extract route from actionData JSON for tap navigation
     String? payload;
-    if (actionData != null) {
+    if (safeActionData != null) {
       try {
-        final data = jsonDecode(actionData) as Map<String, dynamic>;
+        final data = jsonDecode(safeActionData) as Map<String, dynamic>;
         payload = data['type'] as String?;
       } catch (_) {}
     }
 
     await NotificationService.showLocalNotification(
       id: type.hashCode.abs() % 2147483647,
-      title: title,
-      body: body,
+      title: safeTitle,
+      body: safeBody,
       payload: payload,
       dedupKey: type,
     );

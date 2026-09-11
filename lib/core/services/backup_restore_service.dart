@@ -31,6 +31,7 @@ import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/backup/data/account_backup.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/features/backup/data/budget_backup.dart';
 import 'package:mudra_manager/features/backup/data/budget_category_allocation_backup.dart';
 import 'package:mudra_manager/features/backup/data/category_backup.dart';
@@ -89,7 +90,8 @@ class BackupService {
       // Encrypt-then-MAC: HMAC over ciphertext to detect tampering
       final macKey = Hmac(sha256, key.bytes).convert(utf8.encode('mac')).bytes;
       final hmacPayload = '${iv.base64}:${encrypted.base64}';
-      final mac = Hmac(sha256, macKey).convert(utf8.encode(hmacPayload)).toString();
+      final mac =
+          Hmac(sha256, macKey).convert(utf8.encode(hmacPayload)).toString();
 
       final finalData = jsonEncode({
         'data': encrypted.base64,
@@ -123,8 +125,8 @@ class BackupService {
       }
 
       return filePath;
-    } catch (e, stackTrace) {
-      _log.e('Backup creation failed', e, stackTrace);
+    } catch (_) {
+      _log.e('Backup creation failed: backup_creation_failed');
       SnackbarService.error(BuddyMessages.backupFailed, spacing);
       return null;
     }
@@ -144,7 +146,9 @@ class BackupService {
         dialogTitle: 'Select Backup File',
       );
 
-      if (result == null || result.files.isEmpty || result.files.first.path == null) {
+      if (result == null ||
+          result.files.isEmpty ||
+          result.files.first.path == null) {
         _log.w('No file selected');
         return null;
       }
@@ -170,7 +174,8 @@ class BackupService {
       final encrypt.Key key;
       if (backupData['kdf'] == 'pbkdf2' && backupData['salt'] != null) {
         final salt = base64Decode(backupData['salt'] as String);
-        final (derivedKey, _) = deriveKeyWithSalt(password, Uint8List.fromList(salt));
+        final (derivedKey, _) =
+            deriveKeyWithSalt(password, Uint8List.fromList(salt));
         key = derivedKey;
       } else {
         // ignore: deprecated_member_use_from_same_package
@@ -180,9 +185,11 @@ class BackupService {
 
       // Verify MAC before decryption (Encrypt-then-MAC)
       if (backupData['version'] == 2 && backupData['mac'] != null) {
-        final macKey = Hmac(sha256, key.bytes).convert(utf8.encode('mac')).bytes;
+        final macKey =
+            Hmac(sha256, key.bytes).convert(utf8.encode('mac')).bytes;
         final hmacPayload = '${backupData['iv']}:${backupData['data']}';
-        final expectedMac = Hmac(sha256, macKey).convert(utf8.encode(hmacPayload)).toString();
+        final expectedMac =
+            Hmac(sha256, macKey).convert(utf8.encode(hmacPayload)).toString();
         if (expectedMac != backupData['mac']) {
           SnackbarService.error(BuddyMessages.corruptBackup, spacing);
           return null;
@@ -211,10 +218,11 @@ class BackupService {
 
       _log.i('Backup restored successfully');
       return 'success';
-    } catch (e, stackTrace) {
-      _log.e('Restore failed', e, stackTrace);
+    } catch (_) {
+      _log.e('Restore failed: restore_failed');
       SnackbarService.error(
-        'Restore failed: Invalid password or corrupted file', spacing,
+        'Restore failed: Invalid password or corrupted file',
+        spacing,
       );
       return null;
     }
@@ -315,11 +323,29 @@ class BackupService {
   ) async {
     final backupData = <String, List<Map<String, dynamic>>>{};
 
-    // Backup Accounts
+    // Backup Accounts through the account boundary. Resolvable local values
+    // become portable backup data; unresolved local ciphertext remains opaque
+    // and is validated/re-encrypted or skipped during restore.
     final accounts = await isar.accounts.where().findAll();
-    backupData['Account'] = accounts
-        .map((account) => AccountBackup.fromAccount(account).toBackupJson())
-        .toList();
+    final accountBackups = <Map<String, dynamic>>[];
+    for (final account in accounts) {
+      try {
+        accountBackups.add(
+          (await AccountBackup.reEncrypt(account)).toBackupJson(),
+        );
+      } on AccountBackupException catch (error) {
+        _log.w(
+          AccountDataContract.redactedFailure(
+            accountId: account.id,
+            category: error.category,
+          ),
+        );
+        accountBackups.add(
+          AccountBackup.fromOpaqueAccount(account).toBackupJson(),
+        );
+      }
+    }
+    backupData['Account'] = accountBackups;
 
     // Backup Categories
     final categories = await isar.categorys.where().findAll();
@@ -355,7 +381,8 @@ class BackupService {
         .toList();
 
     // Backup User Profiles (assuming you have this collection)
-    final userProfiles = await isar.userProfiles.where().findAll().withDecryption();
+    final userProfiles =
+        await isar.userProfiles.where().findAll().withDecryption();
     backupData['UserProfile'] = userProfiles
         .map((up) => UserProfileBackup.fromUserProfile(up).toBackupJson())
         .toList();
@@ -388,7 +415,8 @@ class BackupService {
         .toList();
 
     // Backup Transactions
-    final transactions = await isar.transactions.where().findAll().withDecryption();
+    final transactions =
+        await isar.transactions.where().findAll().withDecryption();
     backupData['Transaction'] = transactions
         .map((tx) => TransactionBackup.fromTransaction(tx).toBackupJson())
         .toList();
@@ -549,6 +577,33 @@ class BackupService {
       }
       restoredObjects[collectionName] = modelMap;
     }
+
+    // Stage accounts separately. Legacy plaintext and ciphertext decryptable
+    // by this device are re-encrypted with current key before transaction;
+    // foreign/unresolvable records stay untouched while other collections
+    // retain existing restore order and behavior.
+    final preparedAccounts = <int, Account>{};
+    final accountItems = backupData['Account'];
+    if (accountItems is List<dynamic>) {
+      for (final itemJson in accountItems) {
+        final raw = AccountBackup().fromBackupJson(
+          Map<String, dynamic>.from(itemJson as Map),
+          restoredObjects,
+        );
+        final result = await AccountDataContract.prepareRestoredAccount(raw);
+        if (result.succeeded) {
+          preparedAccounts[raw.id] = result.account!;
+        } else {
+          _log.w(
+            AccountDataContract.redactedFailure(
+              accountId: raw.id,
+              category: result.errorCategory ?? 'account_number_unavailable',
+            ),
+          );
+        }
+      }
+    }
+
     // --- Second Pass: Resolve links and save to Isar ---
     await isar.writeTxn(() async {
       for (final entry in backupData.entries) {
@@ -562,11 +617,10 @@ class BackupService {
             dynamic fullyLinkedModel;
             switch (collectionName) {
               case 'Account':
-                fullyLinkedModel = AccountBackup().fromBackupJson(
-                  Map<String, dynamic>.from(itemJson),
-                  restoredObjects,
-                );
-                await isar.accounts.put(fullyLinkedModel);
+                final preparedAccount = preparedAccounts[id];
+                if (preparedAccount != null) {
+                  await isar.accounts.put(preparedAccount);
+                }
                 break;
               case 'Category':
                 fullyLinkedModel = CategoryBackup().fromBackupJson(
@@ -587,7 +641,7 @@ class BackupService {
                   Map<String, dynamic>.from(itemJson),
                   restoredObjects,
                 );
-            rt.encryptFields();
+                rt.encryptFields();
                 await isar.recurringTransactions.put(rt);
                 await rt.category.save();
                 await rt.account.save();

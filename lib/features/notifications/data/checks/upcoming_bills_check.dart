@@ -5,6 +5,7 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/features/notifications/data/smart_check.dart';
 
 class UpcomingBillsCheck extends SmartCheck {
@@ -38,7 +39,9 @@ class UpcomingBillsCheck extends SmartCheck {
 
       final name = bill.description?.isNotEmpty == true
           ? FieldEncryptionService.safeDisplay(
-              bill.description, bill.category.value?.name ?? 'Bill',)
+              bill.description,
+              bill.category.value?.name ?? 'Bill',
+            )
           : bill.category.value?.name ?? 'Bill';
 
       await SmartNotificationEmitter.emit(
@@ -61,11 +64,13 @@ class UpcomingBillsCheck extends SmartCheck {
     }
 
     // ── Credit card due dates ──
-    final cards = await isar.accounts
-        .filter()
-        .accountTypeEqualTo(AccountType.creditCard)
-        .isActiveEqualTo(true)
-        .findAll();
+    final cards = await AccountDataContract.safeAccounts(
+      await isar.accounts
+          .filter()
+          .accountTypeEqualTo(AccountType.creditCard)
+          .isActiveEqualTo(true)
+          .findAll(),
+    );
 
     for (final card in cards) {
       if (card.dueDay == null) continue;
@@ -77,8 +82,11 @@ class UpcomingBillsCheck extends SmartCheck {
           dueDate.difference(DateTime(now.year, now.month, now.day)).inDays;
       if (days > 3) continue;
 
-      final label =
-          days == 0 ? 'today' : days == 1 ? 'tomorrow' : 'in $days days';
+      final label = days == 0
+          ? 'today'
+          : days == 1
+              ? 'tomorrow'
+              : 'in $days days';
       await SmartNotificationEmitter.emit(
         isar,
         type: 'cc_due_${card.id}',

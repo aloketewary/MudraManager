@@ -22,6 +22,7 @@ class DateTimeRow extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
+    final localeName = Localizations.localeOf(context).toLanguageTag();
 
     return Row(
       children: [
@@ -30,7 +31,7 @@ class DateTimeRow extends ConsumerWidget {
           child: _buildChip(
             context: context,
             icon: LucideIcons.calendar,
-            label: DateFormat('MMM dd, yyyy').format(selectedDate),
+            label: DateFormat('MMM dd, yyyy', localeName).format(selectedDate),
             color: color,
             textTheme: textTheme,
             onTap: () => _pickDate(context),
@@ -43,7 +44,7 @@ class DateTimeRow extends ConsumerWidget {
           child: _buildChip(
             context: context,
             icon: LucideIcons.clock,
-            label: DateFormat('hh:mm a').format(selectedDate),
+            label: DateFormat('hh:mm a', localeName).format(selectedDate),
             color: color,
             textTheme: textTheme,
             onTap: () => _pickTime(context),

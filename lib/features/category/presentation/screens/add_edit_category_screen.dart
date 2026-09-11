@@ -7,6 +7,7 @@ import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/category_keyword_suggestions.dart';
@@ -113,7 +114,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     final current = _keywordsController.text.trim();
     _keywordsController.text = current.isEmpty ? keyword : '$current, $keyword';
     setState(() {
-      _keywordSuggestions = _keywordSuggestions.where((k) => k != keyword).toList();
+      _keywordSuggestions =
+          _keywordSuggestions.where((k) => k != keyword).toList();
     });
   }
 
@@ -121,7 +123,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     HapticFeedback.lightImpact();
     setState(() {
       _dismissedSuggestions.add(keyword);
-      _keywordSuggestions = _keywordSuggestions.where((k) => k != keyword).toList();
+      _keywordSuggestions =
+          _keywordSuggestions.where((k) => k != keyword).toList();
     });
   }
 
@@ -163,12 +166,14 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final horizontalPadding =
-            constraints.maxWidth > 600 ? spacing.cardHorizontalMax : spacing.cardHorizontal;
+        final horizontalPadding = constraints.maxWidth > 600
+            ? spacing.cardHorizontalMax
+            : spacing.cardHorizontal;
 
         return ScreenShell(
           config: ScreenShellConfig(
-            title: _isEditing ? ctxt.category_editTitle : ctxt.category_addTitle,
+            title:
+                _isEditing ? ctxt.category_editTitle : ctxt.category_addTitle,
             appBarMode: AppBarMode.standard,
             enableRefresh: false,
           ),
@@ -281,14 +286,16 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                 ),
                 // Identity block (glass surface like AccountScreen)
                 Padding(
-                  padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+                  padding:
+                      EdgeInsets.all(spacing.cardInner + spacing.elementGap),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Icon container
                       RepaintBoundary(
                         child: Container(
-                          padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+                          padding: EdgeInsets.all(
+                              spacing.cardInner + spacing.elementGap),
                           decoration: BoxDecoration(
                             color: _accentColor.withValues(alpha: 0.12),
                             shape: BoxShape.circle,
@@ -312,10 +319,13 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                           vertical: spacing.elementGap,
                         ),
                         decoration: BoxDecoration(
-                          color: color.surface.withValues(alpha: isDark ? 0.1 : 0.15),
-                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                          color: color.surface
+                              .withValues(alpha: isDark ? 0.1 : 0.15),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
                           border: Border.all(
-                            color: color.outlineVariant.withValues(alpha: isDark ? 0.2 : 0.3),
+                            color: color.outlineVariant
+                                .withValues(alpha: isDark ? 0.2 : 0.3),
                           ),
                         ),
                         child: Row(
@@ -345,7 +355,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: color.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                              borderRadius:
+                                  BorderRadius.circular(spacing.radiusMedium),
                               border: Border.all(
                                 color: color.primary.withValues(alpha: 0.2),
                               ),
@@ -436,7 +447,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             selectedBackgroundColor: color.primary.withValues(alpha: 0.15),
             selectedForegroundColor: color.primary,
             foregroundColor: color.onSurfaceVariant,
-            side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+            side:
+                BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
           ),
         ),
       ],
@@ -457,7 +469,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
       fillColor: color.surface.withValues(alpha: isDark ? 0.6 : 0.7),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        borderSide: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+        borderSide:
+            BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -465,7 +478,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        borderSide: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+        borderSide:
+            BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
     );
 
@@ -482,7 +496,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
           controller: _nameController,
           decoration: inputDecoration.copyWith(
             labelText: ctxt.category_nameHint,
-            prefixIcon: Icon(LucideIcons.pencil, size: 18, color: color.primary),
+            prefixIcon:
+                Icon(LucideIcons.pencil, size: 18, color: color.primary),
           ),
           textTheme: textTheme,
           validator: (v) =>
@@ -538,12 +553,14 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             return InputChip(
               label: Text(
                 keyword,
-                style: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+                style:
+                    textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
               avatar: Icon(LucideIcons.plus, size: 14, color: color.primary),
               onPressed: () => _addSuggestedKeyword(keyword),
               onDeleted: () => _dismissSuggestion(keyword),
-              deleteIcon: Icon(LucideIcons.x, size: 14, color: color.onSurfaceVariant),
+              deleteIcon:
+                  Icon(LucideIcons.x, size: 14, color: color.onSurfaceVariant),
               visualDensity: VisualDensity.compact,
               side: BorderSide.none,
               backgroundColor: color.primary.withValues(alpha: 0.08),
@@ -573,7 +590,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+            border:
+                Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
           ),
           child: Material(
             color: Colors.transparent,
@@ -584,7 +602,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                 padding: EdgeInsets.all(spacing.cardInner),
                 child: Row(
                   children: [
-                    Icon(LucideIcons.folderOpen, size: 18, color: color.primary),
+                    Icon(LucideIcons.folderOpen,
+                        size: 18, color: color.primary),
                     SizedBox(width: spacing.elementGap * 1.5),
                     Expanded(
                       child: Text(
@@ -697,8 +716,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 
     if (selected != null && mounted) {
       setState(() {
-        _selectedParent =
-            selected.id == Isar.autoIncrement ? null : selected;
+        _selectedParent = selected.id == Isar.autoIncrement ? null : selected;
       });
     }
   }
@@ -732,6 +750,9 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
         await category.parentCategory.save();
       });
 
+      ref.read(budgetRefreshProvider.notifier).refresh(
+            BudgetRefreshReason.categoryChanged,
+          );
       ref.invalidate(categoryListProvider);
 
       if (!_isEditing) {

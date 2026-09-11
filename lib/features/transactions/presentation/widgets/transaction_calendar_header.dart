@@ -35,11 +35,11 @@ class TransactionCalendarHeader extends ConsumerWidget {
     required this.onToggleViewMode,
   });
 
-  String _getDateRangeText() {
+  String _getDateRangeText(String localeName) {
     if (filterStartDate != null && filterEndDate != null) {
-      return '${DateFormat.MMMd().format(filterStartDate!)} - ${DateFormat.MMMd().format(filterEndDate!)}';
+      return '${DateFormat.MMMd(localeName).format(filterStartDate!)} - ${DateFormat.MMMd(localeName).format(filterEndDate!)}';
     }
-    return DateFormat.yMMMM().format(selectedDate);
+    return DateFormat.yMMMM(localeName).format(selectedDate);
   }
 
   bool _isSameMonth(DateTime a, DateTime b) {
@@ -51,6 +51,7 @@ class TransactionCalendarHeader extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
+    final localeName = Localizations.localeOf(context).toLanguageTag();
 
     return Material(
       color: Colors.transparent,
@@ -70,7 +71,8 @@ class TransactionCalendarHeader extends ConsumerWidget {
                   color: color.primaryContainer,
                   borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
-                child: Icon(LucideIcons.calendar, color: color.primary, size: 20),
+                child:
+                    Icon(LucideIcons.calendar, color: color.primary, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -80,7 +82,7 @@ class TransactionCalendarHeader extends ConsumerWidget {
                     Text(
                       useInfiniteScroll && filterStartDate == null
                           ? 'All Transactions'
-                          : _getDateRangeText(),
+                          : _getDateRangeText(localeName),
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: color.onSurface,
@@ -89,7 +91,8 @@ class TransactionCalendarHeader extends ConsumerWidget {
                     if (useInfiniteScroll && filterStartDate == null)
                       Text(
                         'Scroll to load more',
-                        style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                        style: textTheme.bodySmall
+                            ?.copyWith(color: color.onSurfaceVariant),
                       ),
                   ],
                 ),
@@ -113,7 +116,8 @@ class TransactionCalendarHeader extends ConsumerWidget {
                       ),
                       if (!_isSameMonth(selectedDate, DateTime.now()))
                         IconButton(
-                          icon: Icon(LucideIcons.refreshCw, size: 20, color: color.primary),
+                          icon: Icon(LucideIcons.refreshCw,
+                              size: 20, color: color.primary),
                           tooltip: 'Reset to Current Month',
                           onPressed: () {
                             HapticFeedback.mediumImpact();
@@ -122,7 +126,8 @@ class TransactionCalendarHeader extends ConsumerWidget {
                         )
                       else
                         IconButton(
-                          icon: Icon(LucideIcons.calendar, size: 20, color: color.primary),
+                          icon: Icon(LucideIcons.calendar,
+                              size: 20, color: color.primary),
                           tooltip: 'Select Month',
                           onPressed: () {
                             HapticFeedback.mediumImpact();
@@ -148,7 +153,8 @@ class TransactionCalendarHeader extends ConsumerWidget {
                         size: 20,
                         color: color.primary,
                       ),
-                      tooltip: useInfiniteScroll ? 'Month View' : 'All Transactions',
+                      tooltip:
+                          useInfiniteScroll ? 'Month View' : 'All Transactions',
                       onPressed: () {
                         HapticFeedback.mediumImpact();
                         onToggleViewMode();

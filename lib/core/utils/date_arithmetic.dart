@@ -37,6 +37,14 @@ class DateArithmetic {
     return addMonths(from, years * 12, preferDay: preferDay);
   }
 
+  /// Normalizes a value to local midnight.
+  static DateTime startOfDay(DateTime value) =>
+      DateTime(value.year, value.month, value.day);
+
+  /// Normalizes a value to the inclusive end of its local day.
+  static DateTime endOfDay(DateTime value) =>
+      DateTime(value.year, value.month, value.day, 23, 59, 59, 999, 999);
+
   /// Returns the number of days in a given month/year.
   static int _daysInMonth(int year, int month) {
     return DateTime(year, month + 1, 0).day;

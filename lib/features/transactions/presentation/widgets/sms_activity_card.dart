@@ -7,12 +7,15 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/features/sms/data/category_matcher_service.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
@@ -71,10 +74,11 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
     if (result == true && mounted) {
       // Ask if user wants to auto-approve pending transactions
       final autoApprove = await DialogUtils.showConfirmation(
-        context, spacing,
+        context,
+        spacing,
         title: 'Auto-approve pending?',
         message:
-            'Do you want to automatically approve pending transactions for "${widget.activity.account}"?',
+            'Do you want to automatically approve pending transactions for "${SafeAccountPresentation.formatAccountNumber(widget.activity.account)}"?',
         icon: LucideIcons.circleCheck,
         confirmText: 'Yes',
         cancelText: 'No',
@@ -100,26 +104,24 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
 
   Future<void> _autoApprovePending() async {
     final isar = await ref.read(isarServiceProvider).getInstance();
-    final accounts = await isar.accounts.where().findAll();
+    final storedAccounts = await isar.accounts.where().findAll();
+    final accounts = await AccountDataContract.safeAccounts(storedAccounts);
     final categories = await isar.categorys.where().findAll();
 
-    Account? matchingAccount;
-    try {
-      matchingAccount = accounts.firstWhere(
-        (a) =>
-            a.accountNumber != null &&
-            widget.activity.account!.contains(a.accountNumber!),
-      );
-    } catch (e) {
-      return; // No matching account found
-    }
+    final matchingAccount = AccountMatchingBoundary.firstMatch(
+      accounts,
+      widget.activity.account,
+      activeOnly: true,
+    );
+    if (matchingAccount == null) return;
 
     final pendingActivities = await isar.smsActivitys
         .filter()
         .accountEqualTo(widget.activity.account)
         .and()
         .statusEqualTo(ActivityStatus.pending)
-        .findAll();
+        .findAll()
+        .withDecryption();
 
     for (final activity in pendingActivities) {
       final category = CategoryMatcherService.matchCategory(
@@ -189,9 +191,10 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
           data: (accounts) {
             // Check if any account number matches (last 4 digits)
             return !accounts.any(
-              (a) =>
-                  a.accountNumber != null &&
-                  widget.activity.account!.contains(a.accountNumber!),
+              (a) => AccountMatchingBoundary.matches(
+                a,
+                widget.activity.account,
+              ),
             );
           },
           loading: () => false,
@@ -312,7 +315,9 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                         ),
                         if (widget.activity.account != null)
                           Text(
-                            widget.activity.account!,
+                            SafeAccountPresentation.formatAccountNumber(
+                              widget.activity.account,
+                            ),
                             style: textTheme.bodySmall?.copyWith(
                               color: color.onSurfaceVariant,
                             ),
@@ -393,9 +398,10 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Account "${widget.activity.account}" not found. Add it first.',
+                              'Account "${SafeAccountPresentation.formatAccountNumber(widget.activity.account)}" not found. Add it first.',
                               style: textTheme.bodySmall?.copyWith(
-                                  color: FinanceColors.statusWarning,),
+                                color: FinanceColors.statusWarning,
+                              ),
                             ),
                           ),
                         ],
@@ -419,7 +425,8 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: FilledButton.icon(
-                          onPressed: () => hasUnknownAccount ? _addAccount : _approve,
+                          onPressed: () =>
+                              hasUnknownAccount ? _addAccount : _approve,
                           icon: Icon(
                             hasUnknownAccount
                                 ? LucideIcons.plus

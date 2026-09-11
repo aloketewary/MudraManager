@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 
 class AccountSelector extends ConsumerWidget {
   final Account? selectedAccount;
@@ -33,8 +35,9 @@ class AccountSelector extends ConsumerWidget {
           data: (accounts) {
             final matchedAccount = accountNumber != null
                 ? accounts
-                    .where((a) =>
-                        a.accountNumber?.contains(accountNumber!) == true,)
+                    .where(
+                      (a) => AccountMatchingBoundary.matches(a, accountNumber),
+                    )
                     .firstOrNull
                 : null;
             final showAddButton =
@@ -57,6 +60,8 @@ class AccountSelector extends ConsumerWidget {
                   }
 
                   final account = accounts[index];
+                  final presentation =
+                      SafeAccountPresentation.fromAccount(account);
                   final isSelected = selectedAccount?.id == account.id;
 
                   return GestureDetector(
@@ -66,12 +71,15 @@ class AccountSelector extends ConsumerWidget {
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8,),
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? color.primaryContainer
                             : color.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
                         border: isSelected
                             ? Border.all(color: color.primary, width: 2)
                             : null,
@@ -97,7 +105,7 @@ class AccountSelector extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            account.accountNumber ?? '',
+                            presentation.accountNumber,
                             style: textTheme.labelSmall?.copyWith(
                               color: isSelected
                                   ? color.onPrimaryContainer
@@ -196,8 +204,8 @@ class _AddAccountButton extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(
               bankName != null && bankName!.isNotEmpty
-                  ? '$bankName\n****$accountNumber'
-                  : '****$accountNumber',
+                  ? '$bankName\n${SafeAccountPresentation.formatAccountNumber(accountNumber)}'
+                  : SafeAccountPresentation.formatAccountNumber(accountNumber),
               style: textTheme.labelSmall?.copyWith(
                 color: color.error,
                 fontWeight: FontWeight.bold,

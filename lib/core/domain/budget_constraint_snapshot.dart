@@ -1,5 +1,6 @@
 
 import 'financial_states.dart';
+import 'budget_period_snapshot.dart';
 
 /// Pure data model representing a budget's constraint state at a point in time.
 /// Produced by BudgetStateMachine. Consumed by UI templates.
@@ -33,6 +34,11 @@ class BudgetConstraintSnapshot {
   final int daysPassed;
   final int totalDays;
 
+  // Canonical period source shared with dashboard/progress/history.
+  final BudgetPeriodSnapshot? budgetSnapshot;
+  final DateTime? periodStart;
+  final DateTime? periodEnd;
+
   // Classification
   final BudgetConstraintUrgency urgency;
   final BudgetState state;
@@ -53,6 +59,9 @@ class BudgetConstraintSnapshot {
     required this.daysLeft,
     required this.daysPassed,
     required this.totalDays,
+    this.budgetSnapshot,
+    this.periodStart,
+    this.periodEnd,
     required this.urgency,
     required this.state,
   });

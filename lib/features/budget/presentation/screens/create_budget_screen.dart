@@ -13,6 +13,7 @@ import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
+import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -83,7 +84,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
   }
 
   double get _dailyAllowance {
-    final amount = double.tryParse(_amountC.text.trim().replaceAll(',', '')) ?? 0;
+    final amount =
+        double.tryParse(_amountC.text.trim().replaceAll(',', '')) ?? 0;
     final days = _daysInPeriod;
     return days > 0 && amount > 0 ? amount / days : 0;
   }
@@ -103,7 +105,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     }
 
     // Validation
-    final amount = double.tryParse(_amountC.text.trim().replaceAll(',', '')) ?? 0;
+    final amount =
+        double.tryParse(_amountC.text.trim().replaceAll(',', '')) ?? 0;
     if (amount <= 0) {
       setState(() => _saving = false);
       SnackbarService.error(l10n.budget_amountRequiredHintText, spacing);
@@ -112,7 +115,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
 
     if (_budgetType == BudgetType.categoryWise && _selectedCategory == null) {
       setState(() => _saving = false);
-      SnackbarService.error(l10n.budget_selectAtLeastOneCategoryErrorText, spacing);
+      SnackbarService.error(
+          l10n.budget_selectAtLeastOneCategoryErrorText, spacing);
       return;
     }
 
@@ -164,13 +168,23 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     }
 
     final service = ref.read(budgetServiceProvider);
-    await service.save(budget, newAllocations: allocations);
+    try {
+      await service.save(budget, newAllocations: allocations);
+      // Persistence succeeded; publish shared generation only now.
+      ref.read(budgetRefreshProvider.notifier).refresh(
+            BudgetRefreshReason.budgetCrud,
+          );
 
-    if (mounted) {
-      HapticFeedback.mediumImpact();
-      ref.invalidate(budgetServiceProvider);
-      SnackbarService.success(BuddyMessages.budgetCreated, spacing);
-      context.pop();
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        SnackbarService.success(BuddyMessages.budgetCreated, spacing);
+        context.pop();
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() => _saving = false);
+        SnackbarService.error('$error', spacing);
+      }
     }
   }
 
@@ -277,7 +291,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
         ),
         SizedBox(height: spacing.elementGap),
         InkWell(
-          onTap: () => _showCategorySheet(cats, parents, spacing, color, textTheme),
+          onTap: () =>
+              _showCategorySheet(cats, parents, spacing, color, textTheme),
           borderRadius: BorderRadius.circular(spacing.radiusMedium),
           child: Container(
             padding: EdgeInsets.all(spacing.cardInner),
@@ -300,7 +315,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
                     height: 36,
                     decoration: BoxDecoration(
                       color: _selectedCategory!.colorValue != null
-                          ? Color(_selectedCategory!.colorValue!).withValues(alpha: 0.15)
+                          ? Color(_selectedCategory!.colorValue!)
+                              .withValues(alpha: 0.15)
                           : color.primaryContainer,
                       borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     ),
@@ -322,7 +338,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
                     ),
                   ),
                 ] else ...[
-                  Icon(LucideIcons.tag, size: 20, color: color.onSurfaceVariant),
+                  Icon(LucideIcons.tag,
+                      size: 20, color: color.onSurfaceVariant),
                   SizedBox(width: spacing.elementGap),
                   Expanded(
                     child: Text(
@@ -397,7 +414,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
                       padding: EdgeInsets.only(left: spacing.sectionGap),
                       child: Column(
                         children: subs
-                            .map((s) => _categoryTile(s, spacing, color, textTheme))
+                            .map((s) =>
+                                _categoryTile(s, spacing, color, textTheme))
                             .toList(),
                       ),
                     ),
@@ -417,7 +435,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     ColorScheme color,
     TextTheme textTheme,
   ) {
-    final catColor = cat.colorValue != null ? Color(cat.colorValue!) : color.primary;
+    final catColor =
+        cat.colorValue != null ? Color(cat.colorValue!) : color.primary;
     final isSelected = _selectedCategory?.id == cat.id;
 
     return InkWell(
@@ -433,7 +452,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
           vertical: spacing.elementGap,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? catColor.withValues(alpha: 0.1) : Colors.transparent,
+          color:
+              isSelected ? catColor.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(spacing.radiusSmall),
         ),
         child: Row(
@@ -461,8 +481,7 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
                 ),
               ),
             ),
-            if (isSelected)
-              Icon(LucideIcons.check, size: 16, color: catColor),
+            if (isSelected) Icon(LucideIcons.check, size: 16, color: catColor),
           ],
         ),
       ),
@@ -664,11 +683,13 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
   ) {
     final templates = <(String, double)>[];
     if (history.recommendedLimit > 0) {
-      templates.add((l10n.budget_templateRecommended, history.recommendedLimit));
+      templates
+          .add((l10n.budget_templateRecommended, history.recommendedLimit));
     }
     if (history.conservativeLimit > 0 &&
         history.conservativeLimit != history.recommendedLimit) {
-      templates.add((l10n.budget_templateConservative, history.conservativeLimit));
+      templates
+          .add((l10n.budget_templateConservative, history.conservativeLimit));
     }
     if (history.flexibleLimit > 0 &&
         history.flexibleLimit != history.recommendedLimit) {
@@ -965,7 +986,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
         decoration: BoxDecoration(
           color: color.surfaceContainerLow,
           borderRadius: BorderRadius.circular(spacing.radiusSmall),
-          border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+          border:
+              Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: Row(
           children: [
@@ -981,7 +1003,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
               ),
             ),
             SizedBox(width: spacing.elementGapMin),
-            Icon(LucideIcons.chevronRight, size: 14, color: color.onSurfaceVariant),
+            Icon(LucideIcons.chevronRight,
+                size: 14, color: color.onSurfaceVariant),
           ],
         ),
       ),
@@ -998,7 +1021,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
             return ListTile(
               title: Text(l10n.translate(r.name)),
               trailing: _recurrence == r
-                  ? Icon(LucideIcons.check, color: Theme.of(context).colorScheme.primary)
+                  ? Icon(LucideIcons.check,
+                      color: Theme.of(context).colorScheme.primary)
                   : null,
               onTap: () {
                 setState(() => _recurrence = r);
@@ -1032,7 +1056,8 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
               title: Text(type.localizedName(l10n)),
               subtitle: Text(
                 type.localizedDesc(l10n),
-                style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                style: textTheme.bodySmall
+                    ?.copyWith(color: color.onSurfaceVariant),
               ),
               trailing: _budgetType == type
                   ? Icon(LucideIcons.check, color: color.primary)

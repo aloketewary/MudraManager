@@ -40,77 +40,93 @@ class RecurringTransactionService {
       await recurring.category.load();
       await recurring.account.load();
 
-      final dueDate = DateTime(
-        recurring.nextDueDate.year,
-        recurring.nextDueDate.month,
-        recurring.nextDueDate.day,
-      );
-
-      if (dueDate.isAfter(today)) continue;
-
-      // Check if already processed for this period
-      final exists =
-          await _transactionExists(isar, recurring, recurring.nextDueDate);
-      if (exists) {
-        skipped++;
-        continue;
-      }
-
-      // Try to match with an existing SMS-imported transaction
-      final smsMatch = await _findSmsMatch(isar, recurring);
-      if (smsMatch != null) {
-        // Link the existing transaction to this recurring bill
-        await _linkTransactionToRecurring(isar, smsMatch, recurring);
-        await _updateNextDueDate(isar, recurring);
-        final billName = recurring.description?.isNotEmpty == true
-            ? recurring.description!
-            : recurring.category.value?.name ?? 'Bill';
-        await SmartNotificationService.instance.notifyBillPaid(
-          description: billName,
-          amount: recurring.amount,
-          billId: recurring.id,
-          wasSmsMatched: true,
+      while (recurring.isActive) {
+        final dueDate = DateTime(
+          recurring.nextDueDate.year,
+          recurring.nextDueDate.month,
+          recurring.nextDueDate.day,
         );
-        log.i('Matched SMS transaction to recurring: ${recurring.description}');
-        matched++;
-        continue;
-      }
 
-      // No SMS match — only auto-create if overdue by 2+ days
-      // (gives SMS import time to pick it up)
-      final daysOverdue = today.difference(dueDate).inDays;
-      if (daysOverdue >= 2) {
-        await _createTransaction(isar, recurring);
-        await _updateNextDueDate(isar, recurring);
-        final billName = recurring.description?.isNotEmpty == true
-            ? recurring.description!
-            : recurring.category.value?.name ?? 'Bill';
-        await SmartNotificationService.instance.notifyBillPaid(
-          description: billName,
-          amount: recurring.amount,
-          billId: recurring.id,
-          wasSmsMatched: false,
-        );
-        log.i('Auto-created overdue recurring: ${recurring.description}');
-        processed++;
+        if (dueDate.isAfter(today)) break;
+
+        // Check if this exact scheduled occurrence was already processed.
+        final exists =
+            await _transactionExists(isar, recurring, recurring.nextDueDate);
+        if (exists) {
+          skipped++;
+          await _updateNextDueDate(isar, recurring);
+          continue;
+        }
+
+        // Try to match with an existing SMS-imported transaction.
+        final smsMatch = await _findSmsMatch(isar, recurring);
+        if (smsMatch != null) {
+          // Link the existing transaction to this recurring bill.
+          await _linkTransactionToRecurring(isar, smsMatch, recurring);
+          await _updateNextDueDate(isar, recurring);
+          final billName = recurring.description?.isNotEmpty == true
+              ? recurring.description!
+              : recurring.category.value?.name ?? 'Bill';
+          await SmartNotificationService.instance.notifyBillPaid(
+            description: billName,
+            amount: recurring.amount,
+            billId: recurring.id,
+            wasSmsMatched: true,
+          );
+          log.i(
+              'Matched SMS transaction to recurring: ${recurring.description}');
+          matched++;
+          continue;
+        }
+
+        // No SMS match — only auto-create if overdue by 2+ days
+        // (gives SMS import time to pick it up). Keep grace-period due dates pending.
+        final daysOverdue = today.difference(dueDate).inDays;
+        if (daysOverdue >= 2) {
+          await _createTransaction(isar, recurring);
+          await _updateNextDueDate(isar, recurring);
+          final billName = recurring.description?.isNotEmpty == true
+              ? recurring.description!
+              : recurring.category.value?.name ?? 'Bill';
+          await SmartNotificationService.instance.notifyBillPaid(
+            description: billName,
+            amount: recurring.amount,
+            billId: recurring.id,
+            wasSmsMatched: false,
+          );
+          log.i('Auto-created overdue recurring: ${recurring.description}');
+          processed++;
+        } else {
+          break;
+        }
       }
     }
 
     log.i(
-        'Recurring: $processed created, $matched SMS-matched, $skipped already done',);
+      'Recurring: $processed created, $matched SMS-matched, $skipped already done',
+    );
   }
 
   /// Find an unlinked transaction that matches this recurring bill
   /// (exact amount, within the billing period, same account)
   Future<Transaction?> _findSmsMatch(
-      Isar isar, RecurringTransaction recurring,) async {
+    Isar isar,
+    RecurringTransaction recurring,
+  ) async {
     final dueDate = recurring.nextDueDate;
     // Search from 5 days before due to 2 days after (payments can be early/late)
     final searchStart = DateTime(
-      dueDate.year, dueDate.month, dueDate.day,
+      dueDate.year,
+      dueDate.month,
+      dueDate.day,
     ).subtract(const Duration(days: 5));
     final searchEnd = DateTime(
-      dueDate.year, dueDate.month, dueDate.day, 23, 59, 59,
+      dueDate.year,
+      dueDate.month,
+      dueDate.day,
+      23,
+      59,
+      59,
     ).add(const Duration(days: 2));
 
     final candidates = await isar.transactions
@@ -135,7 +151,10 @@ class RecurringTransactionService {
   }
 
   Future<void> _linkTransactionToRecurring(
-      Isar isar, Transaction txn, RecurringTransaction recurring,) async {
+    Isar isar,
+    Transaction txn,
+    RecurringTransaction recurring,
+  ) async {
     txn.recurringTransactionSource.value = recurring;
     txn.encryptFields();
     await isar.writeTxn(() async {
@@ -145,7 +164,10 @@ class RecurringTransactionService {
   }
 
   Future<bool> _transactionExists(
-      Isar isar, RecurringTransaction recurring, DateTime dueDate,) async {
+    Isar isar,
+    RecurringTransaction recurring,
+    DateTime dueDate,
+  ) async {
     final startOfDay = DateTime(dueDate.year, dueDate.month, dueDate.day);
     final endOfDay =
         DateTime(dueDate.year, dueDate.month, dueDate.day, 23, 59, 59);
@@ -160,7 +182,9 @@ class RecurringTransactionService {
   }
 
   Future<void> _createTransaction(
-      Isar isar, RecurringTransaction recurring,) async {
+    Isar isar,
+    RecurringTransaction recurring,
+  ) async {
     final frequencyText = _getFrequencyText(recurring.frequency);
     final description = recurring.description?.isNotEmpty == true
         ? '${recurring.description} (🔄 $frequencyText)'
@@ -215,7 +239,9 @@ class RecurringTransactionService {
   }
 
   Future<void> _updateNextDueDate(
-      Isar isar, RecurringTransaction recurring,) async {
+    Isar isar,
+    RecurringTransaction recurring,
+  ) async {
     final nextDate = calculateNextDueDate(
       recurring.nextDueDate,
       recurring.frequency,
@@ -258,7 +284,8 @@ class RecurringTransactionService {
 
   Future<List<RecurringTransaction>> getAll() async {
     final isar = await isarService.getInstance();
-    final all = await isar.recurringTransactions.where().findAll().withDecryption();
+    final all =
+        await isar.recurringTransactions.where().findAll().withDecryption();
     for (var r in all) {
       await r.category.load();
       await r.account.load();
@@ -268,8 +295,10 @@ class RecurringTransactionService {
 
   Stream<List<RecurringTransaction>> watchAll() async* {
     final isar = await isarService.getInstance();
-    await for (final list
-        in isar.recurringTransactions.where().watch(fireImmediately: true).withDecryption()) {
+    await for (final list in isar.recurringTransactions
+        .where()
+        .watch(fireImmediately: true)
+        .withDecryption()) {
       for (var r in list) {
         await r.category.load();
         await r.account.load();

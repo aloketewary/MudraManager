@@ -127,8 +127,13 @@ class CategoryMatcherService {
     // Filter by type when known; otherwise consider both income and expense categories.
     final validCategories = isIncome == null
         ? categories.toList()
-        : categories.where((c) => c.categoryType ==
-            (isIncome ? CategoryType.income : CategoryType.expense),).toList();
+        : categories
+            .where(
+              (c) =>
+                  c.categoryType ==
+                  (isIncome ? CategoryType.income : CategoryType.expense),
+            )
+            .toList();
 
     // Priority 1: Check merchant name first (highest priority)
     if (merchant != null && merchant.isNotEmpty) {
@@ -138,13 +143,7 @@ class CategoryMatcherService {
       }
     }
 
-    // Priority 2: Check merchant keyword rules (learned rules)
-    if (merchant != null && merchant.isNotEmpty) {
-      // This would query the categoryRules table in real implementation
-      // For now, treat merchant as keyword with high confidence
-    }
-
-    // Priority 3: Keyword matching with scoring (prioritize longer, more specific keywords)
+    // Priority 2: Keyword matching with scoring (prioritize longer, more specific keywords)
     Category? bestMatch;
     int maxScore = 0;
 
@@ -179,7 +178,8 @@ class CategoryMatcherService {
       // NO penalties on subscription categories - let scoring work naturally
       // Removing the 30% penalty that was causing false negatives
 
-      if (score > maxScore && score >= 10) { // Lowered threshold from 20 to 10
+      if (score > maxScore && score >= 10) {
+        // Lowered threshold from 20 to 10
         maxScore = score;
         bestMatch = category;
       }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/utils/string_util.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 
 class _ChipPainter extends CustomPainter {
@@ -99,6 +100,8 @@ class _AnimatedAccountCard extends ConsumerState<AnimatedAccountCard> {
     final accentLuminance = widget.accentColor.computeLuminance();
     final textColor = accentLuminance > 0.5 ? Colors.black : Colors.white;
     final textColorWithAlpha = textColor.withValues(alpha: 0.85);
+    final safeAccountNumber =
+        SafeAccountPresentation.formatAccountNumber(widget.accountNumber);
 
     return Container(
       height: 220,
@@ -270,7 +273,7 @@ class _AnimatedAccountCard extends ConsumerState<AnimatedAccountCard> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            widget.accountNumber,
+                            safeAccountNumber,
                             style: textTheme.bodyMedium?.copyWith(
                               color: textColor,
                               fontWeight: FontWeight.w600,

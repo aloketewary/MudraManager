@@ -4,6 +4,7 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 
 class SmartDefaults {
   final Category? suggestedCategory;
@@ -98,7 +99,9 @@ final smartDefaultsProvider = FutureProvider.autoDispose
           ..sort((a, b) => b.value.compareTo(a.value)))
         .first
         .key;
-    suggestedAccount = await isar.accounts.get(bestAccId);
+    suggestedAccount = await AccountDataContract.safeAccount(
+      await isar.accounts.get(bestAccId),
+    );
     // Only suggest if account is still active
     if (suggestedAccount?.isActive == false) suggestedAccount = null;
   }
@@ -164,7 +167,8 @@ final frequentCategoriesProvider = FutureProvider.autoDispose
 });
 
 /// Returns the primary or most-used account.
-final lastUsedAccountProvider = FutureProvider.autoDispose<Account?>((ref) async {
+final lastUsedAccountProvider =
+    FutureProvider.autoDispose<Account?>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
 
   // Try primary account first
@@ -173,21 +177,22 @@ final lastUsedAccountProvider = FutureProvider.autoDispose<Account?>((ref) async
       .isPrimaryEqualTo(true)
       .isActiveEqualTo(true)
       .findFirst();
-  if (primary != null) return primary;
+  if (primary != null) {
+    return await AccountDataContract.safeAccount(primary);
+  }
 
   // Fallback: most recent transaction's account
-  final recent = await isar.transactions
-      .where()
-      .sortByDateDesc()
-      .findFirst();
+  final recent = await isar.transactions.where().sortByDateDesc().findFirst();
   if (recent != null) {
     await recent.account.load();
-    if (recent.account.value?.isActive == true) return recent.account.value;
+    final recentAccount = recent.account.value;
+    if (recentAccount?.isActive == true) {
+      return await AccountDataContract.safeAccount(recentAccount);
+    }
   }
 
   // Fallback: first active account
-  return await isar.accounts
-      .filter()
-      .isActiveEqualTo(true)
-      .findFirst();
+  final fallback =
+      await isar.accounts.filter().isActiveEqualTo(true).findFirst();
+  return await AccountDataContract.safeAccount(fallback);
 });

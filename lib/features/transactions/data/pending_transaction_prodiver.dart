@@ -10,7 +10,9 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/services/category_rule_service.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 
 final pendingTxnServiceProvider = Provider<PendingTransactionService>((ref) {
@@ -27,10 +29,10 @@ final pendingTxnCountProvider = FutureProvider.autoDispose<int>((ref) async {
 
 final pendingTxnDataProvider =
     FutureProvider.autoDispose<List<PendingTransaction?>>((ref) async {
-      ref.watch(pendingTransactionChangeProvider);
-      final service = ref.watch(pendingTxnServiceProvider);
-      return await service.getAllPendingTransaction();
-    });
+  ref.watch(pendingTransactionChangeProvider);
+  final service = ref.watch(pendingTxnServiceProvider);
+  return await service.getAllPendingTransaction();
+});
 
 class PendingTransactionService {
   final IsarService isarService;
@@ -99,12 +101,13 @@ class PendingTransactionService {
     required List<db_category.Category> categories,
   }) async {
     final isar = await isarService.getInstance();
+    final safeAccounts = await AccountDataContract.safeAccounts(accounts);
     return await isar.writeTxn(() async {
       final transactionUtil = TransactionUtil();
       return await _processSingleTransactionInternal(
         isar,
         pending,
-        accounts,
+        safeAccounts,
         categories,
         transactionUtil,
       );
@@ -117,6 +120,7 @@ class PendingTransactionService {
   }) async {
     log.i('Starting auto-process for pending transactions');
     final isar = await isarService.getInstance();
+    final safeAccounts = await AccountDataContract.safeAccounts(accounts);
     final pendingTxns = await getAllPendingTransaction();
     if (pendingTxns.isEmpty) {
       log.i('No pending transactions to process');
@@ -132,7 +136,7 @@ class PendingTransactionService {
         if (await _processSingleTransactionInternal(
           isar,
           pending,
-          accounts,
+          safeAccounts,
           categories,
           transactionUtil,
         )) {
@@ -171,10 +175,16 @@ class PendingTransactionService {
       }
     }
 
+    final preMatchedCategory = await _findLearnedCategory(
+      pending,
+      categories,
+      isar,
+    );
     final match = TransactionMatchingService.matchTransaction(
       pending: pending,
       accounts: accounts,
       categories: categories,
+      preMatchedCategory: preMatchedCategory,
     );
 
     if (match != null) {
@@ -199,12 +209,57 @@ class PendingTransactionService {
       await txn.category.save();
 
       await isar.pendingTransactions.delete(pending.id);
-      log.i('Transaction auto-enabled: ${pending.sender} ${BaseCurrency.symbol}${pending.amount} -> ${match.category.name} (${match.account.name})');
+      log.i(
+        'Transaction auto-enabled: ${pending.sender} ${BaseCurrency.symbol}${pending.amount} -> ${match.category.name} (${match.account.name})',
+      );
 
       return true;
     } else {
-      log.w('No match for pending ${pending.id} (Acc: ${pending.account}, Sender: ${pending.sender})');
+      log.w('No match for pending ${pending.id}');
       return false;
     }
+  }
+
+  Future<db_category.Category?> _findLearnedCategory(
+    PendingTransaction pending,
+    List<db_category.Category> categories,
+    Isar isar,
+  ) async {
+    final relevantCategories = categories.where((category) {
+      final typeMatches = (pending.isIncome == true &&
+              category.categoryType == db_category.CategoryType.income) ||
+          (pending.isIncome == false &&
+              category.categoryType == db_category.CategoryType.expense);
+      return typeMatches && !category.isSystem;
+    }).toList();
+    if (relevantCategories.isEmpty) return null;
+
+    final transaction = TransactionUtil().getTransactionInfo(
+      pending.body,
+      pending.sender,
+      pending.sender,
+      pending.smsHash,
+    );
+    final account = transaction.account ?? AccountDetails();
+    account.no = pending.account ?? account.no;
+    account.sendTo = pending.toAccount ?? account.sendTo;
+    account.bankName = pending.fromBank ??
+        account.bankName ??
+        (pending.toAccount?.contains('@') == true
+            ? pending.toAccount!.split('@').first
+            : null);
+    transaction.account = account;
+    if (pending.amount != null) transaction.money = pending.amount.toString();
+
+    final categoryId = await CategoryRuleService(isar).suggestCategory(
+      transaction,
+      availableCategoryIds:
+          relevantCategories.map((category) => category.id.toString()).toSet(),
+    );
+    if (categoryId == null) return null;
+
+    return relevantCategories
+        .where((category) => category.id.toString() == categoryId)
+        .firstOrNull;
   }
 }

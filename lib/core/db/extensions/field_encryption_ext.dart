@@ -174,37 +174,231 @@ extension RecurringTransactionEncryption on RecurringTransaction {
   }
 }
 
+enum AccountNumberResolutionStatus {
+  nullOrEmpty,
+  legacyPlaintext,
+  decrypted,
+  malformed,
+  keyMismatch,
+  unavailable,
+  shortValue,
+}
+
+/// Safe account-number result. [resolvedValue] exists only inside controlled
+/// account/matching code; [display] is the only presentation representation.
+class AccountNumberResolution {
+  final AccountNumberResolutionStatus status;
+  final String? resolvedValue;
+  final String display;
+  final String? errorCategory;
+
+  const AccountNumberResolution({
+    required this.status,
+    required this.display,
+    this.resolvedValue,
+    this.errorCategory,
+  });
+
+  bool get isResolved =>
+      status == AccountNumberResolutionStatus.legacyPlaintext ||
+      status == AccountNumberResolutionStatus.decrypted ||
+      status == AccountNumberResolutionStatus.shortValue;
+
+  bool get isUnavailable =>
+      !isResolved && status != AccountNumberResolutionStatus.nullOrEmpty;
+}
+
+/// Immutable account write preparation. Caller applies it only after all
+/// validation succeeds, enabling atomic persistence with no partial mutation.
+class AccountWritePreparation {
+  final bool succeeded;
+  final String? encryptedAccountNumber;
+  final String? accountSuffixHash;
+  final String? errorCategory;
+
+  const AccountWritePreparation.success({
+    required this.encryptedAccountNumber,
+    required this.accountSuffixHash,
+  })  : succeeded = true,
+        errorCategory = null;
+
+  const AccountWritePreparation.failure(this.errorCategory)
+      : succeeded = false,
+        encryptedAccountNumber = null,
+        accountSuffixHash = null;
+}
+
+String accountSuffixHashFor(String value) {
+  final suffix = value.length >= 4 ? value.substring(value.length - 4) : value;
+  return sha256.convert(utf8.encode(suffix)).toString();
+}
+
 extension AccountEncryption on Account {
-  // Account number is encrypted at rest. A separate `accountSuffixHash`
-  // field (full SHA-256 of last 4 digits) is used for SMS matching.
-  void encryptFields() {
-    if (!FieldEncryptionService.isReady) return;
-    if (accountNumber == null || accountNumber!.isEmpty) return;
-    // If already encrypted, skip to prevent double-encryption corruption
-    if (FieldEncryptionService.isEncrypted(accountNumber)) return;
-
-    final plainNum = accountNumber!;
-    final last4 = plainNum.length >= 4
-        ? plainNum.substring(plainNum.length - 4)
-        : plainNum;
-    // Use full SHA-256 hash to prevent birthday-attack collisions
-    accountSuffixHash = sha256.convert(utf8.encode(last4)).toString();
-    accountNumber = FieldEncryptionService.encryptOrFallback(plainNum);
-  }
-
-  void decryptFields() {
-    if (!FieldEncryptionService.isReady) return;
-    if (accountNumber != null) {
-      accountNumber = FieldEncryptionService.decrypt(accountNumber!);
+  /// Resolve account number without ever returning failed ciphertext.
+  Future<AccountNumberResolution> resolveAccountNumberStrict() async {
+    final result = await FieldEncryptionService.decryptStrict(accountNumber);
+    switch (result.status) {
+      case StrictDecryptStatus.nullOrEmpty:
+        return const AccountNumberResolution(
+          status: AccountNumberResolutionStatus.nullOrEmpty,
+          display: '••••',
+        );
+      case StrictDecryptStatus.legacyPlaintext:
+      case StrictDecryptStatus.decrypted:
+        final value = result.plaintext!;
+        if (value.length < 4) {
+          return AccountNumberResolution(
+            status: AccountNumberResolutionStatus.shortValue,
+            resolvedValue: value,
+            display: '••••',
+          );
+        }
+        return AccountNumberResolution(
+          status: result.status == StrictDecryptStatus.legacyPlaintext
+              ? AccountNumberResolutionStatus.legacyPlaintext
+              : AccountNumberResolutionStatus.decrypted,
+          resolvedValue: value,
+          display: '•••• ${value.substring(value.length - 4)}',
+        );
+      case StrictDecryptStatus.malformed:
+        return AccountNumberResolution(
+          status: AccountNumberResolutionStatus.malformed,
+          display: '••••',
+          errorCategory: result.errorCategory,
+        );
+      case StrictDecryptStatus.keyMismatch:
+        return AccountNumberResolution(
+          status: AccountNumberResolutionStatus.keyMismatch,
+          display: '••••',
+          errorCategory: result.errorCategory,
+        );
+      case StrictDecryptStatus.unavailable:
+        return AccountNumberResolution(
+          status: AccountNumberResolutionStatus.unavailable,
+          display: '••••',
+          errorCategory: result.errorCategory,
+        );
     }
   }
 
-  /// Check if this account matches an SMS last-4 suffix.
-  bool matchesSuffix(String last4FromSms) {
-    if (last4FromSms.isEmpty) return false;
-    if (accountSuffixHash == null) return false;
-    final hash = sha256.convert(utf8.encode(last4FromSms)).toString();
-    // Support both legacy 16-char and new full-length hashes
+  /// Prepare encrypted account number + suffix metadata without mutating this
+  /// model. Existing encrypted values are validated, never double-encrypted.
+  Future<AccountWritePreparation> prepareStrictWrite() async {
+    final readiness = await FieldEncryptionService.waitForReadiness();
+    if (!readiness.isReady) {
+      return AccountWritePreparation.failure(
+        readiness.errorCategory ?? 'encryption_unavailable',
+      );
+    }
+
+    final value = accountNumber;
+    if (value == null || value.isEmpty) {
+      return const AccountWritePreparation.success(
+        encryptedAccountNumber: null,
+        accountSuffixHash: null,
+      );
+    }
+
+    String plainValue;
+    String encryptedValue;
+    if (FieldEncryptionService.isEncrypted(value)) {
+      final resolved = await FieldEncryptionService.decryptStrict(value);
+      if (!resolved.isResolved || resolved.plaintext == null) {
+        return AccountWritePreparation.failure(
+          resolved.errorCategory ?? 'account_number_unavailable',
+        );
+      }
+      plainValue = resolved.plaintext!;
+      encryptedValue = value;
+    } else {
+      plainValue = value;
+      try {
+        encryptedValue = FieldEncryptionService.encryptStrict(plainValue);
+      } on FieldEncryptionException catch (error) {
+        return AccountWritePreparation.failure(error.category);
+      } catch (_) {
+        return const AccountWritePreparation.failure('encryption_failed');
+      }
+    }
+
+    return AccountWritePreparation.success(
+      encryptedAccountNumber: encryptedValue,
+      accountSuffixHash: accountSuffixHashFor(plainValue),
+    );
+  }
+
+  /// Apply prepared fields only after caller has chosen to commit.
+  void applyStrictWrite(AccountWritePreparation preparation) {
+    if (!preparation.succeeded) {
+      throw FieldEncryptionException(
+        preparation.errorCategory ?? 'account_write_failed',
+      );
+    }
+    accountNumber = preparation.encryptedAccountNumber;
+    accountSuffixHash = preparation.accountSuffixHash;
+  }
+
+  /// Legacy synchronous writer retained for existing callers, now strict.
+  /// It never falls back to plaintext or silently accepts unavailable crypto.
+  void encryptFields() {
+    // Keep legacy synchronous extension behavior unchanged when readiness is
+    // unavailable. Account writes must use prepareStrictWrite/writeAccount;
+    // this compatibility method must not silently become their boundary.
+    if (!FieldEncryptionService.isReady) return;
+
+    final value = accountNumber;
+    if (value == null || value.isEmpty) {
+      accountNumber = value;
+      accountSuffixHash = null;
+      return;
+    }
+    if (FieldEncryptionService.isEncrypted(value)) {
+      final resolved = FieldEncryptionService.decryptStrictReady(value);
+      if (!resolved.isResolved || resolved.plaintext == null) {
+        throw FieldEncryptionException(
+          resolved.errorCategory ?? 'account_number_unavailable',
+        );
+      }
+      accountSuffixHash = accountSuffixHashFor(resolved.plaintext!);
+      return;
+    }
+
+    final encryptedValue = FieldEncryptionService.encryptStrict(value);
+    // Assign only after encryption succeeds: failure leaves this model intact.
+    accountNumber = encryptedValue;
+    accountSuffixHash = accountSuffixHashFor(value);
+  }
+
+  /// Compatibility reader fails closed. New account paths should await
+  /// [resolveAccountNumberStrict] to receive typed status.
+  void decryptFields() {
+    // Preserve legacy synchronous no-op semantics until readiness exists.
+    // Strict account consumers use resolveAccountNumberStrict instead.
+    if (!FieldEncryptionService.isReady) return;
+
+    final value = accountNumber;
+    if (value == null || value.isEmpty) return;
+    final resolved = FieldEncryptionService.decryptStrictReady(value);
+    if (!resolved.isResolved || resolved.plaintext == null) {
+      accountNumber = null;
+      throw FieldEncryptionException(
+        resolved.errorCategory ?? 'account_number_unavailable',
+      );
+    }
+    accountNumber = resolved.plaintext;
+  }
+
+  /// Check account suffix using full SHA-256 or legacy 16-char hash.
+  ///
+  /// Callers may provide a full SMS account token (for example `X1234`) or
+  /// only its suffix. Only final four characters are hashed, so storage never
+  /// needs plaintext account-number comparison.
+  bool matchesSuffix(String accountToken) {
+    final trimmed = accountToken.trim();
+    if (trimmed.isEmpty || accountSuffixHash == null) return false;
+    final suffix =
+        trimmed.length <= 4 ? trimmed : trimmed.substring(trimmed.length - 4);
+    final hash = sha256.convert(utf8.encode(suffix)).toString();
     if (accountSuffixHash!.length <= 16) {
       return hash.substring(0, 16) == accountSuffixHash;
     }

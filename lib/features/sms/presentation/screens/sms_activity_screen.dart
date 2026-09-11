@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
@@ -19,6 +18,8 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/core/providers/singleton_providers.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
@@ -390,12 +391,14 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
 
   // ── FILTER SHEET ──
 
-  void _showFilterSheet(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+  void _showFilterSheet(
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(16),
@@ -426,7 +429,8 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
               ActivityStatus.rejected,
             ].map((status) {
               final selected = _filterStatus == status;
-              final label = status == null ? ctxt.common_all : _statusLabel(status);
+              final label =
+                  status == null ? ctxt.common_all : _statusLabel(status);
               return ListTile(
                 dense: true,
                 shape: RoundedRectangleBorder(
@@ -585,7 +589,8 @@ class _ActivityCard extends ConsumerWidget {
                     Row(
                       children: [
                         Text(
-                          safeDateFormat('dd MMM, hh:mm a', ctxt.localeName).format(activity.date),
+                          safeDateFormat('dd MMM, hh:mm a', ctxt.localeName)
+                              .format(activity.date),
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
@@ -713,7 +718,8 @@ class _ActivityCard extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (_) => _ActivityDetailsSheet(activity: activity),
     );
@@ -799,14 +805,12 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
   Future<void> _checkAccount() async {
     final acc = widget.activity.account;
     if (acc == null || acc.isEmpty) return;
-    final isar = await ref.read(isarServiceProvider).getInstance();
-    final accounts = await isar.accounts
-        .filter()
-        .isActiveEqualTo(true)
-        .findAll();
-    final match = accounts.where((a) {
-      return a.matchesSuffix(acc.trim());
-    }).firstOrNull;
+    final accounts = await ref.read(accountsProvider.future);
+    final match = AccountMatchingBoundary.firstMatch(
+      accounts,
+      acc,
+      activeOnly: true,
+    );
     if (mounted) setState(() => _hasMatchingAccount = match != null);
   }
 
@@ -862,7 +866,8 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          safeDateFormat('dd MMM yyyy, hh:mm a', ctxt.localeName)
+                          safeDateFormat(
+                                  'dd MMM yyyy, hh:mm a', ctxt.localeName)
                               .format(widget.activity.date),
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
@@ -940,7 +945,9 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                       _divider(color),
                       _detailRow(
                         ctxt.smsActivity_account,
-                        widget.activity.account!,
+                        SafeAccountPresentation.formatAccountNumber(
+                          widget.activity.account,
+                        ),
                         color,
                         textTheme,
                       ),
@@ -976,7 +983,8 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                       _divider(color),
                       _detailRow(
                         ctxt.smsActivity_balance,
-                        formatCurrency(widget.activity.balance!, code: BaseCurrency.code, decimals: 0),
+                        formatCurrency(widget.activity.balance!,
+                            code: BaseCurrency.code, decimals: 0),
                         color,
                         textTheme,
                       ),
@@ -1057,7 +1065,11 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              ctxt.smsActivity_noAccountWarning(widget.activity.account ?? ''),
+                              ctxt.smsActivity_noAccountWarning(
+                                SafeAccountPresentation.formatAccountNumber(
+                                  widget.activity.account,
+                                ),
+                              ),
                               style: textTheme.bodySmall?.copyWith(
                                 color: color.onSurfaceVariant,
                                 height: 1.4,
@@ -1118,14 +1130,18 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                               .rejectActivity(activity, null);
                           ref.invalidate(smsActivityProvider);
                           ref.invalidate(pendingCountProvider);
-                          ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
+                          ref
+                              .read(smsRefreshProvider.notifier)
+                              .update((v) => v + 1);
 
                           SnackbarService.success(
                             ctxt.smsActivity_rejected,
                             spacing,
                             actionLabel: ctxt.common_undo,
                             onAction: () async {
-                              final isar = await ref.read(isarServiceProvider).getInstance();
+                              final isar = await ref
+                                  .read(isarServiceProvider)
+                                  .getInstance();
                               await isar.writeTxn(() async {
                                 activity.status = previousStatus;
                                 activity.reviewNotes = null;
@@ -1133,7 +1149,9 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                               });
                               ref.invalidate(smsActivityProvider);
                               ref.invalidate(pendingCountProvider);
-                              ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
+                              ref
+                                  .read(smsRefreshProvider.notifier)
+                                  .update((v) => v + 1);
                             },
                           );
                         },
@@ -1205,27 +1223,26 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                                   .getInstance();
                               final pair = await isar.smsActivitys
                                   .get(widget.activity.pairedActivityId!);
-                              final accounts = await isar.accounts
-                                  .filter()
-                                  .isActiveEqualTo(true)
-                                  .findAll();
+                              pair?.decryptFields();
+                              final accounts =
+                                  await ref.read(accountsProvider.future);
 
-                              final thisAcc = accounts
-                                  .where(
-                                    (a) => a.matchesSuffix(
-                                      widget.activity.account ?? '',
-                                    ),
-                                  )
-                                  .firstOrNull;
-                              final pairAcc = pair == null
-                                  ? null
-                                  : accounts
-                                      .where(
-                                        (a) => a.matchesSuffix(
-                                          pair.account ?? '',
-                                        ),
-                                      )
-                                      .firstOrNull;
+                              final thisAcc =
+                                  await AccountDataContract.safeAccount(
+                                AccountMatchingBoundary.firstMatch(
+                                  accounts,
+                                  widget.activity.account,
+                                  activeOnly: true,
+                                ),
+                              );
+                              final pairAcc =
+                                  await AccountDataContract.safeAccount(
+                                AccountMatchingBoundary.firstMatch(
+                                  accounts,
+                                  pair?.account,
+                                  activeOnly: true,
+                                ),
+                              );
 
                               if (widget.activity.isIncome == true) {
                                 toAccount = thisAcc;
@@ -1240,16 +1257,14 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                             navigator.push(
                               AppRoutes.transfer,
                               extra: {
-                                'amount':
-                                    widget.activity.amount?.toString(),
+                                'amount': widget.activity.amount?.toString(),
                                 'note':
                                     'Auto: ${widget.activity.merchant ?? widget.activity.sender}',
                                 'date': widget.activity.date,
                                 'smsActivity': widget.activity,
                                 if (fromAccount != null)
                                   'fromAccount': fromAccount,
-                                if (toAccount != null)
-                                  'toAccount': toAccount,
+                                if (toAccount != null) 'toAccount': toAccount,
                               },
                             );
                           } else {

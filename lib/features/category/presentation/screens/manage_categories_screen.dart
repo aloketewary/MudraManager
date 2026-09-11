@@ -8,7 +8,7 @@ import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
-import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
+import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
@@ -93,8 +93,9 @@ class ManageCategoriesScreen extends ConsumerWidget {
 
           return LayoutBuilder(
             builder: (context, constraints) {
-              final horizontalPadding =
-                  constraints.maxWidth > 600 ? spacing.cardHorizontalMax : spacing.cardHorizontal;
+              final horizontalPadding = constraints.maxWidth > 600
+                  ? spacing.cardHorizontalMax
+                  : spacing.cardHorizontal;
 
               return ListView(
                 padding: EdgeInsets.symmetric(
@@ -221,8 +222,10 @@ class ManageCategoriesScreen extends ConsumerWidget {
               AppRoutes.addCategory,
               extra: {'category': category},
             ),
-            onDelete: () => _deleteCategory(context, ref, category, ctxt, spacing),
-            onDeleteSubcategory: (sub) => _deleteCategory(context, ref, sub, ctxt, spacing),
+            onDelete: () =>
+                _deleteCategory(context, ref, category, ctxt, spacing),
+            onDeleteSubcategory: (sub) =>
+                _deleteCategory(context, ref, sub, ctxt, spacing),
           );
         },
       ),
@@ -258,15 +261,18 @@ class ManageCategoriesScreen extends ConsumerWidget {
       spacing,
       title: BuddyMessages.deleteTitle,
       message: message,
-      deleteText: (txCount > 0 || budgetCount > 0) ? ctxt.categories_deleteAll : null,
+      deleteText:
+          (txCount > 0 || budgetCount > 0) ? ctxt.categories_deleteAll : null,
     );
 
     if (shouldDelete == true) {
       await service.deleteCategory(category.id);
+      ref.read(budgetRefreshProvider.notifier).refresh(
+            BudgetRefreshReason.categoryChanged,
+          );
       ref.invalidate(categoryListProvider);
       ref.invalidate(transactionCountsProvider);
       ref.invalidate(transactionProvider);
-      if (budgetCount > 0) ref.invalidate(budgetsWithProgressProvider);
       SnackbarService.success(BuddyMessages.categoryDeleted, spacing);
     }
   }
@@ -336,8 +342,11 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
                 );
               },
               child: AnimatedPadding(
-                duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                duration: reduceMotion
+                    ? Duration.zero
+                    : const Duration(milliseconds: 150),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 child: Row(
                   children: [
                     RepaintBoundary(
@@ -345,7 +354,8 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: categoryColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
                         ),
                         child: Icon(
                           IconHelper.getIconData(widget.category.iconName),
@@ -381,7 +391,8 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
                                 Text(
                                   '•',
                                   style: textTheme.bodySmall?.copyWith(
-                                    color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                                    color: color.onSurfaceVariant
+                                        .withValues(alpha: 0.4),
                                   ),
                                 ),
                                 const SizedBox(width: 6),
@@ -390,7 +401,8 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
                                   style: textTheme.bodySmall?.copyWith(
                                     color: color.onSurfaceVariant,
                                   ),
-                                  semanticsLabel: '${widget.subcategories.length} subcategories',
+                                  semanticsLabel:
+                                      '${widget.subcategories.length} subcategories',
                                 ),
                               ],
                               if (widget.category.keywords != null &&
@@ -399,7 +411,8 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
                                 Text(
                                   '•',
                                   style: textTheme.bodySmall?.copyWith(
-                                    color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                                    color: color.onSurfaceVariant
+                                        .withValues(alpha: 0.4),
                                   ),
                                 ),
                                 const SizedBox(width: 6),
@@ -407,7 +420,8 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
                                   child: Text(
                                     widget.category.keywords!.join(', '),
                                     style: textTheme.bodySmall?.copyWith(
-                                      color: color.primary.withValues(alpha: 0.7),
+                                      color:
+                                          color.primary.withValues(alpha: 0.7),
                                       fontStyle: FontStyle.italic,
                                     ),
                                     maxLines: 1,
@@ -470,9 +484,12 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
                   );
                 }).toList(),
               ),
-              crossFadeState:
-                  _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-              duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+              crossFadeState: _expanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: reduceMotion
+                  ? Duration.zero
+                  : const Duration(milliseconds: 200),
             ),
           ),
       ],
@@ -488,7 +505,8 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
       },
       child: AnimatedRotation(
         turns: _expanded ? 0.5 : 0,
-        duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+        duration:
+            reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Icon(
@@ -506,8 +524,7 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
     Category category,
     ColorScheme color,
     TextTheme textTheme,
-    AppSpacing spacing,
-    {
+    AppSpacing spacing, {
     required VoidCallback onEdit,
     required VoidCallback onDelete,
   }) {
@@ -518,7 +535,8 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
       context: context,
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => SafeArea(
         child: Column(
@@ -623,7 +641,10 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
   ) {
     final ctxt = AppLocalizations.of(context)!;
     final candidates = widget.allCategories
-        .where((c) => c.id != source.id && c.categoryType == source.categoryType && !c.isSystem)
+        .where((c) =>
+            c.id != source.id &&
+            c.categoryType == source.categoryType &&
+            !c.isSystem)
         .toList();
 
     if (candidates.isEmpty) {
@@ -635,7 +656,8 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
       context: context,
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(spacing.radiusSmall * 2)),
       ),
       builder: (ctx) => SafeArea(
         child: Column(
@@ -654,7 +676,8 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
               padding: const EdgeInsets.all(16),
               child: Text(
                 '${ctxt.category_mergeInto} "${source.name}"',
-                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             const Divider(height: 1),
@@ -667,7 +690,8 @@ class _CategoryRowState extends ConsumerState<CategoryRow> {
                 itemCount: candidates.length,
                 itemBuilder: (_, i) {
                   final target = candidates[i];
-                  final catColor = Color(target.colorValue ?? Colors.grey.toARGB32());
+                  final catColor =
+                      Color(target.colorValue ?? Colors.grey.toARGB32());
                   return ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),

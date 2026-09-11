@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/shared/widgets/account_display_card.dart';
 
 class AccountSelectorBottomSheet extends ConsumerWidget {
@@ -19,15 +20,17 @@ class AccountSelectorBottomSheet extends ConsumerWidget {
   });
 
   static Future<Account?> show(
-    BuildContext context, 
-    AppSpacing spacing,    {
+    BuildContext context,
+    AppSpacing spacing, {
     Account? selectedAccount,
   }) {
     return showModalBottomSheet<Account>(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(spacing.radiusSmall * 2),
+        ),
       ),
       builder: (context) => AccountSelectorBottomSheet(
         selectedAccount: selectedAccount,
@@ -88,6 +91,8 @@ class AccountSelectorBottomSheet extends ConsumerWidget {
                   itemCount: accounts.length,
                   itemBuilder: (context, index) {
                     final account = accounts[index];
+                    final presentation =
+                        SafeAccountPresentation.fromAccount(account);
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: FutureBuilder<double>(
@@ -101,7 +106,7 @@ class AccountSelectorBottomSheet extends ConsumerWidget {
                             startColor: Colors.blue,
                             endColor: Colors.blue.shade100,
                             isSelected: selectedAccount?.id == account.id,
-                            accountNumber: account.accountNumber,
+                            accountNumber: presentation.accountNumber,
                             callbackAction: () => onAccountSelected(account),
                           );
                         },
@@ -118,7 +123,8 @@ class AccountSelectorBottomSheet extends ConsumerWidget {
                   child: AccountCardSkeleton(),
                 ),
               ),
-              error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
+              error: (e, _) =>
+                  Center(child: Text(BuddyMessages.errorWith('$e'))),
             ),
           ),
         ],

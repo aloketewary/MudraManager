@@ -8,12 +8,15 @@ import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/domain/budget_constraint_snapshot.dart';
 import 'package:mudra_manager/core/domain/financial_states.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/features/budget/data/budget_constraint_provider.dart';
+import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/today_card_analytics.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
@@ -30,26 +33,14 @@ class AdaptiveBudgetDashboard extends ConsumerStatefulWidget {
 }
 
 class _AdaptiveBudgetDashboardState
-    extends ConsumerState<AdaptiveBudgetDashboard>
-    with WidgetsBindingObserver {
+    extends ConsumerState<AdaptiveBudgetDashboard> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    ref.read(budgetRefreshProvider.notifier).refresh(
+          BudgetRefreshReason.navigation,
+        );
     TodayCardAnalytics.recordDestinationOpened(destination: 'budget');
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      ref.invalidate(budgetConstraintsProvider);
-    }
   }
 
   @override
@@ -77,18 +68,9 @@ class _AdaptiveBudgetDashboardState
         ],
       ),
       body: ref.watch(budgetConstraintsProvider).when(
+            skipLoadingOnRefresh: false,
+            skipError: false,
             data: (snapshots) {
-              if (snapshots.isEmpty) {
-                return NoDataFound(
-                  message: BuddyMessages.noBudgets,
-                  iconData: LucideIcons.shieldAlert,
-                  action: ElevatedButton.icon(
-                    onPressed: () => context.push(AppRoutes.addBudget),
-                    icon: const Icon(LucideIcons.plus),
-                    label: Text(ctxt.common_add),
-                  ),
-                );
-              }
               return _BudgetConstraintList(snapshots: snapshots);
             },
             loading: () => ListView(
@@ -98,7 +80,17 @@ class _AdaptiveBudgetDashboardState
               ),
               children: List.generate(4, (_) => const BudgetCardSkeleton()),
             ),
-            error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
+            error: (_, __) => Center(
+              child: Builder(
+                builder: (context) => FilledButton.icon(
+                  onPressed: () => ref
+                      .read(budgetRefreshProvider.notifier)
+                      .refresh(BudgetRefreshReason.retry),
+                  icon: const Icon(LucideIcons.rotateCcw),
+                  label: Text(ctxt.common_retry),
+                ),
+              ),
+            ),
           ),
     );
   }
@@ -124,7 +116,17 @@ class _BudgetConstraintList extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: () => RefreshHelper.withMinDuration(() async {
-        ref.invalidate(budgetConstraintsProvider);
+        ref.read(budgetRefreshProvider.notifier).refresh(
+              BudgetRefreshReason.manual,
+            );
+        try {
+          await Future.wait([
+            ref.read(budgetConstraintsProvider.future),
+            ref.read(budgetHistoryProvider.future),
+          ]);
+        } catch (_) {
+          // Provider exposes error/retry state; pull-to-refresh must settle.
+        }
       }),
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -133,9 +135,20 @@ class _BudgetConstraintList extends ConsumerWidget {
           vertical: spacing.cardVertical,
         ),
         children: [
-          const _PortfolioHeroCard(),
-          SizedBox(height: spacing.elementGap * 2),
-
+          if (snapshots.isEmpty)
+            NoDataFound(
+              message: BuddyMessages.noBudgets,
+              iconData: LucideIcons.shieldAlert,
+              action: ElevatedButton.icon(
+                onPressed: () => context.push(AppRoutes.addBudget),
+                icon: const Icon(LucideIcons.plus),
+                label: Text(ctxt.common_add),
+              ),
+            ),
+          if (snapshots.isNotEmpty) ...[
+            const _PortfolioHeroCard(),
+            SizedBox(height: spacing.elementGap * 2),
+          ],
           if (needsAttention.isNotEmpty) ...[
             TypeSectionHeader(
               label: ctxt.budget_highlightLabel,
@@ -151,7 +164,6 @@ class _BudgetConstraintList extends ConsumerWidget {
             ),
             SizedBox(height: spacing.elementGap),
           ],
-
           if (healthy.isNotEmpty) ...[
             TypeSectionHeader(
               label: ctxt.budget_onTrackSection,
@@ -166,7 +178,199 @@ class _BudgetConstraintList extends ConsumerWidget {
               ),
             ),
           ],
+          const _BudgetHistorySection(),
         ],
+      ),
+    );
+  }
+}
+
+class _BudgetHistorySection extends ConsumerWidget {
+  const _BudgetHistorySection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
+
+    return ref.watch(budgetHistoryProvider).when(
+          skipLoadingOnRefresh: false,
+          skipError: false,
+          loading: () => Padding(
+            padding: EdgeInsets.only(top: spacing.sectionGap),
+            child: const BudgetCardSkeleton(),
+          ),
+          error: (_, __) => Padding(
+            padding: EdgeInsets.only(top: spacing.sectionGap),
+            child: OutlinedButton.icon(
+              onPressed: () => ref
+                  .read(budgetRefreshProvider.notifier)
+                  .refresh(BudgetRefreshReason.retry),
+              icon: const Icon(LucideIcons.rotateCcw),
+              label: Text(ctxt.common_retry),
+            ),
+          ),
+          data: (entries) {
+            if (entries.isEmpty) {
+              return Padding(
+                padding: EdgeInsets.only(top: spacing.sectionGap),
+                child: Text(
+                  'No completed budgets',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+              );
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(top: spacing.sectionGap),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TypeSectionHeader(
+                    label: 'Budget history',
+                    icon: LucideIcons.history,
+                    accentColor: color.onSurfaceVariant,
+                  ),
+                  SizedBox(height: spacing.elementGap),
+                  ...entries.map(
+                    (entry) => _BudgetHistoryCard(
+                      entry: entry,
+                      spacing: spacing,
+                      color: color,
+                      textTheme: textTheme,
+                      ctxt: ctxt,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+  }
+}
+
+class _BudgetHistoryCard extends StatelessWidget {
+  final BudgetHistoryEntry entry;
+  final AppSpacing spacing;
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppLocalizations ctxt;
+
+  const _BudgetHistoryCard({
+    required this.entry,
+    required this.spacing,
+    required this.color,
+    required this.textTheme,
+    required this.ctxt,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = entry.status == BudgetPeriodStatus.exceeded
+        ? color.error
+        : entry.status == BudgetPeriodStatus.met
+            ? color.primary
+            : color.onSurfaceVariant;
+    final status = entry.status == null
+        ? 'Unknown'
+        : entry.status == BudgetPeriodStatus.exceeded
+            ? 'Exceeded'
+            : 'Met';
+    final recurrence = entry.recurrence.name;
+    final sourceNote = switch (entry.valueSource) {
+      BudgetHistoryValueSource.persisted => null,
+      BudgetHistoryValueSource.legacyBestAvailable => 'Legacy best available',
+      BudgetHistoryValueSource.unknown => 'Historical limit unavailable',
+    };
+
+    return Card(
+      margin: EdgeInsets.only(bottom: spacing.elementGap),
+      elevation: 0,
+      color: color.surfaceContainerLow,
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    entry.budgetName,
+                    style: textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Text(
+                  status,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: spacing.elementGapMin),
+            Text(
+              '${safeDateFormat('dd MMM yyyy', ctxt.localeName).format(entry.periodStart)}'
+              ' – '
+              '${safeDateFormat('dd MMM yyyy', ctxt.localeName).format(entry.periodEnd)}',
+              style: textTheme.bodySmall?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
+            ),
+            SizedBox(height: spacing.elementGapMin),
+            Text(
+              '${ctxt.budget_recurrenceText}: $recurrence',
+              style: textTheme.bodySmall?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
+            ),
+            if (sourceNote != null) ...[
+              SizedBox(height: spacing.elementGapMin),
+              Text(
+                sourceNote,
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+            SizedBox(height: spacing.elementGap),
+            Row(
+              children: [
+                Expanded(
+                  child: CurrencyText(
+                    amount: entry.spent,
+                    fixedLength: 0,
+                    suffixText: ctxt.budget_spent.toLowerCase(),
+                    style: textTheme.bodyMedium,
+                  ),
+                ),
+                Expanded(
+                  child: entry.limitIsKnown
+                      ? CurrencyText(
+                          amount: entry.limit,
+                          fixedLength: 0,
+                          suffixText: ctxt.budget_limit.toLowerCase(),
+                          style: textTheme.bodyMedium,
+                        )
+                      : Text(
+                          'Limit unavailable',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -240,7 +444,8 @@ class _PortfolioHeroCard extends ConsumerWidget {
                     children: [
                       _statPill(
                         icon: LucideIcons.layoutGrid,
-                        label: '${portfolio.totalBudgets} ${ctxt.budget_activeBudgets}',
+                        label:
+                            '${portfolio.totalBudgets} ${ctxt.budget_activeBudgets}',
                         color: accent,
                         spacing: spacing,
                         textTheme: textTheme,
@@ -365,7 +570,8 @@ class _BudgetConstraintCard extends ConsumerWidget {
                       padding: EdgeInsets.all(spacing.elementGap),
                       decoration: BoxDecoration(
                         color: accent.withValues(alpha: 0.10),
-                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
                       ),
                       child: Icon(
                         snapshot.isBreached
@@ -557,7 +763,8 @@ class _BudgetConstraintCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildProgressBar(AppSpacing spacing, ColorScheme color, Color accent) {
+  Widget _buildProgressBar(
+      AppSpacing spacing, ColorScheme color, Color accent) {
     final pct = snapshot.percentage.clamp(0.0, 1.0);
     return Row(
       children: [
@@ -594,24 +801,26 @@ class _BudgetConstraintCard extends ConsumerWidget {
     AppLocalizations ctxt,
   ) {
     // CTA resolves the displayed state
-    final (String label, IconData icon, VoidCallback onTap) = switch (snapshot.urgency) {
+    final (String label, IconData icon, VoidCallback onTap) =
+        switch (snapshot.urgency) {
       BudgetConstraintUrgency.breached ||
       BudgetConstraintUrgency.imminentBreach ||
-      BudgetConstraintUrgency.approachingBreach => (
-        ctxt.budget_reviewSpending,
-        LucideIcons.search,
-        () => context.push(AppRoutes.budgetDetails, extra: snapshot.budgetId),
-      ),
+      BudgetConstraintUrgency.approachingBreach =>
+        (
+          ctxt.budget_reviewSpending,
+          LucideIcons.search,
+          () => context.push(AppRoutes.budgetDetails, extra: snapshot.budgetId),
+        ),
       BudgetConstraintUrgency.unknown => (
-        ctxt.budget_fixData,
-        LucideIcons.plus,
-        () => context.push(AppRoutes.addTransaction),
-      ),
+          ctxt.budget_fixData,
+          LucideIcons.plus,
+          () => context.push(AppRoutes.addTransaction),
+        ),
       _ => (
-        ctxt.budget_viewDetails,
-        LucideIcons.arrowRight,
-        () => context.push(AppRoutes.budgetDetails, extra: snapshot.budgetId),
-      ),
+          ctxt.budget_viewDetails,
+          LucideIcons.arrowRight,
+          () => context.push(AppRoutes.budgetDetails, extra: snapshot.budgetId),
+        ),
     };
 
     return SizedBox(

@@ -10,28 +10,28 @@ import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 
-
 /// Emits a tick whenever the transactions collection changes.
 /// Uses debouncing to prevent excessive rebuilds on rapid changes.
 final transactionChangeProvider = StreamProvider<void>((ref) async* {
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final source = isar.transactions.watchLazy(fireImmediately: true);
-  
+
   Timer? debounceTimer;
   DateTime? lastEmission;
   bool pendingYield = false;
-  
+
   await for (final _ in source) {
     final now = DateTime.now();
-    
+
     if (pendingYield) {
       pendingYield = false;
       lastEmission = now;
       yield null;
       continue;
     }
-    
-    if (lastEmission == null || now.difference(lastEmission).inMilliseconds > 100) {
+
+    if (lastEmission == null ||
+        now.difference(lastEmission).inMilliseconds > 100) {
       lastEmission = now;
       yield null;
     } else if (debounceTimer == null || !debounceTimer.isActive) {
@@ -43,8 +43,9 @@ final transactionChangeProvider = StreamProvider<void>((ref) async* {
   }
 });
 
-
-/// Emits a tick whenever the accounts collection changes.
+/// Account watcher is link/count-only: emits collection events only.
+/// It never reads account fields, so it stays non-blocking while crypto is
+/// pending. Account data consumers await AccountDataContract via providers.
 final accountChangeProvider = StreamProvider<void>((ref) async* {
   final isar = await ref.watch(isarServiceProvider).getInstance();
   yield* isar.accounts.watchLazy(fireImmediately: true);

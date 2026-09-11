@@ -39,6 +39,8 @@ class ReconciliationService {
     this._accountsService,
   );
 
+  /// Reconciliation uses account ID/type and balance only. Account-number
+  /// content never participates in calculations or transaction links.
   Future<double> getCalculatedBalance(int accountId) {
     return _accountsService.getAccountBalance(accountId);
   }
@@ -52,10 +54,7 @@ class ReconciliationService {
         .findFirst();
     if (cat != null) return cat;
     // Fallback: first parent category of matching type
-    return await isar.categorys
-        .filter()
-        .categoryTypeEqualTo(type)
-        .findFirst();
+    return await isar.categorys.filter().categoryTypeEqualTo(type).findFirst();
   }
 
   /// Creates an adjustment transaction to match the actual bank balance.
@@ -94,7 +93,8 @@ class ReconciliationService {
       transactionId: txn.id,
       state: ReconciliationState.verified,
       bankAmount: actualBalance,
-      notes: 'Auto-adjustment: ${isExpense ? "-" : "+"}${diff.abs().toStringAsFixed(2)}',
+      notes:
+          'Auto-adjustment: ${isExpense ? "-" : "+"}${diff.abs().toStringAsFixed(2)}',
     );
 
     _log.i('Reconciled account ${account.id}: adjustment of $diff');

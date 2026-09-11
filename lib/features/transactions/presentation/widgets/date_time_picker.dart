@@ -18,11 +18,12 @@ class DateTimePicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.watch(spacingProvider);
+    final localeName = Localizations.localeOf(context).toLanguageTag();
 
     return ListTile(
       leading: const Icon(LucideIcons.calendar),
       title: const Text('Date'),
-      subtitle: Text(DateFormat.yMMMd().format(selectedDate)),
+      subtitle: Text(DateFormat.yMMMd(localeName).format(selectedDate)),
       trailing: const Icon(LucideIcons.chevronRight),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.radiusSmall),

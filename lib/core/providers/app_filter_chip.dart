@@ -11,6 +11,7 @@ import 'package:mudra_manager/core/currency/currency_provider.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/core/utils/simple_color_picker.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
@@ -242,7 +243,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                           ),
                           decoration: BoxDecoration(
                             color: _selectedColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusSmall),
                           ),
                           child: Text(
                             _selectedType.label,
@@ -272,7 +274,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                       ),
                     ),
                     Text(
-                      formatCurrency(balance, code: BaseCurrency.code, decimals: 2),
+                      formatCurrency(balance,
+                          code: BaseCurrency.code, decimals: 2),
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                         color: _selectedColor,
@@ -289,7 +292,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   // ── ACCOUNT TYPE GRID (2×3) ──
-  Widget _buildTypeGrid(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+  Widget _buildTypeGrid(
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     return GridView.count(
       crossAxisCount: 3,
       shrinkWrap: true,
@@ -343,7 +347,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   // ── DETAILS CARD ──
-  Widget _buildDetailsCard(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+  Widget _buildDetailsCard(
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     final isCreditCard = _selectedType == AccountType.creditCard;
 
     return Card(
@@ -446,7 +451,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   // ── COLOR SECTION ──
-  Widget _buildColorSection(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+  Widget _buildColorSection(
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     return Card(
       elevation: 0,
       color: color.surfaceContainerLow,
@@ -569,29 +575,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       final accountName = _nameController.text.trim();
       final accountNumber = _accountNumberController.text.trim();
 
-      final existingName =
-          await isar.accounts.filter().nameEqualTo(accountName).findFirst();
-      if (existingName != null && existingName.id != id) {
-        SnackbarService.warning(
-          'Account with name "$accountName" already exists', spacing,
-        );
-        return;
-      }
-
-      if (accountNumber.isNotEmpty) {
-        final existingNum = await isar.accounts
-            .filter()
-            .accountNumberEqualTo(accountNumber)
-            .findFirst();
-        if (existingNum != null && existingNum.id != id) {
-          SnackbarService.warning(
-            'Account with number "$accountNumber" already exists', spacing,
-          );
-          return;
-        }
-      }
-
-      final account = widget.account ?? Account();
+      final account = AccountDataContract.copyAccount(widget.account);
       final isNew = widget.account == null;
 
       account
@@ -602,9 +586,28 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         ..colorValue = _selectedColor.toARGB32()
         ..isActive = true;
 
-      await isar.writeTxn(() async {
-        await isar.accounts.put(account);
-      });
+      final writeResult = await AccountDataContract.writeAccount(
+        isar,
+        account,
+        accountNumber: accountNumber,
+      );
+      if (!writeResult.succeeded) {
+        if (writeResult.status == AccountWriteStatus.duplicateName ||
+            writeResult.status == AccountWriteStatus.duplicateNumber) {
+          SnackbarService.warning(
+            writeResult.status == AccountWriteStatus.duplicateName
+                ? 'Account with this name already exists'
+                : 'Account with this number already exists',
+            spacing,
+          );
+        } else {
+          SnackbarService.error(
+            'Unable to save account. Please try again.',
+            spacing,
+          );
+        }
+        return;
+      }
 
       if (isNew) {
         final gamificationService =

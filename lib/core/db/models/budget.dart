@@ -77,32 +77,49 @@ extension BudgetRecurrenceExtension on Budget {
       return (startDate, endDate);
     }
 
+    // Compare calendar days, not instants. This keeps an occurrence current
+    // through its exact inclusive end date, including end-of-day transactions.
+    final evaluationDay = DateArithmetic.startOfDay(now);
     DateTime currentStart = startDate;
     DateTime currentEnd = endDate;
+    var occurrence = 0;
 
-    // If 'now' is before the initial range, return the initial range.
-    if (now.isBefore(currentStart)) {
-      return (currentStart, currentEnd);
-    }
-
-    // Fast-forward to the period containing 'now'.
-    while (currentEnd.isBefore(now)) {
+    // Preserve original start/end anchors independently. In particular,
+    // Jan-31 -> Feb-29 must become Mar-31, not Mar-29.
+    while (DateArithmetic.startOfDay(currentEnd).isBefore(evaluationDay)) {
+      occurrence++;
       switch (recurrence) {
         case BudgetRecurrence.daily:
-          currentStart = currentStart.add(const Duration(days: 1));
-          currentEnd = currentEnd.add(const Duration(days: 1));
+          currentStart = startDate.add(Duration(days: occurrence));
+          currentEnd = endDate.add(Duration(days: occurrence));
           break;
         case BudgetRecurrence.weekly:
-          currentStart = currentStart.add(const Duration(days: 7));
-          currentEnd = currentEnd.add(const Duration(days: 7));
+          currentStart = startDate.add(Duration(days: occurrence * 7));
+          currentEnd = endDate.add(Duration(days: occurrence * 7));
           break;
         case BudgetRecurrence.monthly:
-          currentStart = DateArithmetic.addMonths(currentStart, 1);
-          currentEnd = DateArithmetic.addMonths(currentEnd, 1);
+          currentStart = DateArithmetic.addMonths(
+            startDate,
+            occurrence,
+            preferDay: startDate.day,
+          );
+          currentEnd = DateArithmetic.addMonths(
+            endDate,
+            occurrence,
+            preferDay: endDate.day,
+          );
           break;
         case BudgetRecurrence.yearly:
-          currentStart = DateArithmetic.addMonths(currentStart, 12);
-          currentEnd = DateArithmetic.addMonths(currentEnd, 12);
+          currentStart = DateArithmetic.addYears(
+            startDate,
+            occurrence,
+            preferDay: startDate.day,
+          );
+          currentEnd = DateArithmetic.addYears(
+            endDate,
+            occurrence,
+            preferDay: endDate.day,
+          );
           break;
         case BudgetRecurrence.none:
           return (currentStart, currentEnd);

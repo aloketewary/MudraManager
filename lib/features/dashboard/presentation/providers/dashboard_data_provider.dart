@@ -3,16 +3,17 @@ import 'package:async/async.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/singleton_providers.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
-import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 
 class DashboardData {
   final List<Transaction> transactions;
@@ -26,6 +27,8 @@ class DashboardData {
   final double totalBalance;
   final double netWorth;
   final int pendingSmsCount;
+  final DateTime? budgetEvaluationDate;
+  final int budgetGeneration;
 
   const DashboardData({
     required this.transactions,
@@ -39,31 +42,176 @@ class DashboardData {
     required this.totalBalance,
     required this.netWorth,
     required this.pendingSmsCount,
+    this.budgetEvaluationDate,
+    this.budgetGeneration = 0,
   });
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is DashboardData &&
-          totalIncome == other.totalIncome &&
-          totalExpense == other.totalExpense &&
-          totalBalance == other.totalBalance &&
-          netWorth == other.netWorth &&
-          transactions.length == other.transactions.length &&
-          accounts.length == other.accounts.length &&
-          budgets.length == other.budgets.length &&
-          goals.length == other.goals.length &&
-          pendingSmsCount == other.pendingSmsCount;
+  static List<BudgetWithProgress> _sortedBudgets(
+    List<BudgetWithProgress> budgets,
+  ) {
+    final sorted = List<BudgetWithProgress>.of(budgets);
+    sorted.sort((a, b) {
+      final byId = a.snapshot.budgetId.compareTo(b.snapshot.budgetId);
+      if (byId != 0) return byId;
+      return a.snapshot.occurrenceKey.compareTo(b.snapshot.occurrenceKey);
+    });
+    return sorted;
+  }
+
+  static List<CategorySpending> _sortedCategorySpendings(
+    List<CategorySpending> spendings,
+  ) {
+    final sorted = List<CategorySpending>.of(spendings);
+    sorted.sort((a, b) {
+      final byId = a.category.id.compareTo(b.category.id);
+      if (byId != 0) return byId;
+      return a.category.name.compareTo(b.category.name);
+    });
+    return sorted;
+  }
+
+  static List<String> _sortedTags(Budget budget) {
+    final tags = budget.budgetTags
+        .map((tag) => '${tag.id}:${tag.name}')
+        .toList(growable: false);
+    return List<String>.of(tags)..sort();
+  }
+
+  static bool _sameBudget(BudgetWithProgress left, BudgetWithProgress right) {
+    final a = left.snapshot;
+    final b = right.snapshot;
+    if (left.hasInvalidCategories != right.hasInvalidCategories ||
+        left.startDate != right.startDate ||
+        left.endDate != right.endDate ||
+        a.budgetId != b.budgetId ||
+        a.budgetName != b.budgetName ||
+        a.budgetType != b.budgetType ||
+        a.recurrence != b.recurrence ||
+        a.isArchived != b.isArchived ||
+        a.evaluationDate != b.evaluationDate ||
+        a.periodStart != b.periodStart ||
+        a.periodEnd != b.periodEnd ||
+        a.limit != b.limit ||
+        a.spent != b.spent ||
+        a.remaining != b.remaining ||
+        a.percentage != b.percentage ||
+        a.status != b.status ||
+        left.spent != right.spent ||
+        _sortedTags(left.budget).length != _sortedTags(right.budget).length) {
+      return false;
+    }
+
+    final leftTags = _sortedTags(left.budget);
+    final rightTags = _sortedTags(right.budget);
+    if (!_sameStrings(leftTags, rightTags)) return false;
+
+    final leftCategories = _sortedCategorySpendings(left.categorySpendings);
+    final rightCategories = _sortedCategorySpendings(right.categorySpendings);
+    if (leftCategories.length != rightCategories.length) return false;
+    for (var i = 0; i < leftCategories.length; i++) {
+      final leftCategory = leftCategories[i];
+      final rightCategory = rightCategories[i];
+      if (leftCategory.category.id != rightCategory.category.id ||
+          leftCategory.category.name != rightCategory.category.name ||
+          leftCategory.allocated != rightCategory.allocated ||
+          leftCategory.spent != rightCategory.spent) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  static bool _sameStrings(List<String> left, List<String> right) {
+    if (left.length != right.length) return false;
+    for (var i = 0; i < left.length; i++) {
+      if (left[i] != right[i]) return false;
+    }
+    return true;
+  }
+
+  static bool _sameBudgets(
+    List<BudgetWithProgress> left,
+    List<BudgetWithProgress> right,
+  ) {
+    if (left.length != right.length) return false;
+    final sortedLeft = _sortedBudgets(left);
+    final sortedRight = _sortedBudgets(right);
+    for (var i = 0; i < sortedLeft.length; i++) {
+      if (!_sameBudget(sortedLeft[i], sortedRight[i])) return false;
+    }
+    return true;
+  }
+
+  static int _budgetHash(BudgetWithProgress value) {
+    final snapshot = value.snapshot;
+    final categories = _sortedCategorySpendings(value.categorySpendings);
+    final categoryHash = Object.hashAll(
+      categories.map(
+        (category) => Object.hash(
+          category.category.id,
+          category.category.name,
+          category.allocated,
+          category.spent,
+        ),
+      ),
+    );
+    return Object.hash(
+      value.hasInvalidCategories,
+      value.startDate,
+      value.endDate,
+      snapshot.budgetId,
+      snapshot.budgetName,
+      snapshot.budgetType,
+      snapshot.recurrence,
+      snapshot.isArchived,
+      snapshot.evaluationDate,
+      snapshot.periodStart,
+      snapshot.periodEnd,
+      snapshot.limit,
+      snapshot.spent,
+      snapshot.remaining,
+      snapshot.percentage,
+      snapshot.status,
+      value.spent,
+      Object.hashAll(_sortedTags(value.budget)),
+      categoryHash,
+    );
+  }
 
   @override
-  int get hashCode =>
-      transactions.length.hashCode ^
-      accounts.length.hashCode ^
-      budgets.length.hashCode ^
-      goals.length.hashCode ^
-      totalIncome.hashCode ^
-      totalExpense.hashCode ^
-      netWorth.hashCode;
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! DashboardData ||
+        totalIncome != other.totalIncome ||
+        totalExpense != other.totalExpense ||
+        totalBalance != other.totalBalance ||
+        netWorth != other.netWorth ||
+        transactions.length != other.transactions.length ||
+        accounts.length != other.accounts.length ||
+        goals.length != other.goals.length ||
+        pendingSmsCount != other.pendingSmsCount ||
+        budgetEvaluationDate != other.budgetEvaluationDate ||
+        budgetGeneration != other.budgetGeneration) {
+      return false;
+    }
+    return _sameBudgets(budgets, other.budgets);
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        transactions.length,
+        accounts.length,
+        goals.length,
+        budgets.length,
+        totalIncome,
+        totalExpense,
+        totalBalance,
+        netWorth,
+        pendingSmsCount,
+        budgetEvaluationDate,
+        budgetGeneration,
+        Object.hashAll(_sortedBudgets(budgets).map(_budgetHash)),
+      );
 }
 
 // Main dashboard provider with debouncing
@@ -71,6 +219,7 @@ final dashboardDataProvider =
     StreamProvider.autoDispose<DashboardData>((ref) async* {
   final isar = await ref.watch(isarServiceProvider).getInstance();
   if (!ref.mounted) return;
+  final budgetRefresh = ref.watch(budgetRefreshProvider);
   final budgetService = ref.watch(budgetServiceProvider);
   final accountService = ref.watch(accountServiceProvider);
 
@@ -100,14 +249,16 @@ final dashboardDataProvider =
   // Returns null if the provider was disposed mid-fetch (e.g. user
   // navigated away while a fetch was in flight). Callers must check for
   // null and bail out without touching `ref` again.
-  Future<DashboardData?> fetchData() async {
+  Future<DashboardData?> fetchData(BudgetRefreshState refresh) async {
     try {
       // Fetch all data in parallel
       final results = await Future.wait([
         getRecentTransactions(isar),
         ref.read(accountsProvider.future),
         accountService.getAccountBalanceMap(),
-        budgetService.getBudgetsWithProgress(),
+        budgetService.getBudgetPeriodSnapshots(
+          evaluationDate: refresh.evaluationDate,
+        ),
         isar.recurringTransactions
             .filter()
             .isActiveEqualTo(true)
@@ -122,9 +273,13 @@ final dashboardDataProvider =
       if (!ref.mounted) return null;
 
       final transactions = results[0] as List<Transaction>;
+      // accountsProvider has already applied AccountDataContract. Balance and
+      // totals below use only IDs/types and preserve existing formulas.
       final accounts = results[1] as List<Account>;
       final accountBalances = results[2] as Map<int, double>;
-      final budgets = results[3] as List<BudgetWithProgress>;
+      final budgetSnapshots = results[3] as List<BudgetPeriodSnapshot>;
+      final budgets =
+          budgetSnapshots.map(BudgetWithProgress.fromSnapshot).toList();
       final recurringExpenses = results[4] as List<RecurringTransaction>;
       for (final r in recurringExpenses) {
         await r.category.load();
@@ -171,7 +326,13 @@ final dashboardDataProvider =
       });
 
       if (!ref.mounted) return null;
-      final pendingSmsCount = await ref.read(smsActivityServiceProvider).getPendingCount();
+      final pendingSmsCount =
+          await ref.read(smsActivityServiceProvider).getPendingCount();
+
+      if (!ref.mounted ||
+          ref.read(budgetRefreshProvider).generation != refresh.generation) {
+        return null;
+      }
 
       return DashboardData(
         transactions: transactions,
@@ -185,6 +346,8 @@ final dashboardDataProvider =
         totalBalance: totalBalance,
         netWorth: netWorth,
         pendingSmsCount: pendingSmsCount,
+        budgetEvaluationDate: refresh.evaluationDate,
+        budgetGeneration: refresh.generation,
       );
     } catch (e) {
       rethrow;
@@ -192,7 +355,7 @@ final dashboardDataProvider =
   }
 
   // Emit initial data immediately
-  final initialData = await fetchData();
+  final initialData = await fetchData(budgetRefresh);
   if (!ref.mounted || initialData == null) return;
   lastEmittedData = initialData;
   yield initialData;
@@ -213,7 +376,7 @@ final dashboardDataProvider =
     debounceTimer = Timer(const Duration(milliseconds: 300), () async {
       if (!ref.mounted) return;
       try {
-        final newData = await fetchData();
+        final newData = await fetchData(budgetRefresh);
         if (!ref.mounted || newData == null) return;
         // Only emit if data actually changed
         if (lastEmittedData != newData) {

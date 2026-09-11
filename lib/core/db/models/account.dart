@@ -10,7 +10,10 @@ part 'account.g.dart';
 class Account {
   Id id = Isar.autoIncrement; // Auto-incrementing primary key
 
-  @Index(type: IndexType.value, unique: true, caseSensitive: false) // Ensure unique names (case-insensitive)
+  @Index(
+      type: IndexType.value,
+      unique: true,
+      caseSensitive: false) // Ensure unique names (case-insensitive)
   late String name; // e.g., "Bank ABC", "Wallet", "Credit Card XYZ"
 
   // Consider adding an 'Account Type' enum (e.g., Bank, Cash, Credit, EWallet)
@@ -65,8 +68,25 @@ class Account {
 // Note: We don't store the 'currentBalance' here.
 // Current balance is typically CALCULATED dynamically by summing:
 // initialBalance + all related income transactions - all related expense transactions.
-  factory Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
-  Map<String, dynamic> toJson() => _$AccountToJson(this);
+  factory Account.fromJson(Map<String, dynamic> json) =>
+      _$AccountFromJson(json);
+
+  /// Serialize only safe presentation data. Storage ciphertext and full
+  /// account numbers never leave the model through generic JSON output.
+  Map<String, dynamic> toJson() {
+    final json = _$AccountToJson(this);
+    final value = json['accountNumber'] as String?;
+    if (value == null || value.isEmpty || value.startsWith('ENC:')) {
+      json['accountNumber'] = '••••';
+    } else if (value.length < 4) {
+      json['accountNumber'] = '••••';
+    } else if (value.startsWith('•••• ')) {
+      json['accountNumber'] = value;
+    } else {
+      json['accountNumber'] = '•••• ${value.substring(value.length - 4)}';
+    }
+    return json;
+  }
 }
 
 // You might define an enum for AccountType outside the class:

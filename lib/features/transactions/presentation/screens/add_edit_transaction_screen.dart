@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_provider.dart';
@@ -17,6 +16,7 @@ import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/notification_record_service.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
@@ -26,11 +26,12 @@ import 'package:mudra_manager/core/services/widget_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_access_provider.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
 import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
-import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
@@ -219,15 +220,15 @@ class _AddEditTransactionScreenState
   Future<void> _matchSmsAccount() async {
     final smsAccountNumber = widget.smsActivity?.account;
     if (smsAccountNumber == null || smsAccountNumber.isEmpty) return;
-    final isar = await ref.read(isarServiceProvider).getInstance();
-    final accounts =
-        await isar.accounts.filter().isActiveEqualTo(true).findAll();
-    final match = accounts.where((a) {
-      final dbAccNo = a.accountNumber?.trim();
-      return dbAccNo != null && dbAccNo.endsWith(smsAccountNumber.trim());
-    }).firstOrNull;
-    if (match != null && mounted) {
-      setState(() => _selectedAccount = match);
+    final accounts = await ref.read(accountsProvider.future);
+    final match = AccountMatchingBoundary.firstMatch(
+      accounts,
+      smsAccountNumber,
+      activeOnly: true,
+    );
+    final safeMatch = await AccountDataContract.safeAccount(match);
+    if (safeMatch != null && mounted) {
+      setState(() => _selectedAccount = safeMatch);
     }
   }
 
@@ -1162,8 +1163,10 @@ class _AddEditTransactionScreenState
 
       // Pop first so the user sees immediate feedback, then run side effects
       if (context.mounted) {
+        ref.read(budgetRefreshProvider.notifier).refresh(
+              BudgetRefreshReason.transactionChanged,
+            );
         ref.invalidate(accountServiceProvider);
-        ref.invalidate(budgetServiceProvider);
         if (widget.smsActivity != null) {
           ref.invalidate(smsActivityProvider);
           ref.invalidate(pendingCountProvider);

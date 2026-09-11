@@ -1,6 +1,10 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
+import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -146,6 +150,90 @@ void main() {
         throwsA(isA<StateError>()),
       );
       expect(FieldEncryptionService.decrypt(input), equals(input));
+    });
+  });
+
+  group('Strict AccountEncryption boundary', () {
+    const key = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=';
+
+    setUp(() {
+      FieldEncryptionService.setKeyForTesting(key);
+    });
+
+    tearDown(FieldEncryptionService.resetForTesting);
+
+    test('prepares encrypted value and full suffix hash without mutation',
+        () async {
+      final account = Account()..accountNumber = '1234567890';
+
+      final preparation = await account.prepareStrictWrite();
+
+      expect(preparation.succeeded, isTrue);
+      expect(preparation.encryptedAccountNumber, startsWith('ENC:'));
+      expect(preparation.encryptedAccountNumber, isNot('1234567890'));
+      expect(
+        preparation.accountSuffixHash,
+        sha256.convert(utf8.encode('7890')).toString(),
+      );
+      expect(account.accountNumber, '1234567890');
+      expect(account.accountSuffixHash, isNull);
+    });
+
+    test('valid encrypted input is not double-encrypted', () async {
+      final account = Account()..accountNumber = '1234567890';
+      final first = await account.prepareStrictWrite();
+      account.accountNumber = first.encryptedAccountNumber;
+
+      final second = await account.prepareStrictWrite();
+
+      expect(second.succeeded, isTrue);
+      expect(second.encryptedAccountNumber, first.encryptedAccountNumber);
+      expect(second.accountSuffixHash, first.accountSuffixHash);
+    });
+
+    test('strict resolution gives safe display and redacted failure', () async {
+      final valid = Account()..accountNumber = '1234567890';
+      final prep = await valid.prepareStrictWrite();
+      valid.accountNumber = prep.encryptedAccountNumber;
+
+      final resolved = await valid.resolveAccountNumberStrict();
+      expect(resolved.status, AccountNumberResolutionStatus.decrypted);
+      expect(resolved.display, '•••• 7890');
+      expect(resolved.resolvedValue, '1234567890');
+
+      final malformed = Account()..accountNumber = 'ENC:not-valid';
+      final unavailable = await malformed.resolveAccountNumberStrict();
+      expect(unavailable.status, AccountNumberResolutionStatus.malformed);
+      expect(unavailable.display, '••••');
+      expect(unavailable.resolvedValue, isNull);
+      expect(unavailable.errorCategory, 'malformed_ciphertext');
+    });
+
+    test('short and empty values classify safely and clear hash', () async {
+      final short = Account()..accountNumber = '12';
+      final shortResult = await short.resolveAccountNumberStrict();
+      expect(shortResult.status, AccountNumberResolutionStatus.shortValue);
+      expect(shortResult.display, '••••');
+
+      final empty = Account()
+        ..accountNumber = ''
+        ..accountSuffixHash = 'stale';
+      final prep = await empty.prepareStrictWrite();
+      expect(prep.succeeded, isTrue);
+      expect(prep.encryptedAccountNumber, isNull);
+      expect(prep.accountSuffixHash, isNull);
+    });
+
+    test('matches full and legacy 16-character suffix hashes', () {
+      final full = Account()
+        ..accountSuffixHash = sha256.convert(utf8.encode('7890')).toString();
+      final legacy = Account()
+        ..accountSuffixHash =
+            sha256.convert(utf8.encode('7890')).toString().substring(0, 16);
+
+      expect(full.matchesSuffix('7890'), isTrue);
+      expect(legacy.matchesSuffix('7890'), isTrue);
+      expect(full.matchesSuffix('0000'), isFalse);
     });
   });
 }

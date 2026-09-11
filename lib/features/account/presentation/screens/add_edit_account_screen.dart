@@ -16,6 +16,7 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/simple_color_picker.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
@@ -165,7 +166,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               reduceMotion,
             ),
             SizedBox(height: spacing.sectionGap),
-            _buildTypeHeader(ctxt.account_typeLabel, color, textTheme, spacing, _selectedType.icon),
+            _buildTypeHeader(ctxt.account_typeLabel, color, textTheme, spacing,
+                _selectedType.icon),
             SizedBox(
               height: spacing.sectionGap,
             ),
@@ -176,7 +178,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               reduceMotion,
             ),
             SizedBox(height: spacing.sectionGap),
-            _buildTypeHeader(ctxt.account_detailsLabel, color, textTheme, spacing, LucideIcons.form),
+            _buildTypeHeader(ctxt.account_detailsLabel, color, textTheme,
+                spacing, LucideIcons.form),
             SizedBox(height: spacing.sectionGap),
             _buildDetailsCard(
               color,
@@ -185,7 +188,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               isDark,
             ),
             SizedBox(height: spacing.sectionGap),
-            _buildTypeHeader(ctxt.account_colorLabel, color, textTheme, spacing, LucideIcons.palette),
+            _buildTypeHeader(ctxt.account_colorLabel, color, textTheme, spacing,
+                LucideIcons.palette),
             SizedBox(height: spacing.sectionGap),
             _buildColorSection(
               color,
@@ -194,7 +198,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               reduceMotion,
             ),
             SizedBox(height: spacing.sectionGap),
-            _buildTypeHeader(ctxt.account_currencyLabel, color, textTheme, spacing, LucideIcons.wallet),
+            _buildTypeHeader(ctxt.account_currencyLabel, color, textTheme,
+                spacing, LucideIcons.wallet),
             SizedBox(height: spacing.sectionGap),
             _buildCurrencySelector(color, textTheme, spacing),
           ],
@@ -260,7 +265,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                 child: Padding(
-                  padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+                  padding:
+                      EdgeInsets.all(spacing.cardInner + spacing.elementGap),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -309,10 +315,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                                         vertical: spacing.elementGapUltraMin,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: _selectedColor.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                                        color: _selectedColor.withValues(
+                                            alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(
+                                            spacing.radiusMedium),
                                         border: Border.all(
-                                          color: _selectedColor.withValues(alpha: 0.2),
+                                          color: _selectedColor.withValues(
+                                              alpha: 0.2),
                                         ),
                                       ),
                                       child: Text(
@@ -341,7 +350,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                                       ? ctxt.account_outstanding
                                       : ctxt.account_balance,
                                   style: textTheme.labelSmall?.copyWith(
-                                    color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                                    color: color.onSurfaceVariant
+                                        .withValues(alpha: 0.6),
                                   ),
                                 ),
                                 Semantics(
@@ -429,7 +439,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 vertical: spacing.elementGapUltraMin + 2,
               ),
               decoration: BoxDecoration(
-                color: color.onSurfaceVariant.withValues(alpha: spacing.opacitySubtle),
+                color: color.onSurfaceVariant
+                    .withValues(alpha: spacing.opacitySubtle),
                 borderRadius: BorderRadius.circular(spacing.radiusSmall),
               ),
               child: Text(
@@ -583,7 +594,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       prefixIcon: Icon(LucideIcons.wallet, size: 18, color: _selectedColor),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        borderSide: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+        borderSide:
+            BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -591,7 +603,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        borderSide: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+        borderSide:
+            BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
     );
 
@@ -631,12 +644,15 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           focusNode: _balanceFocusNode,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: inputDecoration.copyWith(
-            labelText: isCreditCard ? ctxt.account_outstanding : ctxt.account_initialBalance,
+            labelText: isCreditCard
+                ? ctxt.account_outstanding
+                : ctxt.account_initialBalance,
             helperText: isCreditCard ? ctxt.account_cardPaidOff : null,
             helperStyle: textTheme.labelSmall?.copyWith(
               color: color.onSurfaceVariant.withValues(alpha: 0.6),
             ),
-            prefixIcon: Icon(currencyIcon(_selectedCurrency), size: 18, color: _selectedColor),
+            prefixIcon: Icon(currencyIcon(_selectedCurrency),
+                size: 18, color: _selectedColor),
           ),
           textTheme: textTheme,
           validator: (v) => v == null || v.isEmpty ? 'Required' : null,
@@ -649,7 +665,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: inputDecoration.copyWith(
               labelText: ctxt.account_creditLimit,
-              prefixIcon: Icon(LucideIcons.gauge, size: 18, color: _selectedColor),
+              prefixIcon:
+                  Icon(LucideIcons.gauge, size: 18, color: _selectedColor),
             ),
             textTheme: textTheme,
           ),
@@ -700,7 +717,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+          color: Theme.of(context)
+              .colorScheme
+              .outlineVariant
+              .withValues(alpha: 0.3),
         ),
       ),
       child: TextFormField(
@@ -742,7 +762,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           border: InputBorder.none,
           focusedBorder: InputBorder.none,
           enabledBorder: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         ),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<int?>(
@@ -872,7 +893,6 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       ),
     );
   }
-
 
   Widget _buildCurrencySelector(
     ColorScheme color,
@@ -1246,31 +1266,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       final accountName = _nameController.text.trim();
       final accountNumber = _accountNumberController.text.trim();
 
-      final existingName =
-          await isar.accounts.filter().nameEqualTo(accountName).findFirst();
-      if (existingName != null && existingName.id != id) {
-        SnackbarService.warning(
-          'Account with name "$accountName" already exists',
-          spacing,
-        );
-        return;
-      }
-
-      if (accountNumber.isNotEmpty) {
-        final existingNum = await isar.accounts
-            .filter()
-            .accountNumberEqualTo(accountNumber)
-            .findFirst();
-        if (existingNum != null && existingNum.id != id) {
-          SnackbarService.warning(
-            'Account with number "$accountNumber" already exists',
-            spacing,
-          );
-          return;
-        }
-      }
-
-      final account = widget.account ?? Account();
+      final account = AccountDataContract.copyAccount(widget.account);
       final isNew = widget.account == null;
 
       account
@@ -1294,9 +1290,28 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           ..creditLimit = null;
       }
 
-      await isar.writeTxn(() async {
-        await isar.accounts.put(account);
-      });
+      final writeResult = await AccountDataContract.writeAccount(
+        isar,
+        account,
+        accountNumber: accountNumber,
+      );
+      if (!writeResult.succeeded) {
+        if (writeResult.status == AccountWriteStatus.duplicateName ||
+            writeResult.status == AccountWriteStatus.duplicateNumber) {
+          SnackbarService.warning(
+            writeResult.status == AccountWriteStatus.duplicateName
+                ? 'Account with this name already exists'
+                : 'Account with this number already exists',
+            spacing,
+          );
+        } else {
+          SnackbarService.error(
+            'Unable to save account. Please try again.',
+            spacing,
+          );
+        }
+        return;
+      }
 
       if (isNew) {
         final gamificationService =

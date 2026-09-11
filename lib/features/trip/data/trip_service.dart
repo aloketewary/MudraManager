@@ -2,9 +2,9 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/category_seeder.dart';
 import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
-import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
 
@@ -191,9 +191,8 @@ class TripService {
     final allParticipants = await Future.wait(
       participantIds.map((id) => isar.tripParticipants.get(id)),
     );
-    final owner = allParticipants
-        .where((p) => p != null && p.isOwner)
-        .firstOrNull;
+    final owner =
+        allParticipants.where((p) => p != null && p.isOwner).firstOrNull;
     final ownerId = owner?.id;
 
     // Calculate owner's share. Fallback: if no owner flag (old trips),
@@ -215,18 +214,15 @@ class TripService {
         : paidById == participantIds.first; // fallback: first participant
 
     // Look up primary account for ledger transactions
-    final primaryAccount = await isar.accounts
-        .filter()
-        .isPrimaryEqualTo(true)
-        .isActiveEqualTo(true)
-        .findFirst() ??
-        await isar.accounts.filter().isActiveEqualTo(true).findFirst();
+    final primaryAccount = await AccountDataContract.primaryRelation(isar);
 
     // Always create a main ledger transaction so it appears in
     // dashboard/analytics. Uses myShare for the user's portion.
     final trip = await isar.trips.get(tripId);
-    final categoryName = trip?.isTrip == true ? 'Trip Expense' : 'Shared Expense';
-    final systemCategory = await CategorySeeder.getSystemCategory(isar, categoryName);
+    final categoryName =
+        trip?.isTrip == true ? 'Trip Expense' : 'Shared Expense';
+    final systemCategory =
+        await CategorySeeder.getSystemCategory(isar, categoryName);
 
     final ledgerTxn = Transaction.create(
       date: expense.date,
@@ -243,9 +239,8 @@ class TripService {
 
     if (expense.currencyCode != null) {
       ledgerTxn.currencyCode = expense.currencyCode;
-      ledgerTxn.convertedAmount = isOwnerPayer
-          ? (expense.convertedAmount ?? expense.amount)
-          : 0;
+      ledgerTxn.convertedAmount =
+          isOwnerPayer ? (expense.convertedAmount ?? expense.amount) : 0;
     }
 
     expense.encryptFields();
@@ -315,9 +310,8 @@ class TripService {
       final ownerId = owner?.id;
       if (ownerId != null) {
         final idx = participantIds.indexOf(ownerId);
-        ledgerTxn.myShare = (idx >= 0 && idx < splitAmounts.length)
-            ? splitAmounts[idx]
-            : null;
+        ledgerTxn.myShare =
+            (idx >= 0 && idx < splitAmounts.length) ? splitAmounts[idx] : null;
         ledgerTxn.encryptFields();
       }
     }
@@ -382,9 +376,8 @@ class TripService {
       if (balance > 0.01) {
         balances.forEach((otherId, otherBalance) {
           if (otherId != id && otherBalance < -0.01) {
-            final settleAmount = balance < -otherBalance
-                ? balance
-                : -otherBalance;
+            final settleAmount =
+                balance < -otherBalance ? balance : -otherBalance;
             final fromName = participantMap[otherId] ?? 'Unknown';
             final toName = participantMap[id] ?? 'Unknown';
             settlements.putIfAbsent(fromName, () => {});
@@ -429,12 +422,7 @@ class TripService {
     }
 
     // Look up primary account
-    final primaryAccount = await isar.accounts
-        .filter()
-        .isPrimaryEqualTo(true)
-        .isActiveEqualTo(true)
-        .findFirst() ??
-        await isar.accounts.filter().isActiveEqualTo(true).findFirst();
+    final primaryAccount = await AccountDataContract.primaryRelation(isar);
 
     // Create main ledger settlement transaction.
     // If owner pays someone → expense. If owner receives → income.
@@ -444,7 +432,8 @@ class TripService {
     final hasOwner = fromIsOwner || toIsOwner;
 
     // Determine direction: expense (paying out) or income (receiving)
-    final isExpense = fromIsOwner || !hasOwner; // default to expense for old trips
+    final isExpense =
+        fromIsOwner || !hasOwner; // default to expense for old trips
     final catName = isExpense ? 'Settlement' : 'Settlement Received';
     final desc = isExpense
         ? 'Settlement to ${toP?.name ?? "Unknown"}'
@@ -510,9 +499,8 @@ class TripService {
       if (trip == null) return;
 
       await trip.transactions.load();
-      final tripTxn = trip.transactions
-          .where((t) => t.id == tripTransactionId)
-          .firstOrNull;
+      final tripTxn =
+          trip.transactions.where((t) => t.id == tripTransactionId).firstOrNull;
 
       if (tripTxn != null) {
         await tripTxn.splitExpense.load();
@@ -533,13 +521,18 @@ class TripService {
     });
   }
 
-  Future<Map<int, String>> getTripNamesByTransactionIds(List<int> transactionIds) async {
+  Future<Map<int, String>> getTripNamesByTransactionIds(
+    List<int> transactionIds,
+  ) async {
     if (transactionIds.isEmpty) return {};
-    
+
     final isar = await isarService.getInstance();
     final tripTxns = await isar.tripTransactions
         .filter()
-        .anyOf(transactionIds, (q, id) => q.transaction((tq) => tq.idEqualTo(id)))
+        .anyOf(
+          transactionIds,
+          (q, id) => q.transaction((tq) => tq.idEqualTo(id)),
+        )
         .findAll();
 
     // Map: TripTransaction ID -> Transaction ID

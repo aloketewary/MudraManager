@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mudra_manager/main.dart' as app;
+import 'budget_stale_data_test.dart'
+    show registerBudgetStaleDataIntegrationTests;
 
 /// Integration tests for Mudra Manager.
 ///
@@ -151,6 +153,10 @@ void main() {
       }
     });
   });
+
+  // Register fixture-backed budget regression cases in same exact integration
+  // command, without depending on app onboarding/persistent app state.
+  registerBudgetStaleDataIntegrationTests();
 }
 
 /// Taps the primary FilledButton (Continue / Get Started).

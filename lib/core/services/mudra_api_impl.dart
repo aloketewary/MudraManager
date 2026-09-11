@@ -6,6 +6,7 @@ import 'package:mudra_manager/core/db/models/budget.dart' as db;
 import 'package:mudra_manager/core/db/models/goal.dart' as db;
 import 'package:mudra_manager/core/db/models/category.dart' as db;
 import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MudraApiImpl implements MudraApi {
@@ -90,15 +91,18 @@ class MudraApiImpl implements MudraApi {
             .findAll()
         : await isar.collection<db.Account>().where().findAll();
 
+    final safeAccounts = await AccountDataContract.safeAccounts(accounts);
     final result = <AccountData>[];
-    for (final acc in accounts) {
+    for (var i = 0; i < accounts.length; i++) {
+      final acc = accounts[i];
+      final safe = safeAccounts[i];
       final balance = await _calculateBalance(isar, acc);
       result.add(
         AccountData(
-          name: acc.name,
+          name: safe.name,
           balance: balance,
-          type: acc.accountType.name,
-          isActive: acc.isActive,
+          type: safe.accountType.name,
+          isActive: safe.isActive,
         ),
       );
     }

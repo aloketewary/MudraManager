@@ -4,6 +4,7 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/notifications/data/smart_check.dart';
 
@@ -19,8 +20,10 @@ class BalanceDropCheck extends SmartCheck {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    final accounts =
-        await isar.accounts.filter().isActiveEqualTo(true).findAll();
+    final accounts = await AccountDataContract.linkProjections(
+      isar,
+      activeOnly: true,
+    );
 
     double totalBalance = 0;
     for (final acc in accounts) {
@@ -65,10 +68,9 @@ class BalanceDropCheck extends SmartCheck {
       await SmartNotificationEmitter.emit(
         isar,
         type: type,
-        title: Tone.appL10n?.notif_fundsGettingLowTitle ??
-            '📉 Funds getting low',
-        body: Tone.current
-            .balanceDropNotif(daysUntilZero.toStringAsFixed(0)),
+        title:
+            Tone.appL10n?.notif_fundsGettingLowTitle ?? '📉 Funds getting low',
+        body: Tone.current.balanceDropNotif(daysUntilZero.toStringAsFixed(0)),
         channel: 'smart_alerts',
         channelName: 'Smart Alerts',
         priority: daysUntilZero <= 7

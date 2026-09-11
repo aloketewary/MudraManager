@@ -8,11 +8,13 @@ import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/domain/budget_constraint_snapshot.dart';
 import 'package:mudra_manager/core/domain/financial_states.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_constraint_provider.dart';
@@ -32,6 +34,8 @@ class BudgetDetailsScreen extends ConsumerWidget {
     final ctxt = AppLocalizations.of(context)!;
 
     return ref.watch(budgetConstraintByIdProvider(budgetId)).when(
+          skipLoadingOnRefresh: false,
+          skipError: false,
           data: (snapshot) {
             if (snapshot == null) {
               return Scaffold(
@@ -50,7 +54,15 @@ class BudgetDetailsScreen extends ConsumerWidget {
           ),
           error: (e, _) => Scaffold(
             appBar: AppBar(),
-            body: Center(child: Text(BuddyMessages.errorWith('$e'))),
+            body: Center(
+              child: FilledButton.icon(
+                onPressed: () => ref
+                    .read(budgetRefreshProvider.notifier)
+                    .refresh(BudgetRefreshReason.retry),
+                icon: const Icon(LucideIcons.rotateCcw),
+                label: Text(ctxt.common_retry),
+              ),
+            ),
           ),
         );
   }
@@ -103,6 +115,9 @@ class _BudgetDetailShell extends ConsumerWidget {
                 await ref
                     .read(budgetServiceProvider)
                     .deleteBudget(snapshot.budgetId);
+                ref.read(budgetRefreshProvider.notifier).refresh(
+                      BudgetRefreshReason.budgetCrud,
+                    );
                 SnackbarService.success(BuddyMessages.budgetDeleted, spacing);
                 if (context.mounted) context.pop();
               }
@@ -110,7 +125,19 @@ class _BudgetDetailShell extends ConsumerWidget {
           ),
         ],
       ),
-      body: _BudgetDetailBody(snapshot: snapshot),
+      body: RefreshIndicator(
+        onRefresh: () => RefreshHelper.withMinDuration(() async {
+          ref.read(budgetRefreshProvider.notifier).refresh(
+                BudgetRefreshReason.manual,
+              );
+          try {
+            await ref.read(budgetConstraintsProvider.future);
+          } catch (_) {
+            // Error state renders retry; refresh indicator still settles.
+          }
+        }),
+        child: _BudgetDetailBody(snapshot: snapshot),
+      ),
     );
   }
 }
@@ -130,6 +157,7 @@ class _BudgetDetailBody extends ConsumerWidget {
     final accent = _accentColor(color);
 
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.symmetric(
         horizontal: spacing.cardHorizontal,
         vertical: spacing.cardVertical,
@@ -173,7 +201,8 @@ class _BudgetDetailBody extends ConsumerWidget {
             decoration: BoxDecoration(
               color: color.surfaceContainerLow,
               borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+              border: Border.all(
+                  color: color.outlineVariant.withValues(alpha: 0.3)),
             ),
             child: Text(
               ctxt.budget_insufficientData,
@@ -260,9 +289,14 @@ class _BudgetDetailBody extends ConsumerWidget {
     ColorScheme color,
     AppLocalizations ctxt,
   ) {
-    final now = DateTime.now();
-    final start = now.subtract(Duration(days: snapshot.daysPassed));
-    final end = start.add(Duration(days: snapshot.totalDays - 1));
+    final start = snapshot.periodStart;
+    final end = snapshot.periodEnd;
+    if (start == null || end == null) {
+      return Text(
+        ctxt.budget_duration,
+        style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+      );
+    }
 
     return Text(
       '${safeDateFormat('dd MMM', ctxt.localeName).format(start)}'

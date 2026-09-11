@@ -8,6 +8,7 @@ import 'package:mudra_manager/core/constants/dashboard_constants.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -45,7 +46,7 @@ class DashboardAnimationState {
 
   const DashboardAnimationState({
     this.revealedCount = 0,
-    this.allRevealed = false, 
+    this.allRevealed = false,
     this.hasAnimatedOnce = false,
   });
 
@@ -116,6 +117,10 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
   @override
   void initState() {
     super.initState();
+    ref.read(budgetRefreshProvider.notifier).refresh(
+          BudgetRefreshReason.navigation,
+        );
+    TodayCardAnalytics.recordSessionStart();
     _initializeDashboard();
   }
 
@@ -130,7 +135,9 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
         final alertService = ref.read(budgetAlertServiceProvider);
         final budgetAlerts = await alertService.checkBudgetsOnDashboardLoad();
         if (budgetAlerts.isNotEmpty && mounted) {
-          ref.read(budgetAlertsNotifierProvider.notifier).addAlerts(budgetAlerts);
+          ref
+              .read(budgetAlertsNotifierProvider.notifier)
+              .addAlerts(budgetAlerts);
         }
       } catch (e) {
         // Ignore budget check errors
@@ -174,11 +181,13 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
               _showStreakCelebration(streakCount);
             } else {
               SnackbarService.success(
-                '🔥 ${BuddyMessages.streakMessage(streakCount)}', spacing,
+                '🔥 ${BuddyMessages.streakMessage(streakCount)}',
+                spacing,
               );
             }
           } else {
-            SnackbarService.success('🔥 Day $streakCount streak! +${result.xpEarned} XP', spacing);
+            SnackbarService.success(
+                '🔥 Day $streakCount streak! +${result.xpEarned} XP', spacing);
           }
           log.i('Daily check-in completed successfully');
         }
@@ -204,7 +213,8 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
       final spacing = ref.read(spacingProvider);
       final prefs = SharedPrefsUtil.instance;
 
-      if (!prefs.getSmsFirstImportReady() || prefs.getSmsFirstImportCelebrated()) {
+      if (!prefs.getSmsFirstImportReady() ||
+          prefs.getSmsFirstImportCelebrated()) {
         return;
       }
       prefs.setSmsFirstImportCelebrated();
@@ -224,7 +234,8 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
   bool _isNewUser() {
     final onboardedAt = SharedPrefsUtil.instance.getOnboardingCompletedAt();
     return onboardedAt != null &&
-        DateTime.now().difference(onboardedAt).inHours < DashboardConstants.newUserHoursThreshold;
+        DateTime.now().difference(onboardedAt).inHours <
+            DashboardConstants.newUserHoursThreshold;
   }
 
   @override
@@ -269,7 +280,8 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
                     animationState: animationState,
                     pendingSmsCount: data.pendingSmsCount,
                     hasTransactions: hasTransactions,
-                    nudgeDismissed: SharedPrefsUtil.instance.getFirstTxnNudgeDismissed(),
+                    nudgeDismissed:
+                        SharedPrefsUtil.instance.getFirstTxnNudgeDismissed(),
                     isNewUser: _isNewUser(),
                   ),
                 ),
@@ -306,7 +318,9 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
             Text(ctxt.common_error, style: textTheme.titleMedium),
             SizedBox(height: spacing.elementGap),
             FilledButton.icon(
-              onPressed: () => ref.invalidate(dashboardDataProvider),
+              onPressed: () => ref
+                  .read(budgetRefreshProvider.notifier)
+                  .refresh(BudgetRefreshReason.retry),
               icon: const Icon(LucideIcons.rotateCcw),
               label: Text(ctxt.common_retry),
             ),
@@ -364,14 +378,18 @@ class _DashboardContent extends ConsumerWidget {
       });
     }
 
-    final visibleCount =
-        animationState.allRevealed ? widgets.length : animationState.revealedCount;
-    final duration = reduceMotion ? Duration.zero : DashboardConstants.animationDuration;
+    final visibleCount = animationState.allRevealed
+        ? widgets.length
+        : animationState.revealedCount;
+    final duration =
+        reduceMotion ? Duration.zero : DashboardConstants.animationDuration;
     final hasAnimatedOnce = animationState.hasAnimatedOnce;
 
     return RefreshIndicator(
       onRefresh: () => RefreshHelper.withMinDuration(() async {
-        ref.invalidate(dashboardDataProvider);
+        ref.read(budgetRefreshProvider.notifier).refresh(
+              BudgetRefreshReason.manual,
+            );
         for (final widget in widgets) {
           await widget.refresh(ref);
         }
@@ -402,7 +420,8 @@ class _DashboardContent extends ConsumerWidget {
               (context, index) {
                 final widget = widgets[index];
                 if (index < visibleCount) {
-                  if (index == visibleCount - 1 && !animationState.allRevealed) {
+                  if (index == visibleCount - 1 &&
+                      !animationState.allRevealed) {
                     Future.delayed(DashboardConstants.revealDelay, () {
                       animationNotifier.revealNext(widgets.length);
                     });
@@ -427,8 +446,10 @@ class _DashboardContent extends ConsumerWidget {
               childCount: widgets.length,
             ),
           ),
-          if (widgets.isEmpty) _buildEmptyState(context, color, textTheme, spacing, ctxt),
-          if (widgets.isNotEmpty) _buildFooter(context, color, textTheme, spacing, ctxt),
+          if (widgets.isEmpty)
+            _buildEmptyState(context, color, textTheme, spacing, ctxt),
+          if (widgets.isNotEmpty)
+            _buildFooter(context, color, textTheme, spacing, ctxt),
         ],
       ),
     );
@@ -482,12 +503,14 @@ class _DashboardContent extends ConsumerWidget {
               SizedBox(height: spacing.sectionGap),
               Text(
                 BuddyMessages.noData,
-                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               SizedBox(height: spacing.elementGap),
               Text(
                 ctxt.dashboard_enableCardsDesc,
-                style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+                style: textTheme.bodyMedium
+                    ?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: spacing.sectionGap),
@@ -525,7 +548,8 @@ class _DashboardContent extends ConsumerWidget {
                 ),
                 label: Text(
                   ctxt.dashboard_customizeDashboard,
-                  style: textTheme.labelMedium?.copyWith(color: color.onSurfaceVariant),
+                  style: textTheme.labelMedium
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
               ),
             ),

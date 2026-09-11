@@ -9,6 +9,9 @@ import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/category_rule.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/services/category_rule_service.dart';
+import 'package:mudra_manager/core/utils/category_matcher.dart';
+import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/utils/robust_category_matcher.dart';
@@ -88,7 +91,8 @@ class SmsActivityService {
         .and()
         .not()
         .statusEqualTo(ActivityStatus.rejected)
-        .findAll();
+        .findAll()
+        .withDecryption();
 
     // Content-aware: only keep SMS dupes from same sender or same account
     final smsDuplicates = rawSmsDuplicates.where((d) {
@@ -120,7 +124,10 @@ class SmsActivityService {
             : rawManualDuplicates.where((txn) {
                 final txnAccount = txn.account.value;
                 if (txnAccount == null) return false;
-                return txnAccount.matchesSuffix(activity.account!);
+                return AccountMatchingBoundary.matches(
+                  txnAccount,
+                  activity.account,
+                );
               }).toList();
 
     // Also check if any existing transaction was already created from this SMS
@@ -159,8 +166,9 @@ class SmsActivityService {
     // System categories (Shared Expense, Trip Expense, Settlement...) are
     // reserved for the trip/split-bill flow and must never be candidates
     // for general SMS auto-categorization.
-    final categories =
-        (await isar.categorys.where().findAll()).where((c) => !c.isSystem).toList();
+    final categories = (await isar.categorys.where().findAll())
+        .where((c) => !c.isSystem)
+        .toList();
 
     // Use bank parser for better extraction
     final parsed = await BankSmsParser.parse(sender, body);
@@ -207,6 +215,8 @@ class SmsActivityService {
         isar,
         merchant: activity.merchant,
         recipient: activity.toAccount,
+        amount: activity.amount,
+        isIncome: activity.isIncome,
       );
       if (learnedCategory != null) {
         activity.category = learnedCategory.name;
@@ -253,7 +263,9 @@ class SmsActivityService {
     // so it's more likely to go to needsReview instead of auto-approve
     if (isRcs) {
       activity.confidence = (activity.confidence! - 15).clamp(0, 100);
-      _log.d('[$corrId] RCS confidence penalty applied: ${activity.confidence}%');
+      _log.d(
+        '[$corrId] RCS confidence penalty applied: ${activity.confidence}%',
+      );
     }
 
     // ── 1. Check for transfer pair (opposite direction, same amount, different account, within 15 min)
@@ -468,7 +480,8 @@ class SmsActivityService {
     );
 
     // Detect recurring patterns
-    await RecurringDetectorService(IsarService()).detectAndTagRecurring(transaction);
+    await RecurringDetectorService(IsarService())
+        .detectAndTagRecurring(transaction);
 
     _log.i(
       'Activity approved: ID ${activity.id} -> Transaction ${transaction.id}',
@@ -500,118 +513,100 @@ class SmsActivityService {
     String? recipient,
   }) async {
     final categories = await isar.categorys.where().findAll();
-    final keys = <String>{};
-
-    // 1. Merchant from regex extraction
     final detected = CategoryMatcherService.detectMerchant(smsBody, categories);
-    if (detected != null) keys.add(detected.toLowerCase().trim());
+    final ruleService = CategoryRuleService(isar);
 
-    // 2. Pre-extracted merchant from parser (e.g., "Swiggy" from HDFC plugin)
-    if (merchant != null && merchant.isNotEmpty) {
-      keys.add(merchant.toLowerCase().trim());
+    // Keep legacy merchant aliases, but route every write through the shared
+    // normalized upsert so case/edge-whitespace variants cannot duplicate.
+    final merchantIdentities = <String>{};
+    for (final identity in [detected, merchant]) {
+      final normalized = CategoryMatcher.normalizeIdentity(identity);
+      if (normalized != null &&
+          normalized.length >= 3 &&
+          !_smsNoiseWords.contains(normalized)) {
+        merchantIdentities.add(identity!.trim());
+      }
     }
 
-    // 3. UPI VPA recipient (e.g., "suraj@okaxis" → learn "suraj")
-    if (recipient != null && recipient.contains('@')) {
-      final vpaName = recipient.split('@').first.toLowerCase().trim();
-      if (vpaName.length >= 3) keys.add(vpaName);
+    for (final identity in merchantIdentities) {
+      await ruleService.learnFromCategorization(
+        _transactionInfoForIdentity(
+          smsBody,
+          merchant: identity,
+        ),
+        category.id.toString(),
+      );
     }
 
-    // Filter noise and upsert rules
-    final validKeys = keys.where(
-      (k) => k.length >= 3 && !_smsNoiseWords.contains(k),
+    // Store UPI recipient as recipient identity, not merchant alias. This
+    // keeps recipient matching compatible with CategoryMatcher ranking.
+    final normalizedRecipient = CategoryMatcher.normalizeIdentity(recipient);
+    if (normalizedRecipient != null && normalizedRecipient.length >= 3) {
+      await ruleService.learnFromCategorization(
+        _transactionInfoForIdentity(
+          smsBody,
+          recipient: recipient,
+        ),
+        category.id.toString(),
+      );
+    }
+  }
+
+  TransactionInfo _transactionInfoForIdentity(
+    String body, {
+    String? merchant,
+    String? recipient,
+  }) {
+    final parsed = TransactionUtil().getTransactionInfo(
+      body,
+      merchant ?? recipient ?? '',
+      merchant ?? recipient ?? '',
+      '',
     );
-
-    if (validKeys.isNotEmpty) {
-      final allRules = await isar.categoryRules.where().findAll().withDecryption();
-      for (final key in validKeys) {
-        await _upsertRule(key, category, isar, allRules);
-      }
-    }
+    final account = parsed.account ?? AccountDetails();
+    account.bankName = merchant;
+    account.sendTo = recipient;
+    parsed.account = account;
+    return parsed;
   }
 
-  Future<void> _upsertRule(
-    String key,
-    Category category,
-    Isar isar,
-    List<CategoryRule> existingRules,
-  ) async {
-    final existing = existingRules
-        .where((r) => r.merchantName?.toLowerCase() == key.toLowerCase())
-        .firstOrNull;
-
-    await isar.writeTxn(() async {
-      if (existing != null) {
-        existing.categoryId = category.id.toString();
-        existing.matchCount++;
-        existing.confidence = (existing.confidence + 10).clamp(0, 100);
-        existing.lastUsed = DateTime.now();
-        existing.encryptFields();
-        await isar.categoryRules.put(existing);
-        _log.i(
-          'Rule updated: $key → ${category.name} (confidence: ${existing.confidence}, matches: ${existing.matchCount})',
-        );
-      } else {
-        final rule = CategoryRule(
-          merchantName: key,
-          categoryId: category.id.toString(),
-          confidence: 60,
-          matchCount: 1,
-        );
-        rule.encryptFields();
-        await isar.categoryRules.put(rule);
-        _log.i('Rule created: $key → ${category.name}');
-      }
-    });
-  }
-
-  /// Look up a learned merchant→category rule.
-  /// Checks merchant name, then UPI VPA recipient as fallback.
+  /// Resolve learned category through shared deterministic precedence gate.
+  /// Null preserves existing RobustCategoryMatcher fallback path.
   Future<Category?> _matchByLearnedRule(
     String smsBody,
     List<Category> categories,
     Isar isar, {
     String? merchant,
     String? recipient,
+    double? amount,
+    bool? isIncome,
   }) async {
-    // Collect all possible lookup keys
-    final keys = <String>[];
+    final relevantCategories = categories.where((category) {
+      if (isIncome == null) return true;
+      return (isIncome && category.categoryType == CategoryType.income) ||
+          (!isIncome && category.categoryType == CategoryType.expense);
+    }).toList();
 
-    final detected = CategoryMatcherService.detectMerchant(smsBody, categories);
-    if (detected != null) keys.add(detected.toLowerCase().trim());
-    if (merchant != null && merchant.isNotEmpty) {
-      keys.add(merchant.toLowerCase().trim());
-    }
-    if (recipient != null && recipient.contains('@')) {
-      keys.add(recipient.split('@').first.toLowerCase().trim());
-    }
+    final transaction = _transactionInfoForIdentity(
+      smsBody,
+      merchant: merchant ??
+          (recipient?.contains('@') == true
+              ? recipient!.split('@').first
+              : null),
+      recipient: recipient,
+    );
+    if (amount != null) transaction.money = amount.toString();
 
-    if (keys.isNotEmpty) {
-      final allRules =
-          await isar.categoryRules.where().findAll().withDecryption();
-      for (final key in keys) {
-        if (key.length < 3) continue;
-        final rule = allRules
-            .where((r) =>
-                r.merchantName?.toLowerCase() == key.toLowerCase() &&
-                r.confidence > 40,)
-            .firstOrNull;
+    final categoryId = await CategoryRuleService(isar).suggestCategory(
+      transaction,
+      availableCategoryIds:
+          relevantCategories.map((category) => category.id.toString()).toSet(),
+    );
+    if (categoryId == null) return null;
 
-        if (rule == null) continue;
-
-        final categoryId = int.tryParse(rule.categoryId);
-        if (categoryId == null) continue;
-
-        final matched = categories.where((c) => c.id == categoryId).firstOrNull;
-        if (matched != null) {
-          _log.i(
-            'Learned rule matched: $key → ${matched.name} (confidence: ${rule.confidence})',
-          );
-          return matched;
-        }
-      }
-    }
-    return null;
+    return relevantCategories
+        .where((category) => category.id.toString() == categoryId)
+        .firstOrNull;
   }
 
   static const _smsNoiseWords = {
@@ -652,7 +647,8 @@ class SmsActivityService {
 
     // Negative learning: penalize the rule that led to wrong categorization
     if (activity.merchant != null || activity.toAccount != null) {
-      final allRules = await isar.categoryRules.where().findAll().withDecryption();
+      final allRules =
+          await isar.categoryRules.where().findAll().withDecryption();
       await _penalizeRules(activity, isar, allRules);
     }
 
@@ -666,18 +662,20 @@ class SmsActivityService {
     List<CategoryRule> allRules,
   ) async {
     final keys = <String>[];
-    if (activity.merchant != null) {
-      keys.add(activity.merchant!.toLowerCase().trim());
-    }
-    if (activity.toAccount != null && activity.toAccount!.contains('@')) {
-      keys.add(activity.toAccount!.split('@').first.toLowerCase().trim());
+    final merchant = CategoryMatcher.normalizeIdentity(activity.merchant);
+    if (merchant != null) keys.add(merchant);
+    final recipient = CategoryMatcher.normalizeIdentity(activity.toAccount);
+    if (recipient != null) {
+      keys.add(recipient);
+      if (recipient.contains('@')) keys.add(recipient.split('@').first);
     }
 
     for (final key in keys) {
       if (key.length < 3) continue;
-      final rule = allRules
-          .where((r) => r.merchantName?.toLowerCase() == key.toLowerCase())
-          .firstOrNull;
+      final rule = allRules.where((r) {
+        return CategoryMatcher.normalizeIdentity(r.merchantName) == key ||
+            CategoryMatcher.normalizeIdentity(r.recipientName) == key;
+      }).firstOrNull;
 
       if (rule == null) continue;
 

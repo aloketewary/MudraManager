@@ -2,6 +2,7 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 
 /// Phase 1: User Financial Context Foundation
 /// Deterministic state computation from raw financial data
@@ -66,7 +67,7 @@ class FinancialContextService {
     final transactions =
         await _isar.transactions.filter().dateGreaterThan(last90Days).findAll();
 
-    final accounts = await _isar.accounts.where().findAll();
+    final accounts = await AccountDataContract.linkProjections(_isar);
     final bills = await _isar.recurringTransactions
         .filter()
         .isActiveEqualTo(true)
@@ -107,11 +108,16 @@ class FinancialContextService {
     return (total / days) * 30;
   }
 
-  double _liquidityBuffer(List<Account> accounts, double monthlyExpenses) {
+  double _liquidityBuffer(
+    List<AccountLinkProjection> accounts,
+    double monthlyExpenses,
+  ) {
     final liquid = accounts
-        .where((a) =>
-            a.accountType == AccountType.bank ||
-            a.accountType == AccountType.cash,)
+        .where(
+          (a) =>
+              a.accountType == AccountType.bank ||
+              a.accountType == AccountType.cash,
+        )
         .fold<double>(0.0, (s, a) => s + a.initialBalance);
 
     return monthlyExpenses > 0 ? (liquid / monthlyExpenses) * 30 : 0.0;
@@ -125,11 +131,13 @@ class FinancialContextService {
       final start = now.subtract(Duration(days: (w + 1) * 7));
       final end = now.subtract(Duration(days: w * 7));
       final total = txns
-          .where((t) =>
-              t.isExpense &&
-              !t.isTransfer &&
-              t.date.isAfter(start) &&
-              t.date.isBefore(end),)
+          .where(
+            (t) =>
+                t.isExpense &&
+                !t.isTransfer &&
+                t.date.isAfter(start) &&
+                t.date.isBefore(end),
+          )
           .fold<double>(0.0, (s, t) => s + t.amount);
       weekly.add(total);
     }
@@ -146,7 +154,10 @@ class FinancialContextService {
     return (variance / (mean * mean)).clamp(0.0, 1.0);
   }
 
-  double _debtRatio(List<Account> accounts, double monthlyIncome) {
+  double _debtRatio(
+    List<AccountLinkProjection> accounts,
+    double monthlyIncome,
+  ) {
     final debt = accounts
         .where((a) => a.accountType == AccountType.creditCard)
         .fold<double>(0.0, (s, a) => s + a.initialBalance.abs());
@@ -155,7 +166,9 @@ class FinancialContextService {
   }
 
   double _autopayCoverage(
-      List<RecurringTransaction> bills, double monthlyExpenses,) {
+    List<RecurringTransaction> bills,
+    double monthlyExpenses,
+  ) {
     final total = bills.fold<double>(0.0, (s, b) => s + b.amount.abs());
     return monthlyExpenses > 0
         ? (total / monthlyExpenses).clamp(0.0, 1.0)
@@ -174,9 +187,7 @@ class FinancialContextService {
     }
 
     // Fallback: use most recent non-expense transaction (any income)
-    final income = txns
-        .where((t) => !t.isExpense && t.amount >= 5000)
-        .toList()
+    final income = txns.where((t) => !t.isExpense && t.amount >= 5000).toList()
       ..sort((a, b) => b.date.compareTo(a.date));
 
     return income.isNotEmpty
@@ -195,15 +206,29 @@ class FinancialContextService {
 
     final desc = t.description?.toLowerCase() ?? '';
     const keywords = [
-      'salary', 'sal', 'wage', 'payroll', 'neft', 'imps',
-      'credit', 'deposit', 'upi transfer', 'bank transfer',
-      'salary credit', 'salary deposit', 'net banking',
-      'fund transfer', ' inward', 'received',
+      'salary',
+      'sal',
+      'wage',
+      'payroll',
+      'neft',
+      'imps',
+      'credit',
+      'deposit',
+      'upi transfer',
+      'bank transfer',
+      'salary credit',
+      'salary deposit',
+      'net banking',
+      'fund transfer',
+      ' inward',
+      'received',
     ];
     // Also check for bank-specific credit messages
     final bankKeywords = ['hdfc', 'icici', 'sbi', 'axis', 'kotak', 'yes bank'];
     final isBankCredit = bankKeywords.any((b) => desc.contains(b)) &&
-        (desc.contains('cr') || desc.contains('credit') || desc.contains('a/c'));
+        (desc.contains('cr') ||
+            desc.contains('credit') ||
+            desc.contains('a/c'));
 
     return (keywords.any(desc.contains) || isBankCredit) &&
         t.amount >= 10000 &&

@@ -1,10 +1,10 @@
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
-import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/investment_holding.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 
 class InvestmentPortfolioService {
   final IsarService isarService;
@@ -15,7 +15,9 @@ class InvestmentPortfolioService {
   Future<void> addHolding(InvestmentHolding holding, int accountId) async {
     try {
       final isar = await isarService.getInstance();
-      final account = await isar.accounts.get(accountId);
+      // Link-only relation lookup. Account fields are not inspected or
+      // returned; only relation identity crosses into holding storage.
+      final account = await AccountDataContract.relationById(isar, accountId);
       if (account == null) {
         _log.e('Account not found: $accountId');
         throw Exception('Account not found');
@@ -25,9 +27,9 @@ class InvestmentPortfolioService {
         await isar.investmentHoldings.put(holding);
         await holding.account.save();
       });
-      _log.i('Holding added: ${holding.symbol}, Account: ${account.name}');
-    } catch (e) {
-      _log.e('Error adding holding: $e');
+      _log.i('Holding added: ${holding.symbol}, Account ID: $accountId');
+    } catch (_) {
+      _log.e('Error adding holding: account_link_write_failed');
       rethrow;
     }
   }
@@ -38,7 +40,9 @@ class InvestmentPortfolioService {
     if (holding != null) {
       holding.currentPrice = newPrice;
       await isar.writeTxn(() => isar.investmentHoldings.put(holding));
-      _log.i('Price updated for ${holding.symbol}: ${BaseCurrency.symbol}$newPrice');
+      _log.i(
+        'Price updated for ${holding.symbol}: ${BaseCurrency.symbol}$newPrice',
+      );
     }
   }
 
@@ -52,7 +56,8 @@ class InvestmentPortfolioService {
     for (var h in holdings) {
       _log.i('Holding: ${h.symbol}, Account ID: ${h.account.value?.id}');
     }
-    final filtered = holdings.where((h) => h.account.value?.id == accountId).toList();
+    final filtered =
+        holdings.where((h) => h.account.value?.id == accountId).toList();
     _log.i('Filtered holdings for account $accountId: ${filtered.length}');
     return filtered;
   }

@@ -15,6 +15,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
@@ -292,10 +293,8 @@ class _AccountRepresentationCard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
     final isCreditCard = account.accountType == AccountType.creditCard;
-    final lastFour = account.accountNumber != null &&
-            account.accountNumber!.length >= 4
-        ? account.accountNumber!.substring(account.accountNumber!.length - 4)
-        : '****';
+    final safeAccountNumber =
+        SafeAccountPresentation.fromAccount(account).accountNumber;
 
     return Padding(
       padding: EdgeInsets.all(spacing.cardInner),
@@ -342,7 +341,7 @@ class _AccountRepresentationCard extends ConsumerWidget {
             ),
             SizedBox(height: spacing.sectionGap),
             Text(
-              '•••• •••• •••• $lastFour',
+              safeAccountNumber,
               style: textTheme.headlineSmall?.copyWith(
                 color: color.onPrimary,
                 letterSpacing: 2,

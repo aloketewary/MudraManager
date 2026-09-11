@@ -5,8 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/features/budget/domain/budget_overview_aggregate.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/shared/widgets/widgets.dart';
 
@@ -16,21 +19,30 @@ class BudgetOverviewCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.watch(spacingProvider);
-    final budgets = ref.watch(dashboardBudgetsProvider);
+    final dashboard = ref.watch(dashboardDataProvider);
+    final refresh = ref.watch(budgetRefreshProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    if (budgets.isEmpty) return const SizedBox.shrink();
+    // Never reuse prior dashboard values while shared refresh is loading or
+    // failed. Non-budget dashboard cards keep their own rendering contract.
+    if (dashboard.isLoading || dashboard.hasError) {
+      return const SizedBox.shrink();
+    }
+    final data = dashboard.value;
+    if (data == null ||
+        data.budgetGeneration != refresh.generation ||
+        data.budgets.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-    final totalBudget = budgets.fold(0.0, (sum, b) => sum + b.budget.amount);
-    final totalSpent = budgets.fold(0.0, (sum, b) => sum + b.spent);
-    final remaining = totalBudget - totalSpent;
-    final percent = (totalSpent / totalBudget * 100).clamp(0.0, 100.0);
-
-    final daysInMonth =
-        DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
-    final daysLeft = daysInMonth - DateTime.now().day + 1;
-    final dailySafe = daysLeft > 0 ? remaining / daysLeft : 0;
+    final aggregate = BudgetOverviewAggregate.fromSnapshots(
+      data.budgets.map((budget) => budget.snapshot),
+    );
+    final percent = aggregate.percent;
+    final title = aggregate.isCompatibleMonthly
+        ? 'Monthly Budget'
+        : AppLocalizations.of(context)!.budget_dashboardMiniCardBudgetTitleText;
 
     Color progressColor = color.tertiary;
     if (percent >= 100) {
@@ -64,7 +76,7 @@ class BudgetOverviewCard extends ConsumerWidget {
             child: Row(
               children: [
                 ProgressRing(
-                  progress: percent / 100,
+                  progress: aggregate.progress,
                   color: progressColor,
                   size: spacing.sectionGap * 2.5,
                   insetPadding: spacing.cardVerticalMin,
@@ -82,7 +94,7 @@ class BudgetOverviewCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Monthly Budget',
+                        title,
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -102,7 +114,7 @@ class BudgetOverviewCard extends ConsumerWidget {
                           child: TweenAnimationBuilder<double>(
                             duration: const Duration(milliseconds: 1500),
                             curve: Curves.easeOutCubic,
-                            tween: Tween(begin: 0.0, end: percent / 100),
+                            tween: Tween(begin: 0.0, end: aggregate.progress),
                             builder: (context, value, child) {
                               return FractionallySizedBox(
                                 widthFactor: value,
@@ -128,7 +140,7 @@ class BudgetOverviewCard extends ConsumerWidget {
                           Expanded(
                             child: _buildMetricItem(
                               'Remaining',
-                              remaining,
+                              aggregate.totalRemaining,
                               LucideIcons.wallet,
                               progressColor,
                               color,
@@ -140,7 +152,7 @@ class BudgetOverviewCard extends ConsumerWidget {
                           Expanded(
                             child: _buildMetricItem(
                               'Per Day',
-                              dailySafe.toDouble(),
+                              aggregate.dailyAllowance,
                               LucideIcons.calendar,
                               color.primary,
                               color,

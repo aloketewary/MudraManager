@@ -6,6 +6,7 @@ import 'package:mudra_manager/core/db/models/balance_snapshot.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 
 class BalanceHistoryService {
   final IsarService _isarService;
@@ -19,7 +20,9 @@ class BalanceHistoryService {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    final accounts = await isar.accounts.where().findAll();
+    // Link/count-only aggregation: account ID/type drive snapshot math;
+    // account-number content remains opaque and is never rendered or rewritten.
+    final accounts = await AccountDataContract.linkProjections(isar);
 
     for (final account in accounts) {
       // Check if snapshot already exists for today
@@ -59,11 +62,15 @@ class BalanceHistoryService {
       final snapshot = BalanceSnapshot.create(date: today, balance: balance);
       await isar.writeTxn(() async {
         await isar.balanceSnapshots.put(snapshot);
-        snapshot.account.value = account;
+        final storedAccount = await isar.accounts.get(account.id);
+        if (storedAccount == null) return;
+        snapshot.account.value = storedAccount;
         await snapshot.account.save();
       });
 
-      _log.i('Snapshot recorded for ${account.name}: ${BaseCurrency.symbol}$balance');
+      _log.i(
+        'Snapshot recorded for account ${account.id}: ${BaseCurrency.symbol}$balance',
+      );
     }
   }
 

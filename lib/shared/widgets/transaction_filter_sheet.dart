@@ -21,10 +21,12 @@ class TransactionFilterSheet extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<TransactionFilterSheet> createState() => _TransactionFilterSheetState();
+  ConsumerState<TransactionFilterSheet> createState() =>
+      _TransactionFilterSheetState();
 }
 
-class _TransactionFilterSheetState extends ConsumerState<TransactionFilterSheet> {
+class _TransactionFilterSheetState
+    extends ConsumerState<TransactionFilterSheet> {
   late DateTime? _startDate;
   late DateTime? _endDate;
   late bool? _filterIncome;
@@ -44,6 +46,7 @@ class _TransactionFilterSheetState extends ConsumerState<TransactionFilterSheet>
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
+    final localeName = Localizations.localeOf(context).toLanguageTag();
 
     return Padding(
       padding: EdgeInsets.only(
@@ -53,7 +56,8 @@ class _TransactionFilterSheetState extends ConsumerState<TransactionFilterSheet>
         child: Container(
           decoration: BoxDecoration(
             color: color.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
+            borderRadius: BorderRadius.vertical(
+                top: Radius.circular(spacing.radiusSmall * 2)),
             border: Border.all(
               color: color.primary.withValues(alpha: 0.3),
               width: 1.5,
@@ -78,11 +82,13 @@ class _TransactionFilterSheetState extends ConsumerState<TransactionFilterSheet>
                   prefixIcon: Icon(LucideIcons.search, color: color.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                    borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3)),
+                    borderSide:
+                        BorderSide(color: color.primary.withValues(alpha: 0.3)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                    borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3)),
+                    borderSide:
+                        BorderSide(color: color.primary.withValues(alpha: 0.3)),
                   ),
                 ),
                 onChanged: (value) => setState(() => _searchQuery = value),
@@ -135,7 +141,8 @@ class _TransactionFilterSheetState extends ConsumerState<TransactionFilterSheet>
                       label: Text(
                         _startDate == null
                             ? 'Start Date'
-                            : DateFormat('dd MMM').format(_startDate!),
+                            : DateFormat('dd MMM', localeName)
+                                .format(_startDate!),
                       ),
                     ),
                   ),
@@ -155,7 +162,8 @@ class _TransactionFilterSheetState extends ConsumerState<TransactionFilterSheet>
                       label: Text(
                         _endDate == null
                             ? 'End Date'
-                            : DateFormat('dd MMM').format(_endDate!),
+                            : DateFormat('dd MMM', localeName)
+                                .format(_endDate!),
                       ),
                     ),
                   ),
@@ -187,7 +195,8 @@ class _TransactionFilterSheetState extends ConsumerState<TransactionFilterSheet>
                         foregroundColor: color.onPrimary,
                       ),
                       onPressed: () {
-                        widget.onApply(_startDate, _endDate, _filterIncome, _searchQuery);
+                        widget.onApply(
+                            _startDate, _endDate, _filterIncome, _searchQuery);
                         Navigator.pop(context);
                       },
                       child: const Text('Apply'),

@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/domain/budget_constraint_snapshot.dart';
+import 'package:mudra_manager/core/domain/budget_period_snapshot.dart';
 import 'package:mudra_manager/core/domain/financial_states.dart';
 import 'package:mudra_manager/core/domain/metrics.dart';
 
@@ -12,6 +13,7 @@ class BudgetConstraintInput {
   final int daysPassed;
   final int daysLeft;
   final int totalDays;
+  final BudgetPeriodSnapshot? budgetSnapshot;
 
   const BudgetConstraintInput({
     required this.budgetId,
@@ -22,6 +24,7 @@ class BudgetConstraintInput {
     required this.daysPassed,
     required this.daysLeft,
     required this.totalDays,
+    this.budgetSnapshot,
   });
 }
 
@@ -49,14 +52,12 @@ abstract final class BudgetStateMachine {
         : (input.daysPassed > 0 ? input.totalSpent / input.daysPassed : 0.0);
 
     // Allowed pace (stable, period-wide reference)
-    final allowedDailySpend = input.totalDays > 0
-        ? input.budgetAmount / input.totalDays
-        : 0.0;
+    final allowedDailySpend =
+        input.totalDays > 0 ? input.budgetAmount / input.totalDays : 0.0;
 
     // Remaining daily allowance (actionable for detail screen)
-    final remainingDailyAllowance = input.daysLeft > 0 && remaining > 0
-        ? remaining / input.daysLeft
-        : 0.0;
+    final remainingDailyAllowance =
+        input.daysLeft > 0 && remaining > 0 ? remaining / input.daysLeft : 0.0;
 
     // Gap
     final dailyGap = currentDailySpend - allowedDailySpend;
@@ -87,9 +88,8 @@ abstract final class BudgetStateMachine {
       isBreached: isBreached,
       isForecastVisible: isForecastVisible,
       daysUntilLimit: daysUntilLimit,
-      percentage: input.budgetAmount > 0
-          ? input.totalSpent / input.budgetAmount
-          : 0.0,
+      percentage:
+          input.budgetAmount > 0 ? input.totalSpent / input.budgetAmount : 0.0,
       isUnknown: input.daysPassed < 1 && input.totalSpent == 0,
     );
 
@@ -118,6 +118,9 @@ abstract final class BudgetStateMachine {
       daysLeft: input.daysLeft,
       daysPassed: input.daysPassed,
       totalDays: input.totalDays,
+      budgetSnapshot: input.budgetSnapshot,
+      periodStart: input.budgetSnapshot?.periodStart,
+      periodEnd: input.budgetSnapshot?.periodEnd,
       urgency: urgency,
       state: state,
     );

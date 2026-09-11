@@ -63,9 +63,9 @@ class _WeeklyCalendarState extends ConsumerState<WeeklyCalendar> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
+    final localeName = Localizations.localeOf(context).toLanguageTag();
 
-    final isSameDay =
-        day.year == _currentDate.year &&
+    final isSameDay = day.year == _currentDate.year &&
         day.month == _currentDate.month &&
         day.day == _currentDate.day;
 
@@ -87,7 +87,7 @@ class _WeeklyCalendarState extends ConsumerState<WeeklyCalendar> {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Text(
-                  DateFormat('d').format(day),
+                  DateFormat('d', localeName).format(day),
                   style: textTheme.titleLarge?.copyWith(
                     color: isSameDay ? color.onPrimary : color.onSurface,
                   ),
@@ -107,6 +107,7 @@ class _WeeklyCalendarState extends ConsumerState<WeeklyCalendar> {
       7,
       (index) => _firstDayOfWeek.add(Duration(days: index)),
     );
+    final localeName = Localizations.localeOf(context).toLanguageTag();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,7 +125,7 @@ class _WeeklyCalendarState extends ConsumerState<WeeklyCalendar> {
               GestureDetector(
                 onTap: () => _selectMonthYear(context),
                 child: Text(
-                  DateFormat('MMMM yyyy').format(_currentDate),
+                  DateFormat('MMMM yyyy', localeName).format(_currentDate),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -142,19 +143,18 @@ class _WeeklyCalendarState extends ConsumerState<WeeklyCalendar> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Row(
-            children:
-                daysOfWeek
-                    .map(
-                      (day) => Expanded(
-                        child: Center(
-                          child: Text(
-                            day,
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                        ),
+            children: daysOfWeek
+                .map(
+                  (day) => Expanded(
+                    child: Center(
+                      child: Text(
+                        day,
+                        style: const TextStyle(color: Colors.grey),
                       ),
-                    )
-                    .toList(),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
         ),
         Padding(

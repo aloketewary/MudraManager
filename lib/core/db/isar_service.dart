@@ -11,6 +11,7 @@ import 'package:mudra_manager/features/memory/data/financial_snapshot.dart';
 import 'package:mudra_manager/features/memory/data/insight_exposure.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
+import 'package:mudra_manager/core/db/models/budget_period_ledger_entry.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/category_rule.dart';
 import 'package:mudra_manager/core/db/models/debt.dart';
@@ -62,6 +63,7 @@ class IsarService {
           AccountSchema,
           BackupMetadataSchema,
           BudgetSchema,
+          BudgetPeriodLedgerEntrySchema,
           CategorySchema,
           CategoryRuleSchema,
           GoalSchema,

@@ -387,7 +387,8 @@ class AppRouter {
                   return CustomTransitionPage(
                     key: state.pageKey,
                     child: BudgetDetailsScreen(budgetId: budgetId),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
                       return SharedAxisTransition(
                         animation: animation,
                         secondaryAnimation: secondaryAnimation,
@@ -421,7 +422,8 @@ class AppRouter {
                   return CustomTransitionPage(
                     key: state.pageKey,
                     child: GoalDetailsScreen(goal: extra?['goal']),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
                       return SharedAxisTransition(
                         animation: animation,
                         secondaryAnimation: secondaryAnimation,
@@ -515,8 +517,17 @@ class AppRouter {
               ),
               GoRoute(
                 path: '${AppRoutes.editTrip}/:id',
+                redirect: (context, state) {
+                  final id = int.tryParse(
+                    state.pathParameters['id']?.trim() ?? '',
+                  );
+                  return id == null ? AppRoutes.home : null;
+                },
                 builder: (context, state) {
-                  final id = int.parse(state.pathParameters['id']!);
+                  final id = int.tryParse(
+                    state.pathParameters['id']?.trim() ?? '',
+                  );
+                  if (id == null) return const SizedBox.shrink();
                   return ManageTripScreen(tripId: id);
                 },
               ),

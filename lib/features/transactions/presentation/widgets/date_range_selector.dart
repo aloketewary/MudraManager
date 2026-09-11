@@ -33,11 +33,11 @@ class DateRangeSelector extends ConsumerWidget {
     required this.canGoNext,
   });
 
-  String _getDateRangeText() {
+  String _getDateRangeText(String localeName) {
     if (filterStartDate != null && filterEndDate != null) {
-      return '${DateFormat.MMMd().format(filterStartDate!)} - ${DateFormat.MMMd().format(filterEndDate!)}';
+      return '${DateFormat.MMMd(localeName).format(filterStartDate!)} - ${DateFormat.MMMd(localeName).format(filterEndDate!)}';
     }
-    return DateFormat.yMMMM().format(selectedDate);
+    return DateFormat.yMMMM(localeName).format(selectedDate);
   }
 
   bool _isSameMonth(DateTime a, DateTime b) {
@@ -49,6 +49,7 @@ class DateRangeSelector extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
+    final localeName = Localizations.localeOf(context).toLanguageTag();
 
     return Container(
       decoration: BoxDecoration(
@@ -92,7 +93,7 @@ class DateRangeSelector extends ConsumerWidget {
                       Text(
                         useInfiniteScroll && filterStartDate == null
                             ? 'All Transactions'
-                            : _getDateRangeText(),
+                            : _getDateRangeText(localeName),
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: color.onSurface,
@@ -126,7 +127,8 @@ class DateRangeSelector extends ConsumerWidget {
                         if (!_isSameMonth(selectedDate, DateTime.now()))
                           IconButton(
                             tooltip: 'Refresh',
-                            icon: Icon(LucideIcons.refreshCw, size: 20, color: color.primary),
+                            icon: Icon(LucideIcons.refreshCw,
+                                size: 20, color: color.primary),
                             onPressed: onResetToday,
                           ),
                         IconButton(

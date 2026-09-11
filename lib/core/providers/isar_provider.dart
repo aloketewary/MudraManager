@@ -15,15 +15,18 @@ import 'package:mudra_manager/features/gamification/data/gamification_service.da
 final _isarService = IsarService();
 final isarServiceProvider = Provider<IsarService>((ref) => _isarService);
 
-final gamificationServiceInitProvider = FutureProvider<GamificationService>((ref) async {
+final gamificationServiceInitProvider =
+    FutureProvider<GamificationService>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
-  final service = GamificationService(isar, ref.getLogger('GemificationService'));
+  final service =
+      GamificationService(isar, ref.getLogger('GemificationService'));
   await service.initialize();
   return service;
 });
 
-/// Full provider reset — only for currency change (all amounts recalculate).
-/// Do NOT use for normal operations — reactive watchers handle those.
+/// Full reset invalidates account providers only; it never reads or writes
+/// account fields. Account data resolution remains owned by the shared
+/// contract at provider boundaries.
 void invalidateAfterCurrencyChange(WidgetRef ref) {
   ref.invalidate(currencyServiceProvider);
   ref.invalidate(baseCurrencyProvider);
@@ -39,6 +42,7 @@ void invalidateAfterCurrencyChange(WidgetRef ref) {
   ref.invalidate(dashboardDataProvider);
 }
 
-final reminderTimeProvider = NotifierProvider<StateValue<TimeOfDay?>, TimeOfDay?>(
+final reminderTimeProvider =
+    NotifierProvider<StateValue<TimeOfDay?>, TimeOfDay?>(
   () => StateValue(null),
 );

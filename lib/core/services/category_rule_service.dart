@@ -14,10 +14,17 @@ class CategoryRuleService {
     return await isar.categoryRules.where().findAll().withDecryption();
   }
 
-  /// Suggest category for a transaction based on learned rules
-  Future<String?> suggestCategory(TransactionInfo txn) async {
+  /// Suggest category for a transaction based on learned rules.
+  Future<String?> suggestCategory(
+    TransactionInfo txn, {
+    Set<String>? availableCategoryIds,
+  }) async {
     final rules = await getAllRules();
-    return CategoryMatcher.suggestCategoryFromRules(txn, rules);
+    return CategoryMatcher.suggestCategoryFromRules(
+      txn,
+      rules,
+      availableCategoryIds: availableCategoryIds,
+    );
   }
 
   /// Save or update a rule when user categorizes a transaction
@@ -26,7 +33,8 @@ class CategoryRuleService {
     String categoryId,
   ) async {
     final existingRules = await getAllRules();
-    final rule = CategoryMatcher.createOrUpdateRule(txn, categoryId, existingRules);
+    final rule =
+        CategoryMatcher.createOrUpdateRule(txn, categoryId, existingRules);
 
     rule.encryptFields();
     await isar.writeTxn(() async {
@@ -37,7 +45,7 @@ class CategoryRuleService {
   /// Clean up old unused rules (optional maintenance)
   Future<void> cleanupOldRules({int daysOld = 180}) async {
     final cutoffDate = DateTime.now().subtract(Duration(days: daysOld));
-    
+
     await isar.writeTxn(() async {
       final oldRules = await isar.categoryRules
           .filter()
@@ -45,7 +53,7 @@ class CategoryRuleService {
           .and()
           .matchCountLessThan(3) // Only delete if rarely used
           .findAll();
-      
+
       for (final rule in oldRules) {
         await isar.categoryRules.delete(rule.id);
       }

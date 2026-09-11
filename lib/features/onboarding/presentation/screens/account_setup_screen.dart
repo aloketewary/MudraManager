@@ -11,6 +11,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_provider.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
+import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
@@ -99,14 +101,18 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
   int _pauseCounter = 0;
 
   void _tick(Timer timer) {
-    if (!mounted) { timer.cancel(); return; }
+    if (!mounted) {
+      timer.cancel();
+      return;
+    }
 
     final word = _hintExamples[_hintIndex];
 
     // Handle pause after full word
     if (_hintPaused) {
       _pauseCounter++;
-      if (_pauseCounter > 18) { // ~1.5s pause (18 * 80ms)
+      if (_pauseCounter > 18) {
+        // ~1.5s pause (18 * 80ms)
         _hintPaused = false;
         _isDeleting = true;
         _pauseCounter = 0;
@@ -189,7 +195,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
   Future<void> _restoreBackup(AppSpacing spacing) async {
     try {
       final password = await DialogUtils.showPasswordDialog(
-        context, spacing,
+        context,
+        spacing,
         isRestore: true,
       );
       if (password == null) return;
@@ -227,27 +234,42 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
 
     try {
       final isar = await ref.read(isarServiceProvider).getInstance();
+      final starterAccount = Account()
+        ..name = _accountController.text.trim()
+        ..accountType = AccountType.cash
+        ..colorValue = Colors.green.toARGB32()
+        ..accountNumber = '0000'
+        ..currencyCode = _selectedCurrency
+        ..initialBalance =
+            double.tryParse(_balanceController.text.trim()) ?? 0.0;
+      final accountWrite = await AccountDataContract.writeAccount(
+        isar,
+        starterAccount,
+        accountNumber: '0000',
+      );
+      if (!accountWrite.succeeded) {
+        if (context.mounted) {
+          SnackbarService.error(
+            'Unable to save account. Please try again.',
+            spacing,
+          );
+        }
+        return;
+      }
+      ref.invalidate(accountsProvider);
+      ref.invalidate(allAccountsProvider);
+      ref.invalidate(frequencySortedAccountsProvider);
 
       await isar.writeTxn(() async {
         final profile = UserProfile()..name = _nameController.text.trim();
         profile.encryptFields();
         await isar.userProfiles.put(profile);
-
-        await isar.accounts.put(
-          Account()
-            ..name = _accountController.text.trim()
-            ..accountType = AccountType.cash
-            ..colorValue = Colors.green.toARGB32()
-            ..accountNumber = '0000'
-            ..currencyCode = _selectedCurrency
-            ..initialBalance = double.tryParse(_balanceController.text.trim()) ?? 0.0,
-        );
       });
 
       if (!_startFresh && _selectedPackIds.isNotEmpty) {
         await ref.read(categoryManagementServiceProvider).installPacks(
-          _selectedPackIds.toList(),
-        );
+              _selectedPackIds.toList(),
+            );
       }
 
       // Set base currency
@@ -351,12 +373,18 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     );
                   },
                   child: switch (_step) {
-                    0 => _buildNameStep(color, textTheme, spacing, ctxt, accent, isDark),
-                    1 => _buildCurrencyStep(color, textTheme, spacing, accent, isDark, ctxt),
-                    2 => _buildAccountStep(color, textTheme, spacing, ctxt, accent, isDark),
-                    3 => _buildToneStep(color, textTheme, spacing, isDark, accent, ctxt),
-                    4 => _buildPackPickerStep(color, textTheme, spacing, isDark, accent, ctxt),
-                    _ => _buildStarterTxnStep(color, textTheme, spacing, ctxt, accent, isDark),
+                    0 => _buildNameStep(
+                        color, textTheme, spacing, ctxt, accent, isDark),
+                    1 => _buildCurrencyStep(
+                        color, textTheme, spacing, accent, isDark, ctxt),
+                    2 => _buildAccountStep(
+                        color, textTheme, spacing, ctxt, accent, isDark),
+                    3 => _buildToneStep(
+                        color, textTheme, spacing, isDark, accent, ctxt),
+                    4 => _buildPackPickerStep(
+                        color, textTheme, spacing, isDark, accent, ctxt),
+                    _ => _buildStarterTxnStep(
+                        color, textTheme, spacing, ctxt, accent, isDark),
                   },
                 ),
               ),
@@ -375,7 +403,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                       width: double.infinity,
                       height: 52,
                       child: FilledButton(
-                        onPressed:() => _isLoading ? null : _nextStep(spacing),
+                        onPressed: () => _isLoading ? null : _nextStep(spacing),
                         style: FilledButton.styleFrom(
                           shape: RoundedRectangleBorder(
                             borderRadius:
@@ -417,7 +445,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     if (_step < 2) ...[
                       const SizedBox(height: 12),
                       TextButton.icon(
-                        onPressed: () => _isLoading ? null : _restoreBackup(spacing),
+                        onPressed: () =>
+                            _isLoading ? null : _restoreBackup(spacing),
                         icon: Icon(
                           LucideIcons.archiveRestore,
                           size: 16,
@@ -434,7 +463,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     if (_step == 5) ...[
                       const SizedBox(height: 12),
                       TextButton(
-                        onPressed: () => _isLoading ? null : _completeSetup(spacing),
+                        onPressed: () =>
+                            _isLoading ? null : _completeSetup(spacing),
                         child: Text(
                           ctxt.onboard_skipAddLater,
                           style: textTheme.labelLarge?.copyWith(
@@ -695,7 +725,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                 context: context,
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
+                  borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(spacing.radiusSmall * 2)),
                 ),
                 builder: (_) => _AllCurrenciesSheet(
                   selected: _selectedCurrency,
@@ -820,9 +851,13 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
             controller: _accountController,
             decoration: InputDecoration(
               labelText: ctxt.translate('onboard_accountName'),
-              hintText: _typewriterTimer != null ? _animatedHint : ctxt.onboard_accountHint,
-              prefixIcon: Icon(LucideIcons.wallet, color: color.primary, size: 20),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(spacing.radiusMedium)),
+              hintText: _typewriterTimer != null
+                  ? _animatedHint
+                  : ctxt.onboard_accountHint,
+              prefixIcon:
+                  Icon(LucideIcons.wallet, color: color.primary, size: 20),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium)),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 borderSide: BorderSide(color: color.primary, width: 2),
@@ -839,8 +874,10 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
             decoration: InputDecoration(
               labelText: ctxt.onboard_initialBalance,
               hintText: '0',
-              prefixIcon: Icon(currencyIcon(_selectedCurrency), color: color.primary, size: 20),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(spacing.radiusMedium)),
+              prefixIcon: Icon(currencyIcon(_selectedCurrency),
+                  color: color.primary, size: 20),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium)),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 borderSide: BorderSide(color: color.primary, width: 2),
@@ -1448,7 +1485,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     width: 120,
                     child: TextField(
                       controller: controller,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       textAlign: TextAlign.end,
                       decoration: InputDecoration(
                         hintText: '0',
@@ -1459,13 +1497,15 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                           vertical: 10,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
                           borderSide: BorderSide(
                             color: color.outlineVariant.withValues(alpha: 0.4),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
                           borderSide: BorderSide(color: accent, width: 2),
                         ),
                       ),
@@ -1522,9 +1562,11 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
 
   Category? _matchCategory(List<Category> categories, String iconHint) {
     // Try matching by icon name first
-    final byIcon = categories.where(
-      (c) => c.iconName?.toLowerCase() == iconHint.toLowerCase(),
-    ).firstOrNull;
+    final byIcon = categories
+        .where(
+          (c) => c.iconName?.toLowerCase() == iconHint.toLowerCase(),
+        )
+        .firstOrNull;
     if (byIcon != null) return byIcon;
 
     // Fallback: match by common names
@@ -1536,9 +1578,11 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     };
     final keywords = nameMap[iconHint] ?? [];
     for (final kw in keywords) {
-      final match = categories.where(
-        (c) => c.name.toLowerCase().contains(kw),
-      ).firstOrNull;
+      final match = categories
+          .where(
+            (c) => c.name.toLowerCase().contains(kw),
+          )
+          .firstOrNull;
       if (match != null) return match;
     }
     return categories.firstOrNull;
@@ -1550,7 +1594,8 @@ class _AllCurrenciesSheet extends ConsumerStatefulWidget {
   const _AllCurrenciesSheet({required this.selected});
 
   @override
-  ConsumerState<_AllCurrenciesSheet> createState() => _AllCurrenciesSheetState();
+  ConsumerState<_AllCurrenciesSheet> createState() =>
+      _AllCurrenciesSheetState();
 }
 
 class _AllCurrenciesSheetState extends ConsumerState<_AllCurrenciesSheet> {

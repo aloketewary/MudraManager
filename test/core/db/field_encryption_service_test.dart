@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
 
@@ -60,6 +62,72 @@ void main() {
     test('isEncrypted requires ENC: at start', () {
       expect(FieldEncryptionService.isEncrypted('xENC:data'), isFalse);
       expect(FieldEncryptionService.isEncrypted(' ENC:data'), isFalse);
+    });
+  });
+
+  group('Strict account crypto boundary', () {
+    const key = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=';
+
+    setUp(() {
+      FieldEncryptionService.setKeyForTesting(key);
+    });
+
+    tearDown(FieldEncryptionService.resetForTesting);
+
+    test('readiness result is shared and idempotent', () {
+      final first = FieldEncryptionService.initialize();
+      final second = FieldEncryptionService.initialize();
+
+      expect(identical(first, second), isTrue);
+      expect(FieldEncryptionService.readinessResult.isReady, isTrue);
+    });
+
+    test('strict decrypt classifies null, legacy, malformed, and valid values',
+        () async {
+      expect(
+        (await FieldEncryptionService.decryptStrict(null)).status,
+        StrictDecryptStatus.nullOrEmpty,
+      );
+      expect(
+        (await FieldEncryptionService.decryptStrict('1234')).status,
+        StrictDecryptStatus.legacyPlaintext,
+      );
+      final malformed = await FieldEncryptionService.decryptStrict('ENC:bad');
+      expect(malformed.status, StrictDecryptStatus.malformed);
+      expect(malformed.plaintext, isNull);
+
+      final encrypted = FieldEncryptionService.encryptStrict('1234');
+      final resolved = await FieldEncryptionService.decryptStrict(encrypted);
+      expect(resolved.status, StrictDecryptStatus.decrypted);
+      expect(resolved.plaintext, '1234');
+    });
+
+    test('wrong key fails closed without returning ciphertext', () async {
+      final encrypted = FieldEncryptionService.encryptStrict('1234');
+      FieldEncryptionService.setKeyForTesting(
+        base64Encode(List<int>.filled(32, 1)),
+      );
+
+      final result = await FieldEncryptionService.decryptStrict(encrypted);
+
+      expect(result.status, StrictDecryptStatus.keyMismatch);
+      expect(result.plaintext, isNull);
+      expect(encrypted, startsWith('ENC:'));
+    });
+
+    test('strict encryption never falls back to plaintext', () {
+      FieldEncryptionService.resetForTesting();
+
+      expect(
+        () => FieldEncryptionService.encryptStrict('1234'),
+        throwsA(
+          predicate<FieldEncryptionException>(
+            (error) =>
+                error.category == 'encryption_unavailable' &&
+                !error.toString().contains('1234'),
+          ),
+        ),
+      );
     });
   });
 }

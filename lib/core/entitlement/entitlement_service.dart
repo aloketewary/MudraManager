@@ -224,6 +224,7 @@ class EntitlementService {
 
   Future<int> _countCollection<T>() async {
     final isar = await _isarService.getInstance();
+    // Link/count-only entitlement path: account-number content is never read.
     if (T == Account) {
       return isar.accounts.filter().isActiveEqualTo(true).count();
     } else if (T == Budget) {

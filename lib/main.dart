@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
@@ -20,6 +19,7 @@ import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/db/encryption_migration.dart';
 import 'package:mudra_manager/core/db/account_encryption_migration.dart';
 import 'package:mudra_manager/core/db/account_suffix_hash_migration.dart';
+import 'package:mudra_manager/core/db/budget_period_ledger_migration.dart';
 import 'package:mudra_manager/core/db/pin_migration.dart';
 import 'package:mudra_manager/core/db/signal_fields_migration.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -31,6 +31,7 @@ import 'package:mudra_manager/core/services/app_update_service.dart';
 import 'package:mudra_manager/core/services/background_task_manager.dart';
 import 'package:mudra_manager/core/services/auto_backup_service.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/features/skin/data/skin_provider.dart';
 import 'package:mudra_manager/features/skin/data/skin_to_theme.dart';
 import 'package:mudra_manager/features/skin/skin.dart';
@@ -111,11 +112,18 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
     }
     log.i('✅ Isar initialized');
 
-    // 2. Initialize field encryption (needs Android Keystore / iOS Keychain)
-    await safeExecute(() async {
-      await FieldEncryptionService.initialize();
+    // 2. Initialize field encryption (needs Android Keystore / iOS Keychain).
+    // Account consumers share this idempotent result; failure stays visible to
+    // providers as actionable async error instead of becoming raw storage.
+    final encryptionReadiness = await FieldEncryptionService.waitForReadiness();
+    if (encryptionReadiness.isReady) {
       log.i('✅ Field encryption initialized');
-    });
+    } else {
+      log.e(
+        '❌ Field encryption unavailable: '
+        '${encryptionReadiness.errorCategory ?? 'initialization_failed'}',
+      );
+    }
 
     // 3. Critical seeds (fast, needed before UI renders categories)
     await safeExecute(() async {
@@ -169,12 +177,25 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
 
       // Migrations (one-time, guarded by SharedPrefs flags)
       await safeExecute(() => _migrateTransactionFields(isar));
-      await safeExecute(() => _migrateCategoryAndParticipantFields(isar));
+      await safeExecute(
+        () => _migrateCategoryAndParticipantFields(
+          isar,
+          normalizeAccounts: encryptionReadiness.isReady,
+        ),
+      );
       await safeExecute(() => EncryptionMigration.run(isar));
-      await safeExecute(() => AccountEncryptionMigration.run(isar));
-      await safeExecute(() => AccountSuffixHashMigration.run(isar));
+      if (encryptionReadiness.isReady) {
+        await safeExecute(() => AccountEncryptionMigration.run(isar));
+        await safeExecute(() => AccountSuffixHashMigration.run(isar));
+      } else {
+        log.w(
+          'Account migrations deferred: '
+          '${encryptionReadiness.errorCategory ?? 'encryption_unavailable'}',
+        );
+      }
       await safeExecute(() => PinMigration.run());
       await safeExecute(() => SignalFieldsMigration.run(isar));
+      await safeExecute(() => BudgetPeriodLedgerMigration.run(isar));
 
       // Run recurring/bill/notification tasks
       await BackgroundTaskManager.runDeferredTasks();
@@ -216,7 +237,10 @@ Future<void> _migrateTransactionFields(Isar isar) async {
 }
 
 /// One-time migration: seed isSystem on old categories and isOwner on old participants.
-Future<void> _migrateCategoryAndParticipantFields(Isar isar) async {
+Future<void> _migrateCategoryAndParticipantFields(
+  Isar isar, {
+  required bool normalizeAccounts,
+}) async {
   final prefs = await SharedPreferences.getInstance();
   const key = 'migration_category_system_v1';
   if (prefs.getBool(key) == true) return;
@@ -241,24 +265,11 @@ Future<void> _migrateCategoryAndParticipantFields(Isar isar) async {
     });
   }
 
-  // Re-put all accounts to write isPrimary = false to disk
-  // Then set the first active account as primary if none exists
-  final accounts = await isar.accounts.where().findAll();
-  if (accounts.isNotEmpty) {
-    final hasPrimary = accounts.any((a) => a.isPrimary);
-    await isar.writeTxn(() async {
-      for (final acc in accounts) {
-        await isar.accounts.put(acc);
-      }
-      // Auto-set first active account as primary
-      if (!hasPrimary) {
-        final first = accounts.where((a) => a.isActive).firstOrNull;
-        if (first != null) {
-          first.isPrimary = true;
-          await isar.accounts.put(first);
-        }
-      }
-    });
+  // Account normalization is storage-sensitive. Run only after shared
+  // readiness; contract owns metadata-only primary update and preserves the
+  // opaque encrypted account-number field.
+  if (normalizeAccounts) {
+    await AccountDataContract.normalizePrimaryMetadata(isar);
   }
 
   await prefs.setBool(key, true);
@@ -320,7 +331,8 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
         ColorScheme darkScheme;
         ColorScheme amoledScheme;
 
-        if (activeSkin != null && activeSkin.id == 'dynamic' &&
+        if (activeSkin != null &&
+            activeSkin.id == 'dynamic' &&
             lightDynamic != null &&
             darkDynamic != null) {
           lightScheme = lightDynamic.harmonized();

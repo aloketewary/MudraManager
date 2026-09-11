@@ -3,23 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
-import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
+import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 
 final accountsProvider = FutureProvider.autoDispose((ref) async {
   ref.watch(accountChangeProvider);
   ref.watch(transactionChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final accounts = await isar.accounts.filter().isActiveEqualTo(true).findAll();
-  for (final a in accounts) {
-    a.decryptFields();
-  }
-  return accounts;
+  return AccountDataContract.safeAccounts(accounts);
 });
 
 final accountServiceProvider = Provider((ref) {
@@ -34,20 +32,19 @@ final allAccountsProvider = FutureProvider.autoDispose((ref) async {
   final isarService = ref.watch(isarServiceProvider);
   final isar = await isarService.getInstance();
   final accounts = await isar.accounts.where().findAll();
-  for (final a in accounts) {
-    a.decryptFields();
-  }
-  return accounts;
+  return AccountDataContract.safeAccounts(accounts);
 });
 
-final accountBalanceMapProvider = FutureProvider.autoDispose<Map<int, double>>((ref) async {
+final accountBalanceMapProvider =
+    FutureProvider.autoDispose<Map<int, double>>((ref) async {
   ref.watch(accountChangeProvider);
   ref.watch(transactionChangeProvider);
   final service = ref.watch(accountServiceProvider);
   return service.getAccountBalanceMap();
 });
 
-final accountBaseBalanceMapProvider = FutureProvider.autoDispose<Map<int, double>>((ref) async {
+final accountBaseBalanceMapProvider =
+    FutureProvider.autoDispose<Map<int, double>>((ref) async {
   ref.watch(accountChangeProvider);
   ref.watch(transactionChangeProvider);
   final service = ref.watch(accountServiceProvider);
@@ -60,21 +57,19 @@ final balanceVisibilityProvider =
 );
 
 /// The user's primary/default account.
-final primaryAccountProvider = FutureProvider.autoDispose<Account?>((ref) async {
+final primaryAccountProvider =
+    FutureProvider.autoDispose<Account?>((ref) async {
   ref.watch(accountChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
-  // Find the primary account
+  // Query raw storage only to choose primary/fallback. Return detached safe
+  // copy through same boundary used by active/all providers.
   var primary = await isar.accounts
       .filter()
       .isPrimaryEqualTo(true)
       .isActiveEqualTo(true)
       .findFirst();
-  // Fallback: first active account
-  primary ??= await isar.accounts
-      .filter()
-      .isActiveEqualTo(true)
-      .findFirst();
-  return primary;
+  primary ??= await isar.accounts.filter().isActiveEqualTo(true).findFirst();
+  return AccountDataContract.safeAccount(primary);
 });
 
 // Add this new provider:
@@ -88,10 +83,8 @@ final frequencySortedAccountsProvider =
   final cutoff = DateTime.now().subtract(const Duration(days: 30));
 
   // Single query: all recent transactions, group by account in memory
-  final recentTxns = await isar.transactions
-      .filter()
-      .dateGreaterThan(cutoff)
-      .findAll();
+  final recentTxns =
+      await isar.transactions.filter().dateGreaterThan(cutoff).findAll();
 
   final counts = <int, int>{};
   for (final txn in recentTxns) {
@@ -114,24 +107,14 @@ class AccountsService {
 
   /// Sets the given account as primary, clearing any previous primary.
   Future<void> setPrimaryAccount(int accountId) async {
+    final readiness = await FieldEncryptionService.waitForReadiness();
+    if (!readiness.isReady) {
+      throw AccountReadinessException(
+        readiness.errorCategory ?? 'encryption_unavailable',
+      );
+    }
     final isar = await isarService.getInstance();
-    await isar.writeTxn(() async {
-      // Clear existing primary
-      final current = await isar.accounts
-          .filter()
-          .isPrimaryEqualTo(true)
-          .findAll();
-      for (final acc in current) {
-        acc.isPrimary = false;
-        await isar.accounts.put(acc);
-      }
-      // Set new primary
-      final account = await isar.accounts.get(accountId);
-      if (account != null) {
-        account.isPrimary = true;
-        await isar.accounts.put(account);
-      }
-    });
+    await AccountDataContract.setPrimaryMetadata(isar, accountId);
   }
 
   Future<double> getAccountBalance(int accountId) async {
@@ -234,9 +217,8 @@ class AccountsService {
           ? acc.initialBalance + expense - income
           : acc.initialBalance + income - expense;
 
-      final rate = acc.currencyCode != null
-          ? (rateMap[acc.currencyCode!] ?? 1.0)
-          : 1.0;
+      final rate =
+          acc.currencyCode != null ? (rateMap[acc.currencyCode!] ?? 1.0) : 1.0;
       return MapEntry(acc.id, rawBalance * rate);
     });
 

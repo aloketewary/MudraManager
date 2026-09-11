@@ -17,6 +17,7 @@ import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_access_provider.dart';
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/account/presentation/screens/balance_history_screen.dart';
 import 'package:mudra_manager/features/account/presentation/screens/reconciliation_screen.dart';
@@ -26,7 +27,6 @@ import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
-import 'package:mudra_manager/shared/widgets/safe_text.dart';
 
 class ManageAccountScreen extends ConsumerStatefulWidget {
   const ManageAccountScreen({super.key});
@@ -246,8 +246,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                 SizedBox(width: spacing.elementGapMin),
                 Text(
                   '${ctxt.accounts_totalBalance} (${BaseCurrency.code})',
-                  style:
-                      textTheme.labelLarge?.copyWith(color: color.primary),
+                  style: textTheme.labelLarge?.copyWith(color: color.primary),
                 ),
               ],
             ),
@@ -912,10 +911,11 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   ) async {
     final isarService = ref.read(isarServiceProvider);
     final isar = await isarService.getInstance();
-    await isar.writeTxn(() async {
-      account.isActive = true;
-      await isar.accounts.put(account);
-    });
+    await AccountDataContract.patchStoredMetadata(
+      isar,
+      account.id,
+      (stored) => stored.isActive = true,
+    );
     ref.invalidate(allAccountsProvider);
     ref.invalidate(accountsProvider);
 
@@ -963,10 +963,11 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     if (confirmed == true) {
       final isarService = ref.read(isarServiceProvider);
       final isar = await isarService.getInstance();
-      await isar.writeTxn(() async {
-        account.isActive = false;
-        await isar.accounts.put(account);
-      });
+      await AccountDataContract.patchStoredMetadata(
+        isar,
+        account.id,
+        (stored) => stored.isActive = false,
+      );
       ref.invalidate(allAccountsProvider);
       ref.invalidate(accountsProvider);
 
@@ -1260,7 +1261,10 @@ class __AnimatedAccountTileState extends ConsumerState<_AnimatedAccountTile>
                                 children: [
                                   if (account.accountNumber != null)
                                     Text(
-                                      '•••• ${account.accountNumber}'.safe(),
+                                      SafeAccountPresentation
+                                          .formatAccountNumber(
+                                        account.accountNumber,
+                                      ),
                                       style: textTheme.labelSmall?.copyWith(
                                         color: color.onSurfaceVariant
                                             .withValues(alpha: 0.5),

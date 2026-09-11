@@ -1,7 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/budget.dart';
+import 'package:mudra_manager/core/db/models/budget_type.dart';
+import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
+import 'package:mudra_manager/core/db/models/tag.dart';
+import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/greeting_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/priority_alert_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/ai_insight_provider.dart';
@@ -142,7 +147,8 @@ void main() {
         totalIncome: income,
         totalExpense: expense,
         totalBalance: balance,
-        netWorth: netWorth, pendingSmsCount: 0,
+        netWorth: netWorth,
+        pendingSmsCount: 0,
       );
     }
 
@@ -185,6 +191,171 @@ void main() {
       final a = makeData(txnCount: 5, income: 1000, expense: 500);
       final b = makeData(txnCount: 5, income: 1000, expense: 500);
       expect(a.hashCode, b.hashCode);
+    });
+
+    DashboardData withBudget({
+      int id = 1,
+      String name = 'Food',
+      double amount = 1000,
+      double spent = 100,
+      DateTime? start,
+      DateTime? end,
+      BudgetRecurrence recurrence = BudgetRecurrence.monthly,
+      bool archived = false,
+      BudgetType type = BudgetType.dayWise,
+      List<CategorySpending> categorySpendings = const [],
+      List<Tag> tags = const [],
+      DateTime? evaluationDate,
+      int generation = 0,
+    }) {
+      final periodStart = start ?? DateTime(2024, 1, 1);
+      final periodEnd = end ?? DateTime(2024, 1, 31);
+      final budget = Budget()
+        ..id = id
+        ..name = name
+        ..amount = amount
+        ..startDate = periodStart
+        ..endDate = periodEnd
+        ..budgetType = type
+        ..recurrence = recurrence
+        ..isArchived = archived;
+      tags.forEach(budget.budgetTags.add);
+      final snapshot = BudgetPeriodSnapshot.fromBudget(
+        budget: budget,
+        evaluationDate: evaluationDate ?? periodStart,
+        periodStart: periodStart,
+        periodEnd: periodEnd,
+        spent: spent,
+        categorySpendings: categorySpendings,
+      );
+      return DashboardData(
+        transactions: const [],
+        accounts: const [],
+        accountBalances: const {},
+        budgets: [
+          BudgetWithProgress(
+            budget: budget,
+            spent: spent,
+            categorySpendings: categorySpendings,
+            startDate: snapshot.periodStart,
+            endDate: snapshot.periodEnd,
+            snapshot: snapshot,
+          ),
+        ],
+        recurringExpenses: const [],
+        goals: const [],
+        totalIncome: 0,
+        totalExpense: 0,
+        totalBalance: 0,
+        netWorth: 0,
+        pendingSmsCount: 0,
+        budgetEvaluationDate: evaluationDate ?? periodStart,
+        budgetGeneration: generation,
+      );
+    }
+
+    test('Property 3: equal-length snapshots differ on every budget field', () {
+      // **Validates: Requirements 2.3, 3.10**
+      final base = withBudget();
+      final food = Category()
+        ..id = 10
+        ..name = 'Food';
+      final tag = Tag()
+        ..id = 20
+        ..name = 'Travel';
+
+      final changed = <DashboardData>[
+        withBudget(id: 2),
+        withBudget(name: 'Transport'),
+        withBudget(amount: 1200),
+        withBudget(spent: 200),
+        withBudget(start: DateTime(2024, 2, 1)),
+        withBudget(end: DateTime(2024, 2, 29)),
+        withBudget(recurrence: BudgetRecurrence.weekly),
+        withBudget(archived: true),
+        withBudget(type: BudgetType.categoryWise),
+        withBudget(
+          categorySpendings: [
+            CategorySpending(category: food, allocated: 500, spent: 50),
+          ],
+        ),
+        withBudget(tags: [tag]),
+        withBudget(evaluationDate: DateTime(2024, 1, 2)),
+        withBudget(generation: 1),
+      ];
+      for (var index = 0; index < changed.length; index++) {
+        final candidate = changed[index];
+        expect(
+          base,
+          isNot(equals(candidate)),
+          reason: 'changed field index $index',
+        );
+      }
+
+      // Generated deterministic spent/status cases: 120 iterations.
+      for (var i = 0; i < 120; i++) {
+        final candidate = withBudget(spent: 101 + i.toDouble());
+        expect(base, isNot(equals(candidate)), reason: 'spent case $i');
+      }
+    });
+
+    test('Property 3: exact duplicate snapshots suppress duplicate equality',
+        () {
+      // **Validates: Requirements 2.3, 3.10**
+      final category = Category()
+        ..id = 10
+        ..name = 'Food';
+      final tag = Tag()
+        ..id = 20
+        ..name = 'Travel';
+      final a = withBudget(
+        categorySpendings: [
+          CategorySpending(category: category, allocated: 500, spent: 50),
+        ],
+        tags: [tag],
+      );
+      final b = withBudget(
+        categorySpendings: [
+          CategorySpending(category: category, allocated: 500, spent: 50),
+        ],
+        tags: [tag],
+      );
+
+      expect(a, equals(b));
+      expect(a.hashCode, b.hashCode);
+    });
+
+    test('budget ordering is stable for equivalent sets', () {
+      // **Validates: Requirements 3.10**
+      final first = withBudget(id: 1);
+      final second = withBudget(id: 2, amount: 2000);
+      final reversed = DashboardData(
+        transactions: const [],
+        accounts: const [],
+        accountBalances: const {},
+        budgets: [second.budgets.single, first.budgets.single],
+        recurringExpenses: const [],
+        goals: const [],
+        totalIncome: 0,
+        totalExpense: 0,
+        totalBalance: 0,
+        netWorth: 0,
+        pendingSmsCount: 0,
+      );
+      final ordered = DashboardData(
+        transactions: const [],
+        accounts: const [],
+        accountBalances: const {},
+        budgets: [first.budgets.single, second.budgets.single],
+        recurringExpenses: const [],
+        goals: const [],
+        totalIncome: 0,
+        totalExpense: 0,
+        totalBalance: 0,
+        netWorth: 0,
+        pendingSmsCount: 0,
+      );
+      expect(reversed, equals(ordered));
     });
   });
 

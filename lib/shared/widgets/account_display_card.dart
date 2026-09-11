@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
-
+import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 
 class AccountDisplayCard extends StatelessWidget {
   final String title;
@@ -39,10 +39,9 @@ class AccountDisplayCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.0),
           gradient: LinearGradient(
-            colors:
-                isSelected
-                    ? [color.primary, color.primaryFixed, endColor]
-                    : [color.surface, color.surfaceDim, endColor],
+            colors: isSelected
+                ? [color.primary, color.primaryFixed, endColor]
+                : [color.surface, color.surfaceDim, endColor],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -90,11 +89,18 @@ class AccountDisplayCard extends StatelessWidget {
                         color: isSelected ? color.onPrimary : color.primary,
                       ),
                     ),
-                    Text(
-                      '**** **** **** ${accountNumber?.substring(0, 4) ?? '****'}',
-                      style: TextStyle(
-                        color: isSelected ? color.onPrimary : color.primary,
-                        fontSize: 14.0,
+                    Semantics(
+                      label: SafeAccountPresentation.formatAccountNumber(
+                        accountNumber,
+                      ),
+                      child: Text(
+                        SafeAccountPresentation.formatAccountNumber(
+                          accountNumber,
+                        ),
+                        style: TextStyle(
+                          color: isSelected ? color.onPrimary : color.primary,
+                          fontSize: 14.0,
+                        ),
                       ),
                     ),
                   ],

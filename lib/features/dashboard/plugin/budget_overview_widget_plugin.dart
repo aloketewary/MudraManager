@@ -1,8 +1,8 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
-import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/budget/presentation/widgets/budget_overview_card.dart';
 
 class BudgetOverviewWidgetPlugin extends DashboardWidgetPlugin {
@@ -37,6 +37,8 @@ class BudgetOverviewWidgetPlugin extends DashboardWidgetPlugin {
 
   @override
   Future<void> refresh(WidgetRef ref) async {
-    ref.invalidate(budgetsWithProgressProvider);
+    ref.read(budgetRefreshProvider.notifier).refresh(
+          BudgetRefreshReason.manual,
+        );
   }
 }

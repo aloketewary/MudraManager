@@ -7,9 +7,11 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
@@ -52,14 +54,27 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
         enableRefresh: false,
       ),
       body: progressAsync.when(
+        skipLoadingOnRefresh: false,
+        skipError: false,
         data: (budgets) {
-          final match = budgets
-              .where((b) => b.budget.id == _budget.id)
-              .firstOrNull;
+          final match =
+              budgets.where((b) => b.budget.id == _budget.id).firstOrNull;
           if (match == null) {
             return Center(child: Text(l10n.budget_dashboardNotFoundText));
           }
-          return _buildBody(match, spacing, color, textTheme, l10n);
+          return RefreshIndicator(
+            onRefresh: () => RefreshHelper.withMinDuration(() async {
+              ref.read(budgetRefreshProvider.notifier).refresh(
+                    BudgetRefreshReason.manual,
+                  );
+              try {
+                await ref.read(budgetsWithProgressProvider.future);
+              } catch (_) {
+                // Provider exposes retry state; refresh indicator settles.
+              }
+            }),
+            child: _buildBody(match, spacing, color, textTheme, l10n),
+          );
         },
         loading: () => ListView(
           padding: EdgeInsets.symmetric(
@@ -68,7 +83,15 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
           ),
           children: List.generate(3, (_) => const BudgetCardSkeleton()),
         ),
-        error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
+        error: (e, _) => Center(
+          child: FilledButton.icon(
+            onPressed: () => ref
+                .read(budgetRefreshProvider.notifier)
+                .refresh(BudgetRefreshReason.retry),
+            icon: const Icon(LucideIcons.rotateCcw),
+            label: Text(l10n.common_retry),
+          ),
+        ),
       ),
     );
   }
@@ -80,12 +103,14 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     TextTheme textTheme,
     AppLocalizations l10n,
   ) {
-    final spent = progress.spent;
-    final limit = _budget.amount;
-    final remaining = limit - spent;
-    final isOver = remaining < 0;
-    final pct = limit > 0 ? (spent / limit).clamp(0.0, 1.5) : 0.0;
-    final days = _budget.endDate.difference(DateTime.now()).inDays + 1;
+    final snapshot = progress.snapshot;
+    final spent = snapshot.spent;
+    final limit = snapshot.limit;
+    final remaining = snapshot.remaining;
+    final isOver = snapshot.status == BudgetPeriodStatus.exceeded;
+    final pct = snapshot.percentage;
+    final days =
+        snapshot.periodEnd.difference(snapshot.evaluationDate).inDays + 1;
     final dailyAllowance = days > 0 && remaining > 0 ? remaining / days : 0.0;
 
     final heroColor = isOver
@@ -96,6 +121,7 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     final isDark = color.brightness == Brightness.dark;
 
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.symmetric(
         horizontal: spacing.cardHorizontal,
         vertical: spacing.cardVertical,
@@ -205,7 +231,11 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
               const Spacer(),
               TextButton.icon(
                 onPressed: () => _showAdjustLimitSheet(
-                  limit, spacing, color, textTheme, l10n,
+                  limit,
+                  spacing,
+                  color,
+                  textTheme,
+                  l10n,
                 ),
                 icon: const Icon(LucideIcons.pencil, size: 14),
                 label: Text(l10n.budget_adjustLimit),
@@ -342,7 +372,8 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     TextTheme textTheme,
     AppLocalizations l10n,
   ) {
-    final controller = TextEditingController(text: currentLimit.toInt().toString());
+    final controller =
+        TextEditingController(text: currentLimit.toInt().toString());
 
     showModalBottomSheet(
       context: context,
@@ -366,13 +397,15 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
           children: [
             Text(
               l10n.budget_adjustLimit,
-              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style:
+                  textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: spacing.sectionGap),
             TextField(
               controller: controller,
               autofocus: true,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w800,
               ),
@@ -400,12 +433,15 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
                   _budget.amount = newAmount;
                   final service = ref.read(budgetServiceProvider);
                   await service.save(_budget);
-                  ref.invalidate(budgetsWithProgressProvider);
+                  ref.read(budgetRefreshProvider.notifier).refresh(
+                        BudgetRefreshReason.budgetCrud,
+                      );
 
                   if (mounted) {
                     Navigator.pop(ctx);
                     HapticFeedback.mediumImpact();
-                    SnackbarService.success(BuddyMessages.budgetUpdated, spacing);
+                    SnackbarService.success(
+                        BuddyMessages.budgetUpdated, spacing);
                     setState(() {});
                   }
                 },
@@ -505,8 +541,10 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     if (confirmed == true) {
       final service = ref.read(budgetServiceProvider);
       await service.archiveBudget(_budget.id);
+      ref.read(budgetRefreshProvider.notifier).refresh(
+            BudgetRefreshReason.budgetCrud,
+          );
       if (mounted) {
-        ref.invalidate(budgetsWithProgressProvider);
         SnackbarService.success(BuddyMessages.budgetUpdated, spacing);
         context.pop();
       }
@@ -527,8 +565,10 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     if (confirmed == true) {
       final service = ref.read(budgetServiceProvider);
       await service.deleteBudget(_budget.id);
+      ref.read(budgetRefreshProvider.notifier).refresh(
+            BudgetRefreshReason.budgetCrud,
+          );
       if (mounted) {
-        ref.invalidate(budgetsWithProgressProvider);
         context.pop();
       }
     }

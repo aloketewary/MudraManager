@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
@@ -26,7 +27,16 @@ class BackgroundTaskManager {
   /// Number of consecutive failures before showing a banner.
   static const int failureThreshold = 3;
 
-  /// Call at app start — only schedules workmanager, no heavy work.
+  static Future<bool> _accountBoundaryReady() async {
+    final readiness = await FieldEncryptionService.waitForReadiness();
+    if (readiness.isReady) return true;
+    _log.w(
+      'Account-linked background work skipped: '
+      '${readiness.errorCategory ?? 'encryption_unavailable'}',
+    );
+    return false;
+  }
+
   static Future<void> initialize() async {
     await Workmanager().initialize(callbackDispatcher);
     await _scheduleDailyTask();
@@ -36,6 +46,7 @@ class BackgroundTaskManager {
   /// Call after UI is visible — only notifications and cleanup, no heavy processing.
   static Future<void> runDeferredTasks() async {
     try {
+      if (!await _accountBoundaryReady()) return;
       final isar = await IsarService().getInstance();
       await BalanceHistoryService(IsarService()).recordDailySnapshots();
       await SnapshotGenerator(isar).backfillIfNeeded();
@@ -44,14 +55,15 @@ class BackgroundTaskManager {
       await SmsHashCleanupService.cleanupOldHashes();
 
       _log.i('Deferred tasks completed');
-    } catch (e) {
-      _log.e('Deferred tasks failed', e);
+    } catch (_) {
+      _log.e('Deferred tasks failed: deferred_tasks_failed');
     }
   }
 
   /// Call when user opens recurring/bill screens — processes due items on demand.
   static Future<void> processRecurringNow() async {
     try {
+      if (!await _accountBoundaryReady()) return;
       final isar = await IsarService().getInstance();
       final gamificationService = GamificationService(
         isar,
@@ -61,8 +73,10 @@ class BackgroundTaskManager {
           .processRecurringTransactions();
       await BillService.createPendingTransactionsForDueBills();
       _log.i('On-demand recurring processing completed');
-    } catch (e) {
-      _log.e('On-demand recurring processing failed', e);
+    } catch (_) {
+      _log.e(
+        'On-demand recurring processing failed: recurring_processing_failed',
+      );
     }
   }
 
@@ -76,15 +90,15 @@ class BackgroundTaskManager {
           networkType: NetworkType.notRequired,
         ),
       );
-    } catch (e) {
-      _log.e('Failed to schedule background task', e);
+    } catch (_) {
+      _log.e('Failed to schedule background task: schedule_failed');
     }
   }
 
   /// Run auto backup task — used by workmanager callback.
   static Future<void> _runAutoBackup() async {
     try {
-      // Initialize SharedPrefsUtil in this isolate (Workmanager runs separately)
+      if (!await _accountBoundaryReady()) return;
       final prefs = await SharedPreferences.getInstance();
       SharedPrefsUtil.init(prefs);
 
@@ -94,20 +108,28 @@ class BackgroundTaskManager {
         return;
       }
 
-      final path = await AutoBackupService.createAutoBackup(password, const AppSpacing.comfortable());
+      final path = await AutoBackupService.createAutoBackup(
+        password,
+        const AppSpacing.comfortable(),
+      );
       if (path != null) {
         _log.i('Auto backup completed: $path');
         await AutoBackupService.cleanupOldBackups();
       }
-    } catch (e) {
-      _log.e('Auto backup failed', e);
-      ErrorTracker.record('auto_backup', 'runAutoBackup failed', e);
+    } catch (_) {
+      _log.e('Auto backup failed: auto_backup_failed');
+      ErrorTracker.record(
+        'auto_backup',
+        'runAutoBackup failed',
+        'auto_backup_failed',
+      );
     }
   }
 
   /// Full task run — used by workmanager callback only.
   static Future<void> _runAllTasks() async {
     try {
+      if (!await _accountBoundaryReady()) return;
       final isar = await IsarService().getInstance();
       final gamificationService = GamificationService(
         isar,
@@ -126,10 +148,14 @@ class BackgroundTaskManager {
 
       await _recordSuccess();
       _log.i('All background tasks completed');
-    } catch (e) {
-      _log.e('Background tasks failed', e);
-      await _recordFailure(e);
-      ErrorTracker.record('background_task', 'runAllTasks failed', e);
+    } catch (_) {
+      _log.e('Background tasks failed: background_task_failed');
+      await _recordFailure();
+      ErrorTracker.record(
+        'background_task',
+        'runAllTasks failed',
+        'background_task_failed',
+      );
     }
   }
 
@@ -142,12 +168,12 @@ class BackgroundTaskManager {
     } catch (_) {}
   }
 
-  static Future<void> _recordFailure(Object error) async {
+  static Future<void> _recordFailure() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final current = prefs.getInt(_consecutiveFailuresKey) ?? 0;
       await prefs.setInt(_consecutiveFailuresKey, current + 1);
-      await prefs.setString(_lastFailureKey, error.toString());
+      await prefs.setString(_lastFailureKey, 'background_task_failed');
     } catch (_) {}
   }
 

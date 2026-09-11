@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/services/category_rule_service.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 
@@ -23,7 +24,8 @@ class BulkCategorizationHelper {
       if (txn.account?.sendTo != null && txn.account!.sendTo!.isNotEmpty) {
         // UPI transactions - group by recipient
         groupKey = 'UPI:${txn.account!.sendTo!.toLowerCase()}';
-      } else if (txn.account?.bankName != null && txn.account!.bankName!.isNotEmpty) {
+      } else if (txn.account?.bankName != null &&
+          txn.account!.bankName!.isNotEmpty) {
         // Non-UPI - group by merchant/bank
         groupKey = 'MERCHANT:${txn.account!.bankName!.toLowerCase()}';
       } else if (txn.account?.no != null && txn.account!.no!.isNotEmpty) {
@@ -43,8 +45,9 @@ class BulkCategorizationHelper {
   /// Smart bulk categorization workflow
   /// Returns: Map with categorized and uncategorized transactions
   Future<BulkCategorizationResult> processBulkTransactions(
-    List<TransactionInfo> pendingTransactions,
-  ) async {
+    List<TransactionInfo> pendingTransactions, {
+    List<Category>? availableCategories,
+  }) async {
     final result = BulkCategorizationResult();
 
     // Step 1: Group similar transactions
@@ -59,7 +62,17 @@ class BulkCategorizationHelper {
 
       // Get suggestion for first transaction in group
       final firstTxn = transactions.first;
-      final suggestedCategoryId = await ruleService.suggestCategory(firstTxn);
+      // Learned rules are gated by current, non-system categories compatible
+      // with this transaction. Null keeps legacy direct callers compatible
+      // when they have not loaded the current category list.
+      final availableCategoryIds = _availableCategoryIdsFor(
+        firstTxn,
+        availableCategories,
+      );
+      final suggestedCategoryId = await ruleService.suggestCategory(
+        firstTxn,
+        availableCategoryIds: availableCategoryIds,
+      );
 
       if (suggestedCategoryId != null) {
         // High confidence suggestion exists
@@ -80,6 +93,30 @@ class BulkCategorizationHelper {
     }
 
     return result;
+  }
+
+  Set<String>? _availableCategoryIdsFor(
+    TransactionInfo txn,
+    List<Category>? categories,
+  ) {
+    if (categories == null) return null;
+
+    final expectedType = switch (txn.typeOfTransaction) {
+      TransactionType.credited => CategoryType.income,
+      TransactionType.debited ||
+      TransactionType.debitMisc =>
+        CategoryType.expense,
+      TransactionType.noMatch || null => null,
+    };
+
+    return categories
+        .where(
+          (category) =>
+              !category.isSystem &&
+              (expectedType == null || category.categoryType == expectedType),
+        )
+        .map((category) => category.id.toString())
+        .toSet();
   }
 
   /// Apply category to all transactions in a group and learn from it
@@ -110,7 +147,8 @@ class BulkCategorizationHelper {
     }
 
     return BulkStats(
-      totalGroups: result.autoSuggested.length + result.needsManualReview.length,
+      totalGroups:
+          result.autoSuggested.length + result.needsManualReview.length,
       autoSuggestedGroups: result.autoSuggested.length,
       needsReviewGroups: result.needsManualReview.length,
       autoSuggestedTransactions: autoSuggestedCount,
@@ -173,20 +211,20 @@ class BulkStats {
 }
 
 /// EXAMPLE USAGE:
-/// 
+///
 /// ```dart
 /// // Step 1: Scan SMS and get 500+ transactions
 /// final pendingTransactions = await scanSMS();
-/// 
+///
 /// // Step 2: Process bulk
 /// final bulkHelper = BulkCategorizationHelper(categoryRuleService);
 /// final result = await bulkHelper.processBulkTransactions(pendingTransactions);
-/// 
+///
 /// // Step 3: Show stats
 /// final stats = bulkHelper.getStats(result);
 /// print('Auto-suggested: ${stats.autoSuggestedTransactions} transactions');
 /// print('Needs review: ${stats.needsReviewTransactions} transactions');
-/// 
+///
 /// // Step 4: Show UI for bulk approval
 /// // For auto-suggested groups:
 /// for (final entry in result.autoSuggested.entries) {
@@ -207,7 +245,7 @@ class BulkStats {
 ///     },
 ///   );
 /// }
-/// 
+///
 /// // For needs review groups:
 /// for (final entry in result.needsManualReview.entries) {
 ///   final group = entry.value;
