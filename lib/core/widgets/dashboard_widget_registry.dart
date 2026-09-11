@@ -1,11 +1,9 @@
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
-import 'package:mudra_manager/features/dashboard/plugin/accounts_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/budget_overview_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/cash_flow_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/daily_briefing_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/goals_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/health_strip_widget_plugin.dart';
-import 'package:mudra_manager/features/dashboard/plugin/quick_actions_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/recent_transactions_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/recurring_expenses_widget_plugin.dart';
 
@@ -25,14 +23,8 @@ class DashboardWidgetRegistry {
     // Health Strip — attention orientation
     HealthStripWidgetPlugin(),
 
-    // Accounts — current balance
-    AccountsWidgetPlugin(),
-
-    // Unified Briefing — the primary experience
+    // Unified Briefing - the primary experience
     DailyBriefingWidgetPlugin(),
-
-    // Quick access to common tasks
-    QuickActionsWidgetPlugin(),
 
     // Cash Flow — income/expense overview
     CashFlowWidgetPlugin(),

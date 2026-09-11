@@ -358,8 +358,8 @@ class ExcelImportService {
 
             await isar.writeTxn(() async {
               await isar.categorys.put(matched!);
-              if (matched?.parentCategory.value != null) {
-                await matched?.parentCategory.save();
+              if (matched.parentCategory.value != null) {
+                await matched.parentCategory.save();
               }
             });
             categoryMap[catKey] = matched;

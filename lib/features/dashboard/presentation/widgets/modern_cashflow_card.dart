@@ -2,20 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'package:mudra_manager/core/providers/filter_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
-import 'package:mudra_manager/features/dashboard/data/historical_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
-import 'package:mudra_manager/shared/widgets/widgets.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 class ModernCashFlowCard extends ConsumerWidget {
   const ModernCashFlowCard({super.key});
@@ -26,243 +21,206 @@ class ModernCashFlowCard extends ConsumerWidget {
     final isGuestMode = ref.watch(guestModeProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final ctxt = AppLocalizations.of(context)!;
-
-    final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month, 1);
-    final endDate = DateTime(
-      now.year,
-      now.month + 1,
-      1,
-    ).subtract(const Duration(days: 1));
 
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: spacing.cardHorizontal,
         vertical: spacing.cardVertical,
       ),
-      child: Card(
-        elevation: 0,
-        margin: EdgeInsets.zero,
-        color: color.surfaceContainerLow,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.mediumImpact();
-            context.push(AppRoutes.transactions);
-          },
-          borderRadius: BorderRadius.circular(spacing.radiusSmall),
-          child: Semantics(
-            button: true,
-            label:
-                '${ctxt.dashboard_cash_flow_text}. ${ctxt.dashboard_viewAllLabel}',
-            child: Padding(
-              padding: EdgeInsets.all(spacing.cardInner),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Header ──
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              ctxt.dashboard_cash_flow_text,
-                              style: textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${DateFormat('dd', ctxt.localeName).format(startDate)} - ${DateFormat('dd MMM', ctxt.localeName).format(endDate)}',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: color.onSurfaceVariant,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        LucideIcons.chevronRight,
-                        color: color.onSurfaceVariant,
-                        size: 18,
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: spacing.sectionGap),
-
-                  // ── Income / Expense row ──
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final rawIncome = ref.watch(dashboardIncomeProvider);
-                      final rawExpense = ref.watch(dashboardExpenseProvider);
-                      final income =
-                          GuestModeUtil.applyGuestMode(rawIncome, isGuestMode);
-                      final expense =
-                          GuestModeUtil.applyGuestMode(rawExpense, isGuestMode);
-                      final prevSummary = ref.watch(
-                        previousPeriodTransactionsProvider('month'),
-                      );
-                      final rawPrevIncome = prevSummary.value?['income'] ?? 0.0;
-                      final rawPrevExpense =
-                          prevSummary.value?['expense'] ?? 0.0;
-                      final prevIncome = GuestModeUtil.applyGuestMode(
-                          rawPrevIncome, isGuestMode,);
-                      final prevExpense = GuestModeUtil.applyGuestMode(
-                          rawPrevExpense, isGuestMode,);
-
-                      final historicalIncome =
-                          ref.watch(historicalIncomeProvider).value ?? [];
-                      final historicalExpense =
-                          ref.watch(historicalExpenseProvider).value ?? [];
-
-                      return Row(
-                        children: [
-                          Expanded(
-                            child: _buildCompactSection(
-                              isExpense: false,
-                              amount: income,
-                              previousValue: prevIncome,
-                              data: historicalIncome,
-                              context: context,
-                              spacing: spacing,
-                            ),
-                          ),
-                          Container(
-                            width: 1,
-                            height: 40,
-                            color: color.outlineVariant.withValues(alpha: 0.5),
-                          ),
-                          SizedBox(width: spacing.elementGap),
-                          Expanded(
-                            child: _buildCompactSection(
-                              isExpense: true,
-                              amount: expense,
-                              previousValue: prevExpense,
-                              data: historicalExpense,
-                              context: context,
-                              spacing: spacing,
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardInner * 0.8,
+          vertical: spacing.cardInner * 0.65,
+        ),
+        decoration: BoxDecoration(
+          color: color.surface,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(spacing.radiusLarge),
           ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'Your Money',
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(width: spacing.elementGapMin),
+                Icon(
+                  LucideIcons.info,
+                  size: 16,
+                  color: color.onSurfaceVariant,
+                ),
+                const Spacer(),
+                InkWell(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    context.push(AppRoutes.transactions);
+                  },
+                  borderRadius: BorderRadius.circular(spacing.radiusLarge),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.elementGap,
+                      vertical: spacing.elementGapMin,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: color.outlineVariant.withValues(alpha: 0.55),
+                      ),
+                      borderRadius: BorderRadius.circular(spacing.radiusLarge),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Details',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: color.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(width: spacing.elementGapMin),
+                        Icon(
+                          LucideIcons.chevronRight,
+                          size: 14,
+                          color: color.onSurfaceVariant,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: spacing.elementGap),
+            Consumer(
+              builder: (context, ref, child) {
+                final rawIncome = ref.watch(dashboardIncomeProvider);
+                final rawExpense = ref.watch(dashboardExpenseProvider);
+                final income =
+                    GuestModeUtil.applyGuestMode(rawIncome, isGuestMode);
+                final expense =
+                    GuestModeUtil.applyGuestMode(rawExpense, isGuestMode);
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _buildMetricTile(
+                        isExpense: false,
+                        amount: income,
+                        context: context,
+                        spacing: spacing,
+                      ),
+                    ),
+                    SizedBox(width: spacing.elementGap),
+                    Expanded(
+                      child: _buildMetricTile(
+                        isExpense: true,
+                        amount: expense,
+                        context: context,
+                        spacing: spacing,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildCompactSection({
+  Widget _buildMetricTile({
     required bool isExpense,
     required double amount,
-    required double previousValue,
-    required List<double> data,
     required BuildContext context,
     required AppSpacing spacing,
   }) {
     final ctxt = AppLocalizations.of(context)!;
+    final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final brightness = Theme.of(context).brightness;
     final accent = isExpense
         ? FinanceColors.expenseColor(brightness)
         : FinanceColors.incomeColor(brightness);
 
-    final spots = data.asMap().entries.map((e) {
-      return FlSpot(e.key.toDouble(), e.value);
-    }).toList();
-
-    return Stack(
-      children: [
-        // Sparkline chart behind
-        if (spots.length >= 2)
-          Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 48, bottom: 36),
-              child: IgnorePointer(
-                child: LineChart(
-                  LineChartData(
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: spots,
-                        isCurved: true,
-                        curveSmoothness: 0.4,
-                        preventCurveOverShooting: true,
-                        color: accent.withValues(alpha: 0.4),
-                        barWidth: 2,
-                        dotData: const FlDotData(show: false),
-                        belowBarData: BarAreaData(
-                          show: true,
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              accent.withValues(alpha: 0.15),
-                              accent.withValues(alpha: 0.0),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                    gridData: const FlGridData(show: false),
-                    titlesData: const FlTitlesData(show: false),
-                    borderData: FlBorderData(show: false),
-                    lineTouchData: const LineTouchData(enabled: false),
-                  ),
-                ),
-              ),
+    return Semantics(
+      button: true,
+      label: isExpense
+          ? ctxt.transaction_type_expense
+          : ctxt.transaction_type_income,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push(AppRoutes.transactions);
+        },
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 148),
+          padding: EdgeInsets.all(spacing.cardInner * 0.7),
+          decoration: BoxDecoration(
+            color: color.surface,
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(
+              color: color.outlineVariant.withValues(alpha: 0.45),
             ),
           ),
-        // Content on top
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isExpense ? LucideIcons.arrowUp : LucideIcons.arrowDown,
-                  size: 12,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.all(spacing.elementGap),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+                child: Icon(
+                  isExpense
+                      ? LucideIcons.walletCards
+                      : LucideIcons.walletMinimal,
+                  size: 18,
                   color: accent,
                 ),
-                SizedBox(width: spacing.elementGapMin),
-                Text(
-                  isExpense
-                      ? ctxt.transaction_type_expense
-                      : ctxt.transaction_type_income,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: accent,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: spacing.elementGapMin),
-            AnimatedBalance(
-              value: amount,
-              style: textTheme.headlineMedium?.copyWith(
-                color: accent,
-                fontWeight: FontWeight.w800,
               ),
-              fixedStringLength: 0,
-            ),
-            if (previousValue > 0) ...[
-              const SizedBox(height: 2),
-              TrendIndicator(
-                current: amount,
-                previous: previousValue,
-                isIncome: !isExpense,
+              SizedBox(height: spacing.sectionGap),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      isExpense
+                          ? ctxt.transaction_type_expense
+                          : ctxt.transaction_type_income,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: color.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    LucideIcons.info,
+                    size: 14,
+                    color: color.onSurfaceVariant,
+                  ),
+                ],
+              ),
+              SizedBox(height: spacing.elementGapMin),
+              AnimatedBalance(
+                value: amount,
+                style: textTheme.titleLarge?.copyWith(
+                  color: color.onSurface,
+                  fontWeight: FontWeight.w800,
+                ),
+                fixedStringLength: 0,
               ),
             ],
-          ],
+          ),
         ),
-      ],
+      ),
     );
   }
 }

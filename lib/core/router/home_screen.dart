@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
@@ -20,6 +21,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/dashboard/data/greeting_provider.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/dashboard_home.dart';
 import 'package:mudra_manager/features/gamification/data/achievement_unlock_listener.dart';
 import 'package:mudra_manager/features/gamification/presentation/widgets/streak_indicator.dart';
@@ -30,6 +32,7 @@ import 'package:mudra_manager/features/transactions/presentation/screens/transac
 import 'package:mudra_manager/features/statistics/presentation/screens/utility_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
+import 'package:mudra_manager/shared/widgets/finance_v2/finance_amount.dart';
 import 'package:mudra_manager/shared/widgets/animated_greeting.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
@@ -48,6 +51,7 @@ class HomePage extends ConsumerStatefulWidget {
 class HomePageState extends ConsumerState<HomePage>
     with TickerProviderStateMixin {
   late int _selectedIndex;
+  double _dashboardHeaderCollapseProgress = 0;
   final transactionListKey = GlobalKey<TransactionListScreenState>();
   final utilityKey = GlobalKey<UtilityScreenState>();
   late AnimationController _fabController;
@@ -63,7 +67,6 @@ class HomePageState extends ConsumerState<HomePage>
       duration: const Duration(milliseconds: 300),
       value: 1.0,
     );
-
     // Critical — needed for widget click handling
     _setupMethodChannel();
     _setupWidgetClickListener();
@@ -74,6 +77,18 @@ class HomePageState extends ConsumerState<HomePage>
       initNotification();
       ref.read(achievementUnlockListenerProvider).initialize(context);
     });
+  }
+
+  void _onDashboardScrollOffsetChanged(double offset) {
+    final spacing = ref.read(spacingProvider);
+    final collapseRange = spacing.cardInner * 3 + spacing.sectionGap;
+    final progress = (offset / collapseRange).clamp(0.0, 1.0);
+    if ((progress - _dashboardHeaderCollapseProgress).abs() < 0.01) {
+      return;
+    }
+    if (mounted) {
+      setState(() => _dashboardHeaderCollapseProgress = progress);
+    }
   }
 
   @override
@@ -216,93 +231,95 @@ class HomePageState extends ConsumerState<HomePage>
               label: ctxt.nav_activity,
             ),
             if (!isSimple)
-            NavigationDestination(
-              icon: Consumer(
-                builder: (context, ref, _) {
-                  final activeTrips = ref.watch(activeTripsProvider);
-                  final hasActiveTrip = activeTrips.maybeWhen(
-                    data: (trips) {
-                      final now = DateTime.now();
-                      final today = DateTime(now.year, now.month, now.day);
-                      return trips.any((t) {
-                        if (!t.isTrip) return false;
-                        final start = DateTime(t.startDate.year, t.startDate.month, t.startDate.day);
-                        return t.isActive && !today.isBefore(start);
-                      });
-                    },
-                    orElse: () => false,
-                  );
-                  return SvgPicture.asset(
-                    hasActiveTrip
-                        ? 'assets/logo/nav/outline/trip.svg'
-                        : 'assets/logo/nav/outline/utility.svg',
-                    colorFilter: ColorFilter.mode(
+              NavigationDestination(
+                icon: Consumer(
+                  builder: (context, ref, _) {
+                    final activeTrips = ref.watch(activeTripsProvider);
+                    final hasActiveTrip = activeTrips.maybeWhen(
+                      data: (trips) {
+                        final now = DateTime.now();
+                        final today = DateTime(now.year, now.month, now.day);
+                        return trips.any((t) {
+                          if (!t.isTrip) return false;
+                          final start = DateTime(t.startDate.year,
+                              t.startDate.month, t.startDate.day);
+                          return t.isActive && !today.isBefore(start);
+                        });
+                      },
+                      orElse: () => false,
+                    );
+                    return SvgPicture.asset(
                       hasActiveTrip
-                          ? Theme.of(context).colorScheme.primary
-                          : (isDark ? Colors.white : Colors.black),
-                      BlendMode.srcIn,
-                    ),
-                  );
-                },
-              ),
-              selectedIcon: Consumer(
-                builder: (context, ref, _) {
-                  final activeTrips = ref.watch(activeTripsProvider);
-                  final hasActiveTrip = activeTrips.maybeWhen(
-                    data: (trips) {
-                      final now = DateTime.now();
-                      final today = DateTime(now.year, now.month, now.day);
-                      return trips.any((t) {
-                        if (!t.isTrip) return false;
-                        final start = DateTime(t.startDate.year, t.startDate.month, t.startDate.day);
-                        return t.isActive && !today.isBefore(start);
-                      });
-                    },
-                    orElse: () => false,
-                  );
-                  return SvgPicture.asset(
-                    hasActiveTrip
-                        ? 'assets/logo/nav/solid/trip.svg'
-                        : 'assets/logo/nav/solid/utility.svg',
-                    colorFilter: ColorFilter.mode(
+                          ? 'assets/logo/nav/outline/trip.svg'
+                          : 'assets/logo/nav/outline/utility.svg',
+                      colorFilter: ColorFilter.mode(
+                        hasActiveTrip
+                            ? Theme.of(context).colorScheme.primary
+                            : (isDark ? Colors.white : Colors.black),
+                        BlendMode.srcIn,
+                      ),
+                    );
+                  },
+                ),
+                selectedIcon: Consumer(
+                  builder: (context, ref, _) {
+                    final activeTrips = ref.watch(activeTripsProvider);
+                    final hasActiveTrip = activeTrips.maybeWhen(
+                      data: (trips) {
+                        final now = DateTime.now();
+                        final today = DateTime(now.year, now.month, now.day);
+                        return trips.any((t) {
+                          if (!t.isTrip) return false;
+                          final start = DateTime(t.startDate.year,
+                              t.startDate.month, t.startDate.day);
+                          return t.isActive && !today.isBefore(start);
+                        });
+                      },
+                      orElse: () => false,
+                    );
+                    return SvgPicture.asset(
                       hasActiveTrip
-                          ? Theme.of(context).colorScheme.primary
-                          : (isDark ? Colors.white : Colors.black),
-                      BlendMode.srcIn,
-                    ),
-                  ).animate(target: effectiveIndex == 2 ? 1 : 0).scale(
-                        begin: const Offset(0.9, 0.9),
-                        end: const Offset(1, 1),
-                        curve: Curves.easeOutCubic,
-                        duration: 250.ms,
-                      );
-                },
+                          ? 'assets/logo/nav/solid/trip.svg'
+                          : 'assets/logo/nav/solid/utility.svg',
+                      colorFilter: ColorFilter.mode(
+                        hasActiveTrip
+                            ? Theme.of(context).colorScheme.primary
+                            : (isDark ? Colors.white : Colors.black),
+                        BlendMode.srcIn,
+                      ),
+                    ).animate(target: effectiveIndex == 2 ? 1 : 0).scale(
+                          begin: const Offset(0.9, 0.9),
+                          end: const Offset(1, 1),
+                          curve: Curves.easeOutCubic,
+                          duration: 250.ms,
+                        );
+                  },
+                ),
+                label: ctxt.nav_manage,
               ),
-              label: ctxt.nav_manage,
-            ),
             if (!isSimple)
-            NavigationDestination(
-              icon: SvgPicture.asset(
-                'assets/logo/nav/outline/statistics.svg',
-                colorFilter: ColorFilter.mode(
-                  isDark ? Colors.white : Colors.black,
-                  BlendMode.srcIn,
-                ),
-              ),
-              selectedIcon: SvgPicture.asset(
-                'assets/logo/nav/solid/statistics.svg',
-                colorFilter: ColorFilter.mode(
-                  isDark ? Colors.white : Colors.black,
-                  BlendMode.srcIn,
-                ),
-              ).animate(target: effectiveIndex == 3 ? 1 : 0).scale(
-                    begin: const Offset(0.9, 0.9),
-                    end: const Offset(1, 1),
-                    curve: Curves.easeOutCubic,
-                    duration: 250.ms,
+              NavigationDestination(
+                icon: SvgPicture.asset(
+                  'assets/logo/nav/outline/statistics.svg',
+                  colorFilter: ColorFilter.mode(
+                    isDark ? Colors.white : Colors.black,
+                    BlendMode.srcIn,
                   ),
-              label: ctxt.nav_insights,
-            ),
+                ),
+                selectedIcon: SvgPicture.asset(
+                  'assets/logo/nav/solid/statistics.svg',
+                  colorFilter: ColorFilter.mode(
+                    isDark ? Colors.white : Colors.black,
+                    BlendMode.srcIn,
+                  ),
+                ).animate(target: effectiveIndex == 3 ? 1 : 0).scale(
+                      begin: const Offset(0.9, 0.9),
+                      end: const Offset(1, 1),
+                      curve: Curves.easeOutCubic,
+                      duration: 250.ms,
+                    ),
+                label: ctxt.nav_insights,
+              ),
             NavigationDestination(
               icon: Consumer(
                 builder: (context, ref, _) {
@@ -333,7 +350,14 @@ class HomePageState extends ConsumerState<HomePage>
                           : (isDark ? Colors.white : Colors.black),
                       BlendMode.srcIn,
                     ),
-                  ).animate(target: (isSimple ? effectiveIndex == 2 : effectiveIndex == 4) ? 1 : 0).scale(
+                  )
+                      .animate(
+                          target: (isSimple
+                                  ? effectiveIndex == 2
+                                  : effectiveIndex == 4)
+                              ? 1
+                              : 0)
+                      .scale(
                         begin: const Offset(0.9, 0.9),
                         end: const Offset(1, 1),
                         curve: Curves.easeOutCubic,
@@ -359,7 +383,10 @@ class HomePageState extends ConsumerState<HomePage>
               child: IndexedStack(
                 index: stackIndex,
                 children: [
-                  const DashboardHome(),
+                  DashboardHome(
+                    onScrollOffsetChanged: _onDashboardScrollOffsetChanged,
+                    headerCollapseProgress: _dashboardHeaderCollapseProgress,
+                  ),
                   TransactionListScreen(
                     key: transactionListKey,
                     isTabActive: stackIndex == 1,
@@ -399,22 +426,49 @@ class HomePageState extends ConsumerState<HomePage>
     final notificationService = ref.watch(notificationRecordServiceProvider);
     final ctxt = AppLocalizations.of(context)!;
     final spacing = ref.watch(spacingProvider);
+    final headerTransitionDuration = MediaQuery.of(context).disableAnimations
+        ? Duration.zero
+        : const Duration(milliseconds: 240);
 
     switch (selectedIndex) {
       case 0:
+        final totalBalance = ref.watch(dashboardTotalBalanceProvider);
         return AppBar(
           automaticallyImplyLeading: false,
+          backgroundColor: color.surfaceContainerHigh,
+          foregroundColor: color.onSurface,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          toolbarHeight: 80,
+          titleSpacing: spacing.cardInner,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(spacing.radiusLarge + spacing.elementGap),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
           title: GestureDetector(
             onTap: () => _onTabSelected(ref.read(isSimpleModeProvider) ? 2 : 4),
             child: Row(
               children: [
                 profileAsync.when(
-                  data: (profile) => SizedBox(
-                    width: 32,
-                    height: 32,
+                  data: (profile) => Container(
+                    width: spacing.touchTargetSmall,
+                    height: spacing.touchTargetSmall,
+                    padding: EdgeInsets.all(spacing.elementGapMin / 2),
+                    decoration: BoxDecoration(
+                      color: color.surfaceContainerHighest,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: color.primary.withValues(alpha: 0.32),
+                        width: spacing.strokeThin,
+                      ),
+                    ),
                     child: ClipOval(
                       child: BoringAvatar(
-                        name: FieldEncryptionService.safeDisplay(profile?.name, 'User'),
+                        name: FieldEncryptionService.safeDisplay(
+                            profile?.name, 'User'),
                         palette: BoringAvatarPalette([
                           color.primary,
                           color.tertiary,
@@ -426,19 +480,27 @@ class HomePageState extends ConsumerState<HomePage>
                     ),
                   ),
                   loading: () => Container(
-                    width: 32,
-                    height: 32,
+                    width: spacing.touchTargetSmall,
+                    height: spacing.touchTargetSmall,
                     decoration: BoxDecoration(
                       color: color.surfaceContainerHighest,
                       shape: BoxShape.circle,
+                      border: Border.all(
+                        color: color.outlineVariant,
+                        width: spacing.strokeThin,
+                      ),
                     ),
                   ),
                   error: (_, __) => Container(
-                    width: 32,
-                    height: 32,
+                    width: spacing.touchTargetSmall,
+                    height: spacing.touchTargetSmall,
                     decoration: BoxDecoration(
                       color: color.surfaceContainerHighest,
                       shape: BoxShape.circle,
+                      border: Border.all(
+                        color: color.outlineVariant,
+                        width: spacing.strokeThin,
+                      ),
                     ),
                   ),
                 ),
@@ -450,7 +512,8 @@ class HomePageState extends ConsumerState<HomePage>
                       profileAsync.when(
                         data: (profile) => AnimatedGreeting(
                           greeting: '${ctxt.translate(toneGreeting)},',
-                          name: FieldEncryptionService.safeDisplay(profile?.name, 'Awesome User'),
+                          name: FieldEncryptionService.safeDisplay(
+                              profile?.name, 'Awesome User'),
                           greetingStyle: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w400,
                           ),
@@ -473,10 +536,159 @@ class HomePageState extends ConsumerState<HomePage>
                           maxLines: 1,
                         ),
                       ),
+                      SizedBox(height: spacing.elementGapMin / 2),
+                      AnimatedSwitcher(
+                        duration: headerTransitionDuration,
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        transitionBuilder: (child, animation) => FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0, 0.15),
+                              end: Offset.zero,
+                            ).animate(animation),
+                            child: child,
+                          ),
+                        ),
+                        child: (_dashboardHeaderCollapseProgress >= 0.5)
+                            ? FinanceAmount(
+                                key: const ValueKey('dashboard-header-balance'),
+                                value: totalBalance,
+                                compact: false,
+                                fixedStringLength: 2,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              )
+                            : Text(
+                                'Turn dreams into balance',
+                                key:
+                                    const ValueKey('dashboard-header-subtitle'),
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                      ),
                     ],
                   ),
                 ),
               ],
+            ),
+          ),
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(
+              (spacing.cardInner * 3 + spacing.sectionGap) *
+                  (1 - _dashboardHeaderCollapseProgress),
+            ),
+            child: ClipRect(
+              child: Align(
+                alignment: Alignment.topCenter,
+                heightFactor: (1 - _dashboardHeaderCollapseProgress),
+                child: Opacity(
+                  opacity: (1 - _dashboardHeaderCollapseProgress),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      spacing.cardInner,
+                      0,
+                      spacing.cardInner,
+                      spacing.cardInner,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${ctxt.balanceHistory_currentBalance} (${BaseCurrency.code})',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: spacing.elementGapMin),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: FinanceAmount(
+                                value: totalBalance,
+                                compact: false,
+                                fixedStringLength: 2,
+                                style: textTheme.headlineMedium?.copyWith(
+                                  color: color.onSurface,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: ctxt.transaction_addExpenseTitle,
+                              onPressed: () {
+                                HapticFeedback.mediumImpact();
+                                context.push(
+                                  AppRoutes.addTransaction,
+                                  extra: {'isIncome': false},
+                                );
+                              },
+                              icon: const Icon(LucideIcons.arrowDownLeft),
+                              style: IconButton.styleFrom(
+                                foregroundColor: color.onSurface,
+                                backgroundColor: color.surfaceContainerHighest,
+                                minimumSize:
+                                    Size.square(spacing.touchTargetSmall),
+                                shape: const CircleBorder(),
+                              ),
+                            ),
+                            SizedBox(width: spacing.elementGapMin),
+                            IconButton(
+                              tooltip: ctxt.transaction_addIncomeTitle,
+                              onPressed: () {
+                                HapticFeedback.mediumImpact();
+                                context.push(
+                                  AppRoutes.addTransaction,
+                                  extra: {'isIncome': true},
+                                );
+                              },
+                              icon: const Icon(LucideIcons.arrowUpRight),
+                              style: IconButton.styleFrom(
+                                foregroundColor: color.onSurface,
+                                backgroundColor: color.surfaceContainerHighest,
+                                minimumSize:
+                                    Size.square(spacing.touchTargetSmall),
+                                shape: const CircleBorder(),
+                              ),
+                            ),
+                            SizedBox(width: spacing.elementGapMin),
+                            IconButton(
+                              tooltip: ctxt.quickAdd_title,
+                              onPressed: () {
+                                HapticFeedback.mediumImpact();
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (_) =>
+                                      const QuickAddTransactionSheet(
+                                          compact: true),
+                                );
+                              },
+                              icon: const Icon(LucideIcons.plus),
+                              style: IconButton.styleFrom(
+                                foregroundColor: color.onPrimary,
+                                backgroundColor: color.primary,
+                                minimumSize:
+                                    Size.square(spacing.touchTargetSmall),
+                                shape: const CircleBorder(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
           actions: [
@@ -499,7 +711,8 @@ class HomePageState extends ConsumerState<HomePage>
                     // Find active ongoing trip (started & isTrip)
                     final ongoingTrip = trips.where((t) {
                       if (!t.isTrip) return false;
-                      final start = DateTime(t.startDate.year, t.startDate.month, t.startDate.day);
+                      final start = DateTime(
+                          t.startDate.year, t.startDate.month, t.startDate.day);
                       return !today.isBefore(start);
                     }).firstOrNull;
 
@@ -507,7 +720,8 @@ class HomePageState extends ConsumerState<HomePage>
                     final upcomingTrip = ongoingTrip == null
                         ? trips.where((t) {
                             if (!t.isTrip) return false;
-                            final start = DateTime(t.startDate.year, t.startDate.month, t.startDate.day);
+                            final start = DateTime(t.startDate.year,
+                                t.startDate.month, t.startDate.day);
                             final daysUntil = start.difference(today).inDays;
                             return daysUntil > 0 && daysUntil <= 7;
                           }).firstOrNull
@@ -518,7 +732,8 @@ class HomePageState extends ConsumerState<HomePage>
 
                     final isUpcoming = ongoingTrip == null;
                     final daysUntil = isUpcoming
-                        ? DateTime(trip.startDate.year, trip.startDate.month, trip.startDate.day)
+                        ? DateTime(trip.startDate.year, trip.startDate.month,
+                                trip.startDate.day)
                             .difference(today)
                             .inDays
                         : 0;
@@ -530,18 +745,23 @@ class HomePageState extends ConsumerState<HomePage>
                       },
                       borderRadius: BorderRadius.circular(spacing.radiusMedium),
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal, vertical: spacing.cardVertical),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: spacing.cardHorizontal,
+                            vertical: spacing.cardVertical),
                         decoration: BoxDecoration(
                           color: isUpcoming
                               ? color.tertiaryContainer
                               : color.secondaryContainer,
-                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              isUpcoming ? LucideIcons.calendar : LucideIcons.planeTakeoff,
+                              isUpcoming
+                                  ? LucideIcons.calendar
+                                  : LucideIcons.planeTakeoff,
                               size: 14,
                               color: isUpcoming
                                   ? color.onTertiaryContainer
@@ -567,7 +787,10 @@ class HomePageState extends ConsumerState<HomePage>
                           ],
                         ),
                       ),
-                    ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.2, end: 0);
+                    )
+                        .animate()
+                        .fadeIn(duration: 300.ms)
+                        .slideX(begin: 0.2, end: 0);
                   },
                   orElse: () => const SizedBox.shrink(),
                 );
@@ -584,8 +807,23 @@ class HomePageState extends ConsumerState<HomePage>
                   children: [
                     IconButton(
                       tooltip: ctxt.common_notifications,
-                      icon: const Icon(LucideIcons.bell, size: 28),
-                      onPressed: () => context.push(AppRoutes.notifications),
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        context.push(AppRoutes.notifications);
+                      },
+                      icon: const Icon(LucideIcons.bell),
+                      style: IconButton.styleFrom(
+                        foregroundColor: color.onSurface,
+                        backgroundColor: Colors.transparent,
+                        side: BorderSide(
+                          color: color.onSurface.withValues(alpha: 0.28),
+                          width: spacing.strokeThin,
+                        ),
+                        minimumSize: Size.square(spacing.touchTargetSmall),
+                        maximumSize: Size.square(spacing.touchTargetSmall),
+                        padding: EdgeInsets.zero,
+                        shape: const CircleBorder(),
+                      ),
                     ),
                     if (count > 0)
                       Positioned(

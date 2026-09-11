@@ -1,6 +1,58 @@
 #!/bin/bash
+#!/usr/bin/env bash
 
 set -e
+
+project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+android_dir="$project_dir/android"
+
+ensure_gradle_wrapper() {
+  if [ -x "$android_dir/gradlew" ]; then
+    return
+  fi
+
+  if ! command -v gradle >/dev/null 2>&1; then
+    echo "❌ Android Gradle wrapper is missing: $android_dir/gradlew"
+    echo "   Install Gradle or restore the Android Gradle wrapper files, then retry."
+    return 1
+  fi
+
+  wrapper_properties="$android_dir/gradle/wrapper/gradle-wrapper.properties"
+  gradle_version="$(sed -n 's/.*gradle-\([0-9][0-9.]*\)-.*/\1/p' "$wrapper_properties" | head -n 1)"
+  if [ -z "$gradle_version" ]; then
+    echo "❌ Could not determine Gradle version from $wrapper_properties"
+    return 1
+  fi
+
+  echo "🧰 Gradle wrapper missing; generating Gradle $gradle_version wrapper..."
+  temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/mudra-gradle-wrapper.XXXXXX")"
+
+  if ! (
+    cd "$temp_dir"
+    printf '%s\n' "rootProject.name = 'gradle-wrapper-bootstrap'" > settings.gradle
+    printf '%s\n' "plugins { id 'base' }" > build.gradle
+    gradle --no-daemon wrapper --gradle-version "$gradle_version"
+  ); then
+    rm -rf "$temp_dir"
+    echo "❌ Could not generate the Gradle wrapper with the installed Gradle command."
+    return 1
+  fi
+
+  mkdir -p "$android_dir/gradle/wrapper"
+  cp "$temp_dir/gradlew" "$android_dir/gradlew"
+  cp "$temp_dir/gradlew.bat" "$android_dir/gradlew.bat"
+  cp "$temp_dir/gradle/wrapper/gradle-wrapper.jar" \
+    "$android_dir/gradle/wrapper/gradle-wrapper.jar"
+  chmod +x "$android_dir/gradlew"
+  rm -rf "$temp_dir"
+
+  if [ ! -x "$android_dir/gradlew" ]; then
+    echo "❌ Gradle wrapper generation did not create $android_dir/gradlew"
+    return 1
+  fi
+}
+
+cd "$project_dir"
 
 # Check if argument is passed
 if [ -z "$1" ]; then
@@ -77,10 +129,12 @@ flutter test
 echo "✅ Flutter tests passed"
 
 # Step 7: Android unit tests
+ensure_gradle_wrapper
 echo "🤖 Running Android unit tests..."
-cd android
-./gradlew testProdReleaseUnitTest
-cd ..
+(
+  cd "$android_dir"
+  ./gradlew testProdReleaseUnitTest
+)
 echo "✅ Android tests passed"
 
 # Step 8: Build appbundle

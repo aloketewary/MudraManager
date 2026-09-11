@@ -16,7 +16,7 @@ class CashFlowWidgetPlugin extends DashboardWidgetPlugin {
   IconData get icon => LucideIcons.wallet;
 
   @override
-  int get defaultOrder => 4; // Fifth
+  int get defaultOrder => 2; // After accounts and before the daily insight
 
   @override
   WidgetCategory get category => WidgetCategory.essential;

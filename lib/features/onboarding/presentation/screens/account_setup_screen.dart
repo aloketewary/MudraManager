@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_provider.dart';
 import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
@@ -74,6 +73,12 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     super.initState();
     _accountController.addListener(_onAccountTextChanged);
   }
+
+  bool get _animationsDisabled =>
+      MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+
+  Duration _animationDuration(Duration duration) =>
+      _animationsDisabled ? Duration.zero : duration;
 
   void _onAccountTextChanged() {
     if (_accountController.text.isNotEmpty) {
@@ -315,41 +320,61 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // ── TOP BAR ──
+              // ── SETUP PROGRESS ──
               Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal,
-                  vertical: spacing.cardVerticalMin,
+                padding: EdgeInsets.fromLTRB(
+                  spacing.cardHorizontal + 8,
+                  spacing.cardVertical + 4,
+                  spacing.cardHorizontal + 8,
+                  spacing.cardVertical,
                 ),
                 child: Row(
                   children: [
                     IconButton(
+                      tooltip:
+                          MaterialLocalizations.of(context).backButtonTooltip,
                       icon: Icon(
                         LucideIcons.chevronLeft,
-                        color: color.onSurfaceVariant,
+                        color: color.onSurface,
                       ),
                       onPressed: _prevStep,
                     ),
-                    const Spacer(),
-                    Row(
-                      children: List.generate(6, (i) {
-                        final active = i <= _step;
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          width: active ? 28 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: active
-                                ? accent
-                                : color.onSurfaceVariant.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Row(
+                        children: List.generate(
+                          6,
+                          (i) => Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(right: i == 5 ? 0 : 6),
+                              child: AnimatedContainer(
+                                duration: _animationDuration(
+                                  const Duration(milliseconds: 240),
+                                ),
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: i <= _step
+                                      ? accent
+                                      : color.outlineVariant.withValues(
+                                          alpha: 0.38,
+                                        ),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                            ),
                           ),
-                        );
-                      }),
+                        ),
+                      ),
                     ),
-                    const Spacer(),
-                    const SizedBox(width: 48),
+                    const SizedBox(width: 16),
+                    Text(
+                      '${(_step + 1).toString().padLeft(2, '0')} / 06',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: color.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -357,7 +382,9 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
               // ── CONTENT ──
               Expanded(
                 child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
+                  duration: _animationDuration(
+                    const Duration(milliseconds: 260),
+                  ),
                   switchInCurve: Curves.easeOut,
                   switchOutCurve: Curves.easeIn,
                   transitionBuilder: (child, animation) {
@@ -374,17 +401,53 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                   },
                   child: switch (_step) {
                     0 => _buildNameStep(
-                        color, textTheme, spacing, ctxt, accent, isDark,),
+                        color,
+                        textTheme,
+                        spacing,
+                        ctxt,
+                        accent,
+                        isDark,
+                      ),
                     1 => _buildCurrencyStep(
-                        color, textTheme, spacing, accent, isDark, ctxt,),
+                        color,
+                        textTheme,
+                        spacing,
+                        accent,
+                        isDark,
+                        ctxt,
+                      ),
                     2 => _buildAccountStep(
-                        color, textTheme, spacing, ctxt, accent, isDark,),
+                        color,
+                        textTheme,
+                        spacing,
+                        ctxt,
+                        accent,
+                        isDark,
+                      ),
                     3 => _buildToneStep(
-                        color, textTheme, spacing, isDark, accent, ctxt,),
+                        color,
+                        textTheme,
+                        spacing,
+                        isDark,
+                        accent,
+                        ctxt,
+                      ),
                     4 => _buildPackPickerStep(
-                        color, textTheme, spacing, isDark, accent, ctxt,),
+                        color,
+                        textTheme,
+                        spacing,
+                        isDark,
+                        accent,
+                        ctxt,
+                      ),
                     _ => _buildStarterTxnStep(
-                        color, textTheme, spacing, ctxt, accent, isDark,),
+                        color,
+                        textTheme,
+                        spacing,
+                        ctxt,
+                        accent,
+                        isDark,
+                      ),
                   },
                 ),
               ),
@@ -401,13 +464,13 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                   children: [
                     SizedBox(
                       width: double.infinity,
-                      height: 52,
+                      height: 56,
                       child: FilledButton(
                         onPressed: () => _isLoading ? null : _nextStep(spacing),
                         style: FilledButton.styleFrom(
+                          elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusMedium),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: _isLoading
@@ -483,6 +546,55 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     );
   }
 
+  Widget _buildStepHeader({
+    required ColorScheme color,
+    required TextTheme textTheme,
+    required AppSpacing spacing,
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax + 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color.primaryContainer.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: color.primary.withValues(alpha: 0.16),
+              ),
+            ),
+            child: Icon(icon, size: 23, color: color.primary),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            title,
+            style: textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color.onSurface,
+              letterSpacing: -0.6,
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            description,
+            style: textTheme.bodyLarge?.copyWith(
+              color: color.onSurfaceVariant,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── STEP 1: NAME ──
   Widget _buildNameStep(
     ColorScheme color,
@@ -497,68 +609,18 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       child: Column(
         key: const ValueKey('name_step'),
         children: [
-          const SizedBox(height: 32),
-          TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutBack,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (context, value, child) => Opacity(
-              opacity: value.clamp(0.0, 1.0),
-              child: Transform.scale(scale: value, child: child),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: accent.withValues(alpha: 0.25),
-                  width: 2.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: accent.withValues(alpha: isDark ? 0.15 : 0.12),
-                    blurRadius: 40,
-                    spreadRadius: 8,
-                  ),
-                ],
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      accent.withValues(alpha: isDark ? 0.2 : 0.14),
-                      accent.withValues(alpha: isDark ? 0.08 : 0.05),
-                    ],
-                  ),
-                ),
-                child: Icon(LucideIcons.userRound, size: 48, color: accent),
-              ),
+          const SizedBox(height: 24),
+          _buildStepHeader(
+            color: color,
+            textTheme: textTheme,
+            spacing: spacing,
+            icon: LucideIcons.userRound,
+            title: ctxt.translate('onboard_howShouldWeCallYou'),
+            description: ctxt.translate(
+              'onboard_enterYourNameToPersonalizeYourExperience',
             ),
           ),
-          const SizedBox(height: 32),
-          Text(
-            ctxt.translate('onboard_howShouldWeCallYou'),
-            style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: color.onSurface,
-              letterSpacing: -0.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            ctxt.translate('onboard_enterYourNameToPersonalizeYourExperience'),
-            style: textTheme.bodyLarge?.copyWith(
-              color: color.onSurfaceVariant,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 36),
+          const SizedBox(height: 28),
           TextFormField(
             controller: _nameController,
             decoration: InputDecoration(
@@ -599,72 +661,16 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax + 8),
       child: Column(
         children: [
-          const SizedBox(height: 32),
-          TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutBack,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (context, value, child) => Opacity(
-              opacity: value.clamp(0.0, 1.0),
-              child: Transform.scale(scale: value, child: child),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: accent.withValues(alpha: 0.25),
-                  width: 2.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: accent.withValues(alpha: isDark ? 0.15 : 0.12),
-                    blurRadius: 40,
-                    spreadRadius: 8,
-                  ),
-                ],
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      accent.withValues(alpha: isDark ? 0.2 : 0.14),
-                      accent.withValues(alpha: isDark ? 0.08 : 0.05),
-                    ],
-                  ),
-                ),
-                child: CurrencyBadge(
-                  code: _selectedCurrency,
-                  size: 36,
-                  color: accent,
-                ),
-              ),
-            ),
+          const SizedBox(height: 24),
+          _buildStepHeader(
+            color: color,
+            textTheme: textTheme,
+            spacing: spacing,
+            icon: LucideIcons.coins,
+            title: BuddyMessages.currencyPickerTitle,
+            description: BuddyMessages.currencyPickerSubtitle,
           ),
-          const SizedBox(height: 32),
-          Text(
-            BuddyMessages.currencyPickerTitle,
-            style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: color.onSurface,
-              letterSpacing: -0.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            BuddyMessages.currencyPickerSubtitle,
-            style: textTheme.bodyLarge?.copyWith(
-              color: color.onSurfaceVariant,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -726,7 +732,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                 isScrollControlled: true,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(spacing.radiusSmall * 2),),
+                    top: Radius.circular(spacing.radiusSmall * 2),
+                  ),
                 ),
                 builder: (_) => _AllCurrenciesSheet(
                   selected: _selectedCurrency,
@@ -780,73 +787,16 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       child: Column(
         key: const ValueKey('account_step'),
         children: [
-          const SizedBox(height: 32),
-          TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutBack,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (context, value, child) => Opacity(
-              opacity: value.clamp(0.0, 1.0),
-              child: Transform.scale(scale: value, child: child),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: color.primary.withValues(alpha: 0.25),
-                  width: 2.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color:
-                        color.primary.withValues(alpha: isDark ? 0.15 : 0.12),
-                    blurRadius: 40,
-                    spreadRadius: 8,
-                  ),
-                ],
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      color.primary.withValues(alpha: isDark ? 0.2 : 0.14),
-                      color.primary.withValues(alpha: isDark ? 0.08 : 0.05),
-                    ],
-                  ),
-                ),
-                child: Icon(
-                  LucideIcons.wallet,
-                  size: 48,
-                  color: color.primary,
-                ),
-              ),
-            ),
+          const SizedBox(height: 24),
+          _buildStepHeader(
+            color: color,
+            textTheme: textTheme,
+            spacing: spacing,
+            icon: LucideIcons.wallet,
+            title: ctxt.translate('onboard_setupYourFirstAccount'),
+            description: ctxt.translate('onboard_letsCreateYourFirstAccount'),
           ),
-          const SizedBox(height: 32),
-          Text(
-            ctxt.translate('onboard_setupYourFirstAccount'),
-            style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: color.onSurface,
-              letterSpacing: -0.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            ctxt.translate('onboard_letsCreateYourFirstAccount'),
-            style: textTheme.bodyLarge?.copyWith(
-              color: color.onSurfaceVariant,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 36),
+          const SizedBox(height: 28),
           TextFormField(
             controller: _accountController,
             decoration: InputDecoration(
@@ -857,7 +807,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
               prefixIcon:
                   Icon(LucideIcons.wallet, color: color.primary, size: 20),
               border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 borderSide: BorderSide(color: color.primary, width: 2),
@@ -874,10 +825,14 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
             decoration: InputDecoration(
               labelText: ctxt.onboard_initialBalance,
               hintText: '0',
-              prefixIcon: Icon(currencyIcon(_selectedCurrency),
-                  color: color.primary, size: 20,),
+              prefixIcon: Icon(
+                currencyIcon(_selectedCurrency),
+                color: color.primary,
+                size: 20,
+              ),
               border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 borderSide: BorderSide(color: color.primary, width: 2),
@@ -934,76 +889,19 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax + 8),
       child: Column(
         children: [
-          const SizedBox(height: 32),
-          TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutBack,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (context, value, child) => Opacity(
-              opacity: value.clamp(0.0, 1.0),
-              child: Transform.scale(scale: value, child: child),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: color.tertiary.withValues(alpha: 0.25),
-                  width: 2.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color:
-                        color.tertiary.withValues(alpha: isDark ? 0.15 : 0.12),
-                    blurRadius: 40,
-                    spreadRadius: 8,
-                  ),
-                ],
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      color.tertiary.withValues(alpha: isDark ? 0.2 : 0.14),
-                      color.tertiary.withValues(alpha: isDark ? 0.08 : 0.05),
-                    ],
-                  ),
-                ),
-                child: Icon(
-                  LucideIcons.messageCircleHeart,
-                  size: 48,
-                  color: color.tertiary,
-                ),
-              ),
-            ),
+          const SizedBox(height: 24),
+          _buildStepHeader(
+            color: color,
+            textTheme: textTheme,
+            spacing: spacing,
+            icon: _toneIcon(activeTone.id),
+            title: ctxt.onboard_toneTitle,
+            description: ctxt.onboard_toneDesc,
           ),
-          const SizedBox(height: 32),
-          Text(
-            ctxt.onboard_toneTitle,
-            style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: color.onSurface,
-              letterSpacing: -0.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            ctxt.onboard_toneDesc,
-            style: textTheme.bodyLarge?.copyWith(
-              color: color.onSurfaceVariant,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
           ...allTonePacks.map((tone) {
             final isSelected = activeTone.id == tone.id;
-            final toneColor = isSelected ? color.tertiary : color.onSurface;
+            final toneColor = isSelected ? color.primary : color.onSurface;
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -1018,11 +916,11 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     color: isSelected
-                        ? color.tertiary.withValues(alpha: isDark ? 0.15 : 0.08)
+                        ? color.primary.withValues(alpha: isDark ? 0.15 : 0.08)
                         : color.surfaceContainerLow,
                     border: Border.all(
                       color: isSelected
-                          ? color.tertiary.withValues(alpha: 0.5)
+                          ? color.primary.withValues(alpha: 0.5)
                           : color.outlineVariant.withValues(alpha: 0.4),
                       width: isSelected ? 1.5 : 1,
                     ),
@@ -1032,9 +930,21 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            tone.emoji,
-                            style: const TextStyle(fontSize: 22),
+                          Container(
+                            width: 40,
+                            height: 40,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: color.primaryContainer.withValues(
+                                alpha: 0.55,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              _toneIcon(tone.id),
+                              size: 20,
+                              color: toneColor,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -1064,7 +974,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                                 ? LucideIcons.circleCheck
                                 : LucideIcons.circle,
                             color: isSelected
-                                ? color.tertiary
+                                ? color.primary
                                 : color.outlineVariant,
                             size: 22,
                           ),
@@ -1079,7 +989,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                           ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
-                            color: color.tertiary.withValues(alpha: 0.08),
+                            color: color.primary.withValues(alpha: 0.08),
                           ),
                           child: Row(
                             children: [
@@ -1115,6 +1025,16 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     );
   }
 
+  IconData _toneIcon(String id) {
+    return switch (id) {
+      'friendly' => LucideIcons.handshake,
+      'professional' => LucideIcons.briefcase,
+      'motivational' => LucideIcons.trophy,
+      'calm' => LucideIcons.leaf,
+      _ => LucideIcons.messageCircle,
+    };
+  }
+
   // ── STEP 4: PACK PICKER ──
   Widget _buildPackPickerStep(
     ColorScheme color,
@@ -1130,78 +1050,13 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       key: const ValueKey('pack_step'),
       children: [
         const SizedBox(height: 24),
-        // Hero
-        TweenAnimationBuilder<double>(
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeOutBack,
-          tween: Tween(begin: 0.0, end: 1.0),
-          builder: (context, value, child) => Opacity(
-            opacity: value.clamp(0.0, 1.0),
-            child: Transform.scale(scale: value, child: child),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: color.tertiary.withValues(alpha: 0.25),
-                width: 2.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: color.tertiary.withValues(alpha: isDark ? 0.15 : 0.12),
-                  blurRadius: 40,
-                  spreadRadius: 8,
-                ),
-              ],
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    color.tertiary.withValues(alpha: isDark ? 0.2 : 0.14),
-                    color.tertiary.withValues(alpha: isDark ? 0.08 : 0.05),
-                  ],
-                ),
-              ),
-              child: Icon(
-                LucideIcons.layoutGrid,
-                size: 48,
-                color: color.tertiary,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        Padding(
-          padding:
-              EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax + 8),
-          child: Column(
-            children: [
-              Text(
-                ctxt.onboard_categoriesTitle,
-                style: textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: color.onSurface,
-                  letterSpacing: -0.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                ctxt.onboard_categoriesDesc,
-                style: textTheme.bodyLarge?.copyWith(
-                  color: color.onSurfaceVariant,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+        _buildStepHeader(
+          color: color,
+          textTheme: textTheme,
+          spacing: spacing,
+          icon: LucideIcons.layoutGrid,
+          title: ctxt.onboard_categoriesTitle,
+          description: ctxt.onboard_categoriesDesc,
         ),
         const SizedBox(height: 20),
 
@@ -1241,7 +1096,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                 child: Row(
                   children: [
                     Icon(
-                      LucideIcons.sparkles,
+                      LucideIcons.settings2,
                       color: _startFresh ? accent : color.onSurfaceVariant,
                       size: 20,
                     ),
@@ -1403,61 +1258,16 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax + 8),
       child: Column(
         children: [
-          const SizedBox(height: 32),
-          TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutBack,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (context, value, child) => Opacity(
-              opacity: value.clamp(0.0, 1.0),
-              child: Transform.scale(scale: value, child: child),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: accent.withValues(alpha: 0.25),
-                  width: 2.5,
-                ),
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      accent.withValues(alpha: isDark ? 0.2 : 0.14),
-                      accent.withValues(alpha: isDark ? 0.08 : 0.05),
-                    ],
-                  ),
-                ),
-                child: Icon(LucideIcons.receiptText, size: 48, color: accent),
-              ),
-            ),
+          const SizedBox(height: 24),
+          _buildStepHeader(
+            color: color,
+            textTheme: textTheme,
+            spacing: spacing,
+            icon: LucideIcons.receiptText,
+            title: ctxt.onboard_whatDidYouSpend,
+            description: ctxt.onboard_addFewToStart,
           ),
-          const SizedBox(height: 32),
-          Text(
-            ctxt.onboard_whatDidYouSpend,
-            style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: color.onSurface,
-              letterSpacing: -0.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            ctxt.onboard_addFewToStart,
-            style: textTheme.bodyLarge?.copyWith(
-              color: color.onSurfaceVariant,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
           ..._starterItems.map((item) {
             final controller = _starterControllers[item.$1]!;
             return Padding(

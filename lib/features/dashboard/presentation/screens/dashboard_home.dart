@@ -28,6 +28,7 @@ import 'package:mudra_manager/features/dashboard/data/widget_analytics_provider.
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/dashboard_banners.dart';
+import 'package:mudra_manager/features/dashboard/presentation/widgets/daily_briefing_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/first_transaction_nudge.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/sms_success_celebration_sheet.dart';
 import 'package:mudra_manager/features/gamification/presentation/widgets/streak_saved_celebration_sheet.dart';
@@ -96,16 +97,44 @@ class DashboardAnimationNotifier extends Notifier<DashboardAnimationState> {
 // ─────────────────────────────────────────────────────────────
 
 class DashboardHome extends ConsumerWidget {
-  const DashboardHome({super.key});
+  final ValueChanged<double>? onScrollOffsetChanged;
+  final double headerCollapseProgress;
+
+  const DashboardHome({
+    super.key,
+    this.onScrollOffsetChanged,
+    this.headerCollapseProgress = 0,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const _DashboardHomeBody();
+    final spacing = ref.watch(spacingProvider);
+    final headerCollapseOffset =
+        (spacing.cardInner * 3 + spacing.sectionGap) * headerCollapseProgress;
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.depth == 0) {
+          onScrollOffsetChanged?.call(notification.metrics.pixels);
+        }
+        return false;
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(spacing.radiusLarge + spacing.elementGap),
+        ),
+        child: _DashboardHomeBody(
+          headerCollapseOffset: headerCollapseOffset,
+        ),
+      ),
+    );
   }
 }
 
 class _DashboardHomeBody extends ConsumerStatefulWidget {
-  const _DashboardHomeBody();
+  final double headerCollapseOffset;
+
+  const _DashboardHomeBody({this.headerCollapseOffset = 0});
 
   @override
   ConsumerState<_DashboardHomeBody> createState() => _DashboardHomeBodyState();
@@ -117,9 +146,13 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
   @override
   void initState() {
     super.initState();
-    ref.read(budgetRefreshProvider.notifier).refresh(
-          BudgetRefreshReason.navigation,
-        );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      ref.read(budgetRefreshProvider.notifier).refresh(
+            BudgetRefreshReason.navigation,
+          );
+    });
     TodayCardAnalytics.recordSessionStart();
     _initializeDashboard();
   }
@@ -187,7 +220,9 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
             }
           } else {
             SnackbarService.success(
-                '🔥 Day $streakCount streak! +${result.xpEarned} XP', spacing,);
+              '🔥 Day $streakCount streak! +${result.xpEarned} XP',
+              spacing,
+            );
           }
           log.i('Daily check-in completed successfully');
         }
@@ -254,41 +289,44 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
         tooltip: ctxt.quickAdd_title,
         child: const Icon(LucideIcons.plus),
       ),
-      body: dashboardAsync.when(
-        loading: () => const _DashboardLoading(),
-        error: (e, _) => _buildErrorState(e, ctxt),
-        data: (data) {
-          // Pre-compute expensive operations once
-          final txns = data.transactions.where((t) => !t.isTransfer).toList();
-          final hasTransactions = txns.isNotEmpty;
+      body: Padding(
+        padding: EdgeInsets.only(top: widget.headerCollapseOffset),
+        child: dashboardAsync.when(
+          loading: () => const _DashboardLoading(),
+          error: (e, _) => _buildErrorState(e, ctxt),
+          data: (data) {
+            // Pre-compute expensive operations once
+            final txns = data.transactions.where((t) => !t.isTransfer).toList();
+            final hasTransactions = txns.isNotEmpty;
 
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final maxWidth =
-                  constraints.maxWidth > DashboardConstants.maxWidth
-                      ? DashboardConstants.maxWidth
-                      : double.infinity;
-              return Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxWidth),
-                  child: _DashboardContent(
-                    reduceMotion: reduceMotion,
-                    data: data,
-                    widgets: widgets,
-                    alerts: alerts,
-                    hasSeenHelp: hasSeenHelp,
-                    animationState: animationState,
-                    pendingSmsCount: data.pendingSmsCount,
-                    hasTransactions: hasTransactions,
-                    nudgeDismissed:
-                        SharedPrefsUtil.instance.getFirstTxnNudgeDismissed(),
-                    isNewUser: _isNewUser(),
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final maxWidth =
+                    constraints.maxWidth > DashboardConstants.maxWidth
+                        ? DashboardConstants.maxWidth
+                        : double.infinity;
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    child: _DashboardContent(
+                      reduceMotion: reduceMotion,
+                      data: data,
+                      widgets: widgets,
+                      alerts: alerts,
+                      hasSeenHelp: hasSeenHelp,
+                      animationState: animationState,
+                      pendingSmsCount: data.pendingSmsCount,
+                      hasTransactions: hasTransactions,
+                      nudgeDismissed:
+                          SharedPrefsUtil.instance.getFirstTxnNudgeDismissed(),
+                      isNewUser: _isNewUser(),
+                    ),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -579,8 +617,8 @@ class _DashboardLoading extends ConsumerWidget {
           child: Column(
             children: [
               SizedBox(height: spacing.elementGap),
+              const TodayBriefingSkeleton(),
               const AccountCardSkeleton(),
-              const QuickActionsSkeleton(),
               const CashFlowSkeleton(),
               const BudgetCardSkeleton(),
               const DashboardCardSkeleton(),

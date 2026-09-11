@@ -574,6 +574,6 @@ void main() {
         expect(fallbackTransactions.single.category.value!.name, food.name);
       }
     },
-    timeout: Timeout(const Duration(minutes: 2)),
+    timeout: const Timeout(Duration(minutes: 2)),
   );
 }

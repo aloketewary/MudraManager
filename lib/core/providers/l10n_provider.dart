@@ -6,8 +6,8 @@ import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 
-
-final localeProvider = NotifierProvider<_LocaleNotifier, Locale>(_LocaleNotifier.new);
+final localeProvider =
+    NotifierProvider<_LocaleNotifier, Locale>(_LocaleNotifier.new);
 
 class _LocaleNotifier extends Notifier<Locale> {
   @override
@@ -36,34 +36,65 @@ class LanguageService {
   }
 
   static void showLanguagePicker(BuildContext context, WidgetRef ref) {
-    final currentLocale = ref.read(localeProvider);
     final spacing = ref.watch(spacingProvider);
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusSmall * 2)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(spacing.radiusSmall * 2),
+        ),
       ),
-      builder: (_) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+      builder: (sheetContext) => DraggableScrollableSheet(
+        initialChildSize: 0.65,
+        minChildSize: 0.45,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) {
+          final color = Theme.of(context).colorScheme;
+
+          return Column(
             children: [
-              ...AppLocalizations.supportedLocales.map(
-                (locale) => _buildLanguageTile(
-                  context,
-                  ref,
-                  language: locale.displayName(),
-                  locale: locale,
-                  isSelected: currentLocale.languageCode == locale.languageCode,
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
+              Expanded(
+                child: Consumer(
+                  builder: (context, sheetRef, _) {
+                    final currentLocale = sheetRef.watch(localeProvider);
+
+                    return ListView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.only(bottom: 10),
+                      itemCount: AppLocalizations.supportedLocales.length,
+                      itemBuilder: (context, index) {
+                        final locale = AppLocalizations.supportedLocales[index];
+                        return _buildLanguageTile(
+                          sheetContext,
+                          sheetRef,
+                          language: locale.displayName(),
+                          locale: locale,
+                          isSelected:
+                              currentLocale.languageCode == locale.languageCode,
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
             ],
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -77,7 +108,8 @@ class LanguageService {
     return ListTile(
       leading: const Icon(LucideIcons.languages),
       title: Text(language),
-      trailing: isSelected ? const Icon(LucideIcons.check, color: Colors.blue) : null,
+      trailing:
+          isSelected ? const Icon(LucideIcons.check, color: Colors.blue) : null,
       onTap: () => changeLanguage(context, ref, locale),
     );
   }

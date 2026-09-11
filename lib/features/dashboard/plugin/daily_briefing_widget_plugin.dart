@@ -16,7 +16,7 @@ class DailyBriefingWidgetPlugin extends DashboardWidgetPlugin {
   IconData get icon => LucideIcons.newspaper;
 
   @override
-  int get defaultOrder => 2;
+  int get defaultOrder => 3; // Immediately after Cash Flow
 
   @override
   WidgetCategory get category => WidgetCategory.essential;

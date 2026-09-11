@@ -1,3 +1,4 @@
+import 'package:auto_skeleton/auto_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
@@ -265,14 +267,73 @@ class _Signal {
   });
 }
 
-/// Compact "today" status strip with blog-style quote divider.
+/// Compact Insight card for the daily financial briefing.
 ///
 /// Design contract (dashboard-visual-polish steering):
-/// - No balance / currency amount shown here — that's Accounts' job.
+/// - No balance / currency amount shown here - that's Accounts' job.
 /// - One glance, one line of status text, optional single action chip.
 /// - Healthy state: quiet positive affirmation, no numbers.
 /// - Alert state: plain-language signal + one CTA chip, tap anywhere to act.
-/// - Quote divider: blog-style decorative element for visual hierarchy.
+/// - Dark surface separates this insight from the money summary above.
+class TodayBriefingSkeleton extends ConsumerWidget {
+  const TodayBriefingSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+    final insightBackground = color.brightness == Brightness.light
+        ? const Color(0xFF151215)
+        : color.surfaceContainerHighest;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      child: AutoSkeleton(
+        enabled: true,
+        child: Container(
+          decoration: BoxDecoration(
+            color: insightBackground,
+            borderRadius: BorderRadius.circular(spacing.radiusLarge),
+            boxShadow: [
+              BoxShadow(
+                color: color.primary.withValues(alpha: 0.16),
+                blurRadius: 18,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardInner * 0.7,
+              vertical: spacing.elementGap,
+            ),
+            child: Row(
+              children: [
+                Icon(LucideIcons.sparkles, size: 20, color: color.primary),
+                SizedBox(width: spacing.elementGap),
+                const Expanded(
+                  child: Text(
+                    'Your financial insight is loading',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                SizedBox(width: spacing.elementGap),
+                const Text('Review'),
+                SizedBox(width: spacing.elementGapMin),
+                const Icon(LucideIcons.chevronRight, size: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class TodayBriefingCard extends ConsumerStatefulWidget {
   const TodayBriefingCard({super.key});
 
@@ -306,12 +367,20 @@ class _TodayBriefingCardState extends ConsumerState<TodayBriefingCard> {
     }
 
     final isHealthy = state.isHealthy;
+    final isPro = ref.watch(isProProvider).value ?? false;
+    final showUpgrade = isHealthy && !isPro;
     final statusColor = isHealthy ? color.primary : color.error;
     final statusIcon =
-        isHealthy ? LucideIcons.circleCheck : LucideIcons.circleAlert;
+        isHealthy ? LucideIcons.sparkles : LucideIcons.circleAlert;
     final statusText =
-        isHealthy ? 'All good today' : _formatBriefMessage(state);
-    final hasAction = !isHealthy && state.actionRoute != null;
+        isHealthy ? 'Your insight is ready' : _formatBriefMessage(state);
+    final hasAction = showUpgrade || (!isHealthy && state.actionRoute != null);
+    final insightBackground = color.brightness == Brightness.light
+        ? const Color(0xFF151215)
+        : color.surfaceContainerHighest;
+    final insightText = color.brightness == Brightness.light
+        ? const Color(0xFFF7F3F8)
+        : color.onSurface;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -320,18 +389,24 @@ class _TodayBriefingCardState extends ConsumerState<TodayBriefingCard> {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: color.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(spacing.radiusSmall),
-          border: Border(
-            left: BorderSide(
-              color: statusColor,
-              width: 3,
+          color: insightBackground,
+          borderRadius: BorderRadius.circular(spacing.radiusLarge),
+          boxShadow: [
+            BoxShadow(
+              color: color.primary.withValues(alpha: 0.16),
+              blurRadius: 18,
+              offset: const Offset(0, 4),
             ),
-          ),
+          ],
         ),
         child: InkWell(
           onTap: hasAction
               ? () {
+                  if (showUpgrade) {
+                    HapticFeedback.mediumImpact();
+                    context.push(AppRoutes.upgrade);
+                    return;
+                  }
                   HapticFeedback.lightImpact();
                   TodayCardAnalytics.recordCtaTapped(
                     signalType: state.signalType!,
@@ -340,74 +415,47 @@ class _TodayBriefingCardState extends ConsumerState<TodayBriefingCard> {
                   context.push(state.actionRoute!);
                 }
               : null,
-          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+          borderRadius: BorderRadius.circular(spacing.radiusLarge),
           child: Padding(
-            padding: EdgeInsets.all(spacing.cardInner),
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardInner * 0.7,
+              vertical: spacing.elementGap,
+            ),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                  ),
-                  child: Icon(statusIcon, size: 18, color: statusColor),
+                Icon(
+                  statusIcon,
+                  size: 20,
+                  color: isHealthy ? color.primary : statusColor,
                 ),
                 SizedBox(width: spacing.elementGap),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.today_label,
-                        style: textTheme.labelSmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        statusText,
-                        style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: isHealthy ? color.onSurface : statusColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                  child: Text(
+                    statusText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: isHealthy ? insightText : statusColor,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-                if (hasAction)
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.elementGap + 2,
-                      vertical: spacing.elementGapMin,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _formatActionLabel(l10n, state),
-                          style: textTheme.labelSmall?.copyWith(
-                            color: statusColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          LucideIcons.arrowRight,
-                          size: 12,
-                          color: statusColor,
-                        ),
-                      ],
+                if (hasAction) ...[
+                  SizedBox(width: spacing.elementGap),
+                  Text(
+                    showUpgrade ? 'Get Pro' : _formatActionLabel(l10n, state),
+                    style: textTheme.labelMedium?.copyWith(
+                      color: showUpgrade ? insightText : statusColor,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
+                  SizedBox(width: spacing.elementGapMin),
+                  Icon(
+                    LucideIcons.chevronRight,
+                    size: 16,
+                    color: showUpgrade ? insightText : statusColor,
+                  ),
+                ],
               ],
             ),
           ),

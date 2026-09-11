@@ -12,7 +12,7 @@
 | `sms_info_card.dart` | SMS parsing result card |
 | `settings_action_card.dart` | SMS settings action buttons |
 | `settings_toggle_card.dart` | SMS toggle preferences |
-| `sms_import_setting_screen.dart` | SMS import configuration |
+| `sms_import_screen.dart` | SMS import configuration |
 
 ---
 

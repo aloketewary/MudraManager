@@ -148,21 +148,24 @@ class QuickActionsSkeleton extends ConsumerWidget {
           vertical: spacing.cardVertical,
         ),
         child: Row(
-          children: List.generate(4, (i) {
+          children: List.generate(3, (i) {
             return Expanded(
               child: Padding(
                 padding: EdgeInsets.only(
-                  right: i < 3 ? spacing.elementGap : 0,
+                  right: i < 2 ? spacing.elementGap : 0,
                 ),
                 child: Column(
                   children: [
                     _Bone(
-                      width: 48,
-                      height: 48,
-                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                      width: spacing.touchTargetSmall,
+                      height: spacing.touchTargetSmall,
+                      borderRadius: spacing.borderRadiusSmall,
                     ),
-                    const SizedBox(height: 6),
-                    const _Bone(width: 40, height: 10),
+                    SizedBox(height: spacing.elementGapMin),
+                    _Bone(
+                      width: spacing.cardInner,
+                      height: spacing.elementGap,
+                    ),
                   ],
                 ),
               ),

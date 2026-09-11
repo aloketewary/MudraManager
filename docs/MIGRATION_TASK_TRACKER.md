@@ -277,7 +277,7 @@ Every screen maps to exactly ONE template.
 - `AddEditAccountScreen` — TextButton save in AppBar
 - `AddEditCategoryScreen` — TextButton save in AppBar
 - `ReconciliationScreen` — TextButton confirm in AppBar
-- `SmsImportSettingScreen` — nested Scaffolds (multi-step)
+- `SmsImportScreen` — nested Scaffolds (multi-step)
 
 ### Does NOT exist (removed from tracker):
 - ~~Transaction detail~~ — no read-only detail screen exists; edit goes to AddEditTransactionScreen
