@@ -13,11 +13,10 @@ import 'package:mudra_manager/features/dashboard/plugin/recurring_expenses_widge
 /// 1. AI Insights (0) - Contextual alerts at top
 /// 2. Accounts (1) - Most important: current balance
 /// 3. Quick Actions (2) - Easy access to common tasks
-/// 4. Cash Flow (3) - Income vs Expense overview
-/// 5. Budget Overview (4) - Budget health check
-/// 6. Goals Progress (5) - Savings motivation
-/// 7. Recurring Expenses (6) - Bill reminders
-/// 8. Recent Transactions (7) - Latest activity
+/// 4. Budget Overview (4) - Budget health check
+/// 5. Goals Progress (5) - Savings motivation
+/// 6. Recurring Expenses (6) - Bill reminders
+/// 7. Recent Transactions (7) - Latest activity
 class DashboardWidgetRegistry {
   static final List<DashboardWidgetPlugin> _widgets = [
     // Health Strip — attention orientation

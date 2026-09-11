@@ -260,7 +260,7 @@ class _AnimatedSwipeableAccountCardsState
                         ? null
                         : accounts[balanceViewIndex].currencyCode,
                     style: textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       color: color.onSurface,
                     ),
                     compact: false,
@@ -328,7 +328,7 @@ class _AnimatedSwipeableAccountCardsState
                         value: netCashFlow,
                         style: textTheme.labelMedium?.copyWith(
                           color: netCashFlow >= 0 ? color.primary : color.error,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -620,7 +620,7 @@ class _AnimatedSwipeableAccountCardsState
                                                           ?.copyWith(
                                                         color: Colors.white,
                                                         fontWeight:
-                                                            FontWeight.w700,
+                                                            FontWeight.w500,
                                                         fontFamily: AppTheme
                                                             .monoFontFamily,
                                                       ),
@@ -957,7 +957,7 @@ class _AnimatedSwipeableAccountCardsState
                           fixedStringLength: 0,
                           style: textTheme.titleLarge?.copyWith(
                             color: Colors.white,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                             fontFamily: AppTheme.monoFontFamily,
                           ),
                         ),
@@ -997,7 +997,7 @@ class _AnimatedSwipeableAccountCardsState
                           fixedStringLength: 0,
                           style: textTheme.titleMedium?.copyWith(
                             color: Colors.white,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                             fontFamily: AppTheme.monoFontFamily,
                           ),
                         ),
@@ -1096,7 +1096,7 @@ class _AnimatedSwipeableAccountCardsState
                           style: textTheme.titleLarge?.copyWith(
                             color: Colors.white,
                             letterSpacing: 2,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                             fontFamily: AppTheme.monoFontFamily,
                           ),
                         ),

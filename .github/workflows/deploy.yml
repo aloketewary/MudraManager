@@ -51,11 +51,46 @@ jobs:
           storeFile=keystore.jks
           EOF
 
+      - name: Read and validate release version
+        id: version
+        shell: bash
+        run: |
+          version="$(sed -nE 's/^version: ([0-9]+\.[0-9]+\.[0-9]+)\+([0-9]+)$/\1+\2/p' pubspec.yaml)"
+          if [ -z "$version" ]; then
+            echo "Could not read version from pubspec.yaml"
+            exit 1
+          fi
+
+          build_name="${version%%+*}"
+          build_number="${version##*+}"
+
+          if [ "$GITHUB_EVENT_NAME" = "push" ] && [ "${GITHUB_REF_NAME#v}" != "$version" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match pubspec version $version"
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "build_name=$build_name" >> "$GITHUB_OUTPUT"
+          echo "build_number=$build_number" >> "$GITHUB_OUTPUT"
+          echo "Building $build_name (versionCode $build_number)"
+
       - name: Build App Bundle
         run: |
           export JAVA_HOME=$JAVA_HOME_17_X64
-          flutter build appbundle --release --flavor prod --verbose
+          flutter build appbundle \
+            --release \
+            --flavor prod \
+            --build-name "${{ steps.version.outputs.build_name }}" \
+            --build-number "${{ steps.version.outputs.build_number }}" \
+            --verbose
         continue-on-error: false
+
+      - name: Verify Android version code
+        run: |
+          manifest_metadata="build/app/intermediates/merged_manifests/prodRelease/processProdReleaseManifest/output-metadata.json"
+          test -f "$manifest_metadata"
+          grep -q '"versionCode": ${{ steps.version.outputs.build_number }}' "$manifest_metadata"
+          echo "Verified versionCode ${{ steps.version.outputs.build_number }}"
 
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1

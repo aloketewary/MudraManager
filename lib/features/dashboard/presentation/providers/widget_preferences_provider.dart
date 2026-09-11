@@ -153,45 +153,17 @@ final widgetPreferencesProvider =
 
 final orderedDashboardWidgetsProvider =
     Provider<List<DashboardWidgetPlugin>>((ref) {
-  final preferencesAsync = ref.watch(widgetPreferencesProvider);
   final isSimple = ref.watch(isSimpleModeProvider);
+  final widgets = DashboardWidgetRegistry.widgets
+      .where(
+        (widget) =>
+            widget.defaultVisible && (!isSimple || !widget.fullModeOnly),
+      )
+      .toList()
+    ..sort((a, b) => a.defaultOrder.compareTo(b.defaultOrder));
 
-  return preferencesAsync.when(
-    data: (preferences) {
-      final prefMap = {for (var pref in preferences) pref.widgetId: pref};
-      final widgets = DashboardWidgetRegistry.widgets;
-
-      final visibleWidgets = widgets.where((widget) {
-        if (isSimple && widget.fullModeOnly) return false;
-        final pref = prefMap[widget.id];
-        return pref?.visible ?? widget.defaultVisible;
-      }).toList();
-
-      visibleWidgets.sort((a, b) {
-        final prefA = prefMap[a.id];
-        final prefB = prefMap[b.id];
-
-        // Pinned widgets first
-        final pinnedA = prefA?.pinned ?? false;
-        final pinnedB = prefB?.pinned ?? false;
-        if (pinnedA && !pinnedB) return -1;
-        if (!pinnedA && pinnedB) return 1;
-
-        // Manual order
-        final orderA = prefA?.order ?? a.defaultOrder;
-        final orderB = prefB?.order ?? b.defaultOrder;
-        return orderA.compareTo(orderB);
-      });
-
-      return visibleWidgets;
-    },
-    loading: () {
-      final widgets = DashboardWidgetRegistry.widgets
-          .where((w) => w.defaultVisible)
-          .toList();
-      widgets.sort((a, b) => a.defaultOrder.compareTo(b.defaultOrder));
-      return widgets;
-    },
-    error: (_, __) => [],
-  );
+  // Dashboard visual system is intentionally fixed. Keep the preference
+  // service and stored records for compatibility, but do not let legacy
+  // visibility/order/pin values alter the locked dashboard composition.
+  return widgets;
 });

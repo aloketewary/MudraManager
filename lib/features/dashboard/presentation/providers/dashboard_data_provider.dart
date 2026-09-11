@@ -29,6 +29,7 @@ class DashboardData {
   final int pendingSmsCount;
   final DateTime? budgetEvaluationDate;
   final int budgetGeneration;
+  final int? goalRevision;
 
   const DashboardData({
     required this.transactions,
@@ -44,6 +45,7 @@ class DashboardData {
     required this.pendingSmsCount,
     this.budgetEvaluationDate,
     this.budgetGeneration = 0,
+    this.goalRevision,
   });
 
   static List<BudgetWithProgress> _sortedBudgets(
@@ -129,6 +131,81 @@ class DashboardData {
     return true;
   }
 
+  static List<Goal> _sortedGoals(List<Goal> goals) {
+    final sorted = List<Goal>.of(goals);
+    sorted.sort((a, b) => a.id.compareTo(b.id));
+    return sorted;
+  }
+
+  static bool _sameGoals(List<Goal> left, List<Goal> right) {
+    if (left.length != right.length) return false;
+    final sortedLeft = _sortedGoals(left);
+    final sortedRight = _sortedGoals(right);
+
+    for (var i = 0; i < sortedLeft.length; i++) {
+      final a = sortedLeft[i];
+      final b = sortedRight[i];
+      if (a.id != b.id ||
+          a.name != b.name ||
+          a.targetAmount != b.targetAmount ||
+          a.currencyCode != b.currencyCode ||
+          a.currentAmount != b.currentAmount ||
+          a.targetDate != b.targetDate ||
+          a.lastContributionDate != b.lastContributionDate ||
+          a.creationDate != b.creationDate ||
+          a.isActive != b.isActive ||
+          a.iconName != b.iconName ||
+          a.colorValue != b.colorValue ||
+          a.description != b.description ||
+          a.goalType != b.goalType ||
+          a.priority != b.priority ||
+          a.contributions.length != b.contributions.length) {
+        return false;
+      }
+
+      for (var j = 0; j < a.contributions.length; j++) {
+        final leftContribution = a.contributions[j];
+        final rightContribution = b.contributions[j];
+        if (leftContribution.amount != rightContribution.amount ||
+            leftContribution.date != rightContribution.date) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  static int _goalHash(Goal goal) {
+    return Object.hash(
+      goal.id,
+      goal.name,
+      goal.targetAmount,
+      goal.currencyCode,
+      goal.currentAmount,
+      goal.targetDate,
+      goal.lastContributionDate,
+      goal.creationDate,
+      goal.isActive,
+      goal.iconName,
+      goal.colorValue,
+      goal.description,
+      goal.goalType,
+      goal.priority,
+      Object.hashAll(
+        goal.contributions.map(
+          (contribution) => Object.hash(
+            contribution.amount,
+            contribution.date,
+          ),
+        ),
+      ),
+    );
+  }
+
+  static int _goalsRevision(List<Goal> goals) {
+    return Object.hashAll(_sortedGoals(goals).map(_goalHash));
+  }
+
   static bool _sameBudgets(
     List<BudgetWithProgress> left,
     List<BudgetWithProgress> right,
@@ -188,7 +265,9 @@ class DashboardData {
         netWorth != other.netWorth ||
         transactions.length != other.transactions.length ||
         accounts.length != other.accounts.length ||
-        goals.length != other.goals.length ||
+        !((goalRevision != null || other.goalRevision != null)
+            ? goalRevision == other.goalRevision
+            : _sameGoals(goals, other.goals)) ||
         pendingSmsCount != other.pendingSmsCount ||
         budgetEvaluationDate != other.budgetEvaluationDate ||
         budgetGeneration != other.budgetGeneration) {
@@ -201,7 +280,7 @@ class DashboardData {
   int get hashCode => Object.hash(
         transactions.length,
         accounts.length,
-        goals.length,
+        goalRevision ?? Object.hashAll(_sortedGoals(goals).map(_goalHash)),
         budgets.length,
         totalIncome,
         totalExpense,
@@ -346,6 +425,7 @@ final dashboardDataProvider =
         totalBalance: totalBalance,
         netWorth: netWorth,
         pendingSmsCount: pendingSmsCount,
+        goalRevision: DashboardData._goalsRevision(goals),
         budgetEvaluationDate: refresh.evaluationDate,
         budgetGeneration: refresh.generation,
       );

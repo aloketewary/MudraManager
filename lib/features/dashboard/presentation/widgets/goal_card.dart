@@ -1,13 +1,18 @@
-import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/finance_v2/finance_progress_bar.dart';
+import 'package:mudra_manager/shared/widgets/finance_v2/finance_section_header.dart';
+import 'package:mudra_manager/shared/widgets/finance_v2/finance_surface.dart';
 import 'package:mudra_manager/shared/widgets/progress_ring.dart';
 
 class GoalCard extends ConsumerWidget {
@@ -19,174 +24,197 @@ class GoalCard extends ConsumerWidget {
     final goals = ref.watch(dashboardGoalsProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
-    if (goals.isEmpty) return const SizedBox.shrink();
-
-    final activeGoals = goals.where((g) => g.isActive).toList();
+    final activeGoals = goals
+        .where((goal) => goal.isActive && goal.progressPercent < 1.0)
+        .toList();
     if (activeGoals.isEmpty) return const SizedBox.shrink();
 
-    final totalTarget = activeGoals.fold(0.0, (sum, g) => sum + g.targetAmount);
-    final totalSaved = activeGoals.fold(0.0, (sum, g) => sum + g.currentAmount);
-    final progress = totalTarget > 0 ? totalSaved / totalTarget : 0.0;
+    // Dashboard surfaces show one decision at a time. Use the goal with the
+    // most progress as the featured goal and keep the full list in GoalScreen.
+    activeGoals.sort(
+      (a, b) => b.progressPercent.compareTo(a.progressPercent),
+    );
+    final goal = activeGoals.first;
+    final goalColor =
+        goal.colorValue == null ? color.primary : Color(goal.colorValue!);
+    final progress = goal.progressPercent.clamp(0.0, 1.0).toDouble();
+    final percent = (progress * 100).round();
+    final cardRadius = spacing.borderRadiusLarge;
 
-    return Container(
+    return FinanceSurface(
       margin: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
+        horizontal: spacing.cardHorizontalMin,
+        vertical: spacing.cardVerticalMin,
       ),
-      child: Card(
-        elevation: 0,
-        margin: EdgeInsets.zero,
-        color: color.surfaceContainerLow,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.mediumImpact();
-            context.push(AppRoutes.goalScreen);
-          },
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          child: Padding(
-            padding: EdgeInsets.all(spacing.cardInner),
-            child: Row(
+      padding: EdgeInsets.all(spacing.cardHorizontal),
+      borderRadius: cardRadius,
+      border: BorderSide(color: goalColor.withValues(alpha: 0.0)),
+      accent: goalColor,
+      semanticLabel: '${goal.name}, $percent%',
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.push(AppRoutes.goalDetails, extra: {'goal': goal});
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FinanceSectionHeader(
+            title: ctxt.title_goals,
+            trailingLabel: ctxt.dashboard_viewAllLabel,
+            icon: LucideIcons.flag,
+            accent: goalColor,
+            onTrailingTap: () {
+              HapticFeedback.mediumImpact();
+              context.push(AppRoutes.goalScreen);
+            },
+          ),
+          SizedBox(height: spacing.elementGap),
+          Container(
+            padding: EdgeInsets.all(spacing.cardInner * 0.75),
+            decoration: BoxDecoration(
+              color: color.surfaceContainerHigh,
+              borderRadius: spacing.borderRadiusMedium,
+              border: Border.all(
+                color: goalColor.withValues(alpha: 0.16),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ProgressRing(
-                  progress: progress,
-                  color: color.primary,
-                  size: spacing.sectionGap * 2,
-                  insetPadding: spacing.cardVerticalMin,
-                  labelBuilder: (value) => Text(
-                    '${(value * 100).toInt()}%',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: color.primary,
-                    ),
-                  ),
-                ),
-                SizedBox(width: spacing.sectionGap),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.title_goals,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: spacing.elementGap),
-                      Container(
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: color.surfaceContainerHighest,
-                          borderRadius:
-                              BorderRadius.circular(spacing.radiusSmall),
-                        ),
-                        child: ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(spacing.radiusSmall),
-                          child: TweenAnimationBuilder<double>(
-                            duration: const Duration(milliseconds: 1500),
-                            curve: Curves.easeOutCubic,
-                            tween: Tween(begin: 0.0, end: progress),
-                            builder: (context, value, child) {
-                              return FractionallySizedBox(
-                                widthFactor: value,
-                                alignment: Alignment.centerLeft,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [color.primary, color.tertiary],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: spacing.elementGap),
-                      Row(
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildGoalIcon(goal, goalColor, spacing),
+                    SizedBox(width: spacing.elementGap),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: _buildMetricItem(
-                              '${activeGoals.length} ${AppLocalizations.of(context)!.section_active.toLowerCase()}',
-                              formatCurrency(totalSaved, decimals: 0),
-                              LucideIcons.target,
-                              color.primary,
-                              color,
-                              textTheme,
-                              spacing,
+                          Text(
+                            goal.name,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(width: spacing.radiusMedium),
-                          Expanded(
-                            child: _buildMetricItem(
-                              AppLocalizations.of(context)!.budget_remaining,
-                              formatCurrency(
-                                (totalTarget - totalSaved),
-                                decimals: 0,
-                              ),
-                              LucideIcons.trendingUp,
-                              color.tertiary,
-                              color,
-                              textTheme,
-                              spacing,
+                          SizedBox(height: spacing.elementGapMin),
+                          CurrencyText(
+                            amount: goal.remainingAmount,
+                            currencyCode: goal.currencyCode,
+                            fixedLength: 0,
+                            compact: false,
+                            suffixText: ctxt.goal_suffixLeft,
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: color.onSurface,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(width: spacing.elementGap),
+                    ProgressRing(
+                      progress: progress,
+                      color: goalColor,
+                      size: spacing.sectionGap * 2.5,
+                      insetPadding: spacing.cardVerticalMin,
+                      labelBuilder: (value) => Text(
+                        '${(value * 100).toInt()}%',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: goalColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                Icon(
-                  LucideIcons.chevronRight,
-                  color: color.onSurfaceVariant,
-                  size: 20,
+                SizedBox(height: spacing.elementGap),
+                Row(
+                  children: [
+                    Text(
+                      ctxt.goal_suffixSaved,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                    SizedBox(width: spacing.elementGapMin),
+                    CurrencyText(
+                      amount: goal.currentAmount,
+                      currencyCode: goal.currencyCode,
+                      fixedLength: 0,
+                      compact: true,
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      ' / ',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                    CurrencyText(
+                      amount: goal.targetAmount,
+                      currencyCode: goal.currencyCode,
+                      fixedLength: 0,
+                      compact: true,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '$percent%',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: goalColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: spacing.elementGapMin),
+                FinanceProgressBar(
+                  value: progress,
+                  fillColor: goalColor,
+                  trackColor: color.surfaceContainerHighest,
+                  stripeColor: goalColor.withValues(alpha: 0.22),
+                  height: spacing.progressNormal,
+                  semanticLabel: '${goal.name} progress',
                 ),
               ],
             ),
           ),
-        ),
+          if (activeGoals.length > 1) ...[
+            SizedBox(height: spacing.elementGap),
+            Text(
+              ctxt.goal_goalsInProgress(activeGoals.length),
+              style: textTheme.labelSmall?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
 
-  Widget _buildMetricItem(
-    String label,
-    String value,
-    IconData icon,
-    Color itemColor,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-  ) {
-    return Row(
-      children: [
-        Icon(icon, color: itemColor, size: 16),
-        SizedBox(width: spacing.elementGapMin),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: textTheme.bodySmall?.copyWith(
-                  color: color.onSurfaceVariant,
-                  fontSize: 11,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                value,
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ],
+  Widget _buildGoalIcon(Goal goal, Color goalColor, AppSpacing spacing) {
+    return Container(
+      width: spacing.touchTargetSmall,
+      height: spacing.touchTargetSmall,
+      decoration: BoxDecoration(
+        color: goalColor.withValues(alpha: 0.12),
+        borderRadius: spacing.borderRadiusMedium,
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        IconHelper.getIconData(goal.iconName),
+        color: goalColor,
+        size: spacing.iconMD,
+      ),
     );
   }
 }

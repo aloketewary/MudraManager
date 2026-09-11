@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/core/db/models/account.dart';
-import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart' as db;
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -14,10 +11,11 @@ import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
+import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
-import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/finance_v2/finance_surface.dart';
 
 class RecentTransactionsCard extends ConsumerWidget {
   final int maxTransactions;
@@ -30,27 +28,33 @@ class RecentTransactionsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.watch(spacingProvider);
-    final transactions = ref.watch(dashboardTransactionsProvider);
+    final dashboardAsync = ref.watch(dashboardDataProvider);
     final isGuestMode = ref.watch(guestModeProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    if (transactions.isEmpty) return const SizedBox.shrink();
+    return dashboardAsync.when(
+      loading: () => const RecentTransactionsCardSkeleton(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (data) {
+        // Dashboard data is already sorted by date. Keep transfers out of this
+        // compact activity summary, matching the existing transaction screen.
+        final recentTransactions = List<db.Transaction>.from(
+          data.transactions.where((t) => !t.isTransfer).take(maxTransactions),
+        );
 
-    // Dashboard data is already sorted by date. Keep transfers out of this
-    // compact activity summary, matching the existing dashboard behavior.
-    final recentTransactions = List<db.Transaction>.from(
-      transactions.where((t) => !t.isTransfer).take(maxTransactions),
-    );
+        if (recentTransactions.isEmpty) return const SizedBox.shrink();
 
-    return _RecentTransactionsCardContent(
-      recentTransactions: recentTransactions,
-      isGuestMode: isGuestMode,
-      spacing: spacing,
-      color: color,
-      textTheme: textTheme,
-      ctxt: ctxt,
+        return _RecentTransactionsCardContent(
+          recentTransactions: recentTransactions,
+          isGuestMode: isGuestMode,
+          spacing: spacing,
+          color: color,
+          textTheme: textTheme,
+          ctxt: ctxt,
+        );
+      },
     );
   }
 }
@@ -74,131 +78,189 @@ class _RecentTransactionsCardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardRadius = BorderRadius.circular(
-      spacing.radiusMedium + spacing.elementGapMin,
-    );
-
-    return Container(
+    return FinanceSurface(
       margin: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
+        horizontal: spacing.cardHorizontalMin,
+        vertical: spacing.cardVerticalMin,
       ),
-      child: Card(
-        elevation: 0,
-        margin: EdgeInsets.zero,
-        color: color.surfaceContainerLow,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: cardRadius,
-          side: BorderSide(
-            color: color.outlineVariant.withValues(alpha: 0.55),
-            width: spacing.strokeThin,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context, cardRadius),
-            Divider(
-              height: spacing.strokeThin,
-              thickness: spacing.strokeThin,
-              color: color.outlineVariant.withValues(alpha: 0.45),
-            ),
-            ...List.generate(
-              recentTransactions.length,
-              (index) => Column(
-                children: [
-                  if (index > 0)
-                    Divider(
-                      height: spacing.strokeThin,
-                      thickness: spacing.strokeThin,
-                      indent: spacing.cardInner,
-                      endIndent: spacing.cardInner,
-                      color: color.outlineVariant.withValues(alpha: 0.35),
-                    ),
-                  _TransactionItem(
-                    transaction: recentTransactions[index],
-                    index: index,
-                    isGuestMode: isGuestMode,
-                    spacing: spacing,
-                    color: color,
-                    textTheme: textTheme,
-                    ctxt: ctxt,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      padding: EdgeInsets.all(spacing.cardHorizontal),
+      borderRadius: spacing.borderRadiusLarge,
+      border: BorderSide(color: color.primary.withValues(alpha: 0.0)),
+      accent: color.primary,
+      semanticLabel: ctxt.statistics_recentTransactionsTitleText,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildReferenceHeader(context),
+          SizedBox(height: spacing.sectionGap),
+          ..._buildTransactionGroups(),
+        ],
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, BorderRadius cardRadius) {
-    return Semantics(
-      label: 'See all transactions',
-      button: true,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          context.push(AppRoutes.transactions);
-        },
-        borderRadius: cardRadius,
-        child: Padding(
-          padding: EdgeInsets.all(spacing.cardInner),
-          child: Row(
-            children: [
-              _buildHeaderIcon(),
-              SizedBox(width: spacing.elementGap),
-              Expanded(
-                child: AdaptiveText(
-                  ctxt.statistics_recentTransactionsTitleText,
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 1,
-                ),
-              ),
-              SizedBox(
-                width: spacing.touchTarget,
-                height: spacing.touchTarget,
-                child: Icon(
-                  LucideIcons.chevronRight,
-                  color: color.onSurfaceVariant,
-                  size: spacing.iconMD,
-                ),
-              ),
-            ],
+  Widget _buildReferenceHeader(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            ctxt.statistics_recentTransactionsTitleText,
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-      ),
+        Semantics(
+          label: 'Pinned transactions',
+          child: Icon(
+            LucideIcons.pin,
+            size: spacing.iconSM,
+            color: color.onSurfaceVariant,
+          ),
+        ),
+        SizedBox(width: spacing.elementGap),
+        IconButton(
+          tooltip: ctxt.dashboard_viewAllLabel,
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            context.push(AppRoutes.transactions);
+          },
+          icon: Icon(
+            LucideIcons.history,
+            size: spacing.iconSM,
+            color: color.onSurfaceVariant,
+          ),
+          padding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+          constraints: BoxConstraints(
+            minWidth: spacing.touchTargetSmall,
+            minHeight: spacing.touchTargetSmall,
+          ),
+        ),
+        SizedBox(width: spacing.elementGapMin),
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.elementGap,
+            vertical: spacing.elementGapMin,
+          ),
+          decoration: BoxDecoration(
+            color: color.primary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: color.primary.withValues(alpha: 0.18),
+            ),
+          ),
+          child: Text(
+            'For the Period',
+            style: textTheme.labelSmall?.copyWith(
+              color: color.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildHeaderIcon() {
-    return Container(
-      width: spacing.iconXL + spacing.iconSM,
-      height: spacing.iconXL + spacing.iconSM,
-      decoration: BoxDecoration(
-        color: color.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(spacing.radiusSmall),
-        border: Border.all(
-          color: color.primary.withValues(alpha: 0.18),
-          width: spacing.strokeThin,
+  List<Widget> _buildTransactionGroups() {
+    final groups = <DateTime, List<db.Transaction>>{};
+    for (final transaction in recentTransactions) {
+      final day = DateTime(
+        transaction.date.year,
+        transaction.date.month,
+        transaction.date.day,
+      );
+      groups.putIfAbsent(day, () => <db.Transaction>[]).add(transaction);
+    }
+
+    final widgets = <Widget>[];
+    var groupIndex = 0;
+    for (final entry in groups.entries) {
+      if (groupIndex > 0) {
+        widgets.add(SizedBox(height: spacing.sectionGap));
+      }
+      widgets.add(_buildDateHeader(entry.key, entry.value));
+      widgets.add(SizedBox(height: spacing.elementGap));
+
+      for (var index = 0; index < entry.value.length; index++) {
+        if (index > 0) {
+          widgets.add(SizedBox(height: spacing.elementGapMin));
+        }
+        widgets.add(_buildTransactionTile(entry.value[index]));
+      }
+      groupIndex++;
+    }
+    return widgets;
+  }
+
+  Widget _buildDateHeader(DateTime date, List<db.Transaction> transactions) {
+    final total = GuestModeUtil.applyGuestMode(
+      transactions.fold<double>(0, (sum, transaction) {
+        return sum + transaction.baseAmount;
+      }),
+      isGuestMode,
+    );
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            DateFormat('EEEE, d MMMM, y', ctxt.localeName).format(date),
+            style: textTheme.bodyMedium?.copyWith(
+              color: color.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-      ),
-      child: Icon(
-        LucideIcons.receiptText,
-        color: color.primary,
-        size: spacing.iconMD,
+        Text(
+          'Total',
+          style: textTheme.bodySmall?.copyWith(
+            color: color.onSurfaceVariant,
+          ),
+        ),
+        SizedBox(width: spacing.elementGapMin),
+        CurrencyText(
+          amount: total,
+          fixedLength: 0,
+          compact: true,
+          showSign: false,
+          style: textTheme.titleSmall?.copyWith(
+            color: color.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTransactionTile(db.Transaction transaction) {
+    return ClipRRect(
+      borderRadius: spacing.borderRadiusMedium,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color.surfaceContainerHigh,
+          border: Border.all(
+            color: color.outlineVariant.withValues(alpha: 0.30),
+          ),
+          borderRadius: spacing.borderRadiusMedium,
+        ),
+        child: _TransactionItem(
+          transaction: transaction,
+          isGuestMode: isGuestMode,
+          spacing: spacing,
+          color: color,
+          textTheme: textTheme,
+          ctxt: ctxt,
+        ),
       ),
     );
   }
 }
 
-class _TransactionItem extends ConsumerWidget {
+class _TransactionItem extends StatefulWidget {
   final db.Transaction transaction;
-  final int index;
   final bool isGuestMode;
   final AppSpacing spacing;
   final ColorScheme color;
@@ -207,7 +269,6 @@ class _TransactionItem extends ConsumerWidget {
 
   const _TransactionItem({
     required this.transaction,
-    required this.index,
     required this.isGuestMode,
     required this.spacing,
     required this.color,
@@ -216,171 +277,222 @@ class _TransactionItem extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  State<_TransactionItem> createState() => _TransactionItemState();
+}
+
+class _TransactionItemState extends State<_TransactionItem>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final transaction = widget.transaction;
     final category = transaction.category.value;
     final account = transaction.account.value;
+    final categoryColor = Color(
+      category?.colorValue ?? widget.color.primary.toARGB32(),
+    );
+    final amountColor = transaction.isExpense
+        ? FinanceColors.expenseColor(widget.color.brightness)
+        : FinanceColors.incomeColor(widget.color.brightness);
     final displayAmount = GuestModeUtil.applyGuestMode(
       transaction.amount,
-      isGuestMode,
+      widget.isGuestMode,
     );
-    final isExpense = transaction.isExpense;
+    final title = transaction.description?.trim().isNotEmpty == true
+        ? transaction.description!.trim()
+        : category?.name ?? 'Uncategorized';
+    final accountName = account?.name ?? 'Unknown account';
+    final isReducedMotion = MediaQuery.of(context).disableAnimations;
+    final semanticLabel = [
+      title,
+      accountName,
+      transaction.isExpense
+          ? widget.ctxt.transaction_type_expense
+          : widget.ctxt.transaction_type_income,
+    ].join(', ');
 
     final row = Semantics(
-      label:
-          '${category?.name ?? 'Uncategorized'}, ${account?.name ?? 'Unknown account'}, '
-          '$displayAmount ${isExpense ? 'expense' : 'income'}',
+      label: semanticLabel,
       button: true,
       child: RepaintBoundary(
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            context.push(
-              AppRoutes.addTransaction,
-              extra: {'transaction': transaction},
-            );
-          },
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.cardInner,
-              vertical: spacing.elementGap + 4,
-            ),
-            child: Row(
-              children: [
-                _buildCategoryIcon(category),
-                SizedBox(width: spacing.elementGap),
-                _buildCategoryInfo(category, account),
-                SizedBox(width: spacing.elementGap),
-                _buildAmountAndDate(),
-              ],
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              context.push(
+                AppRoutes.addTransaction,
+                extra: {'transaction': transaction},
+              );
+            },
+            onTapDown: isReducedMotion ? null : (_) => _controller.forward(),
+            onTapUp: isReducedMotion ? null : (_) => _controller.reverse(),
+            onTapCancel: isReducedMotion ? null : _controller.reverse,
+            child: Padding(
+              padding: EdgeInsets.all(widget.spacing.cardInner * 0.75),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildCategoryIcon(categoryColor),
+                  SizedBox(width: widget.spacing.elementGap),
+                  Expanded(
+                    child: _buildTransactionInfo(
+                      title: title,
+                      accountName: accountName,
+                      categoryColor: categoryColor,
+                    ),
+                  ),
+                  SizedBox(width: widget.spacing.elementGap),
+                  _buildAmount(
+                    displayAmount: displayAmount,
+                    amountColor: amountColor,
+                    convertedAmount: transaction.convertedAmount,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
 
-    if (MediaQuery.of(context).disableAnimations) return row;
+    if (isReducedMotion) return row;
 
-    return row
-        .animate()
-        .fadeIn(
-          delay: Duration(milliseconds: index * 50),
-          duration: spacing.animNormal,
-        )
-        .slideX(
-          begin: 0.05,
-          end: 0,
-          duration: spacing.animNormal,
-          curve: Curves.easeOutCubic,
-        );
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, child) => Transform.scale(
+        scale: _scaleAnimation.value,
+        alignment: Alignment.center,
+        child: child,
+      ),
+      child: row,
+    );
   }
 
-  Widget _buildCategoryIcon(Category? category) {
-    final iconColor = category == null || category.colorValue == null
-        ? color.primary
-        : Color(category.colorValue!);
-
+  Widget _buildCategoryIcon(Color categoryColor) {
     return Container(
-      width: spacing.iconXL + spacing.iconSM,
-      height: spacing.iconXL + spacing.iconSM,
+      width: widget.spacing.touchTargetSmall + widget.spacing.elementGap,
+      height: widget.spacing.touchTargetSmall + widget.spacing.elementGap,
       decoration: BoxDecoration(
-        color: iconColor.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(spacing.radiusSmall),
-        border: Border.all(
-          color: iconColor.withValues(alpha: 0.18),
-          width: spacing.strokeThin,
-        ),
+        color: categoryColor.withValues(alpha: 0.12),
+        borderRadius: widget.spacing.borderRadiusMedium,
       ),
+      alignment: Alignment.center,
       child: Icon(
-        IconHelper.getIconData(category?.iconName),
-        color: iconColor,
-        size: spacing.iconMD,
+        IconHelper.getIconData(widget.transaction.category.value?.iconName),
+        color: categoryColor,
+        size: widget.spacing.iconMD,
       ),
     );
   }
 
-  Widget _buildCategoryInfo(Category? category, Account? account) {
-    final description = transaction.description?.trim();
-    final title = description != null && description.isNotEmpty
-        ? description
-        : category?.name ?? 'Uncategorized';
-    final metadata =
-        '${account?.name ?? 'Unknown'} · ${_formatDate(transaction.date, withTime: true)}';
-
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AdaptiveText(
-            title,
-            style: textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-            maxLines: 1,
-          ),
-          SizedBox(height: spacing.elementGapUltraMin),
-          AdaptiveText(
-            metadata,
-            style: textTheme.bodySmall?.copyWith(
-              color: color.onSurfaceVariant,
-              height: 1.25,
-            ),
-            maxLines: 1,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAmountAndDate() {
-    final isExpense = transaction.isExpense;
-    final amountColor = isExpense
-        ? FinanceColors.expenseColor(color.brightness)
-        : FinanceColors.incomeColor(color.brightness);
-
+  Widget _buildTransactionInfo({
+    required String title,
+    required String accountName,
+    required Color categoryColor,
+  }) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        CurrencyText(
-          amount: GuestModeUtil.applyGuestMode(transaction.amount, isGuestMode),
-          currencyCode: transaction.currencyCode,
-          showSign: true,
-          isExpense: isExpense,
-          style: textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: amountColor,
+        Text(
+          title,
+          style: widget.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
           ),
           maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-        if (transaction.currencyCode != null &&
-            transaction.convertedAmount != null)
-          CurrencyText(
-            amount: transaction.convertedAmount!,
-            compact: true,
-            style: textTheme.bodySmall?.copyWith(
-              color: color.onSurfaceVariant.withValues(alpha: 0.7),
-              fontSize: 10,
+        SizedBox(height: widget.spacing.elementGapMin),
+        Row(
+          children: [
+            Icon(
+              widget.transaction.isExpense
+                  ? LucideIcons.arrowUpRight
+                  : LucideIcons.arrowDownLeft,
+              size: widget.spacing.iconXS,
+              color: categoryColor,
             ),
-            prefixText: '≈',
-          ),
+            SizedBox(width: widget.spacing.elementGapUltraMin),
+            Icon(
+              LucideIcons.creditCard,
+              size: widget.spacing.iconXS,
+              color: widget.color.onSurfaceVariant,
+            ),
+            SizedBox(width: widget.spacing.elementGapUltraMin),
+            Expanded(
+              child: Text(
+                accountName,
+                style: widget.textTheme.bodySmall?.copyWith(
+                  color: widget.color.onSurfaceVariant,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
 
-  String _formatDate(DateTime date, {bool withTime = false}) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final transactionDate = DateTime(date.year, date.month, date.day);
-    final timeFormatValue = DateFormat('hh:mm a', ctxt.localeName).format(date);
-
-    if (transactionDate == today) {
-      return '${ctxt.label_today}${withTime ? ', $timeFormatValue' : ''}';
-    } else if (transactionDate == yesterday) {
-      return '${ctxt.label_yesterday}${withTime ? ', $timeFormatValue' : ''}';
-    } else if (now.difference(date).inDays < 7) {
-      return '${DateFormat('EEEE', ctxt.localeName).format(date)}${withTime ? ', $timeFormatValue' : ''}';
-    } else {
-      return '${DateFormat('MMM dd', ctxt.localeName).format(date)}${withTime ? ', $timeFormatValue' : ''}';
-    }
+  Widget _buildAmount({
+    required double displayAmount,
+    required Color amountColor,
+    required double? convertedAmount,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CurrencyText(
+          amount: displayAmount,
+          currencyCode: widget.transaction.currencyCode,
+          showSign: true,
+          isExpense: widget.transaction.isExpense,
+          style: widget.textTheme.titleSmall?.copyWith(
+            color: amountColor,
+            fontWeight: FontWeight.w600,
+          ),
+          maxLines: 1,
+        ),
+        if (widget.transaction.currencyCode != null && convertedAmount != null)
+          Padding(
+            padding: EdgeInsets.only(top: widget.spacing.elementGapUltraMin),
+            child: CurrencyText(
+              amount: GuestModeUtil.applyGuestMode(
+                convertedAmount,
+                widget.isGuestMode,
+              ),
+              compact: true,
+              style: widget.textTheme.bodySmall?.copyWith(
+                color: widget.color.onSurfaceVariant,
+              ),
+              prefixText: '≈',
+              maxLines: 1,
+            ),
+          ),
+      ],
+    );
   }
 }

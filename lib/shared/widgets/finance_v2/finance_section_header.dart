@@ -46,7 +46,7 @@ class FinanceSectionHeader extends ConsumerWidget {
             title,
             style: textTheme.titleMedium?.copyWith(
               color: scheme.onSurface,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -69,7 +69,7 @@ class FinanceSectionHeader extends ConsumerWidget {
                       trailingLabel!,
                       style: textTheme.labelSmall?.copyWith(
                         color: foreground,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     SizedBox(width: spacing.elementGapUltraMin),

@@ -69,9 +69,14 @@ Future<List<Transaction>> _executeQuery(
     return _applySearchFilter(results, query.searchQuery);
   }
 
+  // Transfer uses the all-transaction source, then the screen applies its
+  // existing transfer-only presentation filter after grouping.
+  final usesAllTransactionSource = query.type == TransactionTypeFilter.all ||
+      query.type == TransactionTypeFilter.transfer;
+
   // Date-bounded queries
   if (query.startDate != null && query.endDate != null) {
-    final results = query.type == TransactionTypeFilter.all
+    final results = usesAllTransactionSource
         ? await service.getByDateRange(query.startDate!, query.endDate!)
         : await service.getByTypeAndDateRange(
             isExpense: query.type == TransactionTypeFilter.expense,
@@ -84,7 +89,7 @@ Future<List<Transaction>> _executeQuery(
   // InfiniteView: apply performance window
   if (mode is InfiniteView) {
     final cutoff = DateTime.now().subtract(const Duration(days: 180));
-    final results = query.type == TransactionTypeFilter.all
+    final results = usesAllTransactionSource
         ? await service.getByDateRange(cutoff, DateTime.now())
         : await service.getByTypeAndDateRange(
             isExpense: query.type == TransactionTypeFilter.expense,
@@ -95,7 +100,7 @@ Future<List<Transaction>> _executeQuery(
   }
 
   // Fallback: all transactions filtered by type
-  final results = query.type == TransactionTypeFilter.all
+  final results = usesAllTransactionSource
       ? await service.getAll()
       : await service.getByType(
           isExpense: query.type == TransactionTypeFilter.expense,
@@ -112,7 +117,8 @@ List<Transaction> _applySearchFilter(
   final lowerQuery = query.toLowerCase();
   return transactions
       .where(
-          (tx) => tx.description?.toLowerCase().contains(lowerQuery) ?? false,)
+        (tx) => tx.description?.toLowerCase().contains(lowerQuery) ?? false,
+      )
       .toList();
 }
 
@@ -125,5 +131,7 @@ String _typeToString(TransactionTypeFilter type) {
       return 'income';
     case TransactionTypeFilter.expense:
       return 'expense';
+    case TransactionTypeFilter.transfer:
+      return 'all';
   }
 }

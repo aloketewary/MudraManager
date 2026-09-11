@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
@@ -28,6 +29,8 @@ import 'package:mudra_manager/features/gamification/presentation/widgets/streak_
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/profile_screen.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/statistics_screen.dart';
+import 'package:mudra_manager/features/transactions/data/view_mode_provider.dart';
+import 'package:mudra_manager/features/transactions/domain/transaction_view_mode.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/transaction_list_screen.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/utility_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart';
@@ -48,12 +51,10 @@ class HomePage extends ConsumerStatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
-class HomePageState extends ConsumerState<HomePage>
-    with TickerProviderStateMixin {
+class HomePageState extends ConsumerState<HomePage> {
   late int _selectedIndex;
   final transactionListKey = GlobalKey<TransactionListScreenState>();
   final utilityKey = GlobalKey<UtilityScreenState>();
-  late AnimationController _fabController;
   late AppLog log;
   final _speedDialKey = GlobalKey<ExpandableFabState>();
 
@@ -61,11 +62,6 @@ class HomePageState extends ConsumerState<HomePage>
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
-    _fabController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-      value: 1.0,
-    );
     // Critical — needed for widget click handling
     _setupMethodChannel();
     _setupWidgetClickListener();
@@ -124,19 +120,60 @@ class HomePageState extends ConsumerState<HomePage>
     }
   }
 
-  @override
-  void dispose() {
-    _fabController.dispose();
-    super.dispose();
+  int? _stackIndexForNavigationIndex(int index, bool isSimple) {
+    if (isSimple) {
+      return switch (index) {
+        0 => 0,
+        1 => null,
+        2 => 1,
+        _ => null,
+      };
+    }
+
+    return switch (index) {
+      0 => 0,
+      1 => 1,
+      2 => null,
+      3 => 2,
+      4 => 3,
+      _ => null,
+    };
+  }
+
+  int? _navigationIndexForStackIndex(int index, bool isSimple) {
+    if (isSimple) {
+      return switch (index) {
+        0 => 0,
+        1 => 2,
+        _ => null,
+      };
+    }
+
+    return switch (index) {
+      0 => 0,
+      1 => 1,
+      2 => 3,
+      3 => 4,
+      _ => null,
+    };
+  }
+
+  void _openProfile() {
+    HapticFeedback.mediumImpact();
+    context.push(AppRoutes.profile);
   }
 
   void _onTabSelected(int index) {
+    final stackIndex = _stackIndexForNavigationIndex(
+      index,
+      ref.read(isSimpleModeProvider),
+    );
+    if (stackIndex == null) return;
+
     HapticFeedback.mediumImpact();
     log.d('Tab changed: $index');
-    setState(() => _selectedIndex = index);
-    // Close speed dial when leaving transactions tab
+    setState(() => _selectedIndex = stackIndex);
     _speedDialKey.currentState?.close();
-    setState(() => _selectedIndex = index);
   }
 
   @override
@@ -146,257 +183,425 @@ class HomePageState extends ConsumerState<HomePage>
     final ctxt = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSimple = ref.watch(isSimpleModeProvider);
-
-    // In simple mode: Home(0), Activity(1), Profile(2)
-    // In full mode:   Home(0), Activity(1), Manage(2), Insights(3), Profile(4)
-    // Clamp selected index immediately so NavigationBar never gets an out-of-range value
-    final maxIndex = isSimple ? 2 : 4;
-    final effectiveIndex = _selectedIndex > maxIndex ? 0 : _selectedIndex;
-
-    // In simple mode, nav indices 0,1,2 map to stack indices 0,1,4
-    // In full mode, nav indices map 1:1 to stack indices
-    final stackIndex = isSimple && effectiveIndex == 2 ? 4 : effectiveIndex;
+    final color = Theme.of(context).colorScheme;
+    final shellBackground = isDark ? color.surfaceContainerHigh : color.surface;
+    // Full mode: Home(0), Activity(1), Add, Manage(2), Insights(3).
+    // Simple mode: Home(0), Add, Activity(1).
+    final effectiveStackIndex = _selectedIndex.clamp(0, 4).toInt();
+    final selectedNavigationIndex =
+        _navigationIndexForStackIndex(effectiveStackIndex, isSimple) ?? 0;
+    final stackIndex = effectiveStackIndex;
 
     return PopScope(
-      canPop: effectiveIndex == 0,
+      canPop: effectiveStackIndex == 0,
       onPopInvokedWithResult: (didPop, result) async {
-        if (!didPop && effectiveIndex != 0) {
+        if (!didPop && effectiveStackIndex != 0) {
           _onTabSelected(0);
         }
       },
-      child: Scaffold(
-        appBar: buildTopBar(profileAsync, stackIndex),
-        extendBody: true,
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: effectiveIndex,
-          onDestinationSelected: _onTabSelected,
-          elevation: 0,
-          animationDuration: const Duration(milliseconds: 300),
-          destinations: [
-            NavigationDestination(
-              icon: SvgPicture.asset(
-                'assets/logo/nav/outline/home.svg',
-                colorFilter: ColorFilter.mode(
-                  isDark ? Colors.white : Colors.black,
-                  BlendMode.srcIn,
+      child: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: shellBackground,
+            appBar: buildTopBar(profileAsync, stackIndex),
+            // Let dashboard content show through the BottomAppBar notch.
+            extendBody: true,
+            bottomNavigationBar: BottomAppBar(
+              color: shellBackground,
+              elevation: 4,
+              shadowColor: color.shadow.withValues(alpha: 0.16),
+              shape: const AutomaticNotchedShape(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                ),
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(17)),
                 ),
               ),
-              selectedIcon: SvgPicture.asset(
-                'assets/logo/nav/solid/home.svg',
-                colorFilter: ColorFilter.mode(
-                  isDark ? Colors.white : Colors.black,
-                  BlendMode.srcIn,
+              notchMargin: 7,
+              clipBehavior: Clip.antiAlias,
+              height: 72,
+              child: NavigationBar(
+                height: 72,
+                backgroundColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                indicatorColor: color.secondaryContainer,
+                indicatorShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              ).animate(target: effectiveIndex == 0 ? 1 : 0).scale(
-                    begin: const Offset(0.9, 0.9),
-                    end: const Offset(1, 1),
-                    curve: Curves.easeOutCubic,
-                    duration: 250.ms,
-                  ),
-              label: ctxt.home_screen_title,
-            ),
-            NavigationDestination(
-              icon: SvgPicture.asset(
-                'assets/logo/nav/outline/activity.svg',
-                colorFilter: ColorFilter.mode(
-                  isDark ? Colors.white : Colors.black,
-                  BlendMode.srcIn,
-                ),
-              ),
-              selectedIcon: SvgPicture.asset(
-                'assets/logo/nav/solid/activity.svg',
-                colorFilter: ColorFilter.mode(
-                  isDark ? Colors.white : Colors.black,
-                  BlendMode.srcIn,
-                ),
-              ).animate(target: effectiveIndex == 1 ? 1 : 0).scale(
-                    begin: const Offset(0.9, 0.9),
-                    end: const Offset(1, 1),
-                    curve: Curves.easeOutCubic,
-                    duration: 250.ms,
-                  ),
-              label: ctxt.nav_activity,
-            ),
-            if (!isSimple)
-              NavigationDestination(
-                icon: Consumer(
-                  builder: (context, ref, _) {
-                    final activeTrips = ref.watch(activeTripsProvider);
-                    final hasActiveTrip = activeTrips.maybeWhen(
-                      data: (trips) {
-                        final now = DateTime.now();
-                        final today = DateTime(now.year, now.month, now.day);
-                        return trips.any((t) {
-                          if (!t.isTrip) return false;
-                          final start = DateTime(t.startDate.year,
-                              t.startDate.month, t.startDate.day);
-                          return t.isActive && !today.isBefore(start);
-                        });
-                      },
-                      orElse: () => false,
-                    );
-                    return SvgPicture.asset(
-                      hasActiveTrip
-                          ? 'assets/logo/nav/outline/trip.svg'
-                          : 'assets/logo/nav/outline/utility.svg',
+                labelBehavior:
+                    NavigationDestinationLabelBehavior.onlyShowSelected,
+                selectedIndex: selectedNavigationIndex,
+                onDestinationSelected: _onTabSelected,
+                elevation: 0,
+                animationDuration: const Duration(milliseconds: 300),
+                destinations: [
+                  NavigationDestination(
+                    icon: SvgPicture.asset(
+                      'assets/logo/nav/outline/home.svg',
                       colorFilter: ColorFilter.mode(
-                        hasActiveTrip
-                            ? Theme.of(context).colorScheme.primary
-                            : (isDark ? Colors.white : Colors.black),
+                        color.onSurfaceVariant,
                         BlendMode.srcIn,
                       ),
-                    );
-                  },
-                ),
-                selectedIcon: Consumer(
-                  builder: (context, ref, _) {
-                    final activeTrips = ref.watch(activeTripsProvider);
-                    final hasActiveTrip = activeTrips.maybeWhen(
-                      data: (trips) {
-                        final now = DateTime.now();
-                        final today = DateTime(now.year, now.month, now.day);
-                        return trips.any((t) {
-                          if (!t.isTrip) return false;
-                          final start = DateTime(t.startDate.year,
-                              t.startDate.month, t.startDate.day);
-                          return t.isActive && !today.isBefore(start);
-                        });
-                      },
-                      orElse: () => false,
-                    );
-                    return SvgPicture.asset(
-                      hasActiveTrip
-                          ? 'assets/logo/nav/solid/trip.svg'
-                          : 'assets/logo/nav/solid/utility.svg',
+                    ),
+                    selectedIcon: SvgPicture.asset(
+                      'assets/logo/nav/solid/home.svg',
                       colorFilter: ColorFilter.mode(
-                        hasActiveTrip
-                            ? Theme.of(context).colorScheme.primary
-                            : (isDark ? Colors.white : Colors.black),
+                        color.onSecondaryContainer,
                         BlendMode.srcIn,
                       ),
-                    ).animate(target: effectiveIndex == 2 ? 1 : 0).scale(
+                    )
+                        .animate(
+                          target: selectedNavigationIndex == 0 ? 1 : 0,
+                        )
+                        .scale(
                           begin: const Offset(0.9, 0.9),
                           end: const Offset(1, 1),
                           curve: Curves.easeOutCubic,
                           duration: 250.ms,
-                        );
-                  },
-                ),
-                label: ctxt.nav_manage,
-              ),
-            if (!isSimple)
-              NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/logo/nav/outline/statistics.svg',
-                  colorFilter: ColorFilter.mode(
-                    isDark ? Colors.white : Colors.black,
-                    BlendMode.srcIn,
+                        ),
+                    label: ctxt.home_screen_title,
                   ),
-                ),
-                selectedIcon: SvgPicture.asset(
-                  'assets/logo/nav/solid/statistics.svg',
-                  colorFilter: ColorFilter.mode(
-                    isDark ? Colors.white : Colors.black,
-                    BlendMode.srcIn,
+                  if (isSimple)
+                    const NavigationDestination(
+                      icon: SizedBox.shrink(),
+                      selectedIcon: SizedBox.shrink(),
+                      label: '',
+                    ),
+                  NavigationDestination(
+                    icon: SvgPicture.asset(
+                      'assets/logo/nav/outline/activity.svg',
+                      colorFilter: ColorFilter.mode(
+                        color.onSurfaceVariant,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    selectedIcon: SvgPicture.asset(
+                      'assets/logo/nav/solid/activity.svg',
+                      colorFilter: ColorFilter.mode(
+                        color.onSecondaryContainer,
+                        BlendMode.srcIn,
+                      ),
+                    ).animate(target: effectiveStackIndex == 1 ? 1 : 0).scale(
+                          begin: const Offset(0.9, 0.9),
+                          end: const Offset(1, 1),
+                          curve: Curves.easeOutCubic,
+                          duration: 250.ms,
+                        ),
+                    label: ctxt.nav_activity,
                   ),
-                ).animate(target: effectiveIndex == 3 ? 1 : 0).scale(
-                      begin: const Offset(0.9, 0.9),
-                      end: const Offset(1, 1),
-                      curve: Curves.easeOutCubic,
-                      duration: 250.ms,
+                  if (!isSimple)
+                    const NavigationDestination(
+                      icon: SizedBox.shrink(),
+                      selectedIcon: SizedBox.shrink(),
+                      label: '',
                     ),
-                label: ctxt.nav_insights,
-              ),
-            NavigationDestination(
-              icon: Consumer(
-                builder: (context, ref, _) {
-                  final isPro = ref.watch(isProProvider).value ?? false;
-                  return SvgPicture.asset(
-                    isPro
-                        ? 'assets/logo/nav/outline/pro_profile.svg'
-                        : 'assets/logo/nav/outline/profile.svg',
-                    colorFilter: ColorFilter.mode(
-                      isPro
-                          ? const Color(0xFFD4AF37)
-                          : (isDark ? Colors.white : Colors.black),
-                      BlendMode.srcIn,
+                  if (!isSimple)
+                    NavigationDestination(
+                      icon: Consumer(
+                        builder: (context, ref, _) {
+                          final activeTrips = ref.watch(activeTripsProvider);
+                          final hasActiveTrip = activeTrips.maybeWhen(
+                            data: (trips) {
+                              final now = DateTime.now();
+                              final today =
+                                  DateTime(now.year, now.month, now.day);
+                              return trips.any((t) {
+                                if (!t.isTrip) return false;
+                                final start = DateTime(
+                                  t.startDate.year,
+                                  t.startDate.month,
+                                  t.startDate.day,
+                                );
+                                return t.isActive && !today.isBefore(start);
+                              });
+                            },
+                            orElse: () => false,
+                          );
+                          return SvgPicture.asset(
+                            hasActiveTrip
+                                ? 'assets/logo/nav/outline/trip.svg'
+                                : 'assets/logo/nav/outline/utility.svg',
+                            colorFilter: ColorFilter.mode(
+                              hasActiveTrip
+                                  ? Theme.of(context).colorScheme.primary
+                                  : color.onSurfaceVariant,
+                              BlendMode.srcIn,
+                            ),
+                          );
+                        },
+                      ),
+                      selectedIcon: Consumer(
+                        builder: (context, ref, _) {
+                          final activeTrips = ref.watch(activeTripsProvider);
+                          final hasActiveTrip = activeTrips.maybeWhen(
+                            data: (trips) {
+                              final now = DateTime.now();
+                              final today =
+                                  DateTime(now.year, now.month, now.day);
+                              return trips.any((t) {
+                                if (!t.isTrip) return false;
+                                final start = DateTime(
+                                  t.startDate.year,
+                                  t.startDate.month,
+                                  t.startDate.day,
+                                );
+                                return t.isActive && !today.isBefore(start);
+                              });
+                            },
+                            orElse: () => false,
+                          );
+                          return SvgPicture.asset(
+                            hasActiveTrip
+                                ? 'assets/logo/nav/solid/trip.svg'
+                                : 'assets/logo/nav/solid/utility.svg',
+                            colorFilter: ColorFilter.mode(
+                              color.onSecondaryContainer,
+                              BlendMode.srcIn,
+                            ),
+                          )
+                              .animate(
+                                target: effectiveStackIndex == 2 ? 1 : 0,
+                              )
+                              .scale(
+                                begin: const Offset(0.9, 0.9),
+                                end: const Offset(1, 1),
+                                curve: Curves.easeOutCubic,
+                                duration: 250.ms,
+                              );
+                        },
+                      ),
+                      label: ctxt.nav_manage,
                     ),
-                  );
-                },
-              ),
-              selectedIcon: Consumer(
-                builder: (context, ref, _) {
-                  final isPro = ref.watch(isProProvider).value ?? false;
-                  return SvgPicture.asset(
-                    isPro
-                        ? 'assets/logo/nav/solid/pro_profile.svg'
-                        : 'assets/logo/nav/solid/profile.svg',
-                    colorFilter: ColorFilter.mode(
-                      isPro
-                          ? const Color(0xFFD4AF37)
-                          : (isDark ? Colors.white : Colors.black),
-                      BlendMode.srcIn,
+                  if (!isSimple)
+                    NavigationDestination(
+                      icon: SvgPicture.asset(
+                        'assets/logo/nav/outline/statistics.svg',
+                        colorFilter: ColorFilter.mode(
+                          color.onSurfaceVariant,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      selectedIcon: SvgPicture.asset(
+                        'assets/logo/nav/solid/statistics.svg',
+                        colorFilter: ColorFilter.mode(
+                          color.onSecondaryContainer,
+                          BlendMode.srcIn,
+                        ),
+                      ).animate(target: effectiveStackIndex == 3 ? 1 : 0).scale(
+                            begin: const Offset(0.9, 0.9),
+                            end: const Offset(1, 1),
+                            curve: Curves.easeOutCubic,
+                            duration: 250.ms,
+                          ),
+                      label: ctxt.nav_insights,
                     ),
-                  )
-                      .animate(
-                          target: (isSimple
-                                  ? effectiveIndex == 2
-                                  : effectiveIndex == 4)
-                              ? 1
-                              : 0)
-                      .scale(
-                        begin: const Offset(0.9, 0.9),
-                        end: const Offset(1, 1),
-                        curve: Curves.easeOutCubic,
-                        duration: 250.ms,
-                      );
-                },
-              ),
-              label: ctxt.profile_screen_title,
-            ),
-          ],
-        ),
-        body: Stack(
-          children: [
-            PageTransitionSwitcher(
-              duration: const Duration(milliseconds: 400),
-              transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
-                return FadeThroughTransition(
-                  animation: primaryAnimation,
-                  secondaryAnimation: secondaryAnimation,
-                  child: child,
-                );
-              },
-              child: IndexedStack(
-                index: stackIndex,
-                children: [
-                  const DashboardHome(),
-                  TransactionListScreen(
-                    key: transactionListKey,
-                    isTabActive: stackIndex == 1,
-                    onScrollChanged: (isScrollingDown) {
-                      if (isScrollingDown) {
-                        _fabController.reverse();
-                      } else {
-                        _fabController.forward();
-                      }
-                    },
-                  ),
-                  UtilityScreen(key: utilityKey, isTabActive: stackIndex == 2),
-                  const StatisticsScreen(),
-                  const ProfileScreen(),
                 ],
               ),
             ),
-            if (stackIndex == 1)
-              ExpandableFab(
-                key: _speedDialKey,
-                visibilityController: _fabController,
-                padding: const EdgeInsets.only(bottom: 16),
-              ),
-          ],
+            body: Stack(
+              children: [
+                PageTransitionSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  transitionBuilder:
+                      (child, primaryAnimation, secondaryAnimation) {
+                    return FadeThroughTransition(
+                      animation: primaryAnimation,
+                      secondaryAnimation: secondaryAnimation,
+                      child: child,
+                    );
+                  },
+                  child: IndexedStack(
+                    index: stackIndex,
+                    children: [
+                      const DashboardHome(),
+                      TransactionListScreen(
+                        key: transactionListKey,
+                        isTabActive: stackIndex == 1,
+                      ),
+                      UtilityScreen(
+                        key: utilityKey,
+                        isTabActive: stackIndex == 2,
+                      ),
+                      const StatisticsScreen(),
+                      const ProfileScreen(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            floatingActionButton: _buildCenterAddButton(color),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+          ),
+          ExpandableFab(
+            key: _speedDialKey,
+            collapsedAsCircle: true,
+            showCollapsedButton: false,
+            padding: const EdgeInsets.only(bottom: 84),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCenterAddButton(ColorScheme color) {
+    return FloatingActionButton(
+      onPressed: () {
+        HapticFeedback.mediumImpact();
+        _speedDialKey.currentState?.toggle();
+      },
+      tooltip: 'Add transaction',
+      backgroundColor: color.primaryContainer,
+      foregroundColor: color.onPrimaryContainer,
+      elevation: 2,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(17)),
+      ),
+      child: const Icon(LucideIcons.plus, size: 28),
+    );
+  }
+
+  PreferredSizeWidget _buildActivityHomeStyleHeader(
+    TextTheme textTheme,
+    ColorScheme color,
+    AppLocalizations ctxt,
+    AppSpacing spacing,
+  ) {
+    final viewMode = ref.watch(viewModeProvider);
+    final calendarLabel = switch (viewMode) {
+      DateRangeView(:final start, :final end) =>
+        '${DateFormat.MMMd(ctxt.localeName).format(start)} - ${DateFormat.MMMd(ctxt.localeName).format(end)}',
+      MonthView(:final year, :final month) =>
+        MaterialLocalizations.of(context).formatMonthYear(
+          DateTime(year, month),
+        ),
+      InfiniteView() => MaterialLocalizations.of(context).formatMonthYear(
+          DateTime.now(),
+        ),
+    };
+
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: color.surfaceContainerHigh,
+      foregroundColor: color.onSurface,
+      surfaceTintColor: Colors.transparent,
+      flexibleSpace: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.surfaceContainerHigh,
+              color.primaryContainer.withValues(alpha: 0.72),
+            ],
+          ),
         ),
       ),
+      scrolledUnderElevation: 0,
+      toolbarHeight: 80,
+      titleSpacing: spacing.cardInner,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(spacing.radiusLarge + spacing.elementGap),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      title: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            ctxt.transaction_screen_title,
+            style: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          SizedBox(height: spacing.elementGapMin),
+          Material(
+            color: color.surface.withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                transactionListKey.currentState?.toggleCalendarSelection();
+              },
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.elementGap,
+                  vertical: spacing.elementGapMin,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      LucideIcons.calendarDays,
+                      size: spacing.iconXS,
+                      color: color.primary,
+                    ),
+                    SizedBox(width: spacing.elementGapMin),
+                    Text(
+                      calendarLabel,
+                      style: textTheme.labelMedium?.copyWith(
+                        color: color.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(width: spacing.elementGapMin),
+                    Icon(
+                      LucideIcons.chevronDown,
+                      size: spacing.iconXS,
+                      color: color.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        Padding(
+          padding: EdgeInsets.only(right: spacing.elementGapMin),
+          child: IconButton(
+            tooltip: ctxt.common_search,
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              transactionListKey.currentState?.toggleSearch();
+            },
+            icon: const Icon(LucideIcons.search),
+            style: IconButton.styleFrom(
+              foregroundColor: color.onSurface,
+              backgroundColor: color.surfaceContainerHighest,
+              minimumSize: Size.square(spacing.touchTargetSmall),
+              maximumSize: Size.square(spacing.touchTargetSmall),
+              padding: EdgeInsets.zero,
+              shape: const CircleBorder(),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(right: spacing.cardInner),
+          child: IconButton(
+            tooltip: ctxt.common_filter,
+            onPressed: () => transactionListKey.currentState
+                ?.showFilterBottomSheet(context, spacing),
+            icon: const Icon(LucideIcons.listFilter),
+            style: IconButton.styleFrom(
+              foregroundColor: color.onSurface,
+              backgroundColor: color.surfaceContainerHighest,
+              minimumSize: Size.square(spacing.touchTargetSmall),
+              maximumSize: Size.square(spacing.touchTargetSmall),
+              padding: EdgeInsets.zero,
+              shape: const CircleBorder(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -417,9 +622,18 @@ class HomePageState extends ConsumerState<HomePage>
         return AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: color.surfaceContainerHigh,
-          foregroundColor: color.onSurface,
-          surfaceTintColor: Colors.transparent,
-          elevation: 0,
+          flexibleSpace: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  color.surfaceContainerHigh,
+                  color.primaryContainer.withValues(alpha: 0.72),
+                ],
+              ),
+            ),
+          ),
           scrolledUnderElevation: 0,
           toolbarHeight: 80,
           titleSpacing: spacing.cardInner,
@@ -430,7 +644,7 @@ class HomePageState extends ConsumerState<HomePage>
           ),
           clipBehavior: Clip.antiAlias,
           title: GestureDetector(
-            onTap: () => _onTabSelected(ref.read(isSimpleModeProvider) ? 2 : 4),
+            onTap: _openProfile,
             child: Row(
               children: [
                 profileAsync.when(
@@ -449,7 +663,9 @@ class HomePageState extends ConsumerState<HomePage>
                     child: ClipOval(
                       child: BoringAvatar(
                         name: FieldEncryptionService.safeDisplay(
-                            profile?.name, 'User'),
+                          profile?.name,
+                          'User',
+                        ),
                         palette: BoringAvatarPalette([
                           color.primary,
                           color.tertiary,
@@ -494,7 +710,9 @@ class HomePageState extends ConsumerState<HomePage>
                         data: (profile) => AnimatedGreeting(
                           greeting: '${ctxt.translate(toneGreeting)},',
                           name: FieldEncryptionService.safeDisplay(
-                              profile?.name, 'Awesome User'),
+                            profile?.name,
+                            'Awesome User',
+                          ),
                           greetingStyle: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w400,
                           ),
@@ -544,89 +762,96 @@ class HomePageState extends ConsumerState<HomePage>
                 spacing.cardInner,
                 spacing.cardInner,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${ctxt.balanceHistory_currentBalance} (${BaseCurrency.code})',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(height: spacing.elementGapMin),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FinanceAmount(
-                          value: totalBalance,
-                          compact: false,
-                          fixedStringLength: 2,
-                          style: textTheme.headlineMedium?.copyWith(
-                            color: color.onSurface,
-                            fontWeight: FontWeight.w500,
-                            height: 1,
+              child: Container(
+                padding: EdgeInsets.all(spacing.elementGap),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${ctxt.balanceHistory_currentBalance} (${BaseCurrency.code})',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: color.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
+                          SizedBox(height: spacing.elementGapMin),
+                          FinanceAmount(
+                            value: totalBalance,
+                            compact: false,
+                            fixedStringLength: 2,
+                            glow: true,
+                            glowColor: color.primary,
+                            style: textTheme.headlineMedium?.copyWith(
+                              color: color.onSurface,
+                              fontWeight: FontWeight.w500,
+                              height: 1,
+                            ),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        tooltip: ctxt.transaction_addExpenseTitle,
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          context.push(
-                            AppRoutes.addTransaction,
-                            extra: {'isIncome': false},
-                          );
-                        },
-                        icon: const Icon(LucideIcons.arrowDownLeft),
-                        style: IconButton.styleFrom(
-                          foregroundColor: color.onSurface,
-                          backgroundColor: color.surfaceContainerHighest,
-                          minimumSize: Size.square(spacing.touchTargetSmall),
-                          shape: const CircleBorder(),
-                        ),
+                    ),
+                    IconButton(
+                      tooltip: ctxt.transaction_addExpenseTitle,
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        context.push(
+                          AppRoutes.addTransaction,
+                          extra: {'isIncome': false},
+                        );
+                      },
+                      icon: const Icon(LucideIcons.arrowDownLeft),
+                      style: IconButton.styleFrom(
+                        foregroundColor: color.onErrorContainer,
+                        backgroundColor: color.errorContainer,
+                        minimumSize: Size.square(spacing.touchTargetSmall),
+                        shape: const CircleBorder(),
                       ),
-                      SizedBox(width: spacing.elementGapMin),
-                      IconButton(
-                        tooltip: ctxt.transaction_addIncomeTitle,
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          context.push(
-                            AppRoutes.addTransaction,
-                            extra: {'isIncome': true},
-                          );
-                        },
-                        icon: const Icon(LucideIcons.arrowUpRight),
-                        style: IconButton.styleFrom(
-                          foregroundColor: color.onSurface,
-                          backgroundColor: color.surfaceContainerHighest,
-                          minimumSize: Size.square(spacing.touchTargetSmall),
-                          shape: const CircleBorder(),
-                        ),
+                    ),
+                    SizedBox(width: spacing.elementGapMin),
+                    IconButton(
+                      tooltip: ctxt.transaction_addIncomeTitle,
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        context.push(
+                          AppRoutes.addTransaction,
+                          extra: {'isIncome': true},
+                        );
+                      },
+                      icon: const Icon(LucideIcons.arrowUpRight),
+                      style: IconButton.styleFrom(
+                        foregroundColor: color.onPrimaryContainer,
+                        backgroundColor: color.primaryContainer,
+                        minimumSize: Size.square(spacing.touchTargetSmall),
+                        shape: const CircleBorder(),
                       ),
-                      SizedBox(width: spacing.elementGapMin),
-                      IconButton(
-                        tooltip: ctxt.quickAdd_title,
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            builder: (_) =>
-                                const QuickAddTransactionSheet(compact: true),
-                          );
-                        },
-                        icon: const Icon(LucideIcons.plus),
-                        style: IconButton.styleFrom(
-                          foregroundColor: color.onPrimary,
-                          backgroundColor: color.primary,
-                          minimumSize: Size.square(spacing.touchTargetSmall),
-                          shape: const CircleBorder(),
-                        ),
+                    ),
+                    SizedBox(width: spacing.elementGapMin),
+                    IconButton(
+                      tooltip: ctxt.quickAdd_title,
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) =>
+                              const QuickAddTransactionSheet(compact: true),
+                        );
+                      },
+                      icon: const Icon(LucideIcons.plus),
+                      style: IconButton.styleFrom(
+                        foregroundColor: color.onPrimary,
+                        backgroundColor: color.primary,
+                        minimumSize: Size.square(spacing.touchTargetSmall),
+                        shape: const CircleBorder(),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -651,7 +876,10 @@ class HomePageState extends ConsumerState<HomePage>
                     final ongoingTrip = trips.where((t) {
                       if (!t.isTrip) return false;
                       final start = DateTime(
-                          t.startDate.year, t.startDate.month, t.startDate.day);
+                        t.startDate.year,
+                        t.startDate.month,
+                        t.startDate.day,
+                      );
                       return !today.isBefore(start);
                     }).firstOrNull;
 
@@ -659,8 +887,11 @@ class HomePageState extends ConsumerState<HomePage>
                     final upcomingTrip = ongoingTrip == null
                         ? trips.where((t) {
                             if (!t.isTrip) return false;
-                            final start = DateTime(t.startDate.year,
-                                t.startDate.month, t.startDate.day);
+                            final start = DateTime(
+                              t.startDate.year,
+                              t.startDate.month,
+                              t.startDate.day,
+                            );
                             final daysUntil = start.difference(today).inDays;
                             return daysUntil > 0 && daysUntil <= 7;
                           }).firstOrNull
@@ -671,10 +902,11 @@ class HomePageState extends ConsumerState<HomePage>
 
                     final isUpcoming = ongoingTrip == null;
                     final daysUntil = isUpcoming
-                        ? DateTime(trip.startDate.year, trip.startDate.month,
-                                trip.startDate.day)
-                            .difference(today)
-                            .inDays
+                        ? DateTime(
+                            trip.startDate.year,
+                            trip.startDate.month,
+                            trip.startDate.day,
+                          ).difference(today).inDays
                         : 0;
 
                     return InkWell(
@@ -685,8 +917,9 @@ class HomePageState extends ConsumerState<HomePage>
                       borderRadius: BorderRadius.circular(spacing.radiusMedium),
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                            horizontal: spacing.cardHorizontal,
-                            vertical: spacing.cardVertical),
+                          horizontal: spacing.cardHorizontal,
+                          vertical: spacing.cardVertical,
+                        ),
                         decoration: BoxDecoration(
                           color: isUpcoming
                               ? color.tertiaryContainer
@@ -804,28 +1037,11 @@ class HomePageState extends ConsumerState<HomePage>
           ],
         );
       case 1:
-        return AppBar(
-          automaticallyImplyLeading: false,
-          title: Text(
-            ctxt.transaction_screen_title,
-            style: textTheme.titleLarge,
-          ),
-          actions: [
-            IconButton(
-              tooltip: ctxt.common_search,
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                transactionListKey.currentState?.toggleSearch();
-              },
-              icon: const Icon(LucideIcons.search),
-            ),
-            IconButton(
-              tooltip: ctxt.common_filter,
-              onPressed: () => transactionListKey.currentState
-                  ?.showFilterBottomSheet(context, spacing),
-              icon: const Icon(LucideIcons.listFilter),
-            ),
-          ],
+        return _buildActivityHomeStyleHeader(
+          textTheme,
+          color,
+          ctxt,
+          spacing,
         );
       case 2:
         return AppBar(

@@ -1,7 +1,5 @@
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/constants/dashboard_constants.dart';
@@ -12,7 +10,6 @@ import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/services/card_interaction_tracker.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -33,7 +30,6 @@ import 'package:mudra_manager/features/dashboard/presentation/widgets/first_tran
 import 'package:mudra_manager/features/dashboard/presentation/widgets/sms_success_celebration_sheet.dart';
 import 'package:mudra_manager/features/gamification/presentation/widgets/streak_saved_celebration_sheet.dart';
 import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
-import 'package:mudra_manager/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 
 // ─────────────────────────────────────────────────────────────
@@ -255,6 +251,10 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.of(context).disableAnimations;
+    final color = Theme.of(context).colorScheme;
+    final dashboardBackground = color.brightness == Brightness.dark
+        ? color.surfaceContainerHigh
+        : color.surface;
     final dashboardAsync = ref.watch(dashboardDataProvider);
     final widgets = ref.watch(orderedDashboardWidgetsProvider);
     final alerts = ref.watch(budgetAlertsNotifierProvider);
@@ -263,11 +263,7 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
     final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showQuickAddSheet,
-        tooltip: ctxt.quickAdd_title,
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      backgroundColor: dashboardBackground,
       body: dashboardAsync.when(
         loading: () => const _DashboardLoading(),
         error: (e, _) => _buildErrorState(e, ctxt),
@@ -304,15 +300,6 @@ class _DashboardHomeBodyState extends ConsumerState<_DashboardHomeBody> {
           );
         },
       ),
-    );
-  }
-
-  void _showQuickAddSheet() {
-    HapticFeedback.mediumImpact();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => const QuickAddTransactionSheet(compact: true),
     );
   }
 
@@ -468,8 +455,7 @@ class _DashboardContent extends ConsumerWidget {
           ),
           if (widgets.isEmpty)
             _buildEmptyState(context, color, textTheme, spacing, ctxt),
-          if (widgets.isNotEmpty)
-            _buildFooter(context, color, textTheme, spacing, ctxt),
+          if (widgets.isNotEmpty) _buildFooter(),
         ],
       ),
     );
@@ -533,12 +519,6 @@ class _DashboardContent extends ConsumerWidget {
                     ?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: spacing.sectionGap),
-              FilledButton.icon(
-                onPressed: () => context.push(AppRoutes.dashboardCustomize),
-                icon: const Icon(LucideIcons.plus),
-                label: Text(ctxt.dashboard_enableCards),
-              ),
             ],
           ),
         ),
@@ -546,36 +526,12 @@ class _DashboardContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildFooter(
-    BuildContext context,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-    AppLocalizations ctxt,
-  ) {
-    return SliverToBoxAdapter(
+  Widget _buildFooter() {
+    return const SliverToBoxAdapter(
       child: Column(
         children: [
-          Center(
-            child: Padding(
-              padding: EdgeInsets.only(top: spacing.elementGap),
-              child: TextButton.icon(
-                onPressed: () => context.push(AppRoutes.dashboardCustomize),
-                icon: Icon(
-                  LucideIcons.settings2,
-                  size: 16,
-                  color: color.onSurfaceVariant,
-                ),
-                label: Text(
-                  ctxt.dashboard_customizeDashboard,
-                  style: textTheme.labelMedium
-                      ?.copyWith(color: color.onSurfaceVariant),
-                ),
-              ),
-            ),
-          ),
-          const AmbientBrandSection(showSignature: false),
-          const SizedBox(height: 120),
+          AmbientBrandSection(showSignature: false),
+          SizedBox(height: 120),
         ],
       ),
     );
@@ -592,22 +548,44 @@ class _DashboardLoading extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.watch(spacingProvider);
+    final widgets = ref.watch(orderedDashboardWidgetsProvider);
+    final skeletons = widgets.isEmpty
+        ? <Widget>[const DashboardCardSkeleton()]
+        : widgets.map((widget) => _skeletonFor(widget.id)).toList();
 
     return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverToBoxAdapter(
           child: Column(
             children: [
               SizedBox(height: spacing.elementGap),
-              const TodayBriefingSkeleton(),
-              const AccountCardSkeleton(),
-              const CashFlowSkeleton(),
-              const BudgetCardSkeleton(),
-              const DashboardCardSkeleton(),
+              ...skeletons,
             ],
           ),
         ),
       ],
     );
+  }
+
+  Widget _skeletonFor(String widgetId) {
+    switch (widgetId) {
+      case 'health_strip':
+        return const HealthStripSkeleton();
+      case 'daily_briefing':
+        return const TodayBriefingSkeleton();
+      case 'cash_flow':
+        return const CashFlowSkeleton();
+      case 'goals_progress':
+        return const GoalsCardSkeleton();
+      case 'budget_overview':
+        return const BudgetCardSkeleton();
+      case 'recurring_expenses':
+        return const RecurringExpensesCardSkeleton();
+      case 'recent_transactions':
+        return const RecentTransactionsCardSkeleton();
+      default:
+        return const DashboardCardSkeleton();
+    }
   }
 }

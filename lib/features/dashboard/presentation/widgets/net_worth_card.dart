@@ -71,7 +71,8 @@ class NetWorthCard extends ConsumerWidget {
                     // Background chart
                     Positioned.fill(
                       child: historyAsync.when(
-                        data: (history) => _buildMiniChart(history, color, spacing),
+                        data: (history) =>
+                            _buildMiniChart(history, color, spacing),
                         loading: () => const SizedBox.shrink(),
                         error: (_, __) => const SizedBox.shrink(),
                       ),
@@ -124,7 +125,7 @@ class NetWorthCard extends ConsumerWidget {
                               value: totalBalance,
                               duration: const Duration(milliseconds: 1500),
                               style: textTheme.displaySmall?.copyWith(
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w600,
                                 color: color.onPrimaryContainer,
                                 fontSize: 36,
                               ),
@@ -196,7 +197,8 @@ class NetWorthCard extends ConsumerWidget {
                                               : color.onPrimaryContainer
                                                   .withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(
-                                              spacing.radiusMedium,),
+                                            spacing.radiusMedium,
+                                          ),
                                         ),
                                         child: Text(
                                           '${savingsRate.toStringAsFixed(0)}% savings',
@@ -371,7 +373,7 @@ class _MetricChip extends ConsumerWidget {
             amount: amount,
             style: textTheme.titleSmall?.copyWith(
               color: colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
             ),
             showSign: false,
           ),

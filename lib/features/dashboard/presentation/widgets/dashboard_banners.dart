@@ -68,7 +68,6 @@ class _PrioritizedBannerState extends ConsumerState<PrioritizedBanner> {
 
   @override
   Widget build(BuildContext context) {
-
     // Background health blocks everything (critical)
     final unhealthy = ref.watch(backgroundTaskUnhealthyProvider).value ?? false;
     if (unhealthy) return const BackgroundHealthBanner();
@@ -218,7 +217,7 @@ class HelpBanner extends ConsumerWidget {
                       Text(
                         AppLocalizations.of(context)!.dashboard_newToApp,
                         style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: color.onSurface,
                         ),
                       ),
@@ -339,7 +338,7 @@ class AutoImportBanner extends ConsumerWidget {
                     Text(
                       '$pending pending review',
                       style: textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: color.onTertiaryContainer,
                       ),
                     ),
@@ -364,7 +363,7 @@ class AutoImportBanner extends ConsumerWidget {
                 child: Text(
                   '$pending',
                   style: textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                     color: color.onTertiaryContainer,
                   ),
                 ),
@@ -501,7 +500,7 @@ class AutoImportBanner extends ConsumerWidget {
                         AppLocalizations.of(context)!
                             .dashboard_enableAutoImport,
                         style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: color.onSurface,
                         ),
                       ),
@@ -576,7 +575,7 @@ class BackgroundHealthBanner extends ConsumerWidget {
                   Text(
                     AppLocalizations.of(context)!.dashboard_bgSyncIssueTitle,
                     style: textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       color: color.onErrorContainer,
                     ),
                   ),
@@ -687,27 +686,38 @@ class _FinancialAdvisoryBannerState
                     ),
                     SizedBox(width: spacing.elementGap * 1.5),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Financial Advisory',
-                            style: textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: color.primary,
-                            ),
-                          ),
-                          Text(
-                            '${widget.attentionItems.length} '
-                            '${widget.attentionItems.length == 1 ? 'item' : 'items'} '
-                            'may need attention',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        'Financial Advisory',
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: color.primary,
+                        ),
                       ),
                     ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.elementGap,
+                        vertical: spacing.elementGapMin,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.primary.withValues(alpha: 0.1),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
+                        border: Border.all(
+                          color: color.primary.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Text(
+                        '${widget.attentionItems.length}',
+                        semanticsLabel:
+                            '${widget.attentionItems.length} ${widget.attentionItems.length == 1 ? 'item' : 'items'}',
+                        style: textTheme.labelMedium?.copyWith(
+                          color: color.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: spacing.elementGap),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 200),
                       transitionBuilder: (child, animation) =>

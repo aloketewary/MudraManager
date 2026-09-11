@@ -242,7 +242,7 @@ class _AnimatedAccountCard extends ConsumerState<AnimatedAccountCard> {
                   value: widget.totalBalance.toDouble(),
                   style: textTheme.headlineLarge?.copyWith(
                     color: textColor,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     fontSize: 32,
                     letterSpacing: -0.5,
                   ),

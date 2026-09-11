@@ -50,6 +50,7 @@ abstract class AppRoutes {
   static const spendingTrends = '/spending-trends';
   static const monthlyComparison = '/monthly-comparison';
   static const monthlyRecap = '/monthly-recap';
+  static const financialAdvice = '/financial-advice';
 
   // Profile & Settings
   static const editProfile = '/edit-profile';
@@ -73,7 +74,6 @@ abstract class AppRoutes {
   static const addCategory = '/add-category';
 
   // Dashboard
-  static const dashboardCustomize = '/dashboard-customize';
   static const commandCenter = '/command-center';
 
   // Other

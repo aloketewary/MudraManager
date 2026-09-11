@@ -104,7 +104,7 @@ class SpendingPredictionCard extends ConsumerWidget {
                                   pct.toStringAsFixed(0),
                                 ),
                           style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),

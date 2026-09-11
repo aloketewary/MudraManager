@@ -94,7 +94,7 @@ class SpendingPersonalityCard extends ConsumerWidget {
                             child: Text(
                               archetype.name,
                               style: textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -171,7 +171,7 @@ class SpendingPersonalityCard extends ConsumerWidget {
                             '${(status.controlLevel * 100).toInt()}%',
                             style: textTheme.labelSmall?.copyWith(
                               color: archetype.color,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],

@@ -138,10 +138,23 @@ echo "🤖 Running Android unit tests..."
 echo "✅ Android tests passed"
 
 # Step 8: Build appbundle
-echo "🏗️ Building appbundle..."
-flutter build appbundle --flavor prod --release
+echo "🏗️ Building appbundle $new_version (versionCode $new_build_number)..."
+flutter build appbundle \
+  --flavor prod \
+  --release \
+  --build-name "$new_version" \
+  --build-number "$new_build_number"
 
-# Step 9: Git commit
+# Step 9: Verify generated Android version before committing.
+manifest_metadata="$project_dir/build/app/intermediates/merged_manifests/prodRelease/processProdReleaseManifest/output-metadata.json"
+if [ ! -f "$manifest_metadata" ] || ! grep -q "\"versionCode\": $new_build_number" "$manifest_metadata"; then
+  echo "❌ Generated bundle does not contain versionCode $new_build_number"
+  exit 1
+fi
+
+echo "✅ Generated bundle version verified: $new_version+$new_build_number"
+
+# Step 10: Git commit
 echo "📝 Committing version bump..."
 git add pubspec.yaml
 git commit -m "chore: release v$new_full"

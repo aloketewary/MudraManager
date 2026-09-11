@@ -10,6 +10,7 @@ class SwipeActionWrapper extends ConsumerStatefulWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final bool enablePeek;
+  final Key? dismissibleKey;
 
   const SwipeActionWrapper({
     super.key,
@@ -17,6 +18,7 @@ class SwipeActionWrapper extends ConsumerStatefulWidget {
     required this.onEdit,
     required this.onDelete,
     this.enablePeek = false,
+    this.dismissibleKey,
   });
 
   @override
@@ -107,9 +109,12 @@ class _SwipeActionWrapperState extends ConsumerState<SwipeActionWrapper>
     super.dispose();
   }
 
-  Widget _buildDismissible(ColorScheme color, AppSpacing spacing,) {
+  Widget _buildDismissible(
+    ColorScheme color,
+    AppSpacing spacing,
+  ) {
     return Dismissible(
-      key: UniqueKey(),
+      key: widget.dismissibleKey ?? const ValueKey('swipe-action'),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
           HapticFeedback.mediumImpact();
@@ -176,7 +181,10 @@ class _SwipeActionWrapperState extends ConsumerState<SwipeActionWrapper>
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final spacing = ref.watch(spacingProvider);
-    final dismissible = _buildDismissible(color, spacing,);
+    final dismissible = _buildDismissible(
+      color,
+      spacing,
+    );
 
     if (!_showPeek) return dismissible;
 

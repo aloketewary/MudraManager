@@ -83,7 +83,7 @@ class BudgetCard extends ConsumerWidget {
                             AppLocalizations.of(context)!
                                 .dashboard_mini_budget_text,
                             style: textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -101,10 +101,8 @@ class BudgetCard extends ConsumerWidget {
                     Text(
                       formatCurrency(remaining, decimals: 0),
                       style: textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: percent >= 100
-                            ? color.error
-                            : color.onSurface,
+                        fontWeight: FontWeight.w500,
+                        color: percent >= 100 ? color.error : color.onSurface,
                       ),
                     ),
                     SizedBox(height: spacing.elementGapMin),
@@ -123,8 +121,7 @@ class BudgetCard extends ConsumerWidget {
                       child: LinearProgressIndicator(
                         value: (percent / 100).clamp(0.0, 1.0),
                         minHeight: 6,
-                        backgroundColor:
-                            color.surfaceContainerHighest,
+                        backgroundColor: color.surfaceContainerHighest,
                         color: progressColor,
                       ),
                     ),
@@ -141,8 +138,7 @@ class BudgetCard extends ConsumerWidget {
                         ),
                         SizedBox(width: spacing.elementGapMin),
                         Text(
-                          AppLocalizations.of(context)!
-                              .budget_safeToSpend,
+                          AppLocalizations.of(context)!.budget_safeToSpend,
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
@@ -151,7 +147,7 @@ class BudgetCard extends ConsumerWidget {
                         Text(
                           formatCurrency(dailyAllowance, decimals: 0),
                           style: textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],

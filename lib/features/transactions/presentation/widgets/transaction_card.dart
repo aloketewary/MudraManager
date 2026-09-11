@@ -90,6 +90,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
     final isReducedMotion = MediaQuery.of(context).disableAnimations;
 
     return SwipeActionWrapper(
+      dismissibleKey: widget.key,
       enablePeek: widget.enablePeek,
       onEdit: widget.onEdit,
       onDelete: widget.onRemove,
@@ -152,25 +153,30 @@ class _CardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cardRadius = spacing.radiusLarge;
+
     return Card(
       margin: EdgeInsets.symmetric(
         horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
+        vertical: spacing.cardVerticalMin + 1,
       ),
       elevation: 0,
-      color: colorScheme.surfaceContainerLow,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        borderRadius: BorderRadius.circular(cardRadius),
         side: BorderSide(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.38),
           width: spacing.strokeThin,
         ),
       ),
       child: InkWell(
         onTap: onToggleExpand,
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        borderRadius: BorderRadius.circular(cardRadius),
         child: Padding(
-          padding: EdgeInsets.all(spacing.cardInner - 2),
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.cardInner - spacing.elementGap,
+            vertical: spacing.cardVertical + spacing.elementGapMin,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -308,7 +314,15 @@ class _ExpandedDetails extends StatelessWidget {
     return Wrap(
       spacing: spacing.elementGapMin,
       runSpacing: spacing.elementGapMin,
-      children: tags.map((tag) => _TagChip(tag: tag, spacing: spacing, colorScheme: colorScheme)).toList(),
+      children: tags
+          .map(
+            (tag) => _TagChip(
+              tag: tag,
+              spacing: spacing,
+              colorScheme: colorScheme,
+            ),
+          )
+          .toList(),
     );
   }
 }

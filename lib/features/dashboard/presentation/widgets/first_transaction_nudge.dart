@@ -75,7 +75,7 @@ class FirstTransactionNudge extends ConsumerWidget {
                         Text(
                           ctxt.dashboard_addFirstExpense,
                           style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                             color: color.onSurface,
                           ),
                         ),
@@ -206,17 +206,19 @@ class _QuickActionChip extends ConsumerWidget {
         },
         borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.625),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.elementGap + spacing.elementGapMin,
+            vertical: spacing.elementGap + spacing.elementGapMin / 2,
+          ),
           decoration: BoxDecoration(
-            borderRadius:
-                BorderRadius.circular(spacing.radiusSmall * 0.625),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall * 0.625),
             color: color.surfaceContainerHighest.withValues(alpha: 0.5),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 16, color: color.primary),
-              const SizedBox(width: 8),
+              SizedBox(width: spacing.elementGap),
               Flexible(
                 child: Text(
                   label,

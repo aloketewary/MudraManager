@@ -11,7 +11,6 @@ enum ProFeature {
   spendingPersonality,
   netWorth,
   monthlyRecap,
-  dashboardCustomize,
 
   // ── Exports ──
   businessExports,
@@ -45,5 +44,4 @@ const Map<String, ProFeature> gatedRoutes = {
   '/net-worth': ProFeature.netWorth,
   '/tax-estimation': ProFeature.advancedAnalytics,
   '/monthly-recap': ProFeature.monthlyRecap,
-  '/dashboard-customize': ProFeature.dashboardCustomize,
 };

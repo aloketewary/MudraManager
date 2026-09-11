@@ -196,8 +196,6 @@ class _BlurUpgradeOverlay extends ConsumerWidget {
         'Track your complete net worth across all accounts and investments.',
       ProFeature.monthlyRecap =>
         'Get a beautiful monthly recap of your finances.',
-      ProFeature.dashboardCustomize =>
-        'Customize your dashboard with the widgets that matter most to you.',
       ProFeature.businessExports =>
         'Export professional business reports in Excel and PDF.',
       ProFeature.cloudBackup =>

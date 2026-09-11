@@ -68,7 +68,7 @@ class FinancialHealthCard extends ConsumerWidget {
                           labelBuilder: (value) => Text(
                             '${(value * 100).toInt()}',
                             style: textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w600,
                               color: scoreColor,
                             ),
                           ),
@@ -81,7 +81,7 @@ class FinancialHealthCard extends ConsumerWidget {
                               Text(
                                 'Financial Health',
                                 style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                               SizedBox(height: spacing.elementGapMin),

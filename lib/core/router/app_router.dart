@@ -28,7 +28,6 @@ import 'package:mudra_manager/features/budget/presentation/screens/manage_budget
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/adaptive_budget_dashboard.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/budget_details_screen.dart';
-import 'package:mudra_manager/features/dashboard/presentation/screens/dashboard_customize_screen.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/command_center_screen.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/recurring_expenses_screen.dart';
 import 'package:mudra_manager/features/goal/presentation/screens/create_goal_screen.dart';
@@ -47,6 +46,7 @@ import 'package:mudra_manager/features/profile/presentation/screens/currency_set
 import 'package:mudra_manager/features/profile/presentation/screens/exchange_rate_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/archived_transactions_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/edit_user_profile_screen.dart';
+import 'package:mudra_manager/features/profile/presentation/screens/profile_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/help_screen.dart';
 import 'package:mudra_manager/features/account/presentation/screens/manage_account_screen.dart';
 import 'package:mudra_manager/features/category/presentation/screens/manage_categories_screen.dart';
@@ -71,6 +71,7 @@ import 'package:mudra_manager/features/trip/presentation/screens/group_detail_di
 import 'package:mudra_manager/features/trip/presentation/screens/trips_screen.dart';
 import 'package:mudra_manager/features/upgrade/presentation/screens/upgrade_screen.dart';
 import 'package:mudra_manager/features/import_export/presentation/screens/import_export_screen.dart';
+import 'package:mudra_manager/features/insights/presentation/screens/financial_advice_screen.dart';
 import 'package:mudra_manager/features/import_export/presentation/screens/import_preview_screen.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/widget_analytics_screen.dart';
 import 'package:mudra_manager/features/credit_card/presentation/screens/credit_card_bills_screen.dart';
@@ -154,7 +155,7 @@ class AppRouter {
               ),
               GoRoute(
                 path: AppRoutes.profile,
-                builder: (context, state) => const HomePage(initialIndex: 4),
+                builder: (context, state) => const ProfileScreen(),
               ),
               GoRoute(
                 path: AppRoutes.addTransaction,
@@ -237,15 +238,34 @@ class AppRouter {
                 ),
               ),
               GoRoute(
-                path: AppRoutes.dashboardCustomize,
-                builder: (context, state) => const ProGate(
-                  feature: ProFeature.dashboardCustomize,
-                  child: DashboardCustomizeScreen(),
-                ),
-              ),
-              GoRoute(
                 path: AppRoutes.commandCenter,
                 builder: (context, state) => const CommandCenterScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.financialAdvice,
+                pageBuilder: (context, state) {
+                  final extra = state.extra;
+                  final metadata = extra is Map ? extra : const {};
+                  final source = metadata['source'];
+                  final focusId = metadata['focusId'];
+
+                  return CustomTransitionPage(
+                    key: state.pageKey,
+                    child: FinancialAdviceScreen(
+                      source: source is String ? source : null,
+                      focusId: focusId is String ? focusId : null,
+                    ),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return SharedAxisTransition(
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        transitionType: SharedAxisTransitionType.horizontal,
+                        child: child,
+                      );
+                    },
+                  );
+                },
               ),
               GoRoute(
                 path: AppRoutes.recurringExpenses,

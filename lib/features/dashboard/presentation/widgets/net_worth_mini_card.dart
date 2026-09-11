@@ -84,7 +84,8 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                           decoration: BoxDecoration(
                             color: color.secondary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(
-                                spacing.radiusSmall,),
+                              spacing.radiusSmall,
+                            ),
                           ),
                           child: Icon(
                             LucideIcons.wallet,
@@ -99,7 +100,7 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                             textAlign: TextAlign.center,
                             style: textTheme.labelLarge?.copyWith(
                               color: color.secondary,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -132,8 +133,10 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                                           ? ((e.value - minVal) / range) * 50 +
                                               10
                                           : 30;
-                                      return FlSpot(e.key.toDouble(),
-                                          normalized.toDouble(),);
+                                      return FlSpot(
+                                        e.key.toDouble(),
+                                        normalized.toDouble(),
+                                      );
                                     }).toList();
                                     return LineChart(
                                       LineChartData(
@@ -175,7 +178,7 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                               style: textTheme.titleLarge?.copyWith(
                                 color: color.secondary,
                                 fontSize: 40,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w600,
                               ),
                               fixedStringLength: 0,
                               overflow: TextOverflow.fade,

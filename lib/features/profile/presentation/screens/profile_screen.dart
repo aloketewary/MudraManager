@@ -187,7 +187,8 @@ class ProfileErrorView extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+              style:
+                  textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
             ),
             SizedBox(height: spacing.elementGap * 1.5),
             FilledButton.tonalIcon(
@@ -233,7 +234,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
       QuickStatItem(
         icon: LucideIcons.layoutGrid,
-        value: (categoriesAsync.asData?.value as List?)?.length.toString() ?? '0',
+        value:
+            (categoriesAsync.asData?.value as List?)?.length.toString() ?? '0',
         label: l10n.profile_categoriesLabel,
         loading: categoriesAsync.isLoading,
       ),
@@ -271,266 +273,273 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           },
           key: ValueKey(profileAsync.isLoading),
           child: CustomScrollView(
-          slivers: [
-            // ── HERO HEADER ──
-            SliverAppBar(
-              expandedHeight: 260,
-              pinned: true,
-              automaticallyImplyLeading: false,
-              flexibleSpace: LayoutBuilder(
-                builder: (context, constraints) {
-                  final isCollapsed = constraints.biggest.height <=
-                      kToolbarHeight + MediaQuery.of(context).padding.top + 20;
-                  return FlexibleSpaceBar(
-                    centerTitle: false,
-                    titlePadding: EdgeInsets.only(
-                      left: isCollapsed ? spacing.elementGap : spacing.cardHorizontalMax,
-                      bottom: spacing.elementGap * 2,
-                    ),
-                    title: isCollapsed
-                        ? Padding(
-                            padding: EdgeInsets.only(left: spacing.elementGap),
-                            child: Text(
-                              FieldEncryptionService.safeDisplay(
-                                profile?.name,
-                                l10n.profile_awesomeUser,
-                              ),
-                              style: textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: color.onSurface,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                    background: _buildHeroBackground(
-                      profile,
-                      color,
-                      textTheme,
-                      isDark,
-                      spacing,
-                      streakAsync,
-                      reduceMotion,
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            SliverPadding(
-              padding: EdgeInsets.symmetric(
-                horizontal: spacing.cardHorizontal,
-                vertical: spacing.cardVertical,
-              ),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // ── QUICK STATS ──
-                  // Per-stat tonal chip containers instead of single box + dividers
-                  Row(
-                    children: stats.asMap().entries.expand((entry) {
-                      final stat = entry.value;
-                      final isLast = entry.key == stats.length - 1;
-                      return [
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: spacing.cardHorizontalMax,
-                              vertical: spacing.cardVertical,
-                            ),
-                            decoration: BoxDecoration(
-                              // Glassy translucent surface matching SettingsGroupCard
-                              color: color.surface.withValues(alpha: 0.75),
-                              borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
-                              border: Border.all(
-                                color: color.outlineVariant.withValues(alpha: 0.3),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: color.onSurface.withValues(alpha: 0.03),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
-                                  spreadRadius: 0,
+            slivers: [
+              // ── HERO HEADER ──
+              SliverAppBar(
+                expandedHeight: 260,
+                pinned: true,
+                automaticallyImplyLeading: true,
+                flexibleSpace: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isCollapsed = constraints.biggest.height <=
+                        kToolbarHeight +
+                            MediaQuery.of(context).padding.top +
+                            20;
+                    return FlexibleSpaceBar(
+                      centerTitle: false,
+                      titlePadding: EdgeInsets.only(
+                        left: isCollapsed
+                            ? spacing.elementGap
+                            : spacing.cardHorizontalMax,
+                        bottom: spacing.elementGap * 2,
+                      ),
+                      title: isCollapsed
+                          ? Padding(
+                              padding:
+                                  EdgeInsets.only(left: spacing.elementGap),
+                              child: Text(
+                                FieldEncryptionService.safeDisplay(
+                                  profile?.name,
+                                  l10n.profile_awesomeUser,
                                 ),
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                                child: stat,
+                                style: textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: color.onSurface,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                      background: _buildHeroBackground(
+                        profile,
+                        color,
+                        textTheme,
+                        isDark,
+                        spacing,
+                        streakAsync,
+                        reduceMotion,
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              SliverPadding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.cardHorizontal,
+                  vertical: spacing.cardVertical,
+                ),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // ── QUICK STATS ──
+                    // Per-stat tonal chip containers instead of single box + dividers
+                    Row(
+                      children: stats.asMap().entries.expand((entry) {
+                        final stat = entry.value;
+                        final isLast = entry.key == stats.length - 1;
+                        return [
+                          Expanded(
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: spacing.cardHorizontalMax,
+                                vertical: spacing.cardVertical,
+                              ),
+                              decoration: BoxDecoration(
+                                // Glassy translucent surface matching SettingsGroupCard
+                                color: color.surface.withValues(alpha: 0.75),
+                                borderRadius: BorderRadius.circular(
+                                    spacing.radiusMedium + 4),
+                                border: Border.all(
+                                  color: color.outlineVariant
+                                      .withValues(alpha: 0.3),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                        color.onSurface.withValues(alpha: 0.03),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 4),
+                                    spreadRadius: 0,
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                    spacing.radiusMedium + 4),
+                                child: BackdropFilter(
+                                  filter:
+                                      ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                                  child: stat,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        if (!isLast) SizedBox(width: spacing.elementGap),
-                      ];
-                    }).toList(),
-                  ),
-                  SizedBox(height: spacing.elementGap * 2),
+                          if (!isLast) SizedBox(width: spacing.elementGap),
+                        ];
+                      }).toList(),
+                    ),
+                    SizedBox(height: spacing.elementGap * 2),
 
-                  // ── SUBSCRIPTION STATUS ──
-                  const SubscriptionStatusCard(),
-                  SizedBox(height: spacing.elementGap * 2),
-                  // ── CORE SETTINGS ──
-                  SectionHeader(l10n.section_coreSettings),
-                  SettingsGroupCard(
-                    items: [
-                      SettingItem(
-                        icon: LucideIcons.wallet,
-                        title: l10n.profile_accounts,
-                        subtitle: l10n.profile_manageAccounts,
-                        onTap: () => context.push(AppRoutes.manageAccounts),
-                      ),
-                      SettingItem(
-                        icon: LucideIcons.layoutGrid,
-                        title: l10n.profile_categories,
-                        subtitle: l10n.profile_manageCategories,
-                        onTap: () => context.push(AppRoutes.manageCategories),
-                      ),
-                      SettingItem(
-                        icon: LucideIcons.coins,
-                        title: l10n.title_currency,
-                        subtitle: _baseCurrencySubtitle(ref),
-                        onTap: () => context.push(AppRoutes.currencySettings),
-                      ),
-                      SettingItem(
-                        icon: LucideIcons.lock,
-                        title: l10n.title_security,
-                        subtitle: l10n.profile_pinFingerprint,
-                        onTap: () => context.push(AppRoutes.security),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: spacing.elementGap * 2),
-
-                  // ── APP & DATA ──
-                  SectionHeader(l10n.section_appData),
-                  _buildAppDataGroup(color, textTheme, spacing),
-                  SizedBox(height: spacing.elementGap * 2),
-
-                  // ── APPEARANCE ──
-                  SectionHeader(l10n.section_appearance),
-                  SettingsGroupCard(
-                    items: [
-                      SettingItem(
-                        icon: LucideIcons.palette,
-                        title: l10n.title_appearance,
-                        subtitle: l10n.profile_themeDisplay,
-                        onTap: () => context.push(AppRoutes.appearance),
-                      ),
-                      SettingItem(
-                        icon: LucideIcons.languages,
-                        title: l10n.profile_language,
-                        subtitle: Locale(SharedPrefsUtil.instance.getLanguage()).displayName(),
-                        onTap: () => context.push(AppRoutes.chooseLanguage),
-                      ),
-                      SettingItem(
-                        icon: LucideIcons.layoutGrid,
-                        title: ref.watch(isSimpleModeProvider)
-                            ? l10n.mode_switchToFull
-                            : l10n.mode_switchToSimple,
-                        subtitle: ref.watch(isSimpleModeProvider)
-                            ? l10n.mode_fullDesc
-                            : l10n.mode_simpleDesc,
-                        onTap: () async {
-                          final notifier = ref.read(appModeProvider.notifier);
-                          final current = ref.read(appModeProvider);
-                          await notifier.setMode(
-                            current == AppMode.simple
-                                ? AppMode.full
-                                : AppMode.simple,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: spacing.elementGap * 2),
-
-                  // ── ADVANCED ──
-                  if (!ref.watch(isSimpleModeProvider)) ...[
-                    SectionHeader(l10n.section_advanced),
+                    // ── SUBSCRIPTION STATUS ──
+                    const SubscriptionStatusCard(),
+                    SizedBox(height: spacing.elementGap * 2),
+                    // ── CORE SETTINGS ──
+                    SectionHeader(l10n.section_coreSettings),
                     SettingsGroupCard(
                       items: [
                         SettingItem(
-                          icon: LucideIcons.layoutDashboard,
-                          title: l10n.title_dashboardLayout,
-                          subtitle: l10n.profile_customizeWidgets,
-                          onTap: () => context.push(AppRoutes.dashboardCustomize),
-                          trailing: const ProBadge(),
+                          icon: LucideIcons.wallet,
+                          title: l10n.profile_accounts,
+                          subtitle: l10n.profile_manageAccounts,
+                          onTap: () => context.push(AppRoutes.manageAccounts),
                         ),
                         SettingItem(
-                          icon: LucideIcons.arrowLeftRight,
-                          title: l10n.profile_importExport,
-                          subtitle: l10n.profile_importExportDesc,
-                          onTap: () => context.push(AppRoutes.importExport),
+                          icon: LucideIcons.layoutGrid,
+                          title: l10n.profile_categories,
+                          subtitle: l10n.profile_manageCategories,
+                          onTap: () => context.push(AppRoutes.manageCategories),
                         ),
                         SettingItem(
-                          icon: LucideIcons.puzzle,
-                          title: l10n.title_plugins,
-                          subtitle: l10n.profile_manageExtensions,
-                          onTap: () => context.push(AppRoutes.marketplace),
+                          icon: LucideIcons.coins,
+                          title: l10n.title_currency,
+                          subtitle: _baseCurrencySubtitle(ref),
+                          onTap: () => context.push(AppRoutes.currencySettings),
+                        ),
+                        SettingItem(
+                          icon: LucideIcons.lock,
+                          title: l10n.title_security,
+                          subtitle: l10n.profile_pinFingerprint,
+                          onTap: () => context.push(AppRoutes.security),
                         ),
                       ],
                     ),
                     SizedBox(height: spacing.elementGap * 2),
-                  ],
 
-                  // ── SUPPORT & LEGAL ──
-                  SectionHeader(l10n.section_supportLegal),
-                  SettingsGroupCard(
-                    items: [
-                      SettingItem(
-                        icon: LucideIcons.circleQuestionMark,
-                        title: l10n.profile_helpSupport,
-                        subtitle: l10n.profile_faqs,
-                        onTap: () => context.push(AppRoutes.help),
-                      ),
-                      SettingItem(
-                        icon: LucideIcons.info,
-                        title: l10n.profile_aboutApp,
-                        subtitle: l10n.profile_versionInfo,
-                        onTap: () => context.push(AppRoutes.about),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: spacing.sectionGap * 1.33),
-                  if (kDebugMode) ...[
-                    const SectionHeader('Debug'),
-                    _buildDebugEntitlementCard(color, textTheme, spacing),
+                    // ── APP & DATA ──
+                    SectionHeader(l10n.section_appData),
+                    _buildAppDataGroup(color, textTheme, spacing),
                     SizedBox(height: spacing.elementGap * 2),
-                  ],
-                  // ── LOGOUT ──
-                  Center(
-                    child: Semantics(
-                      label: l10n.profile_logout,
-                      button: true,
-                      child: TextButton.icon(
-                        onPressed: () =>
-                            _showLogoutBottomSheet(context, ref, color, textTheme),
-                        icon: Icon(LucideIcons.logOut, size: 18, color: color.error),
-                        label: Text(
-                          l10n.profile_logout,
-                          style: textTheme.bodyMedium?.copyWith(color: color.error),
+
+                    // ── APPEARANCE ──
+                    SectionHeader(l10n.section_appearance),
+                    SettingsGroupCard(
+                      items: [
+                        SettingItem(
+                          icon: LucideIcons.palette,
+                          title: l10n.title_appearance,
+                          subtitle: l10n.profile_themeDisplay,
+                          onTap: () => context.push(AppRoutes.appearance),
                         ),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: spacing.cardHorizontalMax,
-                            vertical: spacing.elementGap * 1.5,
+                        SettingItem(
+                          icon: LucideIcons.languages,
+                          title: l10n.profile_language,
+                          subtitle:
+                              Locale(SharedPrefsUtil.instance.getLanguage())
+                                  .displayName(),
+                          onTap: () => context.push(AppRoutes.chooseLanguage),
+                        ),
+                        SettingItem(
+                          icon: LucideIcons.layoutGrid,
+                          title: ref.watch(isSimpleModeProvider)
+                              ? l10n.mode_switchToFull
+                              : l10n.mode_switchToSimple,
+                          subtitle: ref.watch(isSimpleModeProvider)
+                              ? l10n.mode_fullDesc
+                              : l10n.mode_simpleDesc,
+                          onTap: () async {
+                            final notifier = ref.read(appModeProvider.notifier);
+                            final current = ref.read(appModeProvider);
+                            await notifier.setMode(
+                              current == AppMode.simple
+                                  ? AppMode.full
+                                  : AppMode.simple,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: spacing.elementGap * 2),
+
+                    // ── ADVANCED ──
+                    if (!ref.watch(isSimpleModeProvider)) ...[
+                      SectionHeader(l10n.section_advanced),
+                      SettingsGroupCard(
+                        items: [
+                          SettingItem(
+                            icon: LucideIcons.arrowLeftRight,
+                            title: l10n.profile_importExport,
+                            subtitle: l10n.profile_importExportDesc,
+                            onTap: () => context.push(AppRoutes.importExport),
+                          ),
+                          SettingItem(
+                            icon: LucideIcons.puzzle,
+                            title: l10n.title_plugins,
+                            subtitle: l10n.profile_manageExtensions,
+                            onTap: () => context.push(AppRoutes.marketplace),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: spacing.elementGap * 2),
+                    ],
+
+                    // ── SUPPORT & LEGAL ──
+                    SectionHeader(l10n.section_supportLegal),
+                    SettingsGroupCard(
+                      items: [
+                        SettingItem(
+                          icon: LucideIcons.circleQuestionMark,
+                          title: l10n.profile_helpSupport,
+                          subtitle: l10n.profile_faqs,
+                          onTap: () => context.push(AppRoutes.help),
+                        ),
+                        SettingItem(
+                          icon: LucideIcons.info,
+                          title: l10n.profile_aboutApp,
+                          subtitle: l10n.profile_versionInfo,
+                          onTap: () => context.push(AppRoutes.about),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: spacing.sectionGap * 1.33),
+                    if (kDebugMode) ...[
+                      const SectionHeader('Debug'),
+                      _buildDebugEntitlementCard(color, textTheme, spacing),
+                      SizedBox(height: spacing.elementGap * 2),
+                    ],
+                    // ── LOGOUT ──
+                    Center(
+                      child: Semantics(
+                        label: l10n.profile_logout,
+                        button: true,
+                        child: TextButton.icon(
+                          onPressed: () => _showLogoutBottomSheet(
+                              context, ref, color, textTheme),
+                          icon: Icon(LucideIcons.logOut,
+                              size: 18, color: color.error),
+                          label: Text(
+                            l10n.profile_logout,
+                            style: textTheme.bodyMedium
+                                ?.copyWith(color: color.error),
+                          ),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: spacing.cardHorizontalMax,
+                              vertical: spacing.elementGap * 1.5,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: spacing.sectionGap * 1.33),
+                    SizedBox(height: spacing.sectionGap * 1.33),
 
-                  // ── APP FOOTER ──
-                  const AmbientBrandSection(showSignature: true),
-                ]),
+                    // ── APP FOOTER ──
+                    const AmbientBrandSection(showSignature: true),
+                  ]),
+                ),
               ),
-            ),
-          ],
+            ],
           ),
         ),
         loading: () => ListView(
@@ -623,7 +632,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ref.invalidate(isProProvider);
                       ref.invalidate(proPlanInfoProvider);
                       SnackbarService.success(
-                          'Pro granted, expires in 1 min', spacing,);
+                        'Pro granted, expires in 1 min',
+                        spacing,
+                      );
                     },
             ),
             SettingItem(
@@ -737,7 +748,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             SafeArea(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax),
+                padding:
+                    EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -745,7 +757,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     // Avatar with level ring + glassmorphism ring
                     LevelRingAvatar(
                       profileName: FieldEncryptionService.safeDisplay(
-                          profile?.name, l10n.profile_awesomeUser,),
+                        profile?.name,
+                        l10n.profile_awesomeUser,
+                      ),
                       spacing: spacing,
                       reduceMotion: reduceMotion,
                     ),
@@ -756,7 +770,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         color: color.surface.withValues(
                           alpha: isDark ? 0.1 : 0.15,
                         ),
-                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                         border: Border.all(
                           color: color.outlineVariant.withValues(
                             alpha: isDark ? 0.2 : 0.3,
@@ -780,8 +795,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   vertical: spacing.elementGap,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: color.primaryContainer.withValues(alpha: isDark ? 0.1 : 0.06),
-                                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                                  color: color.primaryContainer
+                                      .withValues(alpha: isDark ? 0.1 : 0.06),
+                                  borderRadius: BorderRadius.circular(
+                                      spacing.radiusMedium),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -789,17 +806,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   children: [
                                     Text(
                                       FieldEncryptionService.safeDisplay(
-                                          profile?.name, l10n.profile_unknown,),
+                                        profile?.name,
+                                        l10n.profile_unknown,
+                                      ),
                                       style: textTheme.headlineSmall?.copyWith(
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                     SizedBox(width: spacing.elementGap),
                                     Container(
-                                      padding: EdgeInsets.all(spacing.elementGapMin + 2),
+                                      padding: EdgeInsets.all(
+                                          spacing.elementGapMin + 2),
                                       decoration: BoxDecoration(
-                                        color: color.onSurfaceVariant.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                                        color: color.onSurfaceVariant
+                                            .withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(
+                                            spacing.radiusSmall),
                                       ),
                                       child: Icon(
                                         LucideIcons.pencil,
@@ -812,7 +834,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ),
                             ),
                           ),
-                          if (profile?.email != null && profile!.email!.isNotEmpty) ...[
+                          if (profile?.email != null &&
+                              profile!.email!.isNotEmpty) ...[
                             SizedBox(height: spacing.elementGap * 1.25),
                             Container(
                               padding: EdgeInsets.symmetric(
@@ -820,11 +843,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 vertical: spacing.elementGapMin + 2,
                               ),
                               decoration: BoxDecoration(
-                                color: color.onSurfaceVariant.withValues(alpha: spacing.opacitySubtle),
-                                borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                                color: color.onSurfaceVariant
+                                    .withValues(alpha: spacing.opacitySubtle),
+                                borderRadius:
+                                    BorderRadius.circular(spacing.radiusSmall),
                               ),
                               child: Text(
-                                FieldEncryptionService.safeDisplay(profile.email),
+                                FieldEncryptionService.safeDisplay(
+                                    profile.email),
                                 style: textTheme.bodySmall?.copyWith(
                                   color: color.onSurfaceVariant,
                                 ),
@@ -836,7 +862,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     SizedBox(height: spacing.elementGap * 2),
                     // Streak + member since row
-                    _buildHeroBadges(profile, color, textTheme, spacing, streakAsync, reduceMotion),
+                    _buildHeroBadges(profile, color, textTheme, spacing,
+                        streakAsync, reduceMotion),
                   ],
                 ),
               ),
@@ -1012,7 +1039,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   borderRadius: BorderRadius.circular(spacing.radiusSmall + 4),
                 ),
-                child: Icon(LucideIcons.logOut, size: spacing.iconLG, color: color.error),
+                child: Icon(LucideIcons.logOut,
+                    size: spacing.iconLG, color: color.error),
               ),
               SizedBox(height: spacing.elementGap),
               Text(

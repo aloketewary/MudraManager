@@ -1,3 +1,4 @@
+import 'package:auto_skeleton/auto_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -105,7 +106,7 @@ class _DashboardCustomizeScreenState
         ],
       ),
       body: prefsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const _DashboardCustomizeSkeleton(),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (prefs) {
           if (!_initialized) {
@@ -114,7 +115,8 @@ class _DashboardCustomizeScreenState
           }
           return LayoutBuilder(
             builder: (context, constraints) {
-              final maxWidth = constraints.maxWidth > 600 ? 600.0 : double.infinity;
+              final maxWidth =
+                  constraints.maxWidth > 600 ? 600.0 : double.infinity;
               return Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: maxWidth),
@@ -224,7 +226,10 @@ class _DashboardContent extends ConsumerWidget {
             },
           ),
         ),
-        const AmbientBrandSection(showSignature: false, absorbBottomInset: false),
+        const AmbientBrandSection(
+          showSignature: false,
+          absorbBottomInset: false,
+        ),
       ],
     );
   }
@@ -356,7 +361,6 @@ class _WidgetTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Card(
       key: key,
       elevation: 0,
@@ -392,4 +396,61 @@ class _WidgetEntry {
     required this.pinned,
     required this.order,
   });
+}
+
+class _DashboardCustomizeSkeleton extends ConsumerWidget {
+  const _DashboardCustomizeSkeleton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+    final enabled = !MediaQuery.of(context).disableAnimations;
+
+    return AutoSkeleton(
+      enabled: enabled,
+      child: ListView(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical,
+        ),
+        children: [
+          _bone(
+            color,
+            height: 152,
+            radius: spacing.radiusMedium,
+          ),
+          SizedBox(height: spacing.sectionGap),
+          ...List.generate(
+            7,
+            (index) => Padding(
+              padding: EdgeInsets.only(bottom: spacing.elementGap),
+              child: _bone(
+                color,
+                height: spacing.touchTarget + spacing.elementGap,
+                radius: spacing.radiusMedium,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bone(
+    ColorScheme color, {
+    required double height,
+    required double radius,
+  }) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: color.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(
+          color: color.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
+    );
+  }
 }

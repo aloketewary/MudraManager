@@ -48,6 +48,14 @@ class BillControlCenterData {
   final int activeCount;
   final RecurringTransaction? largestBill;
 
+  // Expense-only summary used by dashboard surfaces. Keep these separate from
+  // the full Bill Control Center data so recurring income remains available on
+  // the detail screen without inflating the dashboard bill commitment.
+  final List<RecurringTransaction> expenseOverdue;
+  final List<RecurringTransaction> expenseDueSoon;
+  final double expenseMonthlyTotal;
+  final int activeExpenseCount;
+
   const BillControlCenterData({
     required this.affordability,
     required this.paidBillIds,
@@ -59,6 +67,10 @@ class BillControlCenterData {
     required this.thisWeekTotal,
     required this.thisWeekCount,
     required this.activeCount,
+    required this.expenseOverdue,
+    required this.expenseDueSoon,
+    required this.expenseMonthlyTotal,
+    required this.activeExpenseCount,
     this.largestBill,
   });
 }
@@ -86,6 +98,7 @@ final billControlCenterProvider =
       currencyCode != null ? amount * (rateMap[currencyCode] ?? 1.0) : amount;
 
   final active = bills.where((b) => b.isActive).toList();
+  final expenseActive = active.where((b) => b.isExpense).toList();
   final now = DateTime.now();
 
   // ── Group by urgency ──
@@ -178,7 +191,8 @@ final billControlCenterProvider =
       funded++;
       continue;
     }
-    final billAmountBase = toBase(bill.amount, bill.account.value?.currencyCode);
+    final billAmountBase =
+        toBase(bill.amount, bill.account.value?.currencyCode);
     if (depleting >= billAmountBase) {
       depleting -= billAmountBase;
       funded++;
@@ -190,8 +204,16 @@ final billControlCenterProvider =
   // ── Monthly total ──
   final monthlyTotal = active.fold(
     0.0,
-    (sum, b) => sum + toBase(_monthlyEquivalent(b), b.account.value?.currencyCode),
+    (sum, b) =>
+        sum + toBase(_monthlyEquivalent(b), b.account.value?.currencyCode),
   );
+  final expenseMonthlyTotal = expenseActive.fold(
+    0.0,
+    (sum, b) =>
+        sum + toBase(_monthlyEquivalent(b), b.account.value?.currencyCode),
+  );
+  final expenseOverdue = overdue.where((b) => b.isExpense).toList();
+  final expenseDueSoon = dueSoon.where((b) => b.isExpense).toList();
 
   // ── This week required ──
   final thisWeekBills = upcoming.where((b) => !paidBillIds.contains(b.id));
@@ -231,6 +253,10 @@ final billControlCenterProvider =
     thisWeekCount: thisWeekCount,
     activeCount: active.length,
     largestBill: largest,
+    expenseOverdue: expenseOverdue,
+    expenseDueSoon: expenseDueSoon,
+    expenseMonthlyTotal: expenseMonthlyTotal,
+    activeExpenseCount: expenseActive.length,
   );
 });
 

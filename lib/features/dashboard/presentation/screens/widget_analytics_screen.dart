@@ -1,4 +1,6 @@
+import 'package:auto_skeleton/auto_skeleton.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/widget_metrics.dart';
@@ -30,6 +32,7 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
             label: 'Reset',
             icon: LucideIcons.trash2,
             onTap: () async {
+              HapticFeedback.mediumImpact();
               await ref.read(widgetAnalyticsServiceProvider).resetAll();
               ref.invalidate(widgetMetricsProvider);
             },
@@ -38,7 +41,7 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
       ),
       body: metricsAsync.when(
         data: (metrics) => _buildBody(metrics, color, textTheme, spacing),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const _WidgetAnalyticsSkeleton(),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
     );
@@ -100,34 +103,49 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
                 child: Row(
                   children: [
                     Expanded(
-                        flex: 3,
-                        child: Text('Widget',
-                            style: textTheme.labelMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),),),
+                      flex: 3,
+                      child: Text(
+                        'Widget',
+                        style: textTheme.labelMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ),
                     Expanded(
-                        flex: 2,
-                        child: Text('Impr',
-                            style: textTheme.labelMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                            textAlign: TextAlign.right,),),
+                      flex: 2,
+                      child: Text(
+                        'Impr',
+                        style: textTheme.labelMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
                     Expanded(
-                        flex: 2,
-                        child: Text('Clicks',
-                            style: textTheme.labelMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                            textAlign: TextAlign.right,),),
+                      flex: 2,
+                      child: Text(
+                        'Clicks',
+                        style: textTheme.labelMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
                     Expanded(
-                        flex: 2,
-                        child: Text('CTR',
-                            style: textTheme.labelMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                            textAlign: TextAlign.right,),),
+                      flex: 2,
+                      child: Text(
+                        'CTR',
+                        style: textTheme.labelMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
                     Expanded(
-                        flex: 2,
-                        child: Text('Hides',
-                            style: textTheme.labelMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                            textAlign: TextAlign.right,),),
+                      flex: 2,
+                      child: Text(
+                        'Hides',
+                        style: textTheme.labelMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -154,22 +172,42 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
 
     return Row(
       children: [
-        _summaryChip('Impressions', '$totalImpressions', color.primary, color,
-            textTheme,),
+        _summaryChip(
+          'Impressions',
+          '$totalImpressions',
+          color.primary,
+          color,
+          textTheme,
+        ),
         SizedBox(width: spacing.elementGap),
         _summaryChip(
-            'Clicks', '$totalClicks', color.tertiary, color, textTheme,),
+          'Clicks',
+          '$totalClicks',
+          color.tertiary,
+          color,
+          textTheme,
+        ),
         SizedBox(width: spacing.elementGap),
-        _summaryChip('Avg CTR', '${avgCtr.toStringAsFixed(1)}%',
-            color.secondary, color, textTheme,),
+        _summaryChip(
+          'Avg CTR',
+          '${avgCtr.toStringAsFixed(1)}%',
+          color.secondary,
+          color,
+          textTheme,
+        ),
         SizedBox(width: spacing.elementGap),
         _summaryChip('Hides', '$totalHides', color.error, color, textTheme),
       ],
     );
   }
 
-  Widget _summaryChip(String label, String value, Color accent,
-      ColorScheme color, TextTheme textTheme,) {
+  Widget _summaryChip(
+    String label,
+    String value,
+    Color accent,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
@@ -180,21 +218,29 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
         ),
         child: Column(
           children: [
-            Text(value,
-                style: textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w700, color: accent),),
+            Text(
+              value,
+              style: textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w700, color: accent),
+            ),
             const SizedBox(height: 2),
-            Text(label,
-                style: textTheme.labelSmall
-                    ?.copyWith(color: color.onSurfaceVariant),),
+            Text(
+              label,
+              style:
+                  textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildRow(WidgetMetrics m, ColorScheme color, TextTheme textTheme,
-      AppSpacing spacing,) {
+  Widget _buildRow(
+    WidgetMetrics m,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     final ctrColor = m.ctr > 15
         ? color.primary
         : m.ctr > 5
@@ -206,25 +252,36 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
           EdgeInsets.symmetric(horizontal: spacing.cardInner, vertical: 10),
       decoration: BoxDecoration(
         border: Border(
-            bottom:
-                BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),),
+          bottom:
+              BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+        ),
       ),
       child: Row(
         children: [
           Expanded(
-              flex: 3,
-              child: Text(m.widgetId,
-                  style: textTheme.bodySmall
-                      ?.copyWith(fontWeight: FontWeight.w500),
-                  overflow: TextOverflow.ellipsis,),),
+            flex: 3,
+            child: Text(
+              m.widgetId,
+              style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           Expanded(
-              flex: 2,
-              child: Text('${m.impressions}',
-                  style: textTheme.bodySmall, textAlign: TextAlign.right,),),
+            flex: 2,
+            child: Text(
+              '${m.impressions}',
+              style: textTheme.bodySmall,
+              textAlign: TextAlign.right,
+            ),
+          ),
           Expanded(
-              flex: 2,
-              child: Text('${m.clicks}',
-                  style: textTheme.bodySmall, textAlign: TextAlign.right,),),
+            flex: 2,
+            child: Text(
+              '${m.clicks}',
+              style: textTheme.bodySmall,
+              textAlign: TextAlign.right,
+            ),
+          ),
           Expanded(
             flex: 2,
             child: Text(
@@ -235,12 +292,106 @@ class WidgetAnalyticsScreen extends ConsumerWidget {
             ),
           ),
           Expanded(
-              flex: 2,
-              child: Text('${m.hides}',
-                  style: textTheme.bodySmall
-                      ?.copyWith(color: m.hides > 0 ? color.error : null),
-                  textAlign: TextAlign.right,),),
+            flex: 2,
+            child: Text(
+              '${m.hides}',
+              style: textTheme.bodySmall
+                  ?.copyWith(color: m.hides > 0 ? color.error : null),
+              textAlign: TextAlign.right,
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _WidgetAnalyticsSkeleton extends ConsumerWidget {
+  const _WidgetAnalyticsSkeleton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+    final enabled = !MediaQuery.of(context).disableAnimations;
+
+    return AutoSkeleton(
+      enabled: enabled,
+      child: ListView(
+        padding: EdgeInsets.all(spacing.cardHorizontal),
+        children: [
+          Row(
+            children: [
+              Expanded(child: _bone(color, height: 72)),
+              SizedBox(width: spacing.elementGap),
+              Expanded(child: _bone(color, height: 72)),
+              SizedBox(width: spacing.elementGap),
+              Expanded(child: _bone(color, height: 72)),
+              SizedBox(width: spacing.elementGap),
+              Expanded(child: _bone(color, height: 72)),
+            ],
+          ),
+          SizedBox(height: spacing.sectionGap),
+          Container(
+            decoration: BoxDecoration(
+              color: color.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              border: Border.all(
+                color: color.outlineVariant.withValues(alpha: 0.5),
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardInner,
+                    vertical: spacing.elementGap,
+                  ),
+                  color: color.primary.withValues(alpha: 0.06),
+                  child: Row(
+                    children: [
+                      Expanded(flex: 3, child: _bone(color, height: 12)),
+                      Expanded(flex: 2, child: _bone(color, height: 12)),
+                      Expanded(flex: 2, child: _bone(color, height: 12)),
+                      Expanded(flex: 2, child: _bone(color, height: 12)),
+                      Expanded(flex: 2, child: _bone(color, height: 12)),
+                    ],
+                  ),
+                ),
+                ...List.generate(
+                  6,
+                  (_) => Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardInner,
+                      vertical: spacing.elementGap,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(flex: 3, child: _bone(color, height: 13)),
+                        Expanded(flex: 2, child: _bone(color, height: 13)),
+                        Expanded(flex: 2, child: _bone(color, height: 13)),
+                        Expanded(flex: 2, child: _bone(color, height: 13)),
+                        Expanded(flex: 2, child: _bone(color, height: 13)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bone(ColorScheme color, {required double height}) {
+    return Container(
+      height: height,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: color.onSurface.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(6),
       ),
     );
   }

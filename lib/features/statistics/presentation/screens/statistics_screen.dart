@@ -6,7 +6,6 @@ import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
-import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
@@ -16,13 +15,7 @@ import 'package:mudra_manager/features/analytics/domain/analytics_period.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/import_export/data/export_plugin.dart';
 import 'package:mudra_manager/features/insights/data/insights_provider.dart';
-import 'package:mudra_manager/features/insights/presentation/widgets/ai_summary_card.dart';
-import 'package:mudra_manager/features/insights/presentation/widgets/deep_dive_analytics_section.dart';
-import 'package:mudra_manager/features/insights/presentation/widgets/forecast_card.dart';
-import 'package:mudra_manager/features/insights/presentation/widgets/health_score_card.dart';
-import 'package:mudra_manager/features/insights/presentation/widgets/pattern_card.dart';
-import 'package:mudra_manager/features/insights/presentation/widgets/quick_wins_section.dart';
-import 'package:mudra_manager/features/insights/presentation/widgets/spending_personality_card.dart';
+import 'package:mudra_manager/features/insights/presentation/widgets/insights_overview.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/export_options_screen.dart';
 import 'package:mudra_manager/features/transactions/data/tag_analytics_provider.dart';
@@ -31,7 +24,6 @@ import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/type_section_header.dart';
-import 'package:mudra_manager/features/analytics/data/personality_archetype.dart';
 
 /// Insights Screen - Personal Financial Coach Experience
 ///
@@ -128,7 +120,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           ref.invalidate(analyticsNarrativeFactsProvider(_period.key));
           ref.invalidate(categoryTrendsProvider);
           ref.invalidate(
-            tagSpendingProvider(_period.key.contains('_') ? 'Month' : _period.key),
+            tagSpendingProvider(
+              _period.key.contains('_') ? 'Month' : _period.key,
+            ),
           );
           ref.invalidate(predictedSpendingProvider);
           ref.invalidate(netWorthProvider);
@@ -145,45 +139,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 1. AI Summary - Conversational coach message
-                      AiSummaryCard(aiSummary: insights.aiSummary),
-                      SizedBox(height: spacing.sectionGap),
-
-                      // 2. Quick Wins - Top 3 actionable recommendations
-                      if (insights.quickWins.isNotEmpty)
-                        QuickWinsSection(
-                          quickWins: insights.quickWins,
-                          onRecommendationTap: _handleRecommendationTap,
-                        ),
-                      if (insights.quickWins.isNotEmpty)
-                        SizedBox(height: spacing.sectionGap),
-
-                      // 3. Financial Health Score
-                      HealthScoreCard(healthMetrics: insights.healthMetrics),
-                      SizedBox(height: spacing.sectionGap),
-
-                      // 4. Predictions - Cash flow forecast
-                      const ForecastCard(),
-                      SizedBox(height: spacing.sectionGap),
-
-                      // 5. Spending Personality
-                      SpendingPersonalityCard(
-                        archetype: _getArchetype(insights),
-                        spendingBehaviors: null,
+                      InsightsOverview(
+                        insights: insights,
+                        periodKey: _period.key,
+                        onRecommendationTap: _handleRecommendationTap,
+                        onPatternTap: _handlePatternTap,
                       ),
-                      SizedBox(height: spacing.sectionGap),
-
-                      // 6. Hidden Patterns
-                      if (insights.hiddenPatterns.isNotEmpty)
-                        HiddenPatternsSection(
-                          patterns: insights.hiddenPatterns,
-                          onPatternTap: _handlePatternTap,
-                        ),
-                      if (insights.hiddenPatterns.isNotEmpty)
-                        SizedBox(height: spacing.sectionGap),
-
-                      // 7. Deep Dive Analytics
-                      DeepDiveAnalyticsSection(periodKey: _period.key),
                       const AmbientBrandSection(),
                       SizedBox(
                         height: MediaQuery.of(context).padding.bottom +
@@ -211,52 +172,6 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             ),
       ),
     );
-  }
-
-  PersonalityArchetype _getArchetype(InsightsData insights) {
-    // Determine archetype based on spending patterns
-    final savingsRate = insights.aggregates.savingsRate;
-
-    if (savingsRate >= 30) {
-      return PersonalityArchetype(
-        id: 'mindful_planner',
-        name: 'Mindful Planner',
-        tagline: 'Excellent savings habits',
-        description: 'You spend with awareness and control',
-        svgAsset: 'assets/logo/personality/shield.svg',
-        icon: LucideIcons.shieldCheck,
-        color: FinanceColors.incomeColor(Brightness.dark),
-        trait: 'Awareness-driven',
-        traits: ['High Saver', 'Budget Conscious', 'Future Focused'],
-        guidance: 'You\'re doing great — consider increasing savings by 5%',
-      );
-    } else if (savingsRate >= 10) {
-      return PersonalityArchetype(
-        id: 'balanced_spender',
-        name: 'Balanced Spender',
-        tagline: 'Moderate approach to finances',
-        description: 'You maintain a flexible balance',
-        svgAsset: 'assets/logo/personality/plane.svg',
-        icon: LucideIcons.scale,
-        color: FinanceColors.incomeColor(Brightness.dark),
-        trait: 'Balance-driven',
-        traits: ['Consistent', 'Planned', 'Aware'],
-        guidance: 'You\'re well-balanced — pick one area to optimize further',
-      );
-    } else {
-      return const PersonalityArchetype(
-        id: 'spontaneous_spender',
-        name: 'Spontaneous Spender',
-        tagline: 'Lives in the moment',
-        description: 'You enjoy life and spend freely',
-        svgAsset: 'assets/logo/personality/luxury.svg',
-        icon: LucideIcons.partyPopper,
-        color: FinanceColors.statusWarning,
-        trait: 'Experience-driven',
-        traits: ['Flexible', 'Enjoys Now', 'Social'],
-        guidance: 'Small adjustments can boost your savings without losing the fun',
-      );
-    }
   }
 
   Widget _buildLoadingState(AppSpacing spacing) {

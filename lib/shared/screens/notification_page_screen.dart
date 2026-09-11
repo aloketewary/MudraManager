@@ -1,4 +1,5 @@
-import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,10 +9,13 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/providers/notification_record_service.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
-import 'dart:convert';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 final _timeFormat = DateFormat('hh:mm a');
 final _dateFormat = DateFormat('MMM dd');
@@ -47,7 +51,6 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
     };
   }
 
-  // Group by: Today, Yesterday, This Week, Older
   Map<String, List<NotificationRecord>> _groupByTime(
     List<NotificationRecord> items,
   ) {
@@ -57,19 +60,23 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
     final weekAgo = today.subtract(const Duration(days: 7));
 
     final groups = <String, List<NotificationRecord>>{};
-    for (final n in items) {
-      final d = DateTime(n.timestamp.year, n.timestamp.month, n.timestamp.day);
+    for (final notification in items) {
+      final date = DateTime(
+        notification.timestamp.year,
+        notification.timestamp.month,
+        notification.timestamp.day,
+      );
       final String key;
-      if (d == today) {
+      if (date == today) {
         key = 'Today';
-      } else if (d == yesterday) {
+      } else if (date == yesterday) {
         key = 'Yesterday';
-      } else if (d.isAfter(weekAgo)) {
+      } else if (date.isAfter(weekAgo)) {
         key = 'This Week';
       } else {
         key = 'Older';
       }
-      (groups[key] ??= []).add(n);
+      (groups[key] ??= []).add(notification);
     }
     return groups;
   }
@@ -81,419 +88,469 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
     final spacing = ref.watch(spacingProvider);
     final notificationService = ref.watch(notificationRecordServiceProvider);
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        title: Text(
-          'Notifications',
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.checkCheck, size: 20),
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              notificationService.markAllAsRead();
-            },
-            tooltip: 'Mark all read',
+    return ScreenShell(
+      config: const ScreenShellConfig(
+        title: 'Notifications',
+        appBarMode: AppBarMode.standard,
+        enableRefresh: false,
+      ),
+      actions: ScreenActions.build(
+        appBar: [
+          ScreenAction(
+            id: 'mark_all_read',
+            label: 'Mark all read',
+            icon: LucideIcons.checkCheck,
+            onTap: () => notificationService.markAllAsRead(),
           ),
-          IconButton(
-            icon: const Icon(LucideIcons.trash2, size: 20),
-            onPressed: () => _confirmClearAll(context, notificationService),
-            tooltip: 'Clear all',
+          ScreenAction(
+            id: 'clear_all',
+            label: 'Clear all',
+            icon: LucideIcons.trash2,
+            onTap: () => _confirmClearAll(context, notificationService),
           ),
         ],
       ),
       body: StreamBuilder<List<NotificationRecord>>(
         stream: notificationService.watchNotifications(),
         builder: (context, snapshot) {
-          final all = snapshot.data ?? [];
-          final filtered = _applyFilter(all);
-          final grouped = _groupByTime(filtered);
-          final hasData = filtered.isNotEmpty;
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(BuddyMessages.errorWith('${snapshot.error}')),
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
+            return _buildLoadingState(spacing);
+          }
 
-          // Unread count per filter for chips
-          final unreadAll = all.where((n) => !n.isArchived && !n.isRead).length;
-
-          return Column(
-            children: [
-              // ── Filter chips ──
-              SizedBox(
-                height: 48,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.cardHorizontalMax,
-                  ),
-                  children: _FilterType.values.map((f) {
-                    final isActive = _activeFilter == f;
-                    final label = switch (f) {
-                      _FilterType.all => 'All',
-                      _FilterType.financial => 'Financial',
-                      _FilterType.trip => 'Trips',
-                      _FilterType.system => 'System',
-                    };
-                    final icon = switch (f) {
-                      _FilterType.all => LucideIcons.bell,
-                      _FilterType.financial => LucideIcons.wallet,
-                      _FilterType.trip => LucideIcons.plane,
-                      _FilterType.system => LucideIcons.settings,
-                    };
-                    return Padding(
-                      padding: EdgeInsets.only(right: spacing.elementGap),
-                      child: FilterChip(
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(label),
-                            if (f == _FilterType.all && unreadAll > 0) ...[
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                                decoration: BoxDecoration(
-                                  color: isActive ? color.onPrimary : color.primary,
-                                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                                ),
-                                child: Text(
-                                  '$unreadAll',
-                                  style: textTheme.labelSmall?.copyWith(
-                                    color: isActive ? color.primary : color.onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        avatar: Icon(icon, size: 16),
-                        selected: isActive,
-                        onSelected: (_) {
-                          HapticFeedback.selectionClick();
-                          setState(() => _activeFilter = f);
-                        },
-                        showCheckmark: false,
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-
-              // ── Notification list ──
-              Expanded(
-                child: !hasData
-                    ? NoDataFound(
-                        message: _activeFilter == _FilterType.all
-                            ? BuddyMessages.noNotifications
-                            : BuddyMessages.noFilterResults(_activeFilter.name),
-                        iconData: LucideIcons.bellOff,
-                      )
-                    : ListView.builder(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: spacing.cardHorizontalMax,
-                          vertical: spacing.cardVertical,
-                        ),
-                        itemCount: _countItems(grouped),
-                        itemBuilder: (context, index) {
-                          final item = _itemAt(grouped, index);
-                          if (item is String) {
-                            return _buildSectionHeader(
-                              item,
-                              color,
-                              textTheme,
-                              spacing,
-                            );
-                          }
-                          return _buildNotificationCard(
-                            item as NotificationRecord,
-                            color,
-                            textTheme,
-                            spacing,
-                            notificationService,
-                          );
-                        },
-                      ),
-              ),
-            ],
+          return _buildNotificationList(
+            snapshot.data ?? [],
+            color,
+            textTheme,
+            spacing,
+            notificationService,
           );
         },
       ),
     );
   }
 
-  // Flatten grouped map into a list of headers (String) and items
-  int _countItems(Map<String, List<NotificationRecord>> grouped) {
-    int count = 0;
-    for (final entry in grouped.entries) {
-      count += 1 + entry.value.length; // header + items
-    }
-    return count;
-  }
-
-  dynamic _itemAt(Map<String, List<NotificationRecord>> grouped, int index) {
-    int i = 0;
-    for (final entry in grouped.entries) {
-      if (i == index) return entry.key; // section header
-      i++;
-      if (index < i + entry.value.length) return entry.value[index - i];
-      i += entry.value.length;
-    }
-    return '';
-  }
-
-  Widget _buildSectionHeader(
-    String title,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-  ) {
-    return Padding(
-      padding: EdgeInsets.only(
-        top: spacing.sectionGap,
-        bottom: spacing.elementGap,
+  Widget _buildLoadingState(AppSpacing spacing) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
       ),
-      child: Text(
-        title.toUpperCase(),
-        style: textTheme.labelMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: color.onSurfaceVariant,
-          letterSpacing: 1,
-        ),
+      children: List.generate(
+        4,
+        (index) => const DashboardCardSkeleton(),
       ),
     );
   }
 
-  Widget _buildNotificationCard(
-    NotificationRecord n,
+  Widget _buildNotificationList(
+    List<NotificationRecord> all,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
     dynamic notificationService,
   ) {
-    final notifColor = _getColorForType(n.type, color);
-    final isUrgent = n.priority == NotificationPriority.urgent;
+    final filtered = _applyFilter(all);
+    final grouped = _groupByTime(filtered);
+    final unreadAll = all.where((n) => !n.isArchived && !n.isRead).length;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: spacing.elementGap),
-      child: Dismissible(
-        key: Key(n.id.toString()),
-        // Swipe right → archive
-        background: Container(
-          decoration: BoxDecoration(
-            color: color.tertiary,
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          ),
-          alignment: Alignment.centerLeft,
-          padding: EdgeInsets.only(left: spacing.cardInner),
-          child: Icon(LucideIcons.archive, color: color.onTertiary),
-        ),
-        // Swipe left → delete
-        secondaryBackground: Container(
-          decoration: BoxDecoration(
-            color: color.error,
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          ),
-          alignment: Alignment.centerRight,
-          padding: EdgeInsets.only(right: spacing.cardInner),
-          child: Icon(LucideIcons.trash2, color: color.onError),
-        ),
-        confirmDismiss: (direction) async {
-          HapticFeedback.mediumImpact();
-          if (direction == DismissDirection.startToEnd) {
-            await notificationService.archiveNotification(n);
-            return true;
-          } else {
-            await notificationService.deleteNotification(n);
-            return true;
-          }
-        },
-        child: InkWell(
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          onTap: () {
-            HapticFeedback.lightImpact();
-            _handleNotificationTap(context, n, notificationService);
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: EdgeInsets.all(spacing.cardInner),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  n.isRead
-                      ? color.surfaceContainerLow
-                      : notifColor.withValues(alpha: 0.06),
-                  n.isRead
-                      ? color.surfaceContainerLow
-                      : notifColor.withValues(alpha: 0.02),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              border: Border.all(
-                color: isUrgent
-                    ? color.error.withValues(alpha: 0.4)
-                    : n.isRead
-                        ? color.outlineVariant.withValues(alpha: 0.15)
-                        : notifColor.withValues(alpha: 0.2),
-                width: isUrgent ? 1.5 : 1,
-              ),
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        spacing.cardHorizontal,
+        spacing.cardVertical,
+        spacing.cardHorizontal,
+        spacing.cardVertical + MediaQuery.of(context).padding.bottom,
+      ),
+      children: [
+        _buildFilterBar(unreadAll, color, textTheme, spacing),
+        SizedBox(height: spacing.sectionGap),
+        if (filtered.isEmpty)
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.42,
+            child: NoDataFound(
+              message: _activeFilter == _FilterType.all
+                  ? BuddyMessages.noNotifications
+                  : BuddyMessages.noFilterResults(_activeFilter.name),
+              iconData: LucideIcons.bellOff,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Icon
-                    Container(
-                      padding: EdgeInsets.all(spacing.cardHorizontal),
-                      decoration: BoxDecoration(
-                        color: notifColor.withValues(alpha: 0.1),
-                        borderRadius:
-                            BorderRadius.circular(spacing.radiusSmall),
-                      ),
-                      child: Icon(
-                        _getIconForType(n.type),
-                        color: notifColor,
-                        size: 20,
-                      ),
-                    ),
-                    SizedBox(width: spacing.elementGap + 4),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  n.title,
-                                  style: textTheme.titleSmall?.copyWith(
-                                    fontWeight: n.isRead
-                                        ? FontWeight.w500
-                                        : FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              if (!n.isRead)
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: notifColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                            ],
-                          ),
-                          SizedBox(height: spacing.elementGapMin),
-                          Text(
-                            n.body,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: spacing.elementGapMin),
-                          Text(
-                            _formatTimestamp(n.timestamp),
-                            style: textTheme.labelSmall?.copyWith(
-                              color:
-                                  color.onSurfaceVariant.withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ],
+          )
+        else
+          ...grouped.entries.map(
+            (entry) => _buildNotificationGroup(
+              entry.key,
+              entry.value,
+              color,
+              textTheme,
+              spacing,
+              notificationService,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFilterBar(
+    int unreadAll,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: _FilterType.values.map((filter) {
+          final isActive = _activeFilter == filter;
+          final label = switch (filter) {
+            _FilterType.all => 'All',
+            _FilterType.financial => 'Financial',
+            _FilterType.trip => 'Trips',
+            _FilterType.system => 'System',
+          };
+          final icon = switch (filter) {
+            _FilterType.all => LucideIcons.bell,
+            _FilterType.financial => LucideIcons.wallet,
+            _FilterType.trip => LucideIcons.plane,
+            _FilterType.system => LucideIcons.settings,
+          };
+
+          return Padding(
+            padding: EdgeInsets.only(right: spacing.elementGap),
+            child: FilterChip(
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(label),
+                  if (filter == _FilterType.all && unreadAll > 0) ...[
+                    SizedBox(width: spacing.elementGapMin),
+                    Text(
+                      '$unreadAll',
+                      style: textTheme.labelSmall?.copyWith(
+                        color:
+                            isActive ? color.primary : color.onSurfaceVariant,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
-                ),
+                ],
+              ),
+              avatar: Icon(icon, size: spacing.iconSM),
+              selected: isActive,
+              onSelected: (_) {
+                HapticFeedback.selectionClick();
+                setState(() => _activeFilter = filter);
+              },
+              showCheckmark: false,
+              visualDensity: VisualDensity.compact,
+              side: BorderSide(
+                color: isActive
+                    ? color.primary.withValues(alpha: 0.35)
+                    : color.outlineVariant.withValues(alpha: 0.22),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 
-                // Action buttons
-                if (n.primaryAction != null || n.secondaryAction != null) ...[
-                  SizedBox(height: spacing.elementGap + 4),
-                  Row(
-                    children: [
-                      if (n.primaryAction != null)
-                        Expanded(
-                          child: FilledButton.tonal(
-                            onPressed: () => _handlePrimaryAction(
-                              context,
-                              n,
-                              notificationService,
-                            ),
-                            style: FilledButton.styleFrom(
-                              backgroundColor:
-                                  notifColor.withValues(alpha: 0.12),
-                              foregroundColor: notifColor,
-                              padding: EdgeInsets.symmetric(
-                                vertical: spacing.cardVertical,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  spacing.radiusSmall,
+  Widget _buildNotificationGroup(
+    String title,
+    List<NotificationRecord> notifications,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    dynamic notificationService,
+  ) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: spacing.sectionGap),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            title,
+            notifications.length,
+            color,
+            textTheme,
+            spacing,
+          ),
+          SizedBox(height: spacing.elementGap),
+          ...notifications.map(
+            (notification) => Padding(
+              padding: EdgeInsets.only(bottom: spacing.elementGap),
+              child: _buildNotificationCard(
+                notification,
+                color,
+                textTheme,
+                spacing,
+                notificationService,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(
+    String title,
+    int count,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.elementGap,
+            vertical: spacing.elementGapMin,
+          ),
+          decoration: BoxDecoration(
+            color: color.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: color.primary.withValues(alpha: 0.16),
+            ),
+          ),
+          child: Text(
+            '$count',
+            style: textTheme.labelSmall?.copyWith(
+              color: color.primary,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNotificationCard(
+    NotificationRecord notification,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    dynamic notificationService,
+  ) {
+    final notifColor = _getColorForType(notification.type, color);
+    final isUrgent = notification.priority == NotificationPriority.urgent;
+    final borderRadius = spacing.borderRadiusLarge;
+
+    return Dismissible(
+      key: Key(notification.id.toString()),
+      background: Container(
+        decoration: BoxDecoration(
+          color: color.tertiary,
+          borderRadius: borderRadius,
+        ),
+        alignment: Alignment.centerLeft,
+        padding: EdgeInsets.only(left: spacing.cardInner),
+        child: Icon(LucideIcons.archive, color: color.onTertiary),
+      ),
+      secondaryBackground: Container(
+        decoration: BoxDecoration(
+          color: color.error,
+          borderRadius: borderRadius,
+        ),
+        alignment: Alignment.centerRight,
+        padding: EdgeInsets.only(right: spacing.cardInner),
+        child: Icon(LucideIcons.trash2, color: color.onError),
+      ),
+      confirmDismiss: (direction) async {
+        HapticFeedback.mediumImpact();
+        if (direction == DismissDirection.startToEnd) {
+          await notificationService.archiveNotification(notification);
+        } else {
+          await notificationService.deleteNotification(notification);
+        }
+        return true;
+      },
+      child: _AnimatedNotificationTile(
+        semanticLabel: notification.title,
+        borderRadius: borderRadius,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          _handleNotificationTap(context, notification, notificationService);
+        },
+        child: Container(
+          padding: EdgeInsets.all(spacing.cardInner),
+          decoration: BoxDecoration(
+            color: color.surfaceContainerHigh,
+            borderRadius: borderRadius,
+            border: Border.all(
+              color: isUrgent
+                  ? color.error.withValues(alpha: 0.45)
+                  : notification.isRead
+                      ? color.outlineVariant.withValues(alpha: 0.22)
+                      : notifColor.withValues(alpha: 0.35),
+              width: isUrgent ? 1.5 : 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: spacing.touchTargetSmall,
+                    height: spacing.touchTargetSmall,
+                    decoration: BoxDecoration(
+                      color: notifColor.withValues(alpha: 0.12),
+                      borderRadius: spacing.borderRadiusMedium,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      _getIconForType(notification.type),
+                      color: notifColor,
+                      size: spacing.iconSM,
+                    ),
+                  ),
+                  SizedBox(width: spacing.elementGap),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                notification.title,
+                                style: textTheme.titleSmall?.copyWith(
+                                  fontWeight: notification.isRead
+                                      ? FontWeight.w500
+                                      : FontWeight.w700,
                                 ),
                               ),
                             ),
-                            child: Text(
-                              n.primaryAction!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
-                      if (n.primaryAction != null && n.secondaryAction != null)
-                        SizedBox(width: spacing.elementGap),
-                      if (n.secondaryAction != null)
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => _handleSecondaryAction(
-                              context,
-                              n,
-                              notificationService,
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                vertical: spacing.cardVertical,
-                              ),
-                              side: BorderSide(
-                                color:
-                                    color.outlineVariant.withValues(alpha: 0.3),
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  spacing.radiusSmall,
+                            if (!notification.isRead)
+                              Container(
+                                width: spacing.elementGapMin,
+                                height: spacing.elementGapMin,
+                                decoration: BoxDecoration(
+                                  color: notifColor,
+                                  shape: BoxShape.circle,
                                 ),
                               ),
-                            ),
-                            child: Text(
-                              n.secondaryAction!,
-                              style: const TextStyle(fontSize: 13),
-                            ),
+                          ],
+                        ),
+                        SizedBox(height: spacing.elementGapMin),
+                        Text(
+                          notification.body,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: spacing.elementGapMin),
+                        Text(
+                          _formatTimestamp(notification.timestamp),
+                          style: textTheme.labelSmall?.copyWith(
+                            color:
+                                color.onSurfaceVariant.withValues(alpha: 0.6),
                           ),
                         ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
+              ),
+              if (notification.primaryAction != null ||
+                  notification.secondaryAction != null) ...[
+                SizedBox(height: spacing.elementGap + 4),
+                Row(
+                  children: [
+                    if (notification.primaryAction != null)
+                      Expanded(
+                        child: FilledButton.tonal(
+                          onPressed: () => _handlePrimaryAction(
+                            context,
+                            notification,
+                            notificationService,
+                          ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: notifColor.withValues(alpha: 0.12),
+                            foregroundColor: notifColor,
+                            padding: EdgeInsets.symmetric(
+                              vertical: spacing.cardVertical,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                spacing.radiusSmall,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            notification.primaryAction!,
+                            style: textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (notification.primaryAction != null &&
+                        notification.secondaryAction != null)
+                      SizedBox(width: spacing.elementGap),
+                    if (notification.secondaryAction != null)
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => _handleSecondaryAction(
+                            context,
+                            notification,
+                            notificationService,
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              vertical: spacing.cardVertical,
+                            ),
+                            side: BorderSide(
+                              color:
+                                  color.outlineVariant.withValues(alpha: 0.3),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                spacing.radiusSmall,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            notification.secondaryAction!,
+                            style: textTheme.labelLarge,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ],
-            ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  String _formatTimestamp(DateTime ts) {
+  String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
-    final diff = now.difference(ts);
+    final diff = now.difference(timestamp);
     if (diff.inMinutes < 1) return 'Just now';
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return _timeFormat.format(ts);
-    return '${_dateFormat.format(ts)} · ${_timeFormat.format(ts)}';
+    if (diff.inHours < 24) return _timeFormat.format(timestamp);
+    return '${_dateFormat.format(timestamp)} · ${_timeFormat.format(timestamp)}';
   }
 
   void _confirmClearAll(BuildContext context, dynamic notificationService) {
@@ -522,38 +579,42 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
 
   void _handleNotificationTap(
     BuildContext context,
-    NotificationRecord n,
+    NotificationRecord notification,
     dynamic notificationService,
   ) {
-    notificationService.readNotification(record: n);
-    if (n.tripId != null) {
-      context.push(AppRoutes.tripDetail, extra: n.tripId);
-    } else if (n.budgetId != null) {
+    notificationService.readNotification(record: notification);
+    if (notification.tripId != null) {
+      context.push(AppRoutes.tripDetail, extra: notification.tripId);
+    } else if (notification.budgetId != null) {
       context.push(AppRoutes.budgetDashboard);
     }
   }
 
   void _handlePrimaryAction(
     BuildContext context,
-    NotificationRecord n,
+    NotificationRecord notification,
     dynamic notificationService,
   ) {
     HapticFeedback.mediumImpact();
-    notificationService.readNotification(record: n);
+    notificationService.readNotification(record: notification);
 
-    if (n.actionData != null) {
+    if (notification.actionData != null) {
       try {
-        final data = jsonDecode(n.actionData!) as Map<String, dynamic>;
+        final data =
+            jsonDecode(notification.actionData!) as Map<String, dynamic>;
         switch (data['type'] as String?) {
           case 'settle_up':
-            if (n.tripId != null) {
-              context.push(AppRoutes.tripDetail, extra: n.tripId);
+            if (notification.tripId != null) {
+              context.push(AppRoutes.tripDetail, extra: notification.tripId);
             }
           case 'view_expense':
-            if (n.expenseId != null && n.tripId != null) {
+            if (notification.expenseId != null && notification.tripId != null) {
               context.push(
                 AppRoutes.expenseDetail,
-                extra: {'expenseId': n.expenseId, 'tripId': n.tripId},
+                extra: {
+                  'expenseId': notification.expenseId,
+                  'tripId': notification.tripId,
+                },
               );
             }
           case 'view_budget':
@@ -569,13 +630,15 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
         }
       } catch (_) {}
     } else {
-      // Fallback: route by notification category
-      switch (n.category) {
+      switch (notification.category) {
         case NotificationCategory.budget:
           context.push(AppRoutes.budgetDashboard);
         case NotificationCategory.trip:
-          if (n.tripId != null) {
-            context.push(AppRoutes.tripDetail, extra: n.tripId);
+          if (notification.tripId != null) {
+            context.push(
+              AppRoutes.tripDetail,
+              extra: notification.tripId,
+            );
           }
         case NotificationCategory.financial:
           context.push(AppRoutes.statistics);
@@ -587,13 +650,13 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
 
   void _handleSecondaryAction(
     BuildContext context,
-    NotificationRecord n,
+    NotificationRecord notification,
     dynamic notificationService,
   ) {
     HapticFeedback.lightImpact();
-    notificationService.readNotification(record: n);
-    if (n.tripId != null) {
-      context.push(AppRoutes.tripDetail, extra: n.tripId);
+    notificationService.readNotification(record: notification);
+    if (notification.tripId != null) {
+      context.push(AppRoutes.tripDetail, extra: notification.tripId);
     }
   }
 
@@ -625,5 +688,80 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
       'streak' => LucideIcons.flame,
       _ => LucideIcons.bell,
     };
+  }
+}
+
+class _AnimatedNotificationTile extends StatefulWidget {
+  final String semanticLabel;
+  final BorderRadius borderRadius;
+  final VoidCallback onTap;
+  final Widget child;
+
+  const _AnimatedNotificationTile({
+    required this.semanticLabel,
+    required this.borderRadius,
+    required this.onTap,
+    required this.child,
+  });
+
+  @override
+  State<_AnimatedNotificationTile> createState() =>
+      _AnimatedNotificationTileState();
+}
+
+class _AnimatedNotificationTileState extends State<_AnimatedNotificationTile>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
+    final child = Semantics(
+      container: true,
+      button: true,
+      label: widget.semanticLabel,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: widget.borderRadius,
+          onTap: widget.onTap,
+          onTapDown: reduceMotion ? null : (_) => _controller.forward(),
+          onTapUp: reduceMotion ? null : (_) => _controller.reverse(),
+          onTapCancel: reduceMotion ? null : _controller.reverse,
+          child: widget.child,
+        ),
+      ),
+    );
+
+    if (reduceMotion) return child;
+
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, animatedChild) => Transform.scale(
+        scale: _scaleAnimation.value,
+        alignment: Alignment.center,
+        child: animatedChild,
+      ),
+      child: child,
+    );
   }
 }

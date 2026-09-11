@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
 /// Horizontal category filter tabs.
@@ -27,11 +28,13 @@ class CategoryFilterTabs extends ConsumerStatefulWidget {
 
 class _CategoryFilterTabsState extends ConsumerState<CategoryFilterTabs> {
   late final ScrollController _scrollController;
+  late List<GlobalKey> _tabKeys;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _tabKeys = List.generate(widget.tabs.length, (_) => GlobalKey());
   }
 
   @override
@@ -43,32 +46,32 @@ class _CategoryFilterTabsState extends ConsumerState<CategoryFilterTabs> {
   @override
   void didUpdateWidget(CategoryFilterTabs oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Auto-scroll to selected tab when index changes externally
+    if (oldWidget.tabs.length != widget.tabs.length) {
+      _tabKeys = List.generate(widget.tabs.length, (_) => GlobalKey());
+    }
     if (oldWidget.selectedIndex != widget.selectedIndex) {
       _scrollToSelectedTab();
     }
   }
 
   void _scrollToSelectedTab() {
-    final targetOffset = _calculateTabOffset(widget.selectedIndex);
-    _scrollController.animateTo(
-      targetOffset,
-      duration: ref.read(spacingProvider).animNormal,
-      curve: Curves.easeOutCubic,
-    );
-  }
+    if (widget.tabs.isEmpty || !mounted) return;
 
-  double _calculateTabOffset(int index) {
-    const tabWidth = 80.0; // Base tab width
-    final spacing = ref.read(spacingProvider);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final tabCount = widget.tabs.length;
+    final index = widget.selectedIndex.clamp(0, widget.tabs.length - 1);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final tabContext = _tabKeys[index].currentContext;
+      if (tabContext == null) return;
 
-    // Center the selected tab
-    final totalWidth = tabCount * tabWidth + (tabCount - 1) * spacing.elementGap;
-    final targetOffset = (index * tabWidth) - (screenWidth / 2) + (tabWidth / 2);
-
-    return targetOffset.clamp(0.0, (totalWidth - screenWidth).clamp(0.0, double.infinity));
+      Scrollable.ensureVisible(
+        tabContext,
+        alignment: 0.5,
+        duration: MediaQuery.of(context).disableAnimations
+            ? Duration.zero
+            : ref.read(spacingProvider).animNormal,
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   @override
@@ -77,17 +80,29 @@ class _CategoryFilterTabsState extends ConsumerState<CategoryFilterTabs> {
     final colorScheme = Theme.of(context).colorScheme;
     final isReducedMotion = MediaQuery.of(context).disableAnimations;
 
-    return SizedBox(
-      height: 38,
+    return Container(
+      height: spacing.touchTargetSmall + spacing.elementGapMin,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+        ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+      ),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
-        padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax),
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.elementGapMin,
+          vertical: spacing.elementGapMin,
+        ),
         itemCount: widget.tabs.length,
-        separatorBuilder: (_, __) => SizedBox(width: spacing.elementGap),
+        separatorBuilder: (_, __) => SizedBox(width: spacing.elementGapMin),
         itemBuilder: (context, index) {
           final isSelected = widget.selectedIndex == index;
           return _FilterTab(
+            key: _tabKeys[index],
+            index: index,
             label: widget.tabs[index],
             isSelected: isSelected,
             spacing: spacing,
@@ -106,6 +121,7 @@ class _CategoryFilterTabsState extends ConsumerState<CategoryFilterTabs> {
 
 /// Individual filter tab with animated selection state.
 class _FilterTab extends StatelessWidget {
+  final int index;
   final String label;
   final bool isSelected;
   final AppSpacing spacing;
@@ -114,6 +130,8 @@ class _FilterTab extends StatelessWidget {
   final VoidCallback onTap;
 
   const _FilterTab({
+    super.key,
+    required this.index,
     required this.label,
     required this.isSelected,
     required this.spacing,
@@ -122,42 +140,71 @@ class _FilterTab extends StatelessWidget {
     required this.onTap,
   });
 
+  IconData get _icon {
+    return switch (index) {
+      1 => LucideIcons.arrowUpRight,
+      2 => LucideIcons.arrowDownLeft,
+      3 => LucideIcons.arrowLeftRight,
+      _ => LucideIcons.listFilter,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(spacing.radiusSmall + 4),
-        splashFactory: isReducedMotion ? NoSplash.splashFactory : null,
-        child: AnimatedContainer(
-          duration: isReducedMotion ? Duration.zero : spacing.animFast,
-          curve: Curves.easeOutCubic,
-          padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMin + 6),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isSelected ? colorScheme.onSurface : Colors.transparent,
-            border: Border.all(
-              color: isSelected
-                  ? colorScheme.onSurface
-                  : colorScheme.outlineVariant.withValues(alpha: spacing.opacityMedium),
-              width: spacing.strokeThin,
-            ),
-            borderRadius: BorderRadius.circular(spacing.radiusSmall + 4),
-          ),
-          child: AnimatedDefaultTextStyle(
+    final foregroundColor = isSelected
+        ? colorScheme.onPrimaryContainer
+        : colorScheme.onSurfaceVariant;
+
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(spacing.radiusSmall + 4),
+          splashFactory: isReducedMotion ? NoSplash.splashFactory : null,
+          child: AnimatedContainer(
             duration: isReducedMotion ? Duration.zero : spacing.animFast,
             curve: Curves.easeOutCubic,
-            style: TextStyle(
-              color: isSelected
-                  ? colorScheme.surface
-                  : colorScheme.onSurfaceVariant,
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-              letterSpacing: 1.0,
-              height: 1.0,
+            constraints: BoxConstraints(minHeight: spacing.touchTargetSmall),
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal + spacing.elementGapMin,
             ),
-            child: Text(label),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? colorScheme.primaryContainer
+                  : colorScheme.surfaceContainerHighest,
+              border: Border.all(
+                color: isSelected
+                    ? colorScheme.primary.withValues(alpha: 0.65)
+                    : colorScheme.outlineVariant.withValues(alpha: 0.7),
+                width: isSelected ? spacing.strokeNormal : spacing.strokeThin,
+              ),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall + 4),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(_icon, size: spacing.iconXS, color: foregroundColor),
+                SizedBox(width: spacing.elementGapUltraMin),
+                AnimatedDefaultTextStyle(
+                  duration: isReducedMotion ? Duration.zero : spacing.animFast,
+                  curve: Curves.easeOutCubic,
+                  style: DefaultTextStyle.of(context).style.copyWith(
+                        color: foregroundColor,
+                        fontSize: 12,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w600,
+                        letterSpacing: 0.1,
+                        height: 1.1,
+                      ),
+                  child: Text(label, maxLines: 1),
+                ),
+              ],
+            ),
           ),
         ),
       ),

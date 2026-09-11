@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/shared/widgets/amount_glow.dart';
+import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 
 /// Displays monthly spending metric with trend indicator.
 /// Used at top of transaction list screens.
@@ -12,7 +14,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 /// - Theming via AppSpacing for consistent spacing
 class SpendMetric extends ConsumerWidget {
   final String label;
-  final String amount;
+  final double amount;
   final String? changePercent;
   final bool isPositiveChange;
 
@@ -54,27 +56,21 @@ class SpendMetric extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            // Amount with smooth scaling animation
-            TweenAnimationBuilder<double>(
-              duration: isReducedMotion ? Duration.zero : spacing.animNormal,
-              curve: Curves.easeOutCubic,
-              tween: Tween(begin: 0.9, end: 1.0),
-              builder: (context, scale, child) {
-                return Transform.scale(
-                  scale: scale,
-                  child: child,
-                );
-              },
-              child: AnimatedDefaultTextStyle(
-                duration: isReducedMotion ? Duration.zero : spacing.animFast,
+            // The spend total is this card's one focal money value.
+            AmountGlow(
+              color: colorScheme.primary,
+              child: AnimatedBalance(
+                value: amount,
+                duration: isReducedMotion ? Duration.zero : spacing.animHero,
+                fixedStringLength: 2,
+                compact: false,
                 style: TextStyle(
                   color: colorScheme.onSurface,
                   fontSize: 46 * textScaleFactor,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w500,
                   letterSpacing: -1.0,
                   height: 1.0,
                 ),
-                child: Text(amount),
               ),
             ),
             if (changePercent != null) ...[
@@ -113,9 +109,8 @@ class _TrendBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final trendColor = isPositiveChange
-        ? colorScheme.primary
-        : colorScheme.error;
+    final trendColor =
+        isPositiveChange ? colorScheme.primary : colorScheme.error;
 
     return AnimatedContainer(
       duration: isReducedMotion ? Duration.zero : spacing.animFast,

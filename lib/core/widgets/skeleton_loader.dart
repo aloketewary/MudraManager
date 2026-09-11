@@ -1,3 +1,4 @@
+import 'package:auto_skeleton/auto_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,11 +33,11 @@ class _ShimmerWrap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
-    return child.animate(onComplete: (c) => c.repeat()).shimmer(
-          duration: 1200.ms,
-          color: color.onSurface.withValues(alpha: 0.04),
-        );
+    final isReducedMotion = MediaQuery.of(context).disableAnimations;
+    return AutoSkeleton(
+      enabled: !isReducedMotion,
+      child: child,
+    );
   }
 }
 
@@ -451,6 +452,254 @@ class PersonalityCardSkeleton extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Matches the compact attention strip at the top of the dashboard.
+class HealthStripSkeleton extends ConsumerWidget {
+  const HealthStripSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+
+    return _ShimmerWrap(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical,
+        ),
+        child: Container(
+          padding: EdgeInsets.all(spacing.cardInner * 0.75),
+          decoration: BoxDecoration(
+            color: color.surfaceContainerLow,
+            borderRadius: spacing.borderRadiusMedium,
+            border: Border.all(
+              color: color.outlineVariant.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              _Bone(
+                width: spacing.touchTargetSmall,
+                height: spacing.touchTargetSmall,
+                borderRadius: spacing.borderRadiusSmall,
+              ),
+              SizedBox(width: spacing.elementGap),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _Bone(width: 130, height: 14),
+                    SizedBox(height: 8),
+                    _Bone(width: 190, height: 10),
+                  ],
+                ),
+              ),
+              SizedBox(width: spacing.elementGap),
+              const _Bone(width: 52, height: 22),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Matches the featured savings goal card.
+class GoalsCardSkeleton extends ConsumerWidget {
+  const GoalsCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+
+    return _ShimmerWrap(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical,
+        ),
+        child: Container(
+          padding: EdgeInsets.all(spacing.cardInner),
+          decoration: BoxDecoration(
+            color: color.surfaceContainerLow,
+            borderRadius: spacing.borderRadiusLarge,
+            border: Border.all(
+              color: color.outlineVariant.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _Bone(width: 110, height: 14),
+                  _Bone(width: 70, height: 12),
+                ],
+              ),
+              SizedBox(height: spacing.sectionGap),
+              Row(
+                children: [
+                  _Bone(
+                    width: spacing.touchTargetSmall + spacing.elementGap,
+                    height: spacing.touchTargetSmall + spacing.elementGap,
+                    borderRadius: spacing.borderRadiusSmall,
+                  ),
+                  SizedBox(width: spacing.elementGap),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _Bone(width: 150, height: 15),
+                        SizedBox(height: 8),
+                        _Bone(width: double.infinity, height: 8),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: spacing.elementGap),
+                  const _Bone(width: 42, height: 18),
+                ],
+              ),
+              SizedBox(height: spacing.elementGap),
+              const _Bone(width: double.infinity, height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Matches the compact recurring-expenses summary card.
+class RecurringExpensesCardSkeleton extends ConsumerWidget {
+  const RecurringExpensesCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+
+    return _ShimmerWrap(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical,
+        ),
+        child: Container(
+          padding: EdgeInsets.all(spacing.cardInner),
+          decoration: BoxDecoration(
+            color: color.surfaceContainerLow,
+            borderRadius: spacing.borderRadiusMedium,
+            border: Border.all(
+              color: color.outlineVariant.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _Bone(width: 140, height: 14),
+                  _Bone(width: 64, height: 12),
+                ],
+              ),
+              SizedBox(height: spacing.elementGap),
+              const Row(
+                children: [
+                  Expanded(child: _Bone(height: 34)),
+                  SizedBox(width: 8),
+                  Expanded(child: _Bone(height: 34)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Matches the grouped recent-transactions card.
+class RecentTransactionsCardSkeleton extends ConsumerWidget {
+  const RecentTransactionsCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+
+    return _ShimmerWrap(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontalMin,
+          vertical: spacing.cardVerticalMin,
+        ),
+        child: Container(
+          padding: EdgeInsets.all(spacing.cardHorizontal),
+          decoration: BoxDecoration(
+            color: color.surfaceContainerLow,
+            borderRadius: spacing.borderRadiusLarge,
+            border: Border.all(
+              color: color.outlineVariant.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Expanded(child: _Bone(width: 145, height: 16)),
+                  _Bone(width: 22, height: 22),
+                  SizedBox(width: 8),
+                  _Bone(width: 22, height: 22),
+                  SizedBox(width: 8),
+                  _Bone(width: 72, height: 22),
+                ],
+              ),
+              SizedBox(height: spacing.sectionGap),
+              const _Bone(width: 150, height: 12),
+              SizedBox(height: spacing.elementGap),
+              const _TransactionSkeletonRow(),
+              const SizedBox(height: 8),
+              const _TransactionSkeletonRow(),
+              const SizedBox(height: 8),
+              const _TransactionSkeletonRow(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TransactionSkeletonRow extends StatelessWidget {
+  const _TransactionSkeletonRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        _Bone(width: 42, height: 42),
+        SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _Bone(width: 130, height: 13),
+              SizedBox(height: 7),
+              _Bone(width: 90, height: 10),
+            ],
+          ),
+        ),
+        SizedBox(width: 12),
+        _Bone(width: 70, height: 14),
+      ],
     );
   }
 }

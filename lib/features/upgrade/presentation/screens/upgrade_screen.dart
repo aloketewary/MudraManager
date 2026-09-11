@@ -599,7 +599,6 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
       (LucideIcons.brain, 'Spending personality insights'),
       (LucideIcons.trendingUp, 'Net worth tracking'),
       (LucideIcons.fileText, 'Monthly recap reports'),
-      (LucideIcons.layoutDashboard, 'Dashboard customization'),
       (LucideIcons.cloudUpload, 'Cloud backup & restore'),
       (LucideIcons.puzzle, 'Premium plugins & category packs'),
       (LucideIcons.palette, 'All themes & personalization'),

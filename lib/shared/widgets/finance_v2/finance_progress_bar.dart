@@ -37,6 +37,10 @@ class FinanceProgressBar extends ConsumerWidget {
     final duration = animate && !MediaQuery.of(context).disableAnimations
         ? spacing.animNormal
         : Duration.zero;
+    final effectiveTrackColor = trackColor ?? scheme.surfaceContainerHighest;
+    final effectiveFillColor = fillColor ?? scheme.primary;
+    final effectiveStripeColor =
+        stripeColor ?? scheme.onSurfaceVariant.withValues(alpha: 0.25);
 
     return Semantics(
       label: semanticLabel,
@@ -47,32 +51,20 @@ class FinanceProgressBar extends ConsumerWidget {
         curve: Curves.easeOutCubic,
         builder: (context, animatedValue, _) {
           return SizedBox(
+            width: double.infinity,
             height: effectiveHeight,
             child: ClipRRect(
               borderRadius: effectiveRadius,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  ColoredBox(
-                    color: trackColor ?? scheme.surfaceContainerHighest,
-                  ),
-                  if (showStripeRemainder)
-                    CustomPaint(
-                      painter: _DiagonalStripePainter(
-                        color: stripeColor ??
-                            scheme.onSurfaceVariant.withValues(alpha: 0.25),
-                      ),
-                    ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: FractionallySizedBox(
-                      widthFactor: animatedValue,
-                      child: ColoredBox(
-                        color: fillColor ?? scheme.primary,
-                      ),
-                    ),
-                  ),
-                ],
+              child: CustomPaint(
+                painter: _ProgressBarPainter(
+                  value: animatedValue,
+                  trackColor: effectiveTrackColor,
+                  fillColor: effectiveFillColor,
+                  stripeColor: effectiveStripeColor,
+                  showStripeRemainder: showStripeRemainder,
+                  borderRadius: effectiveRadius,
+                ),
+                child: const SizedBox.expand(),
               ),
             ),
           );
@@ -82,28 +74,61 @@ class FinanceProgressBar extends ConsumerWidget {
   }
 }
 
-class _DiagonalStripePainter extends CustomPainter {
-  final Color color;
+class _ProgressBarPainter extends CustomPainter {
+  final double value;
+  final Color trackColor;
+  final Color fillColor;
+  final Color stripeColor;
+  final bool showStripeRemainder;
+  final BorderRadius borderRadius;
 
-  const _DiagonalStripePainter({required this.color});
+  const _ProgressBarPainter({
+    required this.value,
+    required this.trackColor,
+    required this.fillColor,
+    required this.stripeColor,
+    required this.showStripeRemainder,
+    required this.borderRadius,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.4;
+    final trackRRect = borderRadius.toRRect(Offset.zero & size);
+    final trackPaint = Paint()..color = trackColor;
+    canvas.drawRRect(trackRRect, trackPaint);
 
-    for (var x = -size.height; x < size.width + size.height; x += 7) {
-      canvas.drawLine(
-        Offset(x, size.height),
-        Offset(x + size.height, 0),
-        paint,
-      );
+    if (showStripeRemainder) {
+      canvas.save();
+      canvas.clipRRect(trackRRect);
+      final stripePaint = Paint()
+        ..color = stripeColor
+        ..strokeWidth = 1.4;
+      for (var x = -size.height; x < size.width + size.height; x += 7) {
+        canvas.drawLine(
+          Offset(x, size.height),
+          Offset(x + size.height, 0),
+          stripePaint,
+        );
+      }
+      canvas.restore();
     }
+
+    final fillWidth = size.width * value.clamp(0.0, 1.0);
+    if (fillWidth <= 0) return;
+
+    final fillRRect = borderRadius.toRRect(
+      Rect.fromLTWH(0, 0, fillWidth, size.height),
+    );
+    canvas.drawRRect(fillRRect, Paint()..color = fillColor);
   }
 
   @override
-  bool shouldRepaint(_DiagonalStripePainter oldDelegate) {
-    return oldDelegate.color != color;
+  bool shouldRepaint(_ProgressBarPainter oldDelegate) {
+    return oldDelegate.value != value ||
+        oldDelegate.trackColor != trackColor ||
+        oldDelegate.fillColor != fillColor ||
+        oldDelegate.stripeColor != stripeColor ||
+        oldDelegate.showStripeRemainder != showStripeRemainder ||
+        oldDelegate.borderRadius != borderRadius;
   }
 }

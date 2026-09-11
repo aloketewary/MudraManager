@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/recurring_expenses_card.dart';
+import 'package:mudra_manager/features/transactions/data/bill_control_center_provider.dart';
 
 class RecurringExpensesWidgetPlugin extends DashboardWidgetPlugin {
   @override
@@ -38,5 +39,6 @@ class RecurringExpensesWidgetPlugin extends DashboardWidgetPlugin {
   @override
   Future<void> refresh(WidgetRef ref) async {
     ref.invalidate(dashboardRecurringExpensesProvider);
+    ref.invalidate(billControlCenterProvider);
   }
 }

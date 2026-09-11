@@ -7,7 +7,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/db/field_encryption_service.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
-import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
@@ -17,6 +16,19 @@ import 'package:mudra_manager/features/dashboard/data/spending_drift_detector.da
 import 'package:mudra_manager/features/dashboard/data/today_card_analytics.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+
+Color _insightBackground(ColorScheme color) {
+  final tintAlpha = color.brightness == Brightness.light ? 0.45 : 0.18;
+  return Color.alphaBlend(
+    color.primaryContainer.withValues(alpha: tintAlpha),
+    color.surfaceContainerHigh,
+  );
+}
+
+Color _insightBorder(ColorScheme color) {
+  final borderAlpha = color.brightness == Brightness.light ? 0.28 : 0.34;
+  return color.onPrimaryContainer.withValues(alpha: borderAlpha);
+}
 
 enum BriefingSignalType {
   billDueToday,
@@ -282,9 +294,7 @@ class TodayBriefingSkeleton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
-    final insightBackground = color.brightness == Brightness.light
-        ? const Color(0xFF151215)
-        : color.surfaceContainerHighest;
+    final insightBackground = _insightBackground(color);
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -297,6 +307,7 @@ class TodayBriefingSkeleton extends ConsumerWidget {
           decoration: BoxDecoration(
             color: insightBackground,
             borderRadius: BorderRadius.circular(spacing.radiusLarge),
+            border: Border.all(color: _insightBorder(color)),
             boxShadow: [
               BoxShadow(
                 color: color.primary.withValues(alpha: 0.16),
@@ -367,20 +378,16 @@ class _TodayBriefingCardState extends ConsumerState<TodayBriefingCard> {
     }
 
     final isHealthy = state.isHealthy;
-    final isPro = ref.watch(isProProvider).value ?? false;
-    final showUpgrade = isHealthy && !isPro;
     final statusColor = isHealthy ? color.primary : color.error;
     final statusIcon =
         isHealthy ? LucideIcons.sparkles : LucideIcons.circleAlert;
     final statusText =
         isHealthy ? 'Your insight is ready' : _formatBriefMessage(state);
-    final hasAction = showUpgrade || (!isHealthy && state.actionRoute != null);
-    final insightBackground = color.brightness == Brightness.light
-        ? const Color(0xFF151215)
-        : color.surfaceContainerHighest;
-    final insightText = color.brightness == Brightness.light
-        ? const Color(0xFFF7F3F8)
-        : color.onSurface;
+    final hasAction = !isHealthy && state.actionRoute != null;
+    // TodayCardState deliberately selects one highest-priority insight.
+    const insightCount = 1;
+    final insightBackground = _insightBackground(color);
+    final insightText = color.onSurface;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -390,7 +397,11 @@ class _TodayBriefingCardState extends ConsumerState<TodayBriefingCard> {
       child: Container(
         decoration: BoxDecoration(
           color: insightBackground,
-          borderRadius: BorderRadius.circular(spacing.radiusLarge),
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(spacing.radiusLarge),
+            bottomRight: Radius.circular(spacing.radiusLarge),
+          ),
+          border: Border.all(color: _insightBorder(color)),
           boxShadow: [
             BoxShadow(
               color: color.primary.withValues(alpha: 0.16),
@@ -400,68 +411,135 @@ class _TodayBriefingCardState extends ConsumerState<TodayBriefingCard> {
           ],
         ),
         child: InkWell(
-          onTap: hasAction
-              ? () {
-                  if (showUpgrade) {
-                    HapticFeedback.mediumImpact();
-                    context.push(AppRoutes.upgrade);
-                    return;
-                  }
-                  HapticFeedback.lightImpact();
-                  TodayCardAnalytics.recordCtaTapped(
-                    signalType: state.signalType!,
-                    destination: state.actionRoute!,
-                  );
-                  context.push(state.actionRoute!);
-                }
-              : null,
+          onTap: () {
+            HapticFeedback.lightImpact();
+            if (!state.isHealthy && state.signalType != null) {
+              TodayCardAnalytics.recordCtaTapped(
+                signalType: state.signalType!,
+                destination: AppRoutes.financialAdvice,
+              );
+            }
+            context.push(
+              AppRoutes.financialAdvice,
+              extra: {
+                'source': 'briefing',
+                'signalType': state.signalType?.name,
+              },
+            );
+          },
           borderRadius: BorderRadius.circular(spacing.radiusLarge),
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.cardInner * 0.7,
-              vertical: spacing.elementGap,
-            ),
-            child: Row(
+            padding: EdgeInsets.all(spacing.cardInner * 0.7),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  statusIcon,
-                  size: 20,
-                  color: isHealthy ? color.primary : statusColor,
-                ),
-                SizedBox(width: spacing.elementGap),
-                Expanded(
-                  child: Text(
-                    statusText,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: isHealthy ? insightText : statusColor,
-                      fontWeight: FontWeight.w600,
+                Row(
+                  children: [
+                    Icon(
+                      statusIcon,
+                      size: 20,
+                      color: isHealthy ? color.primary : statusColor,
                     ),
-                  ),
-                ),
-                if (hasAction) ...[
-                  SizedBox(width: spacing.elementGap),
-                  Text(
-                    showUpgrade ? 'Get Pro' : _formatActionLabel(l10n, state),
-                    style: textTheme.labelMedium?.copyWith(
-                      color: showUpgrade ? insightText : statusColor,
-                      fontWeight: FontWeight.w600,
+                    SizedBox(width: spacing.elementGap),
+                    Expanded(
+                      child: Text(
+                        'Your Insights',
+                        style: textTheme.titleSmall?.copyWith(
+                          color: insightText,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
-                  ),
-                  SizedBox(width: spacing.elementGapMin),
-                  Icon(
-                    LucideIcons.chevronRight,
-                    size: 16,
-                    color: showUpgrade ? insightText : statusColor,
-                  ),
-                ],
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.elementGap,
+                        vertical: spacing.elementGapMin,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.primary.withValues(alpha: 0.16),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
+                      ),
+                      child: Text(
+                        '$insightCount',
+                        semanticsLabel: '$insightCount insight',
+                        style: textTheme.labelMedium?.copyWith(
+                          color: color.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: spacing.elementGap),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            statusText,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: isHealthy ? insightText : statusColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (isHealthy) ...[
+                            SizedBox(height: spacing.elementGapMin),
+                            Text(
+                              _formatHealthyDetail(state),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: insightText.withValues(alpha: 0.72),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (hasAction) ...[
+                      SizedBox(width: spacing.elementGap),
+                      Text(
+                        _formatActionLabel(l10n, state),
+                        style: textTheme.labelMedium?.copyWith(
+                          color: statusColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGapMin),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 16,
+                        color: statusColor,
+                      ),
+                    ],
+                  ],
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  String _formatHealthyDetail(TodayCardState state) {
+    if (state.nextBillName == null || state.nextBillDays == null) {
+      return 'No urgent issues found today';
+    }
+
+    final days = state.nextBillDays!;
+    final timing = days <= 0
+        ? 'today'
+        : days == 1
+            ? 'tomorrow'
+            : 'in $days days';
+    return 'Next up: ${state.nextBillName} $timing';
   }
 
   String _formatBriefMessage(TodayCardState state) {

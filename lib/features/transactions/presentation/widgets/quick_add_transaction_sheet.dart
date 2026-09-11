@@ -1,4 +1,5 @@
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
+import 'package:auto_skeleton/auto_skeleton.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,6 +37,7 @@ class QuickAddTransactionSheet extends ConsumerStatefulWidget {
 class _QuickAddTransactionSheetState
     extends ConsumerState<QuickAddTransactionSheet> {
   final _amountController = TextEditingController();
+  final _amountFocusNode = FocusNode();
   final _noteController = TextEditingController();
   final _accountScrollController = ScrollController();
   final _categoryScrollController = ScrollController();
@@ -50,11 +52,24 @@ class _QuickAddTransactionSheetState
   void initState() {
     super.initState();
     _showFullMode = !widget.compact;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(milliseconds: 280), () {
+        final focusedWidget =
+            FocusManager.instance.primaryFocus?.context?.widget;
+        final anotherFieldHasFocus = focusedWidget is EditableText;
+        if (!mounted || _amountFocusNode.hasFocus || anotherFieldHasFocus) {
+          return;
+        }
+        _amountFocusNode.requestFocus();
+      });
+    });
   }
 
   @override
   void dispose() {
     _amountController.dispose();
+    _amountFocusNode.dispose();
     _noteController.dispose();
     _accountScrollController.dispose();
     _categoryScrollController.dispose();
@@ -82,7 +97,7 @@ class _QuickAddTransactionSheetState
     final ctxt = AppLocalizations.of(context)!;
     final accentColor = _isExpense ? color.error : color.primary;
 
-    final accountsAsync = ref.watch(accountsProvider);
+    final accountsAsync = _showFullMode ? ref.watch(accountsProvider) : null;
     final categoriesAsync = _isExpense
         ? ref.watch(expenseCategoriesProvider)
         : ref.watch(incomeCategoriesProvider);
@@ -141,9 +156,10 @@ class _QuickAddTransactionSheetState
             // ── Amount ──
             TextField(
               controller: _amountController,
+              focusNode: _amountFocusNode,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
-              autofocus: true,
+              autofocus: false,
               textAlign: TextAlign.center,
               style: textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w900,
@@ -176,7 +192,7 @@ class _QuickAddTransactionSheetState
 
             // ── Account (hidden in compact, auto-selected) ──
             if (_showFullMode)
-              accountsAsync.when(
+              accountsAsync!.when(
                 data: (accounts) {
                   if (_selectedAccount == null && accounts.isNotEmpty) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -290,7 +306,12 @@ class _QuickAddTransactionSheetState
                     ],
                   );
                 },
-                loading: () => const SizedBox(height: 48),
+                loading: () => _buildChipSkeletonRow(
+                  color,
+                  spacing,
+                  height: 48,
+                  itemCount: 3,
+                ),
                 error: (_, __) => const SizedBox(),
               ),
             if (_showFullMode) SizedBox(height: spacing.sectionGap),
@@ -531,7 +552,12 @@ class _QuickAddTransactionSheetState
                     ],
                   );
                 },
-                loading: () => const SizedBox(height: 52),
+                loading: () => _buildChipSkeletonRow(
+                  color,
+                  spacing,
+                  height: 52,
+                  itemCount: 4,
+                ),
                 error: (_, __) => const SizedBox(),
               ),
             SizedBox(height: spacing.sectionGap),
@@ -630,15 +656,15 @@ class _QuickAddTransactionSheetState
         ? ref.watch(expenseCategoriesProvider)
         : ref.watch(incomeCategoriesProvider);
 
-    // Auto-select account from already-cached list
+    // Compact mode only needs the primary/fallback account. Avoid loading and
+    // decrypting every active account when the account list is hidden.
     if (_selectedAccount == null) {
-      final accountsAsync = ref.watch(accountsProvider);
-      accountsAsync.whenData((accounts) {
-        if (accounts.isNotEmpty && _selectedAccount == null) {
-          final primary = accounts.where((a) => a.isPrimary).firstOrNull;
+      final primaryAccountAsync = ref.watch(primaryAccountProvider);
+      primaryAccountAsync.whenData((account) {
+        if (account != null && _selectedAccount == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              setState(() => _selectedAccount = primary ?? accounts.first);
+            if (mounted && _selectedAccount == null) {
+              setState(() => _selectedAccount = account);
             }
           });
         }
@@ -705,8 +731,64 @@ class _QuickAddTransactionSheetState
           }).toList(),
         );
       },
-      loading: () => const SizedBox(height: 48),
+      loading: () => _buildCompactCategorySkeleton(color, spacing),
       error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildChipSkeletonRow(
+    ColorScheme color,
+    AppSpacing spacing, {
+    required double height,
+    required int itemCount,
+  }) {
+    return AutoSkeleton(
+      enabled: true,
+      child: SizedBox(
+        height: height,
+        child: Row(
+          children: [
+            for (var index = 0; index < itemCount; index++) ...[
+              if (index > 0) SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Container(
+                  height: spacing.touchTargetSmall,
+                  decoration: BoxDecoration(
+                    color: color.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactCategorySkeleton(
+    ColorScheme color,
+    AppSpacing spacing,
+  ) {
+    return AutoSkeleton(
+      enabled: true,
+      child: Wrap(
+        spacing: spacing.elementGap,
+        runSpacing: spacing.elementGap,
+        children: List.generate(
+          6,
+          (index) => SizedBox(
+            width: spacing.cardInner * (2.5 + (index % 3) * 0.5),
+            height: spacing.touchTargetSmall,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: color.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

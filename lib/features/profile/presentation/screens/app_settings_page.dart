@@ -8,7 +8,6 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/guest_mode_toggle.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
-import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 
@@ -57,20 +56,6 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
             () {
               HapticFeedback.mediumImpact();
               context.push('/plugins');
-            },
-            spacing,
-          ),
-          const SizedBox(height: 8),
-          _buildSettingCard(
-            context,
-            color,
-            textTheme,
-            LucideIcons.layoutDashboard,
-            'Customize Dashboard',
-            'Show/hide and reorder cards',
-            () {
-              HapticFeedback.mediumImpact();
-              context.push(AppRoutes.dashboardCustomize);
             },
             spacing,
           ),

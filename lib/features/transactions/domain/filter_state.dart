@@ -6,6 +6,7 @@ enum TransactionTypeFilter {
   all,
   income,
   expense,
+  transfer,
 }
 
 class FilterState {

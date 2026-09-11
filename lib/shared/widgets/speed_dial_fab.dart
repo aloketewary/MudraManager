@@ -10,11 +10,15 @@ import 'package:mudra_manager/core/router/app_routes.dart';
 class ExpandableFab extends ConsumerStatefulWidget {
   final AnimationController? visibilityController;
   final EdgeInsets padding;
+  final bool collapsedAsCircle;
+  final bool showCollapsedButton;
 
   const ExpandableFab({
     super.key,
     this.visibilityController,
     this.padding = const EdgeInsets.only(bottom: 16),
+    this.collapsedAsCircle = false,
+    this.showCollapsedButton = true,
   });
 
   @override
@@ -58,6 +62,8 @@ class ExpandableFabState extends ConsumerState<ExpandableFab>
   void close() {
     if (_isOpen) _toggle();
   }
+
+  void toggle() => _toggle();
 
   void _toggle() {
     HapticFeedback.mediumImpact();
@@ -143,8 +149,20 @@ class ExpandableFabState extends ConsumerState<ExpandableFab>
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isSimple = ref.watch(isSimpleModeProvider);
-    final width = lerpDouble(_collapsedWidth, isSimple ? _simpleExpandedWidth : _expandedWidth, t)!;
+    final width = lerpDouble(
+      widget.collapsedAsCircle ? _height : _collapsedWidth,
+      isSimple ? _simpleExpandedWidth : _expandedWidth,
+      t,
+    )!;
     final spacing = ref.watch(spacingProvider);
+    // This instance is controlled by the docked FAB. Keep its collapsed
+    // circle hidden during both opening and closing transitions.
+    if (!widget.showCollapsedButton && t < 0.3) {
+      return const SizedBox.shrink();
+    }
+    final collapsedOpacity = widget.showCollapsedButton
+        ? (1 - t * 3).clamp(0.0, 1.0)
+        : 0.0;
 
     return GestureDetector(
       // Tap bar background to collapse when expanded
@@ -158,7 +176,9 @@ class ExpandableFabState extends ConsumerState<ExpandableFab>
             color.surfaceContainerHigh,
             t,
           ),
-          borderRadius: BorderRadius.circular(spacing.radiusSmall * 1.5),
+          borderRadius: BorderRadius.circular(
+            widget.collapsedAsCircle ? _height / 2 : spacing.radiusSmall * 1.5,
+          ),
           boxShadow: [
             BoxShadow(
               color: color.shadow.withValues(alpha: 0.1 + (t * 0.1)),
@@ -176,34 +196,42 @@ class ExpandableFabState extends ConsumerState<ExpandableFab>
             children: [
               // Collapsed content — fades out
               Opacity(
-                opacity: (1 - t * 3).clamp(0.0, 1.0), // gone by t=0.33
+                opacity: collapsedOpacity,
                 child: IgnorePointer(
                   ignoring: t > 0.1,
                   child: InkWell(
                     onTap: _toggle,
-                    borderRadius: BorderRadius.circular(spacing.radiusSmall * 1.5),
+                    borderRadius: BorderRadius.circular(
+                      widget.collapsedAsCircle
+                          ? _height / 2
+                          : spacing.radiusSmall * 1.5,
+                    ),
                     child: Semantics(
                       button: true,
                       label: 'Add transaction',
                       child: SizedBox(
-                        width: _collapsedWidth,
+                        width: widget.collapsedAsCircle
+                            ? _height
+                            : _collapsedWidth,
                         height: _height,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               LucideIcons.plus,
-                              size: 20,
+                              size: widget.collapsedAsCircle ? 28 : 20,
                               color: color.onPrimaryContainer,
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Add',
-                              style: textTheme.labelLarge?.copyWith(
-                                color: color.onPrimaryContainer,
-                                fontWeight: FontWeight.w700,
+                            if (!widget.collapsedAsCircle) ...[
+                              const SizedBox(width: 8),
+                              Text(
+                                'Add',
+                                style: textTheme.labelLarge?.copyWith(
+                                  color: color.onPrimaryContainer,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
+                            ],
                           ],
                         ),
                       ),
@@ -243,15 +271,15 @@ class ExpandableFabState extends ConsumerState<ExpandableFab>
                           ),
                         ),
                         if (!isSimple) ...[
-                        _buildDivider(color, t),
-                        _buildActionItem(
-                          icon: LucideIcons.arrowLeftRight,
-                          label: 'Transfer',
-                          accentColor: color.tertiary,
-                          color: color,
-                          textTheme: textTheme,
-                          onTap: () => _onItemTap(AppRoutes.transfer),
-                        ),
+                          _buildDivider(color, t),
+                          _buildActionItem(
+                            icon: LucideIcons.arrowLeftRight,
+                            label: 'Transfer',
+                            accentColor: color.tertiary,
+                            color: color,
+                            textTheme: textTheme,
+                            onTap: () => _onItemTap(AppRoutes.transfer),
+                          ),
                         ],
                       ],
                     ),

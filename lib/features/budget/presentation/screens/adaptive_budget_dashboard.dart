@@ -37,9 +37,13 @@ class _AdaptiveBudgetDashboardState
   @override
   void initState() {
     super.initState();
-    ref.read(budgetRefreshProvider.notifier).refresh(
-          BudgetRefreshReason.navigation,
-        );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      ref.read(budgetRefreshProvider.notifier).refresh(
+            BudgetRefreshReason.navigation,
+          );
+    });
     TodayCardAnalytics.recordDestinationOpened(destination: 'budget');
   }
 

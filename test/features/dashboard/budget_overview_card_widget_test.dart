@@ -10,6 +10,7 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/budget/presentation/widgets/budget_overview_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/finance_v2/finance_progress_bar.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import '../budget/budget_widget_fixtures.dart';
 
@@ -108,19 +109,20 @@ void main() {
     );
 
     await tester.pumpWidget(
-        cardApp(dashboard: AsyncValue.data(data), withRouter: true),);
+      cardApp(dashboard: AsyncValue.data(data), withRouter: true),
+    );
     await tester.pump(const Duration(seconds: 2));
 
     expect(find.text('Monthly Budget'), findsOneWidget);
     expect(find.text('Remaining'), findsOneWidget);
     expect(find.text('Per Day'), findsOneWidget);
-    final tween = tester.widget<TweenAnimationBuilder<double>>(
-      find.byType(TweenAnimationBuilder<double>),
+    final progressBar = tester.widget<FinanceProgressBar>(
+      find.byType(FinanceProgressBar),
     );
-    expect(tween.tween.end, inInclusiveRange(0.0, 1.0));
-    expect(tween.tween.end!.isFinite, isTrue);
+    expect(progressBar.value, inInclusiveRange(0.0, 1.0));
+    expect(progressBar.value.isFinite, isTrue);
 
-    await tester.tap(find.byType(InkWell));
+    await tester.tap(find.text('Monthly Budget'));
     await tester.pumpAndSettle();
     expect(find.text('budget dashboard route'), findsOneWidget);
   });
@@ -225,11 +227,12 @@ void main() {
     await tester.pumpWidget(cardApp(dashboard: AsyncValue.data(data)));
     await tester.pump(const Duration(seconds: 2));
 
-    final tween = tester.widget<TweenAnimationBuilder<double>>(
-      find.byType(TweenAnimationBuilder<double>),
+    final progressBar = tester.widget<FinanceProgressBar>(
+      find.byType(FinanceProgressBar),
     );
-    expect(tween.tween.end, 1.0);
-    expect(tween.tween.end!.isFinite, isTrue);
+    expect(progressBar.value, 1.0);
+    expect(progressBar.value.isFinite, isTrue);
+    await tester.pumpAndSettle();
     final amounts = tester.widgetList<CurrencyText>(find.byType(CurrencyText));
     expect(amounts.any((widget) => widget.amount == -150), isTrue);
   });
@@ -252,19 +255,21 @@ void main() {
     for (final dashboard in <AsyncValue<DashboardData>>[
       const AsyncValue.loading(),
       const AsyncValue.error('refresh failed', StackTrace.empty),
-      const AsyncValue.data(DashboardData(
-        transactions: [],
-        accounts: [],
-        accountBalances: {},
-        budgets: [],
-        recurringExpenses: [],
-        goals: [],
-        totalIncome: 0,
-        totalExpense: 0,
-        totalBalance: 0,
-        netWorth: 0,
-        pendingSmsCount: 0,
-      ),),
+      const AsyncValue.data(
+        DashboardData(
+          transactions: [],
+          accounts: [],
+          accountBalances: {},
+          budgets: [],
+          recurringExpenses: [],
+          goals: [],
+          totalIncome: 0,
+          totalExpense: 0,
+          totalBalance: 0,
+          netWorth: 0,
+          pendingSmsCount: 0,
+        ),
+      ),
     ]) {
       await tester.pumpWidget(cardApp(dashboard: dashboard));
       await tester.pump();
