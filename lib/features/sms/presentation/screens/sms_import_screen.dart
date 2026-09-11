@@ -27,16 +27,16 @@ import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SmsImportSettingsScreen extends ConsumerStatefulWidget {
-  const SmsImportSettingsScreen({super.key});
+class SmsImportScreen extends ConsumerStatefulWidget {
+  const SmsImportScreen({super.key});
 
   @override
-  ConsumerState<SmsImportSettingsScreen> createState() =>
-      _SmsImportSettingsScreenState();
+  ConsumerState<SmsImportScreen> createState() =>
+      _SmsImportScreenState();
 }
 
-class _SmsImportSettingsScreenState
-    extends ConsumerState<SmsImportSettingsScreen> with WidgetsBindingObserver {
+class _SmsImportScreenState
+    extends ConsumerState<SmsImportScreen> with WidgetsBindingObserver {
   bool _smsImportEnabled = false;
   bool _permissionGranted = false;
   bool _loaded = false;

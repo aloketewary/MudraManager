@@ -52,7 +52,7 @@ import 'package:mudra_manager/features/account/presentation/screens/manage_accou
 import 'package:mudra_manager/features/category/presentation/screens/manage_categories_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/notification_settings_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/setting_screen.dart';
-import 'package:mudra_manager/features/profile/presentation/screens/sms_import_setting_screen.dart';
+import 'package:mudra_manager/features/sms/presentation/screens/sms_import_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/theme_picker_screen.dart';
 import 'package:mudra_manager/features/skin/presentation/screens/skin_picker_screen.dart';
 import 'package:mudra_manager/features/skin/presentation/screens/skin_editor_screen.dart';
@@ -261,7 +261,7 @@ class AppRouter {
               ),
               GoRoute(
                 path: AppRoutes.smsImport,
-                builder: (context, state) => const SmsImportSettingsScreen(),
+                builder: (context, state) => const SmsImportScreen(),
               ),
               GoRoute(
                 path: AppRoutes.chooseLanguage,
