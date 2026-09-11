@@ -443,65 +443,6 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
     );
   }
 
-  Widget _buildUtilityHeader({
-    required int totalCount,
-    required ColorScheme color,
-    required TextTheme textTheme,
-    required AppSpacing spacing,
-    required AppLocalizations l10n,
-  }) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: spacing.elementGap),
-      child: Row(
-        children: [
-          Container(
-            width: 4,
-            height: 24,
-            decoration: BoxDecoration(
-              color: color.primary,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          SizedBox(width: spacing.elementGap),
-          Icon(
-            LucideIcons.layoutGrid,
-            size: spacing.iconSM,
-            color: color.primary,
-          ),
-          SizedBox(width: spacing.elementGap),
-          Expanded(
-            child: Text(
-              l10n.nav_manage,
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.2,
-              ),
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.elementGap,
-              vertical: spacing.elementGap * 0.5,
-            ),
-            decoration: BoxDecoration(
-              color: color.primary.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              border: Border.all(
-                color: color.primary.withValues(alpha: 0.20),
-              ),
-            ),
-            child: Text(
-              '$totalCount/${_allUtilities.length}',
-              style: textTheme.labelSmall?.copyWith(
-                color: color.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAdvisoryLayer(
     ColorScheme color,
