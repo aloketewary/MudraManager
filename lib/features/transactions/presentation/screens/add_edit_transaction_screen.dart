@@ -24,6 +24,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_access_provider.dart';
 import 'package:mudra_manager/features/account/data/account_data_contract.dart';
@@ -38,9 +39,11 @@ import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/core/providers/singleton_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mudra_manager/features/sms/data/tag_matcher_service.dart';
+import 'package:mudra_manager/features/sms/domain/sms_transaction_label.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_query_provider.dart';
 import 'package:mudra_manager/features/transactions/presentation/providers/smart_defaults_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/simple_calculator.dart';
@@ -1053,6 +1056,45 @@ class _AddEditTransactionScreenState
     setState(() => _saving = true);
 
     try {
+      SmsActivity? linkedSmsActivity;
+      var updateOtherMerchantTransactions = false;
+      final originalCategoryId = _isEditing
+          ? (widget.transaction!.category.value?.id ??
+              widget.transaction!.categoryId)
+          : null;
+      final categoryChanged =
+          _isEditing && originalCategoryId != _selectedCategory!.id;
+
+      if (categoryChanged &&
+          widget.transaction!.isFromSms == true &&
+          widget.transaction!.smsActivityId != null) {
+        linkedSmsActivity = await SmsActivityService.instance
+            .findLinkedActivityForTransaction(widget.transaction!);
+
+        if (linkedSmsActivity != null) {
+          final otherTransactionCount = await SmsActivityService.instance
+              .countOtherTransactionsForMerchant(
+            widget.transaction!,
+            categoryId: _selectedCategory!.id,
+          );
+          if (otherTransactionCount > 0 && mounted) {
+            final choice = await DialogUtils.showCategoryPropagationChoice(
+              context,
+              spacing,
+              merchant: SmsTransactionLabel.validMerchant(
+                    linkedSmsActivity.merchant,
+                  ) ??
+                  linkedSmsActivity.toAccount ??
+                  'this merchant',
+              category: _selectedCategory!.name,
+              otherTransactionCount: otherTransactionCount,
+            );
+            updateOtherMerchantTransactions =
+                choice == CategoryPropagationChoice.updateOthers;
+          }
+        }
+      }
+
       final amount =
           double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
       if (amount <= 0) {
@@ -1111,6 +1153,32 @@ class _AddEditTransactionScreenState
       txn.tags.addAll(selectedTags);
 
       await ref.read(transactionProvider).addTransaction(txn);
+
+      final activityToUpdate = linkedSmsActivity;
+      if (activityToUpdate != null && categoryChanged) {
+        if (updateOtherMerchantTransactions) {
+          await SmsActivityService.instance.updateCategoryForMerchant(
+            txn,
+            _selectedCategory!,
+          );
+        } else {
+          final isar = await ref.read(isarServiceProvider).getInstance();
+          final smsBody = activityToUpdate.body;
+          final merchant = activityToUpdate.merchant;
+          final recipient = activityToUpdate.toAccount;
+          await isar.writeTxn(() async {
+            activityToUpdate.category = _selectedCategory!.name;
+            activityToUpdate.encryptFields();
+            await isar.smsActivitys.put(activityToUpdate);
+          });
+          await SmsActivityService.instance.learnKeywordsFromApproval(
+            smsBody,
+            _selectedCategory!,
+            merchant: merchant,
+            recipient: recipient,
+          );
+        }
+      }
 
       // Add to trip if selected
       if (_selectedTrip != null &&
@@ -1175,10 +1243,14 @@ class _AddEditTransactionScreenState
               BudgetRefreshReason.transactionChanged,
             );
         ref.invalidate(accountServiceProvider);
-        if (widget.smsActivity != null) {
+        ref.invalidate(transactionProvider);
+        ref.invalidate(transactionQueryProvider);
+        if (widget.smsActivity != null || linkedSmsActivity != null) {
           ref.invalidate(smsActivityProvider);
           ref.invalidate(pendingCountProvider);
           ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
+        }
+        if (widget.smsActivity != null) {
           ref
               .read(gamificationServiceProvider)
               ?.track(GamificationEvent.smsTransactionApproved);

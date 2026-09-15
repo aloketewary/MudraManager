@@ -1,3 +1,4 @@
+import 'package:auto_skeleton/auto_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -219,7 +220,10 @@ class AccountCardSkeleton extends ConsumerWidget {
             width: spacing.sectionGap * 1.25,
             height: spacing.iconXL + 4,
           ),
-          SkeletonLoader(width: spacing.sectionGap * 1.1, height: spacing.iconSM),
+          SkeletonLoader(
+            width: spacing.sectionGap * 1.1,
+            height: spacing.iconSM,
+          ),
         ],
       ),
     );
@@ -237,82 +241,110 @@ class AccountCardSkeleton extends ConsumerWidget {
 
 // ── BUDGET CARD SKELETON ──────────────────────────────────────────────────
 
-/// Skeleton loader for budget card.
+/// Auto skeleton matching compact budget list rows.
 class BudgetCardSkeleton extends ConsumerWidget {
   const BudgetCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.watch(spacingProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-    final isReducedMotion = MediaQuery.of(context).disableAnimations;
+    final color = Theme.of(context).colorScheme;
+    final enabled = !MediaQuery.of(context).disableAnimations;
+    final radius = spacing.radiusMedium + 4;
 
-    final cardContent = Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.elementGap,
-      ),
-      child: Container(
-        padding: EdgeInsets.all(spacing.cardInner),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(spacing.radiusMedium + 4),
-        ),
-        child: Row(
-          children: [
-            SkeletonLoader(
-              width: spacing.iconXL * 1.5,
-              height: spacing.iconXL * 1.5,
-              borderRadius: BorderRadius.circular(spacing.iconXL * 1.5 / 2),
+    return AutoSkeleton(
+      enabled: enabled,
+      debugShowBones: false,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: spacing.elementGap),
+        child: Container(
+          padding: EdgeInsets.all(spacing.cardInner),
+          decoration: BoxDecoration(
+            color: color.surface.withValues(alpha: 0.75),
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(
+              color: color.outlineVariant.withValues(alpha: 0.3),
             ),
-            SizedBox(width: spacing.elementGap * 2),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SkeletonLoader(
-                    width: spacing.sectionGap,
-                    height: spacing.iconSM,
-                    margin: EdgeInsets.only(bottom: spacing.elementGap + 4),
-                  ),
-                  SkeletonLoader(
-                    width: double.infinity,
-                    height: spacing.strokeThick,
-                    margin: EdgeInsets.only(bottom: spacing.elementGap),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SkeletonLoader(
-                          width: spacing.cardHorizontalMax,
-                          height: spacing.iconXS,
-                        ),
-                      ),
-                      SizedBox(width: spacing.elementGap),
-                      Expanded(
-                        child: SkeletonLoader(
-                          width: spacing.cardHorizontalMax,
-                          height: spacing.iconXS,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _BudgetSkeletonBone(
+                width: spacing.cardInner * 2.5,
+                height: spacing.cardInner * 3,
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
-            ),
-          ],
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const _BudgetSkeletonBone(width: 120, height: 16),
+                        _BudgetSkeletonBone(
+                          width: spacing.touchTargetSmall,
+                          height: spacing.touchTargetSmall,
+                          borderRadius: BorderRadius.circular(
+                            spacing.touchTargetSmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: spacing.elementGapMin),
+                    const _BudgetSkeletonBone(width: 130, height: 24),
+                    SizedBox(height: spacing.elementGapMin),
+                    const Row(
+                      children: [
+                        _BudgetSkeletonBone(width: 52, height: 12),
+                        SizedBox(width: 8),
+                        _BudgetSkeletonBone(width: 56, height: 12),
+                      ],
+                    ),
+                    SizedBox(height: spacing.elementGap),
+                    _BudgetSkeletonBone(
+                      width: double.infinity,
+                      height: spacing.progressThin,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    SizedBox(height: spacing.elementGapMin),
+                    const _BudgetSkeletonBone(width: 160, height: 11),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+}
 
-    if (isReducedMotion) return cardContent;
+class _BudgetSkeletonBone extends StatelessWidget {
+  final double? width;
+  final double height;
+  final BorderRadius? borderRadius;
 
-    return cardContent
-        .animate(onComplete: (controller) => controller.repeat())
-        .shimmer(
-          duration: spacing.animSlow,
-          color: colorScheme.surface.withValues(alpha: 0.4),
-        );
+  const _BudgetSkeletonBone({
+    this.width,
+    required this.height,
+    this.borderRadius,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    return PlaceholderLeaf(
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: color.onSurface.withValues(alpha: 0.08),
+          borderRadius: borderRadius ?? BorderRadius.circular(6),
+        ),
+      ),
+    );
   }
 }
 

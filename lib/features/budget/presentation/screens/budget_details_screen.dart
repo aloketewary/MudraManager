@@ -32,28 +32,56 @@ class BudgetDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     return ref.watch(budgetConstraintByIdProvider(budgetId)).when(
           skipLoadingOnRefresh: false,
           skipError: false,
           data: (snapshot) {
             if (snapshot == null) {
-              return Scaffold(
-                appBar: AppBar(),
+              return ScreenShell(
+                config: ScreenShellConfig(
+                  customAppBar: _BudgetDetailsAppBar(
+                    title: ctxt.budget_dashboardPageTitle,
+                    spacing: spacing,
+                    onBack: () => context.pop(),
+                  ),
+                  enableRefresh: false,
+                ),
+                actions: ScreenActions.empty,
                 body: Center(child: Text(ctxt.budget_dashboardNotFoundText)),
               );
             }
             return _BudgetDetailShell(snapshot: snapshot);
           },
-          loading: () => Scaffold(
-            appBar: AppBar(title: Text(ctxt.budget_dashboardPageTitle)),
+          loading: () => ScreenShell(
+            config: ScreenShellConfig(
+              customAppBar: _BudgetDetailsAppBar(
+                title: ctxt.budget_dashboardPageTitle,
+                spacing: spacing,
+                onBack: () => context.pop(),
+              ),
+              enableRefresh: false,
+            ),
+            actions: ScreenActions.empty,
             body: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.cardHorizontal,
+                vertical: spacing.cardVertical,
+              ),
               children: List.generate(3, (_) => const BudgetCardSkeleton()),
             ),
           ),
-          error: (e, _) => Scaffold(
-            appBar: AppBar(),
+          error: (e, _) => ScreenShell(
+            config: ScreenShellConfig(
+              customAppBar: _BudgetDetailsAppBar(
+                title: ctxt.budget_dashboardPageTitle,
+                spacing: spacing,
+                onBack: () => context.pop(),
+              ),
+              enableRefresh: false,
+            ),
+            actions: ScreenActions.empty,
             body: Center(
               child: FilledButton.icon(
                 onPressed: () => ref
@@ -80,51 +108,49 @@ class _BudgetDetailShell extends ConsumerWidget {
 
     return ScreenShell(
       config: ScreenShellConfig(
-        title: snapshot.budgetName,
-        appBarMode: AppBarMode.standard,
+        customAppBar: _BudgetDetailsAppBar(
+          title: snapshot.budgetName,
+          spacing: spacing,
+          onBack: () {
+            HapticFeedback.lightImpact();
+            context.pop();
+          },
+          remaining: snapshot.remaining.abs(),
+          remainingLabel:
+              snapshot.isBreached ? ctxt.budget_over : ctxt.budget_remaining,
+          spent: snapshot.spent,
+          spentLabel: ctxt.budget_spent,
+          editLabel: ctxt.budget_buttonEditText,
+          deleteLabel: ctxt.budget_delete,
+          onEdit: () {
+            HapticFeedback.lightImpact();
+            context.push(
+              AppRoutes.addBudget,
+              extra: {'budgetId': snapshot.budgetId},
+            );
+          },
+          onDelete: () async {
+            HapticFeedback.mediumImpact();
+            final confirmed = await DialogUtils.showDeleteConfirmation(
+              context,
+              spacing,
+              title: '${ctxt.budget_delete} \'${snapshot.budgetName}\'',
+            );
+            if (confirmed == true && context.mounted) {
+              await ref
+                  .read(budgetServiceProvider)
+                  .deleteBudget(snapshot.budgetId);
+              ref.read(budgetRefreshProvider.notifier).refresh(
+                    BudgetRefreshReason.budgetCrud,
+                  );
+              SnackbarService.success(BuddyMessages.budgetDeleted, spacing);
+              if (context.mounted) context.pop();
+            }
+          },
+        ),
         enableRefresh: false,
       ),
-      actions: ScreenActions.build(
-        appBar: [
-          ScreenAction(
-            id: 'edit_budget',
-            label: 'Edit',
-            icon: LucideIcons.pencil,
-            onTap: () {
-              HapticFeedback.lightImpact();
-              context.push(
-                AppRoutes.addBudget,
-                extra: {'budgetId': snapshot.budgetId},
-              );
-            },
-          ),
-        ],
-        overflow: [
-          ScreenAction(
-            id: 'delete_budget',
-            label: ctxt.budget_delete,
-            icon: LucideIcons.trash2,
-            onTap: () async {
-              HapticFeedback.mediumImpact();
-              final confirmed = await DialogUtils.showDeleteConfirmation(
-                context,
-                spacing,
-                title: '${ctxt.budget_delete} \'${snapshot.budgetName}\'',
-              );
-              if (confirmed == true && context.mounted) {
-                await ref
-                    .read(budgetServiceProvider)
-                    .deleteBudget(snapshot.budgetId);
-                ref.read(budgetRefreshProvider.notifier).refresh(
-                      BudgetRefreshReason.budgetCrud,
-                    );
-                SnackbarService.success(BuddyMessages.budgetDeleted, spacing);
-                if (context.mounted) context.pop();
-              }
-            },
-          ),
-        ],
-      ),
+      actions: ScreenActions.empty,
       body: RefreshIndicator(
         onRefresh: () => RefreshHelper.withMinDuration(() async {
           ref.read(budgetRefreshProvider.notifier).refresh(
@@ -156,81 +182,89 @@ class _BudgetDetailBody extends ConsumerWidget {
 
     final accent = _accentColor(color);
 
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
-      ),
+    return Stack(
       children: [
-        // 1. Hero card (one glow per screen): period + remaining + spent
-        _buildHeroCard(textTheme, color, accent, spacing, ctxt),
-        SizedBox(height: spacing.elementGap * 2),
-
-        // 2. Remaining daily allowance
-        if (!snapshot.isUnknown &&
-            !snapshot.isBreached &&
-            snapshot.daysLeft > 0) ...[
-          _buildAllowance(textTheme, color, spacing, ctxt),
-          SizedBox(height: spacing.elementGap),
-        ],
-
-        // 3. Forecast (conditional)
-        if (snapshot.isForecastVisible) ...[
-          _buildForecast(textTheme, color, spacing, ctxt),
-          SizedBox(height: spacing.elementGap),
-        ],
-
-        // 4. Pace block
-        if (!snapshot.isUnknown) ...[
-          _buildPaceCard(textTheme, color, spacing, accent, ctxt),
-          SizedBox(height: spacing.elementGap),
-        ],
-
-        // 5. Recovery signal
-        if (snapshot.recoverySignal != null) ...[
-          _buildRecovery(textTheme, color, spacing, accent, ctxt),
-          SizedBox(height: spacing.sectionGap),
-        ],
-
-        // Unknown state
-        if (snapshot.isUnknown) ...[
-          SizedBox(height: spacing.elementGap),
-          Container(
-            padding: EdgeInsets.all(spacing.cardInner),
-            decoration: BoxDecoration(
-              color: color.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              border: Border.all(
-                  color: color.outlineVariant.withValues(alpha: 0.3),),
-            ),
-            child: Text(
-              ctxt.budget_insufficientData,
-              style: textTheme.bodyMedium?.copyWith(
-                color: color.onSurfaceVariant,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
+        ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(
+            spacing.cardHorizontalMax,
+            spacing.sectionGap,
+            spacing.cardHorizontalMax,
+            spacing.cardInner * 5 +
+                MediaQuery.of(context).padding.bottom +
+                spacing.sectionGap,
           ),
-          SizedBox(height: spacing.sectionGap),
-        ],
+          children: [
+            _buildActions(context, spacing, color, ctxt),
+            SizedBox(height: spacing.elementGap),
+            // 1. Hero card (one glow per screen): period + remaining + spent
+            _buildHeroCard(textTheme, color, accent, spacing, ctxt),
 
-        // 6. Dual CTA (capability-driven)
-        _buildActions(context, ref, spacing, color, ctxt),
-        SizedBox(height: spacing.sectionGap),
+            // 2. Remaining daily allowance
+            if (!snapshot.isUnknown &&
+                !snapshot.isBreached &&
+                snapshot.daysLeft > 0) ...[
+              _buildAllowance(textTheme, color, spacing, ctxt),
+              SizedBox(height: spacing.elementGap),
+            ],
 
-        // 7. Time remaining context
-        if (!snapshot.isUnknown && snapshot.daysLeft > 0) ...[
-          Center(
-            child: Text(
-              ctxt.budget_daysRemaining(snapshot.daysLeft),
-              style: textTheme.bodySmall?.copyWith(
-                color: color.onSurfaceVariant,
+            // 3. Forecast (conditional)
+            if (snapshot.isForecastVisible) ...[
+              _buildForecast(textTheme, color, spacing, ctxt),
+              SizedBox(height: spacing.elementGap),
+            ],
+
+            // 4. Pace block
+            if (!snapshot.isUnknown) ...[
+              _buildPaceCard(textTheme, color, spacing, accent, ctxt),
+              SizedBox(height: spacing.elementGap),
+            ],
+
+            // 5. Recovery signal
+            if (snapshot.recoverySignal != null) ...[
+              _buildRecovery(textTheme, color, spacing, accent, ctxt),
+              SizedBox(height: spacing.sectionGap),
+            ],
+
+            if (snapshot.isUnknown) ...[
+              SizedBox(height: spacing.elementGap),
+              Container(
+                padding: EdgeInsets.all(spacing.cardInner),
+                decoration: BoxDecoration(
+                  color: color.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  border: Border.all(
+                    color: color.outlineVariant.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  ctxt.budget_insufficientData,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: color.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
               ),
-            ),
-          ),
-          SizedBox(height: spacing.sectionGap),
-        ],
+              SizedBox(height: spacing.sectionGap),
+            ],
+
+            if (!snapshot.isUnknown && snapshot.daysLeft > 0) ...[
+              SizedBox(height: spacing.sectionGap),
+              Center(
+                child: Text(
+                  ctxt.budget_daysRemaining(snapshot.daysLeft),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: _buildPrimaryAction(context, ref, spacing, color, ctxt),
+        ),
       ],
     );
   }
@@ -270,6 +304,8 @@ class _BudgetDetailBody extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildBudgetVisual(accent, color, spacing),
+          SizedBox(height: spacing.elementGap),
           _buildPeriod(textTheme, color, ctxt),
           SizedBox(height: spacing.elementGap),
           _buildHero(textTheme, accent, ctxt),
@@ -280,6 +316,35 @@ class _BudgetDetailBody extends ConsumerWidget {
             _buildProgressBar(spacing, color, accent, textTheme),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildBudgetVisual(
+    Color accent,
+    ColorScheme color,
+    AppSpacing spacing,
+  ) {
+    return Container(
+      width: double.infinity,
+      height: spacing.sectionGap * 7,
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accent.withValues(alpha: 0.18),
+            color.surfaceContainerHighest,
+          ],
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        snapshot.isBreached ? LucideIcons.triangleAlert : LucideIcons.wallet,
+        color: accent,
+        size: spacing.iconXL * 2.2,
       ),
     );
   }
@@ -555,6 +620,32 @@ class _BudgetDetailBody extends ConsumerWidget {
 
   Widget _buildActions(
     BuildContext context,
+    AppSpacing spacing,
+    ColorScheme color,
+    AppLocalizations ctxt,
+  ) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          context.push(AppRoutes.transactions);
+        },
+        icon: const Icon(LucideIcons.list, size: 16),
+        label: Text(ctxt.budget_viewTransactions),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: color.outlineVariant),
+          minimumSize: Size(double.infinity, spacing.touchTarget),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(spacing.radiusLarge),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrimaryAction(
+    BuildContext context,
     WidgetRef ref,
     AppSpacing spacing,
     ColorScheme color,
@@ -562,23 +653,26 @@ class _BudgetDetailBody extends ConsumerWidget {
   ) {
     final hasAutoTrack = ref.watch(smsPermissionGrantedProvider).value ?? false;
 
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              context.push(AppRoutes.transactions);
-            },
-            icon: const Icon(LucideIcons.list, size: 16),
-            label: Text(ctxt.budget_viewTransactions),
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        spacing.cardHorizontal,
+        spacing.elementGap,
+        spacing.cardHorizontal,
+        MediaQuery.of(context).padding.bottom + spacing.elementGap,
+      ),
+      decoration: BoxDecoration(
+        color: color.surface.withValues(alpha: 0.96),
+        border: Border(
+          top: BorderSide(
+            color: color.outlineVariant.withValues(alpha: 0.25),
           ),
         ),
-        SizedBox(height: spacing.elementGap),
-        SizedBox(
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
           width: double.infinity,
-          child: OutlinedButton.icon(
+          child: FilledButton.icon(
             onPressed: () {
               HapticFeedback.lightImpact();
               if (hasAutoTrack) {
@@ -592,19 +686,22 @@ class _BudgetDetailBody extends ConsumerWidget {
             },
             icon: Icon(
               hasAutoTrack ? LucideIcons.pencil : LucideIcons.plus,
-              size: 16,
+              size: 18,
             ),
             label: Text(
               hasAutoTrack
                   ? ctxt.budget_buttonEditText
                   : ctxt.budget_addExpense,
             ),
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: color.outlineVariant),
+            style: FilledButton.styleFrom(
+              minimumSize: Size(double.infinity, spacing.touchTarget),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusLarge),
+              ),
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -620,5 +717,190 @@ class _BudgetDetailBody extends ConsumerWidget {
       case BudgetConstraintUrgency.withinLimit:
         return color.onSurface;
     }
+  }
+}
+
+class _BudgetDetailsAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  const _BudgetDetailsAppBar({
+    required this.title,
+    required this.spacing,
+    required this.onBack,
+    this.remaining,
+    this.remainingLabel,
+    this.spent,
+    this.spentLabel,
+    this.editLabel,
+    this.deleteLabel,
+    this.onEdit,
+    this.onDelete,
+  });
+
+  final String title;
+  final AppSpacing spacing;
+  final VoidCallback onBack;
+  final double? remaining;
+  final String? remainingLabel;
+  final double? spent;
+  final String? spentLabel;
+  final String? editLabel;
+  final String? deleteLabel;
+  final VoidCallback? onEdit;
+  final Future<void> Function()? onDelete;
+
+  bool get _hasSummary => remaining != null && spent != null;
+
+  @override
+  Size get preferredSize => Size.fromHeight(
+        80 + (_hasSummary ? spacing.cardInner * 2.5 : 0),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: color.surfaceContainerHigh,
+      foregroundColor: color.onSurface,
+      surfaceTintColor: Colors.transparent,
+      flexibleSpace: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.surfaceContainerHigh,
+              color.primaryContainer.withValues(alpha: 0.72),
+            ],
+          ),
+        ),
+      ),
+      scrolledUnderElevation: 0,
+      toolbarHeight: 80,
+      titleSpacing: spacing.cardInner,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(spacing.radiusLarge + spacing.elementGap),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      leading: Padding(
+        padding: EdgeInsets.only(left: spacing.cardHorizontal),
+        child: IconButton(
+          onPressed: onBack,
+          tooltip: 'Back',
+          icon: const Icon(LucideIcons.arrowLeft),
+        ),
+      ),
+      title: Text(
+        title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      ),
+      actions: [
+        if (onEdit != null || onDelete != null)
+          PopupMenuButton<String>(
+            tooltip: 'Budget actions',
+            onSelected: (value) {
+              HapticFeedback.mediumImpact();
+              if (value == 'edit') {
+                onEdit?.call();
+              } else if (value == 'delete') {
+                onDelete?.call();
+              }
+            },
+            itemBuilder: (context) => [
+              if (onEdit != null)
+                PopupMenuItem<String>(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      const Icon(LucideIcons.pen, size: 18),
+                      SizedBox(width: spacing.elementGap),
+                      Text(editLabel ?? ''),
+                    ],
+                  ),
+                ),
+              if (onDelete != null)
+                PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.trash2, size: 18, color: color.error),
+                      SizedBox(width: spacing.elementGap),
+                      Text(deleteLabel ?? ''),
+                    ],
+                  ),
+                ),
+            ],
+            icon: const Icon(LucideIcons.ellipsis),
+          ),
+        SizedBox(width: spacing.cardHorizontal),
+      ],
+      bottom: _hasSummary
+          ? PreferredSize(
+              preferredSize: Size.fromHeight(spacing.cardInner * 2.5),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  spacing.cardInner,
+                  0,
+                  spacing.cardInner,
+                  spacing.cardInner,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _headerAmount(
+                        context,
+                        remainingLabel ?? '',
+                        remaining!,
+                      ),
+                    ),
+                    SizedBox(width: spacing.elementGap * 2),
+                    Expanded(
+                      child: _headerAmount(
+                        context,
+                        'Spent',
+                        spent!,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
+    );
+  }
+
+  Widget _headerAmount(BuildContext context, String label, double amount) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: textTheme.bodySmall?.copyWith(
+            color: color.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(height: spacing.elementGapMin),
+        CurrencyText(
+          amount: amount,
+          currencyCode: BaseCurrency.code,
+          compact: false,
+          fixedLength: 0,
+          style: textTheme.titleLarge?.copyWith(
+            color: color.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
   }
 }

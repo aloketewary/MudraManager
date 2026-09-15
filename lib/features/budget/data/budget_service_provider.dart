@@ -14,6 +14,7 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/utils/budget_spent_calculator.dart';
 import 'package:mudra_manager/core/utils/date_arithmetic.dart';
+import 'package:mudra_manager/features/budget/data/budget_period_ledger_service.dart';
 import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
 import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
@@ -313,10 +314,67 @@ class BudgetService {
   Future<List<BudgetPeriodSnapshot>> getBudgetPeriodSnapshots({
     DateTime? evaluationDate,
   }) async {
+    await finalizeCompletedBudgetPeriods(evaluationDate: evaluationDate);
     final progress = await getBudgetsWithProgress(
       evaluationDate: evaluationDate ?? _now(),
     );
     return progress.map((entry) => entry.snapshot).toList(growable: false);
+  }
+
+  /// Persists completed occurrences without cloning recurring Budget rows.
+  ///
+  /// A recurring budget remains one mutable definition. Each ended occurrence
+  /// is an immutable ledger fact, while the next occurrence is computed from
+  /// the same definition by [getCurrentPeriodRange]. Existing ledger keys are
+  /// skipped before spending is recalculated, making repeated refreshes cheap.
+  Future<void> finalizeCompletedBudgetPeriods({
+    DateTime? evaluationDate,
+  }) async {
+    final isar = await isarService.getInstance();
+    final evaluationDay = DateArithmetic.startOfDay(evaluationDate ?? _now());
+    final budgets = await isar.budgets.where().findAll().withDecryption();
+    final existingKeys = (await isar.budgetPeriodLedgerEntrys.where().findAll())
+        .map((entry) => entry.occurrenceKey)
+        .toSet();
+    final ledgerService = BudgetPeriodLedgerService(isarService);
+
+    for (final budget in budgets) {
+      final occurrenceCount =
+          budget.recurrence == BudgetRecurrence.none ? 1 : 1200;
+      for (var occurrence = 0; occurrence < occurrenceCount; occurrence++) {
+        final (rangeStart, rangeEnd) = _periodAt(budget, occurrence);
+        final periodStart = DateArithmetic.startOfDay(rangeStart);
+        final periodEnd = DateArithmetic.endOfDay(rangeEnd);
+        final endDay = DateArithmetic.startOfDay(periodEnd);
+
+        // The period ending today is still active and must remain current.
+        if (!endDay.isBefore(evaluationDay)) break;
+
+        final occurrenceKey = BudgetPeriodLedgerEntry.buildOccurrenceKey(
+          budget.id,
+          periodStart,
+          periodEnd,
+        );
+        if (existingKeys.contains(occurrenceKey)) continue;
+
+        final snapshot = BudgetPeriodSnapshot.fromBudget(
+          budget: budget,
+          evaluationDate: evaluationDay,
+          periodStart: periodStart,
+          periodEnd: periodEnd,
+          spent: await calculateSpentAmount(
+            budget,
+            start: periodStart,
+            end: periodEnd,
+          ),
+        );
+        await ledgerService.finalizeSnapshot(
+          snapshot,
+          occurrenceIndex: occurrence,
+        );
+        existingKeys.add(occurrenceKey);
+      }
+    }
   }
 
   Future<void> save(
@@ -338,7 +396,8 @@ class BudgetService {
       }
     });
     log.i(
-        'Budget saved: ${bud.name} with ${newAllocations.length} allocations',);
+      'Budget saved: ${bud.name} with ${newAllocations.length} allocations',
+    );
     if (isNew) {
       await gamificationService?.track(GamificationEvent.budgetCreated);
     }
@@ -543,6 +602,7 @@ class BudgetService {
   Future<List<BudgetHistoryEntry>> getBudgetHistory({
     DateTime? evaluationDate,
   }) async {
+    await finalizeCompletedBudgetPeriods(evaluationDate: evaluationDate);
     final isar = await isarService.getInstance();
     final day = DateArithmetic.startOfDay(evaluationDate ?? _now());
     final byKey = <String, BudgetHistoryEntry>{};

@@ -184,6 +184,64 @@ void main() {
   });
 
   group('History boundary and ordering', () {
+    test('automatically finalizes completed recurrence and advances period',
+        () async {
+      final budget = makeBudget(
+        id: 22,
+        amount: 100,
+        start: DateTime(2024, 1, 1),
+        end: DateTime(2024, 1, 31),
+        recurrence: BudgetRecurrence.monthly,
+      );
+      await isar.writeTxn(() => isar.budgets.put(budget));
+      await addExpense(DateTime(2024, 1, 31, 23, 59), 100);
+
+      final onEnd = await budgetService.getBudgetPeriodSnapshots(
+        evaluationDate: DateTime(2024, 1, 31),
+      );
+      expect(onEnd.single.periodStart, DateTime(2024, 1, 1));
+      expect(await isar.budgetPeriodLedgerEntrys.count(), 0);
+
+      final afterEnd = await budgetService.getBudgetPeriodSnapshots(
+        evaluationDate: DateTime(2024, 2, 1),
+      );
+      expect(afterEnd.single.periodStart, DateTime(2024, 2, 1));
+      expect(
+        afterEnd.single.periodEnd,
+        DateTime(2024, 2, 29, 23, 59, 59, 999, 999),
+      );
+
+      final ledgerEntries =
+          await isar.budgetPeriodLedgerEntrys.where().findAll();
+      expect(ledgerEntries, hasLength(1));
+      expect(ledgerEntries.single.periodStart, DateTime(2024, 1, 1));
+      expect(ledgerEntries.single.finalSpent, 100);
+      expect(ledgerEntries.single.status, BudgetPeriodLedgerStatus.met);
+      expect(
+        ledgerEntries.single.provenance,
+        BudgetPeriodLedgerProvenance.finalizedExact,
+      );
+      expect(ledgerEntries.single.occurrenceIndex, 0);
+
+      // Re-reading after rollover must not create a duplicate ledger row.
+      await budgetService.getBudgetPeriodSnapshots(
+        evaluationDate: DateTime(2024, 2, 2),
+      );
+      expect(await isar.budgetPeriodLedgerEntrys.count(), 1);
+
+      // Later edits must not change the finalized January fact.
+      budget.amount = 200;
+      await isar.writeTxn(() => isar.budgets.put(budget));
+      final history = await budgetService.getBudgetHistory(
+        evaluationDate: DateTime(2024, 2, 2),
+      );
+      final january =
+          history.singleWhere((entry) => entry.budgetId == budget.id);
+      expect(january.valueSource, BudgetHistoryValueSource.persisted);
+      expect(january.limit, 100);
+      expect(january.spent, 100);
+    });
+
     test('current recurring occurrence stays out of history on exact end date',
         () async {
       final budget = makeBudget(
@@ -236,8 +294,7 @@ void main() {
       );
     });
 
-    test('legacy derived values are explicitly marked best available',
-        () async {
+    test('completed values are persisted as exact historical facts', () async {
       final budget = makeBudget(
         id: 21,
         amount: 100,
@@ -250,7 +307,7 @@ void main() {
         evaluationDate: DateTime(2024, 2, 1),
       );
       final entry = history.single;
-      expect(entry.valueSource, BudgetHistoryValueSource.legacyBestAvailable);
+      expect(entry.valueSource, BudgetHistoryValueSource.persisted);
       expect(entry.limitIsKnown, isTrue);
       expect(entry.status, BudgetPeriodStatus.met);
     });

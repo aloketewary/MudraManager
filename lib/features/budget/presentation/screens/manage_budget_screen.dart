@@ -9,6 +9,7 @@ import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
@@ -47,10 +48,15 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
 
     return ScreenShell(
       config: ScreenShellConfig(
-        title: _budget.name,
-        appBarMode: AppBarMode.standard,
+        appBarMode: AppBarMode.none,
+        customAppBar: _ManageBudgetAppBar(
+          title: l10n.budget_buttonEditText,
+          budgetName: _budget.name,
+          spacing: spacing,
+        ),
         enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: progressAsync.when(
         skipLoadingOnRefresh: false,
         skipError: false,
@@ -60,18 +66,26 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
           if (match == null) {
             return Center(child: Text(l10n.budget_dashboardNotFoundText));
           }
-          return RefreshIndicator(
-            onRefresh: () => RefreshHelper.withMinDuration(() async {
-              ref.read(budgetRefreshProvider.notifier).refresh(
-                    BudgetRefreshReason.manual,
-                  );
-              try {
-                await ref.read(budgetsWithProgressProvider.future);
-              } catch (_) {
-                // Provider exposes retry state; refresh indicator settles.
-              }
-            }),
-            child: _buildBody(match, spacing, color, textTheme, l10n),
+          return Stack(
+            children: [
+              RefreshIndicator(
+                onRefresh: () => RefreshHelper.withMinDuration(() async {
+                  ref.read(budgetRefreshProvider.notifier).refresh(
+                        BudgetRefreshReason.manual,
+                      );
+                  try {
+                    await ref.read(budgetsWithProgressProvider.future);
+                  } catch (_) {
+                    // Provider exposes retry state; refresh indicator settles.
+                  }
+                }),
+                child: _buildBody(match, spacing, color, textTheme, l10n),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: _buildUpdateAction(spacing, color, textTheme, l10n),
+              ),
+            ],
           );
         },
         loading: () => ListView(
@@ -160,6 +174,7 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
         SizedBox(height: spacing.sectionGap * 2),
         _buildDangerZone(spacing, color, textTheme, l10n),
         SizedBox(height: spacing.sectionGap * 2),
+        SizedBox(height: spacing.touchTarget + spacing.cardInner * 2),
       ],
     );
   }
@@ -176,207 +191,179 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     required TextTheme textTheme,
     required AppLocalizations l10n,
   }) {
-    final isDark = color.brightness == Brightness.dark;
-    final heroBackground =
-        isDark ? color.surfaceContainerHighest : color.onSurface;
-    final heroForeground = isDark ? color.onSurface : color.surface;
-    final heroMuted =
-        isDark ? color.onSurfaceVariant : color.surface.withValues(alpha: 0.68);
+    final heroBackground = color.surfaceContainerHigh;
+    final heroForeground = color.onSurface;
+    final heroMuted = color.onSurfaceVariant;
     final progress = percentage.clamp(0.0, 1.0);
 
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: heroBackground,
-        borderRadius: BorderRadius.circular(spacing.radiusMedium + 8),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.primaryContainer.withValues(alpha: 0.72),
+            heroBackground,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        border: Border.all(color: color.primary.withValues(alpha: 0.22)),
         boxShadow: [
           BoxShadow(
-            color: heroBackground.withValues(alpha: isDark ? 0.24 : 0.18),
-            blurRadius: 28,
-            offset: const Offset(0, 14),
+            color: color.primary.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -74,
-            top: -82,
-            child: Container(
-              width: 220,
-              height: 220,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: accent.withValues(alpha: 0.18),
-                  width: 30,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            right: 24,
-            bottom: -84,
-            child: Container(
-              width: 170,
-              height: 170,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: accent.withValues(alpha: 0.08),
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(spacing.cardInner + 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner + 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(spacing.elementGapMin + 2),
-                      decoration: BoxDecoration(
-                        color: accent.withValues(alpha: 0.16),
-                        borderRadius:
-                            BorderRadius.circular(spacing.radiusSmall),
-                      ),
-                      child: Icon(
-                        isOver ? LucideIcons.triangleAlert : LucideIcons.wallet,
-                        size: 18,
-                        color: accent,
-                      ),
+                Container(
+                  padding: EdgeInsets.all(spacing.elementGapMin + 2),
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                  ),
+                  child: Icon(
+                    isOver ? LucideIcons.triangleAlert : LucideIcons.wallet,
+                    size: 18,
+                    color: accent,
+                  ),
+                ),
+                SizedBox(width: spacing.elementGap),
+                Expanded(
+                  child: Text(
+                    isOver ? l10n.budget_over : l10n.budget_left,
+                    style: textTheme.labelLarge?.copyWith(
+                      color: heroForeground,
+                      fontWeight: FontWeight.w700,
                     ),
-                    SizedBox(width: spacing.elementGap),
-                    Expanded(
-                      child: Text(
-                        isOver ? l10n.budget_over : l10n.budget_left,
-                        style: textTheme.labelLarge?.copyWith(
+                  ),
+                ),
+                _buildHeroPill(
+                  label: isOver ? l10n.budget_over : l10n.budget_left,
+                  accent: accent,
+                  spacing: spacing,
+                  textTheme: textTheme,
+                ),
+              ],
+            ),
+            SizedBox(height: spacing.sectionGap * 1.5),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CurrencyText(
+                        amount: remaining.abs(),
+                        style: textTheme.displayMedium?.copyWith(
                           color: heroForeground,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1.8,
+                          height: 1.0,
                         ),
                       ),
-                    ),
-                    _buildHeroPill(
-                      label: isOver ? l10n.budget_over : l10n.budget_left,
-                      accent: accent,
-                      spacing: spacing,
-                      textTheme: textTheme,
-                    ),
-                  ],
-                ),
-                SizedBox(height: spacing.sectionGap * 1.5),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      SizedBox(height: spacing.elementGapMin),
+                      Text(
+                        isOver
+                            ? l10n.budget_over
+                            : l10n.budget_remainingAllowance,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: heroMuted,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: spacing.sectionGap),
+                      Row(
                         children: [
-                          CurrencyText(
-                            amount: remaining.abs(),
-                            style: textTheme.displayMedium?.copyWith(
+                          _buildHeroInlineMetric(
+                            label: l10n.budget_spent,
+                            amount: spent,
+                            color: heroForeground,
+                            muted: heroMuted,
+                            textTheme: textTheme,
+                          ),
+                          Container(
+                            width: 1,
+                            height: 28,
+                            margin: EdgeInsets.symmetric(
+                              horizontal: spacing.elementGap,
+                            ),
+                            color: heroMuted.withValues(alpha: 0.35),
+                          ),
+                          _buildHeroInlineMetric(
+                            label: l10n.budget_limit,
+                            amount: limit,
+                            color: heroForeground,
+                            muted: heroMuted,
+                            textTheme: textTheme,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: spacing.sectionGap),
+                SizedBox(
+                  width: 98,
+                  height: 98,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox.expand(
+                        child: CircularProgressIndicator(
+                          value: progress,
+                          strokeWidth: 8,
+                          backgroundColor: heroMuted.withValues(alpha: 0.18),
+                          valueColor: AlwaysStoppedAnimation(accent),
+                        ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${(percentage * 100).toStringAsFixed(0)}%',
+                            style: textTheme.titleLarge?.copyWith(
                               color: heroForeground,
                               fontWeight: FontWeight.w900,
-                              letterSpacing: -1.8,
-                              height: 1.0,
+                              letterSpacing: -0.5,
                             ),
                           ),
-                          SizedBox(height: spacing.elementGapMin),
                           Text(
-                            isOver
-                                ? l10n.budget_over
-                                : l10n.budget_remainingAllowance,
-                            style: textTheme.bodyMedium?.copyWith(
+                            l10n.budget_spent,
+                            style: textTheme.labelSmall?.copyWith(
                               color: heroMuted,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
-                          ),
-                          SizedBox(height: spacing.sectionGap),
-                          Row(
-                            children: [
-                              _buildHeroInlineMetric(
-                                label: l10n.budget_spent,
-                                amount: spent,
-                                color: heroForeground,
-                                muted: heroMuted,
-                                textTheme: textTheme,
-                              ),
-                              Container(
-                                width: 1,
-                                height: 28,
-                                margin: EdgeInsets.symmetric(
-                                  horizontal: spacing.elementGap,
-                                ),
-                                color: heroMuted.withValues(alpha: 0.35),
-                              ),
-                              _buildHeroInlineMetric(
-                                label: l10n.budget_limit,
-                                amount: limit,
-                                color: heroForeground,
-                                muted: heroMuted,
-                                textTheme: textTheme,
-                              ),
-                            ],
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(width: spacing.sectionGap),
-                    SizedBox(
-                      width: 98,
-                      height: 98,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox.expand(
-                            child: CircularProgressIndicator(
-                              value: progress,
-                              strokeWidth: 8,
-                              backgroundColor:
-                                  heroMuted.withValues(alpha: 0.18),
-                              valueColor: AlwaysStoppedAnimation(accent),
-                            ),
-                          ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '${(percentage * 100).toStringAsFixed(0)}%',
-                                style: textTheme.titleLarge?.copyWith(
-                                  color: heroForeground,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                              Text(
-                                l10n.budget_spent,
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: heroMuted,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: spacing.sectionGap * 1.25),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(5),
-                  child: LinearProgressIndicator(
-                    semanticsLabel: 'Budget progress',
-                    value: progress,
-                    minHeight: 7,
-                    backgroundColor: heroMuted.withValues(alpha: 0.18),
-                    valueColor: AlwaysStoppedAnimation(accent),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+            SizedBox(height: spacing.sectionGap * 1.25),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: LinearProgressIndicator(
+                semanticsLabel: 'Budget progress',
+                value: progress,
+                minHeight: 7,
+                backgroundColor: heroMuted.withValues(alpha: 0.18),
+                valueColor: AlwaysStoppedAnimation(accent),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -745,8 +732,7 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     TextTheme textTheme,
     AppLocalizations l10n,
   ) {
-    final controller =
-        TextEditingController(text: currentLimit.toInt().toString());
+    final controller = TextEditingController(text: currentLimit.toString());
 
     showModalBottomSheet<void>(
       context: context,
@@ -873,6 +859,56 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     ).whenComplete(controller.dispose);
   }
 
+  Widget _buildUpdateAction(
+    AppSpacing spacing,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppLocalizations l10n,
+  ) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        spacing.cardHorizontal,
+        spacing.elementGap,
+        spacing.cardHorizontal,
+        spacing.elementGap,
+      ),
+      decoration: BoxDecoration(
+        color: color.surface.withValues(alpha: 0.96),
+        border: Border(
+          top: BorderSide(color: color.outlineVariant.withValues(alpha: 0.25)),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              _showAdjustLimitSheet(
+                _budget.amount,
+                spacing,
+                color,
+                textTheme,
+                l10n,
+              );
+            },
+            icon: const Icon(LucideIcons.check, size: 18),
+            label: Text(l10n.budget_updateButtonText),
+            style: FilledButton.styleFrom(
+              backgroundColor: color.primary,
+              foregroundColor: color.onPrimary,
+              minimumSize: Size(double.infinity, spacing.touchTarget),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusLarge),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildDangerZone(
     AppSpacing spacing,
     ColorScheme color,
@@ -880,74 +916,67 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
     AppLocalizations l10n,
   ) {
     return Container(
-      padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
-        color: color.errorContainer.withValues(alpha: 0.10),
+        color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: color.error.withValues(alpha: 0.24)),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.7)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(spacing.elementGapMin),
-                decoration: BoxDecoration(
-                  color: color.error.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                ),
-                child: Icon(
-                  LucideIcons.triangleAlert,
-                  size: 16,
-                  color: color.error,
-                ),
-              ),
-              SizedBox(width: spacing.elementGap),
-              Text(
-                l10n.budget_dangerZone,
-                style: textTheme.titleSmall?.copyWith(
-                  color: color.error,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
+          _dangerAction(
+            icon: LucideIcons.archive,
+            label: l10n.budget_archive,
+            color: color,
+            textTheme: textTheme,
+            spacing: spacing,
+            onTap: () => _archiveBudget(l10n, spacing),
           ),
-          SizedBox(height: spacing.sectionGap),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _archiveBudget(l10n, spacing),
-                  icon: const Icon(LucideIcons.archive, size: 16),
-                  label: Text(l10n.budget_archive),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: color.onSurfaceVariant,
-                    side: BorderSide(color: color.outlineVariant),
-                    padding: EdgeInsets.symmetric(
-                      vertical: spacing.elementGap + 2,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: spacing.elementGap),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _deleteBudget(l10n, spacing),
-                  icon: const Icon(LucideIcons.trash2, size: 16),
-                  label: Text(l10n.budget_buttonDeleteActionText),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: color.error,
-                    side: BorderSide(color: color.error.withValues(alpha: 0.5)),
-                    padding: EdgeInsets.symmetric(
-                      vertical: spacing.elementGap + 2,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          Divider(
+            height: 1,
+            color: color.outlineVariant.withValues(alpha: 0.55),
+          ),
+          _dangerAction(
+            icon: LucideIcons.trash2,
+            label: l10n.budget_buttonDeleteActionText,
+            color: color,
+            textTheme: textTheme,
+            spacing: spacing,
+            onTap: () => _deleteBudget(l10n, spacing),
+            isDestructive: true,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _dangerAction({
+    required IconData icon,
+    required String label,
+    required ColorScheme color,
+    required TextTheme textTheme,
+    required AppSpacing spacing,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    final actionColor = isDestructive ? color.error : color.onSurfaceVariant;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardInner,
+          vertical: spacing.cardInner,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: spacing.iconSM, color: actionColor),
+            SizedBox(width: spacing.elementGap),
+            Text(
+              label,
+              style: textTheme.bodyMedium?.copyWith(color: actionColor),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -998,5 +1027,106 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
         context.pop();
       }
     }
+  }
+}
+
+class _ManageBudgetAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  const _ManageBudgetAppBar({
+    required this.title,
+    required this.budgetName,
+    required this.spacing,
+  });
+
+  final String title;
+  final String budgetName;
+  final AppSpacing spacing;
+
+  @override
+  Size get preferredSize => Size.fromHeight(80 + spacing.cardInner * 2.5);
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return AppBar(
+      automaticallyImplyLeading: true,
+      backgroundColor: color.surfaceContainerHigh,
+      foregroundColor: color.onSurface,
+      surfaceTintColor: Colors.transparent,
+      flexibleSpace: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.surfaceContainerHigh,
+              color.primaryContainer.withValues(alpha: 0.72),
+            ],
+          ),
+        ),
+      ),
+      scrolledUnderElevation: 0,
+      toolbarHeight: 80,
+      titleSpacing: spacing.cardInner,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(spacing.radiusLarge + spacing.elementGap),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      title: Text(
+        title,
+        style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      ),
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(spacing.cardInner * 2.5),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            spacing.cardInner,
+            0,
+            spacing.cardInner,
+            spacing.cardInner,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      budgetName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: spacing.elementGap),
+                  Text(
+                    '1 / 1',
+                    style: textTheme.labelMedium?.copyWith(
+                      color: color.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: spacing.elementGap),
+              AnimatedContainer(
+                duration: spacing.animFast,
+                height: spacing.progressThin,
+                decoration: BoxDecoration(
+                  color: color.primary,
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

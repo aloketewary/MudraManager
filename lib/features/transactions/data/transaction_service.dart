@@ -11,9 +11,12 @@ import 'package:mudra_manager/core/utils/date_arithmetic.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
+import 'package:mudra_manager/features/sms/domain/sms_transaction_label.dart';
+
 class TransactionService {
   final IsarService isarService;
   final AppLog log;
@@ -84,10 +87,29 @@ class TransactionService {
 
   /// Loads category and account links for a list of transactions.
   Future<void> _loadLinks(List<Transaction> txns) async {
+    final isar = await isarService.getInstance();
     for (final t in txns) {
       t.category.loadSync();
       t.account.loadSync();
       t.decryptFields();
+
+      // Older SMS imports stored the full SMS body as the transaction
+      // description. Replace that legacy title in memory while preserving
+      // user-edited descriptions and the raw body on SmsActivity.
+      if (t.isFromSms == true && t.smsActivityId != null) {
+        final activity = await isar.smsActivitys.get(t.smsActivityId!);
+        if (activity != null) {
+          activity.decryptFields();
+          final description = t.description?.trim();
+          final body = activity.body.trim();
+          if (description == body) {
+            t.description = SmsTransactionLabel.resolve(
+              activity,
+              category: t.category.value,
+            );
+          }
+        }
+      }
     }
   }
 

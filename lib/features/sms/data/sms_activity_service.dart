@@ -18,9 +18,20 @@ import 'package:mudra_manager/core/utils/robust_category_matcher.dart';
 import 'package:mudra_manager/features/sms/data/bank_sms_parser.dart';
 import 'package:mudra_manager/features/sms/data/category_matcher_service.dart';
 import 'package:mudra_manager/features/sms/domain/detection_level.dart';
+import 'package:mudra_manager/features/sms/domain/sms_transaction_label.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 import 'package:mudra_manager/features/transactions/data/models/pending_transaction_data.dart';
 import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
+
+class SmsCategoryResolution {
+  const SmsCategoryResolution({
+    required this.category,
+    required this.isHighConfidence,
+  });
+
+  final Category? category;
+  final bool isHighConfidence;
+}
 
 class SmsActivityService {
   static final SmsActivityService instance = SmsActivityService._();
@@ -199,58 +210,28 @@ class SmsActivityService {
       ..category = category
       ..transactionType = parsed?.transactionType
       ..balance = parsed?.balance
-      ..merchant = parsed?.merchant ??
-          CategoryMatcherService.detectMerchant(body, categories)
+      ..merchant = SmsTransactionLabel.validMerchant(parsed?.merchant) ??
+          SmsTransactionLabel.validMerchant(
+            CategoryMatcherService.detectMerchant(body, categories),
+          )
       ..isLikelyTransfer = parsed?.isLikelyTransfer ?? false
       ..paymentType = CategoryMatcherService.detectPaymentType(body)
       ..currencyCode = currencyCode;
 
-    // If parser did not provide a category, try learned rules first, then robust matching
-    bool categoryHighConfidence = false;
-    if (activity.category == null) {
-      // Strategy 0: Check learned merchant→category rules
-      final learnedCategory = await _matchByLearnedRule(
-        body,
-        categories,
-        isar,
-        merchant: activity.merchant,
-        recipient: activity.toAccount,
-        amount: activity.amount,
-        isIncome: activity.isIncome,
+    // Resolve category consistently for ingestion, auto-approval, and manual
+    // approval: learned merchant rule, valid stored category, then matcher.
+    final categoryResolution = await resolveCategoryForActivity(
+      activity,
+      categories,
+      isar,
+    );
+    activity.category = categoryResolution.category?.name;
+    final categoryHighConfidence = categoryResolution.isHighConfidence;
+
+    if (activity.category != null) {
+      _log.d(
+        '[$corrId] Category resolved: ${activity.category} (${categoryHighConfidence ? 'high confidence' : 'matched'})',
       );
-      if (learnedCategory != null) {
-        activity.category = learnedCategory.name;
-        categoryHighConfidence = true;
-        _log.d('[$corrId] Category from learned rule: ${activity.category}');
-      } else {
-        // Strategy 1-5: Robust category matching fallback
-        final relevantCategories = categories
-            .where(
-              (c) =>
-                  activity.isIncome == null ||
-                  (activity.isIncome == true &&
-                      c.categoryType == CategoryType.income) ||
-                  (activity.isIncome == false &&
-                      c.categoryType == CategoryType.expense),
-            )
-            .toList();
-
-        final matchResult = RobustCategoryMatcher.match(
-          text: body,
-          allCategories: categories,
-          relevantCategories: relevantCategories,
-          amount: activity.amount,
-          isIncome: activity.isIncome,
-          merchant: activity.merchant, // Pass merchant for priority matching
-        );
-
-        activity.category = matchResult.category?.name;
-        categoryHighConfidence = matchResult.isHighConfidence;
-
-        _log.d(
-          '[$corrId] Category matched: ${activity.category} (${matchResult.confidenceScore}% via ${matchResult.matchStrategy})',
-        );
-      }
     }
 
     // Calculate base confidence, then apply category match boost
@@ -360,7 +341,10 @@ class SmsActivityService {
         final transaction = Transaction()
           ..amount = activity.amount ?? 0
           ..date = safeDate
-          ..description = activity.body
+          ..description = SmsTransactionLabel.resolve(
+            activity,
+            category: matchResult.category,
+          )
           ..isExpense = !(activity.isIncome == true)
           ..isTransfer = false
           ..isFromSms = true
@@ -435,7 +419,10 @@ class SmsActivityService {
     final transaction = Transaction()
       ..amount = activity.amount ?? 0
       ..date = safeDate
-      ..description = activity.body
+      ..description = SmsTransactionLabel.resolve(
+        activity,
+        category: category,
+      )
       ..isExpense = !(activity.isIncome == true)
       ..isTransfer = false;
 
@@ -488,6 +475,189 @@ class SmsActivityService {
     );
   }
 
+  /// Returns the SMS activity linked to a transaction, if any.
+  Future<SmsActivity?> findLinkedActivityForTransaction(
+    Transaction transaction,
+  ) async {
+    final activityId = transaction.smsActivityId;
+    if (activityId == null) return null;
+
+    final isar = await _getIsar();
+    final activity = await isar.smsActivitys.get(activityId);
+    activity?.decryptFields();
+    return activity;
+  }
+
+  /// Counts other approved SMS transactions for the same merchant identity.
+  Future<int> countOtherTransactionsForMerchant(
+    Transaction source, {
+    int? categoryId,
+  }) async {
+    final candidates = await _findOtherMerchantTransactions(source);
+    if (categoryId == null) return candidates.length;
+    return candidates.where((transaction) {
+      return transaction.categoryId != categoryId;
+    }).length;
+  }
+
+  /// Applies a category to other matching SMS transactions and updates the
+  /// learned merchant rule in one Isar write transaction.
+  Future<int> updateCategoryForMerchant(
+    Transaction source,
+    Category category,
+  ) async {
+    final isar = await _getIsar();
+    final sourceActivity = await findLinkedActivityForTransaction(source);
+    if (sourceActivity == null) return 0;
+
+    final candidates = await _findOtherMerchantTransactions(source);
+    final affected = candidates
+        .where((transaction) => transaction.categoryId != category.id)
+        .toList();
+    if (affected.isEmpty) return 0;
+
+    final targetCategory = await isar.categorys.get(category.id);
+    if (targetCategory == null) return 0;
+
+    final categories = await isar.categorys.where().findAll();
+    final existingRules =
+        await isar.categoryRules.where().findAll().withDecryption();
+    final rulesToPersist = _buildRulesForMerchantCategory(
+      sourceActivity,
+      targetCategory,
+      categories,
+      existingRules,
+    );
+
+    await isar.writeTxn(() async {
+      for (final transaction in affected) {
+        transaction.category.value = targetCategory;
+        transaction.categoryId = targetCategory.id;
+        await isar.transactions.put(transaction);
+        await transaction.category.save();
+
+        final activityId = transaction.smsActivityId;
+        if (activityId != null) {
+          final activity = await isar.smsActivitys.get(activityId);
+          if (activity != null) {
+            activity.category = targetCategory.name;
+            activity.encryptFields();
+            await isar.smsActivitys.put(activity);
+          }
+        }
+      }
+
+      // Keep the linked activity's category aligned with the user's correction.
+      sourceActivity.category = targetCategory.name;
+      sourceActivity.encryptFields();
+      await isar.smsActivitys.put(sourceActivity);
+
+      for (final rule in rulesToPersist) {
+        rule.encryptFields();
+        await isar.categoryRules.put(rule);
+        rule.decryptFields();
+      }
+    });
+
+    return affected.length;
+  }
+
+  Future<List<Transaction>> _findOtherMerchantTransactions(
+    Transaction source,
+  ) async {
+    final sourceActivity = await findLinkedActivityForTransaction(source);
+    if (sourceActivity == null) return [];
+
+    final sourceIdentity = _merchantIdentity(sourceActivity);
+    if (sourceIdentity == null) return [];
+
+    final isar = await _getIsar();
+    final storedActivities = await isar.smsActivitys.where().findAll();
+    final activitiesById = <int, SmsActivity>{};
+    for (final activity in storedActivities) {
+      activity.decryptFields();
+      activitiesById[activity.id] = activity;
+    }
+
+    final transactions = await isar.transactions.where().findAll();
+    return transactions.where((transaction) {
+      if (transaction.id == source.id ||
+          transaction.isFromSms != true ||
+          transaction.smsActivityId == null ||
+          transaction.isTransfer ||
+          transaction.isExpense != source.isExpense) {
+        return false;
+      }
+
+      final activity = activitiesById[transaction.smsActivityId!];
+      return activity != null &&
+          activity.status == ActivityStatus.approved &&
+          _merchantIdentity(activity) == sourceIdentity;
+    }).toList();
+  }
+
+  String? _merchantIdentity(SmsActivity activity) {
+    for (final value in [activity.merchant, activity.toAccount]) {
+      final valid = SmsTransactionLabel.validMerchant(value);
+      final normalized = CategoryMatcher.normalizeIdentity(valid);
+      if (normalized != null &&
+          normalized.length >= 3 &&
+          !_smsNoiseWords.contains(normalized)) {
+        return normalized;
+      }
+    }
+    return null;
+  }
+
+  List<CategoryRule> _buildRulesForMerchantCategory(
+    SmsActivity activity,
+    Category category,
+    List<Category> categories,
+    List<CategoryRule> existingRules,
+  ) {
+    final rulesToPersist = <CategoryRule>[];
+    final detected = CategoryMatcherService.detectMerchant(
+      activity.body,
+      categories,
+    );
+    final merchantIdentities = <String, String>{};
+
+    for (final identity in [detected, activity.merchant]) {
+      final normalized = CategoryMatcher.normalizeIdentity(identity);
+      if (normalized != null &&
+          normalized.length >= 3 &&
+          !_smsNoiseWords.contains(normalized)) {
+        merchantIdentities[normalized] = identity!.trim();
+      }
+    }
+
+    void addRule(TransactionInfo info) {
+      final rule = CategoryMatcher.createOrUpdateRule(
+        info,
+        category.id.toString(),
+        existingRules,
+      );
+      if (!existingRules.contains(rule)) existingRules.add(rule);
+      if (!rulesToPersist.contains(rule)) rulesToPersist.add(rule);
+    }
+
+    for (final merchant in merchantIdentities.values) {
+      addRule(_transactionInfoForIdentity(activity.body, merchant: merchant));
+    }
+
+    final recipient = CategoryMatcher.normalizeIdentity(activity.toAccount);
+    if (recipient != null && recipient.length >= 3) {
+      addRule(
+        _transactionInfoForIdentity(
+          activity.body,
+          recipient: activity.toAccount,
+        ),
+      );
+    }
+
+    return rulesToPersist;
+  }
+
   /// Learn merchant→category mapping when user manually approves.
   Future<void> learnKeywordsFromApproval(
     String smsBody,
@@ -518,17 +688,17 @@ class SmsActivityService {
 
     // Keep legacy merchant aliases, but route every write through the shared
     // normalized upsert so case/edge-whitespace variants cannot duplicate.
-    final merchantIdentities = <String>{};
+    final merchantIdentities = <String, String>{};
     for (final identity in [detected, merchant]) {
       final normalized = CategoryMatcher.normalizeIdentity(identity);
       if (normalized != null &&
           normalized.length >= 3 &&
           !_smsNoiseWords.contains(normalized)) {
-        merchantIdentities.add(identity!.trim());
+        merchantIdentities[normalized] = identity!.trim();
       }
     }
 
-    for (final identity in merchantIdentities) {
+    for (final identity in merchantIdentities.values) {
       await ruleService.learnFromCategorization(
         _transactionInfoForIdentity(
           smsBody,
@@ -568,6 +738,67 @@ class SmsActivityService {
     account.sendTo = recipient;
     parsed.account = account;
     return parsed;
+  }
+
+  /// Resolves category with one deterministic precedence order for every SMS
+  /// approval path: learned rule, valid stored category, generic matcher.
+  Future<SmsCategoryResolution> resolveCategoryForActivity(
+    SmsActivity activity,
+    List<Category> categories,
+    Isar isar,
+  ) async {
+    final relevantCategories = categories.where((category) {
+      if (activity.isIncome == null) return true;
+      return (activity.isIncome! &&
+              category.categoryType == CategoryType.income) ||
+          (!activity.isIncome! &&
+              category.categoryType == CategoryType.expense);
+    }).toList();
+
+    final learnedCategory = await _matchByLearnedRule(
+      activity.body,
+      categories,
+      isar,
+      merchant: activity.merchant,
+      recipient: activity.toAccount,
+      amount: activity.amount,
+      isIncome: activity.isIncome,
+    );
+    if (learnedCategory != null) {
+      return SmsCategoryResolution(
+        category: learnedCategory,
+        isHighConfidence: true,
+      );
+    }
+
+    final storedCategoryName = activity.category?.trim().toLowerCase();
+    if (storedCategoryName != null && storedCategoryName.isNotEmpty) {
+      final storedCategory = relevantCategories
+          .where(
+            (category) =>
+                category.name.trim().toLowerCase() == storedCategoryName,
+          )
+          .firstOrNull;
+      if (storedCategory != null) {
+        return SmsCategoryResolution(
+          category: storedCategory,
+          isHighConfidence: false,
+        );
+      }
+    }
+
+    final matchResult = RobustCategoryMatcher.match(
+      text: activity.body,
+      allCategories: categories,
+      relevantCategories: relevantCategories,
+      amount: activity.amount,
+      isIncome: activity.isIncome,
+      merchant: activity.merchant,
+    );
+    return SmsCategoryResolution(
+      category: matchResult.category,
+      isHighConfidence: matchResult.isHighConfidence,
+    );
   }
 
   /// Resolve learned category through shared deterministic precedence gate.

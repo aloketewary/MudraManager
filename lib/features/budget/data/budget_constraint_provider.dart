@@ -73,6 +73,7 @@ final budgetPortfolioProvider =
     final totalRemaining = snapshots
         .where((s) => !s.isBreached)
         .fold(0.0, (sum, s) => sum + s.remaining);
+    final totalSpent = snapshots.fold(0.0, (sum, s) => sum + s.spent);
     final breachedCount = snapshots.where((s) => s.isBreached).length;
     final paceRiskCount = snapshots
         .where(
@@ -83,6 +84,7 @@ final budgetPortfolioProvider =
     return BudgetPortfolio(
       totalBudgets: snapshots.length,
       totalRemaining: totalRemaining,
+      totalSpent: totalSpent,
       breachedCount: breachedCount,
       paceRiskCount: paceRiskCount,
     );
@@ -102,12 +104,14 @@ final budgetConstraintByIdProvider = Provider.autoDispose
 class BudgetPortfolio {
   final int totalBudgets;
   final double totalRemaining;
+  final double totalSpent;
   final int breachedCount;
   final int paceRiskCount;
 
   const BudgetPortfolio({
     required this.totalBudgets,
     required this.totalRemaining,
+    this.totalSpent = 0,
     required this.breachedCount,
     required this.paceRiskCount,
   });

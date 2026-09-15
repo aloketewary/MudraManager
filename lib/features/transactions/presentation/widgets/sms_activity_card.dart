@@ -17,7 +17,6 @@ import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/account/data/account_data_contract.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
-import 'package:mudra_manager/features/sms/data/category_matcher_service.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_query_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
@@ -106,7 +105,10 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
     final isar = await ref.read(isarServiceProvider).getInstance();
     final storedAccounts = await isar.accounts.where().findAll();
     final accounts = await AccountDataContract.safeAccounts(storedAccounts);
-    final categories = await isar.categorys.where().findAll();
+    final categories = (await isar.categorys.where().findAll())
+        .where((category) => !category.isSystem)
+        .toList();
+    if (categories.isEmpty) return;
 
     final matchingAccount = AccountMatchingBoundary.firstMatch(
       accounts,
@@ -124,11 +126,9 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
         .withDecryption();
 
     for (final activity in pendingActivities) {
-      final category = CategoryMatcherService.matchCategory(
-            activity.body,
-            categories,
-            activity.isIncome == true,
-          ) ??
+      final resolution = await SmsActivityService.instance
+          .resolveCategoryForActivity(activity, categories, isar);
+      final category = resolution.category ??
           categories.firstWhere(
             (c) =>
                 c.categoryType ==

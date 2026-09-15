@@ -7,6 +7,7 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
+import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
@@ -34,6 +35,7 @@ void main() {
         AccountSchema,
         TagSchema,
         RecurringTransactionSchema,
+        SmsActivitySchema,
         ExchangeRateSchema,
         TripSchema,
         TripParticipantSchema,

@@ -526,25 +526,28 @@ class GoalScreen extends ConsumerWidget {
     required AppSpacing spacing,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Container(
-        width: spacing.touchTargetSmall,
-        height: spacing.touchTargetSmall,
-        decoration: BoxDecoration(
-          color: color.primary.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+    return Material(
+      type: MaterialType.transparency,
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: Container(
+          width: spacing.touchTargetSmall,
+          height: spacing.touchTargetSmall,
+          decoration: BoxDecoration(
+            color: color.primary.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
+          ),
+          alignment: Alignment.center,
+          child: Icon(icon, size: spacing.iconSM, color: color.primary),
         ),
-        alignment: Alignment.center,
-        child: Icon(icon, size: spacing.iconSM, color: color.primary),
+        title: Text(label),
+        trailing: Icon(
+          LucideIcons.chevronRight,
+          size: spacing.iconSM,
+          color: color.onSurfaceVariant,
+        ),
+        onTap: onTap,
       ),
-      title: Text(label),
-      trailing: Icon(
-        LucideIcons.chevronRight,
-        size: spacing.iconSM,
-        color: color.onSurfaceVariant,
-      ),
-      onTap: onTap,
     );
   }
 }

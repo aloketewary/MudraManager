@@ -3,6 +3,7 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/features/transactions/domain/recurrence_cadence.dart';
 
 class RecurringDetectorService {
   static const _minOccurrences = 2;
@@ -68,6 +69,13 @@ class RecurringDetectorService {
           .count();
       if (alreadyLinked > 0) continue;
 
+      final cadenceMatches = await RecurrenceCadence.matchesTransaction(
+        isar: isar,
+        candidate: newTransaction,
+        recurring: recurring,
+      );
+      if (!cadenceMatches) continue;
+
       // Exact match found — link it
       await isar.writeTxn(() async {
         newTransaction.recurringTransactionSource.value = recurring;
@@ -96,11 +104,17 @@ class RecurringDetectorService {
         )
         .findAll();
 
-    // Filter by same category
-    final matches = similar.where((t) {
-      if (t.id == newTransaction.id) return false;
-      return t.category.value?.id == newTransaction.category.value?.id;
-    }).toList();
+    // Filter by same account and category before inferring cadence.
+    final matches = <Transaction>[];
+    for (final transaction in similar) {
+      if (transaction.id == newTransaction.id) continue;
+      await transaction.account.load();
+      await transaction.category.load();
+      if (transaction.account.value?.id == newTransaction.account.value?.id &&
+          transaction.category.value?.id == newTransaction.category.value?.id) {
+        matches.add(transaction);
+      }
+    }
 
     if (matches.length < _minOccurrences) return;
 
@@ -118,13 +132,17 @@ class RecurringDetectorService {
         .isExpenseEqualTo(newTransaction.isExpense)
         .findAll();
 
-    final matchingRecurring = existing
-        .where(
-          (r) =>
-              r.category.value?.id == newTransaction.category.value?.id &&
-              r.frequency == pattern,
-        )
-        .firstOrNull;
+    RecurringTransaction? matchingRecurring;
+    for (final recurring in existing) {
+      await recurring.category.load();
+      await recurring.account.load();
+      if (recurring.category.value?.id == newTransaction.category.value?.id &&
+          recurring.account.value?.id == newTransaction.account.value?.id &&
+          recurring.frequency == pattern) {
+        matchingRecurring = recurring;
+        break;
+      }
+    }
 
     if (matchingRecurring != null) {
       await isar.writeTxn(() async {
@@ -166,19 +184,11 @@ class RecurringDetectorService {
     final allDates = [...transactions.map((t) => t.date), latest.date]..sort();
     if (allDates.length < 2) return null;
 
-    final intervals = <int>[];
-    for (int i = 1; i < allDates.length; i++) {
-      intervals.add(allDates[i].difference(allDates[i - 1]).inDays);
+    for (final frequency in Frequency.values) {
+      if (RecurrenceCadence.matches(frequency, allDates)) {
+        return frequency;
+      }
     }
-
-    final avgInterval = intervals.reduce((a, b) => a + b) / intervals.length;
-
-    // Monthly (25-35 days)
-    if (avgInterval >= 25 && avgInterval <= 35) return Frequency.monthly;
-    // Weekly (5-9 days)
-    if (avgInterval >= 5 && avgInterval <= 9) return Frequency.weekly;
-    // Yearly (350-380 days)
-    if (avgInterval >= 350 && avgInterval <= 380) return Frequency.yearly;
 
     return null;
   }

@@ -10,6 +10,7 @@ import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/data/gamification_service.dart';
 import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
+import 'package:mudra_manager/features/transactions/domain/recurrence_cadence.dart';
 
 class RecurringTransactionService {
   final IsarService isarService;
@@ -143,7 +144,12 @@ class RecurringTransactionService {
       await txn.recurringTransactionSource.load();
       await txn.account.load();
       if (txn.recurringTransactionSource.value == null &&
-          txn.account.value?.id == recurring.account.value?.id) {
+          txn.account.value?.id == recurring.account.value?.id &&
+          await RecurrenceCadence.matchesTransaction(
+            isar: isar,
+            candidate: txn,
+            recurring: recurring,
+          )) {
         return txn;
       }
     }

@@ -16,6 +16,7 @@ import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/providers/budget_refresh_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
@@ -24,6 +25,8 @@ import 'package:mudra_manager/features/budget/data/category_spending_history_pro
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_services_provider.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 /// Budget period presets.
@@ -116,7 +119,9 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     if (_budgetType == BudgetType.categoryWise && _selectedCategory == null) {
       setState(() => _saving = false);
       SnackbarService.error(
-          l10n.budget_selectAtLeastOneCategoryErrorText, spacing,);
+        l10n.budget_selectAtLeastOneCategoryErrorText,
+        spacing,
+      );
       return;
     }
 
@@ -196,19 +201,15 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     final l10n = AppLocalizations.of(context)!;
     final catsAsync = ref.watch(expenseCategoriesProvider);
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(LucideIcons.x, color: color.onSurfaceVariant),
-          onPressed: () => context.pop(),
+    return ScreenShell(
+      config: ScreenShellConfig(
+        customAppBar: _CreateBudgetAppBar(
+          title: l10n.budget_createBudget,
+          spacing: spacing,
         ),
-        title: Text(
-          l10n.budget_createBudget,
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
+        enableRefresh: false,
       ),
+      actions: ScreenActions.empty,
       body: catsAsync.when(
         data: (cats) => _buildBody(cats, spacing, color, textTheme, l10n),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -231,8 +232,16 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
       children: [
         Expanded(
           child: ListView(
-            padding: EdgeInsets.all(spacing.sectionGap),
+            padding: EdgeInsets.fromLTRB(
+              spacing.cardHorizontal,
+              spacing.cardVertical,
+              spacing.cardHorizontal,
+              spacing.cardInner * 4,
+            ),
             children: [
+              _buildBudgetPreview(color, textTheme, spacing, l10n),
+              SizedBox(height: spacing.sectionGap * 1.5),
+
               // ── CATEGORY PICKER ──
               _buildCategoryPicker(cats, spacing, color, textTheme, l10n),
               SizedBox(height: spacing.sectionGap),
@@ -338,8 +347,11 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
                     ),
                   ),
                 ] else ...[
-                  Icon(LucideIcons.tag,
-                      size: 20, color: color.onSurfaceVariant,),
+                  Icon(
+                    LucideIcons.tag,
+                    size: 20,
+                    color: color.onSurfaceVariant,
+                  ),
                   SizedBox(width: spacing.elementGap),
                   Expanded(
                     child: Text(
@@ -414,8 +426,10 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
                       padding: EdgeInsets.only(left: spacing.sectionGap),
                       child: Column(
                         children: subs
-                            .map((s) =>
-                                _categoryTile(s, spacing, color, textTheme),)
+                            .map(
+                              (s) =>
+                                  _categoryTile(s, spacing, color, textTheme),
+                            )
                             .toList(),
                       ),
                     ),
@@ -488,6 +502,153 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     );
   }
 
+  InputDecoration _fieldDecoration({
+    required String label,
+    required ColorScheme color,
+    required AppSpacing spacing,
+    String? hintText,
+    Widget? prefixIcon,
+    Color? fillColor,
+  }) {
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+      borderSide: BorderSide(
+        color: color.outlineVariant.withValues(alpha: 0.5),
+      ),
+    );
+    return InputDecoration(
+      labelText: label,
+      hintText: hintText,
+      filled: true,
+      fillColor: fillColor ?? color.surfaceContainerLow,
+      prefixIcon: prefixIcon,
+      prefixIconConstraints: prefixIcon == null
+          ? null
+          : const BoxConstraints(minWidth: 0, minHeight: 0),
+      border: border,
+      enabledBorder: border,
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        borderSide: BorderSide(color: color.primary, width: 1.5),
+      ),
+    );
+  }
+
+  // ── BUDGET PREVIEW ──
+
+  Widget _buildBudgetPreview(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations l10n,
+  ) {
+    final category = _selectedCategory;
+    final categoryColor = category?.colorValue != null
+        ? Color(category!.colorValue!)
+        : color.primary;
+
+    return AnimatedContainer(
+      duration: spacing.animFast,
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.primaryContainer.withValues(alpha: 0.72),
+            color.surfaceContainerHigh,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        border: Border.all(color: color.primary.withValues(alpha: 0.22)),
+        boxShadow: [
+          BoxShadow(
+            color: color.primary.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: spacing.touchTargetSmall,
+            height: spacing.touchTargetSmall,
+            decoration: BoxDecoration(
+              color: categoryColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              category == null
+                  ? LucideIcons.wallet
+                  : IconHelper.getIconData(category.iconName),
+              color: categoryColor,
+              size: spacing.iconLG,
+            ),
+          ),
+          SizedBox(width: spacing.elementGap),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  category?.name ?? l10n.budget_createBudget,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: spacing.elementGapMin),
+                Text(
+                  _budgetPeriodLabel(l10n),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: spacing.elementGap),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                l10n.budget_limit,
+                style: textTheme.labelSmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                ),
+              ),
+              SizedBox(height: spacing.elementGapMin),
+              CurrencyText(
+                amount: double.tryParse(
+                      _amountC.text.trim().replaceAll(',', ''),
+                    ) ??
+                    0,
+                fixedLength: 0,
+                compact: false,
+                style: textTheme.titleMedium?.copyWith(
+                  color: color.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _budgetPeriodLabel(AppLocalizations l10n) {
+    return switch (_period) {
+      _BudgetPeriod.thisWeek => l10n.budget_periodThisWeek,
+      _BudgetPeriod.thisMonth => l10n.budget_periodThisMonth,
+      _BudgetPeriod.thisYear => l10n.budget_periodThisYear,
+      _BudgetPeriod.custom => l10n.budget_periodCustom,
+    };
+  }
+
   // ── AMOUNT INPUT (HERO) ──
 
   Widget _buildAmountInput(
@@ -496,41 +657,25 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     TextTheme textTheme,
     AppLocalizations l10n,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.budget_limit,
-          style: textTheme.labelMedium?.copyWith(
-            color: color.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-          ),
+    return TextField(
+      controller: _amountC,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      style: textTheme.headlineSmall?.copyWith(
+        fontWeight: FontWeight.w800,
+        color: color.primary,
+      ),
+      onChanged: (_) => setState(() {}),
+      decoration: _fieldDecoration(
+        label: l10n.budget_limit,
+        hintText: '0',
+        color: color,
+        spacing: spacing,
+        fillColor: color.primaryContainer.withValues(alpha: 0.24),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 12, right: 4),
+          child: CurrencyBadge(code: BaseCurrency.code, size: 32),
         ),
-        SizedBox(height: spacing.elementGap),
-        TextField(
-          controller: _amountC,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          style: textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w900,
-            color: color.onSurface,
-          ),
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            hintText: '0',
-            hintStyle: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: color.onSurfaceVariant.withValues(alpha: 0.3),
-            ),
-            prefixText: '${BaseCurrency.symbol} ',
-            prefixStyle: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color.onSurfaceVariant.withValues(alpha: 0.6),
-            ),
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(vertical: spacing.elementGap),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -1003,8 +1148,11 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
               ),
             ),
             SizedBox(width: spacing.elementGapMin),
-            Icon(LucideIcons.chevronRight,
-                size: 14, color: color.onSurfaceVariant,),
+            Icon(
+              LucideIcons.chevronRight,
+              size: 14,
+              color: color.onSurfaceVariant,
+            ),
           ],
         ),
       ),
@@ -1021,8 +1169,10 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
             return ListTile(
               title: Text(l10n.translate(r.name)),
               trailing: _recurrence == r
-                  ? Icon(LucideIcons.check,
-                      color: Theme.of(context).colorScheme.primary,)
+                  ? Icon(
+                      LucideIcons.check,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
                   : null,
               onTap: () {
                 setState(() => _recurrence = r);
@@ -1128,43 +1278,97 @@ class _CreateBudgetScreenState extends ConsumerState<CreateBudgetScreen> {
     AppLocalizations l10n,
   ) {
     return Container(
-      padding: EdgeInsets.all(spacing.sectionGap),
+      padding: EdgeInsets.fromLTRB(
+        spacing.cardHorizontal,
+        spacing.elementGap,
+        spacing.cardHorizontal,
+        spacing.elementGap,
+      ),
       decoration: BoxDecoration(
-        color: color.surface,
+        color: color.surface.withValues(alpha: 0.96),
         border: Border(
-          top: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+          top: BorderSide(
+            color: color.outlineVariant.withValues(alpha: 0.25),
+          ),
         ),
       ),
       child: SafeArea(
         top: false,
         child: SizedBox(
           width: double.infinity,
-          child: FilledButton(
-            onPressed: () => _saving ? null : _save(spacing),
-            style: FilledButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: spacing.cardInner),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              ),
-            ),
-            child: _saving
+          child: FilledButton.icon(
+            onPressed: _saving ? null : () => _save(spacing),
+            icon: _saving
                 ? SizedBox(
-                    width: 20,
-                    height: 20,
+                    width: 18,
+                    height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       color: color.onPrimary,
                     ),
                   )
-                : Text(
-                    l10n.budget_createBudget,
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: color.onPrimary,
-                    ),
-                  ),
+                : const Icon(LucideIcons.check, size: 18),
+            label: Text(l10n.budget_createBudget),
+            style: FilledButton.styleFrom(
+              minimumSize: Size(double.infinity, spacing.touchTarget),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusLarge),
+              ),
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _CreateBudgetAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  const _CreateBudgetAppBar({
+    required this.title,
+    required this.spacing,
+  });
+
+  final String title;
+  final AppSpacing spacing;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(80);
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return AppBar(
+      automaticallyImplyLeading: true,
+      backgroundColor: color.surfaceContainerHigh,
+      foregroundColor: color.onSurface,
+      surfaceTintColor: Colors.transparent,
+      flexibleSpace: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.surfaceContainerHigh,
+              color.primaryContainer.withValues(alpha: 0.72),
+            ],
+          ),
+        ),
+      ),
+      scrolledUnderElevation: 0,
+      toolbarHeight: 80,
+      titleSpacing: spacing.cardInner,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(spacing.radiusLarge + spacing.elementGap),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      title: Text(
+        title,
+        style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
       ),
     );
   }
