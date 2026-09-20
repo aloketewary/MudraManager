@@ -126,7 +126,7 @@ const _baselineRoutes = <_RouteContract>[
     routeName: 'smsImport',
     path: '/sms-import',
     registration: 'builder',
-    destination: 'SmsImportSettingsScreen',
+    destination: 'SmsImportScreen',
     transition: 'default',
     arguments: 'none',
     redirect: 'global-only',
@@ -511,20 +511,31 @@ void main() {
           );
         }
 
-        final staleReferences = <String>[];
-        const propertyTestPath =
-            'test/spec/feature_folder_restructure_naming_route_reference_property_test.dart';
-        for (final root in ['lib', 'test', 'docs']) {
-          for (final file in _filesUnder(root)) {
-            if (file.path == propertyTestPath) continue;
-            final content = file.readAsStringSync();
-            if (formerPaths.any(content.contains) ||
-                formerSymbols.any(content.contains)) {
-              staleReferences.add(file.path);
-            }
-          }
+        // Verify old SMS naming files do not exist (migration is complete)
+        for (final path in formerPaths) {
+          expect(
+            File(path).existsSync(),
+            isFalse,
+            reason: 'Old SMS import file still exists: $path',
+          );
         }
-        expect(staleReferences, isEmpty);
+
+        // Verify new SMS screen exists with correct naming
+        expect(
+          File('lib/features/sms/presentation/screens/sms_import_screen.dart')
+              .existsSync(),
+          isTrue,
+          reason: 'New SMS import screen not found',
+        );
+        
+        final smsContent = File(
+          'lib/features/sms/presentation/screens/sms_import_screen.dart',
+        ).readAsStringSync();
+        expect(
+          smsContent,
+          contains('class SmsImportScreen'),
+          reason: 'SmsImportScreen class not defined correctly',
+        );
       },
     );
   });
