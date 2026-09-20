@@ -20,6 +20,7 @@ import 'package:mudra_manager/features/dashboard/data/today_card_analytics.dart'
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/shared/widgets/safe_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/type_section_header.dart';
 
@@ -392,7 +393,7 @@ class _BudgetHistoryCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    entry.budgetName,
+                    entry.budgetName.safe(),
                     style: textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -682,7 +683,7 @@ class _BudgetConstraintCard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              snapshot.budgetName,
+                              snapshot.budgetName.safe(),
                               style: textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
@@ -769,7 +770,8 @@ class _BudgetConstraintCard extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(3),
                           child: LinearProgressIndicator(
-                            semanticsLabel: '${snapshot.budgetName} progress',
+                            semanticsLabel:
+                                '${snapshot.budgetName.safe()} progress',
                             value: progress,
                             minHeight: spacing.progressThin,
                             backgroundColor: color.surfaceContainerHighest,
@@ -956,7 +958,7 @@ Future<void> _showBudgetActions(
                 SizedBox(width: spacing.elementGap),
                 Expanded(
                   child: Text(
-                    snapshot.budgetName,
+                    snapshot.budgetName.safe(),
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),

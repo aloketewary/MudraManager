@@ -14,6 +14,7 @@ import 'package:mudra_manager/features/credit_card/data/credit_card_provider.dar
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/finance_v2/finance_progress_bar.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/type_section_header.dart';
@@ -31,12 +32,25 @@ class CreditCardBillsScreen extends ConsumerWidget {
     final ctxt = AppLocalizations.of(context)!;
     final billsAsync = ref.watch(creditCardBillsProvider);
     final isGuest = ref.watch(guestModeProvider);
+    final appBarData = billsAsync.value;
 
     return ScreenShell(
       config: ScreenShellConfig(
         title: ctxt.cc_title,
         appBarMode: AppBarMode.standard,
         enableRefresh: true,
+        customAppBar: appBarData == null
+            ? null
+            : _CreditCardBillsAppBar(
+                title: ctxt.cc_title,
+                summary: appBarData.summary,
+                isGuest: isGuest,
+                spacing: spacing,
+                onBack: () {
+                  HapticFeedback.lightImpact();
+                  context.pop();
+                },
+              ),
       ),
       actions: ScreenActions.empty,
       onRefresh: () => RefreshHelper.withMinDuration(() async {
@@ -51,12 +65,15 @@ class CreditCardBillsScreen extends ConsumerWidget {
 
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.cardHorizontal,
-              vertical: spacing.cardVertical,
+            padding: EdgeInsets.fromLTRB(
+              spacing.cardHorizontalMax,
+              spacing.sectionGap,
+              spacing.cardHorizontalMax,
+              spacing.sectionGap + MediaQuery.of(context).padding.bottom,
             ),
             children: [
               _buildTotalHero(
+                context,
                 data.summary,
                 isGuest,
                 color,
@@ -110,8 +127,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
             ),
           ),
         ),
-        error: (err, _) =>
-            Center(child: Text(BuddyMessages.errorWith('$err'))),
+        error: (err, _) => Center(child: Text(BuddyMessages.errorWith('$err'))),
       ),
     );
   }
@@ -138,6 +154,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
   }
 
   Widget _buildTotalHero(
+    BuildContext context,
     CreditCardBillsSummary summary,
     bool isGuest,
     ColorScheme color,
@@ -145,28 +162,37 @@ class CreditCardBillsScreen extends ConsumerWidget {
     AppSpacing spacing,
     AppLocalizations ctxt,
   ) {
-    final isZero = summary.totalOutstanding == 0;
-    final heroColor = isZero ? color.primary : color.error;
     final isDark = color.brightness == Brightness.dark;
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
+    final hasLimit = summary.totalCreditLimit > 0;
+    final totalLimit = summary.totalCreditLimit;
+    final utilization = hasLimit
+        ? (summary.totalOutstanding / totalLimit).clamp(0.0, 1.0).toDouble()
+        : 0.0;
+    final heroColor =
+        summary.totalOutstanding > 0 ? color.error : color.primary;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+      duration:
+          reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+      padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            heroColor.withValues(alpha: isDark ? 0.20 : 0.12),
+            heroColor.withValues(alpha: isDark ? 0.22 : 0.12),
             color.surface,
           ],
         ),
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(color: heroColor.withValues(alpha: 0.2)),
+        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        border: Border.all(
+          color: heroColor.withValues(alpha: isDark ? 0.32 : 0.22),
+        ),
         boxShadow: [
           BoxShadow(
-            color: heroColor.withValues(alpha: 0.08),
-            blurRadius: 20,
+            color: heroColor.withValues(alpha: isDark ? 0.16 : 0.10),
+            blurRadius: 24,
             offset: const Offset(0, 8),
           ),
         ],
@@ -174,63 +200,301 @@ class CreditCardBillsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(LucideIcons.creditCard, size: 18, color: heroColor),
-              SizedBox(width: spacing.elementGap),
-              Text(
-                ctxt.cc_totalOutstanding,
-                style: textTheme.labelLarge?.copyWith(
-                  color: color.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
+          _buildCardVisual(heroColor, color, spacing),
           SizedBox(height: spacing.elementGap),
-          CurrencyText(
-            amount: GuestModeUtil.applyGuestMode(
-              summary.totalOutstanding,
-              isGuest,
-            ),
-            compact: false,
-            fixedLength: 0,
-            style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: heroColor,
-            ),
-          ),
-          SizedBox(height: spacing.elementGap),
-          // Aggregate minimum due
           Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                ctxt.cc_totalMinimumDue,
-                style: textTheme.labelMedium?.copyWith(
-                  color: color.onSurfaceVariant,
+              Expanded(
+                child: CurrencyText(
+                  amount: GuestModeUtil.applyGuestMode(
+                    summary.totalOutstanding,
+                    isGuest,
+                  ),
+                  compact: false,
+                  fixedLength: 0,
+                  style: textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: heroColor,
+                  ),
                 ),
               ),
-              SizedBox(width: spacing.elementGapMin),
-              CurrencyText(
-                amount: GuestModeUtil.applyGuestMode(
-                  summary.totalMinimumDue,
-                  isGuest,
+              if (hasLimit) ...[
+                Text(
+                  ' / ',
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
                 ),
-                compact: true,
-                style: textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: color.tertiary,
+                CurrencyText(
+                  amount: GuestModeUtil.applyGuestMode(totalLimit, isGuest),
+                  compact: true,
+                  fixedLength: 0,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
                 ),
-              ),
+                SizedBox(width: spacing.elementGap),
+                Text(
+                  '${(utilization * 100).round()}%',
+                  style: textTheme.titleSmall?.copyWith(
+                    color: heroColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ],
           ),
           SizedBox(height: spacing.elementGapMin),
           Text(
-            ctxt.cc_acrossCards(summary.cardCount),
-            style: textTheme.bodySmall?.copyWith(
-              color: color.onSurfaceVariant.withValues(alpha: 0.6),
+            ctxt.cc_totalOutstanding,
+            style: textTheme.labelMedium?.copyWith(
+              color: color.onSurfaceVariant,
+            ),
+          ),
+          if (hasLimit) ...[
+            SizedBox(height: spacing.elementGap),
+            FinanceProgressBar(
+              value: utilization,
+              fillColor: heroColor,
+              trackColor: color.surfaceContainerHighest,
+              stripeColor: heroColor.withValues(alpha: 0.20),
+              height: spacing.progressNormal,
+              semanticLabel: ctxt.cc_utilization,
+            ),
+            SizedBox(height: spacing.sectionGap),
+            _buildUtilizationMilestones(
+              utilization,
+              heroColor,
+              color,
+              textTheme,
+              spacing,
+              reduceMotion,
+            ),
+          ],
+          SizedBox(height: spacing.elementGap),
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.elementGap,
+              vertical: spacing.elementGapMin,
+            ),
+            decoration: BoxDecoration(
+              color: heroColor.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
+              border: Border.all(color: heroColor.withValues(alpha: 0.20)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  LucideIcons.walletCards,
+                  size: 14,
+                  color: heroColor,
+                ),
+                SizedBox(width: spacing.elementGapMin),
+                Text(
+                  ctxt.cc_acrossCards(summary.cardCount),
+                  style: textTheme.labelSmall?.copyWith(
+                    color: heroColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(width: spacing.elementGap),
+                Text(
+                  ctxt.cc_totalMinimumDue,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+                SizedBox(width: spacing.elementGapMin),
+                CurrencyText(
+                  amount: GuestModeUtil.applyGuestMode(
+                    summary.totalMinimumDue,
+                    isGuest,
+                  ),
+                  compact: true,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: color.tertiary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCardVisual(
+    Color heroColor,
+    ColorScheme color,
+    AppSpacing spacing,
+  ) {
+    return Container(
+      width: double.infinity,
+      height: spacing.sectionGap * 7,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            heroColor.withValues(alpha: 0.18),
+            color.surfaceContainerHighest,
+          ],
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        LucideIcons.creditCard,
+        color: heroColor,
+        size: spacing.iconXL * 2.2,
+      ),
+    );
+  }
+
+  Widget _buildUtilizationMilestones(
+    double progress,
+    Color accentColor,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    bool reduceMotion,
+  ) {
+    const milestones = [0, 25, 50, 75, 100];
+    const milestoneIcons = [
+      LucideIcons.circle,
+      LucideIcons.chartBar,
+      LucideIcons.target,
+      LucideIcons.triangleAlert,
+      LucideIcons.circleAlert,
+    ];
+    final currentIndex = milestones.lastIndexWhere(
+      (milestone) => milestone / 100 <= progress,
+    );
+
+    return Semantics(
+      label: 'Credit utilization milestones',
+      value: '${(progress * 100).round()}%',
+      child: Column(
+        children: [
+          SizedBox(
+            height: spacing.elementGap * 3.5,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned(
+                  left: spacing.elementGap,
+                  right: spacing.elementGap,
+                  child: Container(
+                    height: spacing.progressThin,
+                    decoration: BoxDecoration(
+                      color: color.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: spacing.elementGap,
+                  right: spacing.elementGap,
+                  child: FractionallySizedBox(
+                    widthFactor: progress,
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      height: spacing.progressThin,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            accentColor,
+                            accentColor.withValues(alpha: 0.72),
+                          ],
+                        ),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
+                      ),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    for (var index = 0; index < milestones.length; index++)
+                      _utilizationMilestoneDot(
+                        reached: index <= currentIndex,
+                        isCurrent: index == currentIndex && progress < 1,
+                        icon: milestoneIcons[index],
+                        accentColor: accentColor,
+                        color: color,
+                        spacing: spacing,
+                        reduceMotion: reduceMotion,
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (var index = 0; index < milestones.length; index++)
+                Text(
+                  '${milestones[index]}%',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: index <= currentIndex
+                        ? accentColor
+                        : color.onSurfaceVariant,
+                    fontWeight: index == currentIndex
+                        ? FontWeight.w800
+                        : FontWeight.w600,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _utilizationMilestoneDot({
+    required bool reached,
+    required bool isCurrent,
+    required IconData icon,
+    required Color accentColor,
+    required ColorScheme color,
+    required AppSpacing spacing,
+    required bool reduceMotion,
+  }) {
+    final markerSize = spacing.elementGap * (isCurrent ? 2.75 : 2.25);
+    return AnimatedContainer(
+      duration:
+          reduceMotion ? Duration.zero : const Duration(milliseconds: 160),
+      curve: Curves.easeOut,
+      width: markerSize,
+      height: markerSize,
+      decoration: BoxDecoration(
+        color: isCurrent
+            ? accentColor.withValues(alpha: 0.14)
+            : reached
+                ? accentColor
+                : color.surfaceContainerHigh,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: isCurrent || reached
+              ? accentColor
+              : color.outlineVariant.withValues(alpha: 0.7),
+          width: isCurrent ? spacing.strokeThin * 1.5 : spacing.strokeThin,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        reached ? LucideIcons.check : icon,
+        size: isCurrent ? spacing.iconSM : spacing.iconXS,
+        color: isCurrent
+            ? accentColor
+            : reached
+                ? color.onPrimary
+                : color.onSurfaceVariant,
       ),
     );
   }
@@ -413,7 +677,9 @@ class CreditCardBillsScreen extends ConsumerWidget {
           ),
 
           Divider(
-              height: 1, color: color.outlineVariant.withValues(alpha: 0.3),),
+            height: 1,
+            color: color.outlineVariant.withValues(alpha: 0.3),
+          ),
 
           // Metrics: Outstanding + Est. Minimum Due + Available Credit
           Padding(
@@ -427,7 +693,9 @@ class CreditCardBillsScreen extends ConsumerWidget {
                       child: _metricColumn(
                         ctxt.account_outstanding,
                         GuestModeUtil.applyGuestMode(
-                            summary.outstanding, isGuest,),
+                          summary.outstanding,
+                          isGuest,
+                        ),
                         summary.outstanding > 0 ? color.error : color.primary,
                         textTheme,
                         spacing,
@@ -438,7 +706,9 @@ class CreditCardBillsScreen extends ConsumerWidget {
                       child: _metricColumn(
                         ctxt.cc_minimumDue,
                         GuestModeUtil.applyGuestMode(
-                            summary.minimumDue, isGuest,),
+                          summary.minimumDue,
+                          isGuest,
+                        ),
                         color.tertiary,
                         textTheme,
                         spacing,
@@ -615,7 +885,10 @@ class CreditCardBillsScreen extends ConsumerWidget {
                   Center(
                     child: TextButton(
                       onPressed: () => _navigateToPayment(
-                          context, card, summary.minimumDue,),
+                        context,
+                        card,
+                        summary.minimumDue,
+                      ),
                       style: TextButton.styleFrom(
                         foregroundColor: color.onSurfaceVariant,
                         padding: EdgeInsets.symmetric(
@@ -715,16 +988,13 @@ class CreditCardBillsScreen extends ConsumerWidget {
           ],
         ),
         SizedBox(height: spacing.elementGapMin),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(spacing.radiusSmall),
-          child: LinearProgressIndicator(
-            value: clampedPct,
-            minHeight: spacing.progressNormal,
-            backgroundColor: color.outlineVariant.withValues(alpha: 0.2),
-            valueColor: AlwaysStoppedAnimation(barColor),
-            semanticsLabel: ctxt.cc_utilization,
-            semanticsValue: '${utilPct.toStringAsFixed(0)}%',
-          ),
+        FinanceProgressBar(
+          value: clampedPct.toDouble(),
+          fillColor: barColor,
+          trackColor: color.outlineVariant.withValues(alpha: 0.2),
+          stripeColor: barColor.withValues(alpha: 0.16),
+          height: spacing.progressNormal,
+          semanticLabel: ctxt.cc_utilization,
         ),
         SizedBox(height: spacing.elementGapMin),
         Row(
@@ -805,6 +1075,159 @@ class CreditCardBillsScreen extends ConsumerWidget {
     if (daysUntilDue <= 0) return color.error;
     if (daysUntilDue <= 3) return color.tertiary;
     return color.primary;
+  }
+}
+
+class _CreditCardBillsAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  const _CreditCardBillsAppBar({
+    required this.title,
+    required this.summary,
+    required this.isGuest,
+    required this.spacing,
+    required this.onBack,
+  });
+
+  final String title;
+  final CreditCardBillsSummary summary;
+  final bool isGuest;
+  final AppSpacing spacing;
+  final VoidCallback onBack;
+
+  @override
+  Size get preferredSize => Size.fromHeight(80 + spacing.cardInner * 2.5);
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: color.surfaceContainerHigh,
+      foregroundColor: color.onSurface,
+      surfaceTintColor: Colors.transparent,
+      flexibleSpace: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.surfaceContainerHigh,
+              color.primaryContainer.withValues(alpha: 0.72),
+            ],
+          ),
+        ),
+      ),
+      scrolledUnderElevation: 0,
+      toolbarHeight: 80,
+      titleSpacing: spacing.cardInner,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(spacing.radiusLarge + spacing.elementGap),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      leading: Padding(
+        padding: EdgeInsets.only(left: spacing.cardHorizontal),
+        child: IconButton(
+          onPressed: onBack,
+          tooltip: 'Back',
+          icon: const Icon(LucideIcons.arrowLeft),
+        ),
+      ),
+      title: Text(
+        title,
+        style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      actions: [
+        Padding(
+          padding: EdgeInsets.only(right: spacing.cardHorizontal),
+          child: Tooltip(
+            message: summary.cardCount == 1
+                ? '1 credit card'
+                : '${summary.cardCount} credit cards',
+            child: CircleAvatar(
+              radius: spacing.elementGap + 2,
+              backgroundColor: color.primary.withValues(alpha: 0.12),
+              child: Icon(
+                LucideIcons.creditCard,
+                size: 16,
+                color: color.primary,
+              ),
+            ),
+          ),
+        ),
+      ],
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(spacing.cardInner * 2.5),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            spacing.cardInner,
+            0,
+            spacing.cardInner,
+            spacing.cardInner,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _headerAmount(
+                  context,
+                  AppLocalizations.of(context)!.cc_totalOutstanding,
+                  GuestModeUtil.applyGuestMode(
+                    summary.totalOutstanding,
+                    isGuest,
+                  ),
+                ),
+              ),
+              SizedBox(width: spacing.elementGap * 2),
+              Expanded(
+                child: _headerAmount(
+                  context,
+                  AppLocalizations.of(context)!.cc_totalMinimumDue,
+                  GuestModeUtil.applyGuestMode(
+                    summary.totalMinimumDue,
+                    isGuest,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _headerAmount(BuildContext context, String label, double amount) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: textTheme.bodySmall?.copyWith(
+            color: color.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: spacing.elementGapMin),
+        CurrencyText(
+          amount: amount,
+          compact: false,
+          fixedLength: 0,
+          style: textTheme.titleLarge?.copyWith(
+            color: color.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
   }
 }
 

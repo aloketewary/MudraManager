@@ -261,6 +261,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
         }
         return;
       }
+      if (!mounted) return;
+
       ref.invalidate(accountsProvider);
       ref.invalidate(allAccountsProvider);
       ref.invalidate(frequencySortedAccountsProvider);

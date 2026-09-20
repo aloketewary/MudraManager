@@ -21,6 +21,7 @@ import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/finance_v2/finance_progress_bar.dart';
+import 'package:mudra_manager/shared/widgets/safe_text.dart';
 
 class EditGoalScreen extends ConsumerStatefulWidget {
   final Goal goal;
@@ -45,8 +46,9 @@ class _EditGoalScreenState extends ConsumerState<EditGoalScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.goal.name);
-    _whyController = TextEditingController(text: widget.goal.description ?? '');
+    _nameController = TextEditingController(text: widget.goal.name.safe());
+    _whyController =
+        TextEditingController(text: widget.goal.description.safe());
     _goalType = widget.goal.goalType;
     _targetDate = widget.goal.targetDate;
     _targetAmount = widget.goal.targetAmount;

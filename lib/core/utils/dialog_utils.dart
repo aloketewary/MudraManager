@@ -21,80 +21,105 @@ class DialogUtils {
   }) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final cardInner = spacing.cardInner;
+    final elementGap = spacing.elementGap;
+    final radiusSmall = spacing.radiusSmall;
 
     return showModalBottomSheet<bool>(
       context: context,
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(radiusSmall * 2)),
       ),
       builder: (context) => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(cardInner),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 40,
                 height: 4,
-                margin: const EdgeInsets.only(bottom: 24),
+                margin: EdgeInsets.only(bottom: elementGap),
                 decoration: BoxDecoration(
                   color: color.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              Icon(LucideIcons.trash2, size: 48, color: color.error),
-              const SizedBox(height: 16),
+              Container(
+                padding: EdgeInsets.all(elementGap),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      color.error.withValues(alpha: 0.12),
+                      color.error.withValues(alpha: 0.06),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(radiusSmall),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.error.withValues(alpha: 0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Icon(LucideIcons.trash2, size: 48, color: color.error),
+              ),
+              SizedBox(height: elementGap),
               Text(
                 title ?? BuddyMessages.deleteTitle,
-                style: textTheme.headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 message ?? BuddyMessages.deleteMessage(null),
-                style: textTheme.bodyMedium
-                    ?.copyWith(color: color.onSurfaceVariant),
+                style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: cardInner),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context, false),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.pop(context, false);
+                      },
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: color.outline),
                         shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusSmall)),
+                          borderRadius: BorderRadius.circular(radiusSmall),
+                        ),
                       ),
                       child: Text(
-                        (cancelText ?? BuddyMessages.deleteCancel)
-                            .toUpperCase(),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        cancelText ?? BuddyMessages.deleteCancel,
+                        style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: elementGap),
                   Expanded(
                     child: FilledButton(
-                      onPressed: () => Navigator.pop(context, true),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.pop(context, true);
+                      },
                       style: FilledButton.styleFrom(
                         backgroundColor: color.error,
                         foregroundColor: color.onError,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusSmall)),
+                          borderRadius: BorderRadius.circular(radiusSmall),
+                        ),
                       ),
                       child: Text(
-                        (deleteText ?? BuddyMessages.deleteConfirm)
-                            .toUpperCase(),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        deleteText ?? BuddyMessages.deleteConfirm,
+                        style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -124,7 +149,7 @@ class DialogUtils {
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2)),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (context) => SafeArea(
         child: Padding(
@@ -169,7 +194,7 @@ class DialogUtils {
                         side: BorderSide(color: color.outline),
                         shape: RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.circular(spacing.radiusSmall)),
+                                BorderRadius.circular(spacing.radiusSmall),),
                       ),
                       child: Text(
                         (cancelText ?? 'CANCEL').toUpperCase(),
@@ -185,7 +210,7 @@ class DialogUtils {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.circular(spacing.radiusSmall)),
+                                BorderRadius.circular(spacing.radiusSmall),),
                       ),
                       child: Text(
                         (confirmText ?? 'CONFIRM').toUpperCase(),
@@ -245,10 +270,10 @@ class DialogUtils {
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2)),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (context) => _PasswordDialogContent(
-          isRestore: isRestore, color: color, textTheme: textTheme),
+          isRestore: isRestore, color: color, textTheme: textTheme,),
     );
   }
 
@@ -269,7 +294,7 @@ class DialogUtils {
       backgroundColor: color.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2)),
+            top: Radius.circular(spacing.radiusSmall * 2),),
       ),
       builder: (context) => SafeArea(
         child: Padding(
@@ -533,7 +558,7 @@ class _PasswordDialogContentState
             decoration: InputDecoration(
               labelText: 'Password',
               border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusSmall)),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),),
               prefixIcon: const Icon(LucideIcons.keyRound),
             ),
           ),
@@ -545,7 +570,7 @@ class _PasswordDialogContentState
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(spacing.radiusSmall)),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),),
                 prefixIcon: const Icon(LucideIcons.keyRound),
               ),
             ),
@@ -560,10 +585,10 @@ class _PasswordDialogContentState
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.circular(spacing.radiusSmall)),
+                            BorderRadius.circular(spacing.radiusSmall),),
                   ),
                   child: const Text('CANCEL',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                      style: TextStyle(fontWeight: FontWeight.bold),),
                 ),
               ),
               const SizedBox(width: 16),
@@ -587,7 +612,7 @@ class _PasswordDialogContentState
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content:
-                                Text('Password must be at least 6 characters')),
+                                Text('Password must be at least 6 characters'),),
                       );
                       return;
                     }
@@ -597,10 +622,10 @@ class _PasswordDialogContentState
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.circular(spacing.radiusSmall)),
+                            BorderRadius.circular(spacing.radiusSmall),),
                   ),
                   child: const Text('CONTINUE',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                      style: TextStyle(fontWeight: FontWeight.bold),),
                 ),
               ),
             ],

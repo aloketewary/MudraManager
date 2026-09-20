@@ -22,6 +22,7 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/dashboard/presentation/providers/permission_provider.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/safe_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 class BudgetDetailsScreen extends ConsumerWidget {
@@ -109,7 +110,7 @@ class _BudgetDetailShell extends ConsumerWidget {
     return ScreenShell(
       config: ScreenShellConfig(
         customAppBar: _BudgetDetailsAppBar(
-          title: snapshot.budgetName,
+          title: snapshot.budgetName.safe(),
           spacing: spacing,
           onBack: () {
             HapticFeedback.lightImpact();
@@ -134,7 +135,7 @@ class _BudgetDetailShell extends ConsumerWidget {
             final confirmed = await DialogUtils.showDeleteConfirmation(
               context,
               spacing,
-              title: '${ctxt.budget_delete} \'${snapshot.budgetName}\'',
+              title: '${ctxt.budget_delete} \'${snapshot.budgetName.safe()}\'',
             );
             if (confirmed == true && context.mounted) {
               await ref

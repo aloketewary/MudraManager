@@ -60,6 +60,20 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   bool get _isEditing => widget.account != null;
   AppLocalizations get ctxt => AppLocalizations.of(context)!;
 
+  bool _isValidLastFour(String value) => RegExp(r'^\d{4}$').hasMatch(value);
+
+  bool _isValidOpeningBalance(String value) {
+    final parsed = double.tryParse(value.trim());
+    if (parsed == null || !parsed.isFinite) return false;
+    return _selectedType != AccountType.creditCard || parsed >= 0;
+  }
+
+  bool _isValidCreditLimit(String value) {
+    if (value.trim().isEmpty) return true;
+    final parsed = double.tryParse(value.trim());
+    return parsed != null && parsed.isFinite && parsed > 0;
+  }
+
   // Subset from SimpleColorPickerDialog's palette
   static const _quickColors = [
     Color(0xFFE53935), // Red
@@ -166,8 +180,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               reduceMotion,
             ),
             SizedBox(height: spacing.sectionGap),
-            _buildTypeHeader(ctxt.account_typeLabel, color, textTheme, spacing,
-                _selectedType.icon,),
+            _buildTypeHeader(
+              ctxt.account_typeLabel,
+              color,
+              textTheme,
+              spacing,
+              _selectedType.icon,
+            ),
             SizedBox(
               height: spacing.sectionGap,
             ),
@@ -178,8 +197,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               reduceMotion,
             ),
             SizedBox(height: spacing.sectionGap),
-            _buildTypeHeader(ctxt.account_detailsLabel, color, textTheme,
-                spacing, LucideIcons.form,),
+            _buildTypeHeader(
+              ctxt.account_detailsLabel,
+              color,
+              textTheme,
+              spacing,
+              LucideIcons.form,
+            ),
             SizedBox(height: spacing.sectionGap),
             _buildDetailsCard(
               color,
@@ -188,8 +212,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               isDark,
             ),
             SizedBox(height: spacing.sectionGap),
-            _buildTypeHeader(ctxt.account_colorLabel, color, textTheme, spacing,
-                LucideIcons.palette,),
+            _buildTypeHeader(
+              ctxt.account_colorLabel,
+              color,
+              textTheme,
+              spacing,
+              LucideIcons.palette,
+            ),
             SizedBox(height: spacing.sectionGap),
             _buildColorSection(
               color,
@@ -198,8 +227,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               reduceMotion,
             ),
             SizedBox(height: spacing.sectionGap),
-            _buildTypeHeader(ctxt.account_currencyLabel, color, textTheme,
-                spacing, LucideIcons.wallet,),
+            _buildTypeHeader(
+              ctxt.account_currencyLabel,
+              color,
+              textTheme,
+              spacing,
+              LucideIcons.wallet,
+            ),
             SizedBox(height: spacing.sectionGap),
             _buildCurrencySelector(color, textTheme, spacing),
           ],
@@ -316,12 +350,15 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                                       ),
                                       decoration: BoxDecoration(
                                         color: _selectedColor.withValues(
-                                            alpha: 0.1,),
+                                          alpha: 0.1,
+                                        ),
                                         borderRadius: BorderRadius.circular(
-                                            spacing.radiusMedium,),
+                                          spacing.radiusMedium,
+                                        ),
                                         border: Border.all(
                                           color: _selectedColor.withValues(
-                                              alpha: 0.2,),
+                                            alpha: 0.2,
+                                          ),
                                         ),
                                       ),
                                       child: Text(
@@ -632,9 +669,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           ),
           textTheme: textTheme,
           validator: (v) {
-            if (v == null || v.isEmpty) return ctxt.common_required;
-            if (v.length < 4) return ctxt.account_min4;
-            if (v.length > 4) return ctxt.account_max4;
+            final value = v?.trim() ?? '';
+            if (value.isEmpty) return ctxt.common_required;
+            if (!_isValidLastFour(value)) return 'Enter exactly 4 digits';
             return null;
           },
         ),
@@ -651,11 +688,23 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             helperStyle: textTheme.labelSmall?.copyWith(
               color: color.onSurfaceVariant.withValues(alpha: 0.6),
             ),
-            prefixIcon: Icon(currencyIcon(_selectedCurrency),
-                size: 18, color: _selectedColor,),
+            prefixIcon: Icon(
+              currencyIcon(_selectedCurrency),
+              size: 18,
+              color: _selectedColor,
+            ),
           ),
           textTheme: textTheme,
-          validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+          validator: (v) {
+            final value = v?.trim() ?? '';
+            if (value.isEmpty) return ctxt.common_required;
+            if (!_isValidOpeningBalance(value)) {
+              return isCreditCard
+                  ? 'Enter a non-negative amount'
+                  : 'Enter a valid amount';
+            }
+            return null;
+          },
         ),
         if (isCreditCard) ...[
           SizedBox(height: spacing.sectionGap),
@@ -669,6 +718,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   Icon(LucideIcons.gauge, size: 18, color: _selectedColor),
             ),
             textTheme: textTheme,
+            validator: (v) => _isValidCreditLimit(v ?? '')
+                ? null
+                : 'Enter a positive credit limit',
           ),
           SizedBox(height: spacing.sectionGap),
           Row(
@@ -1235,24 +1287,18 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   Future<void> _saveAccount(Id? id, AppSpacing spacing) async {
-    // ── Entitlement check (new accounts only) ──
-    if (!_isEditing) {
-      final canCreate = await ref.read(canCreateAccountProvider.future);
-      if (!canCreate) {
-        SnackbarService.warning(
-          'Free plan allows up to 3 accounts. Upgrade to Pro for unlimited.',
-          spacing,
-        );
-        return;
-      }
-    }
+    if (_saving) return;
 
     if (!_formKey.currentState!.validate()) {
-      // Focus first invalid field
-      if (_nameController.text.trim().isNotEmpty) {
-        FocusScope.of(context).requestFocus(_accountNumberFocusNode);
-      } else {
+      // Keep keyboard focus on first invalid field so the error is actionable.
+      if (_nameController.text.trim().isEmpty) {
         FocusScope.of(context).requestFocus(_nameFocusNode);
+      } else if (!_isValidLastFour(_accountNumberController.text.trim())) {
+        FocusScope.of(context).requestFocus(_accountNumberFocusNode);
+      } else if (!_isValidOpeningBalance(_balanceController.text)) {
+        FocusScope.of(context).requestFocus(_balanceFocusNode);
+      } else {
+        FocusScope.of(context).requestFocus(_creditLimitFocusNode);
       }
       return;
     }
@@ -1260,18 +1306,34 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     setState(() => _saving = true);
 
     try {
+      // Check entitlement after local validation and while save is locked. This
+      // prevents duplicate account creation when the entitlement future is
+      // slow and the user taps Create more than once.
+      if (!_isEditing) {
+        final canCreate = await ref.read(canCreateAccountProvider.future);
+        if (!canCreate) {
+          SnackbarService.warning(
+            'Free plan allows up to 3 accounts. Upgrade to Pro for unlimited.',
+            spacing,
+          );
+          return;
+        }
+      }
+
       final isarService = ref.read(isarServiceProvider);
       final isar = await isarService.getInstance();
 
       final accountName = _nameController.text.trim();
       final accountNumber = _accountNumberController.text.trim();
+      final openingBalance = double.parse(_balanceController.text.trim());
+      final creditLimitText = _creditLimitController.text.trim();
 
       final account = AccountDataContract.copyAccount(widget.account);
       final isNew = widget.account == null;
 
       account
         ..name = accountName
-        ..initialBalance = double.tryParse(_balanceController.text) ?? 0.0
+        ..initialBalance = openingBalance
         ..accountType = _selectedType
         ..accountNumber = accountNumber.isEmpty ? null : accountNumber
         ..colorValue = _selectedColor.toARGB32()
@@ -1282,7 +1344,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         account
           ..statementDay = _statementDay
           ..dueDay = _dueDay
-          ..creditLimit = double.tryParse(_creditLimitController.text);
+          ..creditLimit =
+              creditLimitText.isEmpty ? null : double.parse(creditLimitText);
       } else {
         account
           ..statementDay = null
@@ -1319,10 +1382,14 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         await gamificationService.track(GamificationEvent.accountCreated);
       }
 
+      if (!mounted) return;
+
       ref.invalidate(accountsProvider);
       ref.invalidate(allAccountsProvider);
       ref.invalidate(frequencySortedAccountsProvider);
-      if (context.mounted) context.pop(true);
+      ref.invalidate(accountBalanceMapProvider);
+      ref.invalidate(accountBaseBalanceMapProvider);
+      context.pop(true);
     } finally {
       if (mounted) setState(() => _saving = false);
     }

@@ -258,16 +258,16 @@ class GoalScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (goal.description?.trim().isNotEmpty ?? false)
+                              if (goal.description.safe().trim().isNotEmpty)
                                 Text(
-                                  goal.description!.trim(),
+                                  goal.description.safe().trim(),
                                   style: textTheme.bodySmall?.copyWith(
                                     color: color.onSurfaceVariant,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                              if (goal.description?.trim().isNotEmpty ?? false)
+                              if (goal.description.safe().trim().isNotEmpty)
                                 SizedBox(height: spacing.elementGapMin),
                               Text(
                                 goal.name.safe(),
@@ -305,7 +305,7 @@ class GoalScreen extends ConsumerWidget {
                       trackColor: color.surfaceContainerHighest,
                       showStripeRemainder: false,
                       height: spacing.progressThin,
-                      semanticLabel: '${goal.name} progress',
+                      semanticLabel: '${goal.name.safe()} progress',
                     ),
                     SizedBox(height: spacing.elementGapMin),
                     Row(
@@ -375,7 +375,7 @@ class GoalScreen extends ConsumerWidget {
       child: Icon(
         IconHelper.resolveIcon(
           iconName: goal.iconName,
-          text: '${goal.name} ${goal.description ?? ''}',
+          text: '${goal.name.safe()} ${goal.description.safe()}',
           fallback: goal.goalType.icon,
         ),
         color: goalColor,

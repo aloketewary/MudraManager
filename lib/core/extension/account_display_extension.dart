@@ -21,7 +21,8 @@ extension AccountDisplayExtension on Account {
   /// Returns true if balance is in good state for this account type
   bool isBalanceHealthy(double balance) {
     if (accountType == AccountType.creditCard) {
-      // For credit cards, lower/zero balance is good (less owed)
+      // Credit-card balances are positive while debt is outstanding. A
+      // zero/negative balance means the card is paid off or overpaid.
       return balance <= 0;
     }
     // For regular accounts, positive balance is good

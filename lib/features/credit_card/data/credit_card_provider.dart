@@ -43,6 +43,7 @@ class CreditCardBillsSummary {
   final double totalOutstanding;
   final double totalMinimumDue;
   final double totalAvailableCredit;
+  final double totalCreditLimit;
   final int overdueCount;
   final int dueSoonCount;
   final int highUtilizationCount;
@@ -52,6 +53,7 @@ class CreditCardBillsSummary {
     required this.totalOutstanding,
     required this.totalMinimumDue,
     required this.totalAvailableCredit,
+    required this.totalCreditLimit,
     required this.overdueCount,
     required this.dueSoonCount,
     required this.highUtilizationCount,
@@ -118,7 +120,10 @@ final creditCardBillsProvider =
 
   for (final card in cards) {
     final balance = await accountService.getAccountBalance(card.id);
-    final outstanding = balance < 0 ? balance.abs() : 0.0;
+    // Credit-card balances use positive values for debt throughout the
+    // account service, reconciliation flow, and account form. A negative
+    // balance means the card has been overpaid, so it is not an amount due.
+    final outstanding = balance > 0 ? balance : 0.0;
 
     // Due date: check *this* cycle's due date first. If it has already
     // passed and there's still an outstanding balance, the card is overdue
@@ -131,13 +136,19 @@ final creditCardBillsProvider =
     var isOverdue = false;
     if (card.dueDay != null) {
       final dueThisCycle = _dateInMonth(now.year, now.month, card.dueDay!);
-      if (!dueThisCycle.isAfter(today)) {
+      if (dueThisCycle.isBefore(today)) {
         if (outstanding > 0) {
           isOverdue = true;
           nextDueDate = dueThisCycle;
         } else {
           nextDueDate = _dateInMonth(now.year, now.month + 1, card.dueDay!);
         }
+      } else if (dueThisCycle.isAtSameMomentAs(today)) {
+        // Due today is urgent, but it is not overdue yet. Show today's date
+        // while there is a balance; otherwise move to the next occurrence.
+        nextDueDate = outstanding > 0
+            ? dueThisCycle
+            : _dateInMonth(now.year, now.month + 1, card.dueDay!);
       } else {
         nextDueDate = dueThisCycle;
       }
@@ -175,8 +186,7 @@ final creditCardBillsProvider =
     if (card.statementDay != null) {
       var cycleStart = _dateInMonth(now.year, now.month, card.statementDay!);
       if (cycleStart.isAfter(today)) {
-        cycleStart =
-            _dateInMonth(now.year, now.month - 1, card.statementDay!);
+        cycleStart = _dateInMonth(now.year, now.month - 1, card.statementDay!);
       }
       final cycleTxns = await isar.transactions
           .filter()
@@ -215,15 +225,14 @@ final creditCardBillsProvider =
     totalOutstanding: summaries.fold(0, (s, c) => s + c.outstanding),
     totalMinimumDue: summaries.fold(0, (s, c) => s + c.minimumDue),
     totalAvailableCredit: summaries.fold(0, (s, c) => s + c.availableCredit),
+    totalCreditLimit: summaries.fold(
+      0,
+      (s, c) => s + (c.account.creditLimit ?? 0),
+    ),
     overdueCount: summaries.where((c) => c.isOverdue).length,
-    // Bug: `(c.daysUntilDue ?? 999) > 0 && c.daysUntilDue! <= 3` crashes
-    // with a null-check error for cards with no due date set — the first
-    // clause coalesces to 999 (true), so `&&` doesn't short-circuit and
-    // force-unwraps the real (null) value in the second clause. Read the
-    // field into a local first so both checks agree on the same value.
     dueSoonCount: summaries.where((c) {
       final days = c.daysUntilDue;
-      return days != null && days > 0 && days <= 3;
+      return days != null && days >= 0 && days <= 3;
     }).length,
     highUtilizationCount:
         summaries.where((c) => (c.utilization ?? 0) > 80).length,

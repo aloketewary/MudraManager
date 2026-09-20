@@ -918,6 +918,8 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     );
     ref.invalidate(allAccountsProvider);
     ref.invalidate(accountsProvider);
+    ref.invalidate(accountBalanceMapProvider);
+    ref.invalidate(accountBaseBalanceMapProvider);
 
     if (context.mounted) {
       SnackbarService.success('${account.name} restored', spacing);
@@ -944,6 +946,11 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
       });
       ref.invalidate(allAccountsProvider);
       ref.invalidate(accountsProvider);
+      ref.invalidate(accountBalanceMapProvider);
+      ref.invalidate(accountBaseBalanceMapProvider);
+      if (context.mounted) {
+        SnackbarService.success('${account.name} deleted', spacing);
+      }
     }
   }
 
@@ -970,6 +977,8 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
       );
       ref.invalidate(allAccountsProvider);
       ref.invalidate(accountsProvider);
+      ref.invalidate(accountBalanceMapProvider);
+      ref.invalidate(accountBaseBalanceMapProvider);
 
       if (context.mounted) {
         SnackbarService.success(

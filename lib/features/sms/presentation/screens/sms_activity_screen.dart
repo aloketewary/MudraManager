@@ -5,6 +5,7 @@ import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/sms/domain/sms_transaction_label.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -392,13 +393,17 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
   // ── FILTER SHEET ──
 
   void _showFilterSheet(
-      ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2),),
+          top: Radius.circular(spacing.radiusSmall * 2),
+        ),
       ),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(16),
@@ -719,7 +724,8 @@ class _ActivityCard extends ConsumerWidget {
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(spacing.radiusSmall * 2),),
+          top: Radius.circular(spacing.radiusSmall * 2),
+        ),
       ),
       builder: (_) => _ActivityDetailsSheet(activity: activity),
     );
@@ -867,8 +873,9 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                         const SizedBox(height: 2),
                         Text(
                           safeDateFormat(
-                                  'dd MMM yyyy, hh:mm a', ctxt.localeName,)
-                              .format(widget.activity.date),
+                            'dd MMM yyyy, hh:mm a',
+                            ctxt.localeName,
+                          ).format(widget.activity.date),
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
@@ -891,7 +898,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
               ),
               const SizedBox(height: 16),
 
-              // SMS body
+              // SMS body / merchant
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
@@ -903,7 +910,8 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                   ),
                 ),
                 child: Text(
-                  widget.activity.body,
+                  SmsTransactionLabel.resolve(widget.activity) ??
+                      widget.activity.body,
                   style: textTheme.bodySmall?.copyWith(
                     height: 1.5,
                     fontFamily: AppTheme.monoFontFamily,
@@ -983,8 +991,11 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                       _divider(color),
                       _detailRow(
                         ctxt.smsActivity_balance,
-                        formatCurrency(widget.activity.balance!,
-                            code: BaseCurrency.code, decimals: 0,),
+                        formatCurrency(
+                          widget.activity.balance!,
+                          code: BaseCurrency.code,
+                          decimals: 0,
+                        ),
                         color,
                         textTheme,
                       ),
@@ -1182,11 +1193,8 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                                 'bankName': widget.activity.fromBank,
                               },
                             ).then((result) {
-                              if (result == true) {
+                              if (result == true && mounted) {
                                 _checkAccount();
-                                ref.invalidate(accountsProvider);
-                                ref.invalidate(allAccountsProvider);
-                                ref.invalidate(frequencySortedAccountsProvider);
                               }
                             });
                           },

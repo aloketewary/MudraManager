@@ -383,18 +383,26 @@ class BudgetService {
   }) async {
     final isNew = bud.id == Isar.autoIncrement;
     final isar = await isarService.getInstance();
-    bud.encryptFields();
-    await isar.writeTxn(() async {
-      await isar.budgets.put(bud);
-      await bud.categories.save();
-      await bud.budgetTags.save();
-      for (final alloc in newAllocations) {
-        alloc.budget.value = bud;
-        await isar.budgetCategoryAllocations.put(alloc);
-        await alloc.category.save();
-        await alloc.budget.save();
-      }
-    });
+
+    try {
+      bud.encryptFields();
+      await isar.writeTxn(() async {
+        await isar.budgets.put(bud);
+        await bud.categories.save();
+        await bud.budgetTags.save();
+        for (final alloc in newAllocations) {
+          alloc.budget.value = bud;
+          await isar.budgetCategoryAllocations.put(alloc);
+          await alloc.category.save();
+          await alloc.budget.save();
+        }
+      });
+    } finally {
+      // Keep caller-owned model readable after the encrypted write. Parent
+      // and child screens can share this instance through navigation.
+      bud.decryptFields();
+    }
+
     log.i(
       'Budget saved: ${bud.name} with ${newAllocations.length} allocations',
     );

@@ -30,20 +30,31 @@ class GoalService {
 
   Future<void> addGoal(Goal goal) async {
     final isar = await isarService.getInstance();
-    goal.encryptFields();
-    await isar.writeTxn(() async {
-      await isar.goals.put(goal);
-    });
+    try {
+      goal.encryptFields();
+      await isar.writeTxn(() async {
+        await isar.goals.put(goal);
+      });
+    } finally {
+      // Goal objects are shared by parent, detail, and edit routes. Keep the
+      // caller-owned instance readable after storing encrypted fields.
+      goal.decryptFields();
+    }
     await _updateGoalReminders();
     await gamificationService?.track(GamificationEvent.goalCreated);
   }
 
   Future<void> updateGoal(Goal goal) async {
     final isar = await isarService.getInstance();
-    goal.encryptFields();
-    await isar.writeTxn(() async {
-      await isar.goals.put(goal);
-    });
+    try {
+      goal.encryptFields();
+      await isar.writeTxn(() async {
+        await isar.goals.put(goal);
+      });
+    } finally {
+      // Do not leave the live object passed between goal screens encrypted.
+      goal.decryptFields();
+    }
     await _updateGoalReminders();
   }
 
@@ -62,8 +73,8 @@ class GoalService {
     await isar.writeTxn(() async {
       goal = await isar.goals.get(goalId).withDecryption();
       if (goal != null) {
-        final wasComplete = goal!.currentAmount >= goal!.targetAmount &&
-            goal!.targetAmount > 0;
+        final wasComplete =
+            goal!.currentAmount >= goal!.targetAmount && goal!.targetAmount > 0;
         goal!.currentAmount += amount;
         goal!.lastContributionDate = DateTime.now();
         goal!.contributions = [
@@ -73,8 +84,8 @@ class GoalService {
         // Reaching the target frees up the free-tier goal slot (canCreateGoal
         // counts isActive goals) and moves it out of the active list —
         // matching the explicit "Mark Complete" action in EditGoalScreen.
-        final isNowComplete = goal!.currentAmount >= goal!.targetAmount &&
-            goal!.targetAmount > 0;
+        final isNowComplete =
+            goal!.currentAmount >= goal!.targetAmount && goal!.targetAmount > 0;
         if (isNowComplete) {
           goal!.isActive = false;
           justCompleted = !wasComplete;

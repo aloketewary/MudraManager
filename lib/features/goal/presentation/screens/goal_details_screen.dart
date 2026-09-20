@@ -569,7 +569,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
       child: Icon(
         IconHelper.resolveIcon(
           iconName: widget.goal.iconName,
-          text: '${widget.goal.name} ${widget.goal.description ?? ''}',
+          text: '${widget.goal.name.safe()} ${widget.goal.description.safe()}',
           fallback: widget.goal.goalType.icon,
         ),
         color: goalColor,

@@ -10,14 +10,17 @@ import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/state/app_screen_state.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
+import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
-import 'package:mudra_manager/features/gamification/domain/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/data/gamification_providers.dart';
+import 'package:mudra_manager/features/transactions/data/bill_control_center_provider.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_provider.dart';
+import 'package:mudra_manager/shared/templates/screen_shell.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/transaction_form/transaction_form_widgets.dart';
 
 class AddRecurringTransactionScreen extends ConsumerStatefulWidget {
@@ -45,6 +48,10 @@ class _AddRecurringTransactionScreenState
   final _categoryScrollController = ScrollController();
   final _subcategoryScrollController = ScrollController();
 
+  final _formKey = GlobalKey<FormState>();
+  int _step = 0;
+  bool _deleting = false;
+
   bool get _isEditing => widget.recurring != null;
   final _accountScrollController = ScrollController();
   bool _accountScrolled = false;
@@ -53,6 +60,7 @@ class _AddRecurringTransactionScreenState
   @override
   void initState() {
     super.initState();
+    _amountController.addListener(_handleAmountChanged);
     if (_isEditing) {
       _amountController.text = widget.recurring!.amount.toString();
       _descController.text = widget.recurring!.description ?? '';
@@ -64,8 +72,13 @@ class _AddRecurringTransactionScreenState
     }
   }
 
+  void _handleAmountChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
+    _amountController.removeListener(_handleAmountChanged);
     _amountController.dispose();
     _descController.dispose();
     _categoryScrollController.dispose();
@@ -79,212 +92,326 @@ class _AddRecurringTransactionScreenState
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
-    final accentColor = _isExpense ? color.error : color.primary;
+    final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: color.surface,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(LucideIcons.x),
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            context.pop();
-          },
+    return ScreenShell(
+      config: ScreenShellConfig(
+        appBarMode: AppBarMode.none,
+        customAppBar: _RecurringFormAppBar(
+          title:
+              _isEditing ? ctxt.common_edit : ctxt.title_recurringTransactions,
+          step: _step,
+          stepLabel: _stepLabel(ctxt),
+          spacing: spacing,
         ),
-        title: Text(
-          _isEditing ? 'Edit Recurring' : 'Add Recurring',
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
+        enableRefresh: false,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.symmetric(
-                horizontal: spacing.cardHorizontal,
-                vertical: spacing.cardVertical,
+      actions: ScreenActions.empty,
+      body: Form(
+        key: _formKey,
+        child: Stack(
+          children: [
+            ListView(
+              padding: EdgeInsets.fromLTRB(
+                spacing.cardHorizontal,
+                spacing.cardVertical,
+                spacing.cardHorizontal,
+                spacing.touchTarget + spacing.cardInner * 2,
               ),
               children: [
-                // ── Type Toggle ──
-                TypeToggle(
-                  isExpense: _isExpense,
-                  onChanged: (val) => setState(() {
-                    _isExpense = val;
-                    _selectedCategory = null;
-                    _categoryScrolled = false;
-                  }),
+                _buildRecurringPreview(color, textTheme, spacing, ctxt),
+                SizedBox(height: spacing.sectionGap * 1.5),
+                AnimatedSwitcher(
+                  duration: spacing.animNormal,
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  child: _buildStepContent(color, textTheme, spacing, ctxt),
                 ),
-                SizedBox(height: spacing.sectionGap),
+                if (_isEditing && _step == 2) ...[
+                  SizedBox(height: spacing.sectionGap * 1.5),
+                  _buildDangerZone(color, textTheme, spacing, ctxt),
+                ],
+                SizedBox(height: spacing.touchTarget + spacing.cardInner),
+              ],
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: _buildWizardActions(color, spacing, ctxt),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-                // ── Amount ──
-                HeroAmountInput(
-                  controller: _amountController,
-                  accentColor: accentColor,
-                ),
-                SizedBox(height: spacing.sectionGap),
+  Widget _buildStepContent(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return switch (_step) {
+      0 => _buildBasicsStep(color, textTheme, spacing, ctxt),
+      1 => _buildScheduleStep(color, textTheme, spacing, ctxt),
+      _ => _buildAssignmentStep(color, textTheme, spacing, ctxt),
+    };
+  }
 
-                // ── Description ──
-                TextField(
-                  controller: _descController,
-                  decoration: InputDecoration(
-                    hintText: 'Description (optional)',
-                    prefixIcon: Icon(
-                      LucideIcons.fileText,
-                      size: 20,
-                      color: color.onSurfaceVariant,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                      borderSide: BorderSide(
-                        color: color.outlineVariant.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                      borderSide: BorderSide(
-                        color: color.outlineVariant.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
+  Widget _buildBasicsStep(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final accentColor = _isExpense ? color.error : color.primary;
+    return Column(
+      key: const ValueKey('recurring-basics-step'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          ctxt.label_type,
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        SizedBox(height: spacing.elementGapMin),
+        Text(
+          ctxt.title_recurringTransactions,
+          style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+        ),
+        SizedBox(height: spacing.sectionGap),
+        TypeToggle(
+          isExpense: _isExpense,
+          onChanged: (value) {
+            setState(() {
+              _isExpense = value;
+              _selectedCategory = null;
+              _categoryScrolled = false;
+            });
+          },
+        ),
+        SizedBox(height: spacing.sectionGap),
+        HeroAmountInput(
+          controller: _amountController,
+          accentColor: accentColor,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        TextFormField(
+          controller: _descController,
+          textCapitalization: TextCapitalization.sentences,
+          maxLength: 80,
+          decoration: InputDecoration(
+            labelText: ctxt.label_description,
+            hintText: ctxt.label_description,
+            prefixIcon: Icon(
+              LucideIcons.fileText,
+              size: spacing.iconSM,
+              color: color.onSurfaceVariant,
+            ),
+            filled: true,
+            fillColor: color.surfaceContainerLow,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              borderSide: BorderSide(color: color.outlineVariant),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              borderSide: BorderSide(color: color.outlineVariant),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              borderSide: BorderSide(color: color.primary, width: 1.5),
+            ),
+            counterText: '',
+          ),
+          onChanged: (_) => setState(() {}),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScheduleStep(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return Column(
+      key: const ValueKey('recurring-schedule-step'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          ctxt.label_frequency,
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        SizedBox(height: spacing.elementGapMin),
+        Text(
+          ctxt.label_frequency,
+          style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+        ),
+        SizedBox(height: spacing.sectionGap),
+        Wrap(
+          spacing: spacing.elementGapMin,
+          runSpacing: spacing.elementGapMin,
+          children: Frequency.values.map((frequency) {
+            final selected = _frequency == frequency;
+            return ChoiceChip(
+              label: Text(_frequencyLabel(frequency, ctxt)),
+              selected: selected,
+              avatar: Icon(
+                _frequencyIcon(frequency),
+                size: spacing.iconSM,
+                color: selected ? color.primary : color.onSurfaceVariant,
+              ),
+              showCheckmark: false,
+              onSelected: (_) {
+                HapticFeedback.selectionClick();
+                setState(() => _frequency = frequency);
+              },
+            );
+          }).toList(),
+        ),
+        SizedBox(height: spacing.sectionGap),
+        _buildSectionLabel(
+          ctxt.budget_startDate,
+          LucideIcons.calendar,
+          color,
+          textTheme,
+        ),
+        SizedBox(height: spacing.elementGap),
+        _buildDatePicker(color, textTheme, spacing, ctxt),
+      ],
+    );
+  }
+
+  Widget _buildAssignmentStep(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return Column(
+      key: const ValueKey('recurring-assignment-step'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          ctxt.transaction_selectAccountLabel,
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        SizedBox(height: spacing.elementGapMin),
+        Text(
+          ctxt.transaction_selectCategoryLabel,
+          style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+        ),
+        SizedBox(height: spacing.sectionGap),
+        _buildSectionLabel(
+          ctxt.transaction_selectAccountLabel,
+          LucideIcons.landmark,
+          color,
+          textTheme,
+        ),
+        SizedBox(height: spacing.elementGap),
+        _buildAccountSelector(color, textTheme, spacing),
+        SizedBox(height: spacing.sectionGap),
+        _buildSectionLabel(
+          ctxt.transaction_selectCategoryLabel,
+          LucideIcons.tag,
+          color,
+          textTheme,
+        ),
+        SizedBox(height: spacing.elementGap),
+        _buildCategorySelector(color, textTheme, spacing),
+      ],
+    );
+  }
+
+  Widget _buildRecurringPreview(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final category = _selectedCategory;
+    final accent = _isExpense ? color.error : color.primary;
+    final title = _descController.text.trim().isEmpty
+        ? category?.name ?? ctxt.title_recurringTransactions
+        : _descController.text.trim();
+    final amount = double.tryParse(
+          _amountController.text.trim().replaceAll(',', ''),
+        ) ??
+        0;
+
+    return AnimatedContainer(
+      duration: spacing.animFast,
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accent.withValues(alpha: 0.14),
+            color.surfaceContainerHigh,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: spacing.touchTargetSmall,
+            height: spacing.touchTargetSmall,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              category == null
+                  ? LucideIcons.repeat
+                  : IconHelper.iconFromName(category.iconName ?? 'category'),
+              color: accent,
+              size: spacing.iconLG,
+            ),
+          ),
+          SizedBox(width: spacing.elementGap),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: spacing.sectionGap),
-
-                // ── Frequency ──
-                _buildSectionLabel(
-                  'Frequency',
-                  LucideIcons.repeat,
-                  color,
-                  textTheme,
-                ),
-                SizedBox(height: spacing.elementGap),
-
-                Wrap(
-                  spacing: 8,
-                  children: Frequency.values.map((f) {
-                    final selected = _frequency == f;
-                    return ChoiceChip(
-                      label: Text(_frequencyLabel(f)),
-                      selected: selected,
-                      avatar: Icon(
-                        _frequencyIcon(f),
-                        size: 16,
-                        color:
-                            selected ? color.primary : color.onSurfaceVariant,
-                      ),
-                      showCheckmark: false,
-                      onSelected: (_) {
-                        HapticFeedback.selectionClick();
-                        setState(() => _frequency = f);
-                      },
-                    );
-                  }).toList(),
-                ),
-                SizedBox(height: spacing.sectionGap),
-
-                // ── Account ──
-                _buildSectionLabel(
-                  'Account',
-                  LucideIcons.landmark,
-                  color,
-                  textTheme,
-                ),
-                SizedBox(height: spacing.elementGap),
-                if (_selectedAccount != null)
-                  Padding(
-                    padding: EdgeInsets.only(bottom: spacing.elementGap),
-                    child: Row(
-                      children: [
-                        Icon(
-                          LucideIcons.check,
-                          size: 16,
-                          color: Color(
-                            _selectedAccount?.colorValue ??
-                                color.primary.toARGB32(),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _selectedAccount!.name,
-                          style: textTheme.labelLarge
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
+                SizedBox(height: spacing.elementGapMin),
+                Text(
+                  '${_frequencyLabel(_frequency, ctxt)} • ${DateFormat.yMMMd(ctxt.localeName).format(_startDate)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
                   ),
-
-                _buildAccountSelector(color, textTheme, spacing),
-                SizedBox(height: spacing.sectionGap),
-
-                // ── Category ──
-                _buildSectionLabel(
-                  'Category',
-                  LucideIcons.tag,
-                  color,
-                  textTheme,
                 ),
-                SizedBox(height: spacing.elementGap),
-                _buildCategorySelector(color, textTheme, spacing),
-                SizedBox(height: spacing.sectionGap),
-
-                // ── Start Date ──
-                _buildSectionLabel(
-                  'Start Date',
-                  LucideIcons.calendar,
-                  color,
-                  textTheme,
-                ),
-                SizedBox(height: spacing.elementGap),
-                _buildDatePicker(color, textTheme, spacing),
-                SizedBox(height: spacing.sectionGap),
               ],
             ),
           ),
-
-          // ── Bottom Buttons ──
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              spacing.cardHorizontal,
-              spacing.elementGap,
-              spacing.cardHorizontal,
-              spacing.cardHorizontalMax + MediaQuery.of(context).padding.bottom,
-            ),
-            child: Column(
-              children: [
-                FilledButton(
-                  onPressed: ()=> _save(spacing),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    ),
-                  ),
-                  child: Text(
-                    _isEditing ? 'Update' : 'Save',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                if (_isEditing) ...[
-                  SizedBox(height: spacing.elementGap),
-                  OutlinedButton.icon(
-                    onPressed: ()=> _delete(spacing),
-                    icon: const Icon(LucideIcons.trash2, size: 18),
-                    label: Text(AppLocalizations.of(context)!.common_delete),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: color.error,
-                      side: BorderSide(color: color.error),
-                      minimumSize: const Size(double.infinity, 48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(spacing.radiusMedium),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
+          SizedBox(width: spacing.elementGap),
+          CurrencyText(
+            amount: amount,
+            fixedLength: 0,
+            compact: false,
+            style: textTheme.titleMedium?.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],
@@ -292,21 +419,183 @@ class _AddRecurringTransactionScreenState
     );
   }
 
+  bool _canContinueForStep() {
+    if (_step == 0) {
+      final amount = double.tryParse(
+        _amountController.text.trim().replaceAll(',', ''),
+      );
+      return amount != null && amount.isFinite && amount > 0;
+    }
+    if (_step == 2) {
+      return _selectedAccount != null && _selectedCategory != null;
+    }
+    return true;
+  }
+
+  void _nextStep(AppSpacing spacing) {
+    final ctxt = AppLocalizations.of(context)!;
+    if (!_canContinueForStep()) {
+      SnackbarService.warning(
+        _step == 0
+            ? ctxt.transaction_amountControllerErrorText
+            : BuddyMessages.selectAccountAndCategory,
+        spacing,
+      );
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
+    setState(() => _step = (_step + 1).clamp(0, 2));
+  }
+
+  void _previousStep() {
+    FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
+    setState(() => _step = (_step - 1).clamp(0, 2));
+  }
+
+  String _stepLabel(AppLocalizations ctxt) {
+    return switch (_step) {
+      0 => ctxt.label_type,
+      1 => ctxt.label_frequency,
+      _ => ctxt.transaction_selectAccountLabel,
+    };
+  }
+
+  Widget _buildWizardActions(
+    ColorScheme color,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final isLastStep = _step == 2;
+    final canContinue = _canContinueForStep() && !_saving && !_deleting;
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        spacing.cardHorizontal,
+        spacing.elementGap,
+        spacing.cardHorizontal,
+        spacing.elementGap,
+      ),
+      decoration: BoxDecoration(
+        color: color.surface.withValues(alpha: 0.96),
+        border: Border(
+          top: BorderSide(color: color.outlineVariant.withValues(alpha: 0.25)),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            if (_step > 0)
+              TextButton.icon(
+                onPressed: _saving || _deleting ? null : _previousStep,
+                icon: const Icon(LucideIcons.arrowLeft, size: 18),
+                label: Text(ctxt.common_back),
+              )
+            else
+              SizedBox(width: spacing.touchTargetSmall),
+            SizedBox(width: spacing.elementGap),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: canContinue
+                    ? (isLastStep
+                        ? () => _save(spacing)
+                        : () => _nextStep(spacing))
+                    : null,
+                icon: _saving
+                    ? SizedBox(
+                        width: spacing.iconSM,
+                        height: spacing.iconSM,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: color.onPrimary,
+                        ),
+                      )
+                    : Icon(
+                        isLastStep ? LucideIcons.check : LucideIcons.arrowRight,
+                        size: 18,
+                      ),
+                label: Text(
+                  isLastStep
+                      ? (_isEditing ? ctxt.common_update : ctxt.common_save)
+                      : ctxt.common_next,
+                ),
+                style: FilledButton.styleFrom(
+                  minimumSize: Size(double.infinity, spacing.touchTarget),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(spacing.radiusLarge),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDangerZone(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.7)),
+      ),
+      child: InkWell(
+        onTap: _saving || _deleting ? null : () => _delete(spacing),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        child: Padding(
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: Row(
+            children: [
+              Icon(
+                LucideIcons.trash2,
+                size: spacing.iconSM,
+                color: color.error,
+              ),
+              SizedBox(width: spacing.elementGap),
+              Text(
+                ctxt.common_delete,
+                style: textTheme.bodyMedium?.copyWith(color: color.error),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _frequencyLabel(Frequency f, AppLocalizations ctxt) {
+    return switch (f) {
+      Frequency.daily => ctxt.label_daily,
+      Frequency.weekly => ctxt.label_weekly,
+      Frequency.monthly => ctxt.label_monthly,
+      Frequency.yearly => ctxt.label_yearly,
+    };
+  }
+
   Widget _buildDatePicker(
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     return InkWell(
       onTap: () async {
+        HapticFeedback.lightImpact();
         final pick = await showDatePicker(
           context: context,
           initialDate: _startDate,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2030),
+          firstDate: DateTime.now().subtract(const Duration(days: 3650)),
+          lastDate: DateTime.now().add(const Duration(days: 36500)),
         );
-        if (pick != null) {
-          HapticFeedback.lightImpact();
+        if (pick != null && mounted) {
           setState(
             () => _startDate = DateTime(pick.year, pick.month, pick.day),
           );
@@ -314,19 +603,22 @@ class _AddRecurringTransactionScreenState
       },
       borderRadius: BorderRadius.circular(spacing.radiusMedium),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        padding: EdgeInsets.all(spacing.cardInner),
         decoration: BoxDecoration(
-          color: color.surfaceContainerHighest,
+          color: color.surfaceContainerLow,
           borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          border:
-              Border.all(color: color.outlineVariant.withValues(alpha: 0.2)),
+          border: Border.all(color: color.outlineVariant),
         ),
         child: Row(
           children: [
-            Icon(LucideIcons.calendar, size: 16, color: color.onSurfaceVariant),
-            const SizedBox(width: 10),
+            Icon(
+              LucideIcons.calendar,
+              size: spacing.iconSM,
+              color: color.onSurfaceVariant,
+            ),
+            SizedBox(width: spacing.elementGap),
             Text(
-              DateFormat('MMM dd, yyyy').format(_startDate),
+              DateFormat.yMMMd(ctxt.localeName).format(_startDate),
               style:
                   textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
@@ -444,8 +736,48 @@ class _AddRecurringTransactionScreenState
           },
         ),
       ),
-      loading: () => const SizedBox(height: 64),
-      error: (_, __) => const SizedBox(),
+      loading: () => Padding(
+        padding: EdgeInsets.symmetric(vertical: spacing.elementGap),
+        child: const LinearProgressIndicator(),
+      ),
+      error: (error, _) => _buildSelectorError(
+        message: BuddyMessages.errorWith('$error'),
+        onRetry: () => ref.invalidate(accountsProvider),
+        spacing: spacing,
+        color: color,
+        textTheme: textTheme,
+      ),
+    );
+  }
+
+  Widget _buildSelectorError({
+    required String message,
+    required VoidCallback onRetry,
+    required AppSpacing spacing,
+    required ColorScheme color,
+    required TextTheme textTheme,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: color.errorContainer.withValues(alpha: 0.28),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.error.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              message,
+              style: textTheme.bodySmall?.copyWith(color: color.error),
+            ),
+          ),
+          TextButton(
+            onPressed: onRetry,
+            child: Text(AppLocalizations.of(context)!.common_retry),
+          ),
+        ],
+      ),
     );
   }
 
@@ -726,8 +1058,17 @@ class _AddRecurringTransactionScreenState
           ],
         );
       },
-      loading: () => const SizedBox(height: 52),
-      error: (_, __) => const SizedBox(),
+      loading: () => Padding(
+        padding: EdgeInsets.symmetric(vertical: spacing.elementGap),
+        child: const LinearProgressIndicator(),
+      ),
+      error: (error, _) => _buildSelectorError(
+        message: BuddyMessages.errorWith('$error'),
+        onRetry: () => ref.invalidate(categoryListProvider),
+        spacing: spacing,
+        color: color,
+        textTheme: textTheme,
+      ),
     );
   }
 
@@ -740,24 +1081,22 @@ class _AddRecurringTransactionScreenState
     };
   }
 
-  String _frequencyLabel(Frequency f) {
-    return switch (f) {
-      Frequency.daily => 'Daily',
-      Frequency.weekly => 'Weekly',
-      Frequency.monthly => 'Monthly',
-      Frequency.yearly => 'Yearly',
-    };
-  }
+  Future<void> _save(AppSpacing spacing) async {
+    if (_saving || _deleting) return;
+    final ctxt = AppLocalizations.of(context)!;
+    final amount = double.tryParse(
+      _amountController.text.trim().replaceAll(',', ''),
+    );
 
-  Future<void> _save(AppSpacing spacing,) async {
-    if (_saving) return;
-    if (_amountController.text.isEmpty ||
-        double.tryParse(_amountController.text) == null) {
-      SnackbarService.error(BuddyMessages.invalidAmount, spacing,);
+    if (amount == null || !amount.isFinite || amount <= 0) {
+      SnackbarService.error(
+        ctxt.transaction_amountControllerErrorText,
+        spacing,
+      );
       return;
     }
     if (_selectedAccount == null || _selectedCategory == null) {
-      SnackbarService.error(BuddyMessages.selectAccountAndCategory, spacing,);
+      SnackbarService.error(BuddyMessages.selectAccountAndCategory, spacing);
       return;
     }
 
@@ -766,16 +1105,22 @@ class _AddRecurringTransactionScreenState
 
     try {
       final recurring = widget.recurring ?? RecurringTransaction();
-      recurring.amount = double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
-      if (recurring.amount <= 0) return;
-      recurring.description = _descController.text;
+      recurring.amount = amount;
+      recurring.description = _descController.text.trim().isEmpty
+          ? null
+          : _descController.text.trim();
       recurring.isExpense = _isExpense;
       recurring.frequency = _frequency;
-      recurring.startDate =
-          DateTime(_startDate.year, _startDate.month, _startDate.day);
+      recurring.startDate = DateTime(
+        _startDate.year,
+        _startDate.month,
+        _startDate.day,
+      );
       if (!_isEditing) {
-        recurring.nextDueDate = _startDate;
+        recurring.nextDueDate = recurring.startDate;
       } else {
+        // Preserve current next due date when editing. Schedule semantics are
+        // intentionally unchanged by this UX refactor.
         recurring.nextDueDate = widget.recurring!.nextDueDate;
       }
       recurring.isActive = true;
@@ -783,31 +1128,163 @@ class _AddRecurringTransactionScreenState
       recurring.category.value = _selectedCategory;
 
       await ref.read(recurringTransactionServiceProvider).save(recurring);
-      if (!_isEditing) {
-        ref
-            .read(gamificationServiceProvider)
-            ?.track(GamificationEvent.recurringTransactionCreated);
-      }
+      ref.invalidate(recurringTransactionsProvider);
+      ref.invalidate(billControlCenterProvider);
 
-      if (context.mounted) {
-        SnackbarService.success(
-          _isEditing ? BuddyMessages.txnUpdated : BuddyMessages.txnAdded, spacing,
-        );
-        context.pop();
-      }
-    } catch (e) {
-      SnackbarService.error(BuddyMessages.errorWith('$e'), spacing);
+      if (!mounted) return;
+      SnackbarService.success(
+        _isEditing ? BuddyMessages.txnUpdated : BuddyMessages.txnAdded,
+        spacing,
+      );
+      context.pop();
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      SnackbarService.error(BuddyMessages.errorWith('$error'), spacing);
     }
   }
 
   Future<void> _delete(AppSpacing spacing) async {
+    if (_saving || _deleting || widget.recurring == null) return;
+    final ctxt = AppLocalizations.of(context)!;
     HapticFeedback.mediumImpact();
-    await ref
-        .read(recurringTransactionServiceProvider)
-        .delete(widget.recurring!.id);
-    if (context.mounted) {
+    final confirmed = await DialogUtils.showDeleteConfirmation(
+      context,
+      spacing,
+      title: ctxt.common_delete,
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _deleting = true);
+    try {
+      await ref
+          .read(recurringTransactionServiceProvider)
+          .delete(widget.recurring!.id);
+      ref.invalidate(recurringTransactionsProvider);
+      ref.invalidate(billControlCenterProvider);
+
+      if (!mounted) return;
       SnackbarService.success(BuddyMessages.txnDeleted, spacing);
       context.pop();
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _deleting = false);
+      SnackbarService.error(BuddyMessages.errorWith('$error'), spacing);
     }
+  }
+}
+
+class _RecurringFormAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  const _RecurringFormAppBar({
+    required this.title,
+    required this.step,
+    required this.stepLabel,
+    required this.spacing,
+  });
+
+  final String title;
+  final int step;
+  final String stepLabel;
+  final AppSpacing spacing;
+
+  @override
+  Size get preferredSize => Size.fromHeight(80 + spacing.cardInner * 2.5);
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return AppBar(
+      automaticallyImplyLeading: true,
+      backgroundColor: color.surfaceContainerHigh,
+      foregroundColor: color.onSurface,
+      surfaceTintColor: Colors.transparent,
+      flexibleSpace: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.surfaceContainerHigh,
+              color.primaryContainer.withValues(alpha: 0.72),
+            ],
+          ),
+        ),
+      ),
+      scrolledUnderElevation: 0,
+      toolbarHeight: 80,
+      titleSpacing: spacing.cardInner,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(spacing.radiusLarge + spacing.elementGap),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      title: Text(
+        title,
+        style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      ),
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(spacing.cardInner * 2.5),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            spacing.cardInner,
+            0,
+            spacing.cardInner,
+            spacing.cardInner,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      stepLabel,
+                      style: textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${step + 1} / 3',
+                    style: textTheme.labelMedium?.copyWith(
+                      color: color.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: spacing.elementGap),
+              Row(
+                children: List.generate(
+                  3,
+                  (index) => Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: index == 2 ? 0 : spacing.elementGapMin,
+                      ),
+                      child: AnimatedContainer(
+                        duration: spacing.animFast,
+                        height: spacing.progressThin,
+                        decoration: BoxDecoration(
+                          color: index <= step
+                              ? color.primary
+                              : color.surfaceContainerHighest,
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

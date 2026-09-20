@@ -17,6 +17,7 @@ import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/shared/templates/screen_shell.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/safe_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 /// Budget management screen. Read-first, action-second.
@@ -51,7 +52,7 @@ class _ManageBudgetScreenState extends ConsumerState<ManageBudgetScreen> {
         appBarMode: AppBarMode.none,
         customAppBar: _ManageBudgetAppBar(
           title: l10n.budget_buttonEditText,
-          budgetName: _budget.name,
+          budgetName: _budget.name.safe(),
           spacing: spacing,
         ),
         enableRefresh: false,

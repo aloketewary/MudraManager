@@ -143,8 +143,9 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
       !_saving &&
       _fromAccount != null &&
       _toAccount != null &&
+      _fromAccount!.id != _toAccount!.id &&
       _amountController.text.isNotEmpty &&
-      (double.tryParse(_amountController.text) ?? 0) > 0;
+      (double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0) > 0;
 
   bool get _isCrossCurrency {
     if (_fromAccount == null || _toAccount == null) return false;
@@ -173,7 +174,10 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
       if (_isCrossCurrency) {
         final service = await ref.read(currencyServiceProvider.future);
         final result = await service.convert(
-            amount, fromCur ?? BaseCurrency.code, toCur ?? BaseCurrency.code,);
+          amount,
+          fromCur ?? BaseCurrency.code,
+          toCur ?? BaseCurrency.code,
+        );
         if (result != null) {
           creditAmount = result.converted;
         }
@@ -256,15 +260,23 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
           if (accounts.isEmpty) {
             return Center(
               child: NoDataFound(
-                  message: BuddyMessages.noAccounts,
-                  iconData: LucideIcons.wallet,),
+                message: BuddyMessages.noAccounts,
+                iconData: LucideIcons.wallet,
+              ),
             );
           }
 
           if (_fromAccount == null && accounts.isNotEmpty) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) setState(() => _fromAccount = accounts.first);
-            });
+            final sourceCandidates = accounts
+                .where((account) => account.id != _toAccount?.id)
+                .toList();
+            if (sourceCandidates.isNotEmpty) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted && _fromAccount == null) {
+                  setState(() => _fromAccount = sourceCandidates.first);
+                }
+              });
+            }
           }
 
           return Column(
@@ -338,16 +350,19 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                                     final chips = amounts.value ??
                                         [100, 500, 1000, 2000, 5000];
                                     final currentAmount = double.tryParse(
-                                            _amountController.text,) ??
+                                          _amountController.text,
+                                        ) ??
                                         0.0;
                                     return Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: chips.map((amt) {
                                         final isSelected =
                                             currentAmount == amt.toDouble();
                                         return Padding(
                                           padding: EdgeInsets.symmetric(
-                                              horizontal: spacing.elementGapMin,),
+                                            horizontal: spacing.elementGapMin,
+                                          ),
                                           child: _buildQuickAmountChip(
                                             amt: amt,
                                             isSelected: isSelected,
@@ -394,7 +409,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                           AnimatedBuilder(
                             animation: _flowController,
                             builder: (_, __) {
-                              final isReducedMotion = MediaQuery.of(context).disableAnimations;
+                              final isReducedMotion =
+                                  MediaQuery.of(context).disableAnimations;
                               return CustomPaint(
                                 size: const Size(2, 32),
                                 painter: _FlowLinePainter(
@@ -498,7 +514,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
 
                     // ── DATE ──
                     Semantics(
-                      label: 'Transfer date: ${DateFormat('MMMM dd, yyyy').format(_date)}, tap to change',
+                      label:
+                          'Transfer date: ${DateFormat('MMMM dd, yyyy').format(_date)}, tap to change',
                       button: true,
                       child: Material(
                         color: Colors.transparent,
@@ -546,8 +563,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                                 ),
                                 SizedBox(width: spacing.elementGap * 2),
                                 Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       'Date',
@@ -557,10 +573,10 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                                       ),
                                     ),
                                     SizedBox(
-                                        height: spacing.elementGapUltraMin,),
+                                      height: spacing.elementGapUltraMin,
+                                    ),
                                     Text(
-                                      DateFormat('MMM dd, yyyy')
-                                          .format(_date),
+                                      DateFormat('MMM dd, yyyy').format(_date),
                                       style: textTheme.bodyLarge,
                                     ),
                                   ],
@@ -588,8 +604,9 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
           );
         },
         loading: () => Padding(
-            padding: EdgeInsets.all(spacing.cardInner),
-            child: const AccountCardSkeleton(),),
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: const AccountCardSkeleton(),
+        ),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
@@ -666,7 +683,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
     return AnimatedContainer(
       duration: spacing.animFast,
       decoration: BoxDecoration(
-        color: isSelected ? color.primary : color.primary.withValues(alpha: 0.08),
+        color:
+            isSelected ? color.primary : color.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Material(
@@ -716,7 +734,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
     final displayBalance = GuestModeUtil.applyGuestMode(balance, isGuestMode);
 
     return Semantics(
-      label: '${account?.name ?? 'Select $label account'} account, balance ${account != null ? formatCurrency(displayBalance, code: account.currencyCode) : 'not selected'}',
+      label:
+          '${account?.name ?? 'Select $label account'} account, balance ${account != null ? formatCurrency(displayBalance, code: account.currencyCode) : 'not selected'}',
       button: true,
       child: Material(
         color: Colors.transparent,
@@ -746,7 +765,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                           color: iconColor.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(icon, size: spacing.iconSM, color: iconColor),
+                        child:
+                            Icon(icon, size: spacing.iconSM, color: iconColor),
                       ),
                       SizedBox(width: spacing.elementGap * 2),
                       Expanded(
@@ -877,8 +897,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                   padding: EdgeInsets.all(spacing.elementGap),
                   decoration: BoxDecoration(
                     color: acColor.withValues(alpha: 0.1),
-                    borderRadius:
-                        BorderRadius.circular(spacing.radiusSmall),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
                   child: Icon(
                     account.accountType.icon,
@@ -947,9 +966,7 @@ class _FlowLinePainter extends CustomPainter {
       ..color = color.withValues(alpha: 0.8)
       ..style = PaintingStyle.fill;
 
-    final y = isReducedMotion
-        ? size.height / 2
-        : progress * size.height;
+    final y = isReducedMotion ? size.height / 2 : progress * size.height;
     canvas.drawCircle(Offset(size.width / 2, y), 3, dotPaint);
   }
 

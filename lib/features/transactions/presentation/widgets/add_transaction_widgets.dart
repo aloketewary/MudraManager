@@ -255,10 +255,8 @@ class AccountSelector extends ConsumerWidget {
                                 }
                               : null,
                         );
-                        if (result == true) {
-                          ref.invalidate(accountsProvider);
-                          ref.invalidate(allAccountsProvider);
-                          ref.invalidate(frequencySortedAccountsProvider);
+                        if (result == true && context.mounted) {
+                          // AccountForm invalidates account providers before pop.
                           onAddResult();
                         }
                       },
